@@ -1,0 +1,10 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "club.notturnisti.twa",
+    "sha256_cert_fingerprints": [
+      "4C:37:A1:15:8A:BC:7C:30:F9:75:ED:B0:74:DE:6B:A2:E5:05:1D:C4:CF:85:ED:8F:06:1D:54:07:03:10:0F:5A"
+    ]
+  }
+}]
