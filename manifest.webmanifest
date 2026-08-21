@@ -10,10 +10,67 @@
   "dir": "ltr",
   "background_color": "#0B0A0E",
   "theme_color": "#0B0A0E",
-  "categories": ["health", "lifestyle", "productivity"],
+  "categories": [
+    "health",
+    "lifestyle",
+    "productivity"
+  ],
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Oggi",
+      "short_name": "Oggi",
+      "description": "Il piano di oggi e il rischio fatica",
+      "url": "./?t=oggi",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Annota il sonno",
+      "short_name": "Annota",
+      "description": "Registra com'è andato il sonno appena fatto",
+      "url": "./?t=diario",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "I miei turni",
+      "short_name": "Turni",
+      "description": "Ciclo, giorni liberi e partner",
+      "url": "./?t=turni",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
   ]
 }

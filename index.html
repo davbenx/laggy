@@ -3481,12 +3481,19 @@ function regolaritaSonno(){
 }
 
 function summaryText(){
-  const sm=diarySummary(); const ws=wakeSummary(); const cs=cycleSummary();
+  let sm=diarySummary(), ws=wakeSummary(), cs=cycleSummary();
   let trend=null;
   try{ if(window.NTHistory){
     const t=window.NTHistory.sleepTrend({beds:state.beds,wakes:state.wakes}, NT_planSafe, {days:30});
     if(t && t.n>=3) trend=t;
   } }catch(e){}
+  // "Il tuo andamento" (debito, regolarità, ciclo, sveglia, diario) è a
+  // pagamento — il riepilogo copiato è un'altra via per vedere lo stesso
+  // contenuto, non deve bypassare lo stesso confine. Bloccato qui, alla
+  // fonte, non al singolo punto di chiamata: un domani in più non deve
+  // ricordarsi da solo di controllare haPagato().
+  const sbloccato = haPagato();
+  if(!sbloccato){ sm=null; ws=null; cs=null; trend=null; }
   if(!sm && !ws && !cs && !trend) return null;
   const testa=["Riepilogo Notturnisti — nessun dato personale, nessuna data",
     "Turni: "+state.pattern,
@@ -3625,7 +3632,11 @@ function setBadge(n){ try{
 
 function diaryReminder(P, CARDS){
   const f=state.focus;
-  if(dnum(f) > dnum(new Date())) return "";
+  // Usava la data letterale invece del giorno vero — la stessa incoerenza
+  // già trovata e corretta altrove (l'intestazione, il badge, la
+  // descrizione del turno): durante un turno di notte ancora in corso,
+  // "domani" per il calendario può essere ancora "oggi" per l'app.
+  if(dnum(f) > dnum(giornoVero())) return "";
   const cd=CARDS.find(c=>c.k==="d");
   if(!cd || !cd.wakeAsk) return "";
   const key0=iso(f), val=diary[key0];
@@ -3807,7 +3818,8 @@ function renderOra(Pfocus){
   // ancora in corso, non solo della mezzanotte del calendario.
   let P=Pfocus;
   const vero = giornoVero();
-  if(dnum(state.focus)!==dnum(vero)){
+  const sfoglioAltrove = dnum(state.focus)!==dnum(vero);
+  if(sfoglioAltrove){
     const f=state.focus; state.focus=vero;
     try{ P=plan(); }catch(e){ P=Pfocus; }
     state.focus=f;
@@ -3842,6 +3854,12 @@ function renderOra(Pfocus){
     '<b>'+esc(title)+'</b></div><span class="ora-ic">'+oraIc+'</span></div>'+
     '<span class="ora-sub">'+esc(sub)+'</span>'+
     (r?'<div class="ora-dis">Modellato dai tuoi orari di sonno, non una misura.</div>':'')+
+    // "Ora" parla sempre del momento vero, per progetto — ma le card sotto
+    // seguono il giorno che si sta sfogliando: stesso schermo, due giorni
+    // diversi, senza nessun segnale che lo dicesse. Non un errore di calcolo,
+    // un buco di presentazione — ora reso esplicito invece di lasciarlo intuire.
+    (sfoglioAltrove ? '<div class="ora-dis">Qui sopra: adesso. Le schede sotto mostrano '+
+      esc(state.focus.toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"}))+'.</div>' : '')+
     '</div>';
 }
 
@@ -4528,8 +4546,22 @@ function renderCards(P, f, CARDS){
 }
 
 // Turni: come ti tratta il ciclo (andamenti gratis, dal diario)
+// Il check dell'abbonamento vive in paid.js (modulo separato, additivo per
+// costruzione — se non carica, l'app gratis resta intatta). Fallisce chiuso,
+// non aperto: se paid.js non ha ancora risposto, o non è mai arrivato,
+// "Il tuo andamento" resta bloccato — è la parte a pagamento adesso, non più
+// quella gratuita di prima.
+function haPagato(){ try{ return !!(window.NTPaid && window.NTPaid.paid()); }catch(e){ return false; } }
+
 function renderAndamenti(){
   const el=$("#andamenti"); if(!el) return;
+  if(!haPagato()){
+    el.innerHTML =
+      '<span class="hint" style="width:100%">Il debito di sonno accumulato, come cambia il tuo umore quando sali, quanto sono regolari i tuoi orari, quale giorno del ciclo ti pesa di più — con settimane di dati dietro, non è più solo un piano, è un ritratto di come il tuo corpo reagisce ai turni.</span>'+
+      '<button class="btn g" type="button" id="doSbloccaAndamento" style="margin-top:10px">Sblocca il tuo andamento →</button>';
+    const b=$("#doSbloccaAndamento"); if(b) b.onclick=()=>{ if(window.NTPaid) window.NTPaid.open(); };
+    return;
+  }
   // Le sezioni richiudibili non hanno funzionato nella pratica — restano
   // sempre visibili tutte, come prima ancora del giro con i <details>.
   // Il debito di sonno resta il primo elemento, perché è il più
@@ -4705,7 +4737,7 @@ function renderPartner(CARDS){
 // usa gli orari VERI dell'utente invece di un esempio generico.
 function renderPiuCal(){
   const el=$("#piuCalTx"); if(!el) return;
-  let prezzo="19 €";
+  let prezzo="24,99 €";
   try{ if(window.NT_PAY&&window.NT_PAY.price) prezzo=String(window.NT_PAY.price).replace(/\.00$/,"")+" "+(window.NT_PAY.currency==="EUR"?"€":window.NT_PAY.currency||"€"); }catch(e){}
   let dom=null;
   try{ const t=new Date(); t.setDate(t.getDate()+1); dom=NT_planSafe(t); }catch(e){}
