@@ -6002,6 +6002,17 @@ addEventListener("nt:refresh", ()=>{ try{ render(); }catch(e){} });
 </script>
 <script type="module" src="./alertness.js"></script>
 <script type="module" src="./history.js"></script>
+<script>
+// Valori reali di Lemon Squeezy — sostituisci i tre segnaposto una volta creato
+// il negozio e il prodotto. Deve stare PRIMA di paid.js: paid.js legge questi
+// valori una sola volta, al caricamento.
+window.NT_PAY = {
+  store: "notturnisti",   // lo slug del negozio Lemon Squeezy
+  variant: "457255",      // l'id della variante del prodotto
+  price: "24.99",
+  currency: "EUR"
+};
+</script>
 <script src="./paid.js" defer></script>
 </body>
 </html>
