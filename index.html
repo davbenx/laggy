@@ -202,7 +202,8 @@ justify-content:center;overflow:hidden}
 .tick.m{color:var(--dim);font-weight:600}
 .card{background:var(--s1);border:1px solid var(--line);border-left-width:3px;border-radius:var(--r);padding:14px 15px;margin-bottom:10px}
 #benvenutoLink{border-left-color:var(--blue)}
-#chiudiBenvenuto{float:right;background:none;border:none;color:var(--faint);
+#installBanner{border-left-color:var(--blue)}
+#chiudiBenvenuto,#chiudiInstall{float:right;background:none;border:none;color:var(--faint);
 font-size:22px;line-height:1;cursor:pointer;padding:0 0 4px 10px;min-height:0}
 .card.s,.card.p{border-left-color:var(--blue)}
 .card.c,.card.l,.card.t{border-left-color:var(--orange-fill)}
@@ -485,12 +486,12 @@ body.tab-oggi.giornata .cap.giornata{display:flex}
 body.tab-oggi.giornata #band{display:block}
 body.tab-oggi.giornata #cards{display:block}
 /* TURNI: ciclo, giorni liberi, partner, modifica */
-body.tab-turni .now-shift,body.tab-turni #status,body.tab-turni #ora,body.tab-turni #benvenutoLink,body.tab-turni #essenziale,
+body.tab-turni .now-shift,body.tab-turni #status,body.tab-turni #ora,body.tab-turni #benvenutoLink,body.tab-turni #installBanner,body.tab-turni #essenziale,
 body.tab-turni .datebar,body.tab-turni .cap.giornata,body.tab-turni #band,body.tab-turni #cards,
 body.tab-turni #icsBox,body.tab-turni .piu-cal,body.tab-turni .tools,body.tab-turni .piu-h,body.tab-turni .piu-info,
 body.tab-turni footer{display:none}
 /* PIÙ: calendario a pagamento ed extra */
-body.tab-piu .now-shift,body.tab-piu #status,body.tab-piu #ora,body.tab-piu #benvenutoLink,body.tab-piu #essenziale,
+body.tab-piu .now-shift,body.tab-piu #status,body.tab-piu #ora,body.tab-piu #benvenutoLink,body.tab-piu #installBanner,body.tab-piu #essenziale,
 body.tab-piu .datebar,body.tab-piu .cap,body.tab-piu #cyc,body.tab-piu #doFree,
 body.tab-piu #tGrid,body.tab-piu #doPartner,body.tab-piu .cycnav,body.tab-piu #cycRange,
 body.tab-piu #freeBox,body.tab-piu #dayBox,body.tab-piu #gridBox,body.tab-piu #andamenti,body.tab-piu .andamento-h,body.tab-piu #partner,
@@ -528,7 +529,7 @@ list-style:none;min-height:44px;display:flex;align-items:center}
 .wdet .q:last-of-type{margin-bottom:14px}
 .piu-info-in b{color:var(--ink)}
 /* OPZIONI: solo la configurazione */
-body.tab-opzioni .now-shift,body.tab-opzioni #status,body.tab-opzioni #ora,body.tab-opzioni #benvenutoLink,body.tab-opzioni #essenziale,
+body.tab-opzioni .now-shift,body.tab-opzioni #status,body.tab-opzioni #ora,body.tab-opzioni #benvenutoLink,body.tab-opzioni #installBanner,body.tab-opzioni #essenziale,
 body.tab-opzioni .datebar,body.tab-opzioni #band,body.tab-opzioni .cap.ciclo,body.tab-opzioni #cyc,
 body.tab-opzioni .cycnav,body.tab-opzioni #tGrid,body.tab-opzioni #gridBox,body.tab-opzioni #dayBox,body.tab-opzioni #cycRange,
 body.tab-opzioni #andamenti,body.tab-opzioni .andamento-h,body.tab-opzioni #doFree,body.tab-opzioni #freeBox,body.tab-opzioni #doPartner,
@@ -822,6 +823,7 @@ header b{font-size:23px}.datebar h1{font-size:19px}
   <button class="skip" id="doSkip">Guarda un esempio</button>
 </div>
 <div id="benvenutoLink" class="card" hidden></div>
+<div id="installBanner" class="card" hidden></div>
 <div id="ora" class="ora"></div>
 <div class="datebar">
   <button class="nav" id="prev" aria-label="Giorno precedente"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
@@ -1859,6 +1861,9 @@ const state = {
   avvisoBifasicoOff:false, // "non mostrarlo più" sull'avviso che segnala un letto troppo
                          // presto e rimanda alla spunta qui sopra — disattivabile, non
                          // obbligatorio vederlo ogni volta una volta capito il meccanismo
+  installBannerOff:false, // "non mostrarlo più" sull'invito a installare l'app —
+                         // persistente fra sessioni: senza, ricomparirebbe ogni
+                         // apertura finché non si installa davvero, diventando fastidioso
   // Quali correzioni del diario (sonno o pisolino) sono aperte in
   // modifica adesso — non salvato, si azzera a ogni ricarica: è solo lo
   // stato della sessione corrente, non parte della configurazione.
@@ -3594,6 +3599,7 @@ function render(){
   const CARDS=cards(P);
   renderOra(P);
   renderBenvenutoLink();
+  renderInstallBanner();
   renderEssenziale(P, CARDS);          // si azzera da solo in dettaglio
   const tab = state.tab || (ess ? "oggi" : "ciclo");
   const giornata = document.body.classList.contains("giornata");
@@ -3884,6 +3890,53 @@ function renderBenvenutoLink(){
 if($("#benvenutoLink")) $("#benvenutoLink").addEventListener("click", e=>{
   if(e.target.closest("#chiudiBenvenuto")){ benvenutoLinkChiuso=true; renderBenvenutoLink(); return; }
   if(e.target.closest("#doConfiguraLaTua")){ benvenutoLinkChiuso=true; renderBenvenutoLink(); apriIntro(true); wizShow(1); }
+});
+
+// Invito a installare l'app — prima viveva solo come un bottone infilato
+// nella tab Più, mai su Oggi dove si passa davvero il tempo, mai nel
+// momento in cui l'interesse è più alto. E su iOS non c'era proprio
+// niente: beforeinstallprompt lì non esiste mai, il browser non chiede,
+// e senza un'istruzione visibile l'unico modo di scoprire "Condividi →
+// Aggiungi a Home" era leggere il codice sorgente.
+//
+// Il momento giusto: dopo che i turni sono configurati (la spinta a
+// tenerselo è più alta subito dopo aver investito due minuti a
+// impostarli), non durante l'onboarding stesso, e non insieme al
+// benvenuto da link (un banner alla volta).
+function isIOSPerInstall(){
+  try{
+    const ua=navigator.userAgent||"";
+    return /iPad|iPhone|iPod/.test(ua) || (navigator.platform==="MacIntel" && navigator.maxTouchPoints>1);
+  }catch(e){ return false; }
+}
+function giaInstallata(){
+  try{ return window.matchMedia("(display-mode: standalone)").matches || navigator.standalone===true; }
+  catch(e){ return false; }
+}
+let installPromptEvento = null;
+function renderInstallBanner(){
+  const el=$("#installBanner"); if(!el) return;
+  const mostraroBenvenuto = primaVoltaDaLink && !benvenutoLinkChiuso;
+  const pronto = !!(state.pattern && Object.keys(state.shifts||{}).length);
+  const ios = isIOSPerInstall();
+  if(state.installBannerOff || giaInstallata() || mostraroBenvenuto || !pronto || !(installPromptEvento || ios)){
+    el.hidden=true; return;
+  }
+  el.hidden=false;
+  el.innerHTML =
+    '<button type="button" id="chiudiInstall" aria-label="Chiudi">×</button>'+
+    '<b>Installa Notturnisti</b>'+
+    (ios
+      ? '<p class="hint" style="margin-top:6px">Aggiungilo alla schermata Home: tocca <b>Condividi</b> (il riquadro con la freccia, in basso nel browser), poi <b>«Aggiungi a Home»</b>. Si apre come un\'app vera, anche offline.</p>'
+      : '<p class="hint" style="margin-top:6px">Aggiungilo alla schermata Home: si apre come un\'app vera, funziona anche offline.</p>'+
+        '<button class="btn g" type="button" id="doInstallOra">Installa →</button>');
+}
+if($("#installBanner")) $("#installBanner").addEventListener("click", e=>{
+  if(e.target.closest("#chiudiInstall")){ state.installBannerOff=true; salva(); renderInstallBanner(); return; }
+  if(e.target.closest("#doInstallOra") && installPromptEvento){
+    installPromptEvento.prompt();
+    installPromptEvento.userChoice.finally(()=>{ installPromptEvento=null; renderInstallBanner(); });
+  }
 });
 
 // Sensibilità all'ora: cosa conta ADESSO, in base al momento della giornata
@@ -5883,7 +5936,7 @@ function salva(){
     maxAdvance:state.maxAdvance,pPattern:state.pPattern,pAnchor:state.pAnchor,
     pShifts:state.pShifts,pWake:state.pWake,pBed:state.pBed,pName:state.pName,people:state.people,personaGlance:state.personaGlance,
     repeat:state.repeat,ecc:state.ecc,evento:state.evento,
-    napTurno:state.napTurno,sonnoDiurno:state.sonnoDiurno,mattinoBifasico:state.mattinoBifasico,avvisoBifasicoOff:state.avvisoBifasicoOff,pausa:state.pausa,caffSens:state.caffSens,vista:state.vista});
+    napTurno:state.napTurno,sonnoDiurno:state.sonnoDiurno,mattinoBifasico:state.mattinoBifasico,avvisoBifasicoOff:state.avvisoBifasicoOff,installBannerOff:state.installBannerOff,pausa:state.pausa,caffSens:state.caffSens,vista:state.vista});
   // segnala i cambi di configurazione (non di vista) così il modulo a pagamento
   // può tenere allineato il feed del calendario. Il primo salva non conta.
   try{
@@ -5990,14 +6043,31 @@ addEventListener("nt:refresh", ()=>{ try{ render(); }catch(e){} });
   var deferred=null;
   addEventListener("beforeinstallprompt", function(e){
     e.preventDefault(); deferred=e;
+    try{ installPromptEvento=e; renderInstallBanner(); }catch(err){}
     var tools=document.querySelector(".tools"); if(!tools || document.getElementById("doInstall")) return;
     var b=document.createElement("button");
     b.className="lnk"; b.id="doInstall"; b.textContent="Installa l'app";
     b.onclick=function(){ if(!deferred) return; deferred.prompt();
-      deferred.userChoice.finally(function(){ deferred=null; b.remove(); }); };
+      deferred.userChoice.finally(function(){ deferred=null; b.remove();
+        try{ installPromptEvento=null; renderInstallBanner(); }catch(err){} }); };
     tools.appendChild(b);
   });
-  addEventListener("appinstalled", function(){ var b=document.getElementById("doInstall"); if(b) b.remove(); });
+  addEventListener("appinstalled", function(){ var b=document.getElementById("doInstall"); if(b) b.remove();
+    try{ installPromptEvento=null; renderInstallBanner(); }catch(err){} });
+  // iOS non manda mai beforeinstallprompt: qui non c'è un pulsante da
+  // aggiungere, solo l'istruzione — sempre raggiungibile in Più, non solo
+  // nel banner che si può chiudere.
+  try{
+    if(isIOSPerInstall() && !giaInstallata()){
+      var tools2=document.querySelector(".tools");
+      if(tools2 && !document.getElementById("iosInstallHint")){
+        var p=document.createElement("p");
+        p.id="iosInstallHint"; p.className="hint";
+        p.innerHTML="<b>Installa l'app:</b> tocca Condividi, poi «Aggiungi a Home».";
+        tools2.appendChild(p);
+      }
+    }
+  }catch(err){}
 })();
 </script>
 <script type="module" src="./alertness.js"></script>
