@@ -562,6 +562,12 @@ text-align:center;gap:5px;padding:10px 3px;line-height:1.2}
 .kface svg{width:23px;height:23px;opacity:.85}
 .kface span{font-size:12px;line-height:1.2}
 .kface.on svg{opacity:1}
+/* .dbtn.on è blu per tutti gli altri usi (preset, pisolino fatto/saltato) —
+   ma qui ogni faccina ha già il suo colore (--tone, inline), dal peggiore
+   al migliore: selezionarne una non deve spegnerlo e sostituirlo con lo
+   stesso blu di ogni altra selezione, sennò "Esausto" selezionato si
+   accende dello stesso colore di "Al meglio" selezionato. */
+.kface.on{background:var(--s1);border-color:var(--tone,var(--blue));color:var(--tone,var(--blue))}
 /* il grafico è la mappa della giornata: parte dell'intestazione, sempre visibile */
 #band{margin:2px 0 20px}
 .ora-kss .hint{width:100%;margin:0 0 2px}
@@ -3973,7 +3979,7 @@ function diaryReminder(P, CARDS){
        [[1,"Esausto",ICON.faceTerrible,"var(--risk)"],[2,"Stanco",ICON.faceLow,"var(--orange)"],
         [3,"Così così",ICON.faceMid,"var(--faint)"],[4,"Sveglio",ICON.faceOk,"var(--blue)"],
         [5,"Al meglio",ICON.faceGreat,"var(--ok)"]].map(o=>
-         '<button class="dbtn kface'+(+diary[key0]===o[0]?" on":"")+'" data-diary="'+o[0]+'" aria-label="'+o[1]+'">'+
+         '<button class="dbtn kface'+(+diary[key0]===o[0]?" on":"")+'" data-diary="'+o[0]+'" aria-label="'+o[1]+'" style="--tone:'+o[3]+'">'+
          '<i class="kic" style="color:'+o[3]+'">'+o[2]+'</i><span>'+o[1]+'</span></button>').join("")+
        '</div>';
   }
@@ -4625,15 +4631,14 @@ function renderHeader(P, f){
   // stava ancora vivendo quel giorno.
   const scarto = dnum(f)-dnum(giornoVero());
   const bt=$("#goToday"); if(bt) bt.hidden = (scarto===0);
-  // Formato "Oggi, martedì 15" come nel mockup per i tre giorni più
-  // rilevanti (l'unico contesto in cui "oggi/ieri/domani" ha davvero
-  // senso); più lontano resta la data intera con lo scarto in piccolo
-  // sotto, come già era.
-  const rel = scarto===0 ? "Oggi" : scarto===1 ? "Domani" : scarto===-1 ? "Ieri" : null;
-  $("#dateLabel").innerHTML = rel
-    ? esc(rel+", "+f.toLocaleDateString("it-IT",{weekday:"long",day:"numeric"}))
-    : esc(f.toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"})) +
-      '<em>'+esc(scarto>0 ? "fra "+scarto+" giorni" : (-scarto)+" giorni fa")+'</em>';
+  // La data intera resta sempre il titolo ("martedì 15 settembre"), lo
+  // scarto da oggi è sempre il sottotitolo piccolo sotto ("oggi", "domani",
+  // "ieri", "fra N giorni"...) — un solo formato per ogni distanza, non un
+  // formato speciale solo per i tre giorni più vicini.
+  const rel = scarto===0 ? "oggi" : scarto===1 ? "domani" : scarto===-1 ? "ieri"
+    : scarto>0 ? "fra "+scarto+" giorni" : (-scarto)+" giorni fa";
+  $("#dateLabel").innerHTML = esc(f.toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"})) +
+    '<em>'+esc(rel)+'</em>';
   // "Pomeriggio · 14:00–22:15" ripeteva un orario che ha già una sua card
   // ("Il tuo turno") più sotto e la striscia sopra — qui basta sapere QUALE
   // turno e A CHE PUNTO della serie sei, non l'orario esatto. Stessa fonte
