@@ -377,11 +377,22 @@ font:inherit;font-weight:700;padding:0 0 0 10px;cursor:pointer}
 padding:7px 15px;min-height:38px;border-radius:3px;cursor:pointer}
 .vb.on{background:var(--bg);color:var(--blue);box-shadow:0 1px 2px rgba(0,0,0,.08)}
 .ess{margin-bottom:6px}
-/* Adesso/Prossimo/Dopo: separatori fra le righe già esistenti di "essenziale",
-   non un'altra vista — le righe, l'ordine e il contenuto restano gli stessi. */
+/* Etichetta di sezione generica — riusata sia per "Adesso" sopra
+   essenziale sia per i nomi di settore sopra i preset del wizard.
+   Neutra: il peso visivo di "Adesso" lo porta la riga evidenziata sotto
+   (vedi sotto), non il colore del testo dell'etichetta. */
 .essgroup{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);
 font-weight:600;padding:16px 0 6px;margin-top:2px;border-top:1px solid var(--line)}
 .essgroup:first-child{border-top:none;margin-top:0;padding-top:2px}
+/* La riga che segue l'etichetta "Adesso" si stacca dalle altre — stesso
+   trattamento del resto dell'app (tinta + bordo sul colore), niente di
+   nuovo da imparare. Selettore di fratello adiacente: zero tocchi a
+   riga(), che genera due forme diverse (.essrow semplice o .erow
+   espandibile) da ~10 punti diversi del codice. */
+.essgroup+.essrow, .essgroup+.erow{background:var(--blue-soft);border-radius:var(--r);
+padding-left:12px;padding-right:12px;margin:0 -12px;border-bottom-color:transparent}
+.essgroup+.erow>summary{padding-left:0}
+.essgroup+.erow .essrow{border-bottom-color:transparent}
 .essrow{display:flex;align-items:flex-start;gap:11px;padding:15px 0;border-bottom:1px solid var(--line)}
 .essrow:first-child{padding-top:2px}
 .essrow .eic{flex:none;width:74px;display:flex;flex-direction:column;align-items:center;
@@ -938,6 +949,12 @@ header b{font-size:23px}.datebar h1{font-size:19px}
   <p class="hint" style="margin:0 0 10px">Le ore in cui non lavori e non dovresti dormire, nei prossimi sette giorni. Sono contate al netto del viaggio: quelle in cui puoi prendere un appuntamento davvero.</p>
   <div id="freeList"></div></div>
 <button class="tsec" id="doPartner"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M16 5.5a3 3 0 0 1 0 5"/><path d="M18 14.5a6 6 0 0 1 3 5.5"/></svg><b>Turni condivisi</b><span class="tchev">›</span></button>
+<!-- Sempre visibile, non dentro l'accordion sopra: un invito nascosto
+     dietro un altro tocco non è un invito. -->
+<button class="tool" type="button" id="doShareCycle" style="margin:8px 0">
+  <span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg></span>
+  <span class="tool-tx"><b>Condividi il tuo ciclo</b><span>Chi apre il link vede i riposi in comune e può aggiungerti alla sua lista — partner, amico, collega.</span></span>
+</button>
 <div class="ecc" id="partner" hidden></div>
 
 
@@ -4274,19 +4291,16 @@ function renderEssenziale(P, CARDS){
   }
 
   voci.sort((a,b)=>a.t-b.t);
-  // Adesso/Prossimo/Dopo: separatori sulle righe già ordinate sopra, non
-  // una vista diversa. "Adesso" è l'ultima riga già iniziata (t<=nowT);
-  // quella dopo è "Prossimo", la successiva "Dopo" (il resto continua
-  // sotto senza altre etichette). Se non è ancora iniziato niente oggi
-  // (adessoIdx=-1), la prima riga in assoluto diventa "Prossimo" — non
-  // c'è ancora un "adesso" da mostrare.
+  // Solo "Adesso": all'utente interessa quello, il resto della giornata
+  // resta sotto come prima (senza altre etichette a dividerlo — non
+  // aggiungono niente che l'ordine cronologico non dica già). L'unica
+  // riga marcata è l'ultima già iniziata (t<=nowT); se non è ancora
+  // iniziato niente oggi, nessuna riga è "adesso".
   const nowT = dSv(minutiDaFocus());
   let adessoIdx=-1; voci.forEach((v,i)=>{ if(v.t<=nowT) adessoIdx=i; });
   let h="";
   voci.forEach((v,i)=>{
     if(i===adessoIdx) h+='<div class="essgroup">Adesso</div>';
-    else if(i===adessoIdx+1) h+='<div class="essgroup">Prossimo</div>';
-    else if(i===adessoIdx+2) h+='<div class="essgroup">Dopo</div>';
     h+=v.html;
   });
 
@@ -4901,15 +4915,11 @@ function renderPartner(CARDS){
         '</span></div>';
     });
   }
-  // Condividere il proprio ciclo è il modo in cui c'è qualcosa da vedere
-  // qui — prima viveva solo come "Salva la configurazione" dentro
-  // Più → Strumenti (pensato per il backup, non per invitare). Stessa
-  // funzione, stesso link: qui è solo il posto giusto per trovarlo.
+  // "Condividi il tuo ciclo" è sempre visibile appena fuori da questo
+  // accordion (vedi #doShareCycle nel markup statico) — qui dentro resta
+  // solo il QR, l'azione secondaria per chi ha già deciso di condividere
+  // e ha la persona davanti.
   h+='<div class="tools" style="margin-top:14px">'+
-    '<button class="tool" data-partner-share type="button">'+
-      '<span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg></span>'+
-      '<span class="tool-tx"><b>Condividi il tuo ciclo</b><span>Chi apre il link può vedere i riposi in comune e aggiungerti alla sua lista — partner, amico, collega.</span></span>'+
-    '</button>'+
     '<button class="tool" data-partner-qr type="button">'+
       '<span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM19 14h2M14 19h2M19 19h2"/></svg></span>'+
       '<span class="tool-tx"><b>Mostra QR</b><span>Per chi hai davanti: inquadra con la fotocamera, si apre da solo.</span></span>'+
@@ -5477,6 +5487,7 @@ async function salvaConfigurazione(){
   state.backupDone=true; store.set("backupDone",true); render();
 }
 $("#doLink").onclick=salvaConfigurazione;
+if($("#doShareCycle")) $("#doShareCycle").onclick=salvaConfigurazione;
 // Il QR codifica lo stesso identico link di "Salva la configurazione" — un
 // vestito diverso dello stesso payload, non un secondo meccanismo. Solo
 // generazione: la lettura la fa già la fotocamera nativa del telefono, che
@@ -5626,10 +5637,28 @@ function renderPresetTiles(){
   const el=$("#presetTiles"); if(!el) return;
   const tile=(val,ic,b,sp)=>'<button type="button" class="tool" data-preset="'+val+'">'+
     '<span class="tool-ic">'+ic+'</span><span class="tool-tx"><b>'+esc(b)+'</b>'+(sp?'<span>'+esc(sp)+'</span>':'')+'</span></button>';
-  el.innerHTML = PRESETS.map((p,i)=>{
-    const parti=p.n.split(" · ");
-    return tile(String(i), ICO_TURNO, parti[0], parti[1]||"");
-  }).join("") + tile("x", ICO_PERSONALIZZA, "Personalizza", "Costruisco il mio in due minuti");
+  // Quando lo stesso settore ricorre più volte (Sanità, Industria), il
+  // nome del settore diventa un'etichetta condivisa sopra le sue varianti
+  // invece di ripetersi identico su ogni card — la ripetizione era quello
+  // che rendeva la lista poco chiara. Un settore con una sola voce resta
+  // una card singola col titolo per intero, non spezzato via.
+  const settore = n => n.includes(" · ") ? n.split(" · ")[0] : null;
+  const conteggio = {};
+  PRESETS.forEach(p=>{ const s=settore(p.n); if(s) conteggio[s]=(conteggio[s]||0)+1; });
+  let html="", ultimoSettore=null;
+  PRESETS.forEach((p,i)=>{
+    const s=settore(p.n);
+    if(s && conteggio[s]>1){
+      if(s!==ultimoSettore){ html+='<div class="essgroup"'+(ultimoSettore===null?'':' style="margin-top:14px"')+'>'+esc(s)+'</div>'; ultimoSettore=s; }
+      html+=tile(String(i), ICO_TURNO, p.n.split(" · ")[1], "");
+    } else {
+      ultimoSettore=null;
+      const parti=p.n.split(" · ");
+      html+=tile(String(i), ICO_TURNO, parti[0], parti[1]||"");
+    }
+  });
+  html+=tile("x", ICO_PERSONALIZZA, "Personalizza", "Costruisco il mio in due minuti");
+  el.innerHTML=html;
 }
 function syncPresetTiles(){
   const el=$("#presetTiles"); if(!el) return;
@@ -6188,7 +6217,6 @@ if($("#tEdit")) $("#tEdit").onclick=()=>{ setTab("opzioni"); apriSezioneInline(1
 if($("#partner")) $("#partner").addEventListener("click", e=>{
   if(e.target.closest("[data-partner-edit]")) apriPartner();
   else if(e.target.closest('[data-goto="piu"]')) setTab("piu");
-  else if(e.target.closest("[data-partner-share]")) salvaConfigurazione();
   else if(e.target.closest("[data-partner-qr]")){
     const b=$("#qrBoxPartner"); if(!b) return;
     b.hidden=!b.hidden;
