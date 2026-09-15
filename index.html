@@ -65,9 +65,10 @@
      componente uno per uno. */
   --r:14px;
   /* Elevazione: prima l'app non aveva quasi nessuna ombra. Usata con
-     misura, solo sui pulsanti primari e sulle superfici che vogliono
-     "staccare" dallo sfondo (card di enfasi, barre sticky in fondo). */
-  --shadow:0 10px 28px -10px rgba(0,0,0,.5), 0 2px 8px rgba(0,0,0,.32);
+     misura: --shadow-card sulle card (leggera, si ripete spesso in
+     schermata), --shadow-btn sui pulsanti primari (più marcata, un solo
+     bottone alla volta). */
+  --shadow-card:0 2px 10px -3px rgba(0,0,0,.4);
   --shadow-btn:0 8px 20px -6px rgba(140,164,192,.45);
   --sans:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   --serif:"Noto Serif",Georgia,serif;
@@ -82,7 +83,7 @@
     --sleep-fill:#24496F; --ok:#2E7D4F; --on-warm:#15171A;
     --bg-blur:rgba(255,255,255,.82);
     --warm-tint:#FBF1E9; --cool-tint:#EAF0F6;
-    --shadow:0 10px 24px -10px rgba(21,23,26,.18), 0 2px 6px rgba(21,23,26,.1);
+    --shadow-card:0 2px 8px -2px rgba(21,23,26,.22);
     --shadow-btn:0 8px 18px -6px rgba(45,90,140,.3);
   }
 }
@@ -222,12 +223,13 @@ justify-content:center;overflow:hidden}
 .tick.edge-l{transform:translateX(0)}
 .tick.edge-r{transform:translateX(-100%)}
 .tick.m{color:var(--dim);font-weight:600}
-.card{background:var(--s1);border:1px solid var(--line);border-left-width:3px;border-radius:var(--r);padding:14px 15px;margin-bottom:10px;box-shadow:0 2px 8px -2px rgba(0,0,0,.22)}
+.card{background:var(--s1);border:1px solid var(--line);border-left-width:3px;border-radius:var(--r);padding:14px 15px;margin-bottom:10px;box-shadow:var(--shadow-card)}
 #benvenutoLink{border-left-color:var(--blue)}
 #demoEsempio{border-left-color:var(--blue)}
+#backupNudge{border-left-color:var(--orange)}
 #installBanner{border-left-color:var(--blue)}
 #clubBanner{border-left-color:var(--orange)}
-#chiudiBenvenuto,#chiudiDemoEsempio,#chiudiInstall{float:right;background:none;border:none;color:var(--faint);
+#chiudiBenvenuto,#chiudiDemoEsempio,#chiudiBackupNudge,#chiudiInstall{float:right;background:none;border:none;color:var(--faint);
 font-size:22px;line-height:1;cursor:pointer;padding:0 0 4px 10px;min-height:0}
 .card.s,.card.p{border-left-color:var(--blue)}
 .card.c,.card.l,.card.t{border-left-color:var(--orange-fill)}
@@ -373,18 +375,20 @@ font:inherit;font-weight:700;padding:0 0 0 10px;cursor:pointer}
    righe) — un tocco che non "risponde" subito si sente fuori posto sia
    su iOS che su Android, che al tap attenuano/scalano l'elemento prima
    ancora che cambi qualcosa di logico. Generico sui controlli tappabili
-   principali, non ripetuto su ognuno. */
-.tool,.btn,.dbtn,.wnext,#doSetup,.tabbtn,.tp,.tsec,.gcell,button.lnk,.skip{
+   principali, non ripetuto su ognuno. .tabbtn resta fuori: ha già un suo
+   :active dedicato sull'icona (.tabbtn:active svg) più avanti — sommare
+   anche questo raddoppiava lo schiacciamento solo lì. */
+.tool,.btn,.dbtn,.wnext,#doSetup,.tp,.tsec,.gcell,button.lnk,.skip{
   transition:transform .1s ease, opacity .1s ease;
 }
 .tool:active,.btn:active,.dbtn:active,.wnext:active,#doSetup:active,
-.tabbtn:active,.tp:active,.tsec:active,.gcell:active,button.lnk:active,.skip:active{
+.tp:active,.tsec:active,.gcell:active,button.lnk:active,.skip:active{
   transform:scale(.97); opacity:.85;
 }
 @media (prefers-reduced-motion:reduce){
-  .tool,.btn,.dbtn,.wnext,#doSetup,.tabbtn,.tp,.tsec,.gcell,button.lnk,.skip{transition:none}
+  .tool,.btn,.dbtn,.wnext,#doSetup,.tp,.tsec,.gcell,button.lnk,.skip{transition:none}
   .tool:active,.btn:active,.dbtn:active,.wnext:active,#doSetup:active,
-  .tabbtn:active,.tp:active,.tsec:active,.gcell:active,button.lnk:active,.skip:active{transform:none}
+  .tp:active,.tsec:active,.gcell:active,button.lnk:active,.skip:active{transform:none}
 }
 
 /* ── vista essenziale / dettaglio ──
@@ -545,12 +549,12 @@ body.tab-oggi.giornata .cap.giornata{display:flex}
 body.tab-oggi.giornata #band{display:block}
 body.tab-oggi.giornata #cards{display:block}
 /* TURNI: ciclo, giorni liberi, partner, modifica */
-body.tab-turni .now-shift,body.tab-turni #status,body.tab-turni #ora,body.tab-turni #benvenutoLink,body.tab-turni #demoEsempio,body.tab-turni #installBanner,body.tab-turni #clubBanner,body.tab-turni #essenziale,
+body.tab-turni .now-shift,body.tab-turni #status,body.tab-turni #ora,body.tab-turni #benvenutoLink,body.tab-turni #demoEsempio,body.tab-turni #backupNudge,body.tab-turni #installBanner,body.tab-turni #clubBanner,body.tab-turni #essenziale,
 body.tab-turni .datebar,body.tab-turni .cap.giornata,body.tab-turni #band,body.tab-turni #cards,
 body.tab-turni #icsBox,body.tab-turni .piu-cal,body.tab-turni .tools,body.tab-turni .piu-h,body.tab-turni .piu-info,
 body.tab-turni footer{display:none}
 /* PIÙ: calendario a pagamento ed extra */
-body.tab-piu .now-shift,body.tab-piu #status,body.tab-piu #ora,body.tab-piu #benvenutoLink,body.tab-piu #demoEsempio,body.tab-piu #installBanner,body.tab-piu #clubBanner,body.tab-piu #essenziale,
+body.tab-piu .now-shift,body.tab-piu #status,body.tab-piu #ora,body.tab-piu #benvenutoLink,body.tab-piu #demoEsempio,body.tab-piu #backupNudge,body.tab-piu #installBanner,body.tab-piu #clubBanner,body.tab-piu #essenziale,
 body.tab-piu .datebar,body.tab-piu .cap,body.tab-piu #cyc,body.tab-piu #doFree,
 body.tab-piu #tGrid,body.tab-piu #doPartner,body.tab-piu .cycnav,body.tab-piu #cycRange,
 body.tab-piu #freeBox,body.tab-piu #dayBox,body.tab-piu #gridBox,body.tab-piu #andamenti,body.tab-piu .andamento-h,body.tab-piu #partner,
@@ -593,7 +597,7 @@ list-style:none;min-height:44px;display:flex;align-items:center}
 .wdet .q:last-of-type{margin-bottom:14px}
 .piu-info-in b{color:var(--ink)}
 /* OPZIONI: solo la configurazione */
-body.tab-opzioni .now-shift,body.tab-opzioni #status,body.tab-opzioni #ora,body.tab-opzioni #benvenutoLink,body.tab-opzioni #demoEsempio,body.tab-opzioni #installBanner,body.tab-opzioni #clubBanner,body.tab-opzioni #essenziale,
+body.tab-opzioni .now-shift,body.tab-opzioni #status,body.tab-opzioni #ora,body.tab-opzioni #benvenutoLink,body.tab-opzioni #demoEsempio,body.tab-opzioni #backupNudge,body.tab-opzioni #installBanner,body.tab-opzioni #clubBanner,body.tab-opzioni #essenziale,
 body.tab-opzioni .datebar,body.tab-opzioni #band,body.tab-opzioni .cap.ciclo,body.tab-opzioni #cyc,
 body.tab-opzioni .cycnav,body.tab-opzioni #tGrid,body.tab-opzioni #gridBox,body.tab-opzioni #dayBox,body.tab-opzioni #cycRange,
 body.tab-opzioni #andamenti,body.tab-opzioni .andamento-h,body.tab-opzioni #doFree,body.tab-opzioni #freeBox,body.tab-opzioni #doPartner,
@@ -896,6 +900,7 @@ header b{font-size:23px}.datebar h1{font-size:19px}
 </div>
 <div id="benvenutoLink" class="card" hidden></div>
 <div id="demoEsempio" class="card" hidden></div>
+<div id="backupNudge" class="card" hidden></div>
 <div id="installBanner" class="card" hidden></div>
 <div id="clubBanner" class="card" hidden></div>
 <div id="ora" class="ora"></div>
@@ -3682,6 +3687,7 @@ function render(){
   renderOra(P);
   renderBenvenutoLink();
   renderDemoEsempio();
+  renderBackupNudge();
   renderInstallBanner();
   renderClubBanner();
   renderEssenziale(P, CARDS);          // si azzera da solo in dettaglio
@@ -4004,6 +4010,30 @@ if($("#demoEsempio")) $("#demoEsempio").addEventListener("click", e=>{
   if(e.target.closest("#doConfiguraEsempio")){ demoEsempioChiuso=true; renderDemoEsempio(); apriIntro(true); wizShow(1); }
 });
 
+// Chi usa "Vedi il mio piano ora →" al passo 2 esce dal wizard SENZA passare
+// dalla spunta obbligatoria "Ho salvato la configurazione" (quella vive solo
+// sull'ultimo passo, qui non c'è arrivato) — i suoi turni veri restano solo
+// nel localStorage di questo browser, senza che nessuno glielo dica. Questo
+// banner è il modo in cui quell'avviso arriva comunque, senza reintrodurre
+// il blocco che l'uscita rapida voleva togliere: si vede su Oggi finché non
+// salva o non lo chiude, sparisce da solo appena state.backupDone diventa
+// vero (salvaConfigurazione() lo imposta).
+let usciteRapide = false, backupNudgeChiuso = false;
+function renderBackupNudge(){
+  const el=$("#backupNudge"); if(!el) return;
+  if(!usciteRapide || state.backupDone || backupNudgeChiuso){ el.hidden=true; return; }
+  el.hidden=false;
+  el.innerHTML =
+    '<button type="button" id="chiudiBackupNudge" aria-label="Chiudi">×</button>'+
+    '<b>Non hai ancora salvato i tuoi turni</b>'+
+    '<p class="hint" style="margin-top:6px">Stanno solo su questo telefono, in questo browser. Se li perdi (nuovo telefono, dati cancellati), li riscrivi da capo — salva il link ora, richiede un tocco.</p>'+
+    '<button class="btn g" type="button" id="doSalvaOraNudge">Salva la configurazione →</button>';
+}
+if($("#backupNudge")) $("#backupNudge").addEventListener("click", e=>{
+  if(e.target.closest("#chiudiBackupNudge")){ backupNudgeChiuso=true; renderBackupNudge(); return; }
+  if(e.target.closest("#doSalvaOraNudge")) salvaConfigurazione();
+});
+
 // Invito a installare l'app — prima viveva solo come un bottone infilato
 // nella tab Più, mai su Oggi dove si passa davvero il tempo, mai nel
 // momento in cui l'interesse è più alto. E su iOS non c'era proprio
@@ -4313,9 +4343,15 @@ function renderEssenziale(P, CARDS){
   // resta sotto come prima (senza altre etichette a dividerlo — non
   // aggiungono niente che l'ordine cronologico non dica già). L'unica
   // riga marcata è l'ultima già iniziata (t<=nowT); se non è ancora
-  // iniziato niente oggi, nessuna riga è "adesso".
-  const nowT = dSv(minutiDaFocus());
-  let adessoIdx=-1; voci.forEach((v,i)=>{ if(v.t<=nowT) adessoIdx=i; });
+  // iniziato niente oggi, nessuna riga è "adesso". Ma "adesso" ha senso
+  // solo se si sta guardando il giorno vero — sfogliando avanti/indietro
+  // con #prev/#next, state.focus non è più oggi: minutiDaFocus() resta
+  // comunque calcolato (può uscire negativo o enorme), e senza questo
+  // controllo una riga di un giorno futuro o passato finiva marcata
+  // "adesso" per puro caso aritmetico.
+  const staGuardandoOggi = dnum(state.focus)===dnum(giornoVero());
+  const nowT = staGuardandoOggi ? dSv(minutiDaFocus()) : -1;
+  let adessoIdx=-1; if(staGuardandoOggi) voci.forEach((v,i)=>{ if(v.t<=nowT) adessoIdx=i; });
   let h="";
   voci.forEach((v,i)=>{
     if(i===adessoIdx) h+='<div class="essgroup">Adesso</div>';
@@ -5653,26 +5689,34 @@ const ICO_TURNO='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" str
 const ICO_PERSONALIZZA='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
 function renderPresetTiles(){
   const el=$("#presetTiles"); if(!el) return;
-  const tile=(val,ic,b,sp)=>'<button type="button" class="tool" data-preset="'+val+'">'+
+  const tile=(val,ic,b,sp)=>'<button type="button" class="tool" data-preset="'+val+'" aria-pressed="false">'+
     '<span class="tool-ic">'+ic+'</span><span class="tool-tx"><b>'+esc(b)+'</b>'+(sp?'<span>'+esc(sp)+'</span>':'')+'</span></button>';
   // Quando lo stesso settore ricorre più volte (Sanità, Industria), il
   // nome del settore diventa un'etichetta condivisa sopra le sue varianti
   // invece di ripetersi identico su ogni card — la ripetizione era quello
   // che rendeva la lista poco chiara. Un settore con una sola voce resta
-  // una card singola col titolo per intero, non spezzato via.
+  // una card singola col titolo per intero, non spezzato via. Raggruppato
+  // per settore su TUTTO l'elenco (non solo fra voci consecutive): se in
+  // futuro un preset di un altro settore finisse inserito in mezzo a due
+  // "Sanità", le due varianti restano comunque sotto un'unica etichetta.
   const settore = n => n.includes(" · ") ? n.split(" · ")[0] : null;
   const conteggio = {};
   PRESETS.forEach(p=>{ const s=settore(p.n); if(s) conteggio[s]=(conteggio[s]||0)+1; });
-  let html="", ultimoSettore=null;
+  const gruppi = []; // [{settore:null|string, voci:[{i,p}]}], nell'ordine di prima comparsa
   PRESETS.forEach((p,i)=>{
     const s=settore(p.n);
-    if(s && conteggio[s]>1){
-      if(s!==ultimoSettore){ html+='<div class="essgroup"'+(ultimoSettore===null?'':' style="margin-top:14px"')+'>'+esc(s)+'</div>'; ultimoSettore=s; }
-      html+=tile(String(i), ICO_TURNO, p.n.split(" · ")[1], "");
+    const chiave = (s && conteggio[s]>1) ? s : null;
+    let g = chiave!==null ? gruppi.find(g=>g.settore===chiave) : null;
+    if(!g){ g={settore:chiave, voci:[]}; gruppi.push(g); }
+    g.voci.push({i,p});
+  });
+  let html="";
+  gruppi.forEach((g,gi)=>{
+    if(g.settore){
+      html+='<div class="essgroup"'+(gi===0?'':' style="margin-top:14px"')+'>'+esc(g.settore)+'</div>';
+      g.voci.forEach(({i,p})=>{ html+=tile(String(i), ICO_TURNO, p.n.split(" · ")[1], ""); });
     } else {
-      ultimoSettore=null;
-      const parti=p.n.split(" · ");
-      html+=tile(String(i), ICO_TURNO, parti[0], parti[1]||"");
+      g.voci.forEach(({i,p})=>{ const parti=p.n.split(" · "); html+=tile(String(i), ICO_TURNO, parti[0], parti[1]||""); });
     }
   });
   html+=tile("x", ICO_PERSONALIZZA, "Personalizza", "Costruisco il mio in due minuti");
@@ -5680,7 +5724,11 @@ function renderPresetTiles(){
 }
 function syncPresetTiles(){
   const el=$("#presetTiles"); if(!el) return;
-  el.querySelectorAll("[data-preset]").forEach(b=>b.classList.toggle("on", b.dataset.preset===oSel.value));
+  el.querySelectorAll("[data-preset]").forEach(b=>{
+    const scelto = b.dataset.preset===oSel.value;
+    b.classList.toggle("on", scelto);
+    b.setAttribute("aria-pressed", scelto ? "true" : "false");
+  });
 }
 renderPresetTiles();
 if($("#presetTiles")) $("#presetTiles").addEventListener("click", e=>{
@@ -6138,7 +6186,7 @@ if($("#doSetup")) $("#doSetup").onclick=()=>{
   chiudiIntro(WIZ.gotoOggi);
 };
 if($("#doSkip")) $("#doSkip").onclick=()=>chiudiIntro(false);
-if($("#doVediSubito")) $("#doVediSubito").onclick=()=>{ toast("Il tuo piano è pronto"); chiudiIntro(true); };
+if($("#doVediSubito")) $("#doVediSubito").onclick=()=>{ usciteRapide=true; toast("Il tuo piano è pronto"); chiudiIntro(true); };
 if($("#doOpen")) $("#doOpen").onclick=()=>{
   // Il wizard a schermo pieno resta solo per il primo avvio — se qualche
   // sezione è già stata spostata dentro Opzioni (basta averne aperta una),

@@ -7,8 +7,9 @@ export { buildFeed, buildCoupleFeed, parseConfig };
 // LEMONSQUEEZY_WEBHOOK_SECRET (dalla dashboard, sezione Webhooks),
 // LEMONSQUEEZY_STORE_ID, LEMONSQUEEZY_VARIANT_ID (l'id del prodotto/variante),
 // PRICE (es. "24.99", solo per la vetrina — il prezzo vero vive sul prodotto
-// Lemon Squeezy stesso), CURRENCY ("EUR"), SITE_ORIGIN (es. "https://notturnisti.club"),
-// e il binding KV: SUBS.
+// Lemon Squeezy stesso), CURRENCY ("EUR"), SITE_ORIGIN (il dominio dell'app,
+// es. "https://app.notturnisti.club" — NON il sito notturnisti.club, che è
+// un dominio diverso e non chiama questi endpoint), e il binding KV: SUBS.
 export function cfgEnv(env) {
   return {
     lsSecret: env.LEMONSQUEEZY_WEBHOOK_SECRET || "LEMONSQUEEZY_WEBHOOK_SECRET_PLACEHOLDER",
