@@ -39,6 +39,23 @@ export function ctEqual(a, b) {
 export const nowSec = () => Math.floor(Date.now() / 1000);
 export const isActive = sub => !!(sub && sub.paid && (!sub.expiry || sub.expiry > nowSec()));
 
+// ── rate limiting best-effort (finestra fissa, per IP, su KV) ──
+// KV non ha un incremento atomico: sotto raffiche concorrenti dalla stessa IP
+// il conteggio può sottostimare di qualche richiesta. Non è una difesa da sola
+// (Cloudflare fa già mitigazione DDoS a livello di edge), ma alza il costo di
+// abuso applicativo su endpoint pubblici senza altra protezione — riempire il
+// KV di record "pending:*", o interrogare "/claim/<token>" a raffica.
+export async function rateLimit(env, request, bucket, limit, windowSec) {
+  if (!env.SUBS) return true; // fail-open: se il KV manca, non è compito del rate limiter bloccare
+  const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+  const key = "rl:" + bucket + ":" + ip;
+  const raw = await env.SUBS.get(key);
+  const count = raw ? parseInt(raw, 10) || 0 : 0;
+  if (count >= limit) return false;
+  await env.SUBS.put(key, String(count + 1), { expirationTtl: windowSec });
+  return true;
+}
+
 // hash SHA-256 esadecimale (per mappare l'email SENZA salvarla in chiaro)
 export async function sha256hex(s) {
   const data = new TextEncoder().encode(String(s || "").trim().toLowerCase());

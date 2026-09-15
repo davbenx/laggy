@@ -3,7 +3,7 @@
 // quando arriva, sa solo il token (passato come dato personalizzato nel
 // checkout) — questo è il ponte fra "che turni aveva" e "chi ha pagato".
 // Scade da solo dopo 30 minuti: un checkout abbandonato non lascia residui.
-import { cfgEnv, sanitizeConfig, json, err, cors } from "./_lib.js";
+import { cfgEnv, sanitizeConfig, json, err, cors, rateLimit } from "./_lib.js";
 
 export async function onRequestOptions({ env }) {
   return new Response(null, { status: 204, headers: cors(cfgEnv(env).origin) });
@@ -12,6 +12,9 @@ export async function onRequestOptions({ env }) {
 export async function onRequestPost({ env, request }) {
   const o = cfgEnv(env).origin;
   if (!env.SUBS) return err(503, "servizio non configurato", o);
+  // Un checkout reale ne genera uno solo: 20 ogni 10 minuti per IP basta per
+  // qualunque utente reale (più tentativi/dispositivi) senza aprire a riempimenti.
+  if (!(await rateLimit(env, request, "pending", 20, 600))) return err(429, "troppe richieste, riprova tra poco", o);
 
   let body; try { body = await request.json(); } catch (_) { return err(400, "JSON non valido", o); }
   const token = String(body.token || "").trim();
