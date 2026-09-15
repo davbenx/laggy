@@ -3302,7 +3302,7 @@ function cards(P){
   if(night){
     const seekEnd=Math.min(cbt-CFG.lightTaper,b.end);
     lc.blocks=[["seek",b.start,seekEnd,"cerca"],["avoid",seekEnd,Math.max(s.onset,b.end),"evita"]];
-    if(s.strategy==="contieni"){ lc.val="Luce per stare sveglio"; lc.small="non per spostarti";
+    if(s.strategy==="contieni"){ lc.val="Luce per stare sveglio";
       lc.rowsA.push(["In turno","tieni le luci accese dove lavori, senza esagerare"]); }
     else{ lc.val="Luce forte fino alle "+hhmm(seekEnd); lc.small="poi abbassa";
       lc.rowsA.push(["In turno","più luce possibile fino alle "+hhmm(seekEnd)+": se puoi, esci o mettiti sotto la luce più forte che trovi"]);
@@ -3428,7 +3428,7 @@ function cards(P){
     out.push({k:"t",
       lab: b.rest ? "Veglia lunga" : "Rientro",
       val: b.rest ? "Oggi resti sveglio "+hm(piuLunga)+" di fila"
-                  : "per la veglia accumulata",
+                  : "Sveglio da "+hm(filate)+" di fila",
       sub:testo,
       rows:[["Se sei stanco","fermati 20 minuti in auto e prendi un caffè prima di ripartire"],
             ["Sempre","occhiali da sole: proteggono il sonno che stai per fare"]],
@@ -4136,12 +4136,6 @@ function renderOra(Pfocus){
     '<div class="ora-tx"><span class="eyebrow">Adesso</span>'+
     '<b>'+esc(title)+'</b></div></div>'+
     '<span class="ora-sub">'+esc(sub)+'</span>'+
-    // "Ora" parla sempre del momento vero, per progetto — ma le card sotto
-    // seguono il giorno che si sta sfogliando: stesso schermo, due giorni
-    // diversi, senza nessun segnale che lo dicesse. Non un errore di calcolo,
-    // un buco di presentazione — ora reso esplicito invece di lasciarlo intuire.
-    (sfoglioAltrove ? '<div class="ora-dis">Qui sopra: adesso. Le schede sotto mostrano '+
-      esc(state.focus.toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"}))+'.</div>' : '')+
     '</div>';
 }
 
@@ -4486,20 +4480,11 @@ function renderEssenziale(P, CARDS){
   if(drem) voci.push({t:-2, html:drem});
 
   // ── la finestra di sonno: non è una scheda, la costruiamo qui ──
-  // Nei giorni di riposo "senza obblighi" era incondizionato — anche quando
-  // il turno di domani impone già l'orario di sveglia. Prima ho provato a
-  // dedurlo da restOptions()==null, ma quel segnale vuol dire un'altra cosa
-  // (nessuna scelta significativa da presentare, cosa che càpita spesso
-  // proprio quando il margine è AMPIO, non quando manca) — risultato
-  // invertito. Il segnale giusto è quanti giorni mancano al prossimo turno
-  // vincolato: stesso calcolo di restOptions(), usato per quello che dice.
-  let runwayGiorni=null;
-  if(P.b.rest){ const pinDay=guardaAvanti(P,10).find(x=>x.pin); if(pinDay) runwayGiorni=pinDay.o; }
-  const sonnoSub = P.lateStart ? "la parte grossa prima del turno, il resto al rientro"
-    : P.s.kind==="corto"  ? "corto apposta: è lo smonto, stasera dormi a orario normale"
-    : P.s.kind==="diurno" ? "di giorno è più corto, è normale: recuperi col pisolino"
-    : P.b.rest            ? (runwayGiorni!==null && runwayGiorni<=2 ? (()=>{ const nd=nextDuty(P); return nd ? "verso il turno di "+nd.gg : "senza obblighi"; })() : "senza obblighi")
-    : dur(P.s.dur);
+  // Sotto "Dormi" solo il numero di ore: il perché (smonto, turno nel cuore
+  // della notte, quanto manca al prossimo turno vincolato...) è già nel
+  // dettaglio a scomparsa (sc.sub/sc.why, dettSonno qui sotto) — ripeterlo
+  // anche qui, abbreviato, era la stessa informazione due volte.
+  const sonnoSub = dur(P.s.dur);
   // Il dettaglio di "Dormi" viene dalla scheda "sveglia" (sub/perché/righe pratiche
   // "se non ti addormenti"/opzioni dei riposi): prima la scartavo insieme alla riga
   // duplicata, perdendo contenuto vero. Ora si fondono: la riga sparisce, il
@@ -4572,7 +4557,7 @@ function renderEssenziale(P, CARDS){
         // questo stesso ramo (s.meta.ramp), non un rilevamento nuovo.
         const tSera = dSv(P.s.onset-180);
         const dettSera = '<div class="why">Anche in un giorno libero, la luce di sera sposta l\'orologio nella direzione sbagliata se stai andando verso le notti — tenerla bassa nelle ultime ore aiuta ad arrivarci già un po\' spostato.</div>';
-        voci.push({t:tSera, html:riga("penombra","Penombra",hhmm(P.s.onset-180),"oggi la luce di sera conta ancora: tienila soffusa",false,ICON.dim,dettSera)});
+        voci.push({t:tSera, html:riga("penombra","Penombra",hhmm(P.s.onset-180),"tieni la luce soffusa",false,ICON.dim,dettSera)});
       }
     } else if(cd.k==="m"){
       // cd.val ripeteva l'orario due volte ("21:30" come valore, "Pasto
@@ -4637,7 +4622,9 @@ function renderHeader(P, f){
   // formato speciale solo per i tre giorni più vicini.
   const rel = scarto===0 ? "oggi" : scarto===1 ? "domani" : scarto===-1 ? "ieri"
     : scarto>0 ? "fra "+scarto+" giorni" : (-scarto)+" giorni fa";
-  $("#dateLabel").innerHTML = esc(f.toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"})) +
+  // Il mese va sempre a capo: "martedì 16" e "settembre" su due righe.
+  $("#dateLabel").innerHTML = esc(f.toLocaleDateString("it-IT",{weekday:"long",day:"numeric"})) +
+    '<br>'+esc(f.toLocaleDateString("it-IT",{month:"long"})) +
     '<em>'+esc(rel)+'</em>';
   // "Pomeriggio · 14:00–22:15" ripeteva un orario che ha già una sua card
   // ("Il tuo turno") più sotto e la striscia sopra — qui basta sapere QUALE
