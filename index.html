@@ -4076,7 +4076,12 @@ function renderOra(Pfocus){
     const now=new Date();
     let lastEnd=null; const ks=Object.keys(wakes).sort();
     if(ks.length){ const kk=ks[ks.length-1], mm=/^(\d{1,2}):(\d{2})$/.exec(wakes[kk]||""); if(mm){ lastEnd=new Date(kk+"T00:00:00"); lastEnd.setMinutes((+mm[1])*60+(+mm[2])); } }
-    const mid=new Date(state.focus), midnight=new Date(mid.getFullYear(),mid.getMonth(),mid.getDate());
+    // vero, non state.focus: qui sotto state.focus è già stato ripristinato
+    // al giorno sfogliato (riga sopra), ma "Adesso" deve restare ancorato
+    // al giorno vero anche per questo calcolo — altrimenti sfogliare in
+    // avanti sposta in avanti anche la mezzanotte di riferimento, e con
+    // lei tutto l'orario del prossimo sonno usato per il rischio fatica.
+    const midnight=new Date(vero.getFullYear(),vero.getMonth(),vero.getDate());
     const nextSleep=(P.s&&typeof P.s.onset==="number")?new Date(midnight.getTime()+P.s.onset*60000):null;
     r=window.NTAlert.alertness({now, freeWake:state.freeWake, freeBed:state.freeBed, lastSleepEnd:lastEnd, nextSleepStart:nextSleep});
   } }catch(e){}
