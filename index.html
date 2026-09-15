@@ -74,6 +74,10 @@ try{
      più moderna — un solo token, si applica ovunque senza toccare ogni
      componente uno per uno. */
   --r:14px;
+  /* Ritmo verticale di Oggi: un solo valore per la distanza fra i blocchi
+     principali (Adesso, data, striscia, lista) — prima erano sei numeri
+     diversi (20/7/14/22/18px) per lo stesso tipo di distacco. */
+  --gap-sezione:20px;
   /* Elevazione: prima l'app non aveva quasi nessuna ombra. Usata con
      misura: --shadow-card sulle card (leggera, si ripete spesso in
      schermata), --shadow-btn sui pulsanti primari (più marcata, un solo
@@ -144,11 +148,15 @@ border-radius:var(--r);font-family:inherit;font-size:12.5px;font-weight:600;curs
 .today:hover{background:var(--blue-fill)}
 .datebar h1 em{font-style:normal;font-weight:400;color:var(--faint);font-size:14px;
 display:block;text-transform:none;margin-top:1px}
-.now-shift{margin:7px 0 14px}
+/* Stesso "ritmo verticale" fra tutti i blocchi di Oggi (--gap-sezione):
+   prima erano 20/7/14/22/18px, sei valori diversi per lo stesso tipo di
+   distacco, accumulati PR dopo PR senza mai riguardare la sequenza
+   intera. Ora un solo valore per tutte le transizioni fra blocchi. */
+.now-shift{margin:8px 0 var(--gap-sezione)}
 /* pillola col turno (o "Riposo"), come nel mockup — non più testo semplice */
 .shiftpill{display:inline-block;background:var(--blue-soft);color:var(--blue);font-size:12px;
 font-weight:700;padding:5px 10px;border-radius:999px;white-space:nowrap}
-.status{background:var(--s1);border-left:3px solid var(--blue);border-radius:var(--r);padding:13px 15px;margin-bottom:22px}
+.status{background:var(--s1);border-left:3px solid var(--blue);border-radius:var(--r);padding:13px 15px;margin-bottom:var(--gap-sezione)}
 .status p{font-size:16px;line-height:1.55}
 .status.warn{border-left-color:var(--risk);background:var(--risk-soft)}
 .status.calm{border-left-color:var(--blue-lt)}
@@ -450,7 +458,7 @@ font:inherit;font-weight:700;padding:0 0 0 10px;cursor:pointer}
 padding:7px 15px;min-height:38px;border-radius:3px;cursor:pointer}
 .vb.on{background:var(--bg);color:var(--blue);box-shadow:0 1px 2px rgba(0,0,0,.08)}
 .ess{margin-bottom:6px}
-#formaGiorno:not(:empty){margin:2px 0 18px}
+#formaGiorno:not(:empty){margin:2px 0 var(--gap-sezione)}
 .fg-legend{display:flex;gap:14px;margin-top:8px}
 .fg-key{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--faint)}
 .fg-key i{width:8px;height:8px;border-radius:999px;display:inline-block}
@@ -565,7 +573,7 @@ background:var(--s2);box-sizing:content-box}
    conta come "neutro": prima era grigio, ora è la tinta calma dell'app. */
 .ora{margin:0}
 .ora-card{background:var(--blue-soft);border:1px solid var(--blue-lt);border-radius:20px;
-padding:16px 18px;margin:2px 0 20px;box-shadow:var(--shadow-btn)}
+padding:16px 18px;margin:2px 0 var(--gap-sezione);box-shadow:var(--shadow-btn)}
 .ora-card .eyebrow{color:var(--blue)}
 .ora-card b{display:block;font-family:var(--serif);font-size:20px;font-weight:600;line-height:1.25;margin-top:3px}
 .ora-sub{display:block;font-size:14px;color:var(--dim);line-height:1.5;margin-top:10px;margin-left:58px}
@@ -596,7 +604,7 @@ line-height:1.2;min-height:2.4em}
    accende dello stesso colore di "Al meglio" selezionato. */
 .kface.on{background:var(--s1);border-color:var(--tone,var(--blue));color:var(--tone,var(--blue))}
 /* il grafico è la mappa della giornata: parte dell'intestazione, sempre visibile */
-#band{margin:2px 0 20px}
+#band{margin:2px 0 var(--gap-sezione)}
 .ora-kss .hint{width:100%;margin:0 0 2px}
 .ora-dis{font-size:11px;color:var(--faint);line-height:1.45;margin-top:10px}
 /* collegamento gratis → a pagamento, in contesto (sobrio) */
