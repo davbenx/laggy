@@ -72,7 +72,20 @@ export function buildSchedule(config, opts = {}) {
   return out;
 }
 
-/* ─── Ponte Capacitor (nel progetto app, non qui) ───────────────────────────
+/* ─── Ponte browser senza import incrociati ─────────────────────────────────
+   Espone buildSchedule sul global così che index.html possa chiamarla senza
+   import dinamico (stesso pattern di NTAlert e NTHistory).                   */
+try {
+  if (typeof window !== "undefined") {
+    window.NTNotif = { buildSchedule };
+    // Segnala al core che il modulo è pronto (potrebbe essere arrivato dopo render)
+    var _kn = function () { try { window.dispatchEvent(new Event("nt:refresh")); } catch (e) {} };
+    if (document.readyState === "loading") window.addEventListener("DOMContentLoaded", _kn);
+    else setTimeout(_kn, 0);
+  }
+} catch (e) {}
+
+/* ─── Ponte Capacitor (nel progetto app nativa, non qui) ────────────────────
 import { LocalNotifications } from "@capacitor/local-notifications";
 import { buildSchedule } from "./notifications.js";
 
@@ -88,8 +101,8 @@ export async function riprogramma(config) {
       id: n.id, title: n.title, body: n.body,
       schedule: { at: n.at, allowWhileIdle: true },   // allowWhileIdle: spara anche in Doze
       sound: n.kind === "wake" ? "sveglia.wav" : undefined,
-      channelId: n.kind === "wake" ? "sveglie" : "promemoria"   // Android: canale ad alta priorità per la sveglia
+      channelId: n.kind === "wake" ? "sveglie" : "promemoria"   // Android: canale ad alta priorità
     }))
   });
 }
-──────────────────────────────────────────────────────────────────────────── */
+────────────────────────────────────────────────────────────────────────────── */

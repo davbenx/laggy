@@ -5800,7 +5800,12 @@ function normalizza(){
 state.ecc = (state.ecc && typeof state.ecc==="object") ? state.ecc : {};
 state.wakes = state.wakes || {};
 normalizza();
-state.focus = giornoVero();
+// Se aperto da uno shortcut del manifest (es. ?t=oggi, ?t=diario, ?t=turni),
+// usa la data di calendario — l'utente vuole vedere OGGI, non il "giorno biologico".
+// In tutti gli altri casi (navigazione normale, tap sull'icona senza shortcut),
+// giornoVero() gestisce correttamente il turno di notte ancora in corso.
+const _fromShortcut = new URLSearchParams(location.search).has("t");
+state.focus = _fromShortcut ? new Date() : giornoVero();
 state.pAnchor=state.pAnchor||state.anchor;
 // L'elenco delle persone OLTRE il partner principale — quello resta
 // state.pPattern ecc, invariato, per non toccare i 30+ punti che già lo
@@ -5990,7 +5995,46 @@ setInterval(salva, 4000);
 // restare spento per sempre dopo il primo salvataggio.
 addEventListener("nt:config-changed", ()=>{
   if(state.backupDone){ state.backupDone=false; store.set("backupDone",false); render(); }
+  ntNotifiche(); // ricarica il piano notifiche quando la config cambia
 });
+
+/* ─── Notifiche locali: bridge app → SW ─────────────────────────────────────
+   Usa buildSchedule() da notifications.js (già caricato come module).
+   L'obiettivo: sveglia, pisolini, ultimo caffè e rientro arrivano sul telefono
+   anche quando l'app non è aperta. Zero backend, zero costi.
+   ─────────────────────────────────────────────────────────────────────────── */
+function ntNotifiche(){
+  try{
+    if(!("serviceWorker" in navigator) || !("Notification" in window)) return;
+    if(Notification.permission !== "granted") return;
+    const sw = navigator.serviceWorker.controller;
+    if(!sw) return;
+    // Costruisce il piano con buildSchedule (da notifications.js, caricato come module)
+    if(!window.NTNotif || !window.NTNotif.buildSchedule) return;
+    const items = window.NTNotif.buildSchedule(state, { days:7 });
+    sw.postMessage({ type:"NT_SCHEDULE", items });
+  }catch(e){}
+}
+// Ricarica il piano al ritorno in foreground (SW potrebbe aver perso i timer)
+document.addEventListener("visibilitychange", ()=>{
+  if(document.visibilityState === "visible") ntNotifiche();
+});
+// Prima attivazione dopo il load (se il permesso è già stato concesso)
+addEventListener("load", ()=>{ setTimeout(ntNotifiche, 1500); });
+
+// Richiesta permesso notifiche: non immediata, non aggressiva.
+// Si mostra come bottone in Più, mai come prompt automatico.
+function ntChiediPermesso(){
+  if(!("Notification" in window)) return;
+  if(Notification.permission === "granted"){ ntNotifiche(); return; }
+  if(Notification.permission === "denied") return;
+  Notification.requestPermission().then(p=>{
+    if(p === "granted") ntNotifiche();
+    render(); // aggiorna UI (nasconde il banner se concesso)
+  });
+}
+window.ntChiediPermesso = ntChiediPermesso;
+
 
 // ── navigazione a tab (feel da app): Oggi · Turni · Più ──
 // Nessuno spostamento nel DOM: mostra/nasconde le sezioni per destinazione.
@@ -6072,7 +6116,21 @@ addEventListener("nt:refresh", ()=>{ try{ render(); }catch(e){} });
 (function(){
   "use strict";
   if("serviceWorker" in navigator){
-    addEventListener("load", function(){ navigator.serviceWorker.register("./sw.js").catch(function(){}); });
+    addEventListener("load", function(){
+      navigator.serviceWorker.register("./sw.js").then(function(reg){
+        // Ricezione messaggi dal SW (es. NT_NAV per cambio tab da notifica)
+        navigator.serviceWorker.addEventListener("message", function(e){
+          if(!e.data) return;
+          if(e.data.type === "NT_NAV"){
+            try{
+              var tab = String(e.data.tab||"oggi").replace(/\?.*/,"");
+              var tabn = {oggi:"oggi",diario:"oggi",turni:"turni"}[tab]||"oggi";
+              setTab(tabn); render();
+            }catch(err){}
+          }
+        });
+      }).catch(function(){});
+    });
   }
   var deferred=null;
   addEventListener("beforeinstallprompt", function(e){

@@ -8,7 +8,9 @@ export const DEFAULTS = {
   pattern:"MPNSR", anchor:"2026-07-13",
   shifts:{ M:{n:"Mattino",s:420,e:840}, P:{n:"Pomeriggio",s:840,e:1260}, N:{n:"Notte",s:1260,e:1860} },
   repeat:true, cTo:25, cFrom:25, need:480, prep:45, freeBed:"23:30", freeWake:"07:30",
-  maxAdvance:60, pPattern:"", pAnchor:"", evento:null, napTurno:"no", caffSens:"alta", pausa:""
+  maxAdvance:60, pPattern:"", pAnchor:"", evento:null, napTurno:"no", caffSens:"alta", pausa:"",
+  sonnoDiurno:"diviso",  // "diviso" (default) | "unico" | "unicoPisolino"
+  mattinoBifasico:false  // sonno bifasico prima dei turni di mattina molto presto
 };
 
 const LIMITI = {need:[300,660,480], cTo:[0,240,25], cFrom:[0,240,25],
@@ -53,7 +55,11 @@ const CFG = {
   preShiftMax:330,   // [DEFAULT] 5h30 prima di un turno che parte nelle ore piccole
   napMin: 30, napMax: 120, napPre: 90, napGap: 30, mealGap: 75, napBuffer: 90,
   adaptThreshold: 4, // [AASM] sotto le 4 notti non conviene spostarsi
-  preNightDelay:120, bindSlack: 20, H: 24
+  preNightDelay:120, bindSlack: 20, H: 24,
+  // mattino bifasico [Lavie 1986 — forbidden zone]: sotto questa soglia addormentarsi è difficile
+  bifasicoSoglia: 1260,   // 21:00
+  bifasicoMainMax: 390,   // 6h30 — blocco principale quando la scelta bifasica è attiva
+  bedtimeFloor: 1200      // 20:00 — non si va a letto prima di quest'ora
 };
 
 const t = s => (+s.slice(0,2))*60 + (+s.slice(3,5));
@@ -215,16 +221,36 @@ function constraint(off){
     const ora = ((onset % 1440) + 1440) % 1440;
     const diGiorno = ora >= 240 && ora <= 840;        // ci si corica fra le 04 e le 14
     const run = sleepsAfter(block(off+1));
-    const dur = run ? (diGiorno ? Math.min(state.need, CFG.daySleepMax) : state.need)
-                    : (diGiorno ? CFG.shortSleep : Math.min(state.need, CFG.daySleepMax));
+    // Chi ha scelto la tirata unica (in Opzioni) non vuole il tetto sul sonno
+    // diurno che divide notte e pisolino — vuole tutto il suo bisogno in un
+    // solo blocco, e se la cava bene lo stesso: la scelta resta sua, non del
+    // motore. Il default resta quello con più letteratura alle spalle.
+    const cap = state.sonnoDiurno==="diviso" || !state.sonnoDiurno;
+    const dur = run ? (diGiorno && cap ? Math.min(state.need, CFG.daySleepMax) : state.need)
+                    : (diGiorno && cap ? CFG.shortSleep : Math.min(state.need, CFG.daySleepMax));
     return {pin:true, onset, dur, mid:Math.round(onset+dur/2), kind: run ? "diurno" : "corto"};
   }
   // 2. il turno di domani obbliga a una sveglia più presta del naturale → vincolo
   if(!nb.rest && !startsInNight(nb)){
     const wake = nb.start + 1440 - state.cTo - state.prep;
-    if(wake < winEnd() - CFG.bindSlack)
-      return {pin:true, onset:wake-state.need, dur:state.need,
-              mid:Math.round(wake-state.need/2), kind:"pre-turno"};
+    if(wake < winEnd() - CFG.bindSlack){
+      const onsetNaturale = wake - state.need;
+      // Sotto una certa ora, addormentarsi diventa fisiologicamente difficile
+      // (la "forbidden zone" di Lavie) — mettere a letto lì non basta a far
+      // dormire davvero. Chi ha scelto la via bifasica accetta un blocco
+      // principale più corto ma a un orario in cui il sonno arriva per
+      // davvero, e recupera il resto con un pisolino pomeridiano dopo il
+      // turno (in block(), più sotto, lo stesso schema già usato per il
+      // sonno corto dopo un turno cominciato nelle ore piccole).
+      if(state.mattinoBifasico && onsetNaturale < CFG.bifasicoSoglia){
+        const dur = Math.min(state.need, CFG.bifasicoMainMax);
+        const onset = Math.max(wake-dur, CFG.bedtimeFloor);
+        return {pin:true, onset, dur, mid:Math.round(onset+dur/2), kind:"pre-turno-bifasico"};
+      }
+      const onset = Math.max(onsetNaturale, CFG.bedtimeFloor);
+      const dur = Math.max(wake-onset, 0);
+      return {pin:true, onset, dur, mid:Math.round(onset+dur/2), kind:"pre-turno"};
+    }
   }
   // 3. libero, con pavimenti e soffitti
   let floor = -Infinity, ceil = Infinity;
@@ -450,43 +476,29 @@ function plan(){
 
 
   // pisolino prima di un turno che attraversa la notte: pisolino → pasto → partenza
-  if(spansNight(b) && !startsInNight(b)){
-    const profondo = deepNight(b) >= 120;          // pesca davvero nel cuore della notte
-    // se hai dormito più del previsto, «manca» diventa negativo e il pisolino
-    // sparisce da solo: hai già coperto quello che serviva
+  // Chi ha scelto la tirata unica non lo vuole (state.sonnoDiurno === "unico"), o lo vuole
+  // ma corto per motivi solo circadiani (unicoPisolino).
+  if(spansNight(b) && !startsInNight(b) && state.sonnoDiurno !== "unico"){
+    const napCorto = state.sonnoDiurno === "unicoPisolino";
+    const profondo = deepNight(b) >= 120;
     const dormito = dormitoVero(wakePiano, sp.dur);
     const manca = state.need - (dormito === null ? sp.dur : dormito) + saltatiIeri();
-    const veglia = s.onset - wake;                 // quanto resti sveglio in tutto
-    // Oltre le 16 ore la veglia da sola basta a peggiorare i riflessi, anche se hai
-    // dormito bene e anche se il turno non tocca il cuore della notte. Lì però serve
-    // un pisolino corto, che taglia la veglia senza aggiungere ore di sonno inutili.
+    const veglia = s.onset - wake;
     const solaVeglia = !profondo && manca <= 30 && veglia > 960;
     if(profondo || manca > 30 || solaVeglia){
       const napEnd = b.start - state.cTo - CFG.mealGap - CFG.napGap;
-      // se dormirai in turno, quello prima di uscire serve meno: le due cose
-      // si bilanciano, non si sommano
       const giaCoperto = naps.reduce((a,x)=>a+(x.turno?(x.b-x.a):0),0);
-      // Davanti a un blocco lungo di notti il pisolino prima di uscire vale di
-      // più: la sveglia non si può spostare al pomeriggio (servirebbero quindici
-      // ore a letto), quindi le ore si recuperano qui. Davanti a un blocco corto
-      // resta contenuto, perché lì il senso è non spostarsi affatto.
       let bloccoN = 0;
       for(let k=0; k<10 && spansNight(block(k)); k++) bloccoN=k+1;
       const soglia = bloccoN >= CFG.adaptThreshold ? CFG.napPreLungo : CFG.napPre;
-      // Un ciclo intero serve a colmare un debito. Se hai già dormito quello che
-      // ti serve, resta il motivo preventivo — la caduta delle ore centrali non
-      // dipende da quanto hai dormito — ma bastano venti minuti, che danno la
-      // stessa sveltezza senza il rimbambimento del risveglio dal sonno profondo.
-      // Solo se l'hai annotato tu: quando è il piano stesso ad aver allungato il
-      // sonno prima delle notti, il pisolino preventivo resta quello che è, ed è
-      // il più importante del ciclo.
       const inPari = dormito !== null && manca <= 0;
-      const len = solaVeglia ? 25
+      const len = napCorto ? CFG.napBreve
+        : solaVeglia ? 25
         : inPari ? CFG.napBreve
         : clamp(Math.max(manca - giaCoperto, profondo ? soglia - giaCoperto : CFG.napMin),
                 CFG.napMin, CFG.napMax);
       let napStart = napEnd - len;
-      if(napStart < wake + 60) napStart = wake + 60;   // lo accorcio invece di buttarlo
+      if(napStart < wake + 60) napStart = wake + 60;
       if(napEnd - napStart >= 20 && napEnd < b.start){
         const p = dallaFine(napEnd, len, Math.max(wake + 60, napEnd - CFG.napMax),
           {first: !spansNight(pb) && !solaVeglia, corto: solaVeglia, ore: veglia});
