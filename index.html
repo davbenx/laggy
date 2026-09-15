@@ -172,7 +172,11 @@ margin-bottom:26px;box-shadow:var(--shadow-card)}
    distingue la riga "oggi" da tutte le altre. */
 .crow.on .crail{background:var(--blue-soft);border:1px solid var(--blue);height:10px}
 .clab{font-size:12.5px;font-weight:700;color:var(--faint);width:46px;flex:none;text-align:right}
-.ccode{font-size:11px;font-weight:600;width:13px;flex:none;text-align:center}
+/* Una tinta a caso per turno (colorOf(k)) non diceva niente — il colore
+   nell'app significa sempre qualcosa (blu=sonno, arancio=turno,
+   rosso=rischio), non "questo è il terzo tipo di turno che hai
+   configurato". Lettera neutra, come il resto dei testi secondari. */
+.ccode{font-size:11px;font-weight:600;width:13px;flex:none;text-align:center;color:var(--faint)}
 /* Striscia del ciclo: pillola sottile, come nel mockup approvato — prima
    era una fascia più alta e squadrata (17px, radius 3px, bordo), un
    linguaggio visivo diverso da tutto il resto della app redesignata. */
@@ -182,8 +186,14 @@ margin-bottom:26px;box-shadow:var(--shadow-card)}
 .cmark.shared{color:var(--blue)}
 .cmark.risk{color:var(--risk)}
 .cmark svg{width:15px;height:15px}
-/* segno dell'ora attuale sulla riga di oggi */
-.cnow{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink);border-radius:3px;z-index:3}
+/* Segno dell'ora attuale sulla riga di oggi: stesso disegno (triangolo +
+   linea) del marcatore "adesso" nella striscia forma-giornata di Oggi —
+   prima qui era solo una linea, un indicatore diverso per lo stesso
+   concetto in due punti dell'app. */
+.cnow{position:absolute;top:-2px;bottom:-2px;width:1.5px;background:var(--ink);z-index:3}
+.cnow::before{content:"";position:absolute;top:-5px;left:50%;transform:translateX(-50%);
+width:0;height:0;border-left:3px solid transparent;border-right:3px solid transparent;
+border-top:5px solid var(--ink)}
 .know i{background:var(--ink)!important;width:2px!important;border-radius:3px}
 /* oggi: contrassegno esplicito, non solo una sfumatura */
 .crow.on{position:relative}
@@ -226,7 +236,6 @@ padding:15px 16px;margin:14px 0}
 .ecc{background:var(--blue-soft);border:1px solid var(--blue-lt);border-radius:var(--r);padding:14px 15px;margin:10px 0 4px}
 .ecc>b{display:block;font-size:16px;margin-bottom:3px}
 .crow.mod .ccode{text-decoration:underline;text-underline-offset:2px}
-.cmid{position:absolute;top:-1px;bottom:-1px;width:1px;background:var(--ink);opacity:.75;box-shadow:0 0 0 1px var(--bg)}
 .caxis span.mez{color:var(--ink);font-weight:600}
 .cbar.sh{background:var(--orange-fill)}
 /* Riposo del partner: funzione reale che il mockup non prevede (mostra
@@ -4835,22 +4844,16 @@ function renderStrip(P, f, S){
       if(ov && ov.some(([a,z])=>z-a>=180)) insieme.push(per.name || (per.principale?"il partner":"qualcuno"));
     }
     const shared = insieme.length>0;
-    // dove cade la mezzanotte: senza questo segno le 08:00 che compaiono due volte sembrano un errore
-    let mezzi="";
-    for(let m=Math.ceil(clo/1440)*1440;m<=chi;m+=1440)
-      mezzi+='<span class="cmid" style="left:'+cpx(m)+'%"></span>';
     const key=iso(d), mark=diary[key];
     const rk=rischi.get(o);
     const rkTitle = rk ? (rk.tipo==="notti" ? rk.n+"ª notte di fila: da queste in poi il rischio sale, meglio proteggere il sonno"
       : rk.tipo==="minimo" ? "Sonno corto prima di un turno che cade nel tuo punto più basso: il rischio è più alto del solito"
       : "Solo "+rk.ore+" ore fra la fine di un turno e l'inizio del successivo: il sonno ne risente") : "";
-    const tint = bb.rest ? "" : (spansNight(bb)||startsInNight(bb)) ? " tnight" : " twork";
-    ch+='<div class="crow'+tint+(shared?" shared":"")+(o===0?" on":"")+(state.ecc[iso(d)]?" mod":"")+'" data-off="'+o+'" role="button" tabindex="0">'+
+    ch+='<div class="crow'+(shared?" shared":"")+(o===0?" on":"")+(state.ecc[iso(d)]?" mod":"")+'" data-off="'+o+'" role="button" tabindex="0">'+
       '<span class="clab">'+d.toLocaleDateString("it-IT",{weekday:"short"}).slice(0,3)+' '+d.getDate()+'</span>'+
-      '<span class="ccode" style="color:'+colorOf(k)+'">'+k+'</span>'+
+      '<span class="ccode">'+k+'</span>'+
       '<span class="crail">'+
       seg.map(([x,w,cl])=>'<span class="cbar '+cl+'" style="left:'+x+'%;width:'+w+'%"></span>').join("")+
-      mezzi+
       (o===0 && cpx(oggiM)>=0 && cpx(oggiM)<=100 ? '<span class="cnow" style="left:'+cpx(oggiM)+'%" title="adesso"></span>' : '')+
       '</span><span class="cdi"'+(mark?' title="'+DLAB[mark-1]+'" style="color:'+DCOL_TEND[tendenzaDi(mark)]+'"':'')+'>'+
       (mark?ICON_TEND[tendenzaDi(mark)]:"")+'</span>'+
@@ -4875,7 +4878,7 @@ function renderStrip(P, f, S){
   let anyRisk=false;
   for(let o=finLo;o<=finHi;o++) if(rischi.has(o)){ anyRisk=true; break; }
   $("#cyc").innerHTML=ch+'<div class="caxis mono">'+cax+'</div>'+
-    '<div class="key">'+'<span><i style="background:var(--blue)"></i>sonno</span>'+'<span><i style="background:var(--orange-fill)"></i>turno</span>'+(hasP?'<span><i style="background:var(--blue-lt);opacity:.5"></i>riposo del partner</span>':'')+(tuttePersone().length?'<span class="kshare">'+ICON.duo+'riposo in comune</span>':'')+(anyRisk?'<span class="kshare">'+ICON.warn+'momento più critico</span>':'')+(Object.keys(diary).length?'<span class="kshare"><span style="color:var(--blue)">●</span> come ti sei sentito</span>':'')+(oggiInFinestra?'<span class="know"><i></i>adesso</span>':'')+'</div>'+
+    '<div class="key">'+'<span><i style="background:var(--blue)"></i>Sonno</span>'+'<span><i style="background:var(--orange-fill)"></i>Turno</span>'+(hasP?'<span><i style="background:var(--blue-lt);opacity:.5"></i>Riposo del partner</span>':'')+(tuttePersone().length?'<span class="kshare">'+ICON.duo+'Riposo in comune</span>':'')+(anyRisk?'<span class="kshare">'+ICON.warn+'Momento più critico</span>':'')+(Object.keys(diary).length?'<span class="kshare"><span style="color:var(--blue)">●</span> Come ti sei sentito</span>':'')+(oggiInFinestra?'<span class="know"><i></i>Adesso</span>':'')+'</div>'+
     (anyRisk?'<details class="piu-info"><summary>Perché questi avvisi</summary><div class="piu-info-in">'+
       '<p><b>4 notti di fila.</b> Da qui il rischio di errore sale in modo netto, secondo la ricerca sul lavoro a turni — non superare le 3 notti consecutive è la raccomandazione di un gruppo di ricercatori del settore riunito nel 2020.</p>'+
       '<p><b>Meno di 11 ore fra un turno e l\'altro.</b> È il riposo minimo richiesto dalla direttiva europea sull\'orario di lavoro, e la stessa soglia raccomandata dagli stessi ricercatori per proteggere il sonno.</p>'+
