@@ -10,7 +10,15 @@
 const parseHM = s => { const m = /^(\d{1,2}):(\d{2})$/.exec(String(s || "")); return m ? (+m[1]) * 60 + (+m[2]) : null; };
 const wrap720 = x => { while (x > 720) x -= 1440; while (x < -720) x += 1440; return x; };
 const minOf = d => d.getHours() * 60 + d.getMinutes();
-const hhmm = d => String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+// Arrotondato ai 5 minuti come hhmm() nel core (è un modello, non una
+// misura — mostrare i minuti esatti del campionamento, es. "01:19", li
+// faceva sembrare più precisi di quello che sono, e diversi da come il
+// resto dell'app arrotonda gli orari).
+const hhmm = d => {
+  let m = Math.round((d.getHours() * 60 + d.getMinutes()) / 5) * 5 % 1440;
+  if (m < 0) m += 1440;
+  return String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0");
+};
 
 // opts: { now:Date, freeWake, freeBed, lastSleepEnd:Date|null, nextSleepStart:Date|null }
 export function alertness(opts) {
