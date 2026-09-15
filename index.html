@@ -202,9 +202,10 @@ justify-content:center;overflow:hidden}
 .tick.m{color:var(--dim);font-weight:600}
 .card{background:var(--s1);border:1px solid var(--line);border-left-width:3px;border-radius:var(--r);padding:14px 15px;margin-bottom:10px}
 #benvenutoLink{border-left-color:var(--blue)}
+#demoEsempio{border-left-color:var(--blue)}
 #installBanner{border-left-color:var(--blue)}
 #clubBanner{border-left-color:var(--orange)}
-#chiudiBenvenuto,#chiudiInstall{float:right;background:none;border:none;color:var(--faint);
+#chiudiBenvenuto,#chiudiDemoEsempio,#chiudiInstall{float:right;background:none;border:none;color:var(--faint);
 font-size:22px;line-height:1;cursor:pointer;padding:0 0 4px 10px;min-height:0}
 .card.s,.card.p{border-left-color:var(--blue)}
 .card.c,.card.l,.card.t{border-left-color:var(--orange-fill)}
@@ -487,12 +488,12 @@ body.tab-oggi.giornata .cap.giornata{display:flex}
 body.tab-oggi.giornata #band{display:block}
 body.tab-oggi.giornata #cards{display:block}
 /* TURNI: ciclo, giorni liberi, partner, modifica */
-body.tab-turni .now-shift,body.tab-turni #status,body.tab-turni #ora,body.tab-turni #benvenutoLink,body.tab-turni #installBanner,body.tab-turni #clubBanner,body.tab-turni #essenziale,
+body.tab-turni .now-shift,body.tab-turni #status,body.tab-turni #ora,body.tab-turni #benvenutoLink,body.tab-turni #demoEsempio,body.tab-turni #installBanner,body.tab-turni #clubBanner,body.tab-turni #essenziale,
 body.tab-turni .datebar,body.tab-turni .cap.giornata,body.tab-turni #band,body.tab-turni #cards,
 body.tab-turni #icsBox,body.tab-turni .piu-cal,body.tab-turni .tools,body.tab-turni .piu-h,body.tab-turni .piu-info,
 body.tab-turni footer{display:none}
 /* PIÙ: calendario a pagamento ed extra */
-body.tab-piu .now-shift,body.tab-piu #status,body.tab-piu #ora,body.tab-piu #benvenutoLink,body.tab-piu #installBanner,body.tab-piu #clubBanner,body.tab-piu #essenziale,
+body.tab-piu .now-shift,body.tab-piu #status,body.tab-piu #ora,body.tab-piu #benvenutoLink,body.tab-piu #demoEsempio,body.tab-piu #installBanner,body.tab-piu #clubBanner,body.tab-piu #essenziale,
 body.tab-piu .datebar,body.tab-piu .cap,body.tab-piu #cyc,body.tab-piu #doFree,
 body.tab-piu #tGrid,body.tab-piu #doPartner,body.tab-piu .cycnav,body.tab-piu #cycRange,
 body.tab-piu #freeBox,body.tab-piu #dayBox,body.tab-piu #gridBox,body.tab-piu #andamenti,body.tab-piu .andamento-h,body.tab-piu #partner,
@@ -530,7 +531,7 @@ list-style:none;min-height:44px;display:flex;align-items:center}
 .wdet .q:last-of-type{margin-bottom:14px}
 .piu-info-in b{color:var(--ink)}
 /* OPZIONI: solo la configurazione */
-body.tab-opzioni .now-shift,body.tab-opzioni #status,body.tab-opzioni #ora,body.tab-opzioni #benvenutoLink,body.tab-opzioni #installBanner,body.tab-opzioni #clubBanner,body.tab-opzioni #essenziale,
+body.tab-opzioni .now-shift,body.tab-opzioni #status,body.tab-opzioni #ora,body.tab-opzioni #benvenutoLink,body.tab-opzioni #demoEsempio,body.tab-opzioni #installBanner,body.tab-opzioni #clubBanner,body.tab-opzioni #essenziale,
 body.tab-opzioni .datebar,body.tab-opzioni #band,body.tab-opzioni .cap.ciclo,body.tab-opzioni #cyc,
 body.tab-opzioni .cycnav,body.tab-opzioni #tGrid,body.tab-opzioni #gridBox,body.tab-opzioni #dayBox,body.tab-opzioni #cycRange,
 body.tab-opzioni #andamenti,body.tab-opzioni .andamento-h,body.tab-opzioni #doFree,body.tab-opzioni #freeBox,body.tab-opzioni #doPartner,
@@ -824,6 +825,7 @@ header b{font-size:23px}.datebar h1{font-size:19px}
   <button class="skip" id="doSkip">Guarda un esempio</button>
 </div>
 <div id="benvenutoLink" class="card" hidden></div>
+<div id="demoEsempio" class="card" hidden></div>
 <div id="installBanner" class="card" hidden></div>
 <div id="clubBanner" class="card" hidden></div>
 <div id="ora" class="ora"></div>
@@ -3603,6 +3605,7 @@ function render(){
   const CARDS=cards(P);
   renderOra(P);
   renderBenvenutoLink();
+  renderDemoEsempio();
   renderInstallBanner();
   renderClubBanner();
   renderEssenziale(P, CARDS);          // si azzera da solo in dettaglio
@@ -3895,6 +3898,34 @@ function renderBenvenutoLink(){
 if($("#benvenutoLink")) $("#benvenutoLink").addEventListener("click", e=>{
   if(e.target.closest("#chiudiBenvenuto")){ benvenutoLinkChiuso=true; renderBenvenutoLink(); return; }
   if(e.target.closest("#doConfiguraLaTua")){ benvenutoLinkChiuso=true; renderBenvenutoLink(); apriIntro(true); wizShow(1); }
+});
+
+// Prima chi apriva l'app per la prima volta (senza arrivare da un link)
+// finiva dritto nel wizard a schermo intero, prima di aver visto qualunque
+// cosa: zero prova del valore prima di doverci investire due minuti. Ma
+// "state" parte già da una configurazione d'esempio valida (lo stesso
+// motore la usa per calcolare Oggi anche qui) — esattamente come già
+// succede con chi arriva da un link altrui (vedi #benvenutoLink sopra).
+// Stesso trattamento: si vede subito un piano vero, con un banner che
+// spiega di cosa si tratta e apre il wizard solo su richiesta. Non serve
+// nessuna spunta "non mostrarlo più": basta salvare qualcosa perché
+// primaVolta risulti falso al prossimo avvio (store.get("state") non è
+// più null), la stessa logica di benvenutoLinkChiuso qui sotto vale solo
+// per la sessione corrente.
+let demoEsempioChiuso = false;
+function renderDemoEsempio(){
+  const el=$("#demoEsempio"); if(!el) return;
+  if(!primaVolta || demoEsempioChiuso){ el.hidden=true; return; }
+  el.hidden=false;
+  el.innerHTML =
+    '<button type="button" id="chiudiDemoEsempio" aria-label="Chiudi">×</button>'+
+    '<b>Stai vedendo un turno d\'esempio</b>'+
+    '<p class="hint" style="margin-top:6px">Per farti capire subito come funziona, il piano qui sotto è calcolato su un turno generico — non il tuo. Configuralo con i tuoi orari in due minuti, o continua a guardarlo così com\'è.</p>'+
+    '<button class="btn g" type="button" id="doConfiguraEsempio">Configura i tuoi turni →</button>';
+}
+if($("#demoEsempio")) $("#demoEsempio").addEventListener("click", e=>{
+  if(e.target.closest("#chiudiDemoEsempio")){ demoEsempioChiuso=true; renderDemoEsempio(); return; }
+  if(e.target.closest("#doConfiguraEsempio")){ demoEsempioChiuso=true; renderDemoEsempio(); apriIntro(true); wizShow(1); }
 });
 
 // Invito a installare l'app — prima viveva solo come un bottone infilato
@@ -5950,7 +5981,6 @@ function apriIntro(nascondiPiano){
   wizReset();
   if(!nascondiPiano && o.scrollIntoView) o.scrollIntoView({behavior:"smooth",block:"start"});
 }
-if(primaVolta) apriIntro(true);
 if($("#doSetup")) $("#doSetup").onclick=()=>{
   const wsc=$("#wizSaveConfirm");
   if(wsc ? !wsc.checked : !state.backupDone){
