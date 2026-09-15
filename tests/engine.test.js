@@ -1,5 +1,6 @@
 // Test del motore (engine.js), via node:test — nessuna libreria, nessun build
-// step: `node --test tests/` (o `npm test`) basta così com'è.
+// step, nessun package.json: `node --test tests/*.test.js` basta così com'è
+// (Node riconosce da solo la sintassi ESM di engine.js).
 //
 // Obiettivo di questa prima passata: invarianti strutturali che proteggono da
 // regressioni ovvie (crash, orari fuori range, eventi invertiti) su un buon

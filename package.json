@@ -1,9 +1,0 @@
-{
-  "name": "notturnisti",
-  "private": true,
-  "type": "module",
-  "description": "Privacy-first shift-work planner for sleep, recovery, light and caffeine.",
-  "scripts": {
-    "test": "node --test tests/*.test.js"
-  }
-}
