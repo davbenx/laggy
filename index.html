@@ -136,8 +136,11 @@ padding:calc(env(safe-area-inset-top,0px) + 12px) 0 12px;position:sticky;top:0;z
 cursor:pointer;display:flex;border-radius:999px}
 .themebtn:hover{color:var(--ink);background:var(--s1)}
 .themebtn[aria-pressed="true"]{color:var(--blue)}
-.datebar{display:flex;align-items:center;gap:12px}
-.datebar h1{font-family:var(--serif);font-size:23px;font-weight:600;flex:1;min-width:0;text-transform:capitalize;line-height:1.3;cursor:pointer}
+.datebar,.cycbar{display:flex;align-items:center;gap:12px}
+.datebar h1,.cycbar h1{font-family:var(--serif);font-size:23px;font-weight:600;flex:1;min-width:0;text-transform:capitalize;line-height:1.3;cursor:pointer}
+/* titolo di tab, come "Turni" nel mockup — Oggi non ne ha uno (la data ne
+   fa già le veci), le altre tab redesignate potranno riusarlo. */
+.tab-title{font-family:var(--serif);font-size:24px;font-weight:600;color:var(--ink);margin:2px 0 var(--gap-sezione)}
 .datebar h1:active{opacity:.7}
 #jumpDate{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;border:0}
 .nav{background:var(--s1);border:1px solid var(--line);color:var(--ink);width:40px;height:40px;font-size:18px;line-height:1;
@@ -166,12 +169,14 @@ font-weight:700;padding:5px 10px;border-radius:999px;white-space:nowrap}
 margin-bottom:26px;box-shadow:var(--shadow-card)}
 .crow{display:flex;align-items:center;gap:10px;min-height:32px;cursor:pointer}
 .crow:hover .crail{background:var(--s2)}
-.crow.on .clab{color:var(--blue);font-weight:600}
 /* pillola, come nel mockup: bordo pieno invece di uno shadow interno, e
    un filo più alta (10px contro 8px) — lo stesso trattamento che lì
    distingue la riga "oggi" da tutte le altre. */
 .crow.on .crail{background:var(--blue-soft);border:1px solid var(--blue);height:10px}
-.clab{font-size:12.5px;font-weight:700;color:var(--faint);width:46px;flex:none;text-align:right}
+/* leggermente più piccolo di prima (era 12.5px): con un peso di 700 e la
+   larghezza fissa (46px), le date più lunghe ("mer 15") mandavano a capo
+   il numero invece di stare su una riga sola. */
+.clab{font-size:11.5px;font-weight:700;color:var(--faint);width:46px;flex:none;text-align:right}
 /* Una tinta a caso per turno (colorOf(k)) non diceva niente — il colore
    nell'app significa sempre qualcosa (blu=sonno, arancio=turno,
    rosso=rischio), non "questo è il terzo tipo di turno che hai
@@ -194,17 +199,15 @@ margin-bottom:26px;box-shadow:var(--shadow-card)}
 .cnow::before{content:"";position:absolute;top:-5px;left:50%;transform:translateX(-50%);
 width:0;height:0;border-left:3px solid transparent;border-right:3px solid transparent;
 border-top:5px solid var(--ink)}
-.know i{background:var(--ink)!important;width:2px!important;border-radius:3px}
-/* oggi: contrassegno esplicito, non solo una sfumatura */
+/* oggi: solo il colore del testo, niente più etichetta "oggi" a parte —
+   un secondo segnale che il colore da solo dice già. */
 .crow.on{position:relative}
-.crow.on .clab{color:var(--ink);font-weight:700}
-.crow.on .clab::after{content:"oggi";display:block;font-size:11px;font-weight:600;
-letter-spacing:.04em;color:var(--blue);line-height:1.1;text-transform:uppercase}
+.crow.on .clab{color:var(--blue);font-weight:700}
 /* scorrimento della finestra del ciclo */
-.cycnav{display:flex;gap:8px;align-items:center;justify-content:center;margin-top:10px}
-.cycrange{text-align:center;font-size:12.5px;color:var(--faint);margin-top:14px;text-transform:capitalize}
-.cycnav .btn{min-width:52px;font-size:17px;line-height:1;font-weight:600;display:inline-flex;align-items:center;justify-content:center}
-.cycnav #cycToday{font-size:13px;font-weight:600}
+/* .cycrange è ora un h1 dentro .cycbar (stile .datebar h1): niente più
+   stile proprio, solo cursor:default (via inline) per non sembrare
+   toccabile come la data di Oggi. .cycnav/.btn di prima non servono più
+   — prev/oggi/next sono .nav/.today dentro .cycbar. */
 /* .crow.shared: tolta di proposito — la riga grigia sovrapposta era
    ridondante con l'icona, stessa condizione, due segnali per una cosa
    sola. Resta solo l'icona (.cmark.shared). */
@@ -650,8 +653,8 @@ color:var(--blue);display:inline-flex;align-items:center;justify-content:center}
 /* in Oggi lo #status resta solo quando è un avviso; il resto lo dice il piano */
 body.tab-oggi #status:not(.warn){display:none}
 /* OGGI: il giorno. "La giornata" (datebar + dettaglio + diario) è a scomparsa. */
-body.tab-oggi .cap.ciclo,body.tab-oggi #cyc,body.tab-oggi #doFree,
-body.tab-oggi #tGrid,body.tab-oggi #doPartner,body.tab-oggi .cycnav,body.tab-oggi #cycRange,
+body.tab-oggi #turniTitle,body.tab-oggi .cap.ciclo,body.tab-oggi #cyc,body.tab-oggi #doFree,
+body.tab-oggi #tGrid,body.tab-oggi #doPartner,body.tab-oggi .cycbar,
 body.tab-oggi #freeBox,body.tab-oggi #icsBox,body.tab-oggi #dayBox,body.tab-oggi #gridBox,body.tab-oggi #andamenti,body.tab-oggi .andamento-h,
 body.tab-oggi #partner,body.tab-oggi .piu-cal,
 body.tab-oggi .tools,body.tab-oggi .piu-h,body.tab-oggi .piu-info,body.tab-oggi footer{display:none}
@@ -676,10 +679,21 @@ body.tab-turni .now-shift,body.tab-turni #status,body.tab-turni #ora,body.tab-tu
 body.tab-turni .datebar,body.tab-turni .cap.giornata,body.tab-turni #band,body.tab-turni #cards,
 body.tab-turni #icsBox,body.tab-turni .piu-cal,body.tab-turni .tools,body.tab-turni .piu-h,body.tab-turni .piu-info,
 body.tab-turni footer{display:none}
+/* Pagina Andamenti (dentro la tab Turni, non una sesta tab): quando è
+   aperta, nasconde il contenuto normale di Turni invece di scorrerci
+   sotto o sopra — una pagina alla volta, come le altre. #andamentiPagina
+   si mostra/nasconde da sé (attributo hidden), non da qui. */
+body.tab-turni.andamenti-aperta #turniTitle,body.tab-turni.andamenti-aperta .cap.ciclo,
+body.tab-turni.andamenti-aperta #cyc,body.tab-turni.andamenti-aperta .cycbar,
+body.tab-turni.andamenti-aperta #tGrid,
+body.tab-turni.andamenti-aperta #gridBox,body.tab-turni.andamenti-aperta #dayBox,
+body.tab-turni.andamenti-aperta #doFree,body.tab-turni.andamenti-aperta #freeBox,
+body.tab-turni.andamenti-aperta #doPartner,body.tab-turni.andamenti-aperta #partner,
+body.tab-turni.andamenti-aperta #doAndamenti{display:none}
 /* PIÙ: calendario a pagamento ed extra */
 body.tab-piu .now-shift,body.tab-piu #status,body.tab-piu #ora,body.tab-piu #benvenutoLink,body.tab-piu #demoEsempio,body.tab-piu #backupNudge,body.tab-piu #installBanner,body.tab-piu #clubBanner,body.tab-piu #formaGiorno,body.tab-piu #essenziale,
-body.tab-piu .datebar,body.tab-piu .cap,body.tab-piu #cyc,body.tab-piu #doFree,
-body.tab-piu #tGrid,body.tab-piu #doPartner,body.tab-piu .cycnav,body.tab-piu #cycRange,
+body.tab-piu .datebar,body.tab-piu #turniTitle,body.tab-piu .cap,body.tab-piu #cyc,body.tab-piu #doFree,
+body.tab-piu #tGrid,body.tab-piu #doPartner,body.tab-piu .cycbar,
 body.tab-piu #freeBox,body.tab-piu #dayBox,body.tab-piu #gridBox,body.tab-piu #andamenti,body.tab-piu .andamento-h,body.tab-piu #partner,
 body.tab-piu #band,body.tab-piu #cards{display:none}
 /* componenti della tab Più */
@@ -714,12 +728,6 @@ width:38px;height:38px;border-radius:999px;background:var(--s2)}
 .tools-grid .tool-tx b{font-size:14px}
 .tools-grid .tool-tx span{font-size:11.5px;line-height:1.4}
 .tools-grid .ecc{grid-column:1/-1}
-/* "Condividi il tuo ciclo": l'unica riga sempre visibile fuori dall'accordion
-   di Turni condivisi — la CTA più importante della schermata, va trattata
-   come tale (come nel mockup), non identica a una riga qualsiasi. */
-#doShareCycle{background:var(--blue-soft);border-color:var(--blue);box-shadow:var(--shadow-btn)}
-#doShareCycle .tool-ic{background:var(--blue);color:var(--su-blu)}
-#doShareCycle .tool-tx b{color:var(--blue)}
 .presetTiles{display:flex;flex-direction:column;gap:8px}
 .piu-info{border:1px solid var(--line);border-radius:var(--r);margin:18px 0 8px;background:var(--s1)}
 .piu-info>summary{padding:12px 15px;cursor:pointer;font-size:14px;font-weight:600;color:var(--dim);
@@ -740,8 +748,8 @@ list-style:none;min-height:44px;display:flex;align-items:center}
 .piu-info-in b{color:var(--ink)}
 /* OPZIONI: solo la configurazione */
 body.tab-opzioni .now-shift,body.tab-opzioni #status,body.tab-opzioni #ora,body.tab-opzioni #benvenutoLink,body.tab-opzioni #demoEsempio,body.tab-opzioni #backupNudge,body.tab-opzioni #installBanner,body.tab-opzioni #clubBanner,body.tab-opzioni #formaGiorno,body.tab-opzioni #essenziale,
-body.tab-opzioni .datebar,body.tab-opzioni #band,body.tab-opzioni .cap.ciclo,body.tab-opzioni #cyc,
-body.tab-opzioni .cycnav,body.tab-opzioni #tGrid,body.tab-opzioni #gridBox,body.tab-opzioni #dayBox,body.tab-opzioni #cycRange,
+body.tab-opzioni .datebar,body.tab-opzioni #band,body.tab-opzioni #turniTitle,body.tab-opzioni .cap.ciclo,body.tab-opzioni #cyc,
+body.tab-opzioni .cycbar,body.tab-opzioni #tGrid,body.tab-opzioni #gridBox,body.tab-opzioni #dayBox,
 body.tab-opzioni #andamenti,body.tab-opzioni .andamento-h,body.tab-opzioni #doFree,body.tab-opzioni #freeBox,body.tab-opzioni #doPartner,
 body.tab-opzioni #partner,body.tab-opzioni #cards,body.tab-opzioni .piu-cal,body.tab-opzioni .tools,body.tab-opzioni .piu-h,
 body.tab-opzioni #icsBox,
@@ -779,7 +787,7 @@ body.intro .appbar,body.intro .tabbar,body.intro #opzioni{display:none}
 .val{font-size:19px}.row b{min-width:88px}
 .cap p{display:none}.clab{width:40px}.caxis{margin-left:60px;padding-left:0}
 .sh,.shhead{grid-template-columns:34px 1fr 78px 78px 28px}
-header b{font-size:23px}.datebar h1{font-size:19px}
+header b{font-size:23px}.datebar h1,.cycbar h1{font-size:19px}
 .grid21{gap:4px}.gcell{min-height:36px;font-size:14px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -1078,15 +1086,21 @@ header b{font-size:23px}.datebar h1{font-size:19px}
 <div id="formaGiorno"></div>
 <div class="ess" id="essenziale"></div>
 
+<h1 class="tab-title" id="turniTitle">Turni</h1>
 <div class="cap ciclo"><span class="eyebrow">Il tuo ciclo<span id="ciclNome"></span></span>
   <button class="lnk" id="tEdit">Modifica →</button></div>
-<div class="cyc" id="cyc"></div>
-<div class="cycrange" id="cycRange"></div>
-<div class="cycnav">
-  <button class="btn g" id="cycPrev" aria-label="Giorni precedenti"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
-  <button class="btn g" id="cycToday" hidden>Torna a oggi</button>
-  <button class="btn g" id="cycNext" aria-label="Giorni successivi"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+<!-- Sopra la striscia, non sotto — e stesso stile della navigazione data
+     di Oggi (.nav/.today), non i bottoncini generici .btn.g di prima.
+     Classe a parte (non .datebar): quella è già nascosta su Turni da
+     "body.tab-turni .datebar{display:none}" (nasconde il datebar di
+     Oggi) — riusarla avrebbe nascosto anche questa. -->
+<div class="cycbar" style="margin-bottom:14px">
+  <button class="nav" id="cycPrev" aria-label="Giorni precedenti"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <h1 class="cycrange" id="cycRange" style="cursor:default">—</h1>
+  <button class="today" id="cycToday" hidden>Torna a oggi</button>
+  <button class="nav" id="cycNext" aria-label="Giorni successivi"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
 </div>
+<div class="cyc" id="cyc"></div>
 <button class="lnk" id="tGrid" style="margin-top:10px">Turni diversi ogni settimana? Impostali a tocchi →</button>
 <div class="ecc" id="gridBox" hidden>
   <b>Imposta i turni giorno per giorno</b>
@@ -1115,30 +1129,34 @@ header b{font-size:23px}.datebar h1{font-size:19px}
   <div id="swapOut" style="margin-top:8px"></div>
 </div>
 
-<!-- Spostato sopra "Il tuo andamento": prima stava dopo un'intera sezione
-     di analisi, in fondo alla tab — un invito a condividere che quasi
-     nessuno arrivava a vedere senza scorrere parecchio. È il motore di
-     crescita organica dell'app (lo stesso motivo per cui questa
-     sezione va sempre mostrata, non dentro un accordion): merita di
-     stare dove si vede subito, appena sotto il proprio ciclo. -->
 <button class="tsec" id="doFree"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg><span class="tsec-tx"><b>Quando sono disponibile</b><span id="doFreeSub"></span></span><span class="tchev">›</span></button>
 <div class="ecc" id="freeBox" hidden>
   <p class="hint" style="margin:0 0 10px">Le ore in cui non lavori e non dovresti dormire, nei prossimi sette giorni. Sono contate al netto del viaggio: quelle in cui puoi prendere un appuntamento davvero.</p>
   <div id="freeList"></div></div>
 <button class="tsec" id="doPartner"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M16 5.5a3 3 0 0 1 0 5"/><path d="M18 14.5a6 6 0 0 1 3 5.5"/></svg><span class="tsec-tx"><b>Turni condivisi</b></span><span class="tchev">›</span></button>
-<!-- Sempre visibile, non dentro l'accordion sopra: un invito nascosto
-     dietro un altro tocco non è un invito. -->
-<button class="tool" type="button" id="doShareCycle" style="margin:8px 0">
-  <span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg></span>
-  <span class="tool-tx"><b>Condividi il tuo ciclo</b><span>Chi apre il link vede i riposi in comune e può aggiungerti alla sua lista — partner, amico, collega.</span></span>
-</button>
 <div class="ecc" id="partner" hidden></div>
-<div class="andamento-h">
-  <span class="eyebrow">Il tuo andamento</span>
-  <p>Quello che i tuoi voti dicono sul ciclo, con il tempo.</p>
-</div>
-<div id="andamenti"></div>
+<!-- Anteprima, non più il contenuto intero in linea: apre la pagina
+     Andamenti a sé (come nel mockup), non un'altra sezione da scorrere
+     dentro Turni. -->
+<button type="button" class="tsec" id="doAndamenti">
+  <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:var(--orange);background:var(--orange-soft)"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 6h6v6"/></svg>
+  <span class="tsec-tx"><span class="eyebrow" style="display:block">Andamenti</span><b id="andamentiAnteprima" style="font-family:var(--serif)">—</b></span>
+  <span class="tchev">›</span>
+</button>
 
+<div id="andamentiPagina" hidden>
+  <div style="display:flex;align-items:center;gap:12px;margin:2px 0 var(--gap-sezione)">
+    <button type="button" class="themebtn" id="chiudiAndamenti" aria-label="Torna a Turni">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+    </button>
+    <h1 class="tab-title" style="margin:0">Andamenti</h1>
+  </div>
+  <div class="andamento-h">
+    <span class="eyebrow">Il tuo andamento</span>
+    <p>Quello che i tuoi voti dicono sul ciclo, con il tempo.</p>
+  </div>
+  <div id="andamenti"></div>
+</div>
 
 <div id="cards"></div>
 
@@ -3906,7 +3924,7 @@ function render(){
   const giornata = document.body.classList.contains("giornata");
   const showStrip = (tab==="turni") || (!ess && tab!=="oggi" && tab!=="piu"); // ciclo/dettaglio legacy
   const showDay = (tab==="oggi" && giornata) || (!ess && tab!=="turni" && tab!=="piu");
-  if(showStrip){ renderStrip(P, f, S); renderAndamenti(); renderPartner(CARDS); renderFreePreview(); }
+  if(showStrip){ renderStrip(P, f, S); renderAndamenti(); renderAndamentiPreview(); renderPartner(CARDS); renderFreePreview(); }
   if(tab==="piu") renderPiuCal();
   if(tab==="oggi") renderBand(P, CARDS);
   if(showDay){ renderCards(P, f, CARDS); }
@@ -4878,7 +4896,7 @@ function renderStrip(P, f, S){
   let anyRisk=false;
   for(let o=finLo;o<=finHi;o++) if(rischi.has(o)){ anyRisk=true; break; }
   $("#cyc").innerHTML=ch+'<div class="caxis mono">'+cax+'</div>'+
-    '<div class="key">'+'<span><i style="background:var(--blue)"></i>Sonno</span>'+'<span><i style="background:var(--orange-fill)"></i>Turno</span>'+(hasP?'<span><i style="background:var(--blue-lt);opacity:.5"></i>Riposo del partner</span>':'')+(tuttePersone().length?'<span class="kshare">'+ICON.duo+'Riposo in comune</span>':'')+(anyRisk?'<span class="kshare">'+ICON.warn+'Momento più critico</span>':'')+(Object.keys(diary).length?'<span class="kshare"><span style="color:var(--blue)">●</span> Come ti sei sentito</span>':'')+(oggiInFinestra?'<span class="know"><i></i>Adesso</span>':'')+'</div>'+
+    '<div class="key">'+'<span><i style="background:var(--blue)"></i>Sonno</span>'+'<span><i style="background:var(--orange-fill)"></i>Turno</span>'+(hasP?'<span><i style="background:var(--blue-lt);opacity:.5"></i>Riposo del partner</span>':'')+(tuttePersone().length?'<span class="kshare">'+ICON.duo+'Riposo in comune</span>':'')+(anyRisk?'<span class="kshare">'+ICON.warn+'Momento più critico</span>':'')+(Object.keys(diary).length?'<span class="kshare"><span style="color:var(--blue)">●</span> Come ti sei sentito</span>':'')+'</div>'+
     (anyRisk?'<details class="piu-info"><summary>Perché questi avvisi</summary><div class="piu-info-in">'+
       '<p><b>4 notti di fila.</b> Da qui il rischio di errore sale in modo netto, secondo la ricerca sul lavoro a turni — non superare le 3 notti consecutive è la raccomandazione di un gruppo di ricercatori del settore riunito nel 2020.</p>'+
       '<p><b>Meno di 11 ore fra un turno e l\'altro.</b> È il riposo minimo richiesto dalla direttiva europea sull\'orario di lavoro, e la stessa soglia raccomandata dagli stessi ricercatori per proteggere il sonno.</p>'+
@@ -5221,6 +5239,15 @@ function renderAndamenti(){
     : '<div class="empty"><img src="./owl-mark.png" alt="" width="46" height="46"><p>Annota il sonno per qualche giorno dal glance di Oggi: qui comparirà quale giorno del ciclo ti pesa di più e come scivola la tua sveglia.</p></div>';
 }
 
+// Anteprima del bottone "Andamenti" in Turni: legge il numero già
+// calcolato da renderAndamenti() (appena sopra, stesso render) invece di
+// ricalcolarlo — un solo posto che sa cos'è "il debito di sonno".
+function renderAndamentiPreview(){
+  const el=$("#andamentiAnteprima"); if(!el) return;
+  const num=$("#andamenti .andamento-num");
+  el.textContent = num ? "Debito di sonno: "+num.textContent : "Ancora pochi dati";
+}
+
 // Turni: la card partner (gestione nel wizard, risultato qui)
 // La stessa lista di renderPartner, ma qui — nel wizard — con "rimuovi":
 // è il posto dove si gestisce, non dove si guarda soltanto.
@@ -5313,10 +5340,8 @@ function renderPartner(CARDS){
         '</span></div>';
     });
   }
-  // "Condividi il tuo ciclo" è sempre visibile appena fuori da questo
-  // accordion (vedi #doShareCycle nel markup statico) — qui dentro resta
-  // solo il QR, l'azione secondaria per chi ha già deciso di condividere
-  // e ha la persona davanti.
+  // Il QR: per chi ha già deciso di condividere e ha la persona davanti,
+  // invece del link.
   h+='<div class="tools" style="margin-top:14px">'+
     '<button class="tool" data-partner-qr type="button">'+
       '<span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM19 14h2M14 19h2M19 19h2"/></svg></span>'+
@@ -5701,6 +5726,20 @@ $("#doFree").onclick=()=>{ const b=$("#freeBox"); const apri=b.hidden;
   $("#doFree").classList.toggle("open",apri);
   if($("#doPartner")) $("#doPartner").classList.remove("open");
   if(apri){ mostraLibere(); if(b.scrollIntoView) b.scrollIntoView({behavior:"smooth",block:"nearest"}); } };
+// Pagina Andamenti: una sola alla volta dentro Turni, non un accordion
+// che si accumula sotto le altre sezioni — apre/chiude come le altre
+// tab, solo senza un suo bottone in fondo.
+function apriAndamenti(){
+  document.body.classList.add("andamenti-aperta");
+  const p=$("#andamentiPagina"); if(p) p.hidden=false;
+  try{ window.scrollTo(0,0); }catch(e){}
+}
+function chiudiAndamenti(){
+  document.body.classList.remove("andamenti-aperta");
+  const p=$("#andamentiPagina"); if(p) p.hidden=true;
+}
+if($("#doAndamenti")) $("#doAndamenti").onclick=apriAndamenti;
+if($("#chiudiAndamenti")) $("#chiudiAndamenti").onclick=chiudiAndamenti;
 
 const cycGo=n=>{
   cicloOff=Math.max(cicloMin(), Math.min(cicloMax(), n));
@@ -5885,7 +5924,6 @@ async function salvaConfigurazione(){
   state.backupDone=true; store.set("backupDone",true); render();
 }
 $("#doLink").onclick=salvaConfigurazione;
-if($("#doShareCycle")) $("#doShareCycle").onclick=salvaConfigurazione;
 // Il QR codifica lo stesso identico link di "Salva la configurazione" — un
 // vestito diverso dello stesso payload, non un secondo meccanismo. Solo
 // generazione: la lettura la fa già la fotocamera nativa del telefono, che
@@ -6612,6 +6650,7 @@ window.ntChiediPermesso = ntChiediPermesso;
 function setTab(t){
   const tab = (t==="turni"||t==="piu"||t==="opzioni") ? t : "oggi";
   document.body.classList.remove("tab-oggi","tab-turni","tab-piu","tab-opzioni","giornata");
+  chiudiAndamenti();
   document.body.classList.add("tab-"+tab);
   state.tab = tab;
   state.vista = "essenziale";
