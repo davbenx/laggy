@@ -4119,9 +4119,17 @@ function renderOra(Pfocus){
   const kssSleepy = votoOraRecente();
   const A = isToday ? adessoLine(P, vero) : null;
   const sleeping = A && A.t==="Dovresti dormire";   // non chiedere l'umore mentre dovresti dormire
-  const risk = r&&r.risk, severe = (risk&&risk.severe) || kssSleepy;
+  // Se dovresti già essere a dormire o a fare un pisolino, quello resta il
+  // consiglio più utile che il modulo possa dare — un avviso di fatica
+  // sopra non aggiunge nulla (anzi confonde: due modi diversi di dire "è
+  // tardi, il corpo è a terra"). Il rischio fatica vince su tutto il resto
+  // SOLO fuori da queste due finestre, dove sì è l'informazione più urgente
+  // (in turno, alla guida, sveglio senza un riposo già programmato adesso).
+  const inFinestraRiposo = A && (A.t==="Dovresti dormire" || A.t==="È l'ora del pisolino");
+  const risk = r&&r.risk, severe = !inFinestraRiposo && ((risk&&risk.severe) || kssSleepy);
   let title, sub, accent=false;
-  if(severe){ accent=true;
+  if(inFinestraRiposo){ title=A.t; sub=A.s; }
+  else if(severe){ accent=true;
     title = kssSleepy ? "Sei assonnato" : "Rischio fatica alto verso le "+risk.hhmm;
     sub = kssSleepy ? "Se devi guidare o decidere, fermati: 20 minuti e un caffè."
       : "Evita decisioni critiche; se guidi al rientro, non farlo stanco.";
@@ -4129,6 +4137,7 @@ function renderOra(Pfocus){
   else if(risk){ title="Lucidità ok"; sub="Prossimo calo verso le "+risk.hhmm+(r.peak?" · meglio verso le "+r.peak.hhmm:""); }
   else { title=A.t; sub=A.s; }   // A esiste sempre quando è oggi: il fallback (mai più vuoto)
   const oraIc = severe ? ICON.warn : sleeping ? ICON.moon
+    : (A && A.t==="È l'ora del pisolino") ? ICON.bed
     : (A && /insieme/.test(A.t)) ? ICON.duo
     : (title && /caff/.test(sub||"")) ? ICON.coffee : ICON.eye;
   el.innerHTML='<div class="ora-card'+(accent?" risk":"")+'">'+
