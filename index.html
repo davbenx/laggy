@@ -133,7 +133,8 @@ cursor:pointer;display:flex;border-radius:999px}
 .themebtn:hover{color:var(--ink);background:var(--s1)}
 .themebtn[aria-pressed="true"]{color:var(--blue)}
 .datebar{display:flex;align-items:center;gap:12px}
-.datebar h1{font-family:var(--serif);font-size:23px;font-weight:600;flex:1;text-transform:capitalize;line-height:1.3;cursor:pointer}
+.dateCol{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:5px}
+.datebar h1{font-family:var(--serif);font-size:23px;font-weight:600;text-transform:capitalize;line-height:1.3;cursor:pointer}
 .datebar h1:active{opacity:.7}
 #jumpDate{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;border:0}
 .nav{background:var(--s1);border:1px solid var(--line);color:var(--ink);width:40px;height:40px;font-size:18px;line-height:1;
@@ -302,7 +303,7 @@ border-radius:var(--r);font-size:12.5px;font-weight:600;cursor:pointer;font-fami
 .btn.g{border-color:var(--line);color:var(--dim)}
 .btn.g:hover{background:var(--s2);color:var(--ink);border-color:var(--dim)}
 .diary{display:flex;gap:6px;margin-top:11px;flex-wrap:wrap;align-items:center}
-.dbtn{flex:1;min-width:52px;min-height:46px;background:var(--card);border:1px solid var(--line);
+.dbtn{flex:1;min-width:52px;min-height:46px;background:var(--s2);border:1px solid var(--line);
 padding:6px 8px;border-radius:var(--r);font-size:14px;font-weight:500;line-height:1.25;
 cursor:pointer;font-family:inherit;color:var(--ink)}
 .dbtn.wide{min-width:132px}
@@ -553,11 +554,15 @@ padding:16px 18px;margin:2px 0 20px;box-shadow:var(--shadow-btn)}
 .ora-card.risk{background:var(--risk-soft);border-color:var(--risk-line);box-shadow:var(--shadow-card)}
 .ora-card.risk .eyebrow{color:var(--risk)}
 .ora-card.risk b{color:var(--risk)}
-.ora-kss{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+/* griglia a 5 colonne invece di righe che si accumulano man mano: prima,
+   larghezza di ognuna dettata dalla lunghezza della sua etichetta ("Così
+   così" più largo di "Sveglio"), qui tutte uguali per costruzione. */
+.ora-kss{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:12px}
 .kface{display:flex;flex-direction:column;align-items:center;justify-content:center;
-text-align:center;gap:5px;padding:9px 6px;line-height:1.2}
-.kface svg{width:24px;height:24px;opacity:.85}
-.kface span{font-size:12.5px}
+text-align:center;gap:5px;padding:10px 3px;line-height:1.2}
+.kface .kic{display:inline-flex}
+.kface svg{width:23px;height:23px;opacity:.85}
+.kface span{font-size:12px;line-height:1.2}
 .kface.on svg{opacity:1}
 /* il grafico è la mappa della giornata: parte dell'intestazione, sempre visibile */
 #band{margin:2px 0 20px}
@@ -721,7 +726,6 @@ background:var(--s1);border-radius:var(--r);border:1px solid var(--line)}
 body.intro .appbar,body.intro .tabbar,body.intro #opzioni{display:none}
 
 @media (max-width:430px){
-.essrow .el{width:72px}.essrow .en{font-size:23px}
 .wrap{padding:0 16px}
 .val{font-size:19px}.row b{min-width:88px}
 .cap p{display:none}.clab{width:40px}.caxis{margin-left:60px;padding-left:0}
@@ -1005,8 +1009,10 @@ header b{font-size:23px}.datebar h1{font-size:19px}
 <div id="ora" class="ora"></div>
 <div class="datebar">
   <button class="nav" id="prev" aria-label="Giorno precedente"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
-  <h1 id="dateLabel" tabindex="0" role="button" aria-label="Vai a una data">—</h1>
-  <span class="shiftpill" id="shiftPill" hidden></span>
+  <div class="dateCol">
+    <h1 id="dateLabel" tabindex="0" role="button" aria-label="Vai a una data">—</h1>
+    <span class="shiftpill" id="shiftPill" hidden></span>
+  </div>
   <input type="date" id="jumpDate" aria-hidden="true">
   <button class="today" id="goToday" hidden>Oggi</button>
   <button class="nav" id="next" aria-label="Giorno successivo"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
@@ -1063,11 +1069,12 @@ header b{font-size:23px}.datebar h1{font-size:19px}
   <div id="swapOut" style="margin-top:8px"></div>
 </div>
 
-<div class="andamento-h">
-  <span class="eyebrow">Il tuo andamento</span>
-  <p>Quello che i tuoi voti dicono sul ciclo, con il tempo.</p>
-</div>
-<div id="andamenti"></div>
+<!-- Spostato sopra "Il tuo andamento": prima stava dopo un'intera sezione
+     di analisi, in fondo alla tab — un invito a condividere che quasi
+     nessuno arrivava a vedere senza scorrere parecchio. È il motore di
+     crescita organica dell'app (lo stesso motivo per cui questa
+     sezione va sempre mostrata, non dentro un accordion): merita di
+     stare dove si vede subito, appena sotto il proprio ciclo. -->
 <button class="tsec" id="doFree"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg><b>Quando sono disponibile</b><span class="tchev">›</span></button>
 <div class="ecc" id="freeBox" hidden>
   <p class="hint" style="margin:0 0 10px">Le ore in cui non lavori e non dovresti dormire, nei prossimi sette giorni. Sono contate al netto del viaggio: quelle in cui puoi prendere un appuntamento davvero.</p>
@@ -1080,6 +1087,11 @@ header b{font-size:23px}.datebar h1{font-size:19px}
   <span class="tool-tx"><b>Condividi il tuo ciclo</b><span>Chi apre il link vede i riposi in comune e può aggiungerti alla sua lista — partner, amico, collega.</span></span>
 </button>
 <div class="ecc" id="partner" hidden></div>
+<div class="andamento-h">
+  <span class="eyebrow">Il tuo andamento</span>
+  <p>Quello che i tuoi voti dicono sul ciclo, con il tempo.</p>
+</div>
+<div id="andamenti"></div>
 
 
 <div id="cards"></div>
@@ -3888,9 +3900,14 @@ function diaryReminder(P, CARDS){
   let x='<div class="drem'+(logged?" done":"")+'">';
   x+='<div class="drem-q"><span class="dic">'+ICON.moon+'</span>Il tuo sonno</div>';
   if(!logged){
-    x+='<div style="font-size:16px;font-weight:600;color:var(--ink);line-height:1.3;margin-bottom:10px">Com\'è andato il sonno appena fatto?</div>'+
+    // Prima chiedeva "com'è andato?" senza dire rispetto a cosa: per
+    // saperlo bisognava tornare al giorno prima e leggere l'orario
+    // previsto. L'orario del piano è già qui (P.s), non c'è motivo di
+    // farlo ricostruire a memoria.
+    x+='<div style="font-size:16px;font-weight:600;color:var(--ink);line-height:1.3;margin-bottom:10px">'+
+       'Hai dormito dalle '+hhmm(P.s.onset)+' alle '+hhmm(P.end)+'?</div>'+
        '<div class="diary" style="gap:8px">'+
-       '<button class="dbtn wide pri" data-asplan="1">come previsto</button>'+
+       '<button class="dbtn wide pri" data-asplan="1">conferma</button>'+
        '<button class="dbtn wide" data-open="1" aria-label="Modifica gli orari del sonno">modifica</button></div>';
   } else {
     x+='<div class="drem-done"><span class="drem-ok">✓</span> Hai dormito <b>'+durTxt+'</b>'+
@@ -3924,9 +3941,15 @@ function diaryReminder(P, CARDS){
        'font-size:12.5px;font-weight:600;color:var(--faint)">Come ti senti, dopo questo sonno? '+
        '<span style="font-weight:400">(facoltativo)</span></div>'+
        '<div class="ora-kss" style="margin-top:0">'+
-       [[1,"Esausto",ICON.faceTerrible],[2,"Stanco",ICON.faceLow],[3,"Così così",ICON.faceMid],
-        [4,"Sveglio",ICON.faceOk],[5,"Al meglio",ICON.faceGreat]].map(o=>
-         '<button class="dbtn kface'+(+diary[key0]===o[0]?" on":"")+'" data-diary="'+o[0]+'" aria-label="'+o[1]+'">'+o[2]+'<span>'+o[1]+'</span></button>').join("")+
+       // Un colore per punto della scala (rosso→verde, lo stesso vocabolario
+       // di rischio/ok già usato altrove in app) invece di un'icona sempre
+       // neutra: si legge la tendenza a colpo d'occhio, non solo leggendo
+       // ogni etichetta una per una.
+       [[1,"Esausto",ICON.faceTerrible,"var(--risk)"],[2,"Stanco",ICON.faceLow,"var(--orange)"],
+        [3,"Così così",ICON.faceMid,"var(--faint)"],[4,"Sveglio",ICON.faceOk,"var(--blue)"],
+        [5,"Al meglio",ICON.faceGreat,"var(--ok)"]].map(o=>
+         '<button class="dbtn kface'+(+diary[key0]===o[0]?" on":"")+'" data-diary="'+o[0]+'" aria-label="'+o[1]+'">'+
+         '<i class="kic" style="color:'+o[3]+'">'+o[2]+'</i><span>'+o[1]+'</span></button>').join("")+
        '</div>';
   }
   const napCards=CARDS.filter(c=>c.nap);
