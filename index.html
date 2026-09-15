@@ -144,8 +144,10 @@ border-radius:var(--r);font-family:inherit;font-size:12.5px;font-weight:600;curs
 .today:hover{background:var(--blue-fill)}
 .datebar h1 em{font-style:normal;font-weight:400;color:var(--faint);font-size:14px;
 display:block;text-transform:none;margin-top:1px}
-.now-shift{font-size:14px;color:var(--dim);margin:7px 0 14px}
-.now-shift i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;vertical-align:1px}
+.now-shift{margin:7px 0 14px}
+/* pillola col turno (o "Riposo"), come nel mockup — non più testo semplice */
+.shiftpill{display:inline-block;background:var(--blue-soft);color:var(--blue);font-size:12px;
+font-weight:700;padding:5px 10px;border-radius:999px;white-space:nowrap}
 .status{background:var(--s1);border-left:3px solid var(--blue);border-radius:var(--r);padding:13px 15px;margin-bottom:22px}
 .status p{font-size:16px;line-height:1.55}
 .status.warn{border-left-color:var(--risk);background:var(--risk-soft)}
@@ -3313,7 +3315,7 @@ function cards(P){
     lc.why="Alzarsi prima è la direzione difficile, e la luce del mattino è quasi l'unico strumento che la rende possibile. Senza, l'orario torna indietro nel giro di un giorno. "+whyLight;
   }else{
     lc.blocks=[["seek",wake,wake+120,"cerca"],["avoid",s.onset-CFG.eveningDim,s.onset,"evita"]];
-    lc.val="Luce al mattino"; lc.small="manutenzione";
+    lc.val="Luce al mattino";
     lc.rowsA.push(["Ultima mezz'ora di sonno","se puoi, luce che sale mentre dormi ancora: una lampada con alba programmata, o la tapparella lasciata a metà. Ti svegli molto meno intontito"]);
     lc.rowsA.push(["Mattino","alla finestra entro un'ora dalla sveglia"]);
     lc.rowsA.push(["Se piove","non serve il sole: anche il cielo coperto è molto più forte di una stanza"]);
@@ -3928,22 +3930,24 @@ function diaryReminder(P, CARDS){
     x+='<div style="font-size:16px;font-weight:600;color:var(--ink);line-height:1.3;margin-bottom:10px">'+
        'Hai dormito dalle '+hhmm(P.s.onset)+' alle '+hhmm(P.end)+'?</div>'+
        '<div class="diary" style="gap:8px">'+
-       '<button class="dbtn wide pri" data-asplan="1">conferma</button>'+
-       '<button class="dbtn wide" data-open="1" aria-label="Modifica gli orari del sonno">modifica</button></div>';
+       '<button class="dbtn wide pri" data-asplan="1">Conferma</button>'+
+       '<button class="dbtn wide" data-open="1" aria-label="Modifica gli orari del sonno">Modifica</button></div>';
   } else {
+    // Prima, con orari diversi dal piano, questa riga mostrava la
+    // differenza ("+15 minuti sul piano") E una riga a parte con gli
+    // orari assoluti ("Orari corretti: 23:40 → 09:10") — la stessa
+    // deviazione detta due volte, in due unità diverse. Il bottone
+    // "Modifica" ora è sempre qui: gli orari esatti si vedono aprendo il
+    // modulo di modifica (che li precompila già), non anche prima di aprirlo.
     x+='<div class="drem-done"><span class="drem-ok">✓</span> Hai dormito <b>'+durTxt+'</b>'+
-       (cmp?' · '+cmp:'')+(diverso?'':' <button class="lnk drem-edit" data-open="1" aria-label="Modifica gli orari del sonno">modifica</button>')+'</div>'+
+       (cmp?' · '+cmp:'')+' <button class="lnk drem-edit" data-open="1" aria-label="Modifica gli orari del sonno">Modifica</button></div>'+
        (recupero?'<div class="drem-rec">Hai dormito meno del previsto: il piano ha aggiunto un pisolino di recupero qui sotto.</div>':'');
     if(diverso && sleepEditing)
       x+='<div class="diary" style="gap:10px;margin-top:8px">'+
          '<span class="hint" style="width:100%">Orari corretti (sonno)</span>'+
          '<input type="time" data-bed="1" value="'+esc(bd)+'" style="max-width:118px;flex:none">'+
          '<input type="time" data-wake="1" value="'+esc(wk)+'" style="max-width:118px;flex:none"></div>'+
-         '<button class="btn g" data-confirm-sleep="1" style="display:block;width:100%;box-sizing:border-box;margin-top:8px;white-space:normal;overflow-wrap:break-word;text-align:center" aria-label="Conferma gli orari del sonno">conferma</button>';
-    else if(diverso)
-      x+='<div class="diary" style="gap:8px;margin-top:8px;align-items:center">'+
-         '<span class="hint" style="width:100%">Orari corretti: '+esc(bd)+' → '+esc(wk)+'</span>'+
-         '<button class="lnk drem-edit" data-open="1" aria-label="Modifica gli orari del sonno">modifica</button></div>';
+         '<button class="btn g" data-confirm-sleep="1" style="display:block;width:100%;box-sizing:border-box;margin-top:8px;white-space:normal;overflow-wrap:break-word;text-align:center" aria-label="Conferma gli orari del sonno">Conferma</button>';
     // Il voto da 1 a 5 alimenta "Il tuo andamento" (il ciclo giorno per
     // giorno, la correlazione col debito) — ma non c'era nessun modo di
     // inserirlo: il gestore del clic esisteva già, scritto e funzionante,
@@ -3980,9 +3984,9 @@ function diaryReminder(P, CARDS){
     const livello=c.nap.livello;
     const skippabile = isFinite(livello) && livello<2;   // c'è un livello dopo a cui scendere
     x+='<div class="diary" style="gap:8px;margin-top:8px"><span class="hint" style="width:100%">Pisolino previsto</span>'+
-      '<button class="dbtn'+(seg.si?" on":"")+'" data-nap="si" data-k="'+esc(c.nap.k)+'" data-min="'+c.nap.min+'">fatto</button>'+
-      '<button class="dbtn'+(seg.no?" on":"")+'" data-nap="no" data-k="'+esc(c.nap.k)+'" data-min="'+c.nap.min+'">saltato</button>'+
-      (skippabile?'<button class="dbtn" data-skip-recupero="'+(livello+1)+'">altra opzione</button>':'')+
+      '<button class="dbtn'+(seg.si?" on":"")+'" data-nap="si" data-k="'+esc(c.nap.k)+'" data-min="'+c.nap.min+'">Fatto</button>'+
+      '<button class="dbtn'+(seg.no?" on":"")+'" data-nap="no" data-k="'+esc(c.nap.k)+'" data-min="'+c.nap.min+'">Saltato</button>'+
+      (skippabile?'<button class="dbtn" data-skip-recupero="'+(livello+1)+'">Altra opzione</button>':'')+
       '</div>';
     if(seg.si){
       const napEditing = state.diaryEditing.has("nap:"+key0+":"+c.nap.k);
@@ -3990,11 +3994,11 @@ function diaryReminder(P, CARDS){
         x+='<div class="diary" style="gap:10px;margin-top:6px"><span class="hint" style="width:100%">A che ora, davvero?</span>'+
           '<input type="time" data-napa="'+esc(c.nap.k)+'" data-min="'+c.nap.min+'" value="'+esc(seg.a||c.nap.k)+'" style="max-width:118px;flex:none">'+
           '<input type="time" data-napb="'+esc(c.nap.k)+'" data-min="'+c.nap.min+'" value="'+esc(seg.b||c.nap.fine)+'" style="max-width:118px;flex:none"></div>'+
-          '<button class="btn g" data-confirm-nap="'+esc(c.nap.k)+'" style="display:block;width:100%;box-sizing:border-box;margin-top:8px;white-space:normal;overflow-wrap:break-word;text-align:center" aria-label="Conferma gli orari del pisolino">conferma</button>';
+          '<button class="btn g" data-confirm-nap="'+esc(c.nap.k)+'" style="display:block;width:100%;box-sizing:border-box;margin-top:8px;white-space:normal;overflow-wrap:break-word;text-align:center" aria-label="Conferma gli orari del pisolino">Conferma</button>';
       } else {
         x+='<div class="diary" style="gap:8px;margin-top:6px;align-items:center">'+
           '<span class="hint" style="width:100%">Fatto: '+esc(seg.a||c.nap.k)+' → '+esc(seg.b||c.nap.fine)+'</span>'+
-          '<button class="lnk drem-edit" data-edit-nap="'+esc(c.nap.k)+'" aria-label="Modifica gli orari del pisolino">modifica</button></div>';
+          '<button class="lnk drem-edit" data-edit-nap="'+esc(c.nap.k)+'" aria-label="Modifica gli orari del pisolino">Modifica</button></div>';
       }
       // Se il pisolino registrato è durato molto più del previsto, un avviso
       // subito — non solo un conto che si aggiusta domani in silenzio.
@@ -4112,7 +4116,7 @@ function renderOra(Pfocus){
   const risk = r&&r.risk, severe = (risk&&risk.severe) || kssSleepy;
   let title, sub, accent=false;
   if(severe){ accent=true;
-    title = kssSleepy ? "Sei assonnato adesso" : "Rischio fatica alto verso le "+risk.hhmm;
+    title = kssSleepy ? "Sei assonnato" : "Rischio fatica alto verso le "+risk.hhmm;
     sub = kssSleepy ? "Se devi guidare o decidere, fermati: 20 minuti e un caffè."
       : "Evita decisioni critiche; se guidi al rientro, non farlo stanco.";
   } else if(A && !A.fallback){ title=A.t; sub=A.s; }
@@ -4301,7 +4305,7 @@ function inWin(m,a,b){ return m>=a && m<b; }
 function adessoLine(P, riferimento){
   const rifMid = new Date(riferimento.getFullYear(), riferimento.getMonth(), riferimento.getDate());
   const m = Math.round((new Date() - rifMid) / 60000), b=P.b;
-  if(inWin(m,P.s.onset,P.end)) return {t:"Dovresti dormire",s:"finestra "+hhmm(P.s.onset)+" → "+hhmm(P.end)};
+  if(inWin(m,P.s.onset,P.end)) return {t:"Dovresti dormire",s:hhmm(P.s.onset)+" → "+hhmm(P.end)};
   for(const n of (P.naps||[])) if(inWin(m,n.a,n.b)) return {t:"È l'ora del pisolino",s:hhmm(n.a)+" → "+hhmm(n.b)};
   let restoFallback=null;
   if(b.rest){
@@ -4309,19 +4313,19 @@ function adessoLine(P, riferimento){
     // probabile e più rilevante — non deve restare nascosto dietro un
     // messaggio generico. "Oggi riposo" diventa la coda della stessa
     // cascata sotto, non un ritorno immediato che la salta del tutto.
-    restoFallback={t:"Oggi riposo",s:"tieni il ritmo: luce al mattino, e annota com'è andato il sonno", fallback:true};
+    restoFallback={t:"Oggi riposo",s:"tieni il ritmo: luce al mattino", fallback:true};
   } else {
     if(inWin(m,b.start,b.end)){
       const toEnd=mod1440(b.end-m);
       // Il rientro è il momento peggiore anche per i turni che iniziano nel cuore
       // della notte (verso le 2): non solo per chi ha fatto tutta la notte.
       if((P.night||P.lateStart) && toEnd<=90) return {t:"Rientro tra "+hm(toEnd),s:"occhiali da sole, e se sei stanco non guidare: è l'ora peggiore"};
-      return {t:"In turno",s:P.night?"la parte dura è nelle ore piccole; caffè solo a inizio turno":"mantieni il ritmo"};
+      return {t:"In turno",s:P.night?"la parte dura arriva nelle ore piccole":"mantieni il ritmo"};
     }
     const toStart=mod1440(b.start-m);
     if(toStart>0 && toStart<=6*60) return {t:"Tra "+hm(toStart)+" entri",s:"ultimo caffè entro le "+hhmm(P.cut)+(P.naps.length?", e c'è un pisolino prima":"")};
     const afterEnd=mod1440(m-b.end);
-    if((P.night||P.lateStart) && afterEnd<=2*60) return {t:"Appena smontato",s:"è l'ora più rischiosa: non guidare stanco, poi dormi "+hhmm(P.s.onset)+" → "+hhmm(P.end)};
+    if((P.night||P.lateStart) && afterEnd<=2*60) return {t:"Appena smontato",s:"è l'ora più rischiosa: non guidare stanco"};
   }
 
   // "Ora" non deve mai restare vuoto: se non c'è nulla di urgente, dice
@@ -4507,7 +4511,7 @@ function renderEssenziale(P, CARDS){
     voci.push({t:dSv(P.s.onset)+0.5, html:
       '<div class="drem-rec">L\'orario a letto ('+hhmm(P.s.onset)+') è presto: addormentarsi lì può essere difficile, non solo scomodo. '+
       '<button class="lnk" data-open-bifasico style="display:inline">C\'è un\'opzione per dividerlo →</button>'+
-      ' <button class="lnk" data-off-bifasico style="display:inline;color:var(--faint)">non mostrarlo più</button></div>'});
+      ' <button class="lnk" data-off-bifasico style="display:inline;color:var(--faint)">Non mostrarlo più</button></div>'});
 
   // ── tutte le altre righe vengono dalle schede, che sono GIÀ in ordine di giornata ──
   for(const cd of CARDS){
@@ -4634,10 +4638,12 @@ function renderHeader(P, f){
   // ("Il tuo turno") più sotto e la striscia sopra — qui basta sapere QUALE
   // turno e A CHE PUNTO della serie sei, non l'orario esatto. Stessa fonte
   // già usata per la pillola (rimossa: era la stessa informazione due volte
-  // a due righe di distanza), non un secondo calcolo.
+  // a due righe di distanza), non un secondo calcolo. Come pillola (non più
+  // testo semplice): vale anche nei giorni di riposo, dove nameOf(c) torna
+  // già "Riposo" da sé — nessun calcolo in più per quel caso.
   const serie=serieTurnoCorrente();
   const nowShiftTxt = serie ? nameOf(c)+" "+serie.posizione+"/"+serie.totale : nameOf(c);
-  $("#nowShift").innerHTML='<i style="background:'+colorOf(c)+'"></i>'+esc(nowShiftTxt);
+  $("#nowShift").innerHTML='<span class="shiftpill">'+esc(nowShiftTxt)+'</span>';
   const cov=$("#cover"); if(cov) cov.textContent=coverage()||"";
   renderToday();
   const avv = freeWakeOk() ? "" : "Questa risposta non è plausibile: sto usando "+hhmm(freeWakeUsata())+".";
@@ -5211,7 +5217,7 @@ function renderWizPeopleList(){
     return '<div class="diary" style="gap:8px;margin-bottom:6px">'+
       (multi?'<button class="lnk" data-glance-persona="'+i+'" aria-label="Mostrala nella card di Oggi" title="Mostrala nella card di Oggi" style="color:'+(attiva?"var(--orange)":"var(--faint)")+';padding:4px">'+star+'</button>':'')+
       '<span style="flex:1;font-weight:600">'+esc(nome)+'</span>'+
-      '<button class="lnk" data-remove-persona="'+i+'" style="color:var(--faint)">rimuovi</button></div>';
+      '<button class="lnk" data-remove-persona="'+i+'" style="color:var(--faint)">Rimuovi</button></div>';
   }).join("")+(multi?'<p class="hint" style="margin:2px 0 10px">La stellina sceglie chi vedi nella card "Turni condivisi" di Oggi — le altre restano comunque visibili qui in Turni.</p>':'');
 }
 function renderPartner(CARDS){
