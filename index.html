@@ -133,8 +133,7 @@ cursor:pointer;display:flex;border-radius:999px}
 .themebtn:hover{color:var(--ink);background:var(--s1)}
 .themebtn[aria-pressed="true"]{color:var(--blue)}
 .datebar{display:flex;align-items:center;gap:12px}
-.dateCol{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:5px}
-.datebar h1{font-family:var(--serif);font-size:23px;font-weight:600;text-transform:capitalize;line-height:1.3;cursor:pointer}
+.datebar h1{font-family:var(--serif);font-size:23px;font-weight:600;flex:1;min-width:0;text-transform:capitalize;line-height:1.3;cursor:pointer}
 .datebar h1:active{opacity:.7}
 #jumpDate{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;border:0}
 .nav{background:var(--s1);border:1px solid var(--line);color:var(--ink);width:40px;height:40px;font-size:18px;line-height:1;
@@ -145,9 +144,6 @@ border-radius:var(--r);font-family:inherit;font-size:12.5px;font-weight:600;curs
 .today:hover{background:var(--blue-fill)}
 .datebar h1 em{font-style:normal;font-weight:400;color:var(--faint);font-size:14px;
 display:block;text-transform:none;margin-top:1px}
-/* pillola "Notte 2/3" accanto alla data, come nel mockup */
-.shiftpill{flex:none;background:var(--blue-soft);color:var(--blue);font-size:12px;
-font-weight:700;padding:5px 10px;border-radius:999px;white-space:nowrap}
 .now-shift{font-size:14px;color:var(--dim);margin:7px 0 14px}
 .now-shift i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;vertical-align:1px}
 .status{background:var(--s1);border-left:3px solid var(--blue);border-radius:var(--r);padding:13px 15px;margin-bottom:22px}
@@ -1009,10 +1005,7 @@ header b{font-size:23px}.datebar h1{font-size:19px}
 <div id="ora" class="ora"></div>
 <div class="datebar">
   <button class="nav" id="prev" aria-label="Giorno precedente"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
-  <div class="dateCol">
-    <h1 id="dateLabel" tabindex="0" role="button" aria-label="Vai a una data">—</h1>
-    <span class="shiftpill" id="shiftPill" hidden></span>
-  </div>
+  <h1 id="dateLabel" tabindex="0" role="button" aria-label="Vai a una data">—</h1>
   <input type="date" id="jumpDate" aria-hidden="true">
   <button class="today" id="goToday" hidden>Oggi</button>
   <button class="nav" id="next" aria-label="Giorno successivo"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
@@ -4133,7 +4126,6 @@ function renderOra(Pfocus){
     '<div class="ora-tx"><span class="eyebrow">Adesso</span>'+
     '<b>'+esc(title)+'</b></div></div>'+
     '<span class="ora-sub">'+esc(sub)+'</span>'+
-    (r?'<div class="ora-dis">Modellato dai tuoi orari di sonno, non una misura.</div>':'')+
     // "Ora" parla sempre del momento vero, per progetto — ma le card sotto
     // seguono il giorno che si sta sfogliando: stesso schermo, due giorni
     // diversi, senza nessun segnale che lo dicesse. Non un errore di calcolo,
@@ -4638,13 +4630,14 @@ function renderHeader(P, f){
     ? esc(rel+", "+f.toLocaleDateString("it-IT",{weekday:"long",day:"numeric"}))
     : esc(f.toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"})) +
       '<em>'+esc(scarto>0 ? "fra "+scarto+" giorni" : (-scarto)+" giorni fa")+'</em>';
-  const pill=$("#shiftPill"), serie=serieTurnoCorrente();
-  if(pill){
-    if(serie){ pill.hidden=false; pill.textContent=nameOf(c)+" "+serie.posizione+"/"+serie.totale; }
-    else pill.hidden=true;
-  }
-  $("#nowShift").innerHTML='<i style="background:'+colorOf(c)+'"></i>'+esc(nameOf(c))+
-    (P.b.rest?"":" · "+hhmm(P.b.start)+"–"+hhmm(P.b.end));
+  // "Pomeriggio · 14:00–22:15" ripeteva un orario che ha già una sua card
+  // ("Il tuo turno") più sotto e la striscia sopra — qui basta sapere QUALE
+  // turno e A CHE PUNTO della serie sei, non l'orario esatto. Stessa fonte
+  // già usata per la pillola (rimossa: era la stessa informazione due volte
+  // a due righe di distanza), non un secondo calcolo.
+  const serie=serieTurnoCorrente();
+  const nowShiftTxt = serie ? nameOf(c)+" "+serie.posizione+"/"+serie.totale : nameOf(c);
+  $("#nowShift").innerHTML='<i style="background:'+colorOf(c)+'"></i>'+esc(nowShiftTxt);
   const cov=$("#cover"); if(cov) cov.textContent=coverage()||"";
   renderToday();
   const avv = freeWakeOk() ? "" : "Questa risposta non è plausibile: sto usando "+hhmm(freeWakeUsata())+".";
