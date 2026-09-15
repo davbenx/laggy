@@ -603,7 +603,7 @@ const encShifts = o => Object.entries(o).map(([k,v])=>[k,safeName(v.n)||k,v.s,v.
 
 function decShifts(str){
   const o={};
-  for(const part of str.split("|")){
+  for(const part of String(str).split("|")){
     const [k,n,s,e] = part.split(":");
     if(!k || !/^[A-Z]$/.test(k) || k==="R") continue;
     const S=+s, E=+e; if(!isFinite(S)||!isFinite(E)||E<=S) continue;
@@ -630,15 +630,34 @@ function busyOf(off){
   const f=state.focus; state.focus=day(f,off);
   let out=[];
   try{
-    const S=simulate(), s=at(S,0), sp=at(S,-1), b=block(0);
-    const wake=sp.onset+sp.dur-1440;
+    // Usa plan() invece di simulate(): plan() include i pisolini nel campo .naps.
+    // simulate() non li conosce, quindi busyOf() precedente segnava come "libere"
+    // le ore dei pisolini — divergenza tra il feed ICS e l'UI dell'app.
+    const P=plan();
+    const b=block(0);
+    const sp=P.sp||{}; // sonno di ieri (onset+dur relativi a ieri+1440)
+    const s=P.s;       // sonno di oggi
+    const wake=(sp.onset||0)+(sp.dur||0)-1440;
     if(wake>0) out.push([0,Math.min(wake,1440)]);
     if(s.onset<1440) out.push([Math.max(s.onset,0),1440]);
     if(!b.rest) out.push([Math.max(b.start,0),Math.min(b.end,1440)]);
-    // un turno di ieri che sconfina oltre mezzanotte occupa anche stamattina
+    // turno di ieri che sconfina oltre mezzanotte
     const yb=block(-1);
     if(!yb.rest && yb.end>1440) out.push([Math.max(yb.start-1440,0),Math.min(yb.end-1440,1440)]);
-  }catch(e){}
+    // pisolini — il motivo per cui serviva plan() invece di simulate()
+    for(const n of (P.naps||[])) out.push([Math.max(n.a,0),Math.min(n.b,1440)]);
+  }catch(e){
+    // fallback su simulate() per robustezza
+    try{
+      const S=simulate(), s=at(S,0), sp=at(S,-1), b=block(0);
+      const wake=(sp.onset+sp.dur)-1440;
+      if(wake>0) out.push([0,Math.min(wake,1440)]);
+      if(s.onset<1440) out.push([Math.max(s.onset,0),1440]);
+      if(!b.rest) out.push([Math.max(b.start,0),Math.min(b.end,1440)]);
+      const yb=block(-1);
+      if(!yb.rest && yb.end>1440) out.push([Math.max(yb.start-1440,0),Math.min(yb.end-1440,1440)]);
+    }catch(e2){}
+  }
   state.focus=f;
   return out.filter(([a,z])=>z>a).sort((x,y)=>x[0]-y[0]);
 }
@@ -797,17 +816,6 @@ export function buildCoupleFeed(config, opts={}){
   return e.buildCouple(days);
 }
 
-const _safeName = x => String(x==null?"":x).replace(/[<>"'\r\n\t:|]/g,"").trim().slice(0,24);
-function _decShifts(str){
-  const o={};
-  for(const part of String(str).split("|")){
-    const [k,n,s,e] = part.split(":");
-    if(!k || !/^[A-Z]$/.test(k) || k==="R") continue;
-    const S=+s, E=+e; if(!isFinite(S)||!isFinite(E)||E<=S) continue;
-    o[k]={n:_safeName(n)||k, s:S, e:E};
-  }
-  return Object.keys(o).length ? o : null;
-}
 const _CAFF = {bassa:1, media:1, alta:1};
 
 export function parseConfig(params){
@@ -817,7 +825,8 @@ export function parseConfig(params){
   const okDate=v=>/^\d{4}-\d{2}-\d{2}$/.test(v||"") && !isNaN(+new Date(v+"T12:00:00"));
   const okTime=v=>/^([01]\d|2[0-3]):[0-5]\d$/.test(v||"");
   const seq=v=>(v||"").toUpperCase().replace(/[^A-Z]/g,"").slice(0,400);
-  if(p.get("s")){ const sh=_decShifts(p.get("s")); if(sh) cfg.shifts=sh; }
+  // usa safeName e decShifts già definiti nel modulo (erano _duplicati_ identici)
+  if(p.get("s")){ const sh=decShifts(p.get("s")); if(sh) cfg.shifts=sh; }
   if(p.get("p")) cfg.pattern=seq(p.get("p"))||undefined;
   if(okDate(p.get("a"))) cfg.anchor=p.get("a");
   if(okTime(p.get("w"))) cfg.freeWake=p.get("w");
@@ -830,7 +839,7 @@ export function parseConfig(params){
   const adv=num("adv",15,180);if(adv!==undefined) cfg.maxAdvance=adv;
   cfg.repeat = p.get("rep")!=="0";
   if(p.get("pp")){ cfg.pPattern=seq(p.get("pp")); cfg.pAnchor=okDate(p.get("pa"))?p.get("pa"):cfg.anchor;
-    if(p.get("ps")){ const psh=_decShifts(p.get("ps")); if(psh) cfg.pShifts=psh; }
+    if(p.get("ps")){ const psh=decShifts(p.get("ps")); if(psh) cfg.pShifts=psh; }
     if(okTime(p.get("pw"))) cfg.pWake=p.get("pw");
     if(okTime(p.get("pwb"))) cfg.pBed=p.get("pwb"); }
   return cfg;

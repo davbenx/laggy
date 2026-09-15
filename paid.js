@@ -95,6 +95,10 @@
     var s = getSub();
     var feed = s.feedUrl || "";
     var https = feed.replace(/^webcal/, "https");
+    // Il link di ripristino contiene la writeKey — non lo rendiamo mai navigabile
+    // (href) per evitare che finisca in cronologia browser, preview WhatsApp,
+    // iCloud Backup URL, ecc. Solo copia-clipboard e download .txt.
+    var restoreText = restoreLink(s);
     return '<h2 class="pf-h">Il tuo calendario</h2>' +
       '<p class="pf-p">Iscrivi il calendario del telefono a questo indirizzo. Da lì in poi si aggiorna da solo.</p>' +
       '<a class="pf-lnk" id="pf-sub" href="' + feed + '">Aggiungi al calendario (iPhone/Mac) →</a>' +
@@ -105,7 +109,7 @@
       '<button class="pf-danger" id="pf-del">Cancella tutto</button></p>' +
       '<div style="border-top:1px solid var(--line);margin-top:16px;padding-top:14px">' +
       '<p class="pf-p" style="margin-top:0"><b>Salva questo accesso.</b> Con questo link riattivi tutto su un altro telefono, senza email. Tienilo privato: è la tua chiave.</p>' +
-      '<a class="pf-lnk" id="pf-rlink" href="' + restoreLink(s) + '">' + restoreLink(s) + '</a>' +
+      '<code class="pf-lnk" id="pf-rlink" style="word-break:break-all;user-select:all;cursor:text;display:block;padding:8px;background:var(--s2);border-radius:6px">' + restoreText + '</code>' +
       '<button class="pf-btn" id="pf-copy">Copia il link</button>' +
       '<button class="pf-btn" id="pf-dl" style="margin-top:8px;background:var(--s2);color:var(--ink);border:1px solid var(--line)">Scarica come file .txt</button>' +
       '</div>';
@@ -227,21 +231,48 @@
   // quasi sempre entro pochi secondi ma mai garantito. Si interroga /claim
   // finché non è pronto, non una volta sola: un webhook un po' lento non deve
   // sembrare un pagamento fallito.
+  var _pollActive = false;   // evita polling paralleli se l'utente tocca più volte
+
   function pollClaim(token, tentativo) {
     tentativo = tentativo || 0;
+    _pollActive = true;
+
+    // Su iOS/Safari i setTimeout ricorsivi vengono congelati quando il tab va in
+    // background (es. l'utente apre LemonSqueezy in un popup). Questo listener
+    // si aggancia alla riapertura del tab e riprende da dove si era fermato.
+    function onVisible() {
+      if (document.visibilityState === "visible" && _pollActive) {
+        document.removeEventListener("visibilitychange", onVisible);
+        pollClaim(token, tentativo);
+      }
+    }
+    document.addEventListener("visibilitychange", onVisible);
+
     api("GET", "/claim/" + encodeURIComponent(token)).then(function (r) {
       if (r.ok && r.data && r.data.ready) {
+        _pollActive = false;
+        document.removeEventListener("visibilitychange", onVisible);
         setSub({ id: r.data.id, writeKey: r.data.writeKey, feedUrl: r.data.feedUrl });
         setStatus(""); screen = "account"; paint();
         try { if (window.render) window.render(); } catch (e) {}
         toast("Sbloccato — buon turno.");
         return;
       }
-      if (tentativo >= 12) { setStatus("Il pagamento risulta fatto, ma lo sblocco sta impiegando più del solito. Riapri questa schermata fra un minuto, o scrivimi con l'ordine a portata di mano."); return; }
+      if (tentativo >= 12) {
+        _pollActive = false;
+        document.removeEventListener("visibilitychange", onVisible);
+        setStatus("Il pagamento risulta fatto, ma lo sblocco sta impiegando più del solito. Riapri questa schermata fra un minuto, o scrivimi con l'ordine a portata di mano.");
+        return;
+      }
       setStatus("Pagamento ricevuto, sto confermando lo sblocco…");
       setTimeout(function () { pollClaim(token, tentativo + 1); }, 1800);
     }, function () {
-      if (tentativo >= 12) { setStatus("Connessione instabile: riprova ad aprire questa schermata fra poco."); return; }
+      if (tentativo >= 12) {
+        _pollActive = false;
+        document.removeEventListener("visibilitychange", onVisible);
+        setStatus("Connessione instabile: riprova ad aprire questa schermata fra poco.");
+        return;
+      }
       setTimeout(function () { pollClaim(token, tentativo + 1); }, 1800);
     });
   }
@@ -266,7 +297,18 @@
     }, function () { setStatus("Non riesco a preparare il checkout — riprova."); });
   }
 
-  function toast(t) { try { var d = document.querySelector("#toast") || document.querySelector(".toast"); if (d) { d.textContent = t; d.className = (d.className || "") + " show"; setTimeout(function () { d.className = (d.className || "").replace(" show", ""); }, 2200); } } catch (e) {} }
+  function toast(t) {
+    try {
+      var d = document.querySelector("#toast") || document.querySelector(".toast");
+      if (d) {
+        d.textContent = t;
+        // assegna direttamente per evitare accumulo "show show show..." in sessioni lunghe
+        d.className = "toast show";
+        clearTimeout(toast._tid);
+        toast._tid = setTimeout(function () { d.className = "toast"; }, 2200);
+      }
+    } catch (e) {}
+  }
 
   // ── lancio ──
   function launcher() {
