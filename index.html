@@ -625,6 +625,14 @@ border-radius:var(--r);padding:14px 15px}
 .andamento-h .eyebrow{display:block;font-family:var(--serif);font-size:20px;
 font-weight:700;color:var(--ink);text-transform:none;letter-spacing:0}
 .andamento-h p{margin:4px 0 0;font-size:13.5px;color:var(--faint)}
+/* Hero del debito di sonno: numero grande + sparkline, non un'altra riga
+   di testo fra le altre — #andamenti è già una card, quindi qui basta un
+   bordo sotto per separarla dalle righe di dettaglio, non un'altra card
+   dentro la card. */
+.andamento-hero{padding-bottom:16px;margin-bottom:16px;border-bottom:1px solid var(--line)}
+.andamento-num{font-family:var(--serif);font-size:34px;font-weight:600;line-height:1.15;margin:4px 0 6px}
+.andamento-insight{background:var(--blue-soft);border-radius:var(--r);padding:12px 14px;margin-top:14px;font-size:13.5px;color:var(--ink);line-height:1.5}
+.andamento-insight-eyebrow{display:block;font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--blue);margin-bottom:4px}
 .wintro{font-size:14.5px;color:var(--ink);line-height:1.6;margin:0 0 20px;padding:14px 15px;
 background:var(--s1);border-radius:var(--r);border:1px solid var(--line)}
 .wintro b{color:var(--ink);font-weight:600}
@@ -4858,29 +4866,48 @@ function renderAndamenti(){
   // riquadro, non come un separatore interno. Ora è tutto UN SOLO <div
   // class="rows">, con solo spaziatura verticale fra le sotto-sezioni,
   // senza nessun bordo che possa sembrare l'inizio di un'altra scatola.
-  let righe=[];
+  // Debito di sonno: prima erano tre righe di testo in mezzo a tutte le
+  // altre, stesso peso visivo del resto. Oura/Whoop insegnano che questo
+  // è il numero che conta di più: un hero (numero grande + sparkline),
+  // non un'altra riga. L'insight sulla correlazione umore/debito segue
+  // subito sotto, in un riquadro a parte — prima era anonimo fra le
+  // righe, mentre è l'osservazione più interessante che questi dati
+  // possono dire (nessun concorrente la fa).
+  let heroHtml="", righe=[];
   try{
     if(window.NTHistory){
       const trend=window.NTHistory.sleepTrend({beds:state.beds,wakes:state.wakes}, NT_planSafe, {days:30});
       if(trend && trend.n>=3){
         const d=trend.debtNow;
-        righe.push('<div class="row"><span class="hint" style="width:100%">Nelle ultime '+trend.series.length+' notti</span></div>');
-        righe.push('<div class="row"><b style="min-width:148px">In media dormi</b><span>'+hm(trend.avgActual)+
-          (trend.avgPlanned?' contro '+hm(trend.avgPlanned)+' pianificate':'')+'</span></div>');
-        righe.push('<div class="row"><b style="min-width:148px">Debito accumulato</b><span>'+
-          (d>0?hm(d)+' in meno':hm(-d)+' in più')+' rispetto al pianificato</span></div>');
+        const vals=trend.series.map(s=>s.debt);
+        const W=280,H=44,pad=4;
+        const mn=Math.min(0,...vals), mx=Math.max(0,...vals), span=Math.max(mx-mn,30);
+        const xAt=i=> vals.length>1 ? (i/(vals.length-1))*(W-pad*2)+pad : W/2;
+        const yAt=v=> H-pad-((v-mn)/span)*(H-pad*2);
+        const pts=vals.map((v,i)=>xAt(i).toFixed(1)+","+yAt(v).toFixed(1)).join(" ");
+        const lx=xAt(vals.length-1).toFixed(1), ly=yAt(vals[vals.length-1]).toFixed(1);
+        const numColor = d>0 ? "var(--orange)" : "var(--ok)";
+        heroHtml='<div class="andamento-hero">'+
+          '<span class="hint" style="display:block">Debito di sonno · ultime '+trend.series.length+' notti</span>'+
+          '<div class="andamento-num" style="color:'+numColor+'">'+(d>0?"-":"+")+hm(Math.abs(d))+'</div>'+
+          '<span class="hint" style="display:block">Dormi in media '+hm(trend.avgActual)+
+            (trend.avgPlanned?' contro '+hm(trend.avgPlanned)+' pianificate':'')+'</span>'+
+          '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:'+H+'px;display:block;margin-top:10px" role="img" aria-label="Andamento del debito di sonno">'+
+            '<polyline points="'+pts+'" fill="none" stroke="var(--orange)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>'+
+            '<circle cx="'+lx+'" cy="'+ly+'" r="3.5" fill="var(--orange)"/>'+
+          '</svg>'+
+        '</div>';
       }
       const corr=correlazioneVotoDebito();
       if(corr){
         const sopra = corr.sogliaDebito>0 ? "quando il debito supera "+hm(corr.sogliaDebito)
           : "nei giorni con meno sonno accumulato rispetto al solito";
-        righe.push('<div class="row" style="margin-top:6px"><span style="color:var(--amber)">'+
-          (corr.coerente
-            ? "Sembra che "+sopra+", il tuo voto scenda in media a "+corr.vAlto.toFixed(1)+
-              " (contro "+corr.vBasso.toFixed(1)+" negli altri giorni)."
-            : "Curioso: nei tuoi dati il voto è più alto proprio "+sopra+
-              " ("+corr.vAlto.toFixed(1)+" contro "+corr.vBasso.toFixed(1)+"). Potrebbe dipendere da altro — vale la pena osservarlo.")+
-          '</span></div>');
+        const testo = corr.coerente
+          ? "Sembra che "+sopra+", il tuo voto scenda in media a "+corr.vAlto.toFixed(1)+
+            " (contro "+corr.vBasso.toFixed(1)+" negli altri giorni)."
+          : "Curioso: nei tuoi dati il voto è più alto proprio "+sopra+
+            " ("+corr.vAlto.toFixed(1)+" contro "+corr.vBasso.toFixed(1)+"). Potrebbe dipendere da altro — vale la pena osservarlo.";
+        heroHtml+='<div class="andamento-insight"><span class="andamento-insight-eyebrow">Insight</span>'+esc(testo)+'</div>';
       }
     }
   }catch(e){}
@@ -4927,8 +4954,10 @@ function renderAndamenti(){
     righe.push('<div class="row" style="margin-top:6px"><button class="btn g" id="doSum">Copia il riepilogo</button></div>');
   }
 
-  el.innerHTML = righe.length
-    ? '<div class="rows" style="border-top:none;margin-top:0;padding-top:0">'+righe.join("")+'</div>'
+  const rowsHtml = righe.length
+    ? '<div class="rows" style="border-top:none;margin-top:0;padding-top:0">'+righe.join("")+'</div>' : "";
+  el.innerHTML = (heroHtml || rowsHtml)
+    ? heroHtml+rowsHtml
     : '<div class="empty"><img src="./owl-mark.png" alt="" width="46" height="46"><p>Annota il sonno per qualche giorno dal glance di Oggi: qui comparirà quale giorno del ciclo ti pesa di più e come scivola la tua sveglia.</p></div>';
 }
 
