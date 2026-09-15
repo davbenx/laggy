@@ -4389,7 +4389,13 @@ const cicloMin = () => -(CFG.H-2), cicloMax = () => CFG.H-10;
 function renderFormaGiorno(P){
   const el=$("#formaGiorno"); if(!el) return;
   if(state.vista==="dettaglio"){ el.innerHTML=""; return; }
-  let clo=P.s.onset, chi=P.s.onset+P.s.dur;
+  // La sveglia di oggi entra sempre nella finestra, non solo nei giorni di
+  // turno (dove il blocco del turno la copriva quasi sempre da solo). Nei
+  // giorni di riposo senza turno la finestra si restringeva al solo sonno
+  // (+ mezz'ora di margine): la striscia diventava quasi tutta blu, non
+  // perché il riposo "sia" così ma perché non c'era nient'altro a tenerla
+  // larga quanto la giornata vera.
+  let clo=Math.min(P.s.onset,P.wake), chi=P.s.onset+P.s.dur;
   if(!P.b.rest){ clo=Math.min(clo,P.b.start); chi=Math.max(chi,P.b.end); }
   for(const n of (P.naps||[])){ clo=Math.min(clo,n.a); chi=Math.max(chi,n.b); }
   const staGuardandoOggi = dnum(state.focus)===dnum(giornoVero());
