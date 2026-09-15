@@ -544,6 +544,16 @@ body.tab-oggi .cap.giornata,body.tab-oggi #cards{display:none}
 body.tab-oggi.giornata .cap.giornata{display:flex}
 body.tab-oggi.giornata #band{display:block}
 body.tab-oggi.giornata #cards{display:block}
+/* La regola che doveva nascondere #band in modalità essenziale
+   (body.essenziale:not(.tabs) #band, più sopra) non scatta mai da
+   quando .tabs viene sempre aggiunta al body: risultato, la timeline
+   di dettaglio restava visibile SEMPRE su Oggi, insieme alla nuova
+   striscia compatta (#formaGiorno) — due strisce per lo stesso turno.
+   Regola dedicata, non una correzione della vecchia (che dipende da
+   .giornata, mai impostata oggi, e non voglio scoprire cos'altro se
+   ne serviva senza saperlo): nasconde #band su Oggi solo quando si è
+   davvero in essenziale, indipendentemente da .tabs/.giornata. */
+body.tab-oggi.essenziale #band{display:none}
 /* TURNI: ciclo, giorni liberi, partner, modifica */
 body.tab-turni .now-shift,body.tab-turni #status,body.tab-turni #ora,body.tab-turni #benvenutoLink,body.tab-turni #demoEsempio,body.tab-turni #backupNudge,body.tab-turni #installBanner,body.tab-turni #clubBanner,body.tab-turni #formaGiorno,body.tab-turni #essenziale,
 body.tab-turni .datebar,body.tab-turni .cap.giornata,body.tab-turni #band,body.tab-turni #cards,
