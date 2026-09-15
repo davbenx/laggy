@@ -532,10 +532,15 @@ body.tab-piu #band,body.tab-piu #cards{display:none}
 .tool{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;background:var(--s1);border:1px solid var(--line);
 border-radius:var(--r);padding:13px 15px;font:inherit;cursor:pointer;color:inherit;min-height:44px}
 .tool:hover{border-color:var(--blue-lt)}
+/* selezionato: stesso trattamento di .dbtn.on, per i preset del passo 1 del wizard */
+.tool.on{border-color:var(--blue);background:var(--blue-soft)}
+.tool.on .tool-ic{color:var(--blue)}
+.tool.on .tool-tx b{color:var(--blue)}
 .tool-ic{flex:none;color:var(--faint);padding-top:1px;display:inline-flex}
 .tool-tx{flex:1;min-width:0}
 .tool-tx b{display:block;font-size:16px;font-weight:600;margin-bottom:2px}
 .tool-tx span{display:block;font-size:12.5px;color:var(--dim);line-height:1.45}
+.presetTiles{display:flex;flex-direction:column;gap:8px}
 .piu-info{border:1px solid var(--line);border-radius:var(--r);margin:18px 0 8px;background:var(--s1)}
 .piu-info>summary{padding:12px 15px;cursor:pointer;font-size:14px;font-weight:600;color:var(--dim);
 list-style:none;min-height:44px;display:flex;align-items:center}
@@ -657,11 +662,14 @@ header b{font-size:23px}.datebar h1{font-size:19px}
   <div class="wsteps" id="wsteps">
 
   <section class="wstep" data-step="1">
-    <p class="wintro">Segui il tuo ciclo di turni e Notturnisti ti dice, giorno per giorno, quando dormire, quando prendere luce e quando fermarti col caffè — così il corpo fa meno fatica a stare al passo. Due minuti per iniziare.</p>
+    <p class="wintro">Segui il tuo ciclo di turni e Notturnisti ti dice, giorno per giorno, quando dormire, quando prendere luce e quando fermarti col caffè — così il corpo fa meno fatica a stare al passo. Due tocchi, se il tuo schema è già tra i più comuni.</p>
     <h2 class="wq">Che turni fai?</h2>
     <p class="wsub">Scegli lo schema più vicino ai tuoi. Non c'è il tuo? Scegli <b>Personalizza</b> e te lo costruisci in due minuti.</p>
     <div class="q">
-      <select id="oPreset"></select>
+      <!-- oPreset resta la fonte dello stato (presetIndex/onchange invariati):
+           le card qui sotto lo guidano, non lo sostituiscono. -->
+      <select id="oPreset" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0" aria-hidden="true" tabindex="-1"></select>
+      <div class="presetTiles" id="presetTiles"></div>
     </div>
     <div id="avanzate" hidden>
       <div class="q">
@@ -843,6 +851,11 @@ header b{font-size:23px}.datebar h1{font-size:19px}
     <div class="wnav-main">
       <button class="wnext" id="wizNext">Avanti →</button>
       <button class="btn" id="doSetup" hidden>Vedi il mio piano</button>
+      <!-- Solo al passo 2 del primo avvio: turni + oggi bastano già per un
+           piano vero (viaggio, caffeina ecc. hanno default sensati) — il
+           resto (passi 3-4) resta a un tocco ma non è più obbligatorio
+           per vedere qualcosa di reale. -->
+      <button class="lnk" type="button" id="doVediSubito" hidden style="display:block;width:100%;text-align:center;margin-top:8px">Vedi il mio piano ora →</button>
     </div>
   </div>
   <button class="skip" id="doSkip">Guarda un esempio</button>
@@ -5570,11 +5583,36 @@ const PRESETS=[
 const oSel=$("#oPreset");
 oSel.innerHTML='<option value="x">Personalizza — costruisco il mio</option>'+
   PRESETS.map((p,i)=>'<option value="'+i+'">'+p.n+'</option>').join("");
+// Card grandi al posto del <select> compresso — stesso identico stato
+// (oSel resta la fonte di verità, presetIndex()/onchange invariati), solo
+// un modo più veloce da toccare per scegliere fra i preset reali.
+const ICO_TURNO='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>';
+const ICO_PERSONALIZZA='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
+function renderPresetTiles(){
+  const el=$("#presetTiles"); if(!el) return;
+  const tile=(val,ic,b,sp)=>'<button type="button" class="tool" data-preset="'+val+'">'+
+    '<span class="tool-ic">'+ic+'</span><span class="tool-tx"><b>'+esc(b)+'</b>'+(sp?'<span>'+esc(sp)+'</span>':'')+'</span></button>';
+  el.innerHTML = PRESETS.map((p,i)=>{
+    const parti=p.n.split(" · ");
+    return tile(String(i), ICO_TURNO, parti[0], parti[1]||"");
+  }).join("") + tile("x", ICO_PERSONALIZZA, "Personalizza", "Costruisco il mio in due minuti");
+}
+function syncPresetTiles(){
+  const el=$("#presetTiles"); if(!el) return;
+  el.querySelectorAll("[data-preset]").forEach(b=>b.classList.toggle("on", b.dataset.preset===oSel.value));
+}
+renderPresetTiles();
+if($("#presetTiles")) $("#presetTiles").addEventListener("click", e=>{
+  const b=e.target.closest("[data-preset]"); if(!b) return;
+  oSel.value=b.dataset.preset;
+  oSel.dispatchEvent(new Event("change"));
+});
 function mostraAvanzate(){
   const perso = oSel.value==="x";
   const a=$("#avanzate"); if(a) a.hidden=!perso;
   const ab=$("#anchorBox"); if(ab) ab.hidden = !(perso && state.repeat===false);
   if(perso) renderWizSeqGrid();
+  syncPresetTiles();
 }
 oSel.onchange=()=>{
   mostraAvanzate();
@@ -5934,6 +5972,10 @@ function wizShow(n){
   // era comunque visibile e permetteva di chiudere il wizard aggirando la
   // spunta obbligatoria, un'altra via d'uscita mai controllata.
   const skip=$("#doSkip"); if(skip) skip.hidden = WIZ.edit;
+  // Turni (passo 1) + oggi (passo 2) bastano già per un piano vero — il
+  // resto ha default sensati. Solo al primo avvio, solo al passo 2: in
+  // modifica non ha senso (si sta già vedendo il piano sotto).
+  const vs=$("#doVediSubito"); if(vs) vs.hidden = !(WIZ.step===2 && !WIZ.edit);
   const sc=$("#wsteps"); if(sc && sc.scrollTo) sc.scrollTo(0,0);
   if(WIZ.step===1) renderWizSeqGrid();
   if(WIZ.step===4){ renderWizPeopleList();
@@ -6015,6 +6057,7 @@ if($("#doSetup")) $("#doSetup").onclick=()=>{
   chiudiIntro(WIZ.gotoOggi);
 };
 if($("#doSkip")) $("#doSkip").onclick=()=>chiudiIntro(false);
+if($("#doVediSubito")) $("#doVediSubito").onclick=()=>{ toast("Il tuo piano è pronto"); chiudiIntro(true); };
 if($("#doOpen")) $("#doOpen").onclick=()=>{
   // Il wizard a schermo pieno resta solo per il primo avvio — se qualche
   // sezione è già stata spostata dentro Opzioni (basta averne aperta una),
