@@ -20,7 +20,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Notturnisti · Pianificatore turni</title>
 <meta name="description" content="Dai tuoi turni: quando dormire, l'ultimo caffè, la luce, i pasti. Turni personalizzabili, giorni liberi in comune con chi vuoi, export calendario.">
-<meta name="theme-color" content="#0B0A0E">
+<meta name="theme-color" content="#14161A">
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -36,33 +36,54 @@
 /* Palette Notturnisti — blu #2D5A8C, arancio #FF6B35.
    Chiaro come il sito. Scuro automatico per chi ha il telefono in modalità notte:
    sono turnisti, ce l'hanno quasi tutti. */
+/* Scuro è il default per chiunque non abbia scelto nulla a livello di
+   sistema — coerente con un prodotto che si chiama "Notturnisti". Lo
+   stesso colore (#14161A) è ora anche lo splash screen PWA
+   (manifest.webmanifest, background_color/theme_color) e il colore della
+   barra del browser (meta theme-color): prima questi due erano scuri
+   (#0B0A0E) mentre l'app appena caricata era chiara, con uno scarto
+   visibile fra lo splash e il primo contenuto. Chi ha impostato
+   esplicitamente il chiaro nel proprio sistema operativo lo vede comunque
+   (vedi @media prefers-color-scheme:light qui sotto) — non è un dark
+   forzato su tutti senza eccezioni, solo il default per chi non ha
+   deciso nulla. */
 :root{
-  --bg:#FFFFFF; --s1:#F7F9FB; --s2:#EDF1F5; --line:#DDE3EA;
-  --ink:#15171A; --dim:#5C6670; --faint:#5F6871;
-  --blue:#2D5A8C; --blue-fill:#2D5A8C; --blue-soft:#E4EBF3; --blue-lt:#5B87B5; --su-blu:#FFFFFF;
-  --orange:#B24B25; --orange-fill:#FF6B35; --orange-bar:#D9541F; --orange-soft:#FCE9E1;
-  --risk:#C0392B; --risk-soft:#FBE9E7; --risk-line:#E57368;
-  --sleep-fill:#24496F; --ok:#2E7D4F; --on-warm:#15171A;
-  --bg-blur:rgba(255,255,255,.82);
-  /* tinte turno (termiche, mute): caldo=giorno, freddo=notte */
-  --warm-tint:#FBF1E9; --cool-tint:#EAF0F6;
+  --bg:#14161A; --s1:#1C1F25; --s2:#23272E; --line:#333941;
+  --ink:#E6E8EB; --dim:#A8B0B8; --faint:#98A0A8;
+  --blue:#8CA4C0; --blue-fill:#4A78A8; --blue-soft:#22303F; --blue-lt:#A9BED6; --su-blu:#14161A;
+  --orange-bar:#FF6B35;
+  --orange:#FF9068; --orange-fill:#FF6B35; --orange-soft:#3A2119;
+  --risk:#FF6B5C; --risk-soft:#3A1C18; --risk-line:#7A342C;
+  --sleep-fill:#2C4E6E; --ok:#5FBF85; --on-warm:#15171A;
+  --bg-blur:rgba(11,10,14,.82);
+  --warm-tint:#241C15; --cool-tint:#182029;
   /* nomi storici, così il resto del codice non cambia */
   --violet:var(--blue); --violetd:var(--blue-soft);
-  --amber:var(--orange); --r:4px;
+  --amber:var(--orange);
+  /* Raggio più morbido (era 4px): stessa identità cromatica, materialità
+     più moderna — un solo token, si applica ovunque senza toccare ogni
+     componente uno per uno. */
+  --r:14px;
+  /* Elevazione: prima l'app non aveva quasi nessuna ombra. Usata con
+     misura, solo sui pulsanti primari e sulle superfici che vogliono
+     "staccare" dallo sfondo (card di enfasi, barre sticky in fondo). */
+  --shadow:0 10px 28px -10px rgba(0,0,0,.5), 0 2px 8px rgba(0,0,0,.32);
+  --shadow-btn:0 8px 20px -6px rgba(140,164,192,.45);
   --sans:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   --serif:"Noto Serif",Georgia,serif;
 }
-@media (prefers-color-scheme:dark){
+@media (prefers-color-scheme:light){
   :root{
-    --bg:#14161A; --s1:#1C1F25; --s2:#23272E; --line:#333941;
-    --ink:#E6E8EB; --dim:#A8B0B8; --faint:#98A0A8;
-    --blue:#8CA4C0; --blue-fill:#4A78A8; --blue-soft:#22303F; --blue-lt:#A9BED6; --su-blu:#14161A;
-    --orange-bar:#FF6B35;
-    --orange:#FF9068; --orange-fill:#FF6B35; --orange-soft:#3A2119;
-    --risk:#FF6B5C; --risk-soft:#3A1C18; --risk-line:#7A342C;
-    --sleep-fill:#2C4E6E; --ok:#5FBF85; --on-warm:#15171A;
-    --bg-blur:rgba(11,10,14,.82);
-    --warm-tint:#241C15; --cool-tint:#182029;
+    --bg:#FFFFFF; --s1:#F7F9FB; --s2:#EDF1F5; --line:#DDE3EA;
+    --ink:#15171A; --dim:#5C6670; --faint:#5F6871;
+    --blue:#2D5A8C; --blue-fill:#2D5A8C; --blue-soft:#E4EBF3; --blue-lt:#5B87B5; --su-blu:#FFFFFF;
+    --orange:#B24B25; --orange-fill:#FF6B35; --orange-bar:#D9541F; --orange-soft:#FCE9E1;
+    --risk:#C0392B; --risk-soft:#FBE9E7; --risk-line:#E57368;
+    --sleep-fill:#24496F; --ok:#2E7D4F; --on-warm:#15171A;
+    --bg-blur:rgba(255,255,255,.82);
+    --warm-tint:#FBF1E9; --cool-tint:#EAF0F6;
+    --shadow:0 10px 24px -10px rgba(21,23,26,.18), 0 2px 6px rgba(21,23,26,.1);
+    --shadow-btn:0 8px 18px -6px rgba(45,90,140,.3);
   }
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -73,8 +94,9 @@ font-size:16px;line-height:1.6;padding:0 0 64px;-webkit-font-smoothing:antialias
 .mono{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
 .eyebrow{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);font-weight:600}
 header{border:none;padding:0;margin:0}
-.appbar{display:flex;align-items:center;gap:11px;background:var(--bg);
+.appbar{display:flex;align-items:center;gap:11px;background:var(--bg-blur);
 padding:calc(env(safe-area-inset-top,0px) + 12px) 0 12px;position:sticky;top:0;z-index:20}
+@supports (backdrop-filter:blur(1px)){.appbar{backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}}
 .applogo{width:36px;height:36px;flex:none;border-radius:9px}
 .apptitle b{display:block;font-family:var(--serif);font-size:19px;font-weight:700;letter-spacing:-.01em;line-height:1.1}
 .apptitle span{display:block;font-size:12.5px;color:var(--faint);margin-top:1px}
@@ -200,7 +222,7 @@ justify-content:center;overflow:hidden}
 .tick.edge-l{transform:translateX(0)}
 .tick.edge-r{transform:translateX(-100%)}
 .tick.m{color:var(--dim);font-weight:600}
-.card{background:var(--s1);border:1px solid var(--line);border-left-width:3px;border-radius:var(--r);padding:14px 15px;margin-bottom:10px}
+.card{background:var(--s1);border:1px solid var(--line);border-left-width:3px;border-radius:var(--r);padding:14px 15px;margin-bottom:10px;box-shadow:0 2px 8px -2px rgba(0,0,0,.22)}
 #benvenutoLink{border-left-color:var(--blue)}
 #demoEsempio{border-left-color:var(--blue)}
 #installBanner{border-left-color:var(--blue)}
@@ -250,7 +272,7 @@ cursor:pointer;font-family:inherit;color:var(--ink)}
 .dbtn.wide{min-width:132px}
 .dbtn:hover{border-color:var(--blue)}
 /* azione primaria: piena, per essere trovata anche da stanchi */
-.dbtn.pri{background:var(--blue);border-color:var(--blue);color:var(--su-blu);font-weight:600}
+.dbtn.pri{background:var(--blue);border-color:var(--blue);color:var(--su-blu);font-weight:600;box-shadow:var(--shadow-btn)}
 .dbtn.pri:hover{filter:brightness(1.08)}
 .dbtn.on{background:var(--blue-soft);border-color:var(--blue);color:var(--blue);font-weight:600}
 input,select,textarea{background:var(--bg);border:1px solid var(--line);color:var(--ink);padding:10px 11px;
@@ -317,7 +339,7 @@ background:none;border:none;width:100%;cursor:pointer;font-family:inherit;text-d
 border-radius:var(--r);padding:0 16px;min-height:48px;font:inherit;font-size:14px;font-weight:600;cursor:pointer}
 .wback:hover{color:var(--ink)}
 .wnext{width:100%;background:var(--blue);color:var(--su-blu);border:none;border-radius:var(--r);
-min-height:48px;font:inherit;font-size:16px;font-weight:600;cursor:pointer}
+min-height:48px;font:inherit;font-size:16px;font-weight:600;cursor:pointer;box-shadow:var(--shadow-btn)}
 .wnext:hover{filter:brightness(1.06)}
 #doSetup{width:100%;min-height:48px;font-size:16px}
 #doSetup.sec{width:auto;min-height:40px;font-size:14px;font-weight:500;padding:8px 14px;
@@ -332,7 +354,8 @@ body.wiz-open .onboard{display:flex;flex-direction:column;min-height:calc(100dvh
    sempre sull'altra quando il suo hidden dice di stare nascosto. */
 body.wiz-open #linkChoice[hidden]{display:none}
 body.wiz-open .wsteps{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:8px}
-body.wiz-open .wiznav{position:sticky;bottom:0;background:var(--s1);padding:10px 0 env(safe-area-inset-bottom,0)}
+body.wiz-open .wiznav{position:sticky;bottom:0;background:var(--bg-blur);padding:10px 0 env(safe-area-inset-bottom,0)}
+@supports (backdrop-filter:blur(1px)){body.wiz-open .wiznav{backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}}
 .tools{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 22px}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);
 color:var(--bg);padding:11px 16px;border-radius:var(--r);
