@@ -578,7 +578,13 @@ text-align:center;gap:5px;padding:9px 6px;line-height:1.2}
 .drem{border:1px solid var(--line);border-left:3px solid var(--blue);border-radius:var(--r);
 background:var(--s1);padding:14px;margin:14px 0 2px;box-shadow:var(--shadow-card)}
 .drem.done{background:var(--bg);border-left-color:var(--line)}
-.drem-q{font-size:14px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+/* eyebrow, come ".eyebrow" altrove nell'app (es. "Il tuo ciclo") — prima
+   era un titolo in grassetto senza nulla in comune con quel linguaggio,
+   la ragione per cui la card sembrava non appartenere al resto. La vera
+   domanda ("Com'è andato...") prende il peso che aveva il titolo, dato
+   che è lei l'azione, non l'etichetta sopra di lei. */
+.drem-q{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+color:var(--faint);margin-bottom:8px;display:flex;align-items:center;gap:10px}
 .drem-q .dic{flex:none;width:30px;height:30px;border-radius:999px;background:var(--blue-soft);
 color:var(--blue);display:inline-flex;align-items:center;justify-content:center}
 .drem-q .dic .ei{width:16px;height:16px;display:block}
@@ -3882,7 +3888,7 @@ function diaryReminder(P, CARDS){
   let x='<div class="drem'+(logged?" done":"")+'">';
   x+='<div class="drem-q"><span class="dic">'+ICON.moon+'</span>Il tuo sonno</div>';
   if(!logged){
-    x+='<div class="drem-q" style="font-weight:400;margin-top:-4px">Com\'è andato il sonno appena fatto?</div>'+
+    x+='<div style="font-size:16px;font-weight:600;color:var(--ink);line-height:1.3;margin-bottom:10px">Com\'è andato il sonno appena fatto?</div>'+
        '<div class="diary" style="gap:8px">'+
        '<button class="dbtn wide pri" data-asplan="1">come previsto</button>'+
        '<button class="dbtn wide" data-open="1" aria-label="Modifica gli orari del sonno">modifica</button></div>';
@@ -3914,7 +3920,9 @@ function diaryReminder(P, CARDS){
     // almeno non sembrano anche due stili diversi — restano comunque due
     // dati diversi (questo è permanente, legato a questa notte; l'altro
     // scade in due ore e parla di adesso), solo vestiti allo stesso modo.
-    x+='<div class="drem-q" style="border-top:1px solid var(--line);margin:14px 0 8px;padding-top:12px">Come ti senti, dopo questo sonno?</div>'+
+    x+='<div style="border-top:1px solid var(--line);margin:14px 0 8px;padding-top:12px;'+
+       'font-size:12.5px;font-weight:600;color:var(--faint)">Come ti senti, dopo questo sonno? '+
+       '<span style="font-weight:400">(facoltativo)</span></div>'+
        '<div class="ora-kss" style="margin-top:0">'+
        [[1,"Esausto",ICON.faceTerrible],[2,"Stanco",ICON.faceLow],[3,"Così così",ICON.faceMid],
         [4,"Sveglio",ICON.faceOk],[5,"Al meglio",ICON.faceGreat]].map(o=>
