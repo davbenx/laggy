@@ -377,6 +377,11 @@ font:inherit;font-weight:700;padding:0 0 0 10px;cursor:pointer}
 padding:7px 15px;min-height:38px;border-radius:3px;cursor:pointer}
 .vb.on{background:var(--bg);color:var(--blue);box-shadow:0 1px 2px rgba(0,0,0,.08)}
 .ess{margin-bottom:6px}
+/* Adesso/Prossimo/Dopo: separatori fra le righe già esistenti di "essenziale",
+   non un'altra vista — le righe, l'ordine e il contenuto restano gli stessi. */
+.essgroup{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);
+font-weight:600;padding:16px 0 6px;margin-top:2px;border-top:1px solid var(--line)}
+.essgroup:first-child{border-top:none;margin-top:0;padding-top:2px}
 .essrow{display:flex;align-items:flex-start;gap:11px;padding:15px 0;border-bottom:1px solid var(--line)}
 .essrow:first-child{padding-top:2px}
 .essrow .eic{flex:none;width:74px;display:flex;flex-direction:column;align-items:center;
@@ -4269,7 +4274,21 @@ function renderEssenziale(P, CARDS){
   }
 
   voci.sort((a,b)=>a.t-b.t);
-  let h=voci.map(v=>v.html).join("");
+  // Adesso/Prossimo/Dopo: separatori sulle righe già ordinate sopra, non
+  // una vista diversa. "Adesso" è l'ultima riga già iniziata (t<=nowT);
+  // quella dopo è "Prossimo", la successiva "Dopo" (il resto continua
+  // sotto senza altre etichette). Se non è ancora iniziato niente oggi
+  // (adessoIdx=-1), la prima riga in assoluto diventa "Prossimo" — non
+  // c'è ancora un "adesso" da mostrare.
+  const nowT = dSv(minutiDaFocus());
+  let adessoIdx=-1; voci.forEach((v,i)=>{ if(v.t<=nowT) adessoIdx=i; });
+  let h="";
+  voci.forEach((v,i)=>{
+    if(i===adessoIdx) h+='<div class="essgroup">Adesso</div>';
+    else if(i===adessoIdx+1) h+='<div class="essgroup">Prossimo</div>';
+    else if(i===adessoIdx+2) h+='<div class="essgroup">Dopo</div>';
+    h+=v.html;
+  });
 
   // Affina la finestra di sonno: si chiede DOPO aver mostrato il piano
   if(state.freeBed==="23:30" && state.freeWake==="07:30")
