@@ -3247,7 +3247,7 @@ function cards(P){
   const pc={k:"d",lab:"Come hai dormito",
     val: detto ? bedV+" → "+wakeV : bedP+" → "+wakeP, small: sotto,
     plannedWake:wake, bedPiano:bedP, wakePiano:wakeP, rows:[]};
-  if(!passato) pc.sub="Questa notte non è ancora arrivata: qui c'è quello che il piano prevede. Potrai segnare com'è andata, e a che ora ti sei alzato davvero, quando sarà passata.";
+  if(!passato) pc.sub="Questa notte non è ancora arrivata: qui c'è il piano. Potrai segnarla quando sarà passata.";
   else{
     pc.diary=true; pc.wakeAsk=true;
     pc.sub = P.sp.kind==="corto"  ? "Era il sonno dello smonto, corto apposta. Se ti è sembrato poco, era previsto."
