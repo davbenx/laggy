@@ -3410,24 +3410,52 @@ function cards(P){
     // 0,5 g/l a 17 ore, poi circa 0,04 g/l per ogni ora in più: è il tasso
     // dello studio citato qui sotto, non una stima.
     const gl = m => (0.5 + (m-1020)/60*0.04).toFixed(1).replace(".",",");
+    // Le due frasi che citavano "l'ora peggiore della giornata biologica"
+    // sono state tolte da qui: quel fatto ha ora una card propria
+    // ("Sonnolenza massima", sotto), e ripeterlo anche qui — con un orario
+    // diverso di 5 minuti dal valore mostrato sopra, solo per aggirare il
+    // controllo di duplicato in frase() — creava un'incongruenza visibile,
+    // non solo un doppione.
     const testo = filate >= 1020
       ? "Dopo il turno sei sveglio da "+hm(filate)+" filate: i riflessi valgono quanto "+
         gl(filate)+" g/l di alcol, contro un limite legale di 0,5."
       : spezzata
-        ? "Dopo il turno sei sveglio da "+hm(filate)+" filate, invece delle "+hm(senzaPisolino)+" che faresti senza il pisolino: è quello che ti tiene sotto le 17 ore, dove i riflessi valgono quanto 0,5 g/l di alcol. Resta comunque l'ora peggiore della giornata biologica, e quella il pisolino non la sposta."
+        ? "Dopo il turno sei sveglio da "+hm(filate)+" filate, invece delle "+hm(senzaPisolino)+" che faresti senza il pisolino: è quello che ti tiene sotto le 17 ore, dove i riflessi valgono quanto 0,5 g/l di alcol."
         : filate < 60
         ? "Sono più di quante il corpo ne regga bene, e oggi non c'è spazio per un pisolino che aiuti davvero: mettilo in conto, e non guidare stanco."
-        : "Dopo il turno sei sveglio da "+hm(filate)+" filate. Sotto le 17 ore il confronto con l'alcol non si applica, ma questa resta l'ora peggiore della giornata biologica: il minimo del corpo cade adesso.";
+        : "Dopo il turno sei sveglio da "+hm(filate)+" filate. Sotto le 17 ore il confronto con l'alcol non si applica, ma restano comunque tante ore di fila.";
     out.push({k:"t",
       lab: b.rest ? "Veglia lunga" : "Rientro",
       val: b.rest ? "Oggi resti sveglio "+hm(piuLunga)+" di fila"
-                  : "Le "+hhmm(b.end+5)+" sono il momento più rischioso",
+                  : "per la veglia accumulata",
       sub:testo,
       rows:[["Se sei stanco","fermati 20 minuti in auto e prendi un caffè prima di ripartire"],
             ["Sempre","occhiali da sole: proteggono il sonno che stai per fare"]],
-      why:"L'equivalenza con l'alcol viene da uno studio che ha misurato la coordinazione occhio-mano durante 28 ore di veglia continuata, confrontandola con dosi crescenti di alcol: ogni ora di veglia in più vale circa 0,004% di alcolemia. Il picco di rischio cade proprio nell'ora del rientro, quando alla veglia lunga si somma il minimo della giornata biologica.",
+      why:"L'equivalenza con l'alcol viene da uno studio che ha misurato la coordinazione occhio-mano durante 28 ore di veglia continuata, confrontandola con dosi crescenti di alcol: ogni ora di veglia in più vale circa 0,004% di alcolemia.",
       cite:"Dawson &amp; Reid, Nature 1997 · Arnedt e coll. 2000 (simulatore di guida)",
       at: b.rest ? wake+600 : b.end});
+  }
+
+  // ── Turno: quando inizia/finisce, come voce cronologica della giornata —
+  // non solo nel badge sotto la data (quello resta un riassunto fisso; qui
+  // è un passaggio della storia della giornata, stesso ruolo di "Dormi"). ──
+  if(!b.rest){
+    out.push({k:"turno", lab:"Il tuo turno",
+      val: hhmm(b.start)+" → "+hhmm(b.end),
+      small: esc(nameOf(b.c)),
+      at: b.start});
+  }
+
+  // ── Sonnolenza massima: il minimo corporeo (temperatura profonda), non
+  // la veglia accumulata di "Rientro" qui sopra — due cause diverse dello
+  // stesso genere di rischio. Solo quando cade dentro il turno: fuori dal
+  // turno non è un'informazione su cui si può agire. ──
+  if(!b.rest && isFinite(cbt) && cbt>=b.start && cbt<=b.end){
+    out.push({k:"cbt", lab:"Sonnolenza massima",
+      val: hhmm(cbt-20)+"–"+hhmm(cbt+20),
+      small: "il punto più basso del ritmo biologico",
+      why: "Il corpo ha un minimo naturale di attivazione, indipendente da quanto hai dormito: è il punto in cui la temperatura corporea profonda tocca il fondo. Cadere in turno proprio in quella finestra pesa più delle altre ore, a parità di riposo.",
+      at: cbt});
   }
 
   // Con più di una persona in elenco, la card guarda quella scelta con la
@@ -4433,9 +4461,9 @@ function renderEssenziale(P, CARDS){
   const riga=(id,lab,num,sub,warn,ic,det)=>{
     const apri = det && essAperte.has(id) ? " open" : "";
     // tinta del bordo/badge: arancio per le voci "calde" (caffè, luce,
-    // rientro), blu per quelle "fredde" (sonno, pisolino, pasti) — il
-    // rosso di rischio (warn) vince su entrambe.
-    const tone = (ic===ICON.coffee||ic===ICON.sun||ic===ICON.dim||ic===ICON.car) ? "orange" : "blue";
+    // rientro, turno), blu per quelle "fredde" (sonno, pisolino, pasti) —
+    // il rosso di rischio (warn) vince su entrambe.
+    const tone = (ic===ICON.coffee||ic===ICON.sun||ic===ICON.dim||ic===ICON.car||ic===ICON.alarm) ? "orange" : "blue";
     const capo='<div class="essrow'+(warn?" warn":" t-"+tone)+'">'+
       '<span class="eic">'+(ic||"")+'</span>'+
       '<div class="ev"><div class="el">'+esc(lab)+'</div>'+
@@ -4524,7 +4552,12 @@ function renderEssenziale(P, CARDS){
         let splitOra=false, tAvoid=null;
         if(avoidBlk){ tAvoid=dSv(avoidBlk[1]); splitOra = Math.abs(tAvoid-t) >= 180; }
         const dettLuce = splitOra ? righeFase(cd.rowsA)+percheLuce : dett(cd);
-        voci.push({t, html:riga("luce","Luce",ora||"—",frase(cd.val,ora)||cd.small||"",false,ICON.sun,dettLuce)});
+        // cd.val ripeteva la parola "Luce" già nell'etichetta della riga
+        // ("Luce" + "Luce forte fino alle..."), e cd.small (il seguito
+        // breve, "poi abbassa" ecc.) restava sempre nascosto perché
+        // frase() sceglieva sempre cd.val. Uniti senza il prefisso.
+        const subLuce=[(cd.val||"").replace(/^Luce\s*/,""),cd.small].filter(Boolean).join(" · ");
+        voci.push({t, html:riga("luce","Luce",ora||"—",subLuce,false,ICON.sun,dettLuce)});
         if(splitOra){
           const dettPenombra = righeFase(cd.rowsE)+percheOmbra;
           voci.push({t:tAvoid, html:riga("penombra","Penombra",hhmm(avoidBlk[1]),"poi buio, per dormire",false,ICON.dim,dettPenombra)});
@@ -4540,9 +4573,16 @@ function renderEssenziale(P, CARDS){
         voci.push({t:tSera, html:riga("penombra","Penombra",hhmm(P.s.onset-180),"oggi la luce di sera conta ancora: tienila soffusa",false,ICON.dim,dettSera)});
       }
     } else if(cd.k==="m"){
-      voci.push({t, html:riga("pasti","Pasti",ora||cd.val,frase(cd.val,ora)||cd.small||"",false,ICON.plate,dett(cd))});
+      // cd.val ripeteva l'orario due volte ("21:30" come valore, "Pasto
+      // pieno alle 21:30" come sottotitolo): cd.small dice la stessa cosa
+      // senza il doppione ("prima di uscire").
+      voci.push({t, html:riga("pasti","Pasti",ora||cd.val,cd.small||"",false,ICON.plate,dett(cd))});
     } else if(cd.k==="t"){
       voci.push({t, html:riga("rientro",cd.lab,ora||cd.val,frase(cd.val,ora)||cd.small||"",!P.b.rest,ICON.car,dett(cd))});
+    } else if(cd.k==="turno"){
+      voci.push({t, html:riga("turno","Turno",cd.val,cd.small,false,ICON.alarm,null)});
+    } else if(cd.k==="cbt"){
+      voci.push({t, html:riga("sonnolenza","Sonnolenza massima",cd.val,cd.small,true,ICON.warn,dett(cd))});
     }
   }
 
