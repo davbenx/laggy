@@ -72,5 +72,21 @@
         }
       ]
     }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshot-oggi.jpg",
+      "sizes": "783x1696",
+      "type": "image/jpeg",
+      "platform": "narrow",
+      "label": "Schermata Oggi: sonno, pisolino, turno, ultimo caffè e rischio fatica"
+    },
+    {
+      "src": "screenshot-turni.jpg",
+      "sizes": "783x1696",
+      "type": "image/jpeg",
+      "platform": "narrow",
+      "label": "Schermata Turni: ciclo settimanale, prossimi turni e riposi con il partner"
+    }
   ]
 }
