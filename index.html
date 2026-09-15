@@ -574,6 +574,17 @@ border-radius:var(--r);padding:13px 15px;font:inherit;cursor:pointer;color:inher
 .tool-tx{flex:1;min-width:0}
 .tool-tx b{display:block;font-size:16px;font-weight:600;margin-bottom:2px}
 .tool-tx span{display:block;font-size:12.5px;color:var(--dim);line-height:1.45}
+/* Strumenti di Più: griglia a 2 colonne invece di righe impilate — meno
+   scroll, ma il testo di ogni card resta per intero (solo più compatto):
+   ridurlo a icona+parola come uno share sheet avrebbe nascosto sfumature
+   vere (es. "senza i tuoi dati" sul foglio orari liberi), non solo tolto
+   decorazione. Classe a parte, non sul .tools/.tool di base: quella
+   resta invariata per l'unico bottone QR già riusato in Turni. */
+.tools-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.tools-grid .tool{flex-direction:column;align-items:flex-start;gap:8px;padding:14px 13px}
+.tools-grid .tool-tx b{font-size:14px}
+.tools-grid .tool-tx span{font-size:11.5px;line-height:1.4}
+.tools-grid .ecc{grid-column:1/-1}
 .presetTiles{display:flex;flex-direction:column;gap:8px}
 .piu-info{border:1px solid var(--line);border-radius:var(--r);margin:18px 0 8px;background:var(--s1)}
 .piu-info>summary{padding:12px 15px;cursor:pointer;font-size:14px;font-weight:600;color:var(--dim);
@@ -1008,7 +1019,7 @@ header b{font-size:23px}.datebar h1{font-size:19px}
   </div>
 </div>
 <div class="piu-h"><span class="eyebrow">Strumenti</span></div>
-<div class="tools">
+<div class="tools tools-grid">
   <button class="tool" id="doLink">
     <span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg></span>
     <span class="tool-tx"><b>Salva la configurazione</b>
