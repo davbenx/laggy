@@ -4901,6 +4901,21 @@ function renderPartner(CARDS){
         '</span></div>';
     });
   }
+  // Condividere il proprio ciclo è il modo in cui c'è qualcosa da vedere
+  // qui — prima viveva solo come "Salva la configurazione" dentro
+  // Più → Strumenti (pensato per il backup, non per invitare). Stessa
+  // funzione, stesso link: qui è solo il posto giusto per trovarlo.
+  h+='<div class="tools" style="margin-top:14px">'+
+    '<button class="tool" data-partner-share type="button">'+
+      '<span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg></span>'+
+      '<span class="tool-tx"><b>Condividi il tuo ciclo</b><span>Chi apre il link può vedere i riposi in comune e aggiungerti alla sua lista — partner, amico, collega.</span></span>'+
+    '</button>'+
+    '<button class="tool" data-partner-qr type="button">'+
+      '<span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM19 14h2M14 19h2M19 19h2"/></svg></span>'+
+      '<span class="tool-tx"><b>Mostra QR</b><span>Per chi hai davanti: inquadra con la fotocamera, si apre da solo.</span></span>'+
+    '</button>'+
+    '<div class="ecc" id="qrBoxPartner" hidden><div id="qrHolderPartner" style="display:flex;justify-content:center;margin:14px 0"></div></div>'+
+  '</div>';
   h+='<button class="lnk" data-partner-edit style="margin-top:8px">'+(pc||persone.length?"Gestisci l'elenco →":"Imposta i turni condivisi →")+'</button>'+
     (pc?'<p class="ladder">Questi riposi in comune sono gratis, qui. Vuoi che arrivino nel <b>calendario di entrambi</b> e si aggiornino da soli? È nel calendario a pagamento. <button class="lnk" data-goto="piu">Calendario di coppia in Più →</button></p>':'');
   el.innerHTML=h;
@@ -5466,8 +5481,8 @@ $("#doLink").onclick=salvaConfigurazione;
 // vestito diverso dello stesso payload, non un secondo meccanismo. Solo
 // generazione: la lettura la fa già la fotocamera nativa del telefono, che
 // riconosce il link e lo apre da sola — non serve costruire anche quella metà.
-function renderQR(){
-  const holder=$("#qrHolder"); if(!holder || typeof qrcodegen==="undefined") return;
+function renderQR(holderSel){
+  const holder=$(holderSel||"#qrHolder"); if(!holder || typeof qrcodegen==="undefined") return;
   const url=location.origin+location.pathname+"#"+toHash();
   let qr; try{ qr=qrcodegen.QrCode.encodeText(url, qrcodegen.QrCode.Ecc.MEDIUM); }catch(e){ holder.textContent="Configurazione troppo estesa per un QR — usa il link."; return; }
   const n=qr.size, border=2, dim=n+border*2;
@@ -6173,6 +6188,12 @@ if($("#tEdit")) $("#tEdit").onclick=()=>{ setTab("opzioni"); apriSezioneInline(1
 if($("#partner")) $("#partner").addEventListener("click", e=>{
   if(e.target.closest("[data-partner-edit]")) apriPartner();
   else if(e.target.closest('[data-goto="piu"]')) setTab("piu");
+  else if(e.target.closest("[data-partner-share]")) salvaConfigurazione();
+  else if(e.target.closest("[data-partner-qr]")){
+    const b=$("#qrBoxPartner"); if(!b) return;
+    b.hidden=!b.hidden;
+    if(!b.hidden) renderQR("#qrHolderPartner");
+  }
 });
 if($("#status")) $("#status").addEventListener("click", e=>{
   if(e.target.closest('[data-goto="opzioni"]')) setTab("opzioni");
