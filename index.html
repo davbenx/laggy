@@ -399,22 +399,18 @@ font:inherit;font-weight:700;padding:0 0 0 10px;cursor:pointer}
 padding:7px 15px;min-height:38px;border-radius:3px;cursor:pointer}
 .vb.on{background:var(--bg);color:var(--blue);box-shadow:0 1px 2px rgba(0,0,0,.08)}
 .ess{margin-bottom:6px}
-/* Etichetta di sezione generica — riusata sia per "Adesso" sopra
-   essenziale sia per i nomi di settore sopra i preset del wizard.
-   Neutra: il peso visivo di "Adesso" lo porta la riga evidenziata sotto
-   (vedi sotto), non il colore del testo dell'etichetta. */
+#formaGiorno:not(:empty){margin:2px 0 18px}
+.fg-legend{display:flex;gap:14px;margin-top:8px}
+.fg-key{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--faint)}
+.fg-key i{width:8px;height:8px;border-radius:999px;display:inline-block}
+/* Etichetta di sezione generica — oggi usata per i nomi di settore sopra
+   i preset del wizard (Sanità, Industria...). Non più per "Adesso" sopra
+   essenziale: quel ruolo lo fa già #ora/.ora-card, il vero eroe della
+   schermata — un'etichetta sulla lista sarebbe stata un secondo segnale
+   "adesso" in competizione con il primo. */
 .essgroup{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);
 font-weight:600;padding:16px 0 6px;margin-top:2px;border-top:1px solid var(--line)}
 .essgroup:first-child{border-top:none;margin-top:0;padding-top:2px}
-/* La riga che segue l'etichetta "Adesso" si stacca dalle altre — stesso
-   trattamento del resto dell'app (tinta + bordo sul colore), niente di
-   nuovo da imparare. Selettore di fratello adiacente: zero tocchi a
-   riga(), che genera due forme diverse (.essrow semplice o .erow
-   espandibile) da ~10 punti diversi del codice. */
-.essgroup+.essrow, .essgroup+.erow{background:var(--blue-soft);border-radius:var(--r);
-padding-left:12px;padding-right:12px;margin:0 -12px;border-bottom-color:transparent}
-.essgroup+.erow>summary{padding-left:0}
-.essgroup+.erow .essrow{border-bottom-color:transparent}
 .essrow{display:flex;align-items:flex-start;gap:11px;padding:15px 0;border-bottom:1px solid var(--line)}
 .essrow:first-child{padding-top:2px}
 .essrow .eic{flex:none;width:74px;display:flex;flex-direction:column;align-items:center;
@@ -466,7 +462,7 @@ body.essenziale:not(.tabs) .cap,body.essenziale:not(.tabs) #cyc,body.essenziale:
 body.essenziale:not(.tabs) #icsBox,body.essenziale:not(.tabs) #dayBox,body.essenziale:not(.tabs) #band,body.essenziale:not(.tabs) #cards,
 body.essenziale:not(.tabs) .tools{display:none}
 body:not(.essenziale) #essenziale{display:none}
-body.intro #vista,body.intro #essenziale{display:none}
+body.intro #vista,body.intro #formaGiorno,body.intro #essenziale{display:none}
 
 /* ── navigazione a tab: destinazioni separate + barra in basso (feel da app) ── */
 #vista{display:none}                     /* i tab sostituiscono il vecchio interruttore */
@@ -549,12 +545,12 @@ body.tab-oggi.giornata .cap.giornata{display:flex}
 body.tab-oggi.giornata #band{display:block}
 body.tab-oggi.giornata #cards{display:block}
 /* TURNI: ciclo, giorni liberi, partner, modifica */
-body.tab-turni .now-shift,body.tab-turni #status,body.tab-turni #ora,body.tab-turni #benvenutoLink,body.tab-turni #demoEsempio,body.tab-turni #backupNudge,body.tab-turni #installBanner,body.tab-turni #clubBanner,body.tab-turni #essenziale,
+body.tab-turni .now-shift,body.tab-turni #status,body.tab-turni #ora,body.tab-turni #benvenutoLink,body.tab-turni #demoEsempio,body.tab-turni #backupNudge,body.tab-turni #installBanner,body.tab-turni #clubBanner,body.tab-turni #formaGiorno,body.tab-turni #essenziale,
 body.tab-turni .datebar,body.tab-turni .cap.giornata,body.tab-turni #band,body.tab-turni #cards,
 body.tab-turni #icsBox,body.tab-turni .piu-cal,body.tab-turni .tools,body.tab-turni .piu-h,body.tab-turni .piu-info,
 body.tab-turni footer{display:none}
 /* PIÙ: calendario a pagamento ed extra */
-body.tab-piu .now-shift,body.tab-piu #status,body.tab-piu #ora,body.tab-piu #benvenutoLink,body.tab-piu #demoEsempio,body.tab-piu #backupNudge,body.tab-piu #installBanner,body.tab-piu #clubBanner,body.tab-piu #essenziale,
+body.tab-piu .now-shift,body.tab-piu #status,body.tab-piu #ora,body.tab-piu #benvenutoLink,body.tab-piu #demoEsempio,body.tab-piu #backupNudge,body.tab-piu #installBanner,body.tab-piu #clubBanner,body.tab-piu #formaGiorno,body.tab-piu #essenziale,
 body.tab-piu .datebar,body.tab-piu .cap,body.tab-piu #cyc,body.tab-piu #doFree,
 body.tab-piu #tGrid,body.tab-piu #doPartner,body.tab-piu .cycnav,body.tab-piu #cycRange,
 body.tab-piu #freeBox,body.tab-piu #dayBox,body.tab-piu #gridBox,body.tab-piu #andamenti,body.tab-piu .andamento-h,body.tab-piu #partner,
@@ -597,7 +593,7 @@ list-style:none;min-height:44px;display:flex;align-items:center}
 .wdet .q:last-of-type{margin-bottom:14px}
 .piu-info-in b{color:var(--ink)}
 /* OPZIONI: solo la configurazione */
-body.tab-opzioni .now-shift,body.tab-opzioni #status,body.tab-opzioni #ora,body.tab-opzioni #benvenutoLink,body.tab-opzioni #demoEsempio,body.tab-opzioni #backupNudge,body.tab-opzioni #installBanner,body.tab-opzioni #clubBanner,body.tab-opzioni #essenziale,
+body.tab-opzioni .now-shift,body.tab-opzioni #status,body.tab-opzioni #ora,body.tab-opzioni #benvenutoLink,body.tab-opzioni #demoEsempio,body.tab-opzioni #backupNudge,body.tab-opzioni #installBanner,body.tab-opzioni #clubBanner,body.tab-opzioni #formaGiorno,body.tab-opzioni #essenziale,
 body.tab-opzioni .datebar,body.tab-opzioni #band,body.tab-opzioni .cap.ciclo,body.tab-opzioni #cyc,
 body.tab-opzioni .cycnav,body.tab-opzioni #tGrid,body.tab-opzioni #gridBox,body.tab-opzioni #dayBox,body.tab-opzioni #cycRange,
 body.tab-opzioni #andamenti,body.tab-opzioni .andamento-h,body.tab-opzioni #doFree,body.tab-opzioni #freeBox,body.tab-opzioni #doPartner,
@@ -923,6 +919,7 @@ header b{font-size:23px}.datebar h1{font-size:19px}
   <button class="vb" data-vista="dettaglio" role="tab" aria-selected="false">Dettaglio</button>
 </div>
 
+<div id="formaGiorno"></div>
 <div class="ess" id="essenziale"></div>
 
 <div class="cap ciclo"><span class="eyebrow">Il tuo ciclo</span>
@@ -3690,6 +3687,7 @@ function render(){
   renderBackupNudge();
   renderInstallBanner();
   renderClubBanner();
+  renderFormaGiorno(P);                // si azzera da solo in dettaglio
   renderEssenziale(P, CARDS);          // si azzera da solo in dettaglio
   const tab = state.tab || (ess ? "oggi" : "ciclo");
   const giornata = document.body.classList.contains("giornata");
@@ -4199,6 +4197,53 @@ let cicloOff=0;   // scorrimento della finestra del ciclo (0 = intorno a oggi)
 // non costanti fisse: altrimenti resterebbero legate al valore di CFG.H di
 // quando lo script è partito, ignorando un ciclo più lungo caricato dopo.
 const cicloMin = () => -(CFG.H-2), cicloMax = () => CFG.H-10;
+// Striscia compatta: la forma della giornata in un colpo d'occhio, senza
+// assi né legenda tecnica a fianco — come il grafico del sonno di Apple
+// Health, non come la timeline di dettaglio (#band) che resta un livello
+// più sotto per chi la vuole. Stessa idea di finestra "clo/chi con
+// margine" già usata in renderStrip() per il ciclo, qui su un solo giorno.
+// Segue il giorno sfogliato (come #essenziale), non sempre "oggi" come
+// #ora: prev/next la ricalcolano insieme al resto.
+function renderFormaGiorno(P){
+  const el=$("#formaGiorno"); if(!el) return;
+  if(state.vista==="dettaglio"){ el.innerHTML=""; return; }
+  let clo=P.s.onset, chi=P.s.onset+P.s.dur;
+  if(!P.b.rest){ clo=Math.min(clo,P.b.start); chi=Math.max(chi,P.b.end); }
+  for(const n of (P.naps||[])){ clo=Math.min(clo,n.a); chi=Math.max(chi,n.b); }
+  const staGuardandoOggi = dnum(state.focus)===dnum(giornoVero());
+  const nowT = staGuardandoOggi ? minutiDaFocus() : null;
+  if(nowT!==null){ clo=Math.min(clo,nowT); chi=Math.max(chi,nowT); }
+  clo=Math.floor((clo-30)/60)*60; chi=Math.ceil((chi+30)/60)*60;
+  const span=Math.max(chi-clo,60), W=335, pos=m=>Math.max(0,Math.min(W,(m-clo)/span*W));
+
+  let segs="";
+  const seg=(a,z,fill)=>{ const x0=pos(a),x1=pos(z); if(x1>x0) segs+='<rect x="'+x0.toFixed(1)+'" y="9" width="'+(x1-x0).toFixed(1)+'" height="12" rx="6" fill="'+fill+'"/>'; };
+  seg(P.s.onset, P.s.onset+P.s.dur, "var(--blue)");
+  for(const n of (P.naps||[])) seg(n.a, n.b, "var(--blue)");
+  if(!P.b.rest) seg(P.b.start, P.b.end, "var(--orange-fill)");
+  // Il minimo corporeo (cbt) è il punto di massima sonnolenza: non un
+  // segmento a sé altrove nell'app, ma un dato già calcolato dal motore
+  // (usato per decidere dove tenere la luce) — qui diventa un piccolo
+  // intaglio rosso, ±20 min intorno al minimo, solo se cade nella finestra.
+  const cbtVisibile = isFinite(P.cbt) && P.cbt>=clo-20 && P.cbt<=chi+20;
+  if(cbtVisibile) seg(P.cbt-20, P.cbt+20, "var(--risk)");
+
+  let now="";
+  if(nowT!==null && nowT>=clo && nowT<=chi){
+    const x=pos(nowT).toFixed(1);
+    now='<path d="M'+(x-3)+' 3 L'+(+x+3)+' 3 L'+x+' 8 Z" fill="var(--ink)"/><line x1="'+x+'" y1="8" x2="'+x+'" y2="22" stroke="var(--ink)" stroke-width="1.5"/>';
+  }
+
+  const legenda=['<span class="fg-key"><i style="background:var(--blue)"></i>Sonno</span>'];
+  if(!P.b.rest) legenda.push('<span class="fg-key"><i style="background:var(--orange-fill)"></i>Turno</span>');
+  if(cbtVisibile) legenda.push('<span class="fg-key"><i style="background:var(--risk)"></i>Sonnolenza</span>');
+
+  el.innerHTML =
+    '<svg viewBox="0 0 '+W+' 30" style="width:100%;height:30px;display:block" role="img" aria-label="Forma della giornata">'+
+      '<rect x="0" y="9" width="'+W+'" height="12" rx="6" fill="var(--s2)"/>'+segs+now+
+    '</svg>'+
+    '<div class="fg-legend">'+legenda.join("")+'</div>';
+}
 function renderEssenziale(P, CARDS){
   const el=$("#essenziale"); if(!el) return;
   // quali righe erano aperte: si legge dal DOM prima di ridisegnare, così
@@ -4339,24 +4384,12 @@ function renderEssenziale(P, CARDS){
   }
 
   voci.sort((a,b)=>a.t-b.t);
-  // Solo "Adesso": all'utente interessa quello, il resto della giornata
-  // resta sotto come prima (senza altre etichette a dividerlo — non
-  // aggiungono niente che l'ordine cronologico non dica già). L'unica
-  // riga marcata è l'ultima già iniziata (t<=nowT); se non è ancora
-  // iniziato niente oggi, nessuna riga è "adesso". Ma "adesso" ha senso
-  // solo se si sta guardando il giorno vero — sfogliando avanti/indietro
-  // con #prev/#next, state.focus non è più oggi: minutiDaFocus() resta
-  // comunque calcolato (può uscire negativo o enorme), e senza questo
-  // controllo una riga di un giorno futuro o passato finiva marcata
-  // "adesso" per puro caso aritmetico.
-  const staGuardandoOggi = dnum(state.focus)===dnum(giornoVero());
-  const nowT = staGuardandoOggi ? dSv(minutiDaFocus()) : -1;
-  let adessoIdx=-1; if(staGuardandoOggi) voci.forEach((v,i)=>{ if(v.t<=nowT) adessoIdx=i; });
-  let h="";
-  voci.forEach((v,i)=>{
-    if(i===adessoIdx) h+='<div class="essgroup">Adesso</div>';
-    h+=v.html;
-  });
+  // Niente etichetta "Adesso" qui: il modulo #ora sopra questa lista
+  // (renderOra/adessoLine) è già l'unico eroe per "cosa succede adesso" —
+  // ripeterlo qui sotto come etichetta su una riga creava due segnali
+  // "adesso" sullo stesso schermo, in competizione. Questa resta la
+  // lista cronologica semplice, senza separatori.
+  let h=voci.map(v=>v.html).join("");
 
   // Affina la finestra di sonno: si chiede DOPO aver mostrato il piano
   if(state.freeBed==="23:30" && state.freeWake==="07:30")
