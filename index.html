@@ -154,7 +154,8 @@ font-weight:700;padding:5px 10px;border-radius:999px;white-space:nowrap}
 .status.calm{border-left-color:var(--blue-lt)}
 .cap{display:flex;justify-content:space-between;align-items:baseline;gap:14px;margin-bottom:9px}
 .cap p{font-size:12.5px;color:var(--faint);text-align:right}
-.cyc{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:11px 13px 5px;margin-bottom:26px}
+.cyc{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:11px 13px 5px;
+margin-bottom:26px;box-shadow:var(--shadow-card)}
 .crow{display:flex;align-items:center;gap:7px;min-height:32px;cursor:pointer}
 .crow:hover .crail{background:var(--s2)}
 .crow.on .clab{color:var(--blue);font-weight:600}
@@ -530,11 +531,13 @@ letter-spacing:.01em;padding:9px 0 8px;min-height:56px;cursor:pointer;position:r
 /* voce di sezione espandibile (Turni): stessa affordance per tutte */
 .tsec{display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:var(--s1);
 border:1px solid var(--line);border-radius:var(--r);padding:13px 15px;font:inherit;color:inherit;
-cursor:pointer;min-height:52px;margin-top:12px}
+cursor:pointer;min-height:52px;margin-top:12px;box-shadow:var(--shadow-card)}
 .tsec:hover{border-color:var(--blue-lt)}
 .tsec>svg{flex:none;color:var(--dim);width:19px;height:19px;padding:9px;border-radius:999px;
 background:var(--s2);box-sizing:content-box}
-.tsec b{flex:1;font-size:16px;font-weight:600}
+.tsec-tx{flex:1;min-width:0}
+.tsec-tx b{display:block;font-size:16px;font-weight:600}
+.tsec-tx span{display:block;font-size:12.5px;color:var(--dim);margin-top:2px;font-weight:400}
 .tchev{color:var(--faint);font-size:19px;line-height:1;transition:transform .15s ease}
 .tsec.open .tchev{transform:rotate(90deg)}
 .tsec.open{border-color:var(--blue-lt)}
@@ -654,7 +657,8 @@ body.tab-piu #band,body.tab-piu #cards{display:none}
 .piu-price{display:block;margin-top:11px;font-weight:600;color:var(--ink)!important;font-size:14px!important}
 .tools{flex-direction:column;gap:10px}
 .tool{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;background:var(--s1);border:1px solid var(--line);
-border-radius:var(--r);padding:13px 15px;font:inherit;cursor:pointer;color:inherit;min-height:44px}
+border-radius:var(--r);padding:13px 15px;font:inherit;cursor:pointer;color:inherit;min-height:44px;
+box-shadow:var(--shadow-card)}
 .tool:hover{border-color:var(--blue-lt)}
 /* selezionato: stesso trattamento di .dbtn.on, per i preset del passo 1 del wizard */
 .tool.on{border-color:var(--blue);background:var(--blue-soft)}
@@ -1040,7 +1044,7 @@ header b{font-size:23px}.datebar h1{font-size:19px}
 <div id="formaGiorno"></div>
 <div class="ess" id="essenziale"></div>
 
-<div class="cap ciclo"><span class="eyebrow">Il tuo ciclo</span>
+<div class="cap ciclo"><span class="eyebrow">Il tuo ciclo<span id="ciclNome"></span></span>
   <button class="lnk" id="tEdit">Modifica →</button></div>
 <div class="cyc" id="cyc"></div>
 <div class="cycrange" id="cycRange"></div>
@@ -1083,11 +1087,11 @@ header b{font-size:23px}.datebar h1{font-size:19px}
      crescita organica dell'app (lo stesso motivo per cui questa
      sezione va sempre mostrata, non dentro un accordion): merita di
      stare dove si vede subito, appena sotto il proprio ciclo. -->
-<button class="tsec" id="doFree"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg><b>Quando sono disponibile</b><span class="tchev">›</span></button>
+<button class="tsec" id="doFree"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg><span class="tsec-tx"><b>Quando sono disponibile</b><span id="doFreeSub"></span></span><span class="tchev">›</span></button>
 <div class="ecc" id="freeBox" hidden>
   <p class="hint" style="margin:0 0 10px">Le ore in cui non lavori e non dovresti dormire, nei prossimi sette giorni. Sono contate al netto del viaggio: quelle in cui puoi prendere un appuntamento davvero.</p>
   <div id="freeList"></div></div>
-<button class="tsec" id="doPartner"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M16 5.5a3 3 0 0 1 0 5"/><path d="M18 14.5a6 6 0 0 1 3 5.5"/></svg><b>Turni condivisi</b><span class="tchev">›</span></button>
+<button class="tsec" id="doPartner"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M16 5.5a3 3 0 0 1 0 5"/><path d="M18 14.5a6 6 0 0 1 3 5.5"/></svg><span class="tsec-tx"><b>Turni condivisi</b></span><span class="tchev">›</span></button>
 <!-- Sempre visibile, non dentro l'accordion sopra: un invito nascosto
      dietro un altro tocco non è un invito. -->
 <button class="tool" type="button" id="doShareCycle" style="margin:8px 0">
@@ -3868,7 +3872,7 @@ function render(){
   const giornata = document.body.classList.contains("giornata");
   const showStrip = (tab==="turni") || (!ess && tab!=="oggi" && tab!=="piu"); // ciclo/dettaglio legacy
   const showDay = (tab==="oggi" && giornata) || (!ess && tab!=="turni" && tab!=="piu");
-  if(showStrip){ renderStrip(P, f, S); renderAndamenti(); renderPartner(CARDS); }
+  if(showStrip){ renderStrip(P, f, S); renderAndamenti(); renderPartner(CARDS); renderFreePreview(); }
   if(tab==="piu") renderPiuCal();
   if(tab==="oggi") renderBand(P, CARDS);
   if(showDay){ renderCards(P, f, CARDS); }
@@ -4662,13 +4666,16 @@ function renderHeader(P, f){
   renderToday();
   const avv = freeWakeOk() ? "" : "Questa risposta non è plausibile: sto usando "+hhmm(freeWakeUsata())+".";
   { const el=$("#oWakeWarn"); if(el) el.textContent=avv; }
-  const bn=$("#setName"), bd=$("#setDesc");
+  const bn=$("#setName"), bd=$("#setDesc"), pi=presetIndex();
+  const nomeCiclo = pi>=0 ? PRESETS[pi].n : "Il tuo turno";
   if(bn){
-    const pi=presetIndex();
-    bn.textContent = pi>=0 ? PRESETS[pi].n : "Il tuo turno";
+    bn.textContent = nomeCiclo;
     const oggi=codeAt(dnum(giornoVero())-dnum(state.focus));
     bd.textContent=state.pattern+" · oggi "+(state.shifts[oggi]?state.shifts[oggi].n:"riposo");
   }
+  // "Il tuo ciclo — Sanità in quinta", come nel mockup: prima diceva solo
+  // "Il tuo ciclo", il nome viveva solo nel vecchio #setbar (nascosto dai tab).
+  const cn=$("#ciclNome"); if(cn) cn.textContent=" — "+nomeCiclo;
   let [cls,msg]=statusLine(P);
   if(!freeWakeOk()){ cls="warn";
     msg="La risposta sul risveglio in ferie ("+esc(state.freeWake)+") non è plausibile: "+
@@ -5233,6 +5240,17 @@ function renderWizPeopleList(){
       '<span style="flex:1;font-weight:600">'+esc(nome)+'</span>'+
       '<button class="lnk" data-remove-persona="'+i+'" style="color:var(--faint)">Rimuovi</button></div>';
   }).join("")+(multi?'<p class="hint" style="margin:2px 0 10px">La stellina sceglie chi vedi nella card "Turni condivisi" di Oggi — le altre restano comunque visibili qui in Turni.</p>':'');
+}
+// Anteprima sotto "Quando sono disponibile", come nel mockup approvato
+// ("Prossima finestra: sabato 16:30–22:00") — prima il bottone diceva solo
+// il nome della sezione, senza dare un motivo per aprirla.
+function renderFreePreview(){
+  const el=$("#doFreeSub"); if(!el) return;
+  const w=finestreLibere(7);
+  if(!w.length){ el.textContent="Nessuna finestra nei prossimi sette giorni"; return; }
+  const x=w[0], scarto=dnum(x.d)-dnum(giornoVero());
+  const quando = scarto===0 ? "oggi" : scarto===1 ? "domani" : x.d.toLocaleDateString("it-IT",{weekday:"long"});
+  el.textContent = "Prossima finestra: "+quando+" "+hhmm(x.a)+"–"+hhmm(x.b);
 }
 function renderPartner(CARDS){
   const el=$("#partner"); if(!el) return;
