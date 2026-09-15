@@ -556,11 +556,18 @@ padding:16px 18px;margin:2px 0 20px;box-shadow:var(--shadow-btn)}
    larghezza di ognuna dettata dalla lunghezza della sua etichetta ("Così
    così" più largo di "Sveglio"), qui tutte uguali per costruzione. */
 .ora-kss{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:12px}
-.kface{display:flex;flex-direction:column;align-items:center;justify-content:center;
+/* Ancorate in alto (non centrate) e con due righe di spazio riservate
+   all'etichetta, sempre: "Così così"/"Al meglio" vanno a capo,
+   "Sveglio" no — se il gruppo icona+testo fosse centrato come blocco
+   unico, le icone finivano a un'altezza diversa da riga a riga.
+   Riservando lo spazio SEMPRE, le icone restano allineate a prescindere
+   da quante righe usa l'etichetta sotto. */
+.kface{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
 text-align:center;gap:5px;padding:10px 3px;line-height:1.2}
 .kface .kic{display:inline-flex}
 .kface svg{width:23px;height:23px;opacity:.85}
-.kface span{font-size:12px;line-height:1.2}
+.kface span{display:flex;align-items:center;justify-content:center;font-size:12px;
+line-height:1.2;min-height:2.4em}
 .kface.on svg{opacity:1}
 /* .dbtn.on è blu per tutti gli altri usi (preset, pisolino fatto/saltato) —
    ma qui ogni faccina ha già il suo colore (--tone, inline), dal peggiore
