@@ -411,27 +411,37 @@ padding:7px 15px;min-height:38px;border-radius:3px;cursor:pointer}
 .essgroup{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);
 font-weight:600;padding:16px 0 6px;margin-top:2px;border-top:1px solid var(--line)}
 .essgroup:first-child{border-top:none;margin-top:0;padding-top:2px}
-.essrow{display:flex;align-items:flex-start;gap:11px;padding:15px 0;border-bottom:1px solid var(--line)}
-.essrow:first-child{padding-top:2px}
-.essrow .eic{flex:none;width:74px;display:flex;flex-direction:column;align-items:center;
-gap:5px;color:var(--dim);padding-top:2px}
-.essrow .eic .ei{display:block;width:26px;height:26px}
-.essrow.warn .eic{color:var(--risk)}
-.essrow .el{display:block;width:100%;text-align:center;font-size:11px;letter-spacing:.03em;
-color:var(--faint);font-weight:600;line-height:1.25;text-transform:none}
+/* Riga della lista essenziale: card singola con bordo colorato a sinistra
+   e icona in badge — stessa grammatica visiva del mockup approvato
+   (icona+titolo a sinistra, orario a destra), non più l'elenco diviso da
+   bordi con l'orario enorme al centro. */
+.essrow{display:flex;align-items:center;gap:12px;background:var(--s1);border:1px solid var(--line);
+border-left:3px solid var(--line);border-radius:var(--r);padding:13px 14px;margin-bottom:8px;
+box-shadow:var(--shadow-card)}
+.essrow.t-orange{border-left-color:var(--orange-fill)}
+.essrow.t-blue{border-left-color:var(--blue)}
+.essrow.warn{background:var(--risk-soft);border-left-color:var(--risk)}
+.essrow .eic{flex:none;width:38px;height:38px;border-radius:999px;background:var(--blue-soft);
+color:var(--blue);display:flex;align-items:center;justify-content:center}
+.essrow .eic .ei{display:block;width:19px;height:19px}
+.essrow.t-orange .eic{background:var(--orange-soft);color:var(--orange)}
+.essrow.warn .eic{background:var(--bg);color:var(--risk)}
+.essrow .el{display:block;font-size:15px;font-weight:600;color:var(--ink);line-height:1.3}
 .essrow .ev{flex:1;min-width:0}
-.essrow .en{font-size:27px;font-weight:600;line-height:1.15;font-variant-numeric:tabular-nums}
+.essrow .en{font-size:14px;font-weight:600;line-height:1.3;font-variant-numeric:tabular-nums;
+flex:none;color:var(--ink)}
 .essrow .en b{font-weight:700}
 /* riga espandibile: unica affordance in Oggi (chevron a destra, riga toccabile) */
-.erow{border-bottom:1px solid var(--line)}
+.erow{margin-bottom:8px}
 .erow>summary{list-style:none;cursor:pointer;display:block}
 .erow>summary::-webkit-details-marker{display:none}
-.erow>summary .essrow{border-bottom:none}
+.erow>summary .essrow{margin-bottom:0}
 .echev{flex:none;align-self:center;color:var(--faint);font-size:19px;line-height:1;
-transition:transform .15s ease;padding-left:6px}
+transition:transform .15s ease;padding-left:2px}
 .erow[open]>summary .echev{transform:rotate(90deg)}
+.erow[open]>summary .essrow{border-color:var(--blue-lt)}
 .erow[open]>summary .el{color:var(--blue)}
-.ed{padding:2px 0 16px 31px}
+.ed{padding:10px 0 16px 50px}
 .ed-sub{font-size:14px;color:var(--dim);line-height:1.55;margin:0 0 9px}
 .ed .why{font-size:14px;color:var(--dim);line-height:1.6;border-left:2px solid var(--line);padding-left:11px;margin-top:9px}
 .ed .why cite{display:block;margin-top:6px;font-size:11px;color:var(--faint);font-style:normal}
@@ -439,14 +449,16 @@ transition:transform .15s ease;padding-left:6px}
 @media (max-width:430px){.ed{padding-left:0}}
 .dwhen{display:block;font-size:12.5px;font-weight:600;letter-spacing:.03em;color:var(--dim);
 text-transform:none;margin-bottom:1px;font-variant-numeric:normal}
-.essrow .es{font-size:14px;color:var(--dim);margin-top:5px;line-height:1.5}
+.essrow .es{font-size:12.5px;color:var(--dim);margin-top:2px;line-height:1.4}
 .essrow.warn .en{color:var(--risk)}
-/* icona di stato nel blocco Ora */
-.ora-h{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
-.ora-tx{min-width:0}
-.ora-ic{color:var(--dim);display:inline-flex;flex:none}
-.ora-ic .ei{width:34px;height:34px}
-.ora-card.risk .ora-ic{color:var(--risk)}
+/* icona di stato nel blocco Ora: badge a cerchio, stesso motivo ripreso
+   in Turni e Più — prima l'icona era "nuda", senza nulla dietro. */
+.ora-h{display:flex;align-items:center;gap:14px}
+.ora-tx{min-width:0;flex:1}
+.ora-ic{color:var(--su-blu);background:var(--blue);display:inline-flex;align-items:center;
+justify-content:center;flex:none;width:44px;height:44px;border-radius:999px}
+.ora-ic .ei{width:22px;height:22px}
+.ora-card.risk .ora-ic{color:var(--risk);background:var(--bg)}
 /* tinte termiche per le celle del ciclo e della griglia (mute) */
 .crow.twork,.gcell.twork{background:var(--warm-tint)}
 .crow.tnight,.gcell.tnight{background:var(--cool-tint)}
@@ -487,20 +499,24 @@ letter-spacing:.01em;padding:9px 0 8px;min-height:56px;cursor:pointer;position:r
 border:1px solid var(--line);border-radius:var(--r);padding:13px 15px;font:inherit;color:inherit;
 cursor:pointer;min-height:52px;margin-top:12px}
 .tsec:hover{border-color:var(--blue-lt)}
-.tsec>svg{flex:none;color:var(--faint)}
+.tsec>svg{flex:none;color:var(--dim);width:19px;height:19px;padding:9px;border-radius:999px;
+background:var(--s2);box-sizing:content-box}
 .tsec b{flex:1;font-size:16px;font-weight:600}
 .tchev{color:var(--faint);font-size:19px;line-height:1;transition:transform .15s ease}
 .tsec.open .tchev{transform:rotate(90deg)}
 .tsec.open{border-color:var(--blue-lt)}
 .tsec.open>svg{color:var(--blue)}
-/* Blocco unico "Ora": l'unico contenitore enfatizzato in cima. Neutro di base,
-   arancio SOLO quando è rischio (disciplina di colore). */
+/* Blocco unico "Ora": l'unico contenitore enfatizzato in cima. Tinta blu
+   di base (è il vero eroe della schermata, va trattato da tale), arancio
+   SOLO quando è rischio — la disciplina di colore resta, cambia solo cosa
+   conta come "neutro": prima era grigio, ora è la tinta calma dell'app. */
 .ora{margin:0}
-.ora-card{background:var(--s1);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:2px 0 20px}
-.ora-card .eyebrow{color:var(--faint)}
-.ora-card b{display:block;font-size:19px;line-height:1.25;margin-top:4px}
-.ora-sub{display:block;font-size:14px;color:var(--dim);line-height:1.5;margin-top:8px}
-.ora-card.risk{background:var(--risk-soft);border-color:var(--risk-line)}
+.ora-card{background:var(--blue-soft);border:1px solid var(--blue-lt);border-radius:20px;
+padding:16px 18px;margin:2px 0 20px;box-shadow:var(--shadow-btn)}
+.ora-card .eyebrow{color:var(--blue)}
+.ora-card b{display:block;font-family:var(--serif);font-size:20px;font-weight:600;line-height:1.25;margin-top:3px}
+.ora-sub{display:block;font-size:14px;color:var(--dim);line-height:1.5;margin-top:10px;margin-left:58px}
+.ora-card.risk{background:var(--risk-soft);border-color:var(--risk-line);box-shadow:var(--shadow-card)}
 .ora-card.risk .eyebrow{color:var(--risk)}
 .ora-card.risk b{color:var(--risk)}
 .ora-kss{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
@@ -521,10 +537,18 @@ text-align:center;gap:5px;padding:9px 6px;line-height:1.2}
 .gcell{aspect-ratio:1;border:1px solid var(--line);border-radius:9px;background:var(--s1);color:var(--ink);font:inherit;font-weight:700;font-size:16px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-height:42px}
 .gcell small{font-weight:400;font-size:11px;color:var(--faint)}
 .gcell.rest{color:var(--faint);background:var(--bg)}
-/* il diario come promemoria a stati */
-.drem{border:1px solid var(--line);border-radius:var(--r);background:var(--s1);padding:13px 14px;margin:14px 0 2px}
-.drem.done{background:var(--bg)}
-.drem-q{font-size:14px;font-weight:600;margin-bottom:8px}
+/* il diario come promemoria a stati: stessa famiglia visiva delle card di
+   Oggi (bordo colorato, badge icona) finché è una domanda aperta; si
+   spegne (bordo neutro, niente più badge) una volta risposto — la
+   domanda non c'è più, il riepilogo non deve più chiedere attenzione. */
+.drem{border:1px solid var(--line);border-left:3px solid var(--blue);border-radius:var(--r);
+background:var(--s1);padding:14px;margin:14px 0 2px;box-shadow:var(--shadow-card)}
+.drem.done{background:var(--bg);border-left-color:var(--line)}
+.drem-q{font-size:14px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+.drem-q .dic{flex:none;width:30px;height:30px;border-radius:999px;background:var(--blue-soft);
+color:var(--blue);display:inline-flex;align-items:center;justify-content:center}
+.drem-q .dic .ei{width:16px;height:16px;display:block}
+.drem.done .drem-q .dic{background:var(--s2);color:var(--dim)}
 .drem-done{font-size:14px;color:var(--dim);line-height:1.5}
 .drem-done b{color:var(--ink)}
 .drem-ok{color:var(--ok);font-weight:700;margin-right:2px}
@@ -578,9 +602,10 @@ border-radius:var(--r);padding:13px 15px;font:inherit;cursor:pointer;color:inher
 .tool:hover{border-color:var(--blue-lt)}
 /* selezionato: stesso trattamento di .dbtn.on, per i preset del passo 1 del wizard */
 .tool.on{border-color:var(--blue);background:var(--blue-soft)}
-.tool.on .tool-ic{color:var(--blue)}
+.tool.on .tool-ic{background:var(--blue);color:var(--su-blu)}
 .tool.on .tool-tx b{color:var(--blue)}
-.tool-ic{flex:none;color:var(--faint);padding-top:1px;display:inline-flex}
+.tool-ic{flex:none;color:var(--dim);display:inline-flex;align-items:center;justify-content:center;
+width:38px;height:38px;border-radius:999px;background:var(--s2)}
 .tool-tx{flex:1;min-width:0}
 .tool-tx b{display:block;font-size:16px;font-weight:600;margin-bottom:2px}
 .tool-tx span{display:block;font-size:12.5px;color:var(--dim);line-height:1.45}
@@ -595,6 +620,12 @@ border-radius:var(--r);padding:13px 15px;font:inherit;cursor:pointer;color:inher
 .tools-grid .tool-tx b{font-size:14px}
 .tools-grid .tool-tx span{font-size:11.5px;line-height:1.4}
 .tools-grid .ecc{grid-column:1/-1}
+/* "Condividi il tuo ciclo": l'unica riga sempre visibile fuori dall'accordion
+   di Turni condivisi — la CTA più importante della schermata, va trattata
+   come tale (come nel mockup), non identica a una riga qualsiasi. */
+#doShareCycle{background:var(--blue-soft);border-color:var(--blue);box-shadow:var(--shadow-btn)}
+#doShareCycle .tool-ic{background:var(--blue);color:var(--su-blu)}
+#doShareCycle .tool-tx b{color:var(--blue)}
 .presetTiles{display:flex;flex-direction:column;gap:8px}
 .piu-info{border:1px solid var(--line);border-radius:var(--r);margin:18px 0 8px;background:var(--s1)}
 .piu-info>summary{padding:12px 15px;cursor:pointer;font-size:14px;font-weight:600;color:var(--dim);
@@ -3788,7 +3819,7 @@ function diaryReminder(P, CARDS){
 
   const sleepEditing = state.diaryEditing.has("sleep:"+key0);
   let x='<div class="drem'+(logged?" done":"")+'">';
-  x+='<div class="drem-q">Il tuo sonno</div>';
+  x+='<div class="drem-q"><span class="dic">'+ICON.moon+'</span>Il tuo sonno</div>';
   if(!logged){
     x+='<div class="drem-q" style="font-weight:400;margin-top:-4px">Com\'è andato il sonno appena fatto?</div>'+
        '<div class="diary" style="gap:8px">'+
@@ -3973,8 +4004,9 @@ function renderOra(Pfocus){
     : (A && /insieme/.test(A.t)) ? ICON.duo
     : (title && /caff/.test(sub||"")) ? ICON.coffee : ICON.eye;
   el.innerHTML='<div class="ora-card'+(accent?" risk":"")+'">'+
-    '<div class="ora-h"><div class="ora-tx"><span class="eyebrow">Ora</span>'+
-    '<b>'+esc(title)+'</b></div><span class="ora-ic">'+oraIc+'</span></div>'+
+    '<div class="ora-h"><span class="ora-ic">'+oraIc+'</span>'+
+    '<div class="ora-tx"><span class="eyebrow">Ora</span>'+
+    '<b>'+esc(title)+'</b></div></div>'+
     '<span class="ora-sub">'+esc(sub)+'</span>'+
     (r?'<div class="ora-dis">Modellato dai tuoi orari di sonno, non una misura.</div>':'')+
     // "Ora" parla sempre del momento vero, per progetto — ma le card sotto
@@ -4303,10 +4335,15 @@ function renderEssenziale(P, CARDS){
   // Stessa affordance per tutte (chevron a destra, riga toccabile).
   const riga=(id,lab,num,sub,warn,ic,det)=>{
     const apri = det && essAperte.has(id) ? " open" : "";
-    const capo='<div class="essrow'+(warn?" warn":"")+'">'+
-      '<div class="eic">'+(ic||"")+'<span class="el">'+esc(lab)+'</span></div>'+
-      '<div class="ev"><div class="en mono">'+num+'</div>'+
+    // tinta del bordo/badge: arancio per le voci "calde" (caffè, luce,
+    // rientro), blu per quelle "fredde" (sonno, pisolino, pasti) — il
+    // rosso di rischio (warn) vince su entrambe.
+    const tone = (ic===ICON.coffee||ic===ICON.sun||ic===ICON.dim||ic===ICON.car) ? "orange" : "blue";
+    const capo='<div class="essrow'+(warn?" warn":" t-"+tone)+'">'+
+      '<span class="eic">'+(ic||"")+'</span>'+
+      '<div class="ev"><div class="el">'+esc(lab)+'</div>'+
       (sub?'<div class="es">'+sub+'</div>':'')+'</div>'+
+      '<div class="en mono">'+num+'</div>'+
       (det?'<span class="echev">›</span>':'')+'</div>';
     if(!det) return capo;
     return '<details class="erow"'+apri+' data-row="'+esc(id)+'"><summary>'+capo+'</summary>'+
