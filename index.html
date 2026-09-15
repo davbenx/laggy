@@ -221,9 +221,16 @@ padding:15px 16px;margin:14px 0}
 .cmid{position:absolute;top:-1px;bottom:-1px;width:1px;background:var(--ink);opacity:.75;box-shadow:0 0 0 1px var(--bg)}
 .caxis span.mez{color:var(--ink);font-weight:600}
 .cbar.sh{background:var(--orange-fill)}
-.cbar.pt{background:var(--blue-lt);opacity:.5;top:auto;height:3px;bottom:4px}
+/* Riposo del partner: funzione reale che il mockup non prevede (mostra
+   un solo ciclo) — riproporzionata sulla nuova traccia sottile (8px,
+   prima 17px), non lasciata alla posizione calcolata per quella vecchia
+   e più alta. */
+.cbar.pt{background:var(--blue-lt);opacity:.5;top:auto;height:3px;bottom:2px}
 .cdi{width:16px;flex:none;display:inline-flex;align-items:center;justify-content:center;color:var(--faint)}
-.caxis{position:relative;height:15px;margin:3px 0 0 66px}
+/* allineata all'inizio vero di .crail: clab(46) + gap(10) + ccode(13) +
+   gap(10) = 79px — ricalcolata dopo aver allargato il gap fra le righe
+   per il mockup (era 66px, tarata sul gap più stretto di prima). */
+.caxis{position:relative;height:15px;margin:3px 0 0 79px}
 .caxis span{position:absolute;transform:translateX(-50%);font-size:11px;color:var(--faint);font-variant-numeric:tabular-nums}
 .caxis span.edge-l{transform:translateX(0)}
 .caxis span.edge-r{transform:translateX(-100%)}
