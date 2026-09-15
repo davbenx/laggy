@@ -16,7 +16,11 @@ export function cfgEnv(env) {
     lsVariantId: env.LEMONSQUEEZY_VARIANT_ID || "",
     price: env.PRICE || "24.99",
     currency: env.CURRENCY || "EUR",
-    origin: env.SITE_ORIGIN || "*"
+    // Se SITE_ORIGIN non è impostata su Cloudflare Pages, NON aprire a "*":
+    // /config/<id> accetta PUT/DELETE, quindi un CORS aperto a qualunque
+    // origine è una configurazione che non deve poter capitare per errore.
+    // Il fallback resta ristretto al dominio dell'app stessa.
+    origin: env.SITE_ORIGIN || "https://app.notturnisti.club"
   };
 }
 

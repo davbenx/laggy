@@ -1,0 +1,13 @@
+# Archivi di deploy/backup: non vanno versionati, si rigenerano dal sorgente
+*.zip
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/
+
+# Segreti locali (se mai introdotti)
+.env
+.env.local

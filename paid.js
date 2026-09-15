@@ -174,7 +174,12 @@
   }
 
   function feedFromId(id) { return location.origin.replace(/^https?/, "webcal") + "/feed/" + id; }
-  function restoreLink(s) { return location.origin + location.pathname + "?restore=" + s.id + "." + s.writeKey; }
+  // Il fragment (#) non viene mai inviato al server: a differenza di una query
+  // string, non finisce nei log di accesso di Cloudflare/proxy intermedi né,
+  // se l'utente preme Invio sulla barra indirizzi, nella cronologia del
+  // browser. Per un link che contiene la chiave di scrittura dell'account è
+  // l'unica forma sicura.
+  function restoreLink(s) { return location.origin + location.pathname + "#restore=" + s.id + "." + s.writeKey; }
   function copyText(txt) {
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(function () { toast("Link copiato"); }, function () { prompt("Copia il link:", txt); });
     else prompt("Copia il link:", txt);
@@ -186,9 +191,24 @@
       setTimeout(function () { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
     } catch (e) {}
   }
-  function cleanUrl() { try { var u = new URL(location.href); u.searchParams.delete("restore"); history.replaceState(null, "", u.pathname + u.search + u.hash); } catch (e) {} }
+  function cleanUrl() {
+    try {
+      var u = new URL(location.href);
+      u.searchParams.delete("restore");
+      if (/^#restore=/.test(u.hash)) u.hash = "";
+      history.replaceState(null, "", u.pathname + u.search + u.hash);
+    } catch (e) {}
+  }
   function autoRestore() {
-    var tok; try { tok = new URLSearchParams(location.search).get("restore"); } catch (e) { return; }
+    var tok;
+    try {
+      // Fragment prima (nuovo formato, mai inviato al server); la query
+      // string resta come fallback di lettura solo per i link già generati
+      // prima di questa modifica, così non si rompono per chi li ha salvati.
+      var h = location.hash || "";
+      if (/^#restore=/.test(h)) tok = decodeURIComponent(h.slice("#restore=".length));
+      else tok = new URLSearchParams(location.search).get("restore");
+    } catch (e) { return; }
     if (!tok) return;
     var i = tok.indexOf("."); if (i < 1) { cleanUrl(); return; }
     var id = tok.slice(0, i), key = tok.slice(i + 1); if (!id || !key) { cleanUrl(); return; }
