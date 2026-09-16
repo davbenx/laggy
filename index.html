@@ -141,10 +141,16 @@ padding:calc(env(safe-area-inset-top,0px) + 12px) 20px 12px;margin:0 -20px;posit
 cursor:pointer;display:flex;border-radius:999px}
 .themebtn:hover{color:var(--ink);background:var(--s1)}
 .themebtn[aria-pressed="true"]{color:var(--blue)}
-.datebar,.cycbar{display:flex;align-items:center;gap:12px}
-/* Titolo + pillola in linea, come nel mockup — non più due elementi
-   impilati su righe diverse. */
-.datebar-tx{display:flex;align-items:baseline;gap:10px;flex:1;min-width:0}
+/* .datebar: solo data+pillola ora (le frecce e "torna a oggi" sono sotto,
+   sulla loro riga, come .cycbar in Turni) — baseline, non center: la
+   pillola è più bassa del testo del titolo, centrarla la faceva
+   sembrare disallineata. */
+.datebar{display:flex;align-items:baseline;gap:10px}
+/* .daynav (Oggi: frecce + torna a oggi) e .cycbar (Turni: frecce + torna
+   a oggi + intervallo del ciclo) condividono lo stile ma restano classi
+   diverse: sono nascoste su tab diverse, e una classe sola avrebbe fatto
+   sparire l'una quando doveva sparire solo l'altra. */
+.cycbar,.daynav{display:flex;align-items:center;gap:12px}
 /* Niente più text-transform:capitalize come prima: "Oggi, martedì 15
    settembre" ha bisogno di UNA sola maiuscola, all'inizio — capitalize
    l'avrebbe messa anche su "Martedì" e "Settembre". La maiuscola giusta
@@ -378,7 +384,7 @@ footer p{font-size:14px;color:var(--faint);line-height:1.6;margin-bottom:10px}
 footer a{color:var(--blue);text-decoration:none;border-bottom:1px solid var(--blue-lt)}
 .onboard{background:var(--s1);border:1px solid var(--line);border-top:3px solid var(--blue);
 border-radius:var(--r);padding:18px 18px 20px;margin-bottom:20px}
-body.intro .datebar,body.intro #ora,body.intro #status,body.intro .cap,
+body.intro .datebar,body.intro .daynav,body.intro #ora,body.intro #status,body.intro .cap,
 body.intro #cyc,body.intro #band,body.intro #cards,body.intro .tools,
 body.intro .setbar{display:none}
 .setbar{display:flex;align-items:center;gap:12px;background:var(--s1);border:1px solid var(--line);
@@ -684,7 +690,7 @@ body.tab-oggi.giornata #cards{display:block}
 body.tab-oggi.essenziale #band{display:none}
 /* TURNI: ciclo, giorni liberi, partner, modifica */
 body.tab-turni #status,body.tab-turni #ora,body.tab-turni #benvenutoLink,body.tab-turni #demoEsempio,body.tab-turni #backupNudge,body.tab-turni #installBanner,body.tab-turni #clubBanner,body.tab-turni #formaGiorno,body.tab-turni #essenziale,
-body.tab-turni .datebar,body.tab-turni .cap.giornata,body.tab-turni #band,body.tab-turni #cards,
+body.tab-turni .datebar,body.tab-turni .daynav,body.tab-turni .cap.giornata,body.tab-turni #band,body.tab-turni #cards,
 body.tab-turni #icsBox,body.tab-turni .piu-cal,body.tab-turni .tools,body.tab-turni .piu-h,body.tab-turni .piu-info,
 body.tab-turni footer{display:none}
 /* Pagina Andamenti (dentro la tab Turni, non una sesta tab): quando è
@@ -700,7 +706,7 @@ body.tab-turni.andamenti-aperta #doPartner,body.tab-turni.andamenti-aperta #part
 body.tab-turni.andamenti-aperta #doAndamenti{display:none}
 /* PIÙ: calendario a pagamento ed extra */
 body.tab-piu #status,body.tab-piu #ora,body.tab-piu #benvenutoLink,body.tab-piu #demoEsempio,body.tab-piu #backupNudge,body.tab-piu #installBanner,body.tab-piu #clubBanner,body.tab-piu #formaGiorno,body.tab-piu #essenziale,
-body.tab-piu .datebar,body.tab-piu #turniTitle,body.tab-piu .cap,body.tab-piu #cyc,body.tab-piu #doFree,
+body.tab-piu .datebar,body.tab-piu .daynav,body.tab-piu #turniTitle,body.tab-piu .cap,body.tab-piu #cyc,body.tab-piu #doFree,
 body.tab-piu #tGrid,body.tab-piu #doPartner,body.tab-piu .cycbar,body.tab-piu #doAndamenti,
 body.tab-piu #freeBox,body.tab-piu #dayBox,body.tab-piu #gridBox,body.tab-piu #andamentiPagina,body.tab-piu #partner,
 body.tab-piu #band,body.tab-piu #cards{display:none}
@@ -756,7 +762,7 @@ list-style:none;min-height:44px;display:flex;align-items:center}
 .piu-info-in b{color:var(--ink)}
 /* OPZIONI: solo la configurazione */
 body.tab-opzioni #status,body.tab-opzioni #ora,body.tab-opzioni #benvenutoLink,body.tab-opzioni #demoEsempio,body.tab-opzioni #backupNudge,body.tab-opzioni #installBanner,body.tab-opzioni #clubBanner,body.tab-opzioni #formaGiorno,body.tab-opzioni #essenziale,
-body.tab-opzioni .datebar,body.tab-opzioni #band,body.tab-opzioni #turniTitle,body.tab-opzioni .cap.ciclo,body.tab-opzioni #cyc,
+body.tab-opzioni .datebar,body.tab-opzioni .daynav,body.tab-opzioni #band,body.tab-opzioni #turniTitle,body.tab-opzioni .cap.ciclo,body.tab-opzioni #cyc,
 body.tab-opzioni .cycbar,body.tab-opzioni #doAndamenti,body.tab-opzioni #tGrid,body.tab-opzioni #gridBox,body.tab-opzioni #dayBox,
 body.tab-opzioni #andamentiPagina,body.tab-opzioni #doFree,body.tab-opzioni #freeBox,body.tab-opzioni #doPartner,
 body.tab-opzioni #partner,body.tab-opzioni #cards,body.tab-opzioni .piu-cal,body.tab-opzioni .tools,body.tab-opzioni .piu-h,
@@ -1080,13 +1086,19 @@ header b{font-size:23px}.datebar h1,.cycbar h1{font-size:19px}
 <!-- Data sopra Adesso, non sotto: prima di sapere "cosa fare adesso" serve
      sapere di quale giorno si sta parlando (specie sfogliando avanti). -->
 <div class="datebar">
+  <h1 id="dateLabel" tabindex="0" role="button" aria-label="Vai a una data">—</h1>
+  <span class="shiftpill" id="shiftPill">—</span>
+</div>
+<input type="date" id="jumpDate" aria-hidden="true">
+<!-- Frecce e "torna a oggi" sotto, sulla propria riga: come la barra di
+     navigazione del ciclo in Turni (.cycbar, stesso stile ma classe
+     diversa — .daynav, per poterle nascondere separatamente per tab).
+     Data e pillola restano su una riga sola invece di stare strette in
+     mezzo alle frecce. -->
+<div class="daynav" style="margin:10px 0 var(--gap-sezione)">
   <button class="nav" id="prev" aria-label="Giorno precedente"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
-  <div class="datebar-tx">
-    <h1 id="dateLabel" tabindex="0" role="button" aria-label="Vai a una data">—</h1>
-    <span class="shiftpill" id="shiftPill">—</span>
-  </div>
-  <input type="date" id="jumpDate" aria-hidden="true">
-  <button class="today" id="goToday" hidden>Oggi</button>
+  <span style="flex:1"></span>
+  <button class="today" id="goToday" hidden>Torna a oggi</button>
   <button class="nav" id="next" aria-label="Giorno successivo"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
 </div>
 <div id="ora" class="ora"></div>
