@@ -168,11 +168,15 @@ cursor:pointer;display:flex;border-radius:999px}
 .nav{background:var(--s1);border:1px solid var(--line);color:var(--ink);width:40px;height:40px;font-size:18px;line-height:1;
 border-radius:var(--r);font-size:16px;cursor:pointer;display:grid;place-items:center;flex:none}
 .nav:hover{border-color:var(--blue);color:var(--blue)}
-/* Come i tasti freccia (.nav), non pieno: "torna a oggi" è una terza
-   azione di navigazione, non l'azione primaria della riga. */
+/* Il bottone centrale c'è sempre (stesse dimensioni), non solo quando
+   ci si è allontanati da oggi: sul giorno vero diventa "Naviga" con lo
+   stesso stile neutro delle frecce; altrove è "Torna a oggi" e prende
+   il colore pieno (.full), perché lì è di nuovo l'azione utile. */
 .today{background:var(--s1);border:1px solid var(--line);color:var(--ink);height:40px;padding:0 13px;
 border-radius:var(--r);font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;flex:none}
 .today:hover{border-color:var(--blue);color:var(--blue)}
+.today.full{background:var(--blue);border:1px solid var(--blue);color:var(--su-blu)}
+.today.full:hover{background:var(--blue-fill)}
 /* pillola del turno, in linea accanto alla data — come nel mockup */
 .shiftpill{flex:none;background:var(--blue-soft);color:var(--blue);font-size:12px;
 font-weight:700;padding:5px 10px;border-radius:999px;white-space:nowrap}
@@ -485,7 +489,7 @@ font:inherit;font-weight:700;padding:0 0 0 10px;cursor:pointer}
 /* ── vista essenziale / dettaglio ──
    Il turnista mediano vuole tre numeri, non un apparato. L'essenziale è il
    default; il dettaglio (tutto quello di prima) è a un tocco. */
-.vista{display:inline-flex;background:var(--s2);border:1px solid var(--line);border-radius:var(--r);padding:2px;gap:2px;margin:2px 0 20px}
+.vista{display:inline-flex;background:var(--s2);border:1px solid var(--line);border-radius:var(--r);padding:2px;gap:2px;margin:2px 0 var(--gap-sezione)}
 .vb{border:none;background:none;color:var(--dim);font-family:inherit;font-size:12.5px;font-weight:600;
 padding:7px 15px;min-height:38px;border-radius:3px;cursor:pointer}
 .vb.on{background:var(--bg);color:var(--blue);box-shadow:0 1px 2px rgba(0,0,0,.08)}
@@ -704,7 +708,7 @@ body.tab-turni footer{display:none}
    sotto o sopra — una pagina alla volta, come le altre. #andamentiPagina
    si mostra/nasconde da sé (attributo hidden), non da qui. */
 body.tab-turni.andamenti-aperta #turniTitle,body.tab-turni.andamenti-aperta .cap.ciclo,
-body.tab-turni.andamenti-aperta #cyc,body.tab-turni.andamenti-aperta .cycbar,
+body.tab-turni.andamenti-aperta #cyc,body.tab-turni.andamenti-aperta .cycbar,body.tab-turni.andamenti-aperta #cycRange,
 body.tab-turni.andamenti-aperta #tGrid,
 body.tab-turni.andamenti-aperta #gridBox,body.tab-turni.andamenti-aperta #dayBox,
 body.tab-turni.andamenti-aperta #doFree,body.tab-turni.andamenti-aperta #freeBox,
@@ -813,7 +817,7 @@ body.intro .appbar,body.intro .tabbar,body.intro #opzioni{display:none}
 .val{font-size:19px}.row b{min-width:88px}
 .cap p{display:none}.clab{width:40px}.caxis{margin-left:60px;padding-left:0}
 .sh,.shhead{grid-template-columns:34px 1fr 78px 78px 28px}
-header b{font-size:23px}.datebar h1,#cycRange{font-size:19px}
+header b{font-size:23px}
 .grid21{gap:4px}.gcell{min-height:36px;font-size:14px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -1103,7 +1107,7 @@ header b{font-size:23px}.datebar h1,#cycRange{font-size:19px}
      mezzo alle frecce. -->
 <div class="daynav" style="margin:10px 0 var(--gap-sezione)">
   <button class="nav" id="prev" aria-label="Giorno precedente"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
-  <button class="today" id="goToday" hidden>Torna a oggi</button>
+  <button class="today" id="goToday">Naviga</button>
   <button class="nav" id="next" aria-label="Giorno successivo"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
 </div>
 <div id="ora" class="ora"></div>
@@ -1131,7 +1135,7 @@ header b{font-size:23px}.datebar h1,#cycRange{font-size:19px}
 <h1 class="cycrange" id="cycRange" style="cursor:default">—</h1>
 <div class="cycbar" style="margin:10px 0 14px">
   <button class="nav" id="cycPrev" aria-label="Giorni precedenti"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
-  <button class="today" id="cycToday" hidden>Torna a oggi</button>
+  <button class="today" id="cycToday">Naviga</button>
   <button class="nav" id="cycNext" aria-label="Giorni successivi"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
 </div>
 <div class="cyc" id="cyc"></div>
@@ -4729,12 +4733,17 @@ function renderHeader(P, f){
   // giorno vero doveva ottenere: l'utente vedeva scritto "ieri" mentre
   // stava ancora vivendo quel giorno.
   const scarto = dnum(f)-dnum(giornoVero());
-  const bt=$("#goToday"); if(bt) bt.hidden = (scarto===0);
-  // "Oggi, martedì 15 settembre" / "Domani, mercoledì 16 settembre" per i
-  // due giorni più vicini; più lontano (avanti o indietro) solo la data,
-  // che a quel punto si basta da sola — "fra 3 giorni" non aggiungeva
-  // nulla che il giorno della settimana scritto per esteso non dicesse già.
-  const giornoTxt = f.toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"});
+  // Il bottone centrale c'è sempre, stesse dimensioni: "Naviga" (neutro)
+  // sul giorno vero, "Torna a oggi" (pieno, .full) quando ci si è
+  // allontanati — mai nascosto, altrimenti la riga di navigazione
+  // "saltava" di dimensione a seconda del giorno mostrato.
+  const bt=$("#goToday");
+  if(bt){ bt.textContent = scarto===0 ? "Naviga" : "Torna a oggi"; bt.classList.toggle("full", scarto!==0); }
+  // "Oggi, martedì 15" / "Domani, mercoledì 16" per i due giorni più
+  // vicini; più lontano (avanti o indietro) solo la data. Senza mese:
+  // la dimensione/formato di questo testo è la stessa di un titolo di
+  // sezione ("Turni"), e un mese in più lo allungava oltre quel ruolo.
+  const giornoTxt = f.toLocaleDateString("it-IT",{weekday:"long",day:"numeric"});
   const dataTesto = scarto===0 ? "Oggi, "+giornoTxt
     : scarto===1 ? "Domani, "+giornoTxt
     : scarto===-1 ? "Ieri, "+giornoTxt
@@ -5769,7 +5778,8 @@ if($("#chiudiAndamenti")) $("#chiudiAndamenti").onclick=chiudiAndamenti;
 
 const cycGo=n=>{
   cicloOff=Math.max(cicloMin(), Math.min(cicloMax(), n));
-  const b=$("#cycToday"); if(b) b.hidden=(cicloOff===0);
+  const b=$("#cycToday");
+  if(b){ b.textContent = cicloOff===0 ? "Naviga" : "Torna a oggi"; b.classList.toggle("full", cicloOff!==0); }
   const p=$("#cycPrev"), nx=$("#cycNext");
   if(p) p.disabled = cicloOff<=cicloMin();
   if(nx) nx.disabled = cicloOff>=cicloMax();
