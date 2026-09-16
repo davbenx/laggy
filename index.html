@@ -149,13 +149,17 @@ cursor:pointer;display:flex;border-radius:999px}
 /* .daynav (Oggi: frecce + torna a oggi) e .cycbar (Turni: frecce + torna
    a oggi + intervallo del ciclo) condividono lo stile ma restano classi
    diverse: sono nascoste su tab diverse, e una classe sola avrebbe fatto
-   sparire l'una quando doveva sparire solo l'altra. */
-.cycbar,.daynav{display:flex;align-items:center;gap:12px}
+   sparire l'una quando doveva sparire solo l'altra. Centrate come gruppo
+   (non più frecce ai bordi con "torna a oggi" in mezzo su una riga
+   intera): niente più span flex:1 di riempimento nel markup. */
+.cycbar,.daynav{display:flex;align-items:center;justify-content:center;gap:12px}
 /* Niente più text-transform:capitalize come prima: "Oggi, martedì 15
    settembre" ha bisogno di UNA sola maiuscola, all'inizio — capitalize
    l'avrebbe messa anche su "Martedì" e "Settembre". La maiuscola giusta
-   la costruisce già il testo stesso, in JS. */
-.datebar h1,.cycbar h1{font-family:var(--serif);font-size:23px;font-weight:600;flex:1;min-width:0;line-height:1.3;cursor:pointer}
+   la costruisce già il testo stesso, in JS.
+   Stessa dimensione di .tab-title (24px): è un titolo come "Turni", non
+   un'etichetta secondaria. */
+.datebar h1,#cycRange{font-family:var(--serif);font-size:24px;font-weight:600;flex:1;min-width:0;line-height:1.3;cursor:pointer}
 /* titolo di tab, come "Turni" nel mockup — Oggi non ne ha uno (la data ne
    fa già le veci), le altre tab redesignate potranno riusarlo. */
 .tab-title{font-family:var(--serif);font-size:24px;font-weight:600;color:var(--ink);margin:2px 0 var(--gap-sezione)}
@@ -164,9 +168,11 @@ cursor:pointer;display:flex;border-radius:999px}
 .nav{background:var(--s1);border:1px solid var(--line);color:var(--ink);width:40px;height:40px;font-size:18px;line-height:1;
 border-radius:var(--r);font-size:16px;cursor:pointer;display:grid;place-items:center;flex:none}
 .nav:hover{border-color:var(--blue);color:var(--blue)}
-.today{background:var(--blue);border:1px solid var(--blue);color:var(--su-blu);height:40px;padding:0 13px;
+/* Come i tasti freccia (.nav), non pieno: "torna a oggi" è una terza
+   azione di navigazione, non l'azione primaria della riga. */
+.today{background:var(--s1);border:1px solid var(--line);color:var(--ink);height:40px;padding:0 13px;
 border-radius:var(--r);font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;flex:none}
-.today:hover{background:var(--blue-fill)}
+.today:hover{border-color:var(--blue);color:var(--blue)}
 /* pillola del turno, in linea accanto alla data — come nel mockup */
 .shiftpill{flex:none;background:var(--blue-soft);color:var(--blue);font-size:12px;
 font-weight:700;padding:5px 10px;border-radius:999px;white-space:nowrap}
@@ -668,7 +674,7 @@ color:var(--blue);display:inline-flex;align-items:center;justify-content:center}
 body.tab-oggi #status:not(.warn){display:none}
 /* OGGI: il giorno. "La giornata" (datebar + dettaglio + diario) è a scomparsa. */
 body.tab-oggi #turniTitle,body.tab-oggi .cap.ciclo,body.tab-oggi #cyc,body.tab-oggi #doFree,
-body.tab-oggi #tGrid,body.tab-oggi #doPartner,body.tab-oggi .cycbar,body.tab-oggi #doAndamenti,
+body.tab-oggi #tGrid,body.tab-oggi #doPartner,body.tab-oggi .cycbar,body.tab-oggi #cycRange,body.tab-oggi #doAndamenti,
 body.tab-oggi #freeBox,body.tab-oggi #icsBox,body.tab-oggi #dayBox,body.tab-oggi #gridBox,body.tab-oggi #andamentiPagina,
 body.tab-oggi #partner,body.tab-oggi .piu-cal,
 body.tab-oggi .tools,body.tab-oggi .piu-h,body.tab-oggi .piu-info,body.tab-oggi footer{display:none}
@@ -707,7 +713,7 @@ body.tab-turni.andamenti-aperta #doAndamenti{display:none}
 /* PIÙ: calendario a pagamento ed extra */
 body.tab-piu #status,body.tab-piu #ora,body.tab-piu #benvenutoLink,body.tab-piu #demoEsempio,body.tab-piu #backupNudge,body.tab-piu #installBanner,body.tab-piu #clubBanner,body.tab-piu #formaGiorno,body.tab-piu #essenziale,
 body.tab-piu .datebar,body.tab-piu .daynav,body.tab-piu #turniTitle,body.tab-piu .cap,body.tab-piu #cyc,body.tab-piu #doFree,
-body.tab-piu #tGrid,body.tab-piu #doPartner,body.tab-piu .cycbar,body.tab-piu #doAndamenti,
+body.tab-piu #tGrid,body.tab-piu #doPartner,body.tab-piu .cycbar,body.tab-piu #cycRange,body.tab-piu #doAndamenti,
 body.tab-piu #freeBox,body.tab-piu #dayBox,body.tab-piu #gridBox,body.tab-piu #andamentiPagina,body.tab-piu #partner,
 body.tab-piu #band,body.tab-piu #cards{display:none}
 /* componenti della tab Più */
@@ -763,7 +769,7 @@ list-style:none;min-height:44px;display:flex;align-items:center}
 /* OPZIONI: solo la configurazione */
 body.tab-opzioni #status,body.tab-opzioni #ora,body.tab-opzioni #benvenutoLink,body.tab-opzioni #demoEsempio,body.tab-opzioni #backupNudge,body.tab-opzioni #installBanner,body.tab-opzioni #clubBanner,body.tab-opzioni #formaGiorno,body.tab-opzioni #essenziale,
 body.tab-opzioni .datebar,body.tab-opzioni .daynav,body.tab-opzioni #band,body.tab-opzioni #turniTitle,body.tab-opzioni .cap.ciclo,body.tab-opzioni #cyc,
-body.tab-opzioni .cycbar,body.tab-opzioni #doAndamenti,body.tab-opzioni #tGrid,body.tab-opzioni #gridBox,body.tab-opzioni #dayBox,
+body.tab-opzioni .cycbar,body.tab-opzioni #cycRange,body.tab-opzioni #doAndamenti,body.tab-opzioni #tGrid,body.tab-opzioni #gridBox,body.tab-opzioni #dayBox,
 body.tab-opzioni #andamentiPagina,body.tab-opzioni #doFree,body.tab-opzioni #freeBox,body.tab-opzioni #doPartner,
 body.tab-opzioni #partner,body.tab-opzioni #cards,body.tab-opzioni .piu-cal,body.tab-opzioni .tools,body.tab-opzioni .piu-h,
 body.tab-opzioni #icsBox,
@@ -807,7 +813,7 @@ body.intro .appbar,body.intro .tabbar,body.intro #opzioni{display:none}
 .val{font-size:19px}.row b{min-width:88px}
 .cap p{display:none}.clab{width:40px}.caxis{margin-left:60px;padding-left:0}
 .sh,.shhead{grid-template-columns:34px 1fr 78px 78px 28px}
-header b{font-size:23px}.datebar h1,.cycbar h1{font-size:19px}
+header b{font-size:23px}.datebar h1,#cycRange{font-size:19px}
 .grid21{gap:4px}.gcell{min-height:36px;font-size:14px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -1097,7 +1103,6 @@ header b{font-size:23px}.datebar h1,.cycbar h1{font-size:19px}
      mezzo alle frecce. -->
 <div class="daynav" style="margin:10px 0 var(--gap-sezione)">
   <button class="nav" id="prev" aria-label="Giorno precedente"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
-  <span style="flex:1"></span>
   <button class="today" id="goToday" hidden>Torna a oggi</button>
   <button class="nav" id="next" aria-label="Giorno successivo"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
 </div>
@@ -1119,14 +1124,13 @@ header b{font-size:23px}.datebar h1,.cycbar h1{font-size:19px}
 <h1 class="tab-title" id="turniTitle">Turni</h1>
 <div class="cap ciclo"><span class="eyebrow">Il tuo ciclo<span id="ciclNome"></span></span>
   <button class="lnk" id="tEdit">Modifica →</button></div>
-<!-- Sopra la striscia, non sotto — e stesso stile della navigazione data
-     di Oggi (.nav/.today), non i bottoncini generici .btn.g di prima.
-     Classe a parte (non .datebar): quella è già nascosta su Turni da
-     "body.tab-turni .datebar{display:none}" (nasconde il datebar di
-     Oggi) — riusarla avrebbe nascosto anche questa. -->
-<div class="cycbar" style="margin-bottom:14px">
+<!-- Sopra la striscia, non sotto. Stesso schema di Oggi: la data (qui
+     l'intervallo) sulla sua riga, le frecce + "torna a oggi" su quella
+     sotto (.cycbar) — prima erano tutte e tre le cose sulla stessa riga
+     e l'intervallo restava stretto in mezzo. -->
+<h1 class="cycrange" id="cycRange" style="cursor:default">—</h1>
+<div class="cycbar" style="margin:10px 0 14px">
   <button class="nav" id="cycPrev" aria-label="Giorni precedenti"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
-  <h1 class="cycrange" id="cycRange" style="cursor:default">—</h1>
   <button class="today" id="cycToday" hidden>Torna a oggi</button>
   <button class="nav" id="cycNext" aria-label="Giorni successivi"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
 </div>
@@ -4940,7 +4944,7 @@ function renderStrip(P, f, S){
     const stessoMese = d1.getMonth()===d2.getMonth() && d1.getFullYear()===d2.getFullYear();
     rangeEl.textContent = stessoMese
       ? d1.getDate()+"–"+d2.toLocaleDateString("it-IT",{day:"numeric",month:"long"})
-      : d1.toLocaleDateString("it-IT",{day:"numeric",month:"short"})+" – "+d2.toLocaleDateString("it-IT",{day:"numeric",month:"short"});
+      : d1.toLocaleDateString("it-IT",{day:"numeric",month:"long"})+" – "+d2.toLocaleDateString("it-IT",{day:"numeric",month:"long"});
   }
 }
 
