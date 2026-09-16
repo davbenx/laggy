@@ -145,7 +145,7 @@ cursor:pointer;display:flex;border-radius:999px}
    sulla loro riga, come .cycbar in Turni) — baseline, non center: la
    pillola è più bassa del testo del titolo, centrarla la faceva
    sembrare disallineata. */
-.datebar{display:flex;align-items:baseline;gap:10px}
+.datebar{display:flex;align-items:baseline;gap:10px;margin-top:2px}
 /* .daynav (Oggi: frecce + torna a oggi) e .cycbar (Turni: frecce + torna
    a oggi + intervallo del ciclo) condividono lo stile ma restano classi
    diverse: sono nascoste su tab diverse, e una classe sola avrebbe fatto
@@ -171,8 +171,12 @@ border-radius:var(--r);font-size:16px;cursor:pointer;display:grid;place-items:ce
 /* Il bottone centrale c'è sempre (stesse dimensioni), non solo quando
    ci si è allontanati da oggi: sul giorno vero diventa "Naviga" con lo
    stesso stile neutro delle frecce; altrove è "Torna a oggi" e prende
-   il colore pieno (.full), perché lì è di nuovo l'azione utile. */
+   il colore pieno (.full), perché lì è di nuovo l'azione utile.
+   min-width pari al testo più lungo ("Torna a oggi"): senza, il
+   bottone si restringeva su "Naviga" e le frecce ai lati si spostavano
+   ogni volta che il testo cambiava. */
 .today{background:var(--s1);border:1px solid var(--line);color:var(--ink);height:40px;padding:0 13px;
+min-width:118px;text-align:center;
 border-radius:var(--r);font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;flex:none}
 .today:hover{border-color:var(--blue);color:var(--blue)}
 .today.full{background:var(--blue);border:1px solid var(--blue);color:var(--su-blu)}
@@ -263,7 +267,6 @@ padding:15px 16px;margin:14px 0}
 .ecc{background:var(--blue-soft);border:1px solid var(--blue-lt);border-radius:var(--r);padding:14px 15px;margin:10px 0 4px}
 .ecc>b{display:block;font-size:16px;margin-bottom:3px}
 .crow.mod .ccode{text-decoration:underline;text-underline-offset:2px}
-.caxis span.mez{color:var(--ink);font-weight:600}
 .cbar.sh{background:var(--orange-fill)}
 /* Riposo del partner: funzione reale che il mockup non prevede (mostra
    un solo ciclo) — riproporzionata sulla nuova traccia sottile (8px,
@@ -271,13 +274,6 @@ padding:15px 16px;margin:14px 0}
    e più alta. */
 .cbar.pt{background:var(--blue-lt);opacity:.5;top:auto;height:3px;bottom:2px}
 .cdi{width:16px;flex:none;display:inline-flex;align-items:center;justify-content:center;color:var(--faint)}
-/* allineata all'inizio vero di .crail: clab(46) + gap(10) + ccode(13) +
-   gap(10) = 79px — ricalcolata dopo aver allargato il gap fra le righe
-   per il mockup (era 66px, tarata sul gap più stretto di prima). */
-.caxis{position:relative;height:15px;margin:3px 0 0 79px}
-.caxis span{position:absolute;transform:translateX(-50%);font-size:11px;color:var(--faint);font-variant-numeric:tabular-nums}
-.caxis span.edge-l{transform:translateX(0)}
-.caxis span.edge-r{transform:translateX(-100%)}
 .key{display:flex;gap:14px;margin-top:8px;font-size:11px;color:var(--faint);flex-wrap:wrap}
 .key i{display:inline-block;width:10px;height:7px;border-radius:3px;margin-right:5px;vertical-align:1px}
 .band{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:13px 14px 6px;margin-bottom:24px;position:relative;overflow:hidden}
@@ -805,6 +801,12 @@ color:var(--su-blu);display:flex;align-items:center;justify-content:center;margi
 .andamento-sezione{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);
 padding:6px 16px;box-shadow:var(--shadow-card)}
 .andamento-sezione .rows{border-top:none;margin-top:0;padding-top:0}
+/* Hero di "Quando possiamo vederci": il pannello che lo contiene (.ecc)
+   è già blu tenue — uno sfondo identico qui dentro sarebbe piatto, non
+   ci sarebbe contrasto. --s1/bordo, come le altre hero della app. */
+.whero{background:var(--s1);border:1px solid var(--line);border-radius:20px;padding:18px;margin-bottom:var(--gap-sezione)}
+.whero-num{font-family:var(--serif);font-size:22px;font-weight:600;line-height:1.25;margin:4px 0 4px;color:var(--ink)}
+.whero-sub{font-size:13px;color:var(--dim)}
 .wintro{font-size:14.5px;color:var(--ink);line-height:1.6;margin:0 0 20px;padding:14px 15px;
 background:var(--s1);border-radius:var(--r);border:1px solid var(--line)}
 .wintro b{color:var(--ink);font-weight:600}
@@ -815,7 +817,7 @@ body.intro .appbar,body.intro .tabbar,body.intro #opzioni{display:none}
 .wrap{padding:0 16px}
 .appbar{margin:0 -16px;padding-left:16px;padding-right:16px}
 .val{font-size:19px}.row b{min-width:88px}
-.cap p{display:none}.clab{width:40px}.caxis{margin-left:60px;padding-left:0}
+.cap p{display:none}.clab{width:40px}
 .sh,.shhead{grid-template-columns:34px 1fr 78px 78px 28px}
 header b{font-size:23px}
 .grid21{gap:4px}.gcell{min-height:36px;font-size:14px}
@@ -1126,8 +1128,6 @@ header b{font-size:23px}
 <div class="ess" id="essenziale"></div>
 
 <h1 class="tab-title" id="turniTitle">Turni</h1>
-<div class="cap ciclo"><span class="eyebrow">Il tuo ciclo<span id="ciclNome"></span></span>
-  <button class="lnk" id="tEdit">Modifica →</button></div>
 <!-- Sopra la striscia, non sotto. Stesso schema di Oggi: la data (qui
      l'intervallo) sulla sua riga, le frecce + "torna a oggi" su quella
      sotto (.cycbar) — prima erano tutte e tre le cose sulla stessa riga
@@ -1138,6 +1138,12 @@ header b{font-size:23px}
   <button class="today" id="cycToday">Naviga</button>
   <button class="nav" id="cycNext" aria-label="Giorni successivi"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
 </div>
+<!-- "Il tuo ciclo" subito sopra la striscia, sotto la navigazione: è
+     l'etichetta di quello che la striscia mostra, non un'intestazione
+     di pagina — stava sopra il range/le frecce, lontana dalla striscia
+     a cui si riferisce. -->
+<div class="cap ciclo"><span class="eyebrow">Il tuo ciclo<span id="ciclNome"></span></span>
+  <button class="lnk" id="tEdit">Modifica →</button></div>
 <div class="cyc" id="cyc"></div>
 <button class="lnk" id="tGrid" style="margin-top:10px">Turni diversi ogni settimana? Impostali a tocchi →</button>
 <div class="ecc" id="gridBox" hidden>
@@ -1171,7 +1177,7 @@ header b{font-size:23px}
 <div class="ecc" id="freeBox" hidden>
   <p class="hint" style="margin:0 0 10px">Le ore in cui non lavori e non dovresti dormire, nei prossimi sette giorni. Sono contate al netto del viaggio: quelle in cui puoi prendere un appuntamento davvero.</p>
   <div id="freeList"></div></div>
-<button class="tsec" id="doPartner"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M16 5.5a3 3 0 0 1 0 5"/><path d="M18 14.5a6 6 0 0 1 3 5.5"/></svg><span class="tsec-tx"><b>Turni condivisi</b></span><span class="tchev">›</span></button>
+<button class="tsec" id="doPartner"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M16 5.5a3 3 0 0 1 0 5"/><path d="M18 14.5a6 6 0 0 1 3 5.5"/></svg><span class="tsec-tx"><b>Quando possiamo vederci?</b><span id="doPartnerSub"></span></span><span class="tchev">›</span></button>
 <div class="ecc" id="partner" hidden></div>
 <!-- Anteprima, non più il contenuto intero in linea: apre la pagina
      Andamenti a sé (come nel mockup), non un'altra sezione da scorrere
@@ -3964,7 +3970,7 @@ function render(){
   const giornata = document.body.classList.contains("giornata");
   const showStrip = (tab==="turni") || (!ess && tab!=="oggi" && tab!=="piu"); // ciclo/dettaglio legacy
   const showDay = (tab==="oggi" && giornata) || (!ess && tab!=="turni" && tab!=="piu");
-  if(showStrip){ renderStrip(P, f, S); renderAndamenti(); renderAndamentiPreview(); renderPartner(CARDS); renderFreePreview(); }
+  if(showStrip){ renderStrip(P, f, S); renderAndamenti(); renderAndamentiPreview(); renderPartner(CARDS); renderPartnerPreview(); renderFreePreview(); }
   if(tab==="piu") renderPiuCal();
   if(tab==="oggi") renderBand(P, CARDS);
   if(showDay){ renderCards(P, f, CARDS); }
@@ -4921,23 +4927,14 @@ function renderStrip(P, f, S){
       (shared?' title="Riposo in comune con '+esc(insieme.join(", "))+'" aria-label="Riposo in comune"':rk?' title="'+esc(rkTitle)+'" aria-label="'+esc(rkTitle)+'"':'')+'>'+
       (shared?ICON.duo:rk?ICON.warn:"")+'</span></div>';
   }
-  // Il passo fisso (120/180/240) dava fino a 9 tacche su una striscia
-  // stretta quanto un telefono — troppo vicine, si sovrapponevano sempre,
-  // non solo ai bordi. Punta invece a un numero di tacche fisso e
-  // ragionevole (circa 4-5), scegliendo fra intervalli "puliti" quello più
-  // vicino: si adatta da solo a qualunque ampiezza di orario.
-  const passiBuoni=[60,120,180,240,360,480,720,1440];
-  const passo = passiBuoni.find(s=>s>=cspan/4.5) || 1440;
-  let cax="", ctks=[];
-  for(let m=Math.ceil(clo/passo)*passo;m<=chi;m+=passo) ctks.push(m);
-  ctks.forEach((m,i)=>{
-    const mez=mod1440(m)===0;
-    const edge = i===0 ? " edge-l" : i===ctks.length-1 ? " edge-r" : "";
-    cax+='<span class="'+(mez?"mez":"")+edge+'" style="left:'+cpx(m)+'%">'+hhmm(m)+'</span>';
-  });
   let anyRisk=false;
   for(let o=finLo;o<=finHi;o++) if(rischi.has(o)){ anyRisk=true; break; }
-  $("#cyc").innerHTML=ch+'<div class="caxis mono">'+cax+'</div>'+
+  // Niente più asse orario sotto la striscia (.caxis): la striscia del
+  // ciclo mostra GIORNI, non orari nella giornata — a differenza di
+  // formaGiorno in Oggi, dove le ore sono il punto. Qui ripetevano solo
+  // un'ampiezza approssimativa dell'intera finestra, già leggibile dalle
+  // etichette dei giorni sopra.
+  $("#cyc").innerHTML=ch+
     '<div class="key">'+'<span><i style="background:var(--blue)"></i>Sonno</span>'+'<span><i style="background:var(--orange-fill)"></i>Turno</span>'+(hasP?'<span><i style="background:var(--blue-lt);opacity:.5"></i>Riposo del partner</span>':'')+(tuttePersone().length?'<span class="kshare">'+ICON.duo+'Riposo in comune</span>':'')+(anyRisk?'<span class="kshare">'+ICON.warn+'Momento più critico</span>':'')+(Object.keys(diary).length?'<span class="kshare"><span style="color:var(--blue)">●</span> Come ti sei sentito</span>':'')+'</div>'+
     (anyRisk?'<details class="piu-info"><summary>Perché questi avvisi</summary><div class="piu-info-in">'+
       '<p><b>4 notti di fila.</b> Da qui il rischio di errore sale in modo netto, secondo la ricerca sul lavoro a turni — non superare le 3 notti consecutive è la raccomandazione di un gruppo di ricercatori del settore riunito nel 2020.</p>'+
@@ -5347,16 +5344,53 @@ function renderFreePreview(){
   const quando = scarto===0 ? "oggi" : scarto===1 ? "domani" : x.d.toLocaleDateString("it-IT",{weekday:"long"});
   el.textContent = "Prossima finestra: "+quando+" "+hhmm(x.a)+"–"+hhmm(x.b);
 }
+// La finestra libera più lunga (almeno tre ore vere) di un giorno in comune —
+// stessa soglia/ordinamento già usati per la card "p" in cards(), qui
+// richiamati direttamente perché la pagina ha bisogno degli orari, non solo
+// del "se" quel giorno.
+function finestraMigliore(off, per){
+  const fin=finestreCondivise(off, per)||[];
+  return fin.filter(([a,z])=>z-a>=180).sort((p,q)=>(q[1]-q[0])-(p[1]-p[0]))[0]||null;
+}
+function renderPartnerPreview(){
+  const el=$("#doPartnerSub"); if(!el) return;
+  const per=tuttePersone()[state.personaGlance]||tuttePersone()[0];
+  const sh=per?sharedDays(6,per):null;
+  if(!sh||!sh.length){ el.textContent="Nessun riposo in comune nei prossimi tre mesi"; return; }
+  const x=sh[0], scarto=x.off;
+  const quando = scarto===0 ? "oggi" : scarto===1 ? "domani" : x.d.toLocaleDateString("it-IT",{weekday:"long"});
+  const w=finestraMigliore(x.off, per);
+  el.textContent = "Prossima finestra: "+quando+(w?" "+hhmm(mod1440(w[0]))+"–"+hhmm(mod1440(w[1])):"");
+}
 function renderPartner(CARDS){
   const el=$("#partner"); if(!el) return;
-  const pc=CARDS.find(c=>c.k==="p");
-  // Il bottone che apre questa sezione dice già "Con il partner": ripeterlo come
-  // intestazione della card appena espansa era la ripetizione lamentata. Qui la
-  // card usa un'etichetta diversa, che dice cosa mostra e non ripete il titolo.
-  const pcLbl = pc ? Object.assign({}, pc, {lab:"Nei prossimi tre mesi"}) : null;
-  let h = pc
-    ? cardHTML(pcLbl, true)
-    : '<div class="empty"><img src="./owl-mark.png" alt="" width="46" height="46"><p>I riposi che avete in comune nei prossimi tre mesi e le ore in cui siete svegli insieme.</p></div>';
+  const tuttePer=tuttePersone();
+  const scelto = tuttePer[state.personaGlance] || tuttePer[0];
+  const sh = scelto ? sharedDays(6, scelto) : null;
+
+  // Come nel mockup: un hero con la prossima occasione vera (giorno + orario
+  // + quante ore vere), non solo la data — poi le prossime, in un elenco
+  // semplice. "Il tuo andamento" ha già stabilito questa forma (hero +
+  // sezioni), qui la finestra libera in comune è l'unico numero che conta.
+  let h;
+  if(sh && sh.length){
+    const x=sh[0], w=finestraMigliore(x.off, scelto);
+    const giorno=x.d.toLocaleDateString("it-IT",{weekday:"long"});
+    const giornoCap=giorno.charAt(0).toUpperCase()+giorno.slice(1);
+    h='<div class="whero"><span class="eyebrow" style="color:var(--blue)">Prossima finestra insieme</span>'+
+      '<div class="whero-num">'+esc(giornoCap)+(w?" "+hhmm(mod1440(w[0]))+" → "+hhmm(mod1440(w[1])):"")+'</div>'+
+      (w?'<div class="whero-sub">'+hm(w[1]-w[0])+' libere insieme</div>':'<div class="whero-sub">Nessuna finestra di almeno tre ore vere questo giorno</div>')+
+      '</div>';
+    const altre=sh.slice(1,5).map(y=>{
+      const wy=finestraMigliore(y.off, scelto);
+      const gy=y.d.toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"});
+      const gyCap=gy.charAt(0).toUpperCase()+gy.slice(1);
+      return '<div class="row"><b>'+esc(gyCap)+'</b><span>'+(wy?hhmm(mod1440(wy[0]))+"–"+hhmm(mod1440(wy[1])):"tutto il giorno")+'</span></div>';
+    }).join("");
+    if(altre) h+='<span class="eyebrow" style="display:block;margin:var(--gap-sezione) 0 8px">Prossime occasioni</span><div class="rows">'+altre+'</div>';
+  } else {
+    h='<div class="empty"><img src="./owl-mark.png" alt="" width="46" height="46"><p>I riposi che avete in comune nei prossimi tre mesi e le ore in cui siete svegli insieme.</p></div>';
+  }
 
   // L'elenco delle ALTRE persone — solo informazione qui: nome e prossimo
   // giorno insieme. Aggiungere, rimuovere, modificare vive tutto nel
@@ -5384,8 +5418,8 @@ function renderPartner(CARDS){
     '</button>'+
     '<div class="ecc" id="qrBoxPartner" hidden><div id="qrHolderPartner" style="display:flex;justify-content:center;margin:14px 0"></div></div>'+
   '</div>';
-  h+='<button class="lnk" data-partner-edit style="margin-top:8px">'+(pc||persone.length?"Gestisci l'elenco →":"Imposta i turni condivisi →")+'</button>'+
-    (pc?'<p class="ladder">Questi riposi in comune sono gratis, qui. Vuoi che arrivino nel <b>calendario di entrambi</b> e si aggiornino da soli? È nel calendario a pagamento. <button class="lnk" data-goto="piu">Calendario di coppia in Più →</button></p>':'');
+  h+='<button class="lnk" data-partner-edit style="margin-top:8px">'+((sh&&sh.length)||persone.length?"Gestisci l'elenco →":"Imposta i turni condivisi →")+'</button>'+
+    ((sh&&sh.length)?'<p class="ladder">Questi riposi in comune sono gratis, qui. Vuoi che arrivino nel <b>calendario di entrambi</b> e si aggiornino da soli? È nel calendario a pagamento. <button class="lnk" data-goto="piu">Calendario di coppia in Più →</button></p>':'');
   el.innerHTML=h;
 }
 
