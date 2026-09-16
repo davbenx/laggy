@@ -4882,7 +4882,7 @@ function renderHeader(P, f){
   if(!freeWakeOk()){ cls="warn";
     msg="La risposta sul risveglio in ferie ("+esc(state.freeWake)+") non è plausibile: "+
         "nessuno apre gli occhi da solo a quell'ora. Sto calcolando tutto su "+hhmm(freeWakeUsata())+
-        ", ma <button class=\"lnk\" data-goto=\"opzioni\">correggila in Opzioni →</button> o il piano resta storto."; }
+        ", ma <button class=\"lnk\" data-goto=\"sonno\">correggila →</button> o il piano resta storto."; }
   else if(c==="?") { cls="warn"; msg="Non so che turno hai oggi: il turno che hai inserito copre altri giorni. Aggiungi in fondo alla sequenza quello nuovo appena te lo comunicano."; }
   else if(state.repeat===false && [1,2,3,4].some(o=>codeAt(o)==="?"))
     msg+=" (Da qui a pochi giorni finisce il turno che hai inserito: da lì in poi il piano vale solo se resti a riposo.)";
@@ -6824,7 +6824,7 @@ if($("#partner")) $("#partner").addEventListener("click", e=>{
   }
 });
 if($("#status")) $("#status").addEventListener("click", e=>{
-  if(e.target.closest('[data-goto="opzioni"]')) setTab("opzioni");
+  if(e.target.closest('[data-goto="sonno"]')) apriFinestraSonno();
   else if(e.target.closest('[data-goto="piu"]')) setTab("piu");
 });
 if($("#andamenti")) $("#andamenti").addEventListener("click", e=>{
