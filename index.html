@@ -666,8 +666,8 @@ color:var(--blue);display:inline-flex;align-items:center;justify-content:center}
 body.tab-oggi #status:not(.warn){display:none}
 /* OGGI: il giorno. "La giornata" (datebar + dettaglio + diario) è a scomparsa. */
 body.tab-oggi .cap.ciclo,body.tab-oggi #cyc,body.tab-oggi #doCycShare,body.tab-oggi #doCycQR,body.tab-oggi #qrBoxCyc,
-body.tab-oggi #tGrid,body.tab-oggi #doPartner,body.tab-oggi .cycbar,body.tab-oggi #cycRange,body.tab-oggi #doAndamenti,
-body.tab-oggi #icsBox,body.tab-oggi #dayBox,body.tab-oggi #gridBox,body.tab-oggi #andamentiPagina,
+body.tab-oggi #doPartner,body.tab-oggi .cycbar,body.tab-oggi #cycRange,body.tab-oggi #doAndamenti,
+body.tab-oggi #icsBox,body.tab-oggi #dayBox,body.tab-oggi #andamentiPagina,
 body.tab-oggi #vederciPagina,body.tab-oggi #partner,body.tab-oggi .piu-cal,
 body.tab-oggi .tools,body.tab-oggi .piu-h,body.tab-oggi .piu-info,body.tab-oggi footer{display:none}
 /* OGGI: la datebar (navigatore giorni) resta sempre; solo il DETTAGLIO è a scomparsa */
@@ -700,22 +700,20 @@ body.tab-turni footer{display:none}
 body.tab-turni.andamenti-aperta .cap.ciclo,
 body.tab-turni.andamenti-aperta #cyc,body.tab-turni.andamenti-aperta #doCycShare,body.tab-turni.andamenti-aperta #doCycQR,body.tab-turni.andamenti-aperta #qrBoxCyc,
 body.tab-turni.andamenti-aperta .cycbar,body.tab-turni.andamenti-aperta #cycRange,
-body.tab-turni.andamenti-aperta #tGrid,
-body.tab-turni.andamenti-aperta #gridBox,body.tab-turni.andamenti-aperta #dayBox,
+body.tab-turni.andamenti-aperta #dayBox,
 body.tab-turni.andamenti-aperta #doPartner,
 body.tab-turni.andamenti-aperta #doAndamenti,
 body.tab-turni.vederci-aperta .cap.ciclo,
 body.tab-turni.vederci-aperta #cyc,body.tab-turni.vederci-aperta #doCycShare,body.tab-turni.vederci-aperta #doCycQR,body.tab-turni.vederci-aperta #qrBoxCyc,
 body.tab-turni.vederci-aperta .cycbar,body.tab-turni.vederci-aperta #cycRange,
-body.tab-turni.vederci-aperta #tGrid,
-body.tab-turni.vederci-aperta #gridBox,body.tab-turni.vederci-aperta #dayBox,
+body.tab-turni.vederci-aperta #dayBox,
 body.tab-turni.vederci-aperta #doPartner,
 body.tab-turni.vederci-aperta #doAndamenti{display:none}
 /* PIÙ: calendario a pagamento ed extra */
 body.tab-piu #status,body.tab-piu #ora,body.tab-piu #benvenutoLink,body.tab-piu #demoEsempio,body.tab-piu #backupNudge,body.tab-piu #installBanner,body.tab-piu #shareNudge,body.tab-piu #icsNudge,body.tab-piu #clubBanner,body.tab-piu #formaGiorno,body.tab-piu #essenziale,
 body.tab-piu .datebar,body.tab-piu .daynav,body.tab-piu .cap,body.tab-piu #cyc,body.tab-piu #doCycShare,body.tab-piu #doCycQR,body.tab-piu #qrBoxCyc,
-body.tab-piu #tGrid,body.tab-piu #doPartner,body.tab-piu .cycbar,body.tab-piu #cycRange,body.tab-piu #doAndamenti,
-body.tab-piu #dayBox,body.tab-piu #gridBox,body.tab-piu #andamentiPagina,body.tab-piu #vederciPagina,body.tab-piu #partner,
+body.tab-piu #doPartner,body.tab-piu .cycbar,body.tab-piu #cycRange,body.tab-piu #doAndamenti,
+body.tab-piu #dayBox,body.tab-piu #andamentiPagina,body.tab-piu #vederciPagina,body.tab-piu #partner,
 body.tab-piu #band,body.tab-piu #cards{display:none}
 /* componenti della tab Più */
 .piu-cal{background:var(--blue-soft);border:1px solid var(--blue-lt);border-radius:var(--r);padding:16px 17px;margin:0 0 16px}
@@ -771,7 +769,7 @@ list-style:none;min-height:44px;display:flex;align-items:center}
 body.tab-opzioni #status,body.tab-opzioni #ora,body.tab-opzioni #benvenutoLink,body.tab-opzioni #demoEsempio,body.tab-opzioni #backupNudge,body.tab-opzioni #installBanner,body.tab-opzioni #shareNudge,body.tab-opzioni #icsNudge,body.tab-opzioni #clubBanner,body.tab-opzioni #formaGiorno,body.tab-opzioni #essenziale,
 body.tab-opzioni .datebar,body.tab-opzioni .daynav,body.tab-opzioni #band,body.tab-opzioni .cap.ciclo,body.tab-opzioni #cyc,
 body.tab-opzioni #doCycShare,body.tab-opzioni #doCycQR,body.tab-opzioni #qrBoxCyc,
-body.tab-opzioni .cycbar,body.tab-opzioni #cycRange,body.tab-opzioni #doAndamenti,body.tab-opzioni #tGrid,body.tab-opzioni #gridBox,body.tab-opzioni #dayBox,
+body.tab-opzioni .cycbar,body.tab-opzioni #cycRange,body.tab-opzioni #doAndamenti,body.tab-opzioni #dayBox,
 body.tab-opzioni #andamentiPagina,body.tab-opzioni #vederciPagina,body.tab-opzioni #doPartner,
 body.tab-opzioni #partner,body.tab-opzioni #cards,body.tab-opzioni .piu-cal,body.tab-opzioni .tools,body.tab-opzioni .piu-h,
 body.tab-opzioni #icsBox,
@@ -912,15 +910,27 @@ header b{font-size:23px}
         <span class="hint">Una riga per tipo di turno. La lettera a sinistra è quella che scriverai nella sequenza. Se un turno comincia dopo mezzanotte (02:00–06:00) spunta <b>+1</b>: appartiene alla notte del giorno segnato, non a quella dopo.</span>
       </div>
       <div class="q">
+        <label class="p1"><input type="checkbox" id="repeat" checked> Il turno si ripete sempre uguale</label>
+        <span class="hint">Togli la spunta se il turno te lo comunicano mese per mese: quello che tocchi vale per questi giorni, fuori da lì lo strumento non inventa niente.</span>
+      </div>
+      <div class="q">
         <label for="seqLen">Quanti giorni dura la tua sequenza?</label>
         <div class="inline"><input type="number" id="seqLen" min="1" max="28" value="7"><span>giorni</span></div>
-        <span class="hint">Quanti giorni prima che il ciclo ricominci uguale (fino a 4 settimane) — o quanti te ne servono, se non si ripete mai identico.</span>
+        <span class="hint">Fino a 4 settimane prima che ricominci uguale — o quanti giorni conosci già, se non si ripete.</span>
+      </div>
+      <!-- Solo quando non si ripete: qui, non più in un passo a parte, così
+           la griglia sa subito a quali date reali corrispondono le celle
+           invece di mostrare solo "giorno 1, giorno 2…". Stesso campo
+           #anchor di prima (era nel passo 2, id invariato: bind() lo lega
+           già a state.anchor), spostato qui perché qui serve davvero. -->
+      <div class="q" id="gridStartBox" hidden>
+        <label for="anchor">Dal giorno</label>
+        <input id="anchor" type="date">
+        <span class="hint">Il primo giorno della sequenza, sul calendario vero — le celle sotto mostrano le date da qui in poi.</span>
       </div>
       <div class="q">
         <label>Tocca ogni giorno per impostare il turno</label>
         <div class="grid21" id="wizSeqGrid"></div>
-        <label class="p1" style="margin-top:10px"><input type="checkbox" id="repeat" checked> Si ripete sempre uguale</label>
-        <span class="hint">Togli la spunta se il turno te lo comunicano mese per mese: quello che tocchi vale per questi giorni, fuori da lì lo strumento non inventa niente.</span>
         <span class="hint" id="cover"></span>
       </div>
     </div>
@@ -932,11 +942,6 @@ header b{font-size:23px}
     <div class="q">
       <div class="tprow" id="oToday"></div>
       <span class="hint">Se più avanti il ciclo ti risulta sfasato, torna qui e tocca la lettera giusta.</span>
-    </div>
-    <div class="q" id="anchorBox" hidden>
-      <label for="anchor">Primo giorno della turnistica</label>
-      <input id="anchor" type="date">
-      <span class="hint">Serve solo se la turnistica che hai inserito non comprende oggi, per esempio se stai caricando in anticipo quella del mese prossimo.</span>
     </div>
   </section>
 
@@ -1170,15 +1175,12 @@ header b{font-size:23px}
   <button type="button" id="doCycQR" class="lnk" style="align-self:flex-start;margin-top:-2px">Mostra invece il codice QR →</button>
   <div class="ecc" id="qrBoxCyc" hidden><div id="qrHolderCyc" style="display:flex;justify-content:center;margin:14px 0"></div></div>
 </div>
-<button class="lnk" id="tGrid" style="margin-top:10px">Turni diversi ogni settimana? Impostali a tocchi →</button>
-<div class="ecc" id="gridBox" hidden>
-  <b>Imposta i turni giorno per giorno</b>
-  <p class="hint">Per chi non ha un ciclo che si ripete. Tocca un giorno per cambiarne il turno; — è riposo. Vale così come lo imposti, senza ripetersi.</p>
-  <div class="q" style="margin-top:8px"><label for="gStart">Dal giorno</label>
-    <input type="date" id="gStart"></div>
-  <div class="grid21" id="gCells"></div>
-  <button class="btn" id="gSave" style="width:100%;min-height:44px;margin-top:4px">Salva questi turni</button>
-</div>
+<!-- "Turni diversi ogni settimana? Impostali a tocchi" (griglia
+     #gridBox a parte) è sparito: era la stessa cosa di "Personalizza"
+     + "non si ripete" nel wizard/Opzioni — due editor paralleli sullo
+     stesso state.pattern/anchor/repeat, che potevano disallinearsi tra
+     loro. Ora quella griglia (con le date vere, la parte migliore
+     delle due) vive solo dentro "Modifica →" / Opzioni → Turni e ciclo. -->
 <div class="ecc" id="dayBox" hidden>
   <b id="dayTit">—</b>
 
@@ -5538,40 +5540,32 @@ function renderPiuCal(){
     '<span class="piu-price">'+prezzo+' una volta sola. Nessun abbonamento.</span>';
 }
 function NT_planSafe(d){ const f=state.focus; state.focus=new Date(d); let P=null; try{ P=plan(); }catch(e){} state.focus=f; return P; }
-
-// Turni: griglia a tocchi per turni variabili (GRATIS, scrive in locale)
-function renderGrid(){
-  const el=$("#gCells"); if(!el) return;
-  const codes=Object.keys(state.shifts||{}).concat(["R"]);
-  const start=($("#gStart")&&$("#gStart").value) || state.anchor || iso(new Date());
-  const seq=(!state.repeat && state.pattern) ? state.pattern.split("") : [];
-  let cells="";
-  for(let i=0;i<21;i++){
-    const d=new Date(start+"T12:00:00"); d.setDate(d.getDate()+i);
-    const c=seq[i]||"R", lab=c==="R"?"—":c;
-    const tint = c==="R" ? " rest" : isNightCode(c) ? " tnight" : " twork";
-    cells+='<button type="button" class="gcell'+tint+'" data-c="'+esc(c)+'">'+lab+
-      '<small>'+d.getDate()+'/'+(d.getMonth()+1)+'</small></button>';
-  }
-  el.innerHTML=cells;
-}
 // La griglia del wizard, passo 1: sostituisce lo scrivere la sequenza a
 // lettere. Sola visualizzazione — legge state.pattern per mostrare i tocchi
 // già fatti (o una sequenza già salvata, riaprendo per modificare), non
 // scrive nulla da sola: solo il tocco su una cella e il cambio di lunghezza
 // scrivono davvero, così riaprire il passo non trunca mai nulla per sbaglio.
+// Se il turno non si ripete, le celle mostrano la DATA vera (dal campo
+// "Dal giorno" qui sopra) invece del numero di posizione astratto ("giorno
+// 3") — prima questa vista a date vere esisteva solo nel pannello a parte
+// sotto la striscia del ciclo, ora fuso qui: un solo editor, non due.
 function renderWizSeqGrid(){
   const el=$("#wizSeqGrid"); if(!el) return;
   const codes=Object.keys(state.shifts||{}).concat(["R"]);
   const len=Math.min(28,Math.max(1,+($("#seqLen")&&$("#seqLen").value)||7));
   const seq=(state.pattern||"").split("");
+  const nonRipete = state.repeat===false;
+  const start = nonRipete ? (($("#anchor")&&$("#anchor").value) || state.anchor || iso(new Date())) : null;
   let cells="";
   for(let i=0;i<len;i++){
     const raw=seq[i];
     const c=(raw && codes.includes(raw)) ? raw : "R";
     const tint = c==="R" ? " rest" : isNightCode(c) ? " tnight" : " twork";
+    const lab = nonRipete
+      ? (()=>{ const d=new Date(start+"T12:00:00"); d.setDate(d.getDate()+i); return d.getDate()+"/"+(d.getMonth()+1); })()
+      : String(i+1);
     cells+='<button type="button" class="gcell'+tint+'" data-c="'+esc(c)+'">'+(c==="R"?"—":c)+
-      '<small>'+(i+1)+'</small></button>';
+      '<small>'+lab+'</small></button>';
   }
   el.innerHTML=cells;
 }
@@ -5686,7 +5680,7 @@ function apriEcc(d){
 
   if(box.scrollIntoView) box.scrollIntoView({behavior:"smooth",block:"nearest"});
 }
-const PANNELLI=["#dayBox","#icsBox","#gridBox","#opzBox1","#opzBox3","#opzBox4"];
+const PANNELLI=["#dayBox","#icsBox","#opzBox1","#opzBox3","#opzBox4"];
 function soloUno(id){
   for(const p of PANNELLI){ const el=$(p); if(el && p!==id) el.hidden=true; }
 }
@@ -5968,26 +5962,6 @@ if($("#doCycQR")) $("#doCycQR").onclick=()=>{
   b.hidden=!b.hidden;
   if(!b.hidden) renderQR("#qrHolderCyc");
 };
-
-// Griglia turni variabili — gratis, scrive in locale (niente server)
-if($("#tGrid")) $("#tGrid").onclick=()=>{ const b=$("#gridBox"); const apri=b.hidden;
-  soloUno(apri?"#gridBox":null); b.hidden=!apri;
-  if(apri){ const gs=$("#gStart"); if(gs && !gs.value) gs.value=state.anchor||iso(new Date()); renderGrid();
-    if(b.scrollIntoView) b.scrollIntoView({behavior:"smooth",block:"nearest"}); } };
-if($("#gStart")) $("#gStart").onchange=()=>renderGrid();
-if($("#gCells")) $("#gCells").addEventListener("click", e=>{
-  const cell=e.target.closest(".gcell"); if(!cell) return;
-  const codes=Object.keys(state.shifts||{}).concat(["R"]);
-  const cur=cell.getAttribute("data-c"), nc=codes[(codes.indexOf(cur)+1)%codes.length];
-  cell.setAttribute("data-c",nc);
-  cell.classList.remove("rest","twork","tnight");
-  cell.classList.add(nc==="R"?"rest":isNightCode(nc)?"tnight":"twork");
-  cell.childNodes[0].nodeValue = nc==="R"?"—":nc; });
-if($("#gSave")) $("#gSave").onclick=()=>{
-  const start=($("#gStart").value||"").trim() || state.anchor || iso(new Date());
-  const seq=Array.prototype.map.call($("#gCells").querySelectorAll(".gcell"), c=>c.getAttribute("data-c")).join("").toUpperCase().replace(/[^A-Z]/g,"");
-  if(seq){ state.pattern=seq; state.anchor=start; state.repeat=false; salva(); render(); }
-  const gb=$("#gridBox"); if(gb) gb.hidden=true; toast("Turni salvati"); };
 
 // La griglia del wizard scrive subito, come ogni altro campo del passo (il
 // bind() degli altri input fa lo stesso): non serve un bottone "salva" a
@@ -6284,7 +6258,7 @@ if($("#presetTiles")) $("#presetTiles").addEventListener("click", e=>{
 function mostraAvanzate(){
   const perso = oSel.value==="x";
   const a=$("#avanzate"); if(a) a.hidden=!perso;
-  const ab=$("#anchorBox"); if(ab) ab.hidden = !(perso && state.repeat===false);
+  const gb=$("#gridStartBox"); if(gb) gb.hidden = !(perso && state.repeat===false);
   if(perso) renderWizSeqGrid();
   syncPresetTiles();
 }
@@ -6331,6 +6305,15 @@ function bind(id,key,fn){
   });
 }
 ["pattern","anchor","cTo","cFrom","prep"].forEach(k=>bind("#"+k,k));
+// bind() sopra scrive state.anchor e fa un render() generale, ma non
+// ridisegna la griglia del passo 1 (viene aggiornata solo da trigger
+// espliciti, per non interrompere chi la sta ancora toccando altrove).
+// Quando non si ripete, però, le celle mostrano DATE vere calcolate da
+// questo stesso campo: cambiarlo senza ridisegnare lascerebbe le date
+// vecchie in faccia mentre il dato sotto è già cambiato.
+if($("#anchor")) $("#anchor").addEventListener("input", ()=>{
+  if(state.repeat===false) renderWizSeqGrid();
+});
 // Aggiungere e rimuovere persone dall'elenco vive solo qui (wizard/Opzioni),
 // non nella tab Turni: lì si guarda, qui si gestisce.
 const PERSONA_MODE_HINT = {
