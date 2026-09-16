@@ -660,7 +660,7 @@ body.tab-oggi #status:not(.warn){display:none}
 /* OGGI: il giorno. "La giornata" (datebar + dettaglio + diario) è a scomparsa. */
 body.tab-oggi #turniTitle,body.tab-oggi .cap.ciclo,body.tab-oggi #cyc,body.tab-oggi #doFree,
 body.tab-oggi #tGrid,body.tab-oggi #doPartner,body.tab-oggi .cycbar,body.tab-oggi #doAndamenti,
-body.tab-oggi #freeBox,body.tab-oggi #icsBox,body.tab-oggi #dayBox,body.tab-oggi #gridBox,body.tab-oggi #andamenti,body.tab-oggi .andamento-h,
+body.tab-oggi #freeBox,body.tab-oggi #icsBox,body.tab-oggi #dayBox,body.tab-oggi #gridBox,body.tab-oggi #andamentiPagina,
 body.tab-oggi #partner,body.tab-oggi .piu-cal,
 body.tab-oggi .tools,body.tab-oggi .piu-h,body.tab-oggi .piu-info,body.tab-oggi footer{display:none}
 /* OGGI: la datebar (navigatore giorni) resta sempre; solo il DETTAGLIO è a scomparsa */
@@ -699,7 +699,7 @@ body.tab-turni.andamenti-aperta #doAndamenti{display:none}
 body.tab-piu .now-shift,body.tab-piu #status,body.tab-piu #ora,body.tab-piu #benvenutoLink,body.tab-piu #demoEsempio,body.tab-piu #backupNudge,body.tab-piu #installBanner,body.tab-piu #clubBanner,body.tab-piu #formaGiorno,body.tab-piu #essenziale,
 body.tab-piu .datebar,body.tab-piu #turniTitle,body.tab-piu .cap,body.tab-piu #cyc,body.tab-piu #doFree,
 body.tab-piu #tGrid,body.tab-piu #doPartner,body.tab-piu .cycbar,body.tab-piu #doAndamenti,
-body.tab-piu #freeBox,body.tab-piu #dayBox,body.tab-piu #gridBox,body.tab-piu #andamenti,body.tab-piu .andamento-h,body.tab-piu #partner,
+body.tab-piu #freeBox,body.tab-piu #dayBox,body.tab-piu #gridBox,body.tab-piu #andamentiPagina,body.tab-piu #partner,
 body.tab-piu #band,body.tab-piu #cards{display:none}
 /* componenti della tab Più */
 .piu-cal{background:var(--blue-soft);border:1px solid var(--blue-lt);border-radius:var(--r);padding:16px 17px;margin:0 0 16px}
@@ -755,7 +755,7 @@ list-style:none;min-height:44px;display:flex;align-items:center}
 body.tab-opzioni .now-shift,body.tab-opzioni #status,body.tab-opzioni #ora,body.tab-opzioni #benvenutoLink,body.tab-opzioni #demoEsempio,body.tab-opzioni #backupNudge,body.tab-opzioni #installBanner,body.tab-opzioni #clubBanner,body.tab-opzioni #formaGiorno,body.tab-opzioni #essenziale,
 body.tab-opzioni .datebar,body.tab-opzioni #band,body.tab-opzioni #turniTitle,body.tab-opzioni .cap.ciclo,body.tab-opzioni #cyc,
 body.tab-opzioni .cycbar,body.tab-opzioni #doAndamenti,body.tab-opzioni #tGrid,body.tab-opzioni #gridBox,body.tab-opzioni #dayBox,
-body.tab-opzioni #andamenti,body.tab-opzioni .andamento-h,body.tab-opzioni #doFree,body.tab-opzioni #freeBox,body.tab-opzioni #doPartner,
+body.tab-opzioni #andamentiPagina,body.tab-opzioni #doFree,body.tab-opzioni #freeBox,body.tab-opzioni #doPartner,
 body.tab-opzioni #partner,body.tab-opzioni #cards,body.tab-opzioni .piu-cal,body.tab-opzioni .tools,body.tab-opzioni .piu-h,
 body.tab-opzioni #icsBox,
 /* la sezione Opzioni vive solo nella sua destinazione */
@@ -764,23 +764,28 @@ body:not(.tab-opzioni) #opzioni{display:none}
 .opz-info{margin-top:22px;border-top:1px solid var(--line);padding-top:16px}
 .opz-info a{color:var(--blue);text-decoration:none;border-bottom:1px solid var(--blue-lt)}
 .piu-h{margin:2px 0 9px}
-/* "Il tuo andamento" è il contenuto che rende Turni utile nel tempo: pesa più
-   delle voci-strumento sotto (disponibile/partner), separato dal ciclo sopra. */
-.andamento-h{margin:28px 0 14px;padding-top:22px;border-top:1px solid var(--line)}
-#andamenti:not(:empty){background:var(--s1);border:1px solid var(--line);
-border-radius:var(--r);padding:14px 15px}
-#andamenti .rows:first-child{margin-top:0;border-top:none;padding-top:0}
-.andamento-h .eyebrow{display:block;font-family:var(--serif);font-size:20px;
-font-weight:700;color:var(--ink);text-transform:none;letter-spacing:0}
-.andamento-h p{margin:4px 0 0;font-size:13.5px;color:var(--faint)}
-/* Hero del debito di sonno: numero grande + sparkline, non un'altra riga
-   di testo fra le altre — #andamenti è già una card, quindi qui basta un
-   bordo sotto per separarla dalle righe di dettaglio, non un'altra card
-   dentro la card. */
-.andamento-hero{padding-bottom:16px;margin-bottom:16px;border-bottom:1px solid var(--line)}
+/* Andamenti, come nel mockup: sezioni separate (ognuna la propria card),
+   non più tutto scaricato dentro un'unica card grande — prima #andamenti
+   era la card, ora è solo una colonna che le distanzia. */
+#andamenti{display:flex;flex-direction:column;gap:var(--gap-sezione)}
+/* Hero del debito di sonno: ora è la sua card, non più solo separata da
+   un bordo sotto dentro una card più grande. */
+.andamento-hero{background:var(--s1);border:1px solid var(--line);border-radius:20px;
+padding:18px;box-shadow:var(--shadow-card)}
 .andamento-num{font-family:var(--serif);font-size:34px;font-weight:600;line-height:1.15;margin:4px 0 6px}
-.andamento-insight{background:var(--blue-soft);border-radius:var(--r);padding:12px 14px;margin-top:14px;font-size:13.5px;color:var(--ink);line-height:1.5}
-.andamento-insight-eyebrow{display:block;font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--blue);margin-bottom:4px}
+/* Badge icona, come le altre card ridisegnate — prima solo testo su
+   sfondo colorato, senza l'icona che il mockup usa per l'insight. */
+.andamento-insight{background:var(--blue-soft);border-radius:var(--r);padding:14px;
+display:flex;gap:12px;align-items:flex-start}
+.andamento-insight .aic{flex:none;width:32px;height:32px;border-radius:999px;background:var(--blue);
+color:var(--su-blu);display:flex;align-items:center;justify-content:center;margin-top:1px}
+.andamento-insight-eyebrow{display:block;font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--blue);margin-bottom:3px}
+/* Le tre sezioni sotto (regolarità, ciclo, sveglia): eyebrow fuori dalla
+   card come nel mockup, poi la card con le righe di dettaglio dentro. */
+.andamento-eyebrow{display:block;margin-bottom:8px}
+.andamento-sezione{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);
+padding:6px 16px;box-shadow:var(--shadow-card)}
+.andamento-sezione .rows{border-top:none;margin-top:0;padding-top:0}
 .wintro{font-size:14.5px;color:var(--ink);line-height:1.6;margin:0 0 20px;padding:14px 15px;
 background:var(--s1);border-radius:var(--r);border:1px solid var(--line)}
 .wintro b{color:var(--ink);font-weight:600}
@@ -1156,10 +1161,6 @@ header b{font-size:23px}.datebar h1,.cycbar h1{font-size:19px}
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
     </button>
     <h1 class="tab-title" style="margin:0">Andamenti</h1>
-  </div>
-  <div class="andamento-h">
-    <span class="eyebrow">Il tuo andamento</span>
-    <p>Quello che i tuoi voti dicono sul ciclo, con il tempo.</p>
   </div>
   <div id="andamenti"></div>
 </div>
@@ -5139,25 +5140,13 @@ function renderAndamenti(){
     const b=$("#doSbloccaAndamento"); if(b) b.onclick=()=>{ if(window.NTPaid) window.NTPaid.open(); };
     return;
   }
-  // Le sezioni richiudibili non hanno funzionato nella pratica — restano
-  // sempre visibili tutte, come prima ancora del giro con i <details>.
+  // Come nel mockup: ogni sotto-sezione è la sua card (eyebrow fuori,
+  // dettaglio dentro), non più tutto scaricato in un'unica card grande.
   // Il debito di sonno resta il primo elemento, perché è il più
-  // immediatamente utile, ma non nasconde più il resto dietro un tocco.
-  //
-  // Prima ogni sotto-sezione aveva il proprio <div class="rows">, con un
-  // bordo sopra a separarle (.rows-sep) — tecnicamente un unico riquadro,
-  // ma quel bordo continuava a leggersi come il bordo di UN SECONDO
-  // riquadro, non come un separatore interno. Ora è tutto UN SOLO <div
-  // class="rows">, con solo spaziatura verticale fra le sotto-sezioni,
-  // senza nessun bordo che possa sembrare l'inizio di un'altra scatola.
-  // Debito di sonno: prima erano tre righe di testo in mezzo a tutte le
-  // altre, stesso peso visivo del resto. Oura/Whoop insegnano che questo
-  // è il numero che conta di più: un hero (numero grande + sparkline),
-  // non un'altra riga. L'insight sulla correlazione umore/debito segue
-  // subito sotto, in un riquadro a parte — prima era anonimo fra le
-  // righe, mentre è l'osservazione più interessante che questi dati
-  // possono dire (nessun concorrente la fa).
-  let heroHtml="", righe=[];
+  // immediatamente utile — hero (numero grande + sparkline) invece di
+  // un'altra riga di testo fra le altre. L'insight sulla correlazione
+  // umore/debito segue subito sotto, la sua card a parte.
+  let heroHtml="", sezioni=[];
   try{
     if(window.NTHistory){
       const trend=window.NTHistory.sleepTrend({beds:state.beds,wakes:state.wakes}, NT_planSafe, {days:30});
@@ -5191,55 +5180,60 @@ function renderAndamenti(){
             " (contro "+corr.vBasso.toFixed(1)+" negli altri giorni)."
           : "Curioso: nei tuoi dati il voto è più alto proprio "+sopra+
             " ("+corr.vAlto.toFixed(1)+" contro "+corr.vBasso.toFixed(1)+"). Potrebbe dipendere da altro — vale la pena osservarlo.";
-        heroHtml+='<div class="andamento-insight"><span class="andamento-insight-eyebrow">Insight</span>'+esc(testo)+'</div>';
+        heroHtml+='<div class="andamento-insight"><span class="aic">'+ICON.sun+'</span>'+
+          '<div><span class="andamento-insight-eyebrow">Insight</span>'+esc(testo)+'</div></div>';
       }
     }
   }catch(e){}
   try{
     const reg=regolaritaSonno();
     if(reg){
-      righe.push('<div class="row" style="margin-top:'+(righe.length?'14px':'0')+'"><span class="hint" style="width:100%">Regolarità degli orari, da '+reg.n+' notti</span></div>');
-      if(reg.sdBed!=null) righe.push('<div class="row"><b style="min-width:148px">Vai a letto</b><span>con una variazione tipica di circa ±'+hm(reg.sdBed)+" da un giorno all'altro</span></div>");
-      if(reg.sdWake!=null) righe.push('<div class="row"><b style="min-width:148px">Ti svegli</b><span>con una variazione tipica di circa ±'+hm(reg.sdWake)+" da un giorno all'altro</span></div>");
+      let righe='';
+      if(reg.sdBed!=null) righe+='<div class="row"><b style="min-width:148px">Vai a letto</b><span>con una variazione tipica di circa ±'+hm(reg.sdBed)+" da un giorno all'altro</span></div>";
+      if(reg.sdWake!=null) righe+='<div class="row"><b style="min-width:148px">Ti svegli</b><span>con una variazione tipica di circa ±'+hm(reg.sdWake)+" da un giorno all'altro</span></div>";
+      if(righe) sezioni.push('<div><span class="eyebrow andamento-eyebrow">Regolarità degli orari, da '+reg.n+' notti</span>'+
+        '<div class="andamento-sezione"><div class="rows">'+righe+'</div></div></div>');
     }
   }catch(e){}
 
   const cs=cycleSummary();
   if(cs){
-    if(righe.length) righe.push('<div class="row" style="margin-top:14px"><span class="hint" style="width:100%">Il tuo ciclo giorno per giorno, da '+cs.voti+' voti</span></div>');
-    else righe.push('<div class="row"><span class="hint" style="width:100%">Il tuo ciclo giorno per giorno, da '+cs.voti+' voti</span></div>');
+    let righe='';
     cs.righe.forEach(r=>{ const largh = r.avg===null ? 0 : Math.round((r.avg-1)/4*100);
-      righe.push('<div class="row"><b style="min-width:34px;font-family:var(--sans)">'+esc(r.c)+'</b>'+
+      righe+='<div class="row"><b style="min-width:34px;font-family:var(--sans)">'+esc(r.c)+'</b>'+
         '<span style="flex:1"><span class="cyb"><i style="width:'+largh+'%"></i></span></span>'+
         '<span style="min-width:62px;text-align:right;color:var(--dim)">'+
-        (r.avg===null?"—":r.avg.toFixed(1)+" · "+r.n)+'</span></div>'); });
-    if(cs.frase) righe.push('<div class="row" style="margin-top:6px"><span style="color:var(--amber)">'+cs.frase+'</span></div>');
+        (r.avg===null?"—":r.avg.toFixed(1)+" · "+r.n)+'</span></div>'; });
+    if(cs.frase) righe+='<div class="row" style="margin-top:6px"><span style="color:var(--amber)">'+cs.frase+'</span></div>';
+    sezioni.push('<div><span class="eyebrow andamento-eyebrow">Il tuo ciclo giorno per giorno, da '+cs.voti+' voti</span>'+
+      '<div class="andamento-sezione"><div class="rows">'+righe+'</div></div></div>');
   }
 
   const ws=wakeSummary();
   if(ws && ws.consigli.length){
-    righe.push('<div class="row" style="margin-top:'+(righe.length?'14px':'0')+'"><span class="hint" style="width:100%">Come scivola la tua sveglia, da '+ws.n+' annotate</span></div>');
-    if(ws.liberi) righe.push('<div class="row"><b style="min-width:148px">Nei giorni liberi</b><span>ti alzi verso le '+
-      hhmm(ws.liberi.media)+' ('+ws.liberi.n+' volte)</span></div>');
-    if(ws.anticipi) righe.push('<div class="row"><b style="min-width:148px">Quando devi anticipare</b><span>'+
+    let righe='';
+    if(ws.liberi) righe+='<div class="row"><b style="min-width:148px">Nei giorni liberi</b><span>ti alzi verso le '+
+      hhmm(ws.liberi.media)+' ('+ws.liberi.n+' volte)</span></div>';
+    if(ws.anticipi) righe+='<div class="row"><b style="min-width:148px">Quando devi anticipare</b><span>'+
       (ws.anticipi.scarto>0?"ti alzi "+hm(ws.anticipi.scarto)+" dopo il piano":
        ws.anticipi.scarto<0?"ti alzi "+hm(-ws.anticipi.scarto)+" prima del piano":"sei puntuale")+
-      ' ('+ws.anticipi.n+' volte)</span></div>');
-    ws.consigli.forEach(c=>righe.push('<div class="row" style="margin-top:5px;flex-wrap:wrap"><span style="color:var(--amber)">'+c.text+'</span>'+
+      ' ('+ws.anticipi.n+' volte)</span></div>';
+    ws.consigli.forEach(c=>righe+='<div class="row" style="margin-top:5px;flex-wrap:wrap"><span style="color:var(--amber)">'+c.text+'</span>'+
       (c.action?'<button class="lnk" data-apply-field="'+esc(c.action.field)+'" data-apply-value="'+esc(String(c.action.value))+'" style="margin-top:4px">'+esc(c.action.label)+' →</button>':'')+
-      '</div>'));
+      '</div>');
+    sezioni.push('<div><span class="eyebrow andamento-eyebrow">Come scivola la tua sveglia, da '+ws.n+' annotate</span>'+
+      '<div class="andamento-sezione"><div class="rows">'+righe+'</div></div></div>');
   }
 
   const sm=diarySummary();
   if(sm){
-    righe.push('<div class="row" style="margin-top:'+(righe.length?'14px':'0')+'">'+
-      (sm.verdict?'<span style="color:var(--amber)">'+sm.verdict+'</span>'
-        :'<span class="hint" style="width:100%">Su '+sm.tot+' notti annotate</span>')+'</div>');
-    righe.push('<div class="row" style="margin-top:6px"><button class="btn g" id="doSum">Copia il riepilogo</button></div>');
+    let righe=(sm.verdict?'<div class="row"><span style="color:var(--amber)">'+sm.verdict+'</span></div>'
+        :'<div class="row"><span class="hint" style="width:100%">Su '+sm.tot+' notti annotate</span></div>');
+    righe+='<div class="row" style="margin-top:6px"><button class="btn g" id="doSum">Copia il riepilogo</button></div>';
+    sezioni.push('<div class="andamento-sezione"><div class="rows">'+righe+'</div></div>');
   }
 
-  const rowsHtml = righe.length
-    ? '<div class="rows" style="border-top:none;margin-top:0;padding-top:0">'+righe.join("")+'</div>' : "";
+  const rowsHtml = sezioni.join("");
   el.innerHTML = (heroHtml || rowsHtml)
     ? heroHtml+rowsHtml
     : '<div class="empty"><img src="./owl-mark.png" alt="" width="46" height="46"><p>Annota il sonno per qualche giorno dal glance di Oggi: qui comparirà quale giorno del ciclo ti pesa di più e come scivola la tua sveglia.</p></div>';
