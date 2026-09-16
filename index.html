@@ -795,6 +795,10 @@ body.tab-opzioni #icsBox,
 body:not(.tab-opzioni) #opzioni{display:none}
 #opzioni .tool{margin-bottom:10px}
 .opz-info{margin-top:22px;border-top:1px solid var(--line);padding-top:16px}
+/* Il nodo "prima di chiudere, salva" appartiene alla fine del wizard — dentro
+   Dettagli del piano (Opzioni) è fuori contesto, Salva/Esporta hanno già la
+   loro sezione a parte. Vedi il commento sul markup di #wizSaveArea. */
+#opzBox4 #wizSaveArea{display:none}
 .opz-info a{color:var(--blue);text-decoration:none;border-bottom:1px solid var(--blue-lt)}
 .piu-h{margin:2px 0 9px}
 /* Andamenti, come nel mockup: sezioni separate (ognuna la propria card),
@@ -1037,6 +1041,15 @@ header b{font-size:23px}
       <label class="p1" style="margin:0"><input type="checkbox" id="mattinoBif"> Il sonno prima di un turno molto presto: dividerlo se serve</label>
       <span class="hint">Se per essere pronto devi metterti a letto molto presto (prima delle 21), addormentarsi a quell'ora è spesso difficile per il corpo, non solo scomodo. Con questa spunta, in quei casi lo strumento accetta un sonno principale più corto ma a un'ora più naturale, e recupera il resto con un pisolino nel primo pomeriggio dopo il turno.</span>
     </div>
+    <!-- Questo pezzo appartiene alla CHIUSURA del wizard, non a "Dettagli
+         del piano" in sé — apriSezioneInline(4) sposta fisicamente questa
+         .wstep dentro #opzBox4 la prima volta che si apre da Opzioni, dove
+         Salva/Esporta hanno già la loro sezione a parte subito sotto: senza
+         #wizSaveArea in quel contesto, comparivano due inviti a salvare/
+         esportare uno sopra l'altro. La regola CSS (#opzBox4 #wizSaveArea)
+         lo nasconde SOLO lì; durante il wizard vero il nodo è ancora al suo
+         posto originale, invariato. -->
+    <div id="wizSaveArea">
     <div class="q" id="wizSaveBox" style="margin-top:22px;padding-top:18px;border-top:1px solid var(--line)">
       <b>Prima di chiudere, salva la configurazione</b>
       <p class="hint">Sta tutta in un link — se la perdi, la riscrivi da capo.</p>
@@ -1047,6 +1060,7 @@ header b{font-size:23px}
     </div>
     <div class="q" style="margin-top:14px">
       <p class="hint">Non vuoi doverti ricordare di aprire l'app? <button class="lnk" type="button" id="doOpenCalendario" style="display:inline">Metti i turni nel calendario del telefono →</button></p>
+    </div>
     </div>
   </section>
 
