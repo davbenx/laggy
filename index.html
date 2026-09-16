@@ -359,6 +359,11 @@ cursor:pointer;font-family:inherit;color:var(--ink)}
 .dbtn.pri{background:var(--blue);border-color:var(--blue);color:var(--su-blu);font-weight:600;box-shadow:var(--shadow-btn)}
 .dbtn.pri:hover{filter:brightness(1.08)}
 .dbtn.on{background:var(--blue-soft);border-color:var(--blue);color:var(--blue);font-weight:600}
+/* display in una classe, non inline: uno stile inline su display batte
+   SEMPRE le regole "body.tab-x #id{display:none}" che nascondono gli
+   elementi per tab, qualunque sia la loro specificità — è esattamente
+   quello che teneva "Condividi il tuo ciclo" visibile su ogni tab. */
+.cycshare-btn{display:flex}
 input,select,textarea{background:var(--bg);border:1px solid var(--line);color:var(--ink);padding:10px 11px;
 border-radius:var(--r);font-family:var(--sans);font-size:16px;width:100%;font-variant-numeric:tabular-nums}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft)}
@@ -383,7 +388,7 @@ footer a{color:var(--blue);text-decoration:none;border-bottom:1px solid var(--bl
 border-radius:var(--r);padding:18px 18px 20px;margin-bottom:20px}
 body.intro .datebar,body.intro .daynav,body.intro #ora,body.intro #status,body.intro .cap,
 body.intro #cyc,body.intro #band,body.intro #cards,body.intro .tools,
-body.intro #doCycShare,body.intro #doCycQR,body.intro #qrBoxCyc,
+body.intro #cycShareBox,
 body.intro .setbar{display:none}
 .setbar{display:flex;align-items:center;gap:12px;background:var(--s1);border:1px solid var(--line);
 border-radius:var(--r);padding:11px 13px;margin-bottom:18px}
@@ -665,7 +670,7 @@ color:var(--blue);display:inline-flex;align-items:center;justify-content:center}
 /* in Oggi lo #status resta solo quando è un avviso; il resto lo dice il piano */
 body.tab-oggi #status:not(.warn){display:none}
 /* OGGI: il giorno. "La giornata" (datebar + dettaglio + diario) è a scomparsa. */
-body.tab-oggi .cap.ciclo,body.tab-oggi #cyc,body.tab-oggi #doCycShare,body.tab-oggi #doCycQR,body.tab-oggi #qrBoxCyc,
+body.tab-oggi .cap.ciclo,body.tab-oggi #cyc,body.tab-oggi #cycShareBox,
 body.tab-oggi #doPartner,body.tab-oggi .cycbar,body.tab-oggi #cycRange,body.tab-oggi #doAndamenti,
 body.tab-oggi #icsBox,body.tab-oggi #dayBox,body.tab-oggi #andamentiPagina,
 body.tab-oggi #vederciPagina,body.tab-oggi #partner,body.tab-oggi .piu-cal,
@@ -698,20 +703,20 @@ body.tab-turni footer{display:none}
    (attributo hidden), non da qui; il JS le tiene anche mutuamente
    esclusive. */
 body.tab-turni.andamenti-aperta .cap.ciclo,
-body.tab-turni.andamenti-aperta #cyc,body.tab-turni.andamenti-aperta #doCycShare,body.tab-turni.andamenti-aperta #doCycQR,body.tab-turni.andamenti-aperta #qrBoxCyc,
+body.tab-turni.andamenti-aperta #cyc,body.tab-turni.andamenti-aperta #cycShareBox,
 body.tab-turni.andamenti-aperta .cycbar,body.tab-turni.andamenti-aperta #cycRange,
 body.tab-turni.andamenti-aperta #dayBox,
 body.tab-turni.andamenti-aperta #doPartner,
 body.tab-turni.andamenti-aperta #doAndamenti,
 body.tab-turni.vederci-aperta .cap.ciclo,
-body.tab-turni.vederci-aperta #cyc,body.tab-turni.vederci-aperta #doCycShare,body.tab-turni.vederci-aperta #doCycQR,body.tab-turni.vederci-aperta #qrBoxCyc,
+body.tab-turni.vederci-aperta #cyc,body.tab-turni.vederci-aperta #cycShareBox,
 body.tab-turni.vederci-aperta .cycbar,body.tab-turni.vederci-aperta #cycRange,
 body.tab-turni.vederci-aperta #dayBox,
 body.tab-turni.vederci-aperta #doPartner,
 body.tab-turni.vederci-aperta #doAndamenti{display:none}
 /* PIÙ: calendario a pagamento ed extra */
 body.tab-piu #status,body.tab-piu #ora,body.tab-piu #benvenutoLink,body.tab-piu #demoEsempio,body.tab-piu #backupNudge,body.tab-piu #installBanner,body.tab-piu #shareNudge,body.tab-piu #icsNudge,body.tab-piu #clubBanner,body.tab-piu #formaGiorno,body.tab-piu #essenziale,
-body.tab-piu .datebar,body.tab-piu .daynav,body.tab-piu .cap,body.tab-piu #cyc,body.tab-piu #doCycShare,body.tab-piu #doCycQR,body.tab-piu #qrBoxCyc,
+body.tab-piu .datebar,body.tab-piu .daynav,body.tab-piu .cap,body.tab-piu #cyc,body.tab-piu #cycShareBox,
 body.tab-piu #doPartner,body.tab-piu .cycbar,body.tab-piu #cycRange,body.tab-piu #doAndamenti,
 body.tab-piu #dayBox,body.tab-piu #andamentiPagina,body.tab-piu #vederciPagina,body.tab-piu #partner,
 body.tab-piu #band,body.tab-piu #cards{display:none}
@@ -768,7 +773,7 @@ list-style:none;min-height:44px;display:flex;align-items:center}
 /* OPZIONI: solo la configurazione */
 body.tab-opzioni #status,body.tab-opzioni #ora,body.tab-opzioni #benvenutoLink,body.tab-opzioni #demoEsempio,body.tab-opzioni #backupNudge,body.tab-opzioni #installBanner,body.tab-opzioni #shareNudge,body.tab-opzioni #icsNudge,body.tab-opzioni #clubBanner,body.tab-opzioni #formaGiorno,body.tab-opzioni #essenziale,
 body.tab-opzioni .datebar,body.tab-opzioni .daynav,body.tab-opzioni #band,body.tab-opzioni .cap.ciclo,body.tab-opzioni #cyc,
-body.tab-opzioni #doCycShare,body.tab-opzioni #doCycQR,body.tab-opzioni #qrBoxCyc,
+body.tab-opzioni #cycShareBox,
 body.tab-opzioni .cycbar,body.tab-opzioni #cycRange,body.tab-opzioni #doAndamenti,body.tab-opzioni #dayBox,
 body.tab-opzioni #andamentiPagina,body.tab-opzioni #vederciPagina,body.tab-opzioni #doPartner,
 body.tab-opzioni #partner,body.tab-opzioni #cards,body.tab-opzioni .piu-cal,body.tab-opzioni .tools,body.tab-opzioni .piu-h,
@@ -1161,9 +1166,9 @@ header b{font-size:23px}
      striscia a cui si riferisce, sempre visibile invece che dietro un
      accordion. Stesso meccanismo di "Salva la configurazione"
      (salvaConfigurazione/renderQR), richiamato da qui. -->
-<div style="display:flex;flex-direction:column;gap:8px;margin-top:var(--gap-sezione)">
+<div id="cycShareBox" class="cycshare-btn" style="flex-direction:column;gap:8px;margin-top:var(--gap-sezione)">
   <span class="eyebrow">Condividi</span>
-  <button type="button" id="doCycShare" style="width:100%;text-align:left;display:flex;align-items:center;gap:14px;padding:14px;background:var(--blue-soft);border:1px solid var(--blue);border-radius:var(--r);box-shadow:var(--shadow-btn);cursor:pointer;">
+  <button type="button" id="doCycShare" class="cycshare-btn" style="width:100%;text-align:left;align-items:center;gap:14px;padding:14px;background:var(--blue-soft);border:1px solid var(--blue);border-radius:var(--r);box-shadow:var(--shadow-btn);cursor:pointer;">
     <span style="flex:none;width:38px;height:38px;border-radius:999px;background:var(--blue);display:flex;align-items:center;justify-content:center;color:var(--su-blu);">
       <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg>
     </span>
