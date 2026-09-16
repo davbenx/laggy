@@ -125,8 +125,13 @@ font-size:16px;line-height:1.6;padding:0 0 64px;-webkit-font-smoothing:antialias
 .mono{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
 .eyebrow{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);font-weight:600}
 header{border:none;padding:0;margin:0}
+/* La banda dell'appbar deve arrivare fino al vero bordo dello schermo,
+   non fermarsi al padding di .wrap (20px) come faceva prima — margine
+   negativo per uscire dal padding del genitore, poi lo stesso padding
+   rimesso qui sopra così il contenuto (logo, titolo) resta allineato
+   col resto della pagina. */
 .appbar{display:flex;align-items:center;gap:11px;background:var(--bg-blur);
-padding:calc(env(safe-area-inset-top,0px) + 12px) 0 12px;position:sticky;top:0;z-index:20}
+padding:calc(env(safe-area-inset-top,0px) + 12px) 20px 12px;margin:0 -20px;position:sticky;top:0;z-index:20}
 @supports (backdrop-filter:blur(1px)){.appbar{backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}}
 .applogo{width:36px;height:36px;flex:none;border-radius:9px}
 .apptitle{flex:1;min-width:0}
@@ -654,7 +659,7 @@ color:var(--blue);display:inline-flex;align-items:center;justify-content:center}
 body.tab-oggi #status:not(.warn){display:none}
 /* OGGI: il giorno. "La giornata" (datebar + dettaglio + diario) è a scomparsa. */
 body.tab-oggi #turniTitle,body.tab-oggi .cap.ciclo,body.tab-oggi #cyc,body.tab-oggi #doFree,
-body.tab-oggi #tGrid,body.tab-oggi #doPartner,body.tab-oggi .cycbar,
+body.tab-oggi #tGrid,body.tab-oggi #doPartner,body.tab-oggi .cycbar,body.tab-oggi #doAndamenti,
 body.tab-oggi #freeBox,body.tab-oggi #icsBox,body.tab-oggi #dayBox,body.tab-oggi #gridBox,body.tab-oggi #andamenti,body.tab-oggi .andamento-h,
 body.tab-oggi #partner,body.tab-oggi .piu-cal,
 body.tab-oggi .tools,body.tab-oggi .piu-h,body.tab-oggi .piu-info,body.tab-oggi footer{display:none}
@@ -693,7 +698,7 @@ body.tab-turni.andamenti-aperta #doAndamenti{display:none}
 /* PIÙ: calendario a pagamento ed extra */
 body.tab-piu .now-shift,body.tab-piu #status,body.tab-piu #ora,body.tab-piu #benvenutoLink,body.tab-piu #demoEsempio,body.tab-piu #backupNudge,body.tab-piu #installBanner,body.tab-piu #clubBanner,body.tab-piu #formaGiorno,body.tab-piu #essenziale,
 body.tab-piu .datebar,body.tab-piu #turniTitle,body.tab-piu .cap,body.tab-piu #cyc,body.tab-piu #doFree,
-body.tab-piu #tGrid,body.tab-piu #doPartner,body.tab-piu .cycbar,
+body.tab-piu #tGrid,body.tab-piu #doPartner,body.tab-piu .cycbar,body.tab-piu #doAndamenti,
 body.tab-piu #freeBox,body.tab-piu #dayBox,body.tab-piu #gridBox,body.tab-piu #andamenti,body.tab-piu .andamento-h,body.tab-piu #partner,
 body.tab-piu #band,body.tab-piu #cards{display:none}
 /* componenti della tab Più */
@@ -749,7 +754,7 @@ list-style:none;min-height:44px;display:flex;align-items:center}
 /* OPZIONI: solo la configurazione */
 body.tab-opzioni .now-shift,body.tab-opzioni #status,body.tab-opzioni #ora,body.tab-opzioni #benvenutoLink,body.tab-opzioni #demoEsempio,body.tab-opzioni #backupNudge,body.tab-opzioni #installBanner,body.tab-opzioni #clubBanner,body.tab-opzioni #formaGiorno,body.tab-opzioni #essenziale,
 body.tab-opzioni .datebar,body.tab-opzioni #band,body.tab-opzioni #turniTitle,body.tab-opzioni .cap.ciclo,body.tab-opzioni #cyc,
-body.tab-opzioni .cycbar,body.tab-opzioni #tGrid,body.tab-opzioni #gridBox,body.tab-opzioni #dayBox,
+body.tab-opzioni .cycbar,body.tab-opzioni #doAndamenti,body.tab-opzioni #tGrid,body.tab-opzioni #gridBox,body.tab-opzioni #dayBox,
 body.tab-opzioni #andamenti,body.tab-opzioni .andamento-h,body.tab-opzioni #doFree,body.tab-opzioni #freeBox,body.tab-opzioni #doPartner,
 body.tab-opzioni #partner,body.tab-opzioni #cards,body.tab-opzioni .piu-cal,body.tab-opzioni .tools,body.tab-opzioni .piu-h,
 body.tab-opzioni #icsBox,
@@ -784,6 +789,7 @@ body.intro .appbar,body.intro .tabbar,body.intro #opzioni{display:none}
 
 @media (max-width:430px){
 .wrap{padding:0 16px}
+.appbar{margin:0 -16px;padding-left:16px;padding-right:16px}
 .val{font-size:19px}.row b{min-width:88px}
 .cap p{display:none}.clab{width:40px}.caxis{margin-left:60px;padding-left:0}
 .sh,.shhead{grid-template-columns:34px 1fr 78px 78px 28px}
