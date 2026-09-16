@@ -748,6 +748,10 @@ width:38px;height:38px;border-radius:999px;background:var(--s2)}
 text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:600;color:var(--dim);padding-left:8px}
 .tool-val:empty{display:none}
 .tool-val::after{content:"›";margin-left:6px;color:var(--faint);font-weight:400}
+/* Riga singola (titolo + valore, niente sottotitolo): icona centrata invece
+   che ancorata in alto, e meno padding verticale — la riga è più bassa,
+   flex-start la farebbe sembrare sbilanciata verso l'alto. */
+.tool-1line{align-items:center;padding-top:11px;padding-bottom:11px}
 /* Strumenti di Più: griglia a 2 colonne invece di righe impilate — meno
    scroll, ma il testo di ogni card resta per intero (solo più compatto):
    ridurlo a icona+parola come uno share sheet avrebbe nascosto sfumature
@@ -1220,14 +1224,13 @@ header b{font-size:23px}
     </button>
     <h1 class="tab-title" style="margin:0">Opzioni</h1>
   </div>
-  <p class="hint" style="margin:-4px 0 12px">Tutto quello che si imposta una volta e poi non si tocca più.</p>
   <span class="eyebrow" style="display:block;margin:0 0 8px">Configurazione</span>
-  <button class="tool" data-opz="1"><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg></span>
-    <span class="tool-tx"><b>Turni e ciclo</b><span>La sequenza, gli orari di ogni turno, il primo giorno del ciclo.</span></span>
+  <button class="tool tool-1line" data-opz="1"><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg></span>
+    <span class="tool-tx"><b>Turni e ciclo</b></span>
     <span class="tool-val" id="opzValTurni"></span></button>
   <div class="ecc" id="opzBox1" hidden></div>
-  <button class="tool" data-opz="3"><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg></span>
-    <span class="tool-tx"><b>Sonno</b><span>A che ora dormi nei giorni liberi e quante ore ti servono davvero.</span></span>
+  <button class="tool tool-1line" data-opz="3"><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg></span>
+    <span class="tool-tx"><b>Sonno</b></span>
     <span class="tool-val" id="opzValSonno"></span></button>
   <div class="ecc" id="opzBox3" hidden></div>
   <button class="tool" data-opz="4"><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h1.5a2.5 2.5 0 0 1 0 5H17"/><path d="M4 8h13v5a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V8z"/><path d="M8 2v3M12 2v3"/></svg></span>
@@ -1237,8 +1240,8 @@ header b{font-size:23px}
        era 2ª (tra "Turni e ciclo" e "Sonno") e interrompeva il filo "tutto
        su di te" con una domanda su qualcun altro — facoltativa, riguarda
        una minoranza di utenti, ha senso arrivarci per ultima. -->
-  <button class="tool" id="doPersone"><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M16 5.5a3 3 0 0 1 0 5"/><path d="M18 14.5a6 6 0 0 1 3 5.5"/></svg></span>
-    <span class="tool-tx"><b>Persone</b><span>Partner, amico, collega: chi altro segui e con chi condividi i turni.</span></span>
+  <button class="tool tool-1line" id="doPersone"><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M16 5.5a3 3 0 0 1 0 5"/><path d="M18 14.5a6 6 0 0 1 3 5.5"/></svg></span>
+    <span class="tool-tx"><b>Persone</b></span>
     <span class="tool-val" id="opzValPersone"></span></button>
   <div class="ecc" id="opzBoxPersone" hidden>
     <label class="p1" style="margin:0"><input type="checkbox" id="wantCross"> Segui un'altra persona</label>
@@ -1342,8 +1345,7 @@ header b{font-size:23px}
   </div>
 </details>
     <p class="hint" style="margin:12px 0 0">I tuoi turni e quello che annoti non escono da questa pagina: restano nel link e nel tuo browser.</p>
-    <p style="margin:10px 0 0"><button class="lnk" id="doFeed" style="padding:0">Segnala cosa non torna</button></p>
-    <p style="margin:6px 0 0"><button class="lnk" id="doShare" style="padding:0">Consiglialo a un collega</button></p>
+    <p style="margin:10px 0 0"><button class="lnk" id="doFeed" style="padding:0">Segnala cosa non torna</button> · <button class="lnk" id="doShare" style="padding:0">Consiglialo a un collega</button></p>
     <p class="hint" style="margin:10px 0 0"><a href="https://notturnisti.club/planner" target="_blank" rel="noopener">Come si usa</a> · <a href="https://notturnisti.club/chi-siamo/" target="_blank" rel="noopener">Chi siamo</a> · <a href="https://notturnisti.club" target="_blank" rel="noopener">notturnisti.club</a></p>
   </div>
 </div>
