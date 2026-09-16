@@ -142,7 +142,14 @@ cursor:pointer;display:flex;border-radius:999px}
 .themebtn:hover{color:var(--ink);background:var(--s1)}
 .themebtn[aria-pressed="true"]{color:var(--blue)}
 .datebar,.cycbar{display:flex;align-items:center;gap:12px}
-.datebar h1,.cycbar h1{font-family:var(--serif);font-size:23px;font-weight:600;flex:1;min-width:0;text-transform:capitalize;line-height:1.3;cursor:pointer}
+/* Titolo + pillola in linea, come nel mockup — non più due elementi
+   impilati su righe diverse. */
+.datebar-tx{display:flex;align-items:baseline;gap:10px;flex:1;min-width:0}
+/* Niente più text-transform:capitalize come prima: "Oggi, martedì 15
+   settembre" ha bisogno di UNA sola maiuscola, all'inizio — capitalize
+   l'avrebbe messa anche su "Martedì" e "Settembre". La maiuscola giusta
+   la costruisce già il testo stesso, in JS. */
+.datebar h1,.cycbar h1{font-family:var(--serif);font-size:23px;font-weight:600;flex:1;min-width:0;line-height:1.3;cursor:pointer}
 /* titolo di tab, come "Turni" nel mockup — Oggi non ne ha uno (la data ne
    fa già le veci), le altre tab redesignate potranno riusarlo. */
 .tab-title{font-family:var(--serif);font-size:24px;font-weight:600;color:var(--ink);margin:2px 0 var(--gap-sezione)}
@@ -154,13 +161,9 @@ border-radius:var(--r);font-size:16px;cursor:pointer;display:grid;place-items:ce
 .today{background:var(--blue);border:1px solid var(--blue);color:var(--su-blu);height:40px;padding:0 13px;
 border-radius:var(--r);font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;flex:none}
 .today:hover{background:var(--blue-fill)}
-.datebar h1 em{font-style:normal;font-weight:400;color:var(--faint);font-size:14px;
-display:block;text-transform:none;margin-top:1px}
-/* Stesso "ritmo verticale" fra tutti i blocchi di Oggi (--gap-sezione):
-   prima erano 20/7/14/22/18px, sei valori diversi per lo stesso tipo di
-   distacco, accumulati PR dopo PR senza mai riguardare la sequenza
-   intera. Ora un solo valore per tutte le transizioni fra blocchi. */
-.now-shift{margin:8px 0 var(--gap-sezione)}
+/* pillola del turno, in linea accanto alla data — come nel mockup */
+.shiftpill{flex:none;background:var(--blue-soft);color:var(--blue);font-size:12px;
+font-weight:700;padding:5px 10px;border-radius:999px;white-space:nowrap}
 /* pillola col turno (o "Riposo"), come nel mockup — non più testo semplice */
 .shiftpill{display:inline-block;background:var(--blue-soft);color:var(--blue);font-size:12px;
 font-weight:700;padding:5px 10px;border-radius:999px;white-space:nowrap}
@@ -375,7 +378,7 @@ footer p{font-size:14px;color:var(--faint);line-height:1.6;margin-bottom:10px}
 footer a{color:var(--blue);text-decoration:none;border-bottom:1px solid var(--blue-lt)}
 .onboard{background:var(--s1);border:1px solid var(--line);border-top:3px solid var(--blue);
 border-radius:var(--r);padding:18px 18px 20px;margin-bottom:20px}
-body.intro .datebar,body.intro .now-shift,body.intro #ora,body.intro #status,body.intro .cap,
+body.intro .datebar,body.intro #ora,body.intro #status,body.intro .cap,
 body.intro #cyc,body.intro #band,body.intro #cards,body.intro .tools,
 body.intro .setbar{display:none}
 .setbar{display:flex;align-items:center;gap:12px;background:var(--s1);border:1px solid var(--line);
@@ -680,7 +683,7 @@ body.tab-oggi.giornata #cards{display:block}
    davvero in essenziale, indipendentemente da .tabs/.giornata. */
 body.tab-oggi.essenziale #band{display:none}
 /* TURNI: ciclo, giorni liberi, partner, modifica */
-body.tab-turni .now-shift,body.tab-turni #status,body.tab-turni #ora,body.tab-turni #benvenutoLink,body.tab-turni #demoEsempio,body.tab-turni #backupNudge,body.tab-turni #installBanner,body.tab-turni #clubBanner,body.tab-turni #formaGiorno,body.tab-turni #essenziale,
+body.tab-turni #status,body.tab-turni #ora,body.tab-turni #benvenutoLink,body.tab-turni #demoEsempio,body.tab-turni #backupNudge,body.tab-turni #installBanner,body.tab-turni #clubBanner,body.tab-turni #formaGiorno,body.tab-turni #essenziale,
 body.tab-turni .datebar,body.tab-turni .cap.giornata,body.tab-turni #band,body.tab-turni #cards,
 body.tab-turni #icsBox,body.tab-turni .piu-cal,body.tab-turni .tools,body.tab-turni .piu-h,body.tab-turni .piu-info,
 body.tab-turni footer{display:none}
@@ -696,7 +699,7 @@ body.tab-turni.andamenti-aperta #doFree,body.tab-turni.andamenti-aperta #freeBox
 body.tab-turni.andamenti-aperta #doPartner,body.tab-turni.andamenti-aperta #partner,
 body.tab-turni.andamenti-aperta #doAndamenti{display:none}
 /* PIÙ: calendario a pagamento ed extra */
-body.tab-piu .now-shift,body.tab-piu #status,body.tab-piu #ora,body.tab-piu #benvenutoLink,body.tab-piu #demoEsempio,body.tab-piu #backupNudge,body.tab-piu #installBanner,body.tab-piu #clubBanner,body.tab-piu #formaGiorno,body.tab-piu #essenziale,
+body.tab-piu #status,body.tab-piu #ora,body.tab-piu #benvenutoLink,body.tab-piu #demoEsempio,body.tab-piu #backupNudge,body.tab-piu #installBanner,body.tab-piu #clubBanner,body.tab-piu #formaGiorno,body.tab-piu #essenziale,
 body.tab-piu .datebar,body.tab-piu #turniTitle,body.tab-piu .cap,body.tab-piu #cyc,body.tab-piu #doFree,
 body.tab-piu #tGrid,body.tab-piu #doPartner,body.tab-piu .cycbar,body.tab-piu #doAndamenti,
 body.tab-piu #freeBox,body.tab-piu #dayBox,body.tab-piu #gridBox,body.tab-piu #andamentiPagina,body.tab-piu #partner,
@@ -752,7 +755,7 @@ list-style:none;min-height:44px;display:flex;align-items:center}
 .wdet .q:last-of-type{margin-bottom:14px}
 .piu-info-in b{color:var(--ink)}
 /* OPZIONI: solo la configurazione */
-body.tab-opzioni .now-shift,body.tab-opzioni #status,body.tab-opzioni #ora,body.tab-opzioni #benvenutoLink,body.tab-opzioni #demoEsempio,body.tab-opzioni #backupNudge,body.tab-opzioni #installBanner,body.tab-opzioni #clubBanner,body.tab-opzioni #formaGiorno,body.tab-opzioni #essenziale,
+body.tab-opzioni #status,body.tab-opzioni #ora,body.tab-opzioni #benvenutoLink,body.tab-opzioni #demoEsempio,body.tab-opzioni #backupNudge,body.tab-opzioni #installBanner,body.tab-opzioni #clubBanner,body.tab-opzioni #formaGiorno,body.tab-opzioni #essenziale,
 body.tab-opzioni .datebar,body.tab-opzioni #band,body.tab-opzioni #turniTitle,body.tab-opzioni .cap.ciclo,body.tab-opzioni #cyc,
 body.tab-opzioni .cycbar,body.tab-opzioni #doAndamenti,body.tab-opzioni #tGrid,body.tab-opzioni #gridBox,body.tab-opzioni #dayBox,
 body.tab-opzioni #andamentiPagina,body.tab-opzioni #doFree,body.tab-opzioni #freeBox,body.tab-opzioni #doPartner,
@@ -1078,12 +1081,14 @@ header b{font-size:23px}.datebar h1,.cycbar h1{font-size:19px}
      sapere di quale giorno si sta parlando (specie sfogliando avanti). -->
 <div class="datebar">
   <button class="nav" id="prev" aria-label="Giorno precedente"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
-  <h1 id="dateLabel" tabindex="0" role="button" aria-label="Vai a una data">—</h1>
+  <div class="datebar-tx">
+    <h1 id="dateLabel" tabindex="0" role="button" aria-label="Vai a una data">—</h1>
+    <span class="shiftpill" id="shiftPill">—</span>
+  </div>
   <input type="date" id="jumpDate" aria-hidden="true">
   <button class="today" id="goToday" hidden>Oggi</button>
   <button class="nav" id="next" aria-label="Giorno successivo"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
 </div>
-<p class="now-shift" id="nowShift"></p>
 <div id="ora" class="ora"></div>
 <div class="band" id="band"></div>
 
@@ -4709,26 +4714,23 @@ function renderHeader(P, f){
   // stava ancora vivendo quel giorno.
   const scarto = dnum(f)-dnum(giornoVero());
   const bt=$("#goToday"); if(bt) bt.hidden = (scarto===0);
-  // La data intera resta sempre il titolo ("martedì 15 settembre"), lo
-  // scarto da oggi è sempre il sottotitolo piccolo sotto ("oggi", "domani",
-  // "ieri", "fra N giorni"...) — un solo formato per ogni distanza, non un
-  // formato speciale solo per i tre giorni più vicini.
-  const rel = scarto===0 ? "oggi" : scarto===1 ? "domani" : scarto===-1 ? "ieri"
-    : scarto>0 ? "fra "+scarto+" giorni" : (-scarto)+" giorni fa";
-  // Il mese va sempre a capo: "martedì 16" e "settembre" su due righe.
-  $("#dateLabel").innerHTML = esc(f.toLocaleDateString("it-IT",{weekday:"long",day:"numeric"})) +
-    '<br>'+esc(f.toLocaleDateString("it-IT",{month:"long"})) +
-    '<em>'+esc(rel)+'</em>';
-  // "Pomeriggio · 14:00–22:15" ripeteva un orario che ha già una sua card
-  // ("Il tuo turno") più sotto e la striscia sopra — qui basta sapere QUALE
-  // turno e A CHE PUNTO della serie sei, non l'orario esatto. Stessa fonte
-  // già usata per la pillola (rimossa: era la stessa informazione due volte
-  // a due righe di distanza), non un secondo calcolo. Come pillola (non più
-  // testo semplice): vale anche nei giorni di riposo, dove nameOf(c) torna
-  // già "Riposo" da sé — nessun calcolo in più per quel caso.
+  // "Oggi, martedì 15 settembre" / "Domani, mercoledì 16 settembre" per i
+  // due giorni più vicini; più lontano (avanti o indietro) solo la data,
+  // che a quel punto si basta da sola — "fra 3 giorni" non aggiungeva
+  // nulla che il giorno della settimana scritto per esteso non dicesse già.
+  const giornoTxt = f.toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"});
+  const dataTesto = scarto===0 ? "Oggi, "+giornoTxt
+    : scarto===1 ? "Domani, "+giornoTxt
+    : scarto===-1 ? "Ieri, "+giornoTxt
+    : giornoTxt.charAt(0).toUpperCase()+giornoTxt.slice(1);
+  $("#dateLabel").textContent = dataTesto;
+  // La pillola del turno torna in linea accanto alla data, come nel
+  // mockup — non più una riga a parte sotto (#nowShift, rimossa): stesso
+  // valore di prima (nameOf(c) torna già "Riposo" nei giorni liberi, senza
+  // bisogno di un calcolo a parte per quel caso).
   const serie=serieTurnoCorrente();
-  const nowShiftTxt = serie ? nameOf(c)+" "+serie.posizione+"/"+serie.totale : nameOf(c);
-  $("#nowShift").innerHTML='<span class="shiftpill">'+esc(nowShiftTxt)+'</span>';
+  const pillEl=$("#shiftPill");
+  if(pillEl) pillEl.textContent = serie ? nameOf(c)+" "+serie.posizione+"/"+serie.totale : nameOf(c);
   const cov=$("#cover"); if(cov) cov.textContent=coverage()||"";
   renderToday();
   const avv = freeWakeOk() ? "" : "Questa risposta non è plausibile: sto usando "+hhmm(freeWakeUsata())+".";
