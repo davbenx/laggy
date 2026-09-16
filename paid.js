@@ -103,6 +103,7 @@
       '<p class="pf-p">Iscrivi il calendario del telefono a questo indirizzo. Da lì in poi si aggiorna da solo.</p>' +
       '<a class="pf-lnk" id="pf-sub" href="' + feed + '">Aggiungi al calendario (iPhone/Mac) →</a>' +
       '<p class="pf-note"><b>Android / Google:</b> apri Google Calendar sul web → Altri calendari → <b>Da URL</b> → incolla:<br>' + https + '</p>' +
+      '<p class="pf-note">L\'aggiornamento non è istantaneo: ogni calendario decide da sé ogni quanto ricontrollare (spesso qualche ora, a volte un giorno intero) — non dipende da noi, e da qui non c\'è modo di farlo controllare più spesso.</p>' +
       '<button class="pf-btn" id="pf-sync" style="margin-top:12px">Sincronizza i turni di adesso</button>' +
       '<p class="pf-note">Aggiorna il feed con la configurazione attuale del pianificatore.</p>' +
       '<p class="pf-note" style="margin-top:16px">La tua configurazione dei turni è salvata sul nostro server per far ruotare il calendario. Non salviamo il diario. ' +
@@ -121,12 +122,13 @@
     var https = coupleUrl.replace(/^webcal/, "https");
     if (!r.pPattern)
       return '<h2 class="pf-h">Calendario di coppia</h2>' +
-        '<p class="pf-p">Il partner si imposta una volta sola, nella scheda <b>Turni → Con il partner</b>. ' +
+        '<p class="pf-p">Il partner si imposta una volta sola, nella scheda <b>Quando sono disponibile → Aggiungi una persona</b>. ' +
         'Da lì i vostri riposi in comune arrivano anche qui, come calendario da iscrivere che si aggiorna da solo.</p>';
     return '<h2 class="pf-h">Calendario di coppia</h2>' +
       '<p class="pf-p">Partner impostato. Iscrivi questo calendario: mostra i <b>riposi in comune</b> nei prossimi 60 giorni e si aggiorna da solo.</p>' +
       '<a class="pf-lnk" id="pf-csub" href="' + coupleUrl + '">Aggiungi il calendario di coppia →</a>' +
       '<p class="pf-note">Android/Google: <b>Da URL</b> →<br>' + https + '</p>' +
+      '<p class="pf-note">Come sopra: l\'aggiornamento non è istantaneo, lo decide il calendario che usi, non c\'è modo di forzarlo da qui.</p>' +
       '<button class="pf-btn" id="pf-couple-sync">Sincronizza il partner</button>' +
       '<p class="pf-note">Aggiorna il feed con la sequenza del partner impostata in Turni.</p>';
   }
