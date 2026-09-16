@@ -308,8 +308,10 @@ justify-content:center;overflow:hidden}
 #demoEsempio{border-left-color:var(--blue)}
 #backupNudge{border-left-color:var(--orange)}
 #installBanner{border-left-color:var(--blue)}
+#shareNudge{border-left-color:var(--blue)}
+#icsNudge{border-left-color:var(--blue)}
 #clubBanner{border-left-color:var(--orange)}
-#chiudiBenvenuto,#chiudiDemoEsempio,#chiudiBackupNudge,#chiudiInstall{float:right;background:none;border:none;color:var(--faint);
+#chiudiBenvenuto,#chiudiDemoEsempio,#chiudiBackupNudge,#chiudiInstall,#chiudiShareNudge,#chiudiIcsNudge,#chiudiClub{float:right;background:none;border:none;color:var(--faint);
 font-size:22px;line-height:1;cursor:pointer;padding:0 0 4px 10px;min-height:0}
 .card.s,.card.p{border-left-color:var(--blue)}
 .card.c,.card.l,.card.t{border-left-color:var(--orange-fill)}
@@ -685,7 +687,7 @@ body.tab-oggi.giornata #cards{display:block}
    davvero in essenziale, indipendentemente da .tabs/.giornata. */
 body.tab-oggi.essenziale #band{display:none}
 /* TURNI: ciclo, giorni liberi, partner, modifica */
-body.tab-turni #status,body.tab-turni #ora,body.tab-turni #benvenutoLink,body.tab-turni #demoEsempio,body.tab-turni #backupNudge,body.tab-turni #installBanner,body.tab-turni #clubBanner,body.tab-turni #formaGiorno,body.tab-turni #essenziale,
+body.tab-turni #status,body.tab-turni #ora,body.tab-turni #benvenutoLink,body.tab-turni #demoEsempio,body.tab-turni #backupNudge,body.tab-turni #installBanner,body.tab-turni #shareNudge,body.tab-turni #icsNudge,body.tab-turni #clubBanner,body.tab-turni #formaGiorno,body.tab-turni #essenziale,
 body.tab-turni .datebar,body.tab-turni .daynav,body.tab-turni .cap.giornata,body.tab-turni #band,body.tab-turni #cards,
 body.tab-turni #icsBox,body.tab-turni .piu-cal,body.tab-turni .tools,body.tab-turni .piu-h,body.tab-turni .piu-info,
 body.tab-turni footer{display:none}
@@ -710,7 +712,7 @@ body.tab-turni.vederci-aperta #gridBox,body.tab-turni.vederci-aperta #dayBox,
 body.tab-turni.vederci-aperta #doPartner,
 body.tab-turni.vederci-aperta #doAndamenti{display:none}
 /* PIÙ: calendario a pagamento ed extra */
-body.tab-piu #status,body.tab-piu #ora,body.tab-piu #benvenutoLink,body.tab-piu #demoEsempio,body.tab-piu #backupNudge,body.tab-piu #installBanner,body.tab-piu #clubBanner,body.tab-piu #formaGiorno,body.tab-piu #essenziale,
+body.tab-piu #status,body.tab-piu #ora,body.tab-piu #benvenutoLink,body.tab-piu #demoEsempio,body.tab-piu #backupNudge,body.tab-piu #installBanner,body.tab-piu #shareNudge,body.tab-piu #icsNudge,body.tab-piu #clubBanner,body.tab-piu #formaGiorno,body.tab-piu #essenziale,
 body.tab-piu .datebar,body.tab-piu .daynav,body.tab-piu .cap,body.tab-piu #cyc,body.tab-piu #doCycShare,body.tab-piu #doCycQR,body.tab-piu #qrBoxCyc,
 body.tab-piu #tGrid,body.tab-piu #doPartner,body.tab-piu .cycbar,body.tab-piu #cycRange,body.tab-piu #doAndamenti,
 body.tab-piu #dayBox,body.tab-piu #gridBox,body.tab-piu #andamentiPagina,body.tab-piu #vederciPagina,body.tab-piu #partner,
@@ -766,7 +768,7 @@ list-style:none;min-height:44px;display:flex;align-items:center}
 .wdet .q:last-of-type{margin-bottom:14px}
 .piu-info-in b{color:var(--ink)}
 /* OPZIONI: solo la configurazione */
-body.tab-opzioni #status,body.tab-opzioni #ora,body.tab-opzioni #benvenutoLink,body.tab-opzioni #demoEsempio,body.tab-opzioni #backupNudge,body.tab-opzioni #installBanner,body.tab-opzioni #clubBanner,body.tab-opzioni #formaGiorno,body.tab-opzioni #essenziale,
+body.tab-opzioni #status,body.tab-opzioni #ora,body.tab-opzioni #benvenutoLink,body.tab-opzioni #demoEsempio,body.tab-opzioni #backupNudge,body.tab-opzioni #installBanner,body.tab-opzioni #shareNudge,body.tab-opzioni #icsNudge,body.tab-opzioni #clubBanner,body.tab-opzioni #formaGiorno,body.tab-opzioni #essenziale,
 body.tab-opzioni .datebar,body.tab-opzioni .daynav,body.tab-opzioni #band,body.tab-opzioni .cap.ciclo,body.tab-opzioni #cyc,
 body.tab-opzioni #doCycShare,body.tab-opzioni #doCycQR,body.tab-opzioni #qrBoxCyc,
 body.tab-opzioni .cycbar,body.tab-opzioni #cycRange,body.tab-opzioni #doAndamenti,body.tab-opzioni #tGrid,body.tab-opzioni #gridBox,body.tab-opzioni #dayBox,
@@ -1094,6 +1096,8 @@ header b{font-size:23px}
 <div id="demoEsempio" class="card" hidden></div>
 <div id="backupNudge" class="card" hidden></div>
 <div id="installBanner" class="card" hidden></div>
+<div id="shareNudge" class="card" hidden></div>
+<div id="icsNudge" class="card" hidden></div>
 <div id="clubBanner" class="card" hidden></div>
 <!-- Data sopra Adesso, non sotto: prima di sapere "cosa fare adesso" serve
      sapere di quale giorno si sta parlando (specie sfogliando avanti). -->
@@ -3996,6 +4000,8 @@ function render(){
   renderDemoEsempio();
   renderBackupNudge();
   renderInstallBanner();
+  renderShareNudge();
+  renderIcsNudge();
   renderClubBanner();
   renderFormaGiorno(P);                // si azzera da solo in dettaglio
   renderEssenziale(P, CARDS);          // si azzera da solo in dettaglio
@@ -4350,9 +4356,16 @@ if($("#demoEsempio")) $("#demoEsempio").addEventListener("click", e=>{
 // salva o non lo chiude, sparisce da solo appena state.backupDone diventa
 // vero (salvaConfigurazione() lo imposta).
 let usciteRapide = false, backupNudgeChiuso = false;
+// Estratta a parte: install/share/ics devono cederle il passo quando è
+// attiva (i turni non salvati sono un rischio di perdita dati vero, più
+// urgente di un invito a installare o condividere) — prima nessuno dei
+// banner successivi sapeva di lei, potevano comparire insieme.
+function backupNudgeVisibile(){
+  return usciteRapide && !state.backupDone && !backupNudgeChiuso;
+}
 function renderBackupNudge(){
   const el=$("#backupNudge"); if(!el) return;
-  if(!usciteRapide || state.backupDone || backupNudgeChiuso){ el.hidden=true; return; }
+  if(!backupNudgeVisibile()){ el.hidden=true; return; }
   el.hidden=false;
   el.innerHTML =
     '<button type="button" id="chiudiBackupNudge" aria-label="Chiudi">×</button>'+
@@ -4391,7 +4404,7 @@ function installBannerVisibile(){
   const mostraBenvenuto = primaVoltaDaLink && !benvenutoLinkChiuso;
   const pronto = !!(state.pattern && Object.keys(state.shifts||{}).length);
   const ios = isIOSPerInstall();
-  return !(state.installBannerOff || giaInstallata() || mostraBenvenuto || !pronto || !(installPromptEvento || ios));
+  return !(state.installBannerOff || giaInstallata() || mostraBenvenuto || backupNudgeVisibile() || !pronto || !(installPromptEvento || ios));
 }
 function renderInstallBanner(){
   const el=$("#installBanner"); if(!el) return;
@@ -4410,8 +4423,62 @@ if($("#installBanner")) $("#installBanner").addEventListener("click", e=>{
   if(e.target.closest("#chiudiInstall")){ state.installBannerOff=true; salva(); renderInstallBanner(); return; }
   if(e.target.closest("#doInstallOra") && installPromptEvento){
     installPromptEvento.prompt();
-    installPromptEvento.userChoice.finally(()=>{ installPromptEvento=null; renderInstallBanner(); renderClubBanner(); });
+    installPromptEvento.userChoice.finally(()=>{ installPromptEvento=null; renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderClubBanner(); });
   }
+});
+
+// Invito a condividere il ciclo — il prodotto vale di più usato in coppia
+// (vedersi quando entrambi siete liberi), ma niente lo suggeriva mai:
+// scoprirlo richiedeva capitare su Turni e notare da soli il bottone.
+// Dopo l'installazione (o quando non si applica), prima del Club: è la
+// leva di crescita più diretta legata a questo prodotto, più della lettura
+// di un articolo. Non si ripropone più una volta condiviso o chiuso, e
+// non se l'utente ha già almeno una persona in elenco — a quel punto lo
+// sta già facendo.
+function shareNudgeVisibile(){
+  const mostraBenvenuto = primaVoltaDaLink && !benvenutoLinkChiuso;
+  const pronto = !!(state.pattern && Object.keys(state.shifts||{}).length);
+  return !(state.shareNudgeOff || mostraBenvenuto || backupNudgeVisibile() || installBannerVisibile() || !pronto || tuttePersone().length);
+}
+function renderShareNudge(){
+  const el=$("#shareNudge"); if(!el) return;
+  if(!shareNudgeVisibile()){ el.hidden=true; return; }
+  el.hidden=false;
+  el.innerHTML =
+    '<button type="button" id="chiudiShareNudge" aria-label="Chiudi">×</button>'+
+    '<b>Lavori con qualcuno che fa turni come te?</b>'+
+    '<p class="hint" style="margin-top:6px">Condividi il tuo ciclo: saprete subito quando siete liberi insieme, senza confrontare gli orari a voce ogni volta.</p>'+
+    '<button class="btn g" type="button" id="doShareNudge">Condividi il tuo ciclo →</button>';
+}
+if($("#shareNudge")) $("#shareNudge").addEventListener("click", e=>{
+  if(e.target.closest("#chiudiShareNudge")){ state.shareNudgeOff=true; salva(); renderShareNudge(); return; }
+  if(e.target.closest("#doShareNudge")){ state.shareNudgeOff=true; salva(); renderShareNudge(); salvaConfigurazione(); }
+});
+
+// Segnala l'export calendario — vive solo dentro Più, mai menzionato
+// altrove: chi non ci capita per caso non lo scopre mai. Non nella prima
+// sessione (c'è già abbastanza da notare fra benvenuto/demo, backup,
+// installazione, condivisione) — dalla seconda in poi, quando l'utente è
+// chiaramente tornato, è il momento più naturale per "lo sapevi?".
+function icsNudgeVisibile(){
+  const mostraBenvenuto = primaVoltaDaLink && !benvenutoLinkChiuso;
+  const pronto = !!(state.pattern && Object.keys(state.shifts||{}).length);
+  const secondaSessione = state.firstSeenAt && state.firstSeenAt!==iso(new Date());
+  return !(state.icsNudgeOff || mostraBenvenuto || backupNudgeVisibile() || installBannerVisibile() || shareNudgeVisibile() || !pronto || !secondaSessione);
+}
+function renderIcsNudge(){
+  const el=$("#icsNudge"); if(!el) return;
+  if(!icsNudgeVisibile()){ el.hidden=true; return; }
+  el.hidden=false;
+  el.innerHTML =
+    '<button type="button" id="chiudiIcsNudge" aria-label="Chiudi">×</button>'+
+    '<b>Lo sapevi? Puoi vedere i turni nel calendario del telefono</b>'+
+    '<p class="hint" style="margin-top:6px">Un file con i prossimi 28 giorni: niente di nuovo da controllare, li vedi dove guardi già i tuoi appuntamenti.</p>'+
+    '<button class="btn g" type="button" id="doIcsNudge">Esporta nel calendario →</button>';
+}
+if($("#icsNudge")) $("#icsNudge").addEventListener("click", e=>{
+  if(e.target.closest("#chiudiIcsNudge")){ state.icsNudgeOff=true; salva(); renderIcsNudge(); return; }
+  if(e.target.closest("#doIcsNudge")){ state.icsNudgeOff=true; salva(); apriCalendarioDaWizard(); }
 });
 
 // Invito a notturnisti.club — prima l'unico collegamento per l'utente
@@ -4420,14 +4487,14 @@ if($("#installBanner")) $("#installBanner").addEventListener("click", e=>{
 // possibile. La pagina giusta esiste già ed è già linkata da lì
 // (/planner/) — ha già due inviti "Entra nel Club" con iscrizione Ghost
 // incorporata nel corpo dell'articolo. Il problema non era la pagina,
-// era non essere mai portati lì in un momento sensato. Un banner alla
-// volta: cede il passo sia al benvenuto da link sia all'invito a
-// installare, non si accumulano tre richieste sullo stesso schermo.
+// era non essere mai portati lì in un momento sensato. Ultimo della fila:
+// cede il passo a tutti i banner sopra, non si accumulano richieste sullo
+// stesso schermo.
 function renderClubBanner(){
   const el=$("#clubBanner"); if(!el) return;
   const mostraBenvenuto = primaVoltaDaLink && !benvenutoLinkChiuso;
   const pronto = !!(state.pattern && Object.keys(state.shifts||{}).length);
-  if(state.clubBannerOff || mostraBenvenuto || installBannerVisibile() || !pronto){
+  if(state.clubBannerOff || mostraBenvenuto || backupNudgeVisibile() || installBannerVisibile() || shareNudgeVisibile() || icsNudgeVisibile() || !pronto){
     el.hidden=true; return;
   }
   el.hidden=false;
@@ -6483,6 +6550,11 @@ if(!primaVolta){
   const pref = store.get("state", null);
   if(pref) for(const k in pref) if(!CAMPI_DAL_LINK.has(k)) state[k]=pref[k];
 }
+// Prima data in cui questo browser ha visto l'app: serve solo a capire se
+// siamo alla prima sessione o già a una successiva (il promemoria
+// dell'export calendario aspetta la seconda). Scritta una sola volta, mai
+// più toccata dopo.
+if(!state.firstSeenAt) state.firstSeenAt = iso(new Date());
 // Qualunque strada abbia preso lo stato (link, memoria, prima visita), i campi
 // numerici devono essere numeri dentro limiti sensati prima che il motore li usi.
 function normalizza(){
@@ -6678,7 +6750,7 @@ function salva(){
     maxAdvance:state.maxAdvance,pPattern:state.pPattern,pAnchor:state.pAnchor,
     pShifts:state.pShifts,pWake:state.pWake,pBed:state.pBed,pName:state.pName,people:state.people,personaGlance:state.personaGlance,
     repeat:state.repeat,ecc:state.ecc,evento:state.evento,
-    napTurno:state.napTurno,sonnoDiurno:state.sonnoDiurno,mattinoBifasico:state.mattinoBifasico,avvisoBifasicoOff:state.avvisoBifasicoOff,installBannerOff:state.installBannerOff,clubBannerOff:state.clubBannerOff,pausa:state.pausa,caffSens:state.caffSens,vista:state.vista});
+    napTurno:state.napTurno,sonnoDiurno:state.sonnoDiurno,mattinoBifasico:state.mattinoBifasico,avvisoBifasicoOff:state.avvisoBifasicoOff,installBannerOff:state.installBannerOff,shareNudgeOff:state.shareNudgeOff,icsNudgeOff:state.icsNudgeOff,firstSeenAt:state.firstSeenAt,clubBannerOff:state.clubBannerOff,pausa:state.pausa,caffSens:state.caffSens,vista:state.vista});
   // segnala i cambi di configurazione (non di vista) così il modulo a pagamento
   // può tenere allineato il feed del calendario. Il primo salva non conta.
   try{
@@ -6850,17 +6922,17 @@ addEventListener("nt:refresh", ()=>{ try{ render(); }catch(e){} });
   var deferred=null;
   addEventListener("beforeinstallprompt", function(e){
     e.preventDefault(); deferred=e;
-    try{ installPromptEvento=e; renderInstallBanner(); renderClubBanner(); }catch(err){}
+    try{ installPromptEvento=e; renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderClubBanner(); }catch(err){}
     var tools=document.querySelector(".tools"); if(!tools || document.getElementById("doInstall")) return;
     var b=document.createElement("button");
     b.className="lnk"; b.id="doInstall"; b.textContent="Installa l'app";
     b.onclick=function(){ if(!deferred) return; deferred.prompt();
       deferred.userChoice.finally(function(){ deferred=null; b.remove();
-        try{ installPromptEvento=null; renderInstallBanner(); renderClubBanner(); }catch(err){} }); };
+        try{ installPromptEvento=null; renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderClubBanner(); }catch(err){} }); };
     tools.appendChild(b);
   });
   addEventListener("appinstalled", function(){ var b=document.getElementById("doInstall"); if(b) b.remove();
-    try{ installPromptEvento=null; renderInstallBanner(); renderClubBanner(); }catch(err){} });
+    try{ installPromptEvento=null; renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderClubBanner(); }catch(err){} });
   // iOS non manda mai beforeinstallprompt: qui non c'è un pulsante da
   // aggiungere, solo l'istruzione — sempre raggiungibile in Più, non solo
   // nel banner che si può chiudere.
