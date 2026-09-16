@@ -6818,15 +6818,9 @@ if($("#tEdit")) $("#tEdit").onclick=()=>{ setTab("opzioni"); apriSezioneInline(1
 if($("#partner")) $("#partner").addEventListener("click", e=>{
   if(e.target.closest("[data-partner-edit]")) apriPartner();
   else if(e.target.closest('[data-goto="piu"]')) setTab("piu");
-  else if(e.target.closest("[data-partner-share]")) salvaConfigurazione();
   else if(e.target.closest("[data-partner-sheet]")){
     if(!buildShareSheet()){ toast("Imposta prima i turni"); return; }
     try{ window.print(); }catch(err){ toast("La stampa non è disponibile qui"); }
-  }
-  else if(e.target.closest("[data-partner-qr]")){
-    const b=$("#qrBoxPartner"); if(!b) return;
-    b.hidden=!b.hidden;
-    if(!b.hidden) renderQR("#qrHolderPartner");
   }
 });
 if($("#status")) $("#status").addEventListener("click", e=>{
