@@ -562,7 +562,7 @@ justify-content:center;flex:none;width:44px;height:44px;border-radius:999px}
 .essnudge{font-size:12.5px;color:var(--faint);margin-top:14px;line-height:1.55}
 .essnudge button{background:none;border:none;color:var(--blue);font:inherit;cursor:pointer;
 text-decoration:underline;text-underline-offset:2px;padding:0}
-body.essenziale:not(.tabs) .cap,body.essenziale:not(.tabs) #cyc,body.essenziale:not(.tabs) #doFree,body.essenziale:not(.tabs) #freeBox,
+body.essenziale:not(.tabs) .cap,body.essenziale:not(.tabs) #cyc,
 body.essenziale:not(.tabs) #icsBox,body.essenziale:not(.tabs) #dayBox,body.essenziale:not(.tabs) #band,body.essenziale:not(.tabs) #cards,
 body.essenziale:not(.tabs) .tools{display:none}
 body:not(.essenziale) #essenziale{display:none}
@@ -674,9 +674,9 @@ color:var(--blue);display:inline-flex;align-items:center;justify-content:center}
 /* in Oggi lo #status resta solo quando è un avviso; il resto lo dice il piano */
 body.tab-oggi #status:not(.warn){display:none}
 /* OGGI: il giorno. "La giornata" (datebar + dettaglio + diario) è a scomparsa. */
-body.tab-oggi .cap.ciclo,body.tab-oggi #cyc,body.tab-oggi #doFree,
+body.tab-oggi .cap.ciclo,body.tab-oggi #cyc,
 body.tab-oggi #tGrid,body.tab-oggi #doPartner,body.tab-oggi .cycbar,body.tab-oggi #cycRange,body.tab-oggi #doAndamenti,
-body.tab-oggi #freeBox,body.tab-oggi #icsBox,body.tab-oggi #dayBox,body.tab-oggi #gridBox,body.tab-oggi #andamentiPagina,
+body.tab-oggi #icsBox,body.tab-oggi #dayBox,body.tab-oggi #gridBox,body.tab-oggi #andamentiPagina,
 body.tab-oggi #vederciPagina,body.tab-oggi #partner,body.tab-oggi .piu-cal,
 body.tab-oggi .tools,body.tab-oggi .piu-h,body.tab-oggi .piu-info,body.tab-oggi footer{display:none}
 /* OGGI: la datebar (navigatore giorni) resta sempre; solo il DETTAGLIO è a scomparsa */
@@ -710,21 +710,19 @@ body.tab-turni.andamenti-aperta .cap.ciclo,
 body.tab-turni.andamenti-aperta #cyc,body.tab-turni.andamenti-aperta .cycbar,body.tab-turni.andamenti-aperta #cycRange,
 body.tab-turni.andamenti-aperta #tGrid,
 body.tab-turni.andamenti-aperta #gridBox,body.tab-turni.andamenti-aperta #dayBox,
-body.tab-turni.andamenti-aperta #doFree,body.tab-turni.andamenti-aperta #freeBox,
 body.tab-turni.andamenti-aperta #doPartner,
 body.tab-turni.andamenti-aperta #doAndamenti,
 body.tab-turni.vederci-aperta .cap.ciclo,
 body.tab-turni.vederci-aperta #cyc,body.tab-turni.vederci-aperta .cycbar,body.tab-turni.vederci-aperta #cycRange,
 body.tab-turni.vederci-aperta #tGrid,
 body.tab-turni.vederci-aperta #gridBox,body.tab-turni.vederci-aperta #dayBox,
-body.tab-turni.vederci-aperta #doFree,body.tab-turni.vederci-aperta #freeBox,
 body.tab-turni.vederci-aperta #doPartner,
 body.tab-turni.vederci-aperta #doAndamenti{display:none}
 /* PIÙ: calendario a pagamento ed extra */
 body.tab-piu #status,body.tab-piu #ora,body.tab-piu #benvenutoLink,body.tab-piu #demoEsempio,body.tab-piu #backupNudge,body.tab-piu #installBanner,body.tab-piu #clubBanner,body.tab-piu #formaGiorno,body.tab-piu #essenziale,
-body.tab-piu .datebar,body.tab-piu .daynav,body.tab-piu .cap,body.tab-piu #cyc,body.tab-piu #doFree,
+body.tab-piu .datebar,body.tab-piu .daynav,body.tab-piu .cap,body.tab-piu #cyc,
 body.tab-piu #tGrid,body.tab-piu #doPartner,body.tab-piu .cycbar,body.tab-piu #cycRange,body.tab-piu #doAndamenti,
-body.tab-piu #freeBox,body.tab-piu #dayBox,body.tab-piu #gridBox,body.tab-piu #andamentiPagina,body.tab-piu #vederciPagina,body.tab-piu #partner,
+body.tab-piu #dayBox,body.tab-piu #gridBox,body.tab-piu #andamentiPagina,body.tab-piu #vederciPagina,body.tab-piu #partner,
 body.tab-piu #band,body.tab-piu #cards{display:none}
 /* componenti della tab Più */
 .piu-cal{background:var(--blue-soft);border:1px solid var(--blue-lt);border-radius:var(--r);padding:16px 17px;margin:0 0 16px}
@@ -780,7 +778,7 @@ list-style:none;min-height:44px;display:flex;align-items:center}
 body.tab-opzioni #status,body.tab-opzioni #ora,body.tab-opzioni #benvenutoLink,body.tab-opzioni #demoEsempio,body.tab-opzioni #backupNudge,body.tab-opzioni #installBanner,body.tab-opzioni #clubBanner,body.tab-opzioni #formaGiorno,body.tab-opzioni #essenziale,
 body.tab-opzioni .datebar,body.tab-opzioni .daynav,body.tab-opzioni #band,body.tab-opzioni .cap.ciclo,body.tab-opzioni #cyc,
 body.tab-opzioni .cycbar,body.tab-opzioni #cycRange,body.tab-opzioni #doAndamenti,body.tab-opzioni #tGrid,body.tab-opzioni #gridBox,body.tab-opzioni #dayBox,
-body.tab-opzioni #andamentiPagina,body.tab-opzioni #vederciPagina,body.tab-opzioni #doFree,body.tab-opzioni #freeBox,body.tab-opzioni #doPartner,
+body.tab-opzioni #andamentiPagina,body.tab-opzioni #vederciPagina,body.tab-opzioni #doPartner,
 body.tab-opzioni #partner,body.tab-opzioni #cards,body.tab-opzioni .piu-cal,body.tab-opzioni .tools,body.tab-opzioni .piu-h,
 body.tab-opzioni #icsBox,
 /* la sezione Opzioni vive solo nella sua destinazione */
@@ -1185,15 +1183,14 @@ header b{font-size:23px}
   <div id="swapOut" style="margin-top:8px"></div>
 </div>
 
-<button class="tsec" id="doFree"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg><span class="tsec-tx"><b>Quando sono disponibile</b><span id="doFreeSub"></span></span><span class="tchev">›</span></button>
-<div class="ecc" id="freeBox" hidden>
-  <p class="hint" style="margin:0 0 10px">Le ore in cui non lavori e non dovresti dormire, nei prossimi sette giorni. Sono contate al netto del viaggio: quelle in cui puoi prendere un appuntamento davvero.</p>
-  <div id="freeList"></div></div>
 <!-- Anteprima, non il contenuto intero in linea: apre la sua pagina a
-     sé (come Andamenti), non un'altra sezione da scorrere dentro Turni. -->
+     sé (come Andamenti), non un'altra sezione da scorrere dentro Turni.
+     Fonde quella che prima era "Quando sono disponibile" (solo tue,
+     #doFree/#freeBox — rimossa) con "Quando possiamo vederci?" (con le
+     persone): sono la stessa domanda, con o senza qualcun altro. -->
 <button type="button" class="tsec" id="doPartner">
-  <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:var(--blue);background:var(--blue-soft)"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M16 5.5a3 3 0 0 1 0 5"/><path d="M18 14.5a6 6 0 0 1 3 5.5"/></svg>
-  <span class="tsec-tx"><span class="eyebrow" style="display:block">Quando possiamo vederci?</span><b id="doPartnerSub" style="font-family:var(--serif)">—</b></span>
+  <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:var(--blue);background:var(--blue-soft)"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
+  <span class="tsec-tx"><span class="eyebrow" style="display:block">Quando sono disponibile</span><b id="doPartnerSub" style="font-family:var(--serif)">—</b></span>
   <span class="tchev">›</span>
 </button>
 
@@ -1202,7 +1199,7 @@ header b{font-size:23px}
     <button type="button" class="themebtn" id="chiudiVederci" aria-label="Torna a Turni">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
     </button>
-    <h1 class="tab-title" style="margin:0">Quando possiamo vederci?</h1>
+    <h1 class="tab-title" style="margin:0">Quando sono disponibile</h1>
   </div>
   <div id="partner"></div>
 </div>
@@ -5344,17 +5341,6 @@ function renderWizPeopleList(){
       '<button class="lnk" data-remove-persona="'+i+'" style="color:var(--faint)">Rimuovi</button></div>';
   }).join("")+(multi?'<p class="hint" style="margin:2px 0 10px">La stellina sceglie chi vedi nella card "Turni condivisi" di Oggi — le altre restano comunque visibili qui in Turni.</p>':'');
 }
-// Anteprima sotto "Quando sono disponibile", come nel mockup approvato
-// ("Prossima finestra: sabato 16:30–22:00") — prima il bottone diceva solo
-// il nome della sezione, senza dare un motivo per aprirla.
-function renderFreePreview(){
-  const el=$("#doFreeSub"); if(!el) return;
-  const w=finestreLibere(7);
-  if(!w.length){ el.textContent="Nessuna finestra nei prossimi sette giorni"; return; }
-  const x=w[0], scarto=dnum(x.d)-dnum(giornoVero());
-  const quando = scarto===0 ? "oggi" : scarto===1 ? "domani" : x.d.toLocaleDateString("it-IT",{weekday:"long"});
-  el.textContent = "Prossima finestra: "+quando+" "+hhmm(x.a)+"–"+hhmm(x.b);
-}
 // La finestra libera più lunga (almeno tre ore vere) di un giorno in comune —
 // stessa soglia/ordinamento già usati per la card "p" in cards(), qui
 // richiamati direttamente perché la pagina ha bisogno degli orari, non solo
@@ -5363,74 +5349,112 @@ function finestraMigliore(off, per){
   const fin=finestreCondivise(off, per)||[];
   return fin.filter(([a,z])=>z-a>=180).sort((p,q)=>(q[1]-q[0])-(p[1]-p[0]))[0]||null;
 }
+// Un giorno senza turno né altri impegni ha una finestra libera lunga quanto
+// tutta la veglia (sveglia → letto, in genere 15-17 ore); il ritaglio fra la
+// fine di un turno e il sonno è molto più corto. Non c'è un modo diretto per
+// chiedere "è un giorno di riposo pieno?" qui (richiederebbe un plan()
+// completo in più per ogni giorno) — la durata è già un'ottima approssimazione.
+const finestraTuttoIlGiorno=w=>(w.b-w.a)>=600;
+// Anteprima sotto "Quando sono disponibile", come nel mockup approvato —
+// prima il bottone diceva solo il nome della sezione, senza dare un motivo
+// per aprirla. La tua prossima finestra libera, non quella con qualcuno:
+// è l'unica sempre disponibile, anche senza persone in elenco.
 function renderPartnerPreview(){
   const el=$("#doPartnerSub"); if(!el) return;
-  const per=tuttePersone()[state.personaGlance]||tuttePersone()[0];
-  const sh=per?sharedDays(6,per):null;
-  if(!sh||!sh.length){ el.textContent="Nessun riposo in comune nei prossimi tre mesi"; return; }
-  const x=sh[0], scarto=x.off;
+  const w=finestreLibere(7);
+  if(!w.length){ el.textContent="Nessuna finestra libera nei prossimi sette giorni"; return; }
+  const x=w[0], scarto=dnum(x.d)-dnum(giornoVero());
   const quando = scarto===0 ? "oggi" : scarto===1 ? "domani" : x.d.toLocaleDateString("it-IT",{weekday:"long"});
-  const w=finestraMigliore(x.off, per);
-  el.textContent = "Prossima finestra: "+quando+(w?" "+hhmm(mod1440(w[0]))+"–"+hhmm(mod1440(w[1])):"");
+  el.textContent = "Prossima finestra libera: "+quando+(finestraTuttoIlGiorno(x)?"":" "+hhmm(x.a));
 }
 function renderPartner(CARDS){
   const el=$("#partner"); if(!el) return;
-  const tuttePer=tuttePersone();
-  const scelto = tuttePer[state.personaGlance] || tuttePer[0];
-  const sh = scelto ? sharedDays(6, scelto) : null;
+  let h="";
 
-  // Come nel mockup: un hero con la prossima occasione vera (giorno + orario
-  // + quante ore vere), non solo la data — poi le prossime, in un elenco
-  // semplice. "Il tuo andamento" ha già stabilito questa forma (hero +
-  // sezioni), qui la finestra libera in comune è l'unico numero che conta.
-  let h;
-  if(sh && sh.length){
-    const x=sh[0], w=finestraMigliore(x.off, scelto);
+  // ── Tuo: la finestra libera più vicina, poi l'elenco — stessa vista di
+  // quella che prima era la sezione "Quando sono disponibile" a sé, ora
+  // fusa qui perché è la stessa domanda, solo senza nessun altro. "Tutto
+  // il giorno" è un'etichetta sulla riga, non un secondo elenco a parte. ──
+  const libere=finestreLibere(7);
+  if(libere.length){
+    const x=libere[0], tutto=finestraTuttoIlGiorno(x);
     const giorno=x.d.toLocaleDateString("it-IT",{weekday:"long"});
     const giornoCap=giorno.charAt(0).toUpperCase()+giorno.slice(1);
-    h='<div class="whero"><span class="eyebrow" style="color:var(--blue)">Prossima finestra insieme</span>'+
-      '<div class="whero-num">'+esc(giornoCap)+(w?" "+hhmm(mod1440(w[0]))+" → "+hhmm(mod1440(w[1])):"")+'</div>'+
-      (w?'<div class="whero-sub">'+hm(w[1]-w[0])+' libere insieme</div>':'<div class="whero-sub">Nessuna finestra di almeno tre ore vere questo giorno</div>')+
+    h+='<div class="whero"><span class="eyebrow" style="color:var(--blue)">Prossima finestra libera</span>'+
+      '<div class="whero-num">'+esc(giornoCap)+(tutto?"":" "+hhmm(x.a)+" → "+hhmm(x.b))+'</div>'+
+      '<div class="whero-sub">'+(tutto?"Libero tutto il giorno":hm(x.b-x.a)+" libere")+'</div>'+
       '</div>';
-    const altre=sh.slice(1,5).map(y=>{
-      const wy=finestraMigliore(y.off, scelto);
+    const altre=libere.slice(1,6).map(y=>{
       const gy=y.d.toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"});
       const gyCap=gy.charAt(0).toUpperCase()+gy.slice(1);
-      return '<div class="row"><b>'+esc(gyCap)+'</b><span>'+(wy?hhmm(mod1440(wy[0]))+"–"+hhmm(mod1440(wy[1])):"tutto il giorno")+'</span></div>';
+      return '<div class="row"><b>'+esc(gyCap)+'</b><span>'+(finestraTuttoIlGiorno(y)?"tutto il giorno":hhmm(y.a)+"–"+hhmm(y.b))+'</span></div>';
     }).join("");
-    if(altre) h+='<span class="eyebrow" style="display:block;margin:var(--gap-sezione) 0 8px">Prossime occasioni</span><div class="rows">'+altre+'</div>';
+    if(altre) h+='<span class="eyebrow" style="display:block;margin:var(--gap-sezione) 0 8px">Prossimi giorni liberi</span><div class="rows">'+altre+'</div>';
   } else {
-    h='<div class="empty"><img src="./owl-mark.png" alt="" width="46" height="46"><p>I riposi che avete in comune nei prossimi tre mesi e le ore in cui siete svegli insieme.</p></div>';
+    h+='<div class="empty"><img src="./owl-mark.png" alt="" width="46" height="46"><p>Nei prossimi sette giorni non restano finestre di almeno un\'ora e mezza.</p></div>';
   }
 
-  // L'elenco delle ALTRE persone — solo informazione qui: nome e prossimo
-  // giorno insieme. Aggiungere, rimuovere, modificare vive tutto nel
-  // wizard (Opzioni → Dettagli): questa tab mostra, non gestisce.
-  const persone=state.people||[];
-  if(persone.length){
-    h+='<div style="margin:22px 0 12px;padding-top:18px;border-top:1px solid var(--line)"><b style="font-size:14px">Altre persone</b></div>';
-    persone.forEach((per,i)=>{
-      const sh=sharedDays(1,per);
-      const nome=per.name || "Persona "+(i+1);
-      h+='<div class="card" style="padding:11px 13px;margin-bottom:8px">'+
-        '<b>'+esc(nome)+'</b>'+
-        '<span class="hint" style="display:block;margin-top:4px">'+
-        (sh&&sh.length ? "Prossimo giorno insieme: "+sh[0].d.toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"short"})
-                       : "Nessun giorno in comune nei prossimi tre mesi")+
-        '</span></div>';
-    });
-  }
-  // Il QR: per chi ha già deciso di condividere e ha la persona davanti,
-  // invece del link.
-  h+='<div class="tools" style="margin-top:14px">'+
+  // ── Con ciascuna persona: stesso schema (hero + elenco), una volta per
+  // persona invece di un'unica vista sulla sola stella — prima si vedeva
+  // solo chi aveva la stellina in Opzioni, le altre restavano invisibili
+  // qui. ──
+  const tuttePer=tuttePersone();
+  tuttePer.forEach((per,i)=>{
+    const nome=per.name || (per.principale?"il partner":"Persona "+(i+1));
+    const sh=sharedDays(6, per);
+    h+='<span class="eyebrow" style="display:block;color:var(--blue);margin:var(--gap-sezione) 0 8px">Con '+esc(nome)+'</span>';
+    if(sh && sh.length){
+      const x=sh[0], w=finestraMigliore(x.off, per);
+      const giorno=x.d.toLocaleDateString("it-IT",{weekday:"long"});
+      const giornoCap=giorno.charAt(0).toUpperCase()+giorno.slice(1);
+      h+='<div class="whero"><div class="whero-num">'+esc(giornoCap)+(w?" "+hhmm(mod1440(w[0]))+" → "+hhmm(mod1440(w[1])):"")+'</div>'+
+        (w?'<div class="whero-sub">'+hm(w[1]-w[0])+' libere insieme</div>':'<div class="whero-sub">Tutto il giorno</div>')+
+        '</div>';
+      const altre=sh.slice(1,5).map(y=>{
+        const wy=finestraMigliore(y.off, per);
+        const gy=y.d.toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"});
+        const gyCap=gy.charAt(0).toUpperCase()+gy.slice(1);
+        return '<div class="row"><b>'+esc(gyCap)+'</b><span>'+(wy?hhmm(mod1440(wy[0]))+"–"+hhmm(mod1440(wy[1])):"tutto il giorno")+'</span></div>';
+      }).join("");
+      if(altre) h+='<div class="rows">'+altre+'</div>';
+    } else {
+      h+='<div class="empty"><p>Nessun riposo in comune nei prossimi tre mesi.</p></div>';
+    }
+  });
+
+  // ── Le tue persone: elenco corto + aggiungi, non un CRUD completo qui —
+  // gestire davvero (rinomina, elimina) resta nel wizard di Opzioni, un
+  // tocco più in là. ──
+  h+='<span class="eyebrow" style="display:block;margin:var(--gap-sezione) 0 8px">Le tue persone</span>';
+  if(tuttePer.length) h+='<div class="rows" style="margin-top:0;border-top:none;padding-top:0">'+
+    tuttePer.map((per,i)=>'<div class="row"><b>'+esc(per.name || (per.principale?"il partner":"Persona "+(i+1)))+'</b></div>').join("")+
+    '</div>';
+  h+='<button type="button" data-partner-edit style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;margin-top:'+(tuttePer.length?"8px":"0")+
+    ';background:none;border:1.5px dashed var(--line);border-radius:var(--r);color:var(--dim);font-family:inherit;font-size:13.5px;font-weight:600;cursor:pointer;">'+
+    '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>'+
+    (tuttePer.length?"Aggiungi un'altra persona":"Aggiungi una persona")+'</button>';
+
+  // ── Condividere: il tuo ciclo (link/QR, stesso payload di "Salva la
+  // configurazione" in Più — non un secondo meccanismo), o solo il foglio
+  // dei giorni liberi senza i tuoi dati (già in Più come "Foglio con i
+  // miei orari liberi": richiamato da qui, non duplicato). ──
+  h+='<span class="eyebrow" style="display:block;margin:var(--gap-sezione) 0 8px">Condividi</span>'+
+    '<div class="tools">'+
+    '<button class="tool" data-partner-share type="button">'+
+      '<span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg></span>'+
+      '<span class="tool-tx"><b>Condividi il tuo ciclo</b><span>Chi apre il link può confrontare i turni con i tuoi.</span></span>'+
+    '</button>'+
     '<button class="tool" data-partner-qr type="button">'+
       '<span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM19 14h2M14 19h2M19 19h2"/></svg></span>'+
       '<span class="tool-tx"><b>Mostra QR</b><span>Per chi hai davanti: inquadra con la fotocamera, si apre da solo.</span></span>'+
     '</button>'+
     '<div class="ecc" id="qrBoxPartner" hidden><div id="qrHolderPartner" style="display:flex;justify-content:center;margin:14px 0"></div></div>'+
-  '</div>';
-  h+='<button class="lnk" data-partner-edit style="margin-top:8px">'+((sh&&sh.length)||persone.length?"Gestisci l'elenco →":"Imposta i turni condivisi →")+'</button>'+
-    ((sh&&sh.length)?'<p class="ladder">Questi riposi in comune sono gratis, qui. Vuoi che arrivino nel <b>calendario di entrambi</b> e si aggiornino da soli? È nel calendario a pagamento. <button class="lnk" data-goto="piu">Calendario di coppia in Più →</button></p>':'');
+    '<button class="tool" data-partner-sheet type="button">'+
+      '<span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="2.4"/><circle cx="6" cy="12" r="2.4"/><circle cx="18" cy="19" r="2.4"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/></svg></span>'+
+      '<span class="tool-tx"><b>Foglio con i miei orari liberi</b><span>Solo i giorni e le ore in cui sei libero, senza sonno né turni: da dare a chi vuole vederti.</span></span>'+
+    '</button>'+
+    '</div>'+
+    (tuttePer.length?'<p class="ladder">Questi riposi in comune sono gratis, qui. Vuoi che arrivino nel <b>calendario di entrambi</b> e si aggiornino da soli? È nel calendario a pagamento. <button class="lnk" data-goto="piu">Calendario di coppia in Più →</button></p>':'');
   el.innerHTML=h;
 }
 
@@ -5608,7 +5632,7 @@ function apriEcc(d){
 
   if(box.scrollIntoView) box.scrollIntoView({behavior:"smooth",block:"nearest"});
 }
-const PANNELLI=["#dayBox","#freeBox","#icsBox","#gridBox","#opzBox1","#opzBox3","#opzBox4"];
+const PANNELLI=["#dayBox","#icsBox","#gridBox","#opzBox1","#opzBox3","#opzBox4"];
 function soloUno(id){
   for(const p of PANNELLI){ const el=$(p); if(el && p!==id) el.hidden=true; }
 }
@@ -5793,18 +5817,6 @@ if($("#doPrintShare")) $("#doPrintShare").onclick=()=>{
     window.print();
   }catch(e){ toast("La stampa non è disponibile qui"); }
 };
-function mostraLibere(){
-  const w=finestreLibere(7);
-  $("#freeList").innerHTML = w.length ? '<div class="rows" style="margin-top:0;border-top:none;padding-top:0">'+
-    w.map(x=>'<div class="row"><b style="min-width:74px">'+
-      esc(x.d.toLocaleDateString("it-IT",{weekday:"short",day:"numeric"}))+'</b><span>'+
-      hhmm(x.a)+" → "+hhmm(x.b)+' · '+dur(x.b-x.a)+'</span></div>').join("")+'</div>'
-    : '<p class="hint">Nei prossimi sette giorni non restano finestre di almeno un\'ora e mezza.</p>';
-}
-$("#doFree").onclick=()=>{ const b=$("#freeBox"); const apri=b.hidden;
-  soloUno(apri?"#freeBox":null); b.hidden=!apri;
-  $("#doFree").classList.toggle("open",apri);
-  if(apri){ mostraLibere(); if(b.scrollIntoView) b.scrollIntoView({behavior:"smooth",block:"nearest"}); } };
 // Pagine Andamenti e "Quando possiamo vederci": una alla volta dentro
 // Turni, non un accordion che si accumula sotto le altre sezioni —
 // aprono/chiudono come le altre tab, solo senza un loro bottone in
@@ -6757,6 +6769,11 @@ if($("#tEdit")) $("#tEdit").onclick=()=>{ setTab("opzioni"); apriSezioneInline(1
 if($("#partner")) $("#partner").addEventListener("click", e=>{
   if(e.target.closest("[data-partner-edit]")) apriPartner();
   else if(e.target.closest('[data-goto="piu"]')) setTab("piu");
+  else if(e.target.closest("[data-partner-share]")) salvaConfigurazione();
+  else if(e.target.closest("[data-partner-sheet]")){
+    if(!buildShareSheet()){ toast("Imposta prima i turni"); return; }
+    try{ window.print(); }catch(err){ toast("La stampa non è disponibile qui"); }
+  }
   else if(e.target.closest("[data-partner-qr]")){
     const b=$("#qrBoxPartner"); if(!b) return;
     b.hidden=!b.hidden;
