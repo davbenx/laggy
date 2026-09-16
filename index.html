@@ -160,8 +160,13 @@ cursor:pointer;display:flex;border-radius:999px}
    Stessa dimensione di .tab-title (24px): è un titolo come "Turni", non
    un'etichetta secondaria. */
 .datebar h1,#cycRange{font-family:var(--serif);font-size:24px;font-weight:600;flex:1;min-width:0;line-height:1.3;cursor:pointer}
-/* titolo di tab, come "Turni" nel mockup — Oggi non ne ha uno (la data ne
-   fa già le veci), le altre tab redesignate potranno riusarlo. */
+/* #cycRange ora fa anche da titolo di Turni ("Turni 13–27 settembre"),
+   primo elemento visibile della tab: stesso margine superiore (2px) di
+   .datebar/.tab-title, per partire alla stessa altezza sotto la banda
+   dell'app di ogni altra tab. */
+#cycRange{margin-top:2px}
+/* titolo di tab, come "Andamenti" nel mockup — Oggi e Turni non ne
+   hanno uno a parte (la data/#cycRange ne fa già le veci). */
 .tab-title{font-family:var(--serif);font-size:24px;font-weight:600;color:var(--ink);margin:2px 0 var(--gap-sezione)}
 .datebar h1:active{opacity:.7}
 #jumpDate{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;border:0}
@@ -214,9 +219,8 @@ margin-bottom:26px;box-shadow:var(--shadow-card)}
    era una fascia più alta e squadrata (17px, radius 3px, bordo), un
    linguaggio visivo diverso da tutto il resto della app redesignata. */
 .crail{position:relative;flex:1;height:8px;border-radius:99px;background:var(--s2)}
-/* riposo in comune: spazio fisso a destra, così le righe restano allineate */
+/* avviso di rischio: spazio fisso a destra, così le righe restano allineate */
 .cmark{flex:none;width:16px;display:inline-flex;justify-content:center}
-.cmark.shared{color:var(--blue)}
 .cmark.risk{color:var(--risk)}
 .cmark svg{width:15px;height:15px}
 /* Segno dell'ora attuale sulla riga di oggi: stesso disegno (triangolo +
@@ -236,9 +240,6 @@ border-top:5px solid var(--ink)}
    stile proprio, solo cursor:default (via inline) per non sembrare
    toccabile come la data di Oggi. .cycnav/.btn di prima non servono più
    — prev/oggi/next sono .nav/.today dentro .cycbar. */
-/* .crow.shared: tolta di proposito — la riga grigia sovrapposta era
-   ridondante con l'icona, stessa condizione, due segnali per una cosa
-   sola. Resta solo l'icona (.cmark.shared). */
 .kshare{display:inline-flex;align-items:center;gap:4px;color:var(--blue)}
 .kshare svg{width:13px;height:13px}
 /* stessi colori del mockup (--blue/--orange-fill), non i toni smorzati
@@ -673,10 +674,10 @@ color:var(--blue);display:inline-flex;align-items:center;justify-content:center}
 /* in Oggi lo #status resta solo quando è un avviso; il resto lo dice il piano */
 body.tab-oggi #status:not(.warn){display:none}
 /* OGGI: il giorno. "La giornata" (datebar + dettaglio + diario) è a scomparsa. */
-body.tab-oggi #turniTitle,body.tab-oggi .cap.ciclo,body.tab-oggi #cyc,body.tab-oggi #doFree,
+body.tab-oggi .cap.ciclo,body.tab-oggi #cyc,body.tab-oggi #doFree,
 body.tab-oggi #tGrid,body.tab-oggi #doPartner,body.tab-oggi .cycbar,body.tab-oggi #cycRange,body.tab-oggi #doAndamenti,
 body.tab-oggi #freeBox,body.tab-oggi #icsBox,body.tab-oggi #dayBox,body.tab-oggi #gridBox,body.tab-oggi #andamentiPagina,
-body.tab-oggi #partner,body.tab-oggi .piu-cal,
+body.tab-oggi #vederciPagina,body.tab-oggi #partner,body.tab-oggi .piu-cal,
 body.tab-oggi .tools,body.tab-oggi .piu-h,body.tab-oggi .piu-info,body.tab-oggi footer{display:none}
 /* OGGI: la datebar (navigatore giorni) resta sempre; solo il DETTAGLIO è a scomparsa */
 body.tab-oggi .cap.giornata,body.tab-oggi #cards{display:none}
@@ -699,22 +700,31 @@ body.tab-turni #status,body.tab-turni #ora,body.tab-turni #benvenutoLink,body.ta
 body.tab-turni .datebar,body.tab-turni .daynav,body.tab-turni .cap.giornata,body.tab-turni #band,body.tab-turni #cards,
 body.tab-turni #icsBox,body.tab-turni .piu-cal,body.tab-turni .tools,body.tab-turni .piu-h,body.tab-turni .piu-info,
 body.tab-turni footer{display:none}
-/* Pagina Andamenti (dentro la tab Turni, non una sesta tab): quando è
-   aperta, nasconde il contenuto normale di Turni invece di scorrerci
-   sotto o sopra — una pagina alla volta, come le altre. #andamentiPagina
-   si mostra/nasconde da sé (attributo hidden), non da qui. */
-body.tab-turni.andamenti-aperta #turniTitle,body.tab-turni.andamenti-aperta .cap.ciclo,
+/* Pagine Andamenti e "Quando possiamo vederci" (dentro la tab Turni,
+   non tab a sé): quando una è aperta, nasconde il contenuto normale di
+   Turni invece di scorrerci sotto o sopra — una pagina alla volta,
+   come le altre. Le due pagine stesse si mostrano/nascondono da sé
+   (attributo hidden), non da qui; il JS le tiene anche mutuamente
+   esclusive. */
+body.tab-turni.andamenti-aperta .cap.ciclo,
 body.tab-turni.andamenti-aperta #cyc,body.tab-turni.andamenti-aperta .cycbar,body.tab-turni.andamenti-aperta #cycRange,
 body.tab-turni.andamenti-aperta #tGrid,
 body.tab-turni.andamenti-aperta #gridBox,body.tab-turni.andamenti-aperta #dayBox,
 body.tab-turni.andamenti-aperta #doFree,body.tab-turni.andamenti-aperta #freeBox,
-body.tab-turni.andamenti-aperta #doPartner,body.tab-turni.andamenti-aperta #partner,
-body.tab-turni.andamenti-aperta #doAndamenti{display:none}
+body.tab-turni.andamenti-aperta #doPartner,
+body.tab-turni.andamenti-aperta #doAndamenti,
+body.tab-turni.vederci-aperta .cap.ciclo,
+body.tab-turni.vederci-aperta #cyc,body.tab-turni.vederci-aperta .cycbar,body.tab-turni.vederci-aperta #cycRange,
+body.tab-turni.vederci-aperta #tGrid,
+body.tab-turni.vederci-aperta #gridBox,body.tab-turni.vederci-aperta #dayBox,
+body.tab-turni.vederci-aperta #doFree,body.tab-turni.vederci-aperta #freeBox,
+body.tab-turni.vederci-aperta #doPartner,
+body.tab-turni.vederci-aperta #doAndamenti{display:none}
 /* PIÙ: calendario a pagamento ed extra */
 body.tab-piu #status,body.tab-piu #ora,body.tab-piu #benvenutoLink,body.tab-piu #demoEsempio,body.tab-piu #backupNudge,body.tab-piu #installBanner,body.tab-piu #clubBanner,body.tab-piu #formaGiorno,body.tab-piu #essenziale,
-body.tab-piu .datebar,body.tab-piu .daynav,body.tab-piu #turniTitle,body.tab-piu .cap,body.tab-piu #cyc,body.tab-piu #doFree,
+body.tab-piu .datebar,body.tab-piu .daynav,body.tab-piu .cap,body.tab-piu #cyc,body.tab-piu #doFree,
 body.tab-piu #tGrid,body.tab-piu #doPartner,body.tab-piu .cycbar,body.tab-piu #cycRange,body.tab-piu #doAndamenti,
-body.tab-piu #freeBox,body.tab-piu #dayBox,body.tab-piu #gridBox,body.tab-piu #andamentiPagina,body.tab-piu #partner,
+body.tab-piu #freeBox,body.tab-piu #dayBox,body.tab-piu #gridBox,body.tab-piu #andamentiPagina,body.tab-piu #vederciPagina,body.tab-piu #partner,
 body.tab-piu #band,body.tab-piu #cards{display:none}
 /* componenti della tab Più */
 .piu-cal{background:var(--blue-soft);border:1px solid var(--blue-lt);border-radius:var(--r);padding:16px 17px;margin:0 0 16px}
@@ -768,9 +778,9 @@ list-style:none;min-height:44px;display:flex;align-items:center}
 .piu-info-in b{color:var(--ink)}
 /* OPZIONI: solo la configurazione */
 body.tab-opzioni #status,body.tab-opzioni #ora,body.tab-opzioni #benvenutoLink,body.tab-opzioni #demoEsempio,body.tab-opzioni #backupNudge,body.tab-opzioni #installBanner,body.tab-opzioni #clubBanner,body.tab-opzioni #formaGiorno,body.tab-opzioni #essenziale,
-body.tab-opzioni .datebar,body.tab-opzioni .daynav,body.tab-opzioni #band,body.tab-opzioni #turniTitle,body.tab-opzioni .cap.ciclo,body.tab-opzioni #cyc,
+body.tab-opzioni .datebar,body.tab-opzioni .daynav,body.tab-opzioni #band,body.tab-opzioni .cap.ciclo,body.tab-opzioni #cyc,
 body.tab-opzioni .cycbar,body.tab-opzioni #cycRange,body.tab-opzioni #doAndamenti,body.tab-opzioni #tGrid,body.tab-opzioni #gridBox,body.tab-opzioni #dayBox,
-body.tab-opzioni #andamentiPagina,body.tab-opzioni #doFree,body.tab-opzioni #freeBox,body.tab-opzioni #doPartner,
+body.tab-opzioni #andamentiPagina,body.tab-opzioni #vederciPagina,body.tab-opzioni #doFree,body.tab-opzioni #freeBox,body.tab-opzioni #doPartner,
 body.tab-opzioni #partner,body.tab-opzioni #cards,body.tab-opzioni .piu-cal,body.tab-opzioni .tools,body.tab-opzioni .piu-h,
 body.tab-opzioni #icsBox,
 /* la sezione Opzioni vive solo nella sua destinazione */
@@ -801,10 +811,10 @@ color:var(--su-blu);display:flex;align-items:center;justify-content:center;margi
 .andamento-sezione{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);
 padding:6px 16px;box-shadow:var(--shadow-card)}
 .andamento-sezione .rows{border-top:none;margin-top:0;padding-top:0}
-/* Hero di "Quando possiamo vederci": il pannello che lo contiene (.ecc)
-   è già blu tenue — uno sfondo identico qui dentro sarebbe piatto, non
-   ci sarebbe contrasto. --s1/bordo, come le altre hero della app. */
-.whero{background:var(--s1);border:1px solid var(--line);border-radius:20px;padding:18px;margin-bottom:var(--gap-sezione)}
+/* Hero di "Quando possiamo vederci" — sfondo blu tenue pieno, come nel
+   mockup: ora è una pagina a sé (non più dentro un pannello .ecc già
+   blu), quindi qui il colore fa davvero da risalto. */
+.whero{background:var(--blue-soft);border-radius:20px;padding:18px;margin-bottom:var(--gap-sezione)}
 .whero-num{font-family:var(--serif);font-size:22px;font-weight:600;line-height:1.25;margin:4px 0 4px;color:var(--ink)}
 .whero-sub{font-size:13px;color:var(--dim)}
 .wintro{font-size:14.5px;color:var(--ink);line-height:1.6;margin:0 0 20px;padding:14px 15px;
@@ -1127,12 +1137,14 @@ header b{font-size:23px}
 <div id="formaGiorno"></div>
 <div class="ess" id="essenziale"></div>
 
-<h1 class="tab-title" id="turniTitle">Turni</h1>
-<!-- Sopra la striscia, non sotto. Stesso schema di Oggi: la data (qui
-     l'intervallo) sulla sua riga, le frecce + "torna a oggi" su quella
-     sotto (.cycbar) — prima erano tutte e tre le cose sulla stessa riga
-     e l'intervallo restava stretto in mezzo. -->
-<h1 class="cycrange" id="cycRange" style="cursor:default">—</h1>
+<!-- Non più un titolo "Turni" separato sopra: l'intervallo del ciclo fa
+     già da titolo ("Turni 13–27 settembre"), il nome della tab è già
+     ripetuto anche sotto nella barra di navigazione. Sopra la striscia,
+     non sotto — stesso schema di Oggi: il titolo/intervallo sulla sua
+     riga, le frecce + "torna a oggi" su quella sotto (.cycbar), prima
+     erano tutte e tre le cose sulla stessa riga e l'intervallo restava
+     stretto in mezzo. -->
+<h1 class="cycrange" id="cycRange" style="cursor:default">Turni</h1>
 <div class="cycbar" style="margin:10px 0 14px">
   <button class="nav" id="cycPrev" aria-label="Giorni precedenti"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
   <button class="today" id="cycToday">Naviga</button>
@@ -1177,11 +1189,24 @@ header b{font-size:23px}
 <div class="ecc" id="freeBox" hidden>
   <p class="hint" style="margin:0 0 10px">Le ore in cui non lavori e non dovresti dormire, nei prossimi sette giorni. Sono contate al netto del viaggio: quelle in cui puoi prendere un appuntamento davvero.</p>
   <div id="freeList"></div></div>
-<button class="tsec" id="doPartner"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M16 5.5a3 3 0 0 1 0 5"/><path d="M18 14.5a6 6 0 0 1 3 5.5"/></svg><span class="tsec-tx"><b>Quando possiamo vederci?</b><span id="doPartnerSub"></span></span><span class="tchev">›</span></button>
-<div class="ecc" id="partner" hidden></div>
-<!-- Anteprima, non più il contenuto intero in linea: apre la pagina
-     Andamenti a sé (come nel mockup), non un'altra sezione da scorrere
-     dentro Turni. -->
+<!-- Anteprima, non il contenuto intero in linea: apre la sua pagina a
+     sé (come Andamenti), non un'altra sezione da scorrere dentro Turni. -->
+<button type="button" class="tsec" id="doPartner">
+  <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:var(--blue);background:var(--blue-soft)"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M16 5.5a3 3 0 0 1 0 5"/><path d="M18 14.5a6 6 0 0 1 3 5.5"/></svg>
+  <span class="tsec-tx"><span class="eyebrow" style="display:block">Quando possiamo vederci?</span><b id="doPartnerSub" style="font-family:var(--serif)">—</b></span>
+  <span class="tchev">›</span>
+</button>
+
+<div id="vederciPagina" hidden>
+  <div style="display:flex;align-items:center;gap:12px;margin:2px 0 var(--gap-sezione)">
+    <button type="button" class="themebtn" id="chiudiVederci" aria-label="Torna a Turni">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+    </button>
+    <h1 class="tab-title" style="margin:0">Quando possiamo vederci?</h1>
+  </div>
+  <div id="partner"></div>
+</div>
+
 <button type="button" class="tsec" id="doAndamenti">
   <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:var(--orange);background:var(--orange-soft)"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 6h6v6"/></svg>
   <span class="tsec-tx"><span class="eyebrow" style="display:block">Andamenti</span><b id="andamentiAnteprima" style="font-family:var(--serif)">—</b></span>
@@ -4894,28 +4919,12 @@ function renderStrip(P, f, S){
     let pRest=false;
     if(hasP){ pRest = !!asPartner(()=>{ const pb=block(o); return pb && pb.rest; });
       if(pRest) seg.push([0,100,"pt"]); }
-    // "Condiviso" prima significava solo "riposo dal turno per entrambi" —
-    // ma un giorno libero dal lavoro con orari di sonno sfasati (lui dorme
-    // di giorno, tu di notte) non ha un'ora vera in cui state svegli
-    // insieme. Ora usa la stessa sovrapposizione reale già calcolata per
-    // "Ora" (finestreCondivise, che conta il sonno principale, non solo il
-    // turno) — non un secondo metodo diverso e più impreciso.
-    // Esteso a TUTTE le persone in elenco, non solo il partner principale:
-    // condiviso se c'è sovrapposizione reale con almeno una di loro.
-    // Nota: non conta ancora i pisolini (richiederebbe plan() completo per
-    // ogni giorno e persona, non solo la lettura leggera che c'è qui).
-    const insieme=[];
-    for(const per of tuttePersone()){
-      const ov=finestreCondivise(o, per);
-      if(ov && ov.some(([a,z])=>z-a>=180)) insieme.push(per.name || (per.principale?"il partner":"qualcuno"));
-    }
-    const shared = insieme.length>0;
     const key=iso(d), mark=diary[key];
     const rk=rischi.get(o);
     const rkTitle = rk ? (rk.tipo==="notti" ? rk.n+"ª notte di fila: da queste in poi il rischio sale, meglio proteggere il sonno"
       : rk.tipo==="minimo" ? "Sonno corto prima di un turno che cade nel tuo punto più basso: il rischio è più alto del solito"
       : "Solo "+rk.ore+" ore fra la fine di un turno e l'inizio del successivo: il sonno ne risente") : "";
-    ch+='<div class="crow'+(shared?" shared":"")+(o===0?" on":"")+(state.ecc[iso(d)]?" mod":"")+'" data-off="'+o+'" role="button" tabindex="0">'+
+    ch+='<div class="crow'+(o===0?" on":"")+(state.ecc[iso(d)]?" mod":"")+'" data-off="'+o+'" role="button" tabindex="0">'+
       '<span class="clab">'+d.toLocaleDateString("it-IT",{weekday:"short"}).slice(0,3)+' '+d.getDate()+'</span>'+
       '<span class="ccode">'+k+'</span>'+
       '<span class="crail">'+
@@ -4923,9 +4932,9 @@ function renderStrip(P, f, S){
       (o===0 && cpx(oggiM)>=0 && cpx(oggiM)<=100 ? '<span class="cnow" style="left:'+cpx(oggiM)+'%" title="adesso"></span>' : '')+
       '</span><span class="cdi"'+(mark?' title="'+DLAB[mark-1]+'" style="color:'+DCOL_TEND[tendenzaDi(mark)]+'"':'')+'>'+
       (mark?ICON_TEND[tendenzaDi(mark)]:"")+'</span>'+
-      '<span class="cmark'+(shared?' shared':rk?' risk':'')+'"'+
-      (shared?' title="Riposo in comune con '+esc(insieme.join(", "))+'" aria-label="Riposo in comune"':rk?' title="'+esc(rkTitle)+'" aria-label="'+esc(rkTitle)+'"':'')+'>'+
-      (shared?ICON.duo:rk?ICON.warn:"")+'</span></div>';
+      '<span class="cmark'+(rk?' risk':'')+'"'+
+      (rk?' title="'+esc(rkTitle)+'" aria-label="'+esc(rkTitle)+'"':'')+'>'+
+      (rk?ICON.warn:"")+'</span></div>';
   }
   let anyRisk=false;
   for(let o=finLo;o<=finHi;o++) if(rischi.has(o)){ anyRisk=true; break; }
@@ -4935,7 +4944,7 @@ function renderStrip(P, f, S){
   // un'ampiezza approssimativa dell'intera finestra, già leggibile dalle
   // etichette dei giorni sopra.
   $("#cyc").innerHTML=ch+
-    '<div class="key">'+'<span><i style="background:var(--blue)"></i>Sonno</span>'+'<span><i style="background:var(--orange-fill)"></i>Turno</span>'+(hasP?'<span><i style="background:var(--blue-lt);opacity:.5"></i>Riposo del partner</span>':'')+(tuttePersone().length?'<span class="kshare">'+ICON.duo+'Riposo in comune</span>':'')+(anyRisk?'<span class="kshare">'+ICON.warn+'Momento più critico</span>':'')+(Object.keys(diary).length?'<span class="kshare"><span style="color:var(--blue)">●</span> Come ti sei sentito</span>':'')+'</div>'+
+    '<div class="key">'+'<span><i style="background:var(--blue)"></i>Sonno</span>'+'<span><i style="background:var(--orange-fill)"></i>Turno</span>'+(hasP?'<span><i style="background:var(--blue-lt);opacity:.5"></i>Riposo del partner</span>':'')+(anyRisk?'<span class="kshare">'+ICON.warn+'Momento più critico</span>':'')+(Object.keys(diary).length?'<span class="kshare"><span style="color:var(--blue)">●</span> Come ti sei sentito</span>':'')+'</div>'+
     (anyRisk?'<details class="piu-info"><summary>Perché questi avvisi</summary><div class="piu-info-in">'+
       '<p><b>4 notti di fila.</b> Da qui il rischio di errore sale in modo netto, secondo la ricerca sul lavoro a turni — non superare le 3 notti consecutive è la raccomandazione di un gruppo di ricercatori del settore riunito nel 2020.</p>'+
       '<p><b>Meno di 11 ore fra un turno e l\'altro.</b> È il riposo minimo richiesto dalla direttiva europea sull\'orario di lavoro, e la stessa soglia raccomandata dagli stessi ricercatori per proteggere il sonno.</p>'+
@@ -4948,9 +4957,11 @@ function renderStrip(P, f, S){
   if(rangeEl){
     const d1=day(f,finLo), d2=day(f,finHi);
     const stessoMese = d1.getMonth()===d2.getMonth() && d1.getFullYear()===d2.getFullYear();
-    rangeEl.textContent = stessoMese
+    // "Turni 13–27 settembre": fa anche da titolo della tab, non c'è più
+    // un h1 "Turni" separato sopra.
+    rangeEl.textContent = "Turni "+(stessoMese
       ? d1.getDate()+"–"+d2.toLocaleDateString("it-IT",{day:"numeric",month:"long"})
-      : d1.toLocaleDateString("it-IT",{day:"numeric",month:"long"})+" – "+d2.toLocaleDateString("it-IT",{day:"numeric",month:"long"});
+      : d1.toLocaleDateString("it-IT",{day:"numeric",month:"long"})+" – "+d2.toLocaleDateString("it-IT",{day:"numeric",month:"long"}));
   }
 }
 
@@ -5597,7 +5608,7 @@ function apriEcc(d){
 
   if(box.scrollIntoView) box.scrollIntoView({behavior:"smooth",block:"nearest"});
 }
-const PANNELLI=["#dayBox","#freeBox","#icsBox","#gridBox","#partner","#opzBox1","#opzBox3","#opzBox4"];
+const PANNELLI=["#dayBox","#freeBox","#icsBox","#gridBox","#opzBox1","#opzBox3","#opzBox4"];
 function soloUno(id){
   for(const p of PANNELLI){ const el=$(p); if(el && p!==id) el.hidden=true; }
 }
@@ -5793,12 +5804,14 @@ function mostraLibere(){
 $("#doFree").onclick=()=>{ const b=$("#freeBox"); const apri=b.hidden;
   soloUno(apri?"#freeBox":null); b.hidden=!apri;
   $("#doFree").classList.toggle("open",apri);
-  if($("#doPartner")) $("#doPartner").classList.remove("open");
   if(apri){ mostraLibere(); if(b.scrollIntoView) b.scrollIntoView({behavior:"smooth",block:"nearest"}); } };
-// Pagina Andamenti: una sola alla volta dentro Turni, non un accordion
-// che si accumula sotto le altre sezioni — apre/chiude come le altre
-// tab, solo senza un suo bottone in fondo.
+// Pagine Andamenti e "Quando possiamo vederci": una alla volta dentro
+// Turni, non un accordion che si accumula sotto le altre sezioni —
+// aprono/chiudono come le altre tab, solo senza un loro bottone in
+// fondo. Aprirne una chiude sempre l'altra, non possono stare aperte
+// insieme.
 function apriAndamenti(){
+  chiudiVederci();
   document.body.classList.add("andamenti-aperta");
   const p=$("#andamentiPagina"); if(p) p.hidden=false;
   try{ window.scrollTo(0,0); }catch(e){}
@@ -5807,8 +5820,20 @@ function chiudiAndamenti(){
   document.body.classList.remove("andamenti-aperta");
   const p=$("#andamentiPagina"); if(p) p.hidden=true;
 }
+function apriVederci(){
+  chiudiAndamenti();
+  document.body.classList.add("vederci-aperta");
+  const p=$("#vederciPagina"); if(p) p.hidden=false;
+  try{ window.scrollTo(0,0); }catch(e){}
+}
+function chiudiVederci(){
+  document.body.classList.remove("vederci-aperta");
+  const p=$("#vederciPagina"); if(p) p.hidden=true;
+}
 if($("#doAndamenti")) $("#doAndamenti").onclick=apriAndamenti;
 if($("#chiudiAndamenti")) $("#chiudiAndamenti").onclick=chiudiAndamenti;
+if($("#doPartner")) $("#doPartner").onclick=apriVederci;
+if($("#chiudiVederci")) $("#chiudiVederci").onclick=chiudiVederci;
 
 const cycGo=n=>{
   cicloOff=Math.max(cicloMin(), Math.min(cicloMax(), n));
@@ -5870,11 +5895,6 @@ function finestraCiclo(){
 if($("#cycPrev"))  $("#cycPrev").onclick =()=>cycGo(cicloOff-passoCiclo());
 if($("#cycNext"))  $("#cycNext").onclick =()=>cycGo(cicloOff+passoCiclo());
 if($("#cycToday")) $("#cycToday").onclick=()=>cycGo(0);
-
-if($("#doPartner")) $("#doPartner").onclick=()=>{ const b=$("#partner"); const apri=b.hidden;
-  soloUno(apri?"#partner":null); b.hidden=!apri;
-  $("#doPartner").classList.toggle("open",apri);
-  if(apri){ render(); if(b.scrollIntoView) b.scrollIntoView({behavior:"smooth",block:"nearest"}); } };
 
 // Griglia turni variabili — gratis, scrive in locale (niente server)
 if($("#tGrid")) $("#tGrid").onclick=()=>{ const b=$("#gridBox"); const apri=b.hidden;
@@ -6721,6 +6741,7 @@ function setTab(t){
   const tab = (t==="turni"||t==="piu"||t==="opzioni") ? t : "oggi";
   document.body.classList.remove("tab-oggi","tab-turni","tab-piu","tab-opzioni","giornata");
   chiudiAndamenti();
+  chiudiVederci();
   document.body.classList.add("tab-"+tab);
   state.tab = tab;
   state.vista = "essenziale";
