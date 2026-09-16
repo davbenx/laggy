@@ -219,10 +219,6 @@ margin-bottom:26px;box-shadow:var(--shadow-card)}
    era una fascia più alta e squadrata (17px, radius 3px, bordo), un
    linguaggio visivo diverso da tutto il resto della app redesignata. */
 .crail{position:relative;flex:1;height:8px;border-radius:99px;background:var(--s2)}
-/* avviso di rischio: spazio fisso a destra, così le righe restano allineate */
-.cmark{flex:none;width:16px;display:inline-flex;justify-content:center}
-.cmark.risk{color:var(--risk)}
-.cmark svg{width:15px;height:15px}
 /* Segno dell'ora attuale sulla riga di oggi: stesso disegno (triangolo +
    linea) del marcatore "adesso" nella striscia forma-giornata di Oggi —
    prima qui era solo una linea, un indicatore diverso per lo stesso
@@ -240,8 +236,6 @@ border-top:5px solid var(--ink)}
    stile proprio, solo cursor:default (via inline) per non sembrare
    toccabile come la data di Oggi. .cycnav/.btn di prima non servono più
    — prev/oggi/next sono .nav/.today dentro .cycbar. */
-.kshare{display:inline-flex;align-items:center;gap:4px;color:var(--blue)}
-.kshare svg{width:13px;height:13px}
 /* stessi colori del mockup (--blue/--orange-fill), non i toni smorzati
    che la striscia usava per conto suo (--sleep-fill/--orange-bar) —
    quei token restano dove servivano altrove (#band), qui la tinta è la
@@ -269,12 +263,6 @@ padding:15px 16px;margin:14px 0}
 .ecc>b{display:block;font-size:16px;margin-bottom:3px}
 .crow.mod .ccode{text-decoration:underline;text-underline-offset:2px}
 .cbar.sh{background:var(--orange-fill)}
-/* Riposo del partner: funzione reale che il mockup non prevede (mostra
-   un solo ciclo) — riproporzionata sulla nuova traccia sottile (8px,
-   prima 17px), non lasciata alla posizione calcolata per quella vecchia
-   e più alta. */
-.cbar.pt{background:var(--blue-lt);opacity:.5;top:auto;height:3px;bottom:2px}
-.cdi{width:16px;flex:none;display:inline-flex;align-items:center;justify-content:center;color:var(--faint)}
 .key{display:flex;gap:14px;margin-top:8px;font-size:11px;color:var(--faint);flex-wrap:wrap}
 .key i{display:inline-block;width:10px;height:7px;border-radius:3px;margin-right:5px;vertical-align:1px}
 .band{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:13px 14px 6px;margin-bottom:24px;position:relative;overflow:hidden}
@@ -3992,7 +3980,7 @@ function render(){
   const giornata = document.body.classList.contains("giornata");
   const showStrip = (tab==="turni") || (!ess && tab!=="oggi" && tab!=="piu"); // ciclo/dettaglio legacy
   const showDay = (tab==="oggi" && giornata) || (!ess && tab!=="turni" && tab!=="piu");
-  if(showStrip){ renderStrip(P, f, S); renderAndamenti(); renderAndamentiPreview(); renderPartner(CARDS); renderPartnerPreview(); renderFreePreview(); }
+  if(showStrip){ renderStrip(P, f, S); renderAndamenti(); renderAndamentiPreview(); renderPartner(CARDS); renderPartnerPreview(); }
   if(tab==="piu") renderPiuCal();
   if(tab==="oggi") renderBand(P, CARDS);
   if(showDay){ renderCards(P, f, CARDS); }
@@ -4875,7 +4863,6 @@ function rischiAvanti(P, n){
   return flag;
 }
 function renderStrip(P, f, S){
-  const rischi=rischiAvanti(P);
   // Scala unica per tutte le righe, senza avvolgimenti: così ogni barra
   // resta sul giorno a cui appartiene e non se ne va a finire su quello dopo.
   let clo=Infinity, chi=-Infinity;
@@ -4900,7 +4887,7 @@ function renderStrip(P, f, S){
   if(oggiInFinestra && isFinite(clo)){ clo=Math.min(clo,oggiM); chi=Math.max(chi,oggiM); }
   clo=Math.floor((clo-30)/60)*60; chi=Math.ceil((chi+30)/60)*60;
   const cspan=Math.max(chi-clo,60), cpx=m=>(m-clo)/cspan*100;
-  let ch="", hasP=!!state.pPattern;
+  let ch="";
   for(let o=finLo;o<=finHi;o++){
     const d=day(f,o), k=codeAt(o), sd=at(S,o), bb=block(o), seg=[];
     if(!sd||!bb) continue;
@@ -4911,42 +4898,27 @@ function renderStrip(P, f, S){
     // (il pisolino non è nella striscia: simulate() non calcola i pisolini,
     // solo plan() lo fa — chiamarlo per ogni giorno della striscia costerebbe
     // un plan() completo x13 a ogni render, non solo una lettura leggera)
-    // Il riposo dell'altra persona si calcola sui SUOI turni (ora ha definizioni proprie):
-    // dedurlo da "codice che non conosco" era sbagliato e dava falsi riposi.
-    let pRest=false;
-    if(hasP){ pRest = !!asPartner(()=>{ const pb=block(o); return pb && pb.rest; });
-      if(pRest) seg.push([0,100,"pt"]); }
-    const key=iso(d), mark=diary[key];
-    const rk=rischi.get(o);
-    const rkTitle = rk ? (rk.tipo==="notti" ? rk.n+"ª notte di fila: da queste in poi il rischio sale, meglio proteggere il sonno"
-      : rk.tipo==="minimo" ? "Sonno corto prima di un turno che cade nel tuo punto più basso: il rischio è più alto del solito"
-      : "Solo "+rk.ore+" ore fra la fine di un turno e l'inizio del successivo: il sonno ne risente") : "";
     ch+='<div class="crow'+(o===0?" on":"")+(state.ecc[iso(d)]?" mod":"")+'" data-off="'+o+'" role="button" tabindex="0">'+
       '<span class="clab">'+d.toLocaleDateString("it-IT",{weekday:"short"}).slice(0,3)+' '+d.getDate()+'</span>'+
       '<span class="ccode">'+k+'</span>'+
       '<span class="crail">'+
       seg.map(([x,w,cl])=>'<span class="cbar '+cl+'" style="left:'+x+'%;width:'+w+'%"></span>').join("")+
       (o===0 && cpx(oggiM)>=0 && cpx(oggiM)<=100 ? '<span class="cnow" style="left:'+cpx(oggiM)+'%" title="adesso"></span>' : '')+
-      '</span><span class="cdi"'+(mark?' title="'+DLAB[mark-1]+'" style="color:'+DCOL_TEND[tendenzaDi(mark)]+'"':'')+'>'+
-      (mark?ICON_TEND[tendenzaDi(mark)]:"")+'</span>'+
-      '<span class="cmark'+(rk?' risk':'')+'"'+
-      (rk?' title="'+esc(rkTitle)+'" aria-label="'+esc(rkTitle)+'"':'')+'>'+
-      (rk?ICON.warn:"")+'</span></div>';
+      '</span></div>';
   }
-  let anyRisk=false;
-  for(let o=finLo;o<=finHi;o++) if(rischi.has(o)){ anyRisk=true; break; }
   // Niente più asse orario sotto la striscia (.caxis): la striscia del
   // ciclo mostra GIORNI, non orari nella giornata — a differenza di
   // formaGiorno in Oggi, dove le ore sono il punto. Qui ripetevano solo
   // un'ampiezza approssimativa dell'intera finestra, già leggibile dalle
   // etichette dei giorni sopra.
+  // "Il tuo ciclo" torna alle sole funzioni base (sonno + turno): tolti il
+  // riposo del partner (vive in "Quando sono disponibile"), l'avviso di
+  // rischio (notti di fila, turno rientrante, minimo circadiano — anche
+  // se in questo momento non compare da nessun'altra parte visibile:
+  // riassuntoGiorno() lo scrive solo in #band, nascosto in modalità
+  // essenziale) e il pallino dell'umore dal diario.
   $("#cyc").innerHTML=ch+
-    '<div class="key">'+'<span><i style="background:var(--blue)"></i>Sonno</span>'+'<span><i style="background:var(--orange-fill)"></i>Turno</span>'+(hasP?'<span><i style="background:var(--blue-lt);opacity:.5"></i>Riposo del partner</span>':'')+(anyRisk?'<span class="kshare">'+ICON.warn+'Momento più critico</span>':'')+(Object.keys(diary).length?'<span class="kshare"><span style="color:var(--blue)">●</span> Come ti sei sentito</span>':'')+'</div>'+
-    (anyRisk?'<details class="piu-info"><summary>Perché questi avvisi</summary><div class="piu-info-in">'+
-      '<p><b>4 notti di fila.</b> Da qui il rischio di errore sale in modo netto, secondo la ricerca sul lavoro a turni — non superare le 3 notti consecutive è la raccomandazione di un gruppo di ricercatori del settore riunito nel 2020.</p>'+
-      '<p><b>Meno di 11 ore fra un turno e l\'altro.</b> È il riposo minimo richiesto dalla direttiva europea sull\'orario di lavoro, e la stessa soglia raccomandata dagli stessi ricercatori per proteggere il sonno.</p>'+
-      '<p class="hint" style="margin-top:8px">Garde e coll. 2020, Scandinavian Journal of Work, Environment &amp; Health.</p>'+
-      '</div></details>':'');
+    '<div class="key">'+'<span><i style="background:var(--blue)"></i>Sonno</span>'+'<span><i style="background:var(--orange-fill)"></i>Turno</span>'+'</div>';
   // L'etichetta del range: stessa finestra usata sopra per costruire la
   // striscia (finestraCiclo()), non un calcolo separato che rischierebbe
   // di disallinearsi da quello che si vede davvero.
@@ -5365,7 +5337,7 @@ function renderPartnerPreview(){
   if(!w.length){ el.textContent="Nessuna finestra libera nei prossimi sette giorni"; return; }
   const x=w[0], scarto=dnum(x.d)-dnum(giornoVero());
   const quando = scarto===0 ? "oggi" : scarto===1 ? "domani" : x.d.toLocaleDateString("it-IT",{weekday:"long"});
-  el.textContent = "Prossima finestra libera: "+quando+(finestraTuttoIlGiorno(x)?"":" "+hhmm(x.a));
+  el.textContent = quando.charAt(0).toUpperCase()+quando.slice(1)+(finestraTuttoIlGiorno(x)?"":" "+hhmm(x.a));
 }
 function renderPartner(CARDS){
   const el=$("#partner"); if(!el) return;
