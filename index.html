@@ -929,7 +929,14 @@ header b{font-size:23px}
       <select id="oPreset" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0" aria-hidden="true" tabindex="-1"></select>
       <div class="presetTiles" id="presetTiles"></div>
     </div>
-    <div id="avanzate" hidden>
+    <!-- Gli orari veri restano sempre visibili e modificabili, anche con un
+         preset scelto: prima si vedevano solo con "Personalizza", quindi un
+         preset con orari leggermente diversi dai tuoi (es. il tuo "Mattino"
+         comincia alle 6:30 non alle 7) non dava mai occasione di accorgersene
+         né di correggerlo qui. Ripetizione/lunghezza/griglia (sotto, dentro
+         #avanzate) restano invece solo per "Personalizza": con un preset
+         sono già decise dal pattern scelto, non c'è niente da rivedere lì. -->
+    <div id="shiftsBox">
       <div class="q">
         <label>I tuoi turni</label>
         <div class="shhead"><span></span><span>Nome</span><span>Inizio</span><span>Fine</span><span></span></div>
@@ -937,6 +944,8 @@ header b{font-size:23px}
         <div class="p1"><button class="btn g" id="addShift" style="margin-top:6px">+ Aggiungi turno</button></div>
         <span class="hint">Una riga per tipo di turno. La lettera a sinistra è quella che scriverai nella sequenza. Se un turno comincia dopo mezzanotte (02:00–06:00) spunta <b>+1</b>: appartiene alla notte del giorno segnato, non a quella dopo.</span>
       </div>
+    </div>
+    <div id="avanzate" hidden>
       <div class="q">
         <label class="p1"><input type="checkbox" id="repeat" checked> Il turno si ripete sempre uguale</label>
         <span class="hint">Togli la spunta se il turno te lo comunicano mese per mese: quello che tocchi vale per questi giorni, fuori da lì lo strumento non inventa niente.</span>
@@ -4326,7 +4335,7 @@ function renderHeader(P, f){
   const avv = NT.freeWakeOk() ? "" : "Questa risposta non è plausibile: sto usando "+hhmm(NT.freeWakeUsata())+".";
   { const el=$("#oWakeWarn"); if(el) el.textContent=avv; }
   const bn=$("#setName"), bd=$("#setDesc"), pi=presetIndex();
-  const nomeCiclo = pi>=0 ? PRESETS[pi].n : "Il tuo turno";
+  const nomeCiclo = pi>=0 ? nomePreset(PRESETS[pi]) : "Il tuo turno";
   if(bn){
     bn.textContent = nomeCiclo;
     const oggi=NT.codeAt(dnum(giornoVero())-dnum(state.focus));
@@ -5007,7 +5016,7 @@ function renderOpzSummaries(){
   if(t){
     const pi=presetIndex();
     t.textContent = !state.pattern ? ""
-      : pi>=0 ? PRESETS[pi].n.replace(/\s*\([^)]*\)\s*$/,"")
+      : pi>=0 ? nomePreset(PRESETS[pi])
       : "Personalizzato · "+state.pattern.length+" giorni";
   }
   const s=$("#opzValSonno");
@@ -5689,22 +5698,33 @@ function presetIndex(){
       return i;
   return -1;
 }
+// sector: null per i preset senza settore condiviso (mostrati come card
+// singola col titolo per intero). title/sub separati invece di un'unica
+// stringa con " · "/parentesi incorporati: prima renderPresetTiles()
+// ricavava titolo e sottotitolo tagliando quella stringa, fragile e
+// difficile da leggere. sub è in parole, non lettere del turno (M-P-N...):
+// chi guarda una card la prima volta non ha ancora imparato quella
+// convenzione, gli orari in chiaro dicono di più.
 const PRESETS=[
- {n:"Sanità · in quinta (M-P-N-smonto-riposo)", p:"MPNSR", s:SAN},
- {n:"Sanità · in sesta (due riposi dopo lo smonto)", p:"MPNSRR", s:SAN},
- {n:"Industria · ciclo continuo 16 giorni (4 squadre)", p:"MMMMPPPPNNNNRRRR", s:T3},
- {n:"Industria · 4x2 (quattro giorni, due di riposo)", p:"MMMMRRPPPPRRNNNNRR", s:T3},
- {n:"Industria · tre turni a settimana", p:"MMMMMRRPPPPPRRNNNNNRR", s:T3},
- {n:"Due turni, senza notte", p:"MMMMMRRPPPPPRR",
+ {sector:"Sanità", title:"In quinta", sub:"Mattina, pomeriggio, notte, smonto, riposo — 5 giorni", p:"MPNSR", s:SAN},
+ {sector:"Sanità", title:"In sesta", sub:"Come in quinta, con un riposo in più dopo lo smonto — 6 giorni", p:"MPNSRR", s:SAN},
+ {sector:"Industria", title:"Ciclo continuo", sub:"4 squadre, 16 giorni: 4 mattine, 4 pomeriggi, 4 notti, 4 riposi", p:"MMMMPPPPNNNNRRRR", s:T3},
+ {sector:"Industria", title:"4x2", sub:"Quattro giorni di lavoro, due di riposo, per ogni turno", p:"MMMMRRPPPPRRNNNNRR", s:T3},
+ {sector:"Industria", title:"Turni settimanali", sub:"Una settimana per turno: 5 giorni, poi due liberi", p:"MMMMMRRPPPPPRRNNNNNRR", s:T3},
+ {sector:null, title:"Due turni", sub:"Mattina e pomeriggio, mai di notte — 5 giorni, poi due liberi", p:"MMMMMRRPPPPPRR",
   s:{M:{n:"Mattino",s:360,e:840},P:{n:"Pomeriggio",s:840,e:1320}}},
- {n:"Dodici ore · sanità, vigilanza, RSA, guardia", p:"DDNNRRRR",
+ {sector:null, title:"Dodici ore", sub:"Sanità, vigilanza, RSA, guardia — giorno e notte da 12 ore", p:"DDNNRRRR",
   s:{D:{n:"Giorno 12h",s:420,e:1140},N:{n:"Notte 12h",s:1140,e:1860}}},
- {n:"Spezzato · trasporti, ristorazione", p:"SSSSSRR",
+ {sector:null, title:"Spezzato", sub:"Trasporti, ristorazione — pausa lunga a metà giornata", p:"SSSSSRR",
   s:{S:{n:"Spezzato",s:660,e:1380}}},
 ];
+// Nome per esteso di un preset, per i posti che oggi mostrano solo il nome
+// (il titolo "Il tuo ciclo — …" e il valore accanto a "Turni e ciclo" in
+// Opzioni) — non per le card, che titolo/settore li mostrano già separati.
+const nomePreset = p => p.sector ? p.sector+" · "+p.title : p.title;
 const oSel=$("#oPreset");
 oSel.innerHTML='<option value="x">Personalizza — costruisco il mio</option>'+
-  PRESETS.map((p,i)=>'<option value="'+i+'">'+p.n+'</option>').join("");
+  PRESETS.map((p,i)=>'<option value="'+i+'">'+nomePreset(p)+'</option>').join("");
 // Card grandi al posto del <select> compresso — stesso identico stato
 // (oSel resta la fonte di verità, presetIndex()/onchange invariati), solo
 // un modo più veloce da toccare per scegliere fra i preset reali.
@@ -5718,29 +5738,23 @@ function renderPresetTiles(){
   // nome del settore diventa un'etichetta condivisa sopra le sue varianti
   // invece di ripetersi identico su ogni card — la ripetizione era quello
   // che rendeva la lista poco chiara. Un settore con una sola voce resta
-  // una card singola col titolo per intero, non spezzato via. Raggruppato
-  // per settore su TUTTO l'elenco (non solo fra voci consecutive): se in
-  // futuro un preset di un altro settore finisse inserito in mezzo a due
-  // "Sanità", le due varianti restano comunque sotto un'unica etichetta.
-  const settore = n => n.includes(" · ") ? n.split(" · ")[0] : null;
+  // una card singola, senza etichetta sopra. Raggruppato per settore su
+  // TUTTO l'elenco (non solo fra voci consecutive): se in futuro un preset
+  // di un altro settore finisse inserito in mezzo a due "Sanità", le due
+  // varianti restano comunque sotto un'unica etichetta.
   const conteggio = {};
-  PRESETS.forEach(p=>{ const s=settore(p.n); if(s) conteggio[s]=(conteggio[s]||0)+1; });
+  PRESETS.forEach(p=>{ if(p.sector) conteggio[p.sector]=(conteggio[p.sector]||0)+1; });
   const gruppi = []; // [{settore:null|string, voci:[{i,p}]}], nell'ordine di prima comparsa
   PRESETS.forEach((p,i)=>{
-    const s=settore(p.n);
-    const chiave = (s && conteggio[s]>1) ? s : null;
+    const chiave = (p.sector && conteggio[p.sector]>1) ? p.sector : null;
     let g = chiave!==null ? gruppi.find(g=>g.settore===chiave) : null;
     if(!g){ g={settore:chiave, voci:[]}; gruppi.push(g); }
     g.voci.push({i,p});
   });
   let html="";
   gruppi.forEach((g,gi)=>{
-    if(g.settore){
-      html+='<div class="essgroup"'+(gi===0?'':' style="margin-top:14px"')+'>'+esc(g.settore)+'</div>';
-      g.voci.forEach(({i,p})=>{ html+=tile(String(i), ICO_TURNO, p.n.split(" · ")[1], ""); });
-    } else {
-      g.voci.forEach(({i,p})=>{ const parti=p.n.split(" · "); html+=tile(String(i), ICO_TURNO, parti[0], parti[1]||""); });
-    }
+    if(g.settore) html+='<div class="essgroup"'+(gi===0?'':' style="margin-top:14px"')+'>'+esc(g.settore)+'</div>';
+    g.voci.forEach(({i,p})=>{ html+=tile(String(i), ICO_TURNO, p.title, p.sub); });
   });
   html+=tile("x", ICO_PERSONALIZZA, "Personalizza", "Costruisco il mio in due minuti");
   el.innerHTML=html;
