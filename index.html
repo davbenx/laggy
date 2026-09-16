@@ -2178,89 +2178,55 @@ var qrcodegen;
     })(QrSegment = qrcodegen.QrSegment || (qrcodegen.QrSegment = {}));
 })(qrcodegen || (qrcodegen = {}));
 </script>
-<script data-cfasync="false">
-"use strict";
+<script type="module" data-cfasync="false">
+// Modulo, non più script classico: serve per poter fare import diretto di
+// engine.js qui sotto, con la garanzia che il suo codice sia già eseguito
+// prima che il resto di questo script (che lo usa ovunque, via NT.) parta —
+// stessa garanzia di ordine che un normalizzatore await avrebbe dato, senza
+// bisogno di riscrivere tutto in async. I moduli sono già strict di default.
+import { createEngine } from "./engine.js";
 /* MOTORE NOTTURNISTI v4 — turni arbitrari.
    Nessuna regola guarda più la lettera del turno. Tutto si decide dalla
    geometria: dove cade il turno rispetto alla finestra di sonno naturale.
    Convenzione: minuti dalla mezzanotte del giorno i. Un turno che comincia
    dopo mezzanotte ha start >= 1440. end > start sempre. */
 
-const CFG = {
-  // l'anticipo massimo è per persona: sta in state.maxAdvance, non qui
-  maxDelay:   90,    // [Eastman & Burgess 2009] ~1.5h/giorno
-  buffer: 1, windDown: 30, windDownEve: 60,
-  margineImpegno: 180,   // in piedi tre ore prima: il tempo di svegliarsi davvero
-  inerzia: 45,           // dopo un pisolino i riflessi restano peggiori per un po'
-  margineFineTurno: 90,  // mai svegliarsi poco prima di salire in macchina
-  napBreve: 20, napCiclo: 90,   // fra i 30 e i 45 ci si sveglia dal sonno profondo
-  estensionePreNotte: 120,      // quanto si può allungare il sonno prima della prima notte
-  napPreLungo: 120,             // davanti a un blocco lungo il pisolino pre-turno vale di più
-  dormitaMax: 600,              // oltre le dieci ore il sonno in più rende poco
-  caffeine:  480,    // [Drake 2013: minimo 6h] 8 = margine, ora è il valore di partenza
-  caffScala: {bassa:240, media:360, alta:480},   // quanto prima smettere
-  cbtOffset: 120,    // [SOLIDO] minimo corporeo ~2h prima della sveglia libera
-  eveningDim:120, lightTaper: 120,
-  daySleepMax:390,   // [DEFAULT] 6h30 di sonno diurno
-  shortSleep: 270,   // [DEFAULT] 4h30 dopo l'ultimo turno notturno
-  preShiftMax:330,   // [DEFAULT] 5h30 prima di un turno che parte nelle ore piccole
-  bifasicoSoglia: 1260,          // 21:00 — sotto questa soglia, addormentarsi diventa difficile [Lavie 1986, forbidden zone]
-  bifasicoMainMax: 390,          // 6h30 — il blocco principale quando la scelta bifasica è attiva
-  napMin: 30, napMax: 120, napPre: 90, napGap: 30, mealGap: 75, napBuffer: 90,
-  adaptThreshold: 4, // [AASM] sotto le 4 notti non conviene spostarsi
-  preNightDelay:120, bindSlack: 20, H: 24,
-  // Calcolando il letto all'indietro dalla sveglia richiesta (turno di
-  // mattina presto + bisogno di sonno lungo), niente impediva di arrivare
-  // a un orario che quasi nessuno riesce davvero a rispettare — prima
-  // delle 20:00, con la luce ancora alta e la vita sociale ancora in
-  // corso. Un piano che sulla carta è perfetto ma che nessuno segue non
-  // serve a niente: qui si accetta un po' meno sonno pur di restare a
-  // un'ora in cui coricarsi è umanamente sostenibile.
-  bedtimeFloor: 1200   // 20:00, non prima
-};
-
-const state = {
-  pattern:"MPNSR", anchor:"2026-07-13",
-  shifts:{ M:{n:"Mattino",s:420,e:840}, P:{n:"Pomeriggio",s:840,e:1260}, N:{n:"Notte",s:1260,e:1860} },
-  repeat:true, cTo:25, cFrom:25, need:480, prep:45, freeBed:"23:30", freeWake:"07:30", maxAdvance:60, focus:new Date(), pPattern:"", pAnchor:"", pShifts:null, pWake:"", pBed:"",
-  // giorni che non seguono la sequenza: ferie, malattia, cambio turno
-  ecc:{},
-  // un impegno per cui vuoi essere lucido: matrimonio, visita, viaggio
-  evento:null,
-  // orari di sveglia realmente annotati: il motore li usa per il giorno dopo
-  wakes:{},          // "2026-08-24": "07:30"  a che ora ti sei alzato
-  beds:{},           // "2026-08-24": "23:40"  a che ora sei andato a letto
-  pisolini:{},       // "2026-08-24": {0:{no:true,min:90}}  fatti o saltati
-  napTurno:"no",     // se puoi dormire in turno: "no" | "pausa" | "libero"
-  sonnoDiurno:"diviso",  // sonno dopo la notte: "diviso" (sonno più corto + pisolino, il più
-                         // documentato) | "unico" (tirata lunga, niente pisolino) |
-                         // "unicoPisolino" (tirata lunga, pisolino corto facoltativo)
-  mattinoBifasico:false, // sonno prima di un turno di mattina molto presto: se l'orario a
-                         // letto naturale cade sotto la soglia in cui addormentarsi è
-                         // difficile, accetta un blocco più corto a un'ora più naturale,
-                         // e recupera il resto con un pisolino pomeridiano dopo il turno
-  avvisoBifasicoOff:false, // "non mostrarlo più" sull'avviso che segnala un letto troppo
-                         // presto e rimanda alla spunta qui sopra — disattivabile, non
-                         // obbligatorio vederlo ogni volta una volta capito il meccanismo
-  installBannerOff:false, // "non mostrarlo più" sull'invito a installare l'app —
-                         // persistente fra sessioni: senza, ricomparirebbe ogni
-                         // apertura finché non si installa davvero, diventando fastidioso
-  clubBannerOff:false, // "non mostrarlo più" sull'invito a notturnisti.club —
-                         // stessa logica, permanente una volta chiuso
-  // Quali correzioni del diario (sonno o pisolino) sono aperte in
-  // modifica adesso — non salvato, si azzera a ogni ricarica: è solo lo
-  // stato della sessione corrente, non parte della configurazione.
+// Il motore vero e proprio (turni/sonno/caffeina/luce, CFG compresa) vive in
+// engine.js, caricato come modulo qui sotto — non più una copia incollata a
+// mano: le due versioni erano già divergenti una volta (vedi il commento in
+// testa a engine.js), e da qui in avanti ce n'è una sola. NT è l'istanza
+// dell'app; NT.state È lo state dell'app (stesso oggetto, non una copia:
+// ogni "state.campo = x" sparso nel resto del file continua a scrivere
+// esattamente lì). NT.CFG/NT.plan/NT.constraint/eccetera sostituiscono le
+// funzioni che prima erano bare qui dentro.
+const NT = createEngine({});
+const state = NT.state;
+// Campi che il motore non conosce — appartengono solo all'app (persone
+// extra tracciate, preferenze di visualizzazione, promemoria "non mostrarlo
+// più"), quindi non fanno parte di engine.js: si aggiungono qui, sullo
+// stesso oggetto.
+Object.assign(state, {
+  pShifts:null, pWake:"", pBed:"",
+  // "non mostrarlo più" sull'avviso che segnala un letto troppo presto e
+  // rimanda alla spunta del sonno bifasico — disattivabile, non
+  // obbligatorio vederlo ogni volta una volta capito il meccanismo
+  avvisoBifasicoOff:false,
+  // "non mostrarlo più" sui banner di installazione/notturnisti.club —
+  // persistenti fra sessioni, altrimenti ricomparirebbero ogni apertura
+  installBannerOff:false, clubBannerOff:false,
+  // Quali correzioni del diario (sonno o pisolino) sono aperte in modifica
+  // adesso — non salvato, si azzera a ogni ricarica: è solo lo stato della
+  // sessione corrente, non parte della configurazione.
   diaryEditing:new Set(),
-  caffSens:"alta",   // quanto ti resta addosso: "bassa" | "media" | "alta"
-  pausa:"",
-  // come si vede il piano: "essenziale" (tre numeri, default) | "dettaglio" (tutto).
-  // È una preferenza di lettura, non parte del piano: sta nel browser, non nel link.
+  // come si vede il piano: "essenziale" (tre numeri, default) | "dettaglio"
+  // (tutto). È una preferenza di lettura, non parte del piano: sta nel
+  // browser, non nel link.
   vista:"essenziale",
-  // Quale persona guarda la card compatta di Oggi, quando ce n'è più di una:
-  // indice dentro tuttePersone() (0 = principale). Con una sola persona
-  // in elenco non cambia nulla — resta sempre lei.
+  // Quale persona guarda la card compatta di Oggi, quando ce n'è più di
+  // una: indice dentro tuttePersone() (0 = principale). Con una sola
+  // persona in elenco non cambia nulla — resta sempre lei.
   personaGlance:0
-};
+});
 
 const t = s => (+s.slice(0,2))*60 + (+s.slice(3,5));
 const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
@@ -2311,24 +2277,6 @@ const hhmm15 = m => { const x=mod1440(Math.round(m/15)*15);
 const near = (m,r) => { while(m-r>720) m-=1440; while(m-r<-720) m+=1440; return m; };
 
 const iso = d => d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
-// Un giorno segnato come eccezione (ferie, malattia, cambio) vince sulla sequenza:
-// senza questo il piano racconta una giornata che l'utente non farà.
-function eccezioneA(off){
-  const e = state.ecc && state.ecc[iso(day(state.focus,off))];
-  return (typeof e === "string" && e) ? e : null;
-}
-function codeAt(off){
-  const ecc = eccezioneA(off); if(ecc) return ecc;
-  const p = (state.pattern.toUpperCase().replace(/[^A-Z]/g,"") || "R");
-  const n = dnum(day(state.focus,off)) - dnum(new Date(state.anchor+"T12:00:00"));
-  if(state.repeat === false) return (n < 0 || n >= p.length) ? "?" : p[n];
-  return p[((n % p.length) + p.length) % p.length];
-}
-function block(off){
-  const c = codeAt(off), d = state.shifts[c];
-  if(!d) return {c, rest:true};
-  return {c, name:d.n, start:d.s, end:d.e, rest:false};
-}
 // Un solo sguardo avanti, condiviso da tutto quello che deve sapere "cosa mi
 // aspetta nei prossimi giorni" — invece di un ciclo diverso per ogni domanda
 // (nextDuty, restOptions, il conto dei giorni liberi, gli avvisi di rischio
@@ -2337,564 +2285,11 @@ function block(off){
 function guardaAvanti(P, n){
   const out=[];
   for(let o=1;o<=n;o++){
-    const bb=block(o), sd=P&&P.S ? at(P.S,o) : null;
+    const bb=NT.block(o), sd=P&&P.S ? NT.at(P.S,o) : null;
     out.push({o, c:bb.c, rest:bb.rest, name:bb.name, start:bb.start, end:bb.end,
-               pin:!!(sd&&sd.pin), night:sd?spansNight(bb)||startsInNight(bb):false});
+               pin:!!(sd&&sd.pin), night:sd?NT.spansNight(bb)||NT.startsInNight(bb):false});
   }
   return out;
-}
-
-// Nessuno si sveglia spontaneamente prima delle 4 o dopo mezzogiorno. Fuori da lì
-// la risposta è un errore di digitazione, e senza questo filtro il motore
-// costruirebbe una giornata capovolta perfettamente coerente e completamente sbagliata.
-const WAKE_LO = 240, WAKE_HI = 720;
-// La finestra di sonno dei giorni liberi è l'unica cosa che si chiede: da lì
-// discendono sia il fabbisogno sia il cronotipo. È la stessa misura del MCTQ,
-// dove il punto medio del sonno libero È la definizione di cronotipo.
-function durataLibera(){
-  const a=t(state.freeBed), b=t(state.freeWake);
-  if(!isFinite(a) || !isFinite(b)) return 480;
-  let d=b-a; while(d<=0) d+=1440;
-  return Math.min(Math.max(Math.round(d/15)*15, 300), 660);
-}
-function sincronizzaNeed(){ state.need = durataLibera(); }
-function freeWakeOk(){ const v = t(state.freeWake); return isFinite(v) && v>=WAKE_LO && v<=WAKE_HI; }
-function freeWakeUsata(){ const v = t(state.freeWake);
-  return Math.min(Math.max(isFinite(v)?v:450, WAKE_LO), WAKE_HI); }
-const naturalMid  = () => Math.round(freeWakeUsata() - state.need/2) + 1440;
-const winStart    = () => naturalMid() - state.need/2;   // ~23:30
-const winEnd      = () => naturalMid() + state.need/2;   // ~07:30 del giorno dopo
-
-/* --- classificazione geometrica di un turno --- */
-// il turno comincia dentro la notte: si dorme PRIMA, e si recupera dopo
-const startsInNight = b => !b.rest && b.start >= 1440;
-// il turno comincia prima della finestra e la invade: si dorme DOPO
-// Quanto hai dormito DAVVERO stanotte, se l'hai annotato. La sveglia vera è
-// registrata sul giorno in cui apri gli occhi, cioè oggi. Restituisce null
-// quando il dato manca, così chi chiama distingue "uguale al piano" da "non lo so".
-// Quanto sonno è mancato stanotte rispetto a QUELLO CHE IL PIANO CHIEDEVA.
-// Si misura sulla differenza fra le due sveglie, non sulle durate: gli orari del
-// sonno vivono nel sistema del giorno precedente, la sveglia annotata in quello
-// di oggi, e confrontare le durate significherebbe sommare mele e pere.
-// Non è il divario col fabbisogno: un sonno corto voluto, come lo smonto,
-// è una scelta del piano, non un debito da sanare.
-const oraDi = v => { const m=/^([01]\d|2[0-3]):([0-5]\d)$/.exec(String(v||""));
-  return m ? (+m[1])*60 + (+m[2]) : null; };
-
-// Quanto sonno è mancato stanotte rispetto a quello che il piano chiedeva.
-// Con l'ora di coricamento la misura è esatta: chi va a letto tardi e si alza
-// con la sveglia perde ore che, guardando solo la sveglia, non si vedono.
-// Senza, si ripiega sul confronto fra le due sveglie, che è un'approssimazione.
-// Quanto hai dormito DAVVERO stanotte, in minuti, se l'hai annotato.
-// Vale in tutte e due le direzioni: chi dorme meno del piano accumula un debito,
-// chi dorme di più non ha bisogno del pisolino che il piano aveva previsto.
-// Con l'ora di coricamento la misura è esatta; senza, si ricava dallo scarto
-// fra la sveglia vera e quella prevista.
-function dormitoVero(wakePianificato, durPianificata){
-  const k = iso(state.focus);
-  const sv = oraDi((state.wakes||{})[k]);
-  if(sv === null || !isFinite(durPianificata)) return null;
-  const letto = oraDi((state.beds||{})[k]);
-  // La soglia bassa era 60 minuti: un sonno reale ma gravissimo (15-45 min)
-  // finiva scartato come un refuso, esattamente come se non ci fosse nessun
-  // dato — ed è il caso più urgente da non perdere. 15 minuti resta un
-  // filtro contro i veri refusi (letto=sveglia, doppio tocco), non contro
-  // una notte davvero pessima.
-  if(letto !== null){
-    let d = sv - letto; while(d <= 0) d += 1440;
-    return (d >= 15 && d <= 900) ? d : null;
-  }
-  let scarto = sv - mod1440(wakePianificato);
-  while(scarto > 720) scarto -= 1440; while(scarto < -720) scarto += 1440;
-  const d = Math.round(durPianificata + scarto);
-  return (d >= 15 && d <= 900) ? d : null;
-}
-
-// Il sonno mancato rispetto a QUELLO CHE IL PIANO CHIEDEVA, mai negativo:
-// un sonno corto voluto, come lo smonto, è una scelta e non un debito.
-function debitoVero(wakePianificato, durPianificata){
-  const d = dormitoVero(wakePianificato, durPianificata);
-  return d === null ? 0 : Math.min(Math.max(Math.round(durPianificata - d), 0), 480);
-}
-
-// I pisolini di IERI dichiarati saltati sono debito che il piano credeva coperto.
-// Si guarda solo il giorno prima: il debito non si accumula, o dopo una settimana
-// storta il piano prescriverebbe pisolini da quattro ore.
-function saltatiIeri(){
-  const v = (state.pisolini||{})[iso(day(state.focus,-1))];
-  if(!v || typeof v !== "object") return 0;
-  let m = 0;
-  for(const k in v){
-    const g = v[k]; if(!g) continue;
-    if(g.no){ m += +g.min || 0; continue; }
-    if(g.si && g.a && g.b && g.min){
-      const a = oraDi(g.a), b = oraDi(g.b);
-      if(a !== null && b !== null){
-        let d = b - a; while(d <= 0) d += 1440;
-        // fatto, ma più corto di quanto previsto: la differenza resta scoperta
-        if(d < 300 && g.min - d >= 20) m += g.min - d;
-        // fatto, ma più LUNGO: il sonno in più è reale e riduce il debito,
-        // ma non un minuto per minuto oltre un certo punto — un pisolino che
-        // sfora così tanto rischia di scivolare in sonno profondo, e da lì
-        // l'utilità aggiuntiva smette di essere lineare (da cui il tetto).
-        else if(d < 300 && d - g.min >= 20) m -= Math.min(d - g.min, 60);
-      }
-    }
-  }
-  return Math.min(m, 180);
-}
-
-const sleepsAfter = b => {
-  if(b.rest || startsInNight(b)) return false;
-  // Non conta quanto il turno "invade" la finestra, ma di quanto mi costringe
-  // a rimandare il sonno. Un pomeriggio che finisce alle 22 lo sposta di due ore:
-  // vado a letto più tardi e basta. Una notte lo sposta di cinque o sei: è un'altra cosa.
-  return (b.end + state.cFrom + CFG.windDown) - winStart() >= 150;
-};
-// il turno attraversa il cuore della notte biologica
-function deepNight(b){
-  if(b.rest) return 0;
-  const c = naturalMid() + CFG.cbtOffset;
-  return Math.max(0, Math.min(b.end, c+120) - Math.max(b.start, c-120));
-}
-function spansNight(b){
-  if(b.rest) return false;
-  const c = naturalMid() + CFG.cbtOffset;               // minimo corporeo stimato
-  return b.end > c - 240 && b.start < c + 120;
-}
-
-// Un impegno importante è un vincolo come un turno, ma al contrario: non ti
-// obbliga a essere altrove, ti obbliga a essere sveglio e lucido. Lo tratto
-// come un perno, così la rincorsa dei giorni precedenti ci arriva da sola.
-function impegnoA(off){
-  const e = state.evento;
-  if(!e || !e.d || !/^\d{4}-\d{2}-\d{2}$/.test(e.d)) return null;
-  if(iso(day(state.focus,off)) !== e.d) return null;
-  const m = /^([01]\d|2[0-3]):([0-5]\d)$/.exec(String(e.h||""));
-  return m ? (+m[1])*60 + (+m[2]) : null;
-}
-
-function constraint(off){
-  const b = block(off), nb = block(off+1);
-
-
-  // 0. il turno di oggi parte dopo mezzanotte → dorme prima, recupero dopo
-  if(startsInNight(b)){
-    const wake = b.start - state.cTo - state.prep;
-    const dur = Math.min(state.need, CFG.preShiftMax);
-    return {pin:true, onset:wake-dur, dur, mid:Math.round(wake-dur/2), kind:"pre-turno"};
-  }
-  // 1. il turno di oggi invade la finestra dall'inizio → dorme dopo, appena rientra
-  if(sleepsAfter(b)){
-    const onset = b.end + state.cFrom + CFG.windDown;
-    const ora = ((onset % 1440) + 1440) % 1440;
-    const diGiorno = ora >= 240 && ora <= 840;        // ci si corica fra le 04 e le 14
-    const run = sleepsAfter(block(off+1));
-    // Chi ha scelto la tirata unica (in Opzioni) non vuole il tetto sul sonno
-    // diurno che divide notte e pisolino — vuole tutto il suo bisogno in un
-    // solo blocco, e se la cava bene lo stesso: la scelta resta sua, non del
-    // motore. Il default resta quello con più letteratura alle spalle.
-    const cap = state.sonnoDiurno==="diviso" || !state.sonnoDiurno;
-    const dur = run ? (diGiorno && cap ? Math.min(state.need, CFG.daySleepMax) : state.need)
-                    : (diGiorno && cap ? CFG.shortSleep : Math.min(state.need, CFG.daySleepMax));
-    return {pin:true, onset, dur, mid:Math.round(onset+dur/2), kind: run ? "diurno" : "corto"};
-  }
-  // 2. il turno di domani obbliga a una sveglia più presta del naturale → vincolo
-  if(!nb.rest && !startsInNight(nb)){
-    const wake = nb.start + 1440 - state.cTo - state.prep;
-    if(wake < winEnd() - CFG.bindSlack){
-      const onsetNaturale = wake - state.need;
-      // Sotto una certa ora, addormentarsi diventa fisiologicamente difficile
-      // (la "forbidden zone" di Lavie) — mettere a letto lì non basta a far
-      // dormire davvero. Chi ha scelto la via bifasica accetta un blocco
-      // principale più corto ma a un orario in cui il sonno arriva per
-      // davvero, e recupera il resto con un pisolino pomeridiano dopo il
-      // turno (in block(), più sotto, lo stesso schema già usato per il
-      // sonno corto dopo un turno cominciato nelle ore piccole).
-      if(state.mattinoBifasico && onsetNaturale < CFG.bifasicoSoglia){
-        const dur = Math.min(state.need, CFG.bifasicoMainMax);
-        const onset = Math.max(wake-dur, CFG.bedtimeFloor);
-        return {pin:true, onset, dur, mid:Math.round(onset+dur/2), kind:"pre-turno-bifasico"};
-      }
-      const onset = Math.max(onsetNaturale, CFG.bedtimeFloor);
-      const dur = Math.max(wake-onset, 0);
-      return {pin:true, onset, dur, mid:Math.round(onset+dur/2), kind:"pre-turno"};
-    }
-  }
-  // 3. libero, con pavimenti e soffitti
-  let floor = -Infinity, ceil = Infinity;
-  if(!b.rest) floor = b.end + state.cFrom + CFG.windDownEve;
-  if(!nb.rest && !startsInNight(nb)){
-    ceil = nb.start + 1440 - state.cTo - state.prep;
-    if(spansNight(nb))
-      ceil = Math.min(ceil, nb.start + 1440 - state.cTo - CFG.napBuffer - CFG.napPre);
-  }
-  // Un impegno importante non fissa la sveglia, la limita: in piedi ENTRO tre ore
-  // prima. Dormire meno va bene lo stesso, dormirci sopra no. Il vincolo cade sul
-  // sonno che finisce QUELLA mattina, cioè quello che comincia il giorno prima:
-  // per questo si guarda off+1 e si somma 1440, come per il turno di domani.
-  // Va applicato per ultimo, o le righe sopra lo cancellerebbero.
-  const impDomani = impegnoA(off+1);
-  if(impDomani !== null) ceil = Math.min(ceil, impDomani + 1440 - CFG.margineImpegno);
-  // Un riposo prima di una notte è l'unico giorno in cui conviene dormire PIÙ
-  // del solito: ogni ora in più è un'ora di veglia in meno da reggere durante
-  // il turno. Non è uno spostamento dell'orologio, quindi non paga il limite
-  // dei 90 minuti al giorno: è semplicemente restare a letto.
-  // La prima mattina libera dopo un blocco di lavoro è quella in cui si recupera
-  // il debito accumulato, e dormire più a lungo lì è naturale. Ma vale solo se
-  // il turno che arriva dopo comincia PIÙ TARDI: se invece bisogna anticipare
-  // (dai pomeriggi ai mattini) dormire di più allontana dall'obiettivo.
-  let recupero = false;
-  if(!b.rest && nb.rest){
-    for(let k=off+2; k<=off+7; k++){
-      const x = block(k);
-      if(x.rest) continue;
-      recupero = mod1440(x.start) >= mod1440(b.start);
-      break;
-    }
-  }
-  const estendibile = (b.rest && spansNight(nb)) || recupero;
-  // quante notti comincia domani: davanti a un blocco lungo si può dormire di più
-  let bloccoDopo = 0;
-  if(b.rest) for(let k=1; k<=10 && spansNight(block(off+k)); k++) bloccoDopo=k;
-  return {pin:false, floor, ceil, estendibile, bloccoDopo, kind: spansNight(nb) ? "pre-notte" : "libero"};
-}
-CFG.prepGap0 = 45;
-
-function simulate(){
-  const H = CFG.H, N = 2*H+1;
-  const C = [], meta = [], mid = new Array(N).fill(null), pin = new Array(N).fill(false);
-  for(let i=0;i<N;i++){ C.push(constraint(i-H)); meta.push({}); if(C[i].pin) pin[i]=true; }
-
-  // blocchi di turni che attraversano la notte
-  const nLen = new Array(N).fill(0), nIdx = new Array(N).fill(0);
-  const isN = i => spansNight(block(i-H));
-  for(let i=0;i<N;i++){
-    if(!isN(i)) continue;
-    let a=i; while(a>0 && isN(a-1)) a--;
-    let z=i; while(z<N-1 && isN(z+1)) z++;
-    nLen[i]=z-a+1; nIdx[i]=i-a+1;
-  }
-
-  for(let i=0;i<N-1;i++)
-    if(C[i].pin && C[i].kind==="corto"){ meta[i+1].reset = true; pin[i+1] = true; }
-  for(let i=1;i<N;i++)
-    if(isN(i) && !isN(i-1) && !pin[i-1] && !startsInNight(block(i-H))){
-      pin[i-1]=true; meta[i-1].preNight=true; }
-  // dopo l'ultimo turno di un blocco notturno si rientra, qualunque sia la forma del turno
-  for(let i=0;i<N-1;i++)
-    if(startsInNight(block(i-H)) && !isN(i+1)){ meta[i+1].reset=true; pin[i+1]=true; }
-
-  const pinMid = i => C[i].pin ? C[i].mid
-    : meta[i].reset ? naturalMid() : naturalMid() + CFG.preNightDelay;
-  const nextPin = i => { for(let j=i+1;j<N;j++) if(pin[j]) return j; return -1; };
-
-  let prev = null;
-  for(let i=0;i<N;i++){
-    const c = C[i]; let target, dr = +(c.pin ? c.dur : state.need) || 480;
-    if(pin[i]){
-      target = c.pin ? c.mid : pinMid(i);
-      if(prev !== null){
-        target = near(target, prev);
-        if(meta[i].preNight) target = prev + clamp(target-prev, -state.maxAdvance, CFG.maxDelay);
-      }
-    } else {
-      const ref = prev === null ? naturalMid() : prev, j = nextPin(i);
-      const nat = near(naturalMid(), ref);
-      // di norma si torna verso il proprio orario naturale
-      let goal = nat, spread = 1;
-      if(j>=0){
-        let pg = near(pinMid(j), ref);
-        // verso un blocco notturno corto non ci si sposta più di tanto: è il senso di "contieni"
-        if(nLen[j] && nLen[j] < CFG.adaptThreshold)
-          pg = nat + clamp(pg-nat, -CFG.preNightDelay, CFG.preNightDelay);
-        const steps = j-i, lim = (pg-ref)<0 ? state.maxAdvance : CFG.maxDelay;
-        const kmin = Math.ceil(Math.abs(pg-ref)/lim);
-        // solo quando la pista comincia a stringersi si punta al perno
-        if(steps-kmin <= CFG.buffer){ goal = pg; spread = Math.max(steps,1); }
-      }
-      const move = clamp((goal-ref)/spread, -state.maxAdvance, CFG.maxDelay);
-      target = ref + move;
-    }
-    let onset = c.pin ? c.onset : target - dr/2;
-    if(!c.pin){
-      if(isFinite(c.floor) && onset < c.floor){ onset = c.floor; meta[i].blocked = true; }
-      if(isFinite(c.ceil) && onset+dr > c.ceil){
-        // devo essere in piedi entro il soffitto: sposto indietro fin dove il pavimento consente
-        const giu = isFinite(c.floor) ? c.floor : -Infinity;
-        onset = Math.max(giu, Math.min(onset, c.ceil - dr));
-        if(onset + dr > c.ceil){ dr = c.ceil - onset; meta[i].tight = true; }
-        meta[i].blocked = true;
-      }
-    } else if(isFinite(c.floor === undefined ? NaN : c.floor)){ /* i perni hanno già l'orario */ }
-    onset = Math.round(onset/5)*5; dr = Math.round(dr/5)*5;
-    mid[i] = Math.round(onset + dr/2);
-    if(!c.pin && prev !== null && Math.abs(mid[i]-prev) > 15) meta[i].ramp = true;
-    if(c.pin && prev !== null && !meta[i].reset){
-      const jump = mid[i]-prev, lim = jump<0 ? state.maxAdvance : CFG.maxDelay;
-      if(Math.abs(jump) > lim+1){ meta[i].gap = Math.abs(jump)-lim; meta[i].gapNight = isN(i); }
-    }
-    if(c.estendibile && !c.pin && !meta[i].tight){
-      const tetto = isFinite(c.ceil) ? c.ceil : Infinity;
-      const max = Math.min(state.need + CFG.estensionePreNotte, CFG.dormitaMax, tetto - onset);
-      if(max > dr){ meta[i].esteso = Math.round(max - dr); dr = Math.round(max); }
-    }
-    c.onsetR = onset; c.durR = dr; prev = mid[i];
-  }
-
-  return C.map((c,i) => ({
-    onset:c.onsetR, dur:c.durR, mid:mid[i], kind:c.kind, pin:!!c.pin, meta:meta[i], off:i-H,
-    nLen:nLen[i], nIdx:nIdx[i], syn:!!(meta[i].reset||meta[i].preNight),
-    strategy: nLen[i] ? (nLen[i] >= CFG.adaptThreshold ? "compromesso" : "contieni") : null
-  }));
-}
-const at = (S,off) => S[off+CFG.H];
-
-function place(m, busy){
-  for(let g=0; g<6; g++){ let mv=false;
-    for(const w of busy) if(m > w.a-10 && m < w.b+10){ m = w.b+20; mv=true; }
-    if(!mv) break; }
-  return m;
-}
-
-// Se hai annotato a che ora ti sei alzato davvero, i pisolini e la veglia si
-// calcolano su quella. Il resto del piano resta sui suoi binari: qui interessa
-// solo quante ore starai sveglio, che è l'unica cosa che decide il pisolino.
-function svegliaVera(wakePiano){
-  const v = oraDi((state.wakes||{})[iso(state.focus)]);
-  if(v === null) return wakePiano;
-  // la riporto sulla stessa scala del piano, entro mezza giornata
-  let x = v; while(x < wakePiano - 720) x += 1440; while(x > wakePiano + 720) x -= 1440;
-  return x;
-}
-
-function plan(){
-  const S = simulate(), b = block(0), pb = block(-1), nb = block(1);
-  const s = at(S,0), sp = at(S,-1);
-  const end = s.onset + s.dur, wakePiano = sp.onset + sp.dur - 1440;
-  const wake = svegliaVera(wakePiano);
-  const oreCaffe = CFG.caffScala[state.caffSens] || CFG.caffeine;
-  const cbt = s.mid + CFG.cbtOffset, cut = s.onset - oreCaffe, shift = s.mid - sp.mid;
-
-  const sleeps = [{a:s.onset, b:end}], naps = [];
-  let debitoScoperto = 0;   // debito reale che nessuna finestra pre/post turno riesce a coprire
-  // Un orario si legge sull'orologio e una durata si dice a voce: «16:11» e
-  // «1h39» non sono consigli, sono residui di una divisione. Gli estremi cadono
-  // sui cinque minuti e la durata si sceglie da una scala di valori che si
-  // ricordano — venti minuti, mezz'ora, un'ora e mezza — prendendo il gradino
-  // più vicino a quello calcolato fra quelli che ci stanno davvero.
-  const q5 = m => Math.round(m/5)*5;
-  const SCALA = [20,30,45,60,90,120];
-  const durataNetta = (voluta, massima) => {
-    const ok = SCALA.filter(x => x <= massima);
-    if(!ok.length) return 0;
-    return ok.reduce((a,b) => Math.abs(b-voluta) < Math.abs(a-voluta) ? b : a);
-  };
-  // pisolino ancorato alla fine (deve finire entro un certo orario)
-  const dallaFine = (fine, voluta, primoInizio, extra) => {
-    const f = q5(fine), d = durataNetta(voluta, f - primoInizio);
-    return d ? Object.assign({a:f-d, b:f}, extra) : null;
-  };
-  // pisolino ancorato all'inizio (comincia appena puoi)
-  const dallInizio = (inizio, voluta, ultimaFine, extra) => {
-    const i = q5(inizio), d = durataNetta(voluta, ultimaFine - i);
-    return d ? Object.assign({a:i, b:i+d}, extra) : null;
-  };
-
-  // recupero dopo un turno cominciato nelle ore piccole: il sonno di stanotte era corto
-  if(startsInNight(b) && s.dur < state.need - 20){
-    const a0 = b.end + state.cFrom + CFG.windDown, last = !spansNight(nb);
-    const cap = last ? 120 : 240;          // l'ultimo è corto: serve a rientrare stasera
-    const p = dallInizio(a0, state.need - s.dur, a0 + cap, {rec:true, last});
-    if(p) naps.push(p);
-  }
-  // Stessa idea, capovolta: dopo un turno di mattina preparato ieri sera con
-  // la scelta bifasica (sonno principale accorciato apposta, a un orario in
-  // cui addormentarsi fosse davvero possibile), il resto si recupera qui,
-  // nel primo pomeriggio, appena rientrati.
-  if(sp.kind==="pre-turno-bifasico" && sp.dur < state.need - 20){
-    const a0 = b.end + state.cFrom + CFG.windDown;
-    const p = dallInizio(a0, state.need - sp.dur, a0 + 180, {rec:true, bifasico:true});
-    if(p) naps.push(p);
-  }
-  // Pisolino DENTRO il turno. Si fa solo se l'utente ha dichiarato di poterlo
-  // fare: in molti contratti dormire in servizio è vietato, e lo strumento non
-  // deve suggerirlo a chi non può.
-  //
-  // Va collocato PRIMA del minimo corporeo, non a metà turno: un pisolino prima
-  // del crollo lo previene, dopo raccoglie i cocci. E deve finire con largo
-  // margine dalla fine del turno, perché l'inerzia al risveglio peggiora proprio
-  // l'ora del rientro, che è già la più rischiosa della giornata.
-  const inTurno = (function(){
-    if(state.napTurno === "no" || b.rest || !spansNight(b)) return null;
-    const minimo = sp.mid + CFG.cbtOffset;              // dove cade il peggio
-    const ultimo = b.end - CFG.margineFineTurno;        // oltre qui è pericoloso
-    const primo  = b.start + 60;                        // non appena entri
-    if(ultimo - primo < CFG.napBreve) return null;
-
-    // durata: o corta, o un ciclo intero. Fra i 30 e i 45 ci si sveglia dal
-    // sonno profondo, con l'inerzia al massimo e senza il ciclo completo.
-    const spazio = ultimo - primo;
-    const len = state.napTurno === "libero" && spazio >= CFG.napCiclo + 30
-      ? CFG.napCiclo : CFG.napBreve;
-
-    // se c'è una pausa dichiarata si parte da lì, altrimenti si punta al minimo
-    const chiesta = oraDi(state.pausa);
-    let fine;
-    if(chiesta !== null){
-      let p = chiesta; while(p < b.start) p += 1440;
-      fine = p + len;
-    } else {
-      fine = minimo - CFG.inerzia;                      // sveglio e lucido nel peggio
-    }
-    fine = Math.min(Math.max(fine, primo + len), ultimo);
-    const inizio = fine - len;
-    return (inizio >= primo && fine <= ultimo) ? {a:inizio, b:fine, turno:true} : null;
-  })();
-  if(inTurno) naps.push(inTurno);
-
-
-  // pisolino prima di un turno che attraversa la notte: pisolino → pasto → partenza
-  // Chi ha scelto la tirata unica non lo vuole affatto ("unico"), o lo vuole ma
-  // corto per davvero ("unicoPisolino") — il debito di ore è già quasi azzerato
-  // da sé (il sonno diurno non è più tagliato), ma un pisolino per motivi
-  // puramente circadiani (il turno attraversa comunque il minimo corporeo)
-  // potrebbe restare lungo anche a sonno pieno: qui lo si tiene corto apposta.
-  if(spansNight(b) && !startsInNight(b) && state.sonnoDiurno!=="unico"){
-    const napCorto = state.sonnoDiurno==="unicoPisolino";
-    const profondo = deepNight(b) >= 120;          // pesca davvero nel cuore della notte
-    // se hai dormito più del previsto, «manca» diventa negativo e il pisolino
-    // sparisce da solo: hai già coperto quello che serviva
-    const dormito = dormitoVero(wakePiano, sp.dur);
-    const manca = state.need - (dormito === null ? sp.dur : dormito) + saltatiIeri();
-    const veglia = s.onset - wake;                 // quanto resti sveglio in tutto
-    // Oltre le 16 ore la veglia da sola basta a peggiorare i riflessi, anche se hai
-    // dormito bene e anche se il turno non tocca il cuore della notte. Lì però serve
-    // un pisolino corto, che taglia la veglia senza aggiungere ore di sonno inutili.
-    const solaVeglia = !profondo && manca <= 30 && veglia > 960;
-    if(profondo || manca > 30 || solaVeglia){
-      const napEnd = b.start - state.cTo - CFG.mealGap - CFG.napGap;
-      // se dormirai in turno, quello prima di uscire serve meno: le due cose
-      // si bilanciano, non si sommano
-      const giaCoperto = naps.reduce((a,x)=>a+(x.turno?(x.b-x.a):0),0);
-      // Davanti a un blocco lungo di notti il pisolino prima di uscire vale di
-      // più: la sveglia non si può spostare al pomeriggio (servirebbero quindici
-      // ore a letto), quindi le ore si recuperano qui. Davanti a un blocco corto
-      // resta contenuto, perché lì il senso è non spostarsi affatto.
-      let bloccoN = 0;
-      for(let k=0; k<10 && spansNight(block(k)); k++) bloccoN=k+1;
-      const soglia = bloccoN >= CFG.adaptThreshold ? CFG.napPreLungo : CFG.napPre;
-      // Un ciclo intero serve a colmare un debito. Se hai già dormito quello che
-      // ti serve, resta il motivo preventivo — la caduta delle ore centrali non
-      // dipende da quanto hai dormito — ma bastano venti minuti, che danno la
-      // stessa sveltezza senza il rimbambimento del risveglio dal sonno profondo.
-      // Solo se l'hai annotato tu: quando è il piano stesso ad aver allungato il
-      // sonno prima delle notti, il pisolino preventivo resta quello che è, ed è
-      // il più importante del ciclo.
-      const inPari = dormito !== null && manca <= 0;
-      const len = napCorto ? CFG.napBreve
-        : solaVeglia ? 25
-        : inPari ? CFG.napBreve
-        : clamp(Math.max(manca - giaCoperto, profondo ? soglia - giaCoperto : CFG.napMin),
-                CFG.napMin, CFG.napMax);
-      let napStart = napEnd - len;
-      if(napStart < wake + 60) napStart = wake + 60;   // lo accorcio invece di buttarlo
-      if(napEnd - napStart >= 20 && napEnd < b.start){
-        const p = dallaFine(napEnd, len, Math.max(wake + 60, napEnd - CFG.napMax),
-          {first: !spansNight(pb) && !solaVeglia, corto: solaVeglia, ore: veglia});
-        if(p) naps.push(p);
-      }
-    }
-  }
-
-  // Se ieri hai dormito davvero meno del previsto, il debito è reale e non
-  // sparisce da solo. Prima si prova la soluzione migliore, poi si scende:
-  // 0) pisolino normale prima del turno (comportamento di sempre)
-  // 1) power nap: più corto (20 min, la durata con meno inerzia) e un
-  //    margine di veglia più corto — quando lo spazio è poco ma non nullo
-  // 2) recupero DOPO il turno, quando prima non c'è spazio in nessun caso
-  // 3) nessun pisolino inventato: si dichiara il debito invece di tacerlo
-  // "livelloMin" permette di saltare le opzioni già rifiutate dall'utente
-  // per oggi ("non posso farlo → prossima opzione"), senza ripartire da zero.
-  if(!naps.length){
-    const debito = debitoVero(wakePiano, sp.dur) + saltatiIeri();
-    if(debito >= 60){
-      const livelloMin = (state.pisolini && state.pisolini[iso(state.focus)] &&
-        state.pisolini[iso(state.focus)].skipRecupero) || 0;
-      // Una scadenza "prima del turno" ha senso solo se il turno lascia
-      // davvero un margine dopo il risveglio. Prima la clip scattava solo se
-      // b.start > wake+150 (con '>' stretto): sul confine esatto restava una
-      // scadenza sbagliata (calcolata per stanotte, ore dopo la fine del
-      // turno), e il controllo anti-collisione non sempre se ne accorgeva.
-      // Ora: senza un margine minimo, i livelli 0/1 non si tentano nemmeno.
-      const margineTurno = !b.rest ? (b.start - wake) : Infinity;
-      const haSpazioPreTurno = margineTurno >= 75;   // almeno 45min di buffer + 20min di pisolino
-      const fineBase = (()=>{ let f=s.onset-300;
-        if(!b.rest && haSpazioPreTurno) f=Math.min(f, b.start-state.cTo-CFG.mealGap-CFG.napGap);
-        return f; })();
-
-      let p=null, livello=-1;
-      // 0: normale, prima del turno, buffer pieno
-      if(livelloMin<=0 && haSpazioPreTurno){
-        const len=clamp(Math.round(debito*0.6),20,120);
-        const inizio=Math.max(fineBase-len, wake+120);
-        const scontro=!b.rest && inizio<b.end && fineBase>b.start;
-        if(!scontro){ p=dallaFine(fineBase, fineBase-inizio, Math.max(wake+120, fineBase-120), {debito}); if(p) livello=0; }
-      }
-      // 1: power nap, buffer ridotto — quando lo spazio è poco ma non nullo
-      if(!p && livelloMin<=1 && haSpazioPreTurno){
-        const inizio=Math.max(fineBase-CFG.napBreve, wake+45);
-        const scontro=!b.rest && inizio<b.end && fineBase>b.start;
-        if(!scontro){ p=dallaFine(fineBase, CFG.napBreve, Math.max(wake+45, fineBase-CFG.napBreve), {debito,corto:true}); if(p) livello=1; }
-      }
-      // 2: dopo il turno, quando prima non c'è spazio in nessun caso
-      if(!p && livelloMin<=2 && !b.rest){
-        const dopoInizio=b.end+state.cFrom+CFG.windDown;
-        const dopoLimite=Math.min(s.onset-60, dopoInizio+CFG.napMax+60);
-        p=dallInizio(dopoInizio, clamp(Math.round(debito*0.6),20,90), dopoLimite, {debito,dopo:true});
-        if(p) livello=2;
-      }
-      if(p){ p.livello=livello; naps.push(p); }
-      else debitoScoperto = debito;   // livello 3: nessuna finzione, si dichiara
-    }
-  }
-
-
-  // Veglia lunga. Se resti sveglio oltre le 16 ore e quelle ore arrivano a toccare
-  // il tuo momento peggiore, il pisolino non è comodità: è la differenza sulla
-  // strada di casa (Dawson & Reid). Sotto le 18, e lontano dal minimo, una
-  // giornata lunga resta solo una giornata lunga e non serve prescrivere niente.
-  if(!naps.length){
-    const veglia = s.onset - wake;
-    const minimo = sp.mid + CFG.cbtOffset;
-    const tocca  = s.onset >= minimo - 240;
-    const soglia = s.meta.reset ? 1140 : 960;      // il rientro è una giornata lunga apposta
-    if(veglia > soglia && (tocca || veglia > 1080)){
-      const len = s.meta.reset ? 30 : clamp(Math.round(veglia/12), 30, 90);
-      let fine = s.onset - 300;
-      if(!b.rest && b.start > wake + 150)
-        fine = Math.min(fine, b.start - state.cTo - CFG.mealGap - CFG.napGap);
-      const inizio = Math.max(fine - len, wake + 180);
-      const scontro = !b.rest && inizio < b.end && fine > b.start;
-      if(fine - inizio >= CFG.napMin && !scontro)
-        { const p = dallaFine(fine, fine - inizio, Math.max(wake + 180, fine - 90), {lungo:true, ore:veglia});
-          if(p) naps.push(p); }
-    }
-  }
-
-  const busy = sleeps.concat(naps), meals = [];
-  if(spansNight(b) && !startsInNight(b)){
-    meals.push({at:place(b.start - state.cTo - CFG.mealGap, busy), main:true});
-    meals.push({at:place(b.start + 120, busy)});
-    meals.push({at:place(s.onset - 25, busy), lt:true});
-  } else {
-    const main = b.rest ? wake+330 : (b.start > 720 ? b.start-90 : 750);
-    meals.push({at:place(wake+30, busy), lt:true});
-    meals.push({at:place(main, busy), main:true});
-    meals.push({at:place(s.onset-180, busy), lt:true});
-  }
-  return {b, pb, nb, s, sp, S, wake, end, cut, cbt, shift, sleeps, naps, meals, busy,
-          night:spansNight(b), lateStart:startsInNight(b), debitoScoperto};
 }
 
 /* ===================== STATO NEL LINK + DIARIO ===================== */
@@ -2959,7 +2354,7 @@ function fromHash(hashStr){
   if(okDate(p.get("a"))) state.anchor=p.get("a");
   if(okTime(p.get("w"))) state.freeWake=p.get("w");
   if(okTime(p.get("wb"))) state.freeBed=p.get("wb");
-  if(CFG.caffScala[p.get("cs")]) state.caffSens=p.get("cs");
+  if(NT.CFG.caffScala[p.get("cs")]) state.caffSens=p.get("cs");
   else if(okTime(p.get("w")) && +p.get("n")) state.freeBed=hhmm15(t(p.get("w"))-(+p.get("n")));
   state.need=num("n",state.need,240,900); state.cTo=num("ct",state.cTo,0,240);
   state.cFrom=num("cf",state.cFrom,0,240); state.prep=num("pr",state.prep,5,240);
@@ -3106,7 +2501,7 @@ function busyOf(off){
     // per la sovrapposizione col partner, quando in realtà si stava dormendo.
     // plan() calcola già "busy" (sonno più pisolini insieme, sleeps.concat(naps))
     // per costruire la card del giorno — qui basta riusarlo, non ricalcolarlo.
-    const P=plan(), sp=P.sp, b=P.b;
+    const P=NT.plan(), sp=P.sp, b=P.b;
     const wake=sp.onset+sp.dur-1440;
     if(wake>0) out.push([0,Math.min(wake,1440)]);
     for(const iv of P.busy){
@@ -3115,7 +2510,7 @@ function busyOf(off){
     }
     if(!b.rest) out.push([Math.max(b.start,0),Math.min(b.end,1440)]);
     // un turno di ieri che sconfina oltre mezzanotte occupa anche stamattina
-    const yb=block(-1);
+    const yb=NT.block(-1);
     if(!yb.rest && yb.end>1440) out.push([Math.max(yb.start-1440,0),Math.min(yb.end-1440,1440)]);
   }catch(e){}
   state.focus=f;
@@ -3144,7 +2539,7 @@ function sharedDays(n, person){
   if(!person && !state.pPattern) return null;
   const out=[];
   for(let o=0;o<90 && out.length<n;o++){
-    const mc=codeAt(o); if(mc==="?") continue;
+    const mc=NT.codeAt(o); if(mc==="?") continue;
     // Prima "in comune" voleva dire solo "riposo dal turno per entrambi" —
     // ma con orari di sonno sfasati due giorni di riposo possono non avere
     // nessuna ora vera in cui siete svegli insieme. Ora richiede una
@@ -3156,21 +2551,6 @@ function sharedDays(n, person){
   return out;
 }
 
-/* ===================== CALENDARIO .ics ===================== */
-function icsDate(base, mins){
-  const d=day(base, Math.floor(mins/1440));
-  const m=mod1440(mins);
-  return [d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")]
-    .join("")+"T"+String(Math.floor(m/60)).padStart(2,"0")+String(m%60).padStart(2,"0")+"00";
-}
-// Cosa finisce nel calendario e con quanto anticipo. Le scelte stanno qui perché
-// un file .ics, una volta esportato, è congelato: la personalizzazione deve
-// avvenire prima, dove c'è un'interfaccia, non dopo nel calendario dove non c'è.
-const ICS = {turni:true, sonno:true, pisolini:true, caffe:true, luce:false, pasti:false, rientro:true, avviso:30};
-
-function esc7986(t){   // nel formato iCalendar virgole e punti e virgola vanno protetti
-  return String(t).replace(/\\/g,"\\\\").replace(/;/g,"\\;").replace(/,/g,"\\,").replace(/\n/g,"\\n");
-}
 // Cosa costa scambiare un turno con un collega. Si misura simulando davvero
 // lo scambio sulla finestra intorno, invece di lasciarlo decidere a naso.
 function bilancio(giorni){
@@ -3178,14 +2558,14 @@ function bilancio(giorni){
   let sonno=0, pisolini=0, vegliaMax=0, ribaltati=0;
   for(let o=0;o<giorni;o++){
     state.focus=day(f0,o);
-    if(codeAt(0)==="?") continue;
-    let P; try{ P=plan(); }catch(e){ continue; }
+    if(NT.codeAt(0)==="?") continue;
+    let P; try{ P=NT.plan(); }catch(e){ continue; }
     sonno += P.s.dur;
     for(const x of P.naps){ sonno += x.b-x.a; pisolini++; }
     const blocchi=[[P.s.onset,P.s.onset+P.s.dur]].concat(P.naps.map(x=>[x.a,x.b])).sort((a,b)=>a[0]-b[0]);
     let u=P.wake;
     for(const [a,z] of blocchi){ if(a-u>vegliaMax) vegliaMax=a-u; u=Math.max(u,z); }
-    let dev=P.s.mid-naturalMid(); while(dev>720)dev-=1440; while(dev<-720)dev+=1440;
+    let dev=P.s.mid-NT.naturalMid(); while(dev>720)dev-=1440; while(dev<-720)dev+=1440;
     if(Math.abs(dev)>330) ribaltati++;
   }
   state.focus=f0;
@@ -3197,7 +2577,7 @@ function scambio(offA, offB, giorni){
   const prima=bilancio(giorni);
   const ecc0=state.ecc;
   const dA=iso(day(state.focus,offA)), dB=iso(day(state.focus,offB));
-  const cA=codeAt(offA), cB=codeAt(offB);
+  const cA=NT.codeAt(offA), cB=NT.codeAt(offB);
   state.ecc=Object.assign({}, ecc0, {[dA]:cB, [dB]:cA});
   const dopo=bilancio(giorni);
   state.ecc=ecc0;
@@ -3210,8 +2590,8 @@ function finestreLibere(giorni){
   const f0=state.focus, out=[];
   for(let o=0;o<giorni;o++){
     state.focus=day(f0,o);
-    if(codeAt(0)==="?") continue;
-    let P; try{ P=plan(); }catch(e){ continue; }
+    if(NT.codeAt(0)==="?") continue;
+    let P; try{ P=NT.plan(); }catch(e){ continue; }
     // occupato: turno, sonno e pisolini, sulla scala del giorno
     const occ=[[P.s.onset,P.s.onset+P.s.dur]].concat(P.naps.map(x=>[x.a,x.b]));
     if(!P.b.rest) occ.push([P.b.start - state.cTo, P.b.end + state.cFrom]);
@@ -3226,69 +2606,6 @@ function finestreLibere(giorni){
   }
   state.focus=f0;
   return out;
-}
-
-function buildIcs(days){
-  const L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//notturnisti.club//pianificatore//IT",
-           "CALSCALE:GREGORIAN","METHOD:PUBLISH","X-WR-CALNAME:Notturnisti",
-           // dice al calendario ogni quanto ricontrollare: senza, alcune app
-           // aggiornano di rado e "si aggiorna da solo" non si vede
-           "REFRESH-INTERVAL;VALUE=DURATION:PT12H","X-PUBLISHED-TTL:PT12H"];
-  const f0=state.focus, stamp=icsDate(new Date(),0)+"Z";
-  // L'identificativo dipende solo da giorno e tipo: riesportando, il calendario
-  // aggiorna gli eventi invece di duplicarli. Con un contatore progressivo,
-  // ogni esportazione creava una copia nuova di tutto.
-  const ev=(base,a,b,tipo,title,desc,avvisa,sveglia)=>{
-    L.push("BEGIN:VEVENT",
-      "UID:nt-"+iso(base)+"-"+tipo+"@notturnisti.club",
-      "DTSTAMP:"+stamp,"DTSTART:"+icsDate(base,a),"DTEND:"+icsDate(base,b),
-      "SUMMARY:"+esc7986(title));
-    if(desc) L.push("DESCRIPTION:"+esc7986(desc));
-    if(avvisa && ICS.avviso>0){
-      L.push("BEGIN:VALARM","ACTION:DISPLAY","TRIGGER:-PT"+ICS.avviso+"M",
-             "DESCRIPTION:"+esc7986(title),"END:VALARM");
-      // Promemoria vero e proprio della sveglia, non un preavviso: scatta
-      // esattamente alla fine del sonno (RELATED=END, offset zero), non
-      // prima — è l'unico canale qui dove "svegliati adesso" ha senso, il
-      // caso in cui l'affidabilità conta più di ogni altro. Stessa scelta
-      // dell'utente sopra (spento se ha messo "nessun promemoria"): un solo
-      // interruttore, non uno nascosto che ignora l'altro.
-      if(sveglia)
-        L.push("BEGIN:VALARM","ACTION:DISPLAY","TRIGGER;RELATED=END:PT0M",
-               "DESCRIPTION:"+esc7986("Sveglia"),"END:VALARM");
-    }
-    L.push("END:VEVENT");
-  };
-  for(let o=0;o<days;o++){
-    state.focus=day(f0,o);
-    if(codeAt(0)==="?") continue;
-    let P; try{ P=plan(); }catch(e){ continue; }
-    const base=day(f0,o);
-    // il turno lo sai già: evento sì, sveglia no
-    if(ICS.turni && !P.b.rest) ev(base,P.b.start,P.b.end,"turno","Turno "+(P.b.name||P.b.c),"",false);
-    if(ICS.sonno) ev(base,P.s.onset,P.s.onset+P.s.dur,"sonno","Sonno",
-      "Pianificato da notturnisti.club",true,true);
-    if(ICS.pisolini) P.naps.forEach((n,i)=>ev(base,n.a,n.b,"pisolino"+i,
-      (n.rec||n.debito)?"Pisolino di recupero":((n.b-n.a)<40?"Pisolino breve":"Pisolino"),"",true));
-    if(ICS.caffe) ev(base,P.cut,P.cut+15,"caffe","Ultimo caffè",
-      "Dopo quest'ora la caffeina è ancora in circolo quando provi a dormire.",true);
-    // La luce è la leva principale sull'orologio: senza, il piano si disfa.
-    if(ICS.luce && isFinite(P.wake))
-      ev(base,P.wake+15,P.wake+35,"luce","Luce",
-        "Luce forte adesso: è ciò che tiene agganciato l'orologio al turno.",true);
-    if(ICS.pasti){
-      const mm=(P.meals||[]).find(x=>x&&x.main);
-      if(mm&&isFinite(mm.at)) ev(base,mm.at,mm.at+30,"pasti","Pasto principale",
-        "Mangiare a orari stabili aiuta a tenere fermo l'orologio.",false);
-    }
-    // Il rientro dalla notte è il momento di massimo rischio alla guida.
-    if(ICS.rientro && !P.b.rest && (P.night||P.lateStart))
-      ev(base,P.b.end,P.b.end+20,"rientro","Rientro: non guidare stanco",
-        "Occhiali da sole appena esci. Se sei stanco, fermati 20 minuti e un caffè prima di ripartire.",true);
-  }
-  state.focus=f0;
-  L.push("END:VCALENDAR");
-  return L.filter(Boolean).join("\r\n");
 }
 function download(name, text, mime){
   const blob=new Blob([text],{type:mime});
@@ -3329,7 +2646,7 @@ const colorOf=c=>{ const k=Object.keys(state.shifts); const i=k.indexOf(c);
 const nameOf=c=>state.shifts[c]?state.shifts[c].n:"Riposo";
 // un codice turno è "notturno" se attraversa o parte nel cuore della notte
 function isNightCode(c){ const sh=state.shifts&&state.shifts[c]; if(!sh) return false;
-  try{ const b={rest:false,start:sh.s,end:sh.e}; return spansNight(b)||startsInNight(b); }catch(e){ return false; } }
+  try{ const b={rest:false,start:sh.s,end:sh.e}; return NT.spansNight(b)||NT.startsInNight(b); }catch(e){ return false; } }
 const dur=m=>{m=Math.round(m/5)*5;const h=Math.floor(m/60),q=m%60;
 return h?(q?h+"h "+q+"m":h+"h"):q+" min"};
 // Una durata detta a voce: «un'ora», non «1 ore». Arrotondata ai cinque minuti,
@@ -3427,7 +2744,7 @@ function conto(P){
     // il tetto va detto solo se preme davvero: dirlo quando la sveglia è ore
     // prima sarebbe un'aritmetica che non torna, ed è quello che questo
     // pannello esiste per evitare
-    const c = constraint(0), fine = s.onset + s.dur;
+    const c = NT.constraint(0), fine = s.onset + s.dur;
     if(isFinite(c.ceil) && fine >= c.ceil - 30)
       r.push("Domani entri alle "+q(nb.start)+": meno "+state.cTo+" min di viaggio e "+state.prep+
         " di preparazione, devi essere in piedi entro le "+q(c.ceil)+".");
@@ -3438,21 +2755,21 @@ function conto(P){
       r.push("Il turno di domani non impone nessuna sveglia.");
   }
   else
-    r.push("Nessun vincolo domani: l'orario torna verso il tuo naturale, che dalla finestra che hai dichiarato cade attorno alle "+q(naturalMid())+".");
+    r.push("Nessun vincolo domani: l'orario torna verso il tuo naturale, che dalla finestra che hai dichiarato cade attorno alle "+q(NT.naturalMid())+".");
 
   r.push("Il tuo sonno dura "+hm(state.need)+", quindi la finestra è "+q(s.onset)+" → "+q(s.onset+s.dur)+
     (s.dur < state.need-4 ? " ("+hm(s.dur)+": più corta, perché non ci sta tutto)" : "") + ".");
 
   if(s.meta.ramp)
     r.push("Rispetto a ieri il sonno si sposta di "+hm(P.shift)+", il massimo che ha senso chiedere in un giorno: anticipare più di "+
-      state.maxAdvance+" min non riesce, e ritardare più di "+CFG.maxDelay+" nemmeno.");
+      state.maxAdvance+" min non riesce, e ritardare più di "+NT.CFG.maxDelay+" nemmeno.");
   if(s.meta.gap)
     r.push("I riposi non bastavano a coprire tutto: resta uno scarto di "+hm(s.meta.gap)+".");
 
-  const deb = debitoVero(wake, sp.dur) + saltatiIeri();
+  const deb = NT.debitoVero(wake, sp.dur) + NT.saltatiIeri();
   if(deb >= 60) r.push("Hai annotato "+hm(deb)+" di sonno in meno del previsto: il recupero di oggi ne tiene conto.");
 
-  r.push("Ultimo caffè: "+q(s.onset)+" meno "+hm(CFG.caffScala[state.caffSens]||CFG.caffeine)+
+  r.push("Ultimo caffè: "+q(s.onset)+" meno "+hm(NT.CFG.caffScala[state.caffSens]||NT.CFG.caffeine)+
     " secondo la sensibilità che hai impostato, quindi "+q(cut)+".");
   for(const x of P.naps)
     r.push("Pisolino "+q(x.a)+" → "+q(x.b)+": "+hm(x.b-x.a)+
@@ -3506,7 +2823,7 @@ function cards(P){
     sc.small=dur(s.dur)+" · corto apposta";
     sc.sub="È lo smonto, il primo dei due giorni di rientro. Dormi poco stamattina, poi resta sveglio fino a sera: costa una giornata e te ne restituisce due, e domani sei di nuovo sugli orari di tutti.";
     sc.rows.push(["Nel pomeriggio","niente pisolini dopo lo smonto, per quanto costi"]);
-    sc.rows.push(["Stasera","a letto verso "+hhmm(at(P.S,1).onset)+", anche senza sonno"]);
+    sc.rows.push(["Stasera","a letto verso "+hhmm(NT.at(P.S,1).onset)+", anche senza sonno"]);
     sc.why="Dormire fino a pomeriggio dopo l'ultima notte sembra la scelta giusta ed è la trappola classica: sposta l'orologio ancora più in là e ti lascia sveglio la notte dopo, bruciando anche il secondo giorno di riposo.";
     sc.cite="Minors & Waterhouse · Smith & Eastman";
   }else if(lateStart){
@@ -3547,7 +2864,7 @@ function cards(P){
   const lc={k:"l",lab:"Luce",rows:[],rowsA:[],rowsE:[],at:wake+15,cite:"Khalsa, Jewett, Cajochen & Czeisler, J Physiol 2003 · Smith &amp; Eastman · Thompson, Jones &amp; Gradisar 2014 (alba simulata)"};
   const whyLight="La luce sposta l'orologio in due direzioni opposte, decise dall'ora in cui la prendi: il confine è il minimo corporeo, per te intorno alle "+hhmm(cbt)+". Prima di quell'ora ti spinge avanti e ti tiene sveglio; dopo ti tira indietro — per questo il sole della strada, dopo la notte, è il nemico numero uno del sonno diurno.";
   if(night){
-    const seekEnd=Math.min(cbt-CFG.lightTaper,b.end);
+    const seekEnd=Math.min(cbt-NT.CFG.lightTaper,b.end);
     lc.blocks=[["seek",b.start,seekEnd,"cerca"],["avoid",seekEnd,Math.max(s.onset,b.end),"evita"]];
     if(s.strategy==="contieni"){ lc.val="Luce per stare sveglio";
       lc.rowsA.push(["In turno","tieni le luci accese dove lavori, senza esagerare"]); }
@@ -3559,20 +2876,20 @@ function cards(P){
     lc.rowsE.push(["Camera","oscurante vero, non tende leggere, e sui 18-19°C: la temperatura conta quanto il buio"]);
     lc.why=whyLight;
   }else if(shift<-20){
-    lc.blocks=[["seek",wake,wake+180,"cerca"],["avoid",s.onset-CFG.eveningDim,s.onset,"evita"]];
+    lc.blocks=[["seek",wake,wake+180,"cerca"],["avoid",s.onset-NT.CFG.eveningDim,s.onset,"evita"]];
     lc.val="Luce piena appena sveglio"; lc.small="ti stai alzando prima";
     lc.rowsA.push(["Ultima mezz'ora di sonno","se puoi, luce che sale mentre dormi ancora: una lampada con alba programmata, o la tapparella lasciata a metà. Ti svegli molto meno intontito"]);
     lc.rowsA.push(["Al risveglio","esci o mettiti alla finestra entro un'ora"]);
     lc.rowsA.push(["Se non puoi uscire","accendi tutto quello che hai: poca luce è meglio di niente"]);
-    lc.rowsE.push(["Sera","luci basse dalle "+hhmm(s.onset-CFG.eveningDim)+", schermi al minimo"]);
+    lc.rowsE.push(["Sera","luci basse dalle "+hhmm(s.onset-NT.CFG.eveningDim)+", schermi al minimo"]);
     lc.why="Alzarsi prima è la direzione difficile, e la luce del mattino è quasi l'unico strumento che la rende possibile. Senza, l'orario torna indietro nel giro di un giorno. "+whyLight;
   }else{
-    lc.blocks=[["seek",wake,wake+120,"cerca"],["avoid",s.onset-CFG.eveningDim,s.onset,"evita"]];
+    lc.blocks=[["seek",wake,wake+120,"cerca"],["avoid",s.onset-NT.CFG.eveningDim,s.onset,"evita"]];
     lc.val="Luce al mattino";
     lc.rowsA.push(["Ultima mezz'ora di sonno","se puoi, luce che sale mentre dormi ancora: una lampada con alba programmata, o la tapparella lasciata a metà. Ti svegli molto meno intontito"]);
     lc.rowsA.push(["Mattino","alla finestra entro un'ora dalla sveglia"]);
     lc.rowsA.push(["Se piove","non serve il sole: anche il cielo coperto è molto più forte di una stanza"]);
-    lc.rowsE.push(["Sera","luci basse dalle "+hhmm(s.onset-CFG.eveningDim)]);
+    lc.rowsE.push(["Sera","luci basse dalle "+hhmm(s.onset-NT.CFG.eveningDim)]);
     lc.why="Senza niente da spostare, l'obiettivo è tenere fermo l'orologio. "+whyLight;
   }
   lc.rows=lc.rowsA.concat(lc.rowsE);   // combinato: usato quando le due fasi restano una sola riga
@@ -3636,7 +2953,7 @@ function cards(P){
   // CONTINUATA: un pisolino la spezza davvero, e il numero deve dirlo.
   const segni = (state.pisolini||{})[iso(state.focus)]||{};
   // se hai corretto l'ora, la veglia si conta da quando ti sei svegliato davvero
-  const fineVera = x => { const g=segni[hhmm(x.a)]||{}, v=oraDi(g.b);
+  const fineVera = x => { const g=segni[hhmm(x.a)]||{}, v=NT.oraDi(g.b);
     if(v===null) return x.b;
     let y=v; while(y < x.b-720) y+=1440; while(y > x.b+720) y-=1440; return y; };
   const finiti = naps.filter(x => !(segni[hhmm(x.a)]||{}).no)
@@ -3789,7 +3106,7 @@ function dayKind(off){
   // il voto riguarda il sonno da cui ti sei svegliato quel giorno: at(S,-1)
   const f=state.focus; state.focus=day(f,off); let g=null;
   try{
-    const S=simulate(), sd=at(S,-1), sp=at(S,-2);
+    const S=NT.simulate(), sd=NT.at(S,-1), sp=NT.at(S,-2);
     const mv=Math.abs(sd.mid-sp.mid);
     g = sd.kind==="corto"   ? "Il sonno dello smonto"
       : sd.kind==="diurno"  ? "Sonno di giorno dopo la notte"
@@ -3877,7 +3194,7 @@ function wakeSummary(){
     const reale=t(wakes[k]); if(!isFinite(reale)) continue;
     state.focus=d;
     let S,sd,pr,P;
-    try{ P=plan(); S=P.S; sd=at(S,-1); pr=at(S,-2); }catch(e){ continue; }
+    try{ P=NT.plan(); S=P.S; sd=NT.at(S,-1); pr=NT.at(S,-2); }catch(e){ continue; }
     let scarto=reale-mod1440(P.wake);
     while(scarto>720) scarto-=1440; while(scarto<-720) scarto+=1440;
     if(Math.abs(scarto)>300) continue;                 // voce implausibile, la salto
@@ -4093,8 +3410,8 @@ function render(){
   // render, prima di tutto il resto — così resta corretto anche se il
   // ciclo cambia lunghezza a sessione aperta.
   const lunghezzaCiclo = (state.pattern||"").replace(/[^A-Za-z]/g,"").length;
-  CFG.H = Math.max(24, lunghezzaCiclo*2 + 14);
-  const P=plan(), f=state.focus, S=P.S;
+  NT.CFG.H = Math.max(24, lunghezzaCiclo*2 + 14);
+  const P=NT.plan(), f=state.focus, S=P.S;
   const ess = state.vista!=="dettaglio";
   document.body.classList.toggle("essenziale", ess);
   renderHeader(P, f);
@@ -4125,6 +3442,11 @@ function render(){
   try{ history.replaceState(null,"","#"+toHash()); }catch(e){}
   try{ window.dispatchEvent(new Event("nt:rendered")); }catch(e){}
 }
+// Un modulo non aggancia le sue dichiarazioni top-level a window da solo
+// (uno script classico lo faceva gratis) — paid.js (script classico a
+// parte) legge window.render dopo un acquisto/ripristino per aggiornare la
+// UI, quindi va esposta esplicitamente.
+window.render = render;
 
 function aggiornaVista(){
   const ess = state.vista!=="dettaglio";
@@ -4264,7 +3586,7 @@ function diaryReminder(P, CARDS){
       }
       // Se il pisolino registrato è durato molto più del previsto, un avviso
       // subito — non solo un conto che si aggiusta domani in silenzio.
-      const aReale=oraDi(seg.a||c.nap.k), bReale=oraDi(seg.b||c.nap.fine);
+      const aReale=NT.oraDi(seg.a||c.nap.k), bReale=NT.oraDi(seg.b||c.nap.fine);
       if(aReale!==null && bReale!==null){
         let dReale=bReale-aReale; while(dReale<=0) dReale+=1440;
         if(dReale-c.nap.min>=20 && dReale<300)
@@ -4354,7 +3676,7 @@ function renderOra(Pfocus){
   const sfoglioAltrove = dnum(state.focus)!==dnum(vero);
   if(sfoglioAltrove){
     const f=state.focus; state.focus=vero;
-    try{ P=plan(); }catch(e){ P=Pfocus; }
+    try{ P=NT.plan(); }catch(e){ P=Pfocus; }
     state.focus=f;
   }
   const isToday = true;
@@ -4733,7 +4055,7 @@ let cicloOff=0;   // scorrimento della finestra del ciclo (0 = intorno a oggi)
 // alla lunghezza vera del ciclo (aggiornaFinestraSim, più sotto) — funzioni,
 // non costanti fisse: altrimenti resterebbero legate al valore di CFG.H di
 // quando lo script è partito, ignorando un ciclo più lungo caricato dopo.
-const cicloMin = () => -(CFG.H-2), cicloMax = () => CFG.H-10;
+const cicloMin = () => -(NT.CFG.H-2), cicloMax = () => NT.CFG.H-10;
 // Striscia compatta: la forma della giornata in un colpo d'occhio, senza
 // assi né legenda tecnica a fianco — come il grafico del sonno di Apple
 // Health, non come la timeline di dettaglio (#band) che resta un livello
@@ -4859,7 +4181,7 @@ function renderEssenziale(P, CARDS){
   // scomodo — Lavie 1986). Se quel ramo non è già attivo (kind resterebbe
   // "pre-turno-bifasico", non "pre-turno"), c'è un modo di risolverlo che
   // l'utente potrebbe non aver ancora trovato da solo.
-  if(P.s.kind==="pre-turno" && P.s.onset<=CFG.bifasicoSoglia && !state.avvisoBifasicoOff)
+  if(P.s.kind==="pre-turno" && P.s.onset<=NT.CFG.bifasicoSoglia && !state.avvisoBifasicoOff)
     voci.push({t:dSv(P.s.onset)+0.5, html:
       '<div class="drem-rec">L\'orario a letto ('+hhmm(P.s.onset)+') è presto: addormentarsi lì può essere difficile, non solo scomodo. '+
       '<button class="lnk" data-open-bifasico style="display:inline">C\'è un\'opzione per dividerlo →</button>'+
@@ -4959,10 +4281,10 @@ function renderEssenziale(P, CARDS){
 // rischiAvanti() qui sopra, solo per sapere "dove sono dentro la serie".
 // Niente pillola sotto i 2 giorni: "Notte 1/1" non direbbe nulla di utile.
 function serieTurnoCorrente(){
-  const oggi=block(0);
+  const oggi=NT.block(0);
   if(oggi.rest) return null;
-  let inizio=0; while(!block(inizio-1).rest && block(inizio-1).c===oggi.c) inizio--;
-  let fine=0; while(!block(fine+1).rest && block(fine+1).c===oggi.c) fine++;
+  let inizio=0; while(!NT.block(inizio-1).rest && NT.block(inizio-1).c===oggi.c) inizio--;
+  let fine=0; while(!NT.block(fine+1).rest && NT.block(fine+1).c===oggi.c) fine++;
   const totale=fine-inizio+1;
   if(totale<2) return null;
   return {posizione:-inizio+1, totale};
@@ -5001,25 +4323,25 @@ function renderHeader(P, f){
   if(pillEl) pillEl.textContent = serie ? nameOf(c)+" "+serie.posizione+"/"+serie.totale : nameOf(c);
   const cov=$("#cover"); if(cov) cov.textContent=coverage()||"";
   renderToday();
-  const avv = freeWakeOk() ? "" : "Questa risposta non è plausibile: sto usando "+hhmm(freeWakeUsata())+".";
+  const avv = NT.freeWakeOk() ? "" : "Questa risposta non è plausibile: sto usando "+hhmm(NT.freeWakeUsata())+".";
   { const el=$("#oWakeWarn"); if(el) el.textContent=avv; }
   const bn=$("#setName"), bd=$("#setDesc"), pi=presetIndex();
   const nomeCiclo = pi>=0 ? PRESETS[pi].n : "Il tuo turno";
   if(bn){
     bn.textContent = nomeCiclo;
-    const oggi=codeAt(dnum(giornoVero())-dnum(state.focus));
+    const oggi=NT.codeAt(dnum(giornoVero())-dnum(state.focus));
     bd.textContent=state.pattern+" · oggi "+(state.shifts[oggi]?state.shifts[oggi].n:"riposo");
   }
   // "Il tuo ciclo — Sanità in quinta", come nel mockup: prima diceva solo
   // "Il tuo ciclo", il nome viveva solo nel vecchio #setbar (nascosto dai tab).
   const cn=$("#ciclNome"); if(cn) cn.textContent=" — "+nomeCiclo;
   let [cls,msg]=statusLine(P);
-  if(!freeWakeOk()){ cls="warn";
+  if(!NT.freeWakeOk()){ cls="warn";
     msg="La risposta sul risveglio in ferie ("+esc(state.freeWake)+") non è plausibile: "+
-        "nessuno apre gli occhi da solo a quell'ora. Sto calcolando tutto su "+hhmm(freeWakeUsata())+
+        "nessuno apre gli occhi da solo a quell'ora. Sto calcolando tutto su "+hhmm(NT.freeWakeUsata())+
         ", ma <button class=\"lnk\" data-goto=\"sonno\">correggila →</button> o il piano resta storto."; }
   else if(c==="?") { cls="warn"; msg="Non so che turno hai oggi: il turno che hai inserito copre altri giorni. Aggiungi in fondo alla sequenza quello nuovo appena te lo comunicano."; }
-  else if(state.repeat===false && [1,2,3,4].some(o=>codeAt(o)==="?"))
+  else if(state.repeat===false && [1,2,3,4].some(o=>NT.codeAt(o)==="?"))
     msg+=" (Da qui a pochi giorni finisce il turno che hai inserito: da lì in poi il piano vale solo se resti a riposo.)";
   // Il promemoria "Salvala ora" viveva qui prima — ora la spunta
   // obbligatoria a fine wizard copre lo stesso bisogno in ogni via
@@ -5046,8 +4368,8 @@ function rischiAvanti(P, n){
   // all'indietro prima di contare in avanti, fino a un tetto ragionevole.
   let fila=0;
   for(let o=-1; o>=-14; o--){
-    const b=block(o);
-    if(b.rest || !(spansNight(b)||startsInNight(b))) break;
+    const b=NT.block(o);
+    if(b.rest || !(NT.spansNight(b)||NT.startsInNight(b))) break;
     fila++;
   }
   for(const g of av){
@@ -5058,7 +4380,7 @@ function rischiAvanti(P, n){
   // partendo da oggi (av[0]), senza un riferimento a ieri il rischio non
   // poteva MAI atterrare su oggi stesso, anche quando lo era davvero: il
   // primo confronto possibile era sempre (oggi, domani), mai (ieri, oggi).
-  const ieri=block(-1);
+  const ieri=NT.block(-1);
   const avConIeri=[{o:-1, rest:ieri.rest, start:ieri.start, end:ieri.end}].concat(av);
   for(let i=0;i<avConIeri.length-1;i++){
     const a=avConIeri[i], b=avConIeri[i+1];
@@ -5082,7 +4404,7 @@ function rischiAvanti(P, n){
     // riallinea del tutto (motivo per cui questo avviso ha senso). Stessa
     // stima già usata altrove nel motore per lo stesso scopo (riga 2062),
     // non un secondo calcolo da tenere allineato al primo.
-    const minimo = naturalMid() + CFG.cbtOffset;
+    const minimo = NT.naturalMid() + NT.CFG.cbtOffset;
     const dentroTurno = minimo>=P.b.start && minimo<P.b.end;
     const scoperto = P.sp.dur < state.need - 20;
     if(dentroTurno && scoperto) flag.set(0,{tipo:"minimo"});
@@ -5095,7 +4417,7 @@ function renderStrip(P, f, S){
   let clo=Infinity, chi=-Infinity;
   const [finLo,finHi]=finestraCiclo();
   for(let o=finLo;o<=finHi;o++){
-    const sd=at(S,o), bb=block(o);
+    const sd=NT.at(S,o), bb=NT.block(o);
     if(!sd||!bb) continue;
     clo=Math.min(clo, sd.onset); chi=Math.max(chi, sd.onset+sd.dur);
     if(!bb.rest){ clo=Math.min(clo,bb.start); chi=Math.max(chi,bb.end); }
@@ -5116,7 +4438,7 @@ function renderStrip(P, f, S){
   const cspan=Math.max(chi-clo,60), cpx=m=>(m-clo)/cspan*100;
   let ch="";
   for(let o=finLo;o<=finHi;o++){
-    const d=day(f,o), k=codeAt(o), sd=at(S,o), bb=block(o), seg=[];
+    const d=day(f,o), k=NT.codeAt(o), sd=NT.at(S,o), bb=NT.block(o), seg=[];
     if(!sd||!bb) continue;
     const push=(a,z,cl)=>{const x0=Math.max(cpx(a),0), x1=Math.min(cpx(z),100);
       if(x1>x0) seg.push([x0,x1-x0,cl]);};
@@ -5672,7 +4994,7 @@ function renderPiuCal(){
     '<span class="piu-line">'+rigaCoppia+'</span>'+
     '<span class="piu-price">'+prezzo+' una volta sola. Nessun abbonamento.</span>';
 }
-function NT_planSafe(d){ const f=state.focus; state.focus=new Date(d); let P=null; try{ P=plan(); }catch(e){} state.focus=f; return P; }
+function NT_planSafe(d){ const f=state.focus; state.focus=new Date(d); let P=null; try{ P=NT.plan(); }catch(e){} state.focus=f; return P; }
 // Valore corrente a destra dei tre bottoni di Opzioni che ne hanno uno solo
 // e onesto da mostrare (non "Dettagli del piano": 5 campi diversi, nessun
 // numero rappresenta gli altri quattro). Costa pochissimo, ma non ha senso
@@ -5898,13 +5220,13 @@ function diaryClick(e){
   if(e.target.closest("[data-wake]") || e.target.closest("[data-bed]")
      || e.target.closest("[data-napa]") || e.target.closest("[data-napb]")) return;   // i campi orario si gestiscono da soli
   const ap=e.target.closest("[data-asplan]");
-  if(ap){ const k=iso(state.focus), c=cards(plan()).find(x=>x.k==="d");
+  if(ap){ const k=iso(state.focus), c=cards(NT.plan()).find(x=>x.k==="d");
     if(c){ state.beds[k]=c.bedPiano; state.wakes[k]=c.wakePiano;
       state.diaryEditing.delete("sleep:"+k);
       store.set("beds",state.beds); store.set("wakes",state.wakes); render(); }
     return; }
   const op=e.target.closest("[data-open]");
-  if(op){ const k=iso(state.focus), c=cards(plan()).find(x=>x.k==="d");
+  if(op){ const k=iso(state.focus), c=cards(NT.plan()).find(x=>x.k==="d");
     // i campi si aprono precompilati col piano: si correggono, non si compilano da zero
     if(c && state.beds[k]===c.bedPiano && state.wakes[k]===c.wakePiano){
       state.wakes[k]=hhmm(t(c.wakePiano)+15);
@@ -5966,7 +5288,7 @@ function buildPrintSheet(){
   for(let o=0;o<L;o++){
     const d=day(f0,o);
     state.focus=d;
-    let P=null; try{ P=plan(); }catch(e){}
+    let P=null; try{ P=NT.plan(); }catch(e){}
     if(!P){ continue; }
     const b=P.b;
     righe.push('<tr'+(o===0?' class="oggi"':'')+'>'+
@@ -6148,7 +5470,7 @@ function opzioniGiorni(escludi){
     if(i===escludi) continue;
     const d=day(state.focus,i);
     o+='<option value="'+i+'">'+esc(d.toLocaleDateString("it-IT",{weekday:"short",day:"numeric"}))+
-       " · "+esc(nameOf(codeAt(i)))+'</option>';
+       " · "+esc(nameOf(NT.codeAt(i)))+'</option>';
   }
   return o;
 }
@@ -6179,14 +5501,16 @@ $("#doIcs").onclick=()=>{ const b=$("#icsBox"); const apri=b.hidden;
   soloUno(apri?"#icsBox":null); b.hidden=!apri;
   if(apri && b.scrollIntoView) b.scrollIntoView({behavior:"smooth",block:"nearest"}); };
 $("#icsVai").onclick=()=>{
-  ICS.turni=$("#icsT").checked; ICS.sonno=$("#icsS").checked;
-  ICS.pisolini=$("#icsN").checked; ICS.caffe=$("#icsC").checked;
-  ICS.luce=$("#icsL")?$("#icsL").checked:true;
-  ICS.rientro=$("#icsR")?$("#icsR").checked:true;
-  ICS.pasti=$("#icsM")?$("#icsM").checked:false;
-  ICS.avviso=+$("#icsA").value||0;
-  if(!(ICS.turni||ICS.sonno||ICS.pisolini||ICS.caffe||ICS.luce||ICS.rientro||ICS.pasti)){ toast("Scegli almeno una cosa"); return; }
-  download("notturnisti-"+iso(state.focus)+".ics",buildIcs(28),"text/calendar");
+  const ics=NT.setIcs({
+    turni:$("#icsT").checked, sonno:$("#icsS").checked,
+    pisolini:$("#icsN").checked, caffe:$("#icsC").checked,
+    luce:$("#icsL")?$("#icsL").checked:true,
+    rientro:$("#icsR")?$("#icsR").checked:true,
+    pasti:$("#icsM")?$("#icsM").checked:false,
+    avviso:+$("#icsA").value||0
+  });
+  if(!(ics.turni||ics.sonno||ics.pisolini||ics.caffe||ics.luce||ics.rientro||ics.pasti)){ toast("Scegli almeno una cosa"); return; }
+  download("notturnisti-"+iso(state.focus)+".ics",NT.buildIcs(28),"text/calendar");
   $("#icsBox").hidden=true; toast("28 giorni scaricati");
   // Segna quando: il file è statico e scade dopo 28 giorni, senza questo
   // l'app non ha modo di sapere se il calendario del telefono è ancora
@@ -6245,9 +5569,9 @@ if($("#doCycShare")) $("#doCycShare").onclick=condividiCiclo;
 // generazione: la lettura la fa già la fotocamera nativa del telefono, che
 // riconosce il link e lo apre da sola — non serve costruire anche quella metà.
 function renderQR(holderSel){
-  const holder=$(holderSel||"#qrHolder"); if(!holder || typeof qrcodegen==="undefined") return;
+  const holder=$(holderSel||"#qrHolder"); if(!holder || typeof window.qrcodegen==="undefined") return;
   const url=location.origin+location.pathname+"#"+toHashCiclo();
-  let qr; try{ qr=qrcodegen.QrCode.encodeText(url, qrcodegen.QrCode.Ecc.MEDIUM); }catch(e){ holder.textContent="Configurazione troppo estesa per un QR — usa il link."; return; }
+  let qr; try{ qr=window.qrcodegen.QrCode.encodeText(url, window.qrcodegen.QrCode.Ecc.MEDIUM); }catch(e){ holder.textContent="Configurazione troppo estesa per un QR — usa il link."; return; }
   const n=qr.size, border=2, dim=n+border*2;
   let path="";
   for(let y=0;y<n;y++) for(let x=0;x<n;x++) if(qr.getModule(x,y)) path+="M"+(x+border)+","+(y+border)+"h1v1h-1z";
@@ -6335,13 +5659,13 @@ if(selBed){
 // la durata si mostra scritta a parole, così l'utente vede subito cosa ha detto
 function mostraDurata(){
   const el=$("#oDur"); if(!el) return;
-  const m=durataLibera(), h=Math.floor(m/60), q=m%60;
+  const m=NT.durataLibera(), h=Math.floor(m/60), q=m%60;
   el.textContent = h+(q===0?" ore":q===30?" ore e mezza":" ore e "+q);
 }
 function leggiFinestra(){
   if(selBed  && /^([01]\d|2[0-3]):[0-5]\d$/.test(selBed.value))  state.freeBed=selBed.value;
   if(selWake && /^([01]\d|2[0-3]):[0-5]\d$/.test(selWake.value)) state.freeWake=selWake.value;
-  sincronizzaNeed(); mostraDurata(); render();
+  NT.sincronizzaNeed(); mostraDurata(); render();
 }
 if(selWake) selWake.addEventListener("change",leggiFinestra);
 if(selBed)  selBed.addEventListener("change",leggiFinestra);
@@ -6720,15 +6044,14 @@ if(!primaVolta){
 if(!state.firstSeenAt) state.firstSeenAt = iso(new Date());
 // Qualunque strada abbia preso lo stato (link, memoria, prima visita), i campi
 // numerici devono essere numeri dentro limiti sensati prima che il motore li usi.
+// Il grosso del lavoro (LIMITI, orari, need) è in engine.js, richiamato una
+// volta dentro createEngine() e di nuovo qui perché il ripristino da
+// link/localStorage può reintrodurre valori fuori dai limiti — prima questa
+// funzione ne aveva una copia locale tutta sua, stesso rischio di
+// divergenza già visto altrove in questo file. "vista" resta qui: è una
+// preferenza di lettura dell'app, non qualcosa che il motore conosce.
 function normalizza(){
-  for(const k in LIMITI){
-    const [lo,hi,def]=LIMITI[k], v=+state[k];
-    state[k] = (isFinite(v) && v>0) ? Math.min(Math.max(Math.round(v),lo),hi) : def;
-  }
-  if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(String(state.freeWake))) state.freeWake="07:30";
-  if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(String(state.freeBed)))  state.freeBed="23:30";
-  sincronizzaNeed();
-  state.need = Math.round(state.need/15)*15;      // la tendina va a quarti d'ora
+  NT.normalizza();
   state.vista = state.vista==="dettaglio" ? "dettaglio" : "essenziale";
 }
 state.ecc = (state.ecc && typeof state.ecc==="object") ? state.ecc : {};
@@ -6865,7 +6188,7 @@ function apriIntro(nascondiPiano){
   }
   if(selWake){
     // se il valore salvato non è fra le scelte (link vecchio, ora impossibile) lo avvicino
-    const val=freeWakeOk()? state.freeWake : hhmm(Math.round(freeWakeUsata()/15)*15);
+    const val=NT.freeWakeOk()? state.freeWake : hhmm(Math.round(NT.freeWakeUsata()/15)*15);
     selWake.value = val;
     if(selWake.value!==val) selWake.value="07:30";
   }
@@ -7084,7 +6407,7 @@ window.NT = {
     freeWake:state.freeWake, freeBed:state.freeBed, need:state.need,
     focus:new Date(state.focus), params:toHash() }; },
   diary(){ return { wakes:{...state.wakes}, beds:{...state.beds} }; },
-  planFor(date){ const f=state.focus; state.focus=new Date(date); let P=null; try{ P=plan(); }catch(e){} state.focus=f; return P; },
+  planFor(date){ const f=state.focus; state.focus=new Date(date); let P=null; try{ P=NT.plan(); }catch(e){} state.focus=f; return P; },
   setRoster(seq, anchorISO, repeat){ const s=String(seq||"").toUpperCase().replace(/[^A-Z]/g,"").slice(0,400);
     if(s) state.pattern=s; if(anchorISO) state.anchor=anchorISO; if(repeat!=null) state.repeat=!!repeat;
     salva(); render(); },
@@ -7097,8 +6420,11 @@ addEventListener("nt:refresh", ()=>{ try{ render(); }catch(e){} });
 // Ultima riga di tutte: l'avviso sparisce solo se lo script è arrivato fin qui.
 // Se si rompe prima, resta a schermo e dice perché.
 { const av=$("#jsoff"); if(av && av.parentNode) av.parentNode.removeChild(av); }
-</script>
-<script data-cfasync="false">
+// Fuso nello stesso modulo di cui sopra (era un secondo <script> classico
+// separato: bastava per condividere lo scope globale con quello prima,
+// come due script classici fanno sempre — ma i moduli NON condividono scope
+// fra loro, ognuno ha il proprio. Un modulo qui a parte non avrebbe più
+// visto render()/setTab()/renderInstallBanner() ecc, tutti bare qui sotto).
 /* PWA: registra il service worker (offline + icona in home) e, dove il browser
    lo permette (Android/Chrome), mostra un bottone «Installa». Su iOS l'aggiunta
    alla schermata Home si fa da Condividi → Aggiungi a Home; lì non c'è prompt. */
