@@ -1074,7 +1074,8 @@ header b{font-size:23px}.datebar h1,.cycbar h1{font-size:19px}
 <div id="backupNudge" class="card" hidden></div>
 <div id="installBanner" class="card" hidden></div>
 <div id="clubBanner" class="card" hidden></div>
-<div id="ora" class="ora"></div>
+<!-- Data sopra Adesso, non sotto: prima di sapere "cosa fare adesso" serve
+     sapere di quale giorno si sta parlando (specie sfogliando avanti). -->
 <div class="datebar">
   <button class="nav" id="prev" aria-label="Giorno precedente"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
   <h1 id="dateLabel" tabindex="0" role="button" aria-label="Vai a una data">—</h1>
@@ -1083,6 +1084,7 @@ header b{font-size:23px}.datebar h1,.cycbar h1{font-size:19px}
   <button class="nav" id="next" aria-label="Giorno successivo"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
 </div>
 <p class="now-shift" id="nowShift"></p>
+<div id="ora" class="ora"></div>
 <div class="band" id="band"></div>
 
 
@@ -3519,9 +3521,15 @@ function cards(P){
 
   // ── Sonnolenza massima: il minimo corporeo (temperatura profonda), non
   // la veglia accumulata di "Rientro" qui sopra — due cause diverse dello
-  // stesso genere di rischio. Solo quando cade dentro il turno: fuori dal
-  // turno non è un'informazione su cui si può agire. ──
-  if(!b.rest && isFinite(cbt) && cbt>=b.start && cbt<=b.end){
+  // stesso genere di rischio. Prima la finestra era solo il turno
+  // (b.start/b.end): la striscia forma-giornata invece la mostra anche
+  // un po' fuori, perché include il margine di viaggio — la stessa card
+  // poteva sparire pur restando visibile lì, un disallineamento fra le
+  // due. Ora la finestra include anche l'andata/il ritorno (state.cTo/
+  // cFrom, lo stesso margine già usato per "Rientro" e per calcolare
+  // quando sei davvero libero): resta comunque un momento in cui sei
+  // sveglio e attivo, non dentro il sonno — quello lo copre già "Dormi". ──
+  if(!b.rest && isFinite(cbt) && cbt>=b.start-state.cTo && cbt<=b.end+state.cFrom){
     out.push({k:"cbt", lab:"Sonnolenza massima",
       val: hhmm(cbt-20)+"–"+hhmm(cbt+20),
       small: "il punto più basso del ritmo biologico",
