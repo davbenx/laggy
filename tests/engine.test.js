@@ -63,6 +63,26 @@ for (const [label, pattern] of Object.entries(CICLI)) {
   });
 }
 
+// La sveglia via calendario (VALARM alla fine dell'evento Sonno, non un
+// preavviso) è la parte più affidabile di tutto il sistema di promemoria —
+// niente service worker, niente timer che può perdersi: nato dall'audit
+// generale sulle notifiche (il meccanismo interno via SW non garantisce la
+// consegna ad app chiusa). Verifica solo che ci sia davvero, non il modello.
+test("buildFeed mette un VALARM di sveglia (RELATED=END) sull'evento Sonno", () => {
+  const ics = buildFeed({ pattern: "NNNRR", anchor: "2026-07-13" }, { days: 7, ics: { avviso: 30 } });
+  const sonno = ics.split("BEGIN:VEVENT").slice(1).find(b => /UID:nt-.*-sonno@/.test(b));
+  assert.ok(sonno, "nessun evento Sonno trovato");
+  assert.match(sonno, /TRIGGER;RELATED=END:PT0M/, "manca il VALARM di sveglia alla fine del sonno");
+  assert.equal((sonno.match(/BEGIN:VALARM/g) || []).length, 2, "attesi due VALARM: preavviso + sveglia");
+});
+
+test("buildFeed non mette nessun VALARM se l'utente ha scelto \"nessun promemoria\" (avviso:0)", () => {
+  const ics = buildFeed({ pattern: "NNNRR", anchor: "2026-07-13" }, { days: 7, ics: { avviso: 0 } });
+  const sonno = ics.split("BEGIN:VEVENT").slice(1).find(b => /UID:nt-.*-sonno@/.test(b));
+  assert.ok(sonno, "nessun evento Sonno trovato");
+  assert.doesNotMatch(sonno, /BEGIN:VALARM/, "la sveglia non deve ignorare la scelta esplicita \"nessun promemoria\"");
+});
+
 test("createEngine: il piano del giorno corrente ha una finestra di sonno con durata positiva", () => {
   const e = createEngine({ pattern: "NNNRR", anchor: "2026-07-13", focus: "2026-07-15" });
   const p = e.plan();

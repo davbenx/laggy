@@ -724,15 +724,25 @@ function buildIcs(days){
   // L'identificativo dipende solo da giorno e tipo: riesportando, il calendario
   // aggiorna gli eventi invece di duplicarli. Con un contatore progressivo,
   // ogni esportazione creava una copia nuova di tutto.
-  const ev=(base,a,b,tipo,title,desc,avvisa)=>{
+  const ev=(base,a,b,tipo,title,desc,avvisa,sveglia)=>{
     L.push("BEGIN:VEVENT",
       "UID:nt-"+iso(base)+"-"+tipo+"@notturnisti.club",
       "DTSTAMP:"+stamp,"DTSTART:"+icsDate(base,a),"DTEND:"+icsDate(base,b),
       "SUMMARY:"+esc7986(title));
     if(desc) L.push("DESCRIPTION:"+esc7986(desc));
-    if(avvisa && ICS.avviso>0)
+    if(avvisa && ICS.avviso>0){
       L.push("BEGIN:VALARM","ACTION:DISPLAY","TRIGGER:-PT"+ICS.avviso+"M",
              "DESCRIPTION:"+esc7986(title),"END:VALARM");
+      // Promemoria vero e proprio della sveglia, non un preavviso: scatta
+      // esattamente alla fine del sonno (RELATED=END, offset zero), non
+      // prima — è l'unico canale qui dove "svegliati adesso" ha senso, il
+      // caso in cui l'affidabilità conta più di ogni altro. Stessa scelta
+      // dell'utente sopra (spento se ha messo "nessun promemoria"): un solo
+      // interruttore, non uno nascosto che ignora l'altro.
+      if(sveglia)
+        L.push("BEGIN:VALARM","ACTION:DISPLAY","TRIGGER;RELATED=END:PT0M",
+               "DESCRIPTION:"+esc7986("Sveglia"),"END:VALARM");
+    }
     L.push("END:VEVENT");
   };
   for(let o=0;o<days;o++){
@@ -743,7 +753,7 @@ function buildIcs(days){
     // il turno lo sai già: evento sì, sveglia no
     if(ICS.turni && !P.b.rest) ev(base,P.b.start,P.b.end,"turno","Turno "+(P.b.name||P.b.c),"",false);
     if(ICS.sonno) ev(base,P.s.onset,P.s.onset+P.s.dur,"sonno","Sonno",
-      "Pianificato da notturnisti.club",true);
+      "Pianificato da notturnisti.club",true,true);
     if(ICS.pisolini) P.naps.forEach((n,i)=>ev(base,n.a,n.b,"pisolino"+i,
       (n.rec||n.debito)?"Pisolino di recupero":((n.b-n.a)<40?"Pisolino breve":"Pisolino"),"",true));
     if(ICS.caffe) ev(base,P.cut,P.cut+15,"caffe","Ultimo caffè",
