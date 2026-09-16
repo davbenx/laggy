@@ -381,6 +381,7 @@ footer a{color:var(--blue);text-decoration:none;border-bottom:1px solid var(--bl
 border-radius:var(--r);padding:18px 18px 20px;margin-bottom:20px}
 body.intro .datebar,body.intro .daynav,body.intro #ora,body.intro #status,body.intro .cap,
 body.intro #cyc,body.intro #band,body.intro #cards,body.intro .tools,
+body.intro #doCycShare,body.intro #doCycQR,body.intro #qrBoxCyc,
 body.intro .setbar{display:none}
 .setbar{display:flex;align-items:center;gap:12px;background:var(--s1);border:1px solid var(--line);
 border-radius:var(--r);padding:11px 13px;margin-bottom:18px}
@@ -662,7 +663,7 @@ color:var(--blue);display:inline-flex;align-items:center;justify-content:center}
 /* in Oggi lo #status resta solo quando è un avviso; il resto lo dice il piano */
 body.tab-oggi #status:not(.warn){display:none}
 /* OGGI: il giorno. "La giornata" (datebar + dettaglio + diario) è a scomparsa. */
-body.tab-oggi .cap.ciclo,body.tab-oggi #cyc,
+body.tab-oggi .cap.ciclo,body.tab-oggi #cyc,body.tab-oggi #doCycShare,body.tab-oggi #doCycQR,body.tab-oggi #qrBoxCyc,
 body.tab-oggi #tGrid,body.tab-oggi #doPartner,body.tab-oggi .cycbar,body.tab-oggi #cycRange,body.tab-oggi #doAndamenti,
 body.tab-oggi #icsBox,body.tab-oggi #dayBox,body.tab-oggi #gridBox,body.tab-oggi #andamentiPagina,
 body.tab-oggi #vederciPagina,body.tab-oggi #partner,body.tab-oggi .piu-cal,
@@ -695,20 +696,22 @@ body.tab-turni footer{display:none}
    (attributo hidden), non da qui; il JS le tiene anche mutuamente
    esclusive. */
 body.tab-turni.andamenti-aperta .cap.ciclo,
-body.tab-turni.andamenti-aperta #cyc,body.tab-turni.andamenti-aperta .cycbar,body.tab-turni.andamenti-aperta #cycRange,
+body.tab-turni.andamenti-aperta #cyc,body.tab-turni.andamenti-aperta #doCycShare,body.tab-turni.andamenti-aperta #doCycQR,body.tab-turni.andamenti-aperta #qrBoxCyc,
+body.tab-turni.andamenti-aperta .cycbar,body.tab-turni.andamenti-aperta #cycRange,
 body.tab-turni.andamenti-aperta #tGrid,
 body.tab-turni.andamenti-aperta #gridBox,body.tab-turni.andamenti-aperta #dayBox,
 body.tab-turni.andamenti-aperta #doPartner,
 body.tab-turni.andamenti-aperta #doAndamenti,
 body.tab-turni.vederci-aperta .cap.ciclo,
-body.tab-turni.vederci-aperta #cyc,body.tab-turni.vederci-aperta .cycbar,body.tab-turni.vederci-aperta #cycRange,
+body.tab-turni.vederci-aperta #cyc,body.tab-turni.vederci-aperta #doCycShare,body.tab-turni.vederci-aperta #doCycQR,body.tab-turni.vederci-aperta #qrBoxCyc,
+body.tab-turni.vederci-aperta .cycbar,body.tab-turni.vederci-aperta #cycRange,
 body.tab-turni.vederci-aperta #tGrid,
 body.tab-turni.vederci-aperta #gridBox,body.tab-turni.vederci-aperta #dayBox,
 body.tab-turni.vederci-aperta #doPartner,
 body.tab-turni.vederci-aperta #doAndamenti{display:none}
 /* PIÙ: calendario a pagamento ed extra */
 body.tab-piu #status,body.tab-piu #ora,body.tab-piu #benvenutoLink,body.tab-piu #demoEsempio,body.tab-piu #backupNudge,body.tab-piu #installBanner,body.tab-piu #clubBanner,body.tab-piu #formaGiorno,body.tab-piu #essenziale,
-body.tab-piu .datebar,body.tab-piu .daynav,body.tab-piu .cap,body.tab-piu #cyc,
+body.tab-piu .datebar,body.tab-piu .daynav,body.tab-piu .cap,body.tab-piu #cyc,body.tab-piu #doCycShare,body.tab-piu #doCycQR,body.tab-piu #qrBoxCyc,
 body.tab-piu #tGrid,body.tab-piu #doPartner,body.tab-piu .cycbar,body.tab-piu #cycRange,body.tab-piu #doAndamenti,
 body.tab-piu #dayBox,body.tab-piu #gridBox,body.tab-piu #andamentiPagina,body.tab-piu #vederciPagina,body.tab-piu #partner,
 body.tab-piu #band,body.tab-piu #cards{display:none}
@@ -765,6 +768,7 @@ list-style:none;min-height:44px;display:flex;align-items:center}
 /* OPZIONI: solo la configurazione */
 body.tab-opzioni #status,body.tab-opzioni #ora,body.tab-opzioni #benvenutoLink,body.tab-opzioni #demoEsempio,body.tab-opzioni #backupNudge,body.tab-opzioni #installBanner,body.tab-opzioni #clubBanner,body.tab-opzioni #formaGiorno,body.tab-opzioni #essenziale,
 body.tab-opzioni .datebar,body.tab-opzioni .daynav,body.tab-opzioni #band,body.tab-opzioni .cap.ciclo,body.tab-opzioni #cyc,
+body.tab-opzioni #doCycShare,body.tab-opzioni #doCycQR,body.tab-opzioni #qrBoxCyc,
 body.tab-opzioni .cycbar,body.tab-opzioni #cycRange,body.tab-opzioni #doAndamenti,body.tab-opzioni #tGrid,body.tab-opzioni #gridBox,body.tab-opzioni #dayBox,
 body.tab-opzioni #andamentiPagina,body.tab-opzioni #vederciPagina,body.tab-opzioni #doPartner,
 body.tab-opzioni #partner,body.tab-opzioni #cards,body.tab-opzioni .piu-cal,body.tab-opzioni .tools,body.tab-opzioni .piu-h,
@@ -1143,6 +1147,25 @@ header b{font-size:23px}
 <div class="cap ciclo"><span class="eyebrow">Il tuo ciclo<span id="ciclNome"></span></span>
   <button class="lnk" id="tEdit">Modifica →</button></div>
 <div class="cyc" id="cyc"></div>
+<!-- Condividere il ciclo è un'azione che vogliamo prima vista, non
+     sepolta dentro "Quando sono disponibile" — subito sotto la
+     striscia a cui si riferisce, sempre visibile invece che dietro un
+     accordion. Stesso meccanismo di "Salva la configurazione"
+     (salvaConfigurazione/renderQR), richiamato da qui. -->
+<div style="display:flex;flex-direction:column;gap:8px;margin-top:var(--gap-sezione)">
+  <span class="eyebrow">Condividi</span>
+  <button type="button" id="doCycShare" style="width:100%;text-align:left;display:flex;align-items:center;gap:14px;padding:14px;background:var(--blue-soft);border:1px solid var(--blue);border-radius:var(--r);box-shadow:var(--shadow-btn);cursor:pointer;">
+    <span style="flex:none;width:38px;height:38px;border-radius:999px;background:var(--blue);display:flex;align-items:center;justify-content:center;color:var(--su-blu);">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg>
+    </span>
+    <span style="flex:1;">
+      <span style="display:block;font-size:15px;font-weight:700;color:var(--ink);">Condividi il tuo ciclo</span>
+      <span style="display:block;font-size:12.5px;color:var(--dim);margin-top:2px;">Chi apre il link può confrontare i turni con i tuoi</span>
+    </span>
+  </button>
+  <button type="button" id="doCycQR" class="lnk" style="align-self:flex-start;margin-top:-2px">Mostra invece il codice QR →</button>
+  <div class="ecc" id="qrBoxCyc" hidden><div id="qrHolderCyc" style="display:flex;justify-content:center;margin:14px 0"></div></div>
+</div>
 <button class="lnk" id="tGrid" style="margin-top:10px">Turni diversi ogni settimana? Impostali a tocchi →</button>
 <div class="ecc" id="gridBox" hidden>
   <b>Imposta i turni giorno per giorno</b>
@@ -5337,7 +5360,7 @@ function renderPartnerPreview(){
   if(!w.length){ el.textContent="Nessuna finestra libera nei prossimi sette giorni"; return; }
   const x=w[0], scarto=dnum(x.d)-dnum(giornoVero());
   const quando = scarto===0 ? "oggi" : scarto===1 ? "domani" : x.d.toLocaleDateString("it-IT",{weekday:"long"});
-  el.textContent = quando.charAt(0).toUpperCase()+quando.slice(1)+(finestraTuttoIlGiorno(x)?"":" "+hhmm(x.a));
+  el.textContent = quando.charAt(0).toUpperCase()+quando.slice(1)+(finestraTuttoIlGiorno(x)?"":" "+hhmm(x.a)+"–"+hhmm(x.b));
 }
 function renderPartner(CARDS){
   const el=$("#partner"); if(!el) return;
@@ -5406,21 +5429,13 @@ function renderPartner(CARDS){
     '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>'+
     (tuttePer.length?"Aggiungi un'altra persona":"Aggiungi una persona")+'</button>';
 
-  // ── Condividere: il tuo ciclo (link/QR, stesso payload di "Salva la
-  // configurazione" in Più — non un secondo meccanismo), o solo il foglio
-  // dei giorni liberi senza i tuoi dati (già in Più come "Foglio con i
-  // miei orari liberi": richiamato da qui, non duplicato). ──
-  h+='<span class="eyebrow" style="display:block;margin:var(--gap-sezione) 0 8px">Condividi</span>'+
+  // ── Esportare il foglio dei giorni liberi: senza i tuoi dati, per chi
+  // vuole vederti senza avere l'app. "Condividi il tuo ciclo" (link/QR)
+  // si è spostato subito sotto la striscia in Turni — è un'azione che
+  // riguarda il ciclo, non specificamente la disponibilità, e la
+  // vogliamo prima vista lì, non sepolta qui dentro. ──
+  h+='<span class="eyebrow" style="display:block;margin:var(--gap-sezione) 0 8px">Esporta</span>'+
     '<div class="tools">'+
-    '<button class="tool" data-partner-share type="button">'+
-      '<span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg></span>'+
-      '<span class="tool-tx"><b>Condividi il tuo ciclo</b><span>Chi apre il link può confrontare i turni con i tuoi.</span></span>'+
-    '</button>'+
-    '<button class="tool" data-partner-qr type="button">'+
-      '<span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM19 14h2M14 19h2M19 19h2"/></svg></span>'+
-      '<span class="tool-tx"><b>Mostra QR</b><span>Per chi hai davanti: inquadra con la fotocamera, si apre da solo.</span></span>'+
-    '</button>'+
-    '<div class="ecc" id="qrBoxPartner" hidden><div id="qrHolderPartner" style="display:flex;justify-content:center;margin:14px 0"></div></div>'+
     '<button class="tool" data-partner-sheet type="button">'+
       '<span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="2.4"/><circle cx="6" cy="12" r="2.4"/><circle cx="18" cy="19" r="2.4"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/></svg></span>'+
       '<span class="tool-tx"><b>Foglio con i miei orari liberi</b><span>Solo i giorni e le ore in cui sei libero, senza sonno né turni: da dare a chi vuole vederti.</span></span>'+
@@ -5879,6 +5894,13 @@ function finestraCiclo(){
 if($("#cycPrev"))  $("#cycPrev").onclick =()=>cycGo(cicloOff-passoCiclo());
 if($("#cycNext"))  $("#cycNext").onclick =()=>cycGo(cicloOff+passoCiclo());
 if($("#cycToday")) $("#cycToday").onclick=()=>cycGo(0);
+
+if($("#doCycShare")) $("#doCycShare").onclick=salvaConfigurazione;
+if($("#doCycQR")) $("#doCycQR").onclick=()=>{
+  const b=$("#qrBoxCyc"); if(!b) return;
+  b.hidden=!b.hidden;
+  if(!b.hidden) renderQR("#qrHolderCyc");
+};
 
 // Griglia turni variabili — gratis, scrive in locale (niente server)
 if($("#tGrid")) $("#tGrid").onclick=()=>{ const b=$("#gridBox"); const apri=b.hidden;
