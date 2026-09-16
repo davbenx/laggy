@@ -311,7 +311,7 @@ justify-content:center;overflow:hidden}
 #shareNudge{border-left-color:var(--blue)}
 #icsNudge{border-left-color:var(--blue)}
 #clubBanner{border-left-color:var(--orange)}
-#chiudiBenvenuto,#chiudiDemoEsempio,#chiudiBackupNudge,#chiudiInstall,#chiudiShareNudge,#chiudiIcsNudge,#chiudiClub{float:right;background:none;border:none;color:var(--faint);
+#chiudiBenvenuto,#chiudiDemoEsempio,#chiudiBackupNudge,#chiudiInstall,#chiudiShareNudge,#chiudiIcsNudge,#chiudiIcsExpireNudge,#chiudiClub{float:right;background:none;border:none;color:var(--faint);
 font-size:22px;line-height:1;cursor:pointer;padding:0 0 4px 10px;min-height:0}
 .card.s,.card.p{border-left-color:var(--blue)}
 .card.c,.card.l,.card.t{border-left-color:var(--orange-fill)}
@@ -692,7 +692,7 @@ body.tab-oggi.giornata #cards{display:block}
    davvero in essenziale, indipendentemente da .tabs/.giornata. */
 body.tab-oggi.essenziale #band{display:none}
 /* TURNI: ciclo, giorni liberi, partner, modifica */
-body.tab-turni #status,body.tab-turni #ora,body.tab-turni #benvenutoLink,body.tab-turni #demoEsempio,body.tab-turni #backupNudge,body.tab-turni #installBanner,body.tab-turni #shareNudge,body.tab-turni #icsNudge,body.tab-turni #clubBanner,body.tab-turni #formaGiorno,body.tab-turni #essenziale,
+body.tab-turni #status,body.tab-turni #ora,body.tab-turni #benvenutoLink,body.tab-turni #demoEsempio,body.tab-turni #backupNudge,body.tab-turni #installBanner,body.tab-turni #shareNudge,body.tab-turni #icsNudge,body.tab-turni #icsExpireNudge,body.tab-turni #clubBanner,body.tab-turni #formaGiorno,body.tab-turni #essenziale,
 body.tab-turni .datebar,body.tab-turni .daynav,body.tab-turni .cap.giornata,body.tab-turni #band,body.tab-turni #cards,
 body.tab-turni #icsBox,body.tab-turni .piu-h,body.tab-turni .piu-info,
 body.tab-turni footer{display:none}
@@ -784,7 +784,7 @@ list-style:none;min-height:44px;display:flex;align-items:center}
 .wdet .q:last-of-type{margin-bottom:14px}
 .piu-info-in b{color:var(--ink)}
 /* OPZIONI: solo la configurazione */
-body.tab-opzioni #status,body.tab-opzioni #ora,body.tab-opzioni #benvenutoLink,body.tab-opzioni #demoEsempio,body.tab-opzioni #backupNudge,body.tab-opzioni #installBanner,body.tab-opzioni #shareNudge,body.tab-opzioni #icsNudge,body.tab-opzioni #clubBanner,body.tab-opzioni #formaGiorno,body.tab-opzioni #essenziale,
+body.tab-opzioni #status,body.tab-opzioni #ora,body.tab-opzioni #benvenutoLink,body.tab-opzioni #demoEsempio,body.tab-opzioni #backupNudge,body.tab-opzioni #installBanner,body.tab-opzioni #shareNudge,body.tab-opzioni #icsNudge,body.tab-opzioni #icsExpireNudge,body.tab-opzioni #clubBanner,body.tab-opzioni #formaGiorno,body.tab-opzioni #essenziale,
 body.tab-opzioni .datebar,body.tab-opzioni .daynav,body.tab-opzioni #band,body.tab-opzioni .cap.ciclo,body.tab-opzioni #cyc,
 body.tab-opzioni #cycShareBox,
 body.tab-opzioni .cycbar,body.tab-opzioni #cycRange,body.tab-opzioni #doAndamenti,body.tab-opzioni #dayBox,
@@ -1072,6 +1072,7 @@ header b{font-size:23px}
 <div id="installBanner" class="card" hidden></div>
 <div id="shareNudge" class="card" hidden></div>
 <div id="icsNudge" class="card" hidden></div>
+<div id="icsExpireNudge" class="card" hidden></div>
 <div id="clubBanner" class="card" hidden></div>
 <!-- Data sopra Adesso, non sotto: prima di sapere "cosa fare adesso" serve
      sapere di quale giorno si sta parlando (specie sfogliando avanti). -->
@@ -1300,6 +1301,19 @@ header b{font-size:23px}
   <button class="tool" data-opz="4"><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h1.5a2.5 2.5 0 0 1 0 5H17"/><path d="M4 8h13v5a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V8z"/><path d="M8 2v3M12 2v3"/></svg></span>
     <span class="tool-tx"><b>Dettagli del piano</b><span>Sensibilità alla caffeina, tempi di viaggio, quanto puoi anticipare, sonno bifasico.</span></span></button>
   <div class="ecc" id="opzBox4" hidden></div>
+  <!-- Il bottone che chiedeva il permesso notifiche viveva in Più (sparita
+       con la ristrutturazione della navigazione): la funzione ntChiediPermesso()
+       è rimasta nel codice, ma senza più nessun bottone da nessuna parte che
+       la richiamasse — nessun utente poteva più attivare un promemoria da
+       quel momento in poi. Rimessa qui, ultima cosa mancante trovata
+       nell'audit generale sulle notifiche. -->
+  <span class="eyebrow" style="display:block;margin:var(--gap-sezione) 0 8px">Promemoria</span>
+  <button type="button" class="tool tool-1line" id="doNotifiche">
+    <span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></span>
+    <span class="tool-tx"><b id="notifTesto">Attiva i promemoria sul telefono</b></span>
+    <span class="tool-val" id="notifVal"></span>
+  </button>
+  <p class="hint" style="margin:8px 0 var(--gap-sezione)">Funzionano meglio se riapri l'app almeno una volta al giorno: restano programmati nel telefono, ma il sistema può interromperli se l'app resta chiusa a lungo — non sono una sveglia garantita.</p>
   <!-- Salva/Esporta erano in Più (sparita): sono azioni sulla TUA
        configurazione, hanno senso vicino a dove la modifichi. -->
   <span class="eyebrow" style="display:block;margin:var(--gap-sezione) 0 8px">Salva ed esporta</span>
@@ -1346,7 +1360,7 @@ header b{font-size:23px}
     <p><b>Melatonina.</b> Non ne parliamo qui perché i dosaggi degli studi sul jet lag e sui turni non coincidono con quelli in vendita come integratore in Italia — proporre un numero sarebbe fuorviante. Se pensi possa servirti, parlane con un medico o un farmacista: possono valutare il tuo caso, non un piano generico.</p>
   </div>
 </details>
-    <p class="hint" style="margin:12px 0 0">I tuoi turni e quello che annoti non escono da questa pagina: restano nel link e nel tuo browser.</p>
+    <p class="hint" style="margin:12px 0 0" id="privacyNota">I tuoi turni e quello che annoti non escono da questa pagina: restano nel link e nel tuo browser.<span id="privacyNotaAbbonato" hidden> Se hai il calendario di coppia a pagamento, i turni restano comunque anche sul server che lo tiene aggiornato — solo quelli, il resto no.</span></p>
     <p style="margin:10px 0 0"><button class="lnk" id="doFeed" style="padding:0">Segnala cosa non torna</button> · <button class="lnk" id="doShare" style="padding:0">Consiglialo a un collega</button></p>
     <p class="hint" style="margin:10px 0 0"><a href="https://notturnisti.club/planner" target="_blank" rel="noopener">Come si usa</a> · <a href="https://notturnisti.club/chi-siamo/" target="_blank" rel="noopener">Chi siamo</a> · <a href="https://notturnisti.club" target="_blank" rel="noopener">notturnisti.club</a></p>
   </div>
@@ -2882,15 +2896,41 @@ function decShifts(str){
   }
   return Object.keys(o).length ? o : null;
 }
-function toHash(){
+// Solo i TUOI dati (turni/ciclo/sonno/dettagli) — mai quelli di una persona
+// che segui. Condiviso da due link con scopi diversi: toHashCiclo() (solo
+// questo) per chi manda il proprio ciclo a un collega, toHash() (questo +
+// tutte le persone) per il backup personale — vedi sotto perché sono due
+// funzioni e non una con un flag.
+function hashParamsBase(){
   const p=new URLSearchParams();
   p.set("p",state.pattern); p.set("a",state.anchor); p.set("s",encShifts(state.shifts));
   p.set("w",state.freeWake); p.set("wb",state.freeBed); p.set("cs",state.caffSens); p.set("n",state.need); p.set("ct",state.cTo);
   p.set("cf",state.cFrom); p.set("pr",state.prep); p.set("adv",state.maxAdvance); if(state.repeat===false) p.set("rep","0");
+  return p;
+}
+// Link del "Condividi il tuo ciclo"/QR in Turni: pensato per un collega che
+// lo incolla per confrontare i SUOI turni con i tuoi (vedi personaDaLink,
+// che legge esattamente questi stessi campi p/a/s/w/wb). Deve contenere SOLO
+// i tuoi dati — prima usava toHash() come "Salva la configurazione", e chi
+// tracciava un partner gli mandava involontariamente anche i suoi turni e i
+// suoi orari di sonno insieme al proprio ciclo.
+function toHashCiclo(){ return hashParamsBase().toString(); }
+// Link di "Salva la configurazione": backup personale completo, non
+// qualcosa che si manda a un collega — include anche la persona principale
+// tracciata e l'elenco di chi altro segui (prima si perdevano nome e
+// persone oltre la prima: "salvalo per non perderla" non era vero per chi
+// ne segue più di una).
+function toHash(){
+  const p=hashParamsBase();
   if(state.pPattern){ p.set("pp",state.pPattern); p.set("pa",state.pAnchor||state.anchor);
     if(state.pShifts) p.set("ps",encShifts(state.pShifts));
     if(state.pWake) p.set("pw",state.pWake);
     if(state.pBed) p.set("pwb",state.pBed); }
+  if(state.pName) p.set("pn",safeName(state.pName));
+  if(state.people && state.people.length) p.set("ppl", JSON.stringify(state.people.map(per=>({
+    p:(per.pattern||"").toUpperCase().replace(/[^A-Z]/g,"").slice(0,400),
+    a:per.anchor||null, s:per.shifts||null, w:per.wake||null, b:per.bed||null, n:safeName(per.name)||null
+  }))));
   return p.toString();
 }
 function fromHash(hashStr){
@@ -2916,6 +2956,35 @@ function fromHash(hashStr){
     if(p.get("ps")){ const psh=decShifts(p.get("ps")); if(psh) state.pShifts=psh; }
     if(okTime(p.get("pw"))) state.pWake=p.get("pw");
     if(okTime(p.get("pwb"))) state.pBed=p.get("pwb"); }
+  if(p.get("pn")) state.pName=safeName(p.get("pn"));
+  // Elenco delle persone oltre la principale (solo nel link di "Salva la
+  // configurazione" — toHashCiclo() non lo scrive mai). JSON incollato da
+  // fuori: ogni campo si rivalida da zero, come decShifts fa già per i
+  // turni, invece di fidarsi della forma che ha in arrivo.
+  if(p.get("ppl")){
+    try{
+      const lista=JSON.parse(p.get("ppl"));
+      if(Array.isArray(lista)){
+        const puliti=lista.map(x=>{
+          const pattern=seq(x && x.p); if(!pattern) return null;
+          const per={pattern};
+          if(okDate(x.a)) per.anchor=x.a;
+          if(x.s && typeof x.s==="object"){
+            const sh={};
+            for(const k in x.s){ const v=x.s[k];
+              if(/^[A-Z]$/.test(k) && k!=="R" && v && isFinite(+v.s) && isFinite(+v.e) && +v.e>+v.s)
+                sh[k]={n:safeName(v.n)||k, s:+v.s, e:+v.e}; }
+            if(Object.keys(sh).length) per.shifts=sh;
+          }
+          if(okTime(x.w)) per.wake=x.w;
+          if(okTime(x.b)) per.bed=x.b;
+          if(x.n) per.name=safeName(x.n);
+          return per;
+        }).filter(Boolean);
+        if(puliti.length) state.people=puliti;
+      }
+    }catch(e){}
+  }
   return true;
 }
 const store = {
@@ -4016,6 +4085,7 @@ function render(){
   renderInstallBanner();
   renderShareNudge();
   renderIcsNudge();
+  renderIcsExpireNudge();
   renderClubBanner();
   renderFormaGiorno(P);                // si azzera da solo in dettaglio
   renderEssenziale(P, CARDS);          // si azzera da solo in dettaglio
@@ -4437,7 +4507,7 @@ if($("#installBanner")) $("#installBanner").addEventListener("click", e=>{
   if(e.target.closest("#chiudiInstall")){ state.installBannerOff=true; salva(); renderInstallBanner(); return; }
   if(e.target.closest("#doInstallOra") && installPromptEvento){
     installPromptEvento.prompt();
-    installPromptEvento.userChoice.finally(()=>{ installPromptEvento=null; renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderClubBanner(); });
+    installPromptEvento.userChoice.finally(()=>{ installPromptEvento=null; renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderIcsExpireNudge(); renderClubBanner(); });
   }
 });
 
@@ -4495,6 +4565,35 @@ if($("#icsNudge")) $("#icsNudge").addEventListener("click", e=>{
   if(e.target.closest("#doIcsNudge")){ state.icsNudgeOff=true; salva(); apriCalendarioDaWizard(); }
 });
 
+// Il file esportato è statico e scade dopo 28 giorni — senza questo, l'unico
+// modo per accorgersi che il calendario del telefono si è disallineato dal
+// piano vero è notarlo a occhio. Ricompare da solo quando mancano pochi
+// giorni alla scadenza (24 dall'ultimo export, un margine prima dei 28
+// veri), si silenzia solo per QUESTO export (icsExpireNudgeSeenAt uguale a
+// icsExportedAt) e si riarma da sé al prossimo — a differenza di icsNudge
+// (che introduce la funzione una volta sola), questo deve tornare ogni ciclo.
+function icsExpireNudgeVisibile(){
+  if(!state.icsExportedAt || state.icsExpireNudgeSeenAt===state.icsExportedAt) return false;
+  const giorni=(new Date()-new Date(state.icsExportedAt+"T00:00:00"))/86400000;
+  if(giorni<24) return false;
+  const mostraBenvenuto = primaVoltaDaLink && !benvenutoLinkChiuso;
+  return !(mostraBenvenuto || backupNudgeVisibile() || installBannerVisibile() || shareNudgeVisibile() || icsNudgeVisibile());
+}
+function renderIcsExpireNudge(){
+  const el=$("#icsExpireNudge"); if(!el) return;
+  if(!icsExpireNudgeVisibile()){ el.hidden=true; return; }
+  el.hidden=false;
+  el.innerHTML =
+    '<button type="button" id="chiudiIcsExpireNudge" aria-label="Chiudi">×</button>'+
+    '<b>Il calendario esportato sta per scadere</b>'+
+    '<p class="hint" style="margin-top:6px">I 28 giorni dell\'ultimo export finiscono presto: se non lo rifai, il telefono continua a mostrare turni vecchi.</p>'+
+    '<button class="btn g" type="button" id="doIcsExpireNudge">Esporta di nuovo →</button>';
+}
+if($("#icsExpireNudge")) $("#icsExpireNudge").addEventListener("click", e=>{
+  if(e.target.closest("#chiudiIcsExpireNudge")){ state.icsExpireNudgeSeenAt=state.icsExportedAt; salva(); renderIcsExpireNudge(); return; }
+  if(e.target.closest("#doIcsExpireNudge")){ state.icsExpireNudgeSeenAt=state.icsExportedAt; salva(); apriCalendarioDaWizard(); }
+});
+
 // Invito a notturnisti.club — prima l'unico collegamento per l'utente
 // stesso viveva dentro una sezione chiusa ("Come funziona, limiti e
 // avvertenze"), sotto gli avvisi medici: il posto meno invitante
@@ -4508,7 +4607,7 @@ function renderClubBanner(){
   const el=$("#clubBanner"); if(!el) return;
   const mostraBenvenuto = primaVoltaDaLink && !benvenutoLinkChiuso;
   const pronto = !!(state.pattern && Object.keys(state.shifts||{}).length);
-  if(state.clubBannerOff || mostraBenvenuto || backupNudgeVisibile() || installBannerVisibile() || shareNudgeVisibile() || icsNudgeVisibile() || !pronto){
+  if(state.clubBannerOff || mostraBenvenuto || backupNudgeVisibile() || installBannerVisibile() || shareNudgeVisibile() || icsNudgeVisibile() || icsExpireNudgeVisibile() || !pronto){
     el.hidden=true; return;
   }
   el.hidden=false;
@@ -5567,6 +5666,7 @@ function renderOpzSummaries(){
   }
   const s=$("#opzValSonno");
   if(s) s.textContent = (state.freeBed && state.freeWake) ? state.freeBed+" → "+state.freeWake : "Da impostare";
+  renderNotifRiga();
 }
 // La griglia del wizard, passo 1: sostituisce lo scrivere la sequenza a
 // lettere. Sola visualizzazione — legge state.pattern per mostrare i tocchi
@@ -5991,7 +6091,6 @@ if($("#cycPrev"))  $("#cycPrev").onclick =()=>cycGo(cicloOff-passoCiclo());
 if($("#cycNext"))  $("#cycNext").onclick =()=>cycGo(cicloOff+passoCiclo());
 if($("#cycToday")) $("#cycToday").onclick=()=>cycGo(0);
 
-if($("#doCycShare")) $("#doCycShare").onclick=salvaConfigurazione;
 if($("#doCycQR")) $("#doCycQR").onclick=()=>{
   const b=$("#qrBoxCyc"); if(!b) return;
   b.hidden=!b.hidden;
@@ -6065,6 +6164,10 @@ $("#icsVai").onclick=()=>{
   if(!(ICS.turni||ICS.sonno||ICS.pisolini||ICS.caffe||ICS.luce||ICS.rientro||ICS.pasti)){ toast("Scegli almeno una cosa"); return; }
   download("notturnisti-"+iso(state.focus)+".ics",buildIcs(28),"text/calendar");
   $("#icsBox").hidden=true; toast("28 giorni scaricati");
+  // Segna quando: il file è statico e scade dopo 28 giorni, senza questo
+  // l'app non ha modo di sapere se il calendario del telefono è ancora
+  // allineato al piano vero — vedi renderIcsExpireNudge().
+  state.icsExportedAt=iso(new Date()); salva();
 };
 $("#doFeed").onclick=()=>{
   const url=location.origin+location.pathname+"#"+toHash();
@@ -6076,17 +6179,18 @@ $("#doFeed").onclick=()=>{
   location.href="mailto:"+FEEDBACK.replace(/\+/g,"%2B")+"?subject="+encodeURIComponent("Riscontro pianificatore")+
     "&body="+encodeURIComponent(body);
 };
-// Estratta a funzione a sé: sia il bottone in Più sia il promemoria che
+// Estratta a funzione a sé: sia il bottone in Opzioni sia il promemoria che
 // compare in Oggi la richiamano allo stesso modo — un tocco solo che fa
 // davvero qualcosa, non un cambio di tab che ne richiede un secondo.
+// Backup personale completo (toHash(): anche le persone che segui) — non va
+// confuso con "Condividi il tuo ciclo" (condividiCiclo() sotto), che è per
+// un collega e non deve MAI portarsi dietro i dati di una terza persona.
 async function salvaConfigurazione(){
   const url=location.origin+location.pathname+"#"+toHash();
   // Prima il foglio di condivisione nativo del telefono — un tocco, scegli
   // WhatsApp o SMS dalla lista che il telefono stesso propone, invece di
-  // copiare e dover cambiare app a mano. Il testo serve anche a chi lo
-  // riceve per aggiungerti alla sua lista di turni condivisi, non solo a
-  // te per un backup.
-  const testo="La mia configurazione Notturnisti — salvala, o incollala nell'app per confrontare i turni.";
+  // copiare e dover cambiare app a mano.
+  const testo="La mia configurazione Notturnisti — salvala per non perderla, o passarla a un altro dispositivo.";
   try{
     if(navigator.share){ await navigator.share({title:"Notturnisti",text:testo,url});
       state.backupDone=true; store.set("backupDone",true); render(); return; }
@@ -6096,13 +6200,29 @@ async function salvaConfigurazione(){
   state.backupDone=true; store.set("backupDone",true); render();
 }
 $("#doLink").onclick=salvaConfigurazione;
-// Il QR codifica lo stesso identico link di "Salva la configurazione" — un
-// vestito diverso dello stesso payload, non un secondo meccanismo. Solo
+// "Condividi il tuo ciclo" (Turni): stesso meccanismo di salvaConfigurazione,
+// ma payload ristretto (toHashCiclo(), solo i tuoi dati) — prima era
+// letteralmente la stessa funzione di "Salva la configurazione", e chi
+// tracciava un partner gli mandava involontariamente anche i suoi turni e i
+// suoi orari di sonno insieme al proprio ciclo. Non segna backupDone: non è
+// un backup completo, è la condivisione di una sola parte.
+async function condividiCiclo(){
+  const url=location.origin+location.pathname+"#"+toHashCiclo();
+  const testo="Il mio ciclo turni su Notturnisti — incollalo nell'app per confrontare i turni con i tuoi.";
+  try{
+    if(navigator.share){ await navigator.share({title:"Notturnisti",text:testo,url}); return; }
+  }catch(e){ if(e && e.name==="AbortError") return; }
+  try{ await navigator.clipboard.writeText(url); toast("Link copiato"); }
+  catch(e){ prompt("Copia questo link:",url); }
+}
+if($("#doCycShare")) $("#doCycShare").onclick=condividiCiclo;
+// Il QR codifica lo stesso identico link di "Condividi il tuo ciclo" — solo
+// i tuoi dati (toHashCiclo()), mai quelli di una persona che segui. Solo
 // generazione: la lettura la fa già la fotocamera nativa del telefono, che
 // riconosce il link e lo apre da sola — non serve costruire anche quella metà.
 function renderQR(holderSel){
   const holder=$(holderSel||"#qrHolder"); if(!holder || typeof qrcodegen==="undefined") return;
-  const url=location.origin+location.pathname+"#"+toHash();
+  const url=location.origin+location.pathname+"#"+toHashCiclo();
   let qr; try{ qr=qrcodegen.QrCode.encodeText(url, qrcodegen.QrCode.Ecc.MEDIUM); }catch(e){ holder.textContent="Configurazione troppo estesa per un QR — usa il link."; return; }
   const n=qr.size, border=2, dim=n+border*2;
   let path="";
@@ -6120,6 +6240,12 @@ if($("#doShare")) $("#doShare").onclick=async()=>{
   try{ await navigator.clipboard.writeText(testo+" "+url); toast("Link copiato, pronto da incollare"); }
   catch(e){ prompt("Copia questo messaggio:",testo+" "+url); }
 };
+// La nota privacy in Opzioni dice "restano nel link e nel tuo browser" — vero
+// per chi non paga, non del tutto per chi ha il calendario di coppia
+// (paid.js, chiave "nt:sub"): quel piano vive anche in un KV lato server,
+// perché il feed live deve poterlo rileggere da solo. Un tocco in più di
+// verità, non nascosto dietro il fatto che riguarda una minoranza di utenti.
+if(store.get("sub") && $("#privacyNotaAbbonato")) $("#privacyNotaAbbonato").hidden=false;
 
 /* --- editor turni --- */
 function renderShifts(){
@@ -6763,7 +6889,7 @@ function salva(){
     maxAdvance:state.maxAdvance,pPattern:state.pPattern,pAnchor:state.pAnchor,
     pShifts:state.pShifts,pWake:state.pWake,pBed:state.pBed,pName:state.pName,people:state.people,personaGlance:state.personaGlance,
     repeat:state.repeat,ecc:state.ecc,evento:state.evento,
-    napTurno:state.napTurno,sonnoDiurno:state.sonnoDiurno,mattinoBifasico:state.mattinoBifasico,avvisoBifasicoOff:state.avvisoBifasicoOff,installBannerOff:state.installBannerOff,shareNudgeOff:state.shareNudgeOff,icsNudgeOff:state.icsNudgeOff,firstSeenAt:state.firstSeenAt,clubBannerOff:state.clubBannerOff,pausa:state.pausa,caffSens:state.caffSens,vista:state.vista});
+    napTurno:state.napTurno,sonnoDiurno:state.sonnoDiurno,mattinoBifasico:state.mattinoBifasico,avvisoBifasicoOff:state.avvisoBifasicoOff,installBannerOff:state.installBannerOff,shareNudgeOff:state.shareNudgeOff,icsNudgeOff:state.icsNudgeOff,icsExportedAt:state.icsExportedAt,icsExpireNudgeSeenAt:state.icsExpireNudgeSeenAt,firstSeenAt:state.firstSeenAt,clubBannerOff:state.clubBannerOff,pausa:state.pausa,caffSens:state.caffSens,vista:state.vista});
   // segnala i cambi di configurazione (non di vista) così il modulo a pagamento
   // può tenere allineato il feed del calendario. Il primo salva non conta.
   try{
@@ -6811,7 +6937,7 @@ document.addEventListener("visibilitychange", ()=>{
 addEventListener("load", ()=>{ setTimeout(ntNotifiche, 1500); });
 
 // Richiesta permesso notifiche: non immediata, non aggressiva.
-// Si mostra come bottone in Più, mai come prompt automatico.
+// Si mostra come bottone in Opzioni ("Promemoria"), mai come prompt automatico.
 function ntChiediPermesso(){
   if(!("Notification" in window)) return;
   if(Notification.permission === "granted"){ ntNotifiche(); return; }
@@ -6822,6 +6948,22 @@ function ntChiediPermesso(){
   });
 }
 window.ntChiediPermesso = ntChiediPermesso;
+if($("#doNotifiche")) $("#doNotifiche").onclick=ntChiediPermesso;
+// Stato del bottone "Promemoria" in Opzioni: solo lettura di
+// Notification.permission, costa nulla, ma non serve calcolarlo se Opzioni
+// non è nemmeno aperta — stessa idea di renderOpzSummaries().
+function renderNotifRiga(){
+  const btn=$("#doNotifiche"); if(!btn) return;
+  if(!("Notification" in window)){ btn.hidden=true; return; }
+  const t=$("#notifTesto"), v=$("#notifVal"), perm=Notification.permission;
+  if(perm==="granted"){
+    if(t) t.textContent="Promemoria attivi"; if(v) v.textContent="Attivi"; btn.disabled=true;
+  } else if(perm==="denied"){
+    if(t) t.textContent="Promemoria bloccati"; if(v) v.textContent="Riattivali dal telefono"; btn.disabled=true;
+  } else {
+    if(t) t.textContent="Attiva i promemoria sul telefono"; if(v) v.textContent=""; btn.disabled=false;
+  }
+}
 
 
 // ── navigazione a tab (feel da app): Oggi · Turni · Più ──
@@ -6939,17 +7081,17 @@ addEventListener("nt:refresh", ()=>{ try{ render(); }catch(e){} });
   var deferred=null;
   addEventListener("beforeinstallprompt", function(e){
     e.preventDefault(); deferred=e;
-    try{ installPromptEvento=e; renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderClubBanner(); }catch(err){}
+    try{ installPromptEvento=e; renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderIcsExpireNudge(); renderClubBanner(); }catch(err){}
     var tools=document.querySelector(".tools"); if(!tools || document.getElementById("doInstall")) return;
     var b=document.createElement("button");
     b.className="lnk"; b.id="doInstall"; b.textContent="Installa l'app";
     b.onclick=function(){ if(!deferred) return; deferred.prompt();
       deferred.userChoice.finally(function(){ deferred=null; b.remove();
-        try{ installPromptEvento=null; renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderClubBanner(); }catch(err){} }); };
+        try{ installPromptEvento=null; renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderIcsExpireNudge(); renderClubBanner(); }catch(err){} }); };
     tools.appendChild(b);
   });
   addEventListener("appinstalled", function(){ var b=document.getElementById("doInstall"); if(b) b.remove();
-    try{ installPromptEvento=null; renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderClubBanner(); }catch(err){} });
+    try{ installPromptEvento=null; renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderIcsExpireNudge(); renderClubBanner(); }catch(err){} });
   // iOS non manda mai beforeinstallprompt: qui non c'è un pulsante da
   // aggiungere, solo l'istruzione — sempre raggiungibile in Più, non solo
   // nel banner che si può chiudere.

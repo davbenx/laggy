@@ -438,6 +438,15 @@ function plan(){
     const p = dallInizio(a0, state.need - s.dur, a0 + cap, {rec:true, last});
     if(p) naps.push(p);
   }
+  // Stessa idea, capovolta: dopo un turno di mattina preparato ieri sera con
+  // la scelta bifasica (sonno principale accorciato apposta, a un orario in
+  // cui addormentarsi fosse davvero possibile), il resto si recupera qui,
+  // nel primo pomeriggio, appena rientrati.
+  if(sp.kind==="pre-turno-bifasico" && sp.dur < state.need - 20){
+    const a0 = b.end + state.cFrom + CFG.windDown;
+    const p = dallInizio(a0, state.need - sp.dur, a0 + 180, {rec:true, bifasico:true});
+    if(p) naps.push(p);
+  }
   // Pisolino DENTRO il turno. Si fa solo se l'utente ha dichiarato di poterlo
   // fare: in molti contratti dormire in servizio è vietato, e lo strumento non
   // deve suggerirlo a chi non può.

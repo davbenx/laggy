@@ -9,7 +9,7 @@
 // che va oltre quello che si può validare da fuori in una prima passata.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createEngine, buildFeed, DEFAULTS } from "../engine.js";
+import { createEngine, buildFeed, buildCoupleFeed, DEFAULTS } from "../engine.js";
 
 // Pattern di cicli comuni nel lavoro a turni italiano: N=notte, M=mattino,
 // P=pomeriggio, R=riposo (qualunque lettera fuori dalla mappa "shifts" è
@@ -105,4 +105,69 @@ test("stessa configurazione + stessa data → stesso risultato (determinismo)", 
   // escludiamo dal confronto, il resto deve essere identico.
   const strip = s => s.replace(/DTSTAMP:\d{8}T\d{6}Z/g, "DTSTAMP:");
   assert.equal(strip(a), strip(b));
+});
+
+// ── Rami senza copertura finora: sonno bifasico, sonno diurno unico/con
+// pisolino, pisolino in turno, calendario di coppia — trovati scoperti in
+// un audit generale dell'app (proprio nel primo, sp.kind==="pre-turno-
+// bifasico" nascondeva una divergenza reale fra questo file e la copia
+// incollata in index.html: un pisolino di recupero mancante). Stesso
+// livello dei test sopra: invarianti strutturali (non va in crash, ICS
+// valido, eventi non invertiti), non validazione del modello fisiologico. ──
+
+test("buildFeed non va in crash con sonno bifasico attivo (mattinoBifasico)", () => {
+  // Turno di mattina molto presto (05:00): l'onset naturale del sonno prima
+  // cade sotto la soglia (21:00) che fa scattare la scelta bifasica in
+  // simulate() — è il ramo che aveva la divergenza fra engine.js e index.html.
+  const cfg = {
+    pattern: "MMMRR", anchor: "2026-07-13",
+    shifts: { M: { n: "Mattino", s: 300, e: 720 } },
+    mattinoBifasico: true
+  };
+  const ics = buildFeed(cfg, { days: 14 });
+  assert.match(ics, /^BEGIN:VCALENDAR/);
+  const events = parseIcsEvents(ics);
+  assert.ok(events.length > 0);
+  for (const ev of events) assert.ok(toDate(ev.end) >= toDate(ev.start), `${ev.summary}: ${ev.start}→${ev.end}`);
+});
+
+for (const sonnoDiurno of ["unico", "unicoPisolino", "diviso"]) {
+  test(`buildFeed non va in crash con sonnoDiurno="${sonnoDiurno}"`, () => {
+    const ics = buildFeed({ pattern: "NNNRR", anchor: "2026-07-13", sonnoDiurno }, { days: 14 });
+    assert.match(ics, /^BEGIN:VCALENDAR/);
+    const events = parseIcsEvents(ics);
+    for (const ev of events) assert.ok(toDate(ev.end) >= toDate(ev.start), `${ev.summary}: ${ev.start}→${ev.end}`);
+  });
+}
+
+for (const napTurno of ["pausa", "libero", "no"]) {
+  test(`buildFeed non va in crash con napTurno="${napTurno}"`, () => {
+    const ics = buildFeed({ pattern: "NNNRR", anchor: "2026-07-13", napTurno }, { days: 14 });
+    assert.match(ics, /^BEGIN:VCALENDAR/);
+    const events = parseIcsEvents(ics);
+    for (const ev of events) assert.ok(toDate(ev.end) >= toDate(ev.start), `${ev.summary}: ${ev.start}→${ev.end}`);
+  });
+}
+
+test("buildCoupleFeed non va in crash con un partner configurato e produce ICS valido", () => {
+  const cfg = {
+    pattern: "NNNRR", anchor: "2026-07-13",
+    pPattern: "NNNRR", pAnchor: "2026-07-15"   // sfasato di due giorni: qualche riposo in comune, non tutti
+  };
+  const ics = buildCoupleFeed(cfg, { days: 30 });
+  assert.match(ics, /^BEGIN:VCALENDAR/);
+  assert.match(ics.trim(), /END:VCALENDAR$/);
+  // Eventi tutto-il-giorno (DATE, non DATE-TIME): stesso parser non basta,
+  // verifichiamo solo che ogni DTSTART;VALUE=DATE preceda o coincida col
+  // DTEND;VALUE=DATE associato.
+  const blocks = ics.split("BEGIN:VEVENT").slice(1);
+  for (const b of blocks) {
+    const s = /DTSTART;VALUE=DATE:(\d{8})/.exec(b), e = /DTEND;VALUE=DATE:(\d{8})/.exec(b);
+    assert.ok(s && e, "evento coppia senza DTSTART/DTEND a tutto il giorno");
+    assert.ok(+e[1] >= +s[1], `evento coppia con fine prima dell'inizio: ${s[1]}→${e[1]}`);
+  }
+});
+
+test("buildCoupleFeed rifiuta esplicitamente una config senza partner", () => {
+  assert.throws(() => buildCoupleFeed({ pattern: "NNNRR", anchor: "2026-07-13" }, { days: 30 }));
 });
