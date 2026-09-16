@@ -1,8 +1,12 @@
 // engine.js — Motore di pianificazione Notturnisti, PURO.
-// Nessun DOM, nessun browser, nessuno stato globale: gira identico nel browser,
-// in Node e in un Worker Cloudflare. Le funzioni del motore sono estratte
-// VERBATIM da index.html (stesso codice, stessi numeri). Il test differenziale
-// prova che l'ICS generato qui e' identico byte-per-byte a quello del browser.
+// Nessun DOM, nessuno stato globale proprio: gira identico in Node, in un
+// Worker Cloudflare (functions/feed, functions/couple) e nel browser, dove
+// index.html lo carica come modulo (createEngine()) invece di tenerne una
+// copia a mano — fino a prima di questo file esistevano due copie della
+// stessa logica, ed erano già divergenti (un pisolino di recupero bifasico
+// mancava qui ma non nella copia), scoperto e corretto in una sessione di
+// audit. Questo file è ora l'UNICA fonte di verità: un cambiamento fatto
+// solo qui si vede subito ovunque, incluso nel browser.
 
 export const DEFAULTS = {
   pattern:"MPNSR", anchor:"2026-07-13",
@@ -817,7 +821,21 @@ function buildIcs(days){
   return {
     state, plan, buildIcs, buildCouple, codeAt, block,
     sharedDays, freeOverlap, asPartner,
-    setIcs(o){ Object.assign(ICS, o||{}); return ICS; }
+    setIcs(o){ Object.assign(ICS, o||{}); return ICS; },
+    // Esposti anche questi: prima privati alla closure, ma index.html (che
+    // ora carica questo file invece di tenerne una copia a mano — vedi il
+    // commento in testa al file) ne ha bisogno per avvisi e calcoli di
+    // supporto intorno al piano principale (soglia bifasica, finestra
+    // naturale, debito di sonno annotato, ecc). Nessuna delle funzioni
+    // stesse è cambiata: solo il return si è allargato.
+    CFG, constraint, simulate, at,
+    startsInNight, spansNight, oraDi, debitoVero, saltatiIeri,
+    freeWakeOk, freeWakeUsata, naturalMid, durataLibera, sincronizzaNeed,
+    // index.html la richiama di nuovo dopo aver ripristinato lo state da
+    // link/localStorage (quei valori possono arrivare fuori dai limiti
+    // sensati) — prima aveva una seconda copia di LIMITI/normalizza() tutta
+    // sua, stesso rischio di divergenza già visto altrove in questo file.
+    normalizza
   };
 }
 
