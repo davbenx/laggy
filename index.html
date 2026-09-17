@@ -3451,6 +3451,21 @@ function pickToday(i){
   renderToday(); render();
 }
 function render(){
+  // salva() qui, non solo nei singoli gestori: trovati (in questa sessione,
+  // da segnalazioni reali) SEI punti diversi che cambiano preferenze vere
+  // — turni, orari, se il ciclo si ripete, i preset — senza mai chiamare
+  // salva() da soli, affidandosi solo al giro periodico di setInterval
+  // (perso se si chiude/si mette in background entro 4 secondi dal cambio).
+  // Rincorrerli uno per uno ogni volta che se ne trova un altro non è
+  // sostenibile: render() viene chiamato da ogni gestore che cambia
+  // qualcosa (mai da un timer cieco, verificato), quindi è il punto giusto
+  // per chiudere l'intera classe di bug in un colpo solo, non il prossimo
+  // punto da correggere quando arriva la prossima segnalazione. salva() è
+  // già economico e già protetto dalla sua stessa firma di configurazione
+  // (non ridispaccia nt:config-changed se nulla di rilevante è cambiato),
+  // quindi chiamarlo più spesso di quanto strettamente necessario non ha
+  // controindicazioni reali.
+  salva();
   // CFG.H governa quanti giorni la simulazione copre in ogni direzione — e
   // con lui, fin dove la striscia del ciclo può scorrere in sicurezza
   // (cicloMin/cicloMax, sopra). Un ciclo più lungo del margine fisso di

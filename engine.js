@@ -36,7 +36,14 @@ export function createEngine(config){
     // che need si potesse impostare direttamente), tolto in un audit.
     for(const k in LIMITI){
       const [lo,hi,def]=LIMITI[k], v=+state[k];
-      state[k] = (isFinite(v) && v>0) ? Math.min(Math.max(Math.round(v),lo),hi) : def;
+      // v>=0, non v>0: 0 è il minimo esplicitamente valido per cTo/cFrom
+      // (nessun tempo di viaggio) — con v>0 uno 0 legittimo veniva scartato
+      // e sostituito col default (25) invece di restare 0, a ogni
+      // normalizza() (quindi a ogni avvio): bug vero, trovato da una
+      // segnalazione reale. Per prep/maxAdvance (lo>0) non cambia nulla:
+      // un 0 lì viene comunque riportato al loro minimo dal clamp sotto,
+      // esattamente come un 5 per prep sarebbe riportato a 10.
+      state[k] = (isFinite(v) && v>=0) ? Math.min(Math.max(Math.round(v),lo),hi) : def;
     }
     if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(String(state.freeWake))) state.freeWake="07:30";
     if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(String(state.freeBed)))  state.freeBed="23:30";
