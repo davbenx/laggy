@@ -2203,6 +2203,16 @@ var qrcodegen;
     })(QrSegment = qrcodegen.QrSegment || (qrcodegen.QrSegment = {}));
 })(qrcodegen || (qrcodegen = {}));
 </script>
+<!-- Prima del modulo principale, non dopo (era l'ultimo script del file):
+     script classici deferred e script modulo eseguono in ordine di
+     documento fra loro, tutti prima di DOMContentLoaded — se
+     analytics.js arrivasse dopo, window.NTAnalytics non esisterebbe
+     ancora nei punti in cui il modulo qui sotto lo chiama a livello
+     top-level (non dentro un gestore di eventi, che scatta comunque
+     più tardi): l'evento si perderebbe in silenzio, senza errori,
+     senza modo di accorgersene. Non tocca il DOM, non ha bisogno di
+     aspettare nulla per partire prima. -->
+<script src="./analytics.js" defer></script>
 <script type="module" data-cfasync="false">
 // Modulo, non più script classico: serve per poter fare import diretto di
 // engine.js qui sotto, con la garanzia che il suo codice sia già eseguito
@@ -2645,6 +2655,13 @@ function download(name, text, mime){
   document.body.appendChild(a); a.click();
   setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },400);
 }
+// Scorciatoia per NTAnalytics.track() (analytics.js, caricato a parte come
+// script classico): molti blocker di tracker bloccano per pattern qualunque
+// file chiamato "analytics.js", quindi window.NTAnalytics può non esistere
+// mai — un solo controllo qui invece che ripeterlo a ogni chiamata. La
+// telemetria non deve mai rompere l'app, stesso principio già dentro
+// analytics.js stesso (il suo track() ha già un try/catch tutto suo).
+function track(evento, props){ try{ if(window.NTAnalytics) window.NTAnalytics.track(evento, props); }catch(e){} }
 let toastT;
 function toast(msg){
   const el=$("#toast"); el.textContent=msg; el.classList.add("on");
@@ -3796,10 +3813,15 @@ if($("#benvenutoLink")) $("#benvenutoLink").addEventListener("click", e=>{
 // più null), la stessa logica di benvenutoLinkChiuso qui sotto vale solo
 // per la sessione corrente.
 let demoEsempioChiuso = false;
+let demoEsempioTracciato = false;
 function renderDemoEsempio(){
   const el=$("#demoEsempio"); if(!el) return;
   if(!primaVolta || demoEsempioChiuso){ el.hidden=true; return; }
   el.hidden=false;
+  // Una volta sola per sessione, non a ogni render() (chiamato spesso):
+  // "sta vedendo l'esempio" è vero dal primo istante in cui il banner
+  // compare, non da ogni ridisegno successivo dello stesso banner.
+  if(!demoEsempioTracciato){ demoEsempioTracciato=true; track("example_started"); }
   el.innerHTML =
     '<button type="button" id="chiudiDemoEsempio" aria-label="Chiudi">×</button>'+
     '<b>Stai vedendo un turno d\'esempio</b>'+
@@ -3808,7 +3830,7 @@ function renderDemoEsempio(){
 }
 if($("#demoEsempio")) $("#demoEsempio").addEventListener("click", e=>{
   if(e.target.closest("#chiudiDemoEsempio")){ demoEsempioChiuso=true; renderDemoEsempio(); return; }
-  if(e.target.closest("#doConfiguraEsempio")){ demoEsempioChiuso=true; renderDemoEsempio(); apriIntro(true); wizShow(1); }
+  if(e.target.closest("#doConfiguraEsempio")){ demoEsempioChiuso=true; track("example_completed"); renderDemoEsempio(); apriIntro(true); wizShow(1); }
 });
 
 // Chi usa "Vedi il mio piano ora →" al passo 2 esce dal wizard SENZA passare
@@ -3870,11 +3892,16 @@ function installBannerVisibile(){
   const ios = isIOSPerInstall();
   return !(state.installBannerOff || giaInstallata() || mostraBenvenuto || backupNudgeVisibile() || !pronto || !(installPromptEvento || ios));
 }
+let installBannerTracciato=false;
 function renderInstallBanner(){
   const el=$("#installBanner"); if(!el) return;
   if(!installBannerVisibile()){ el.hidden=true; return; }
   const ios = isIOSPerInstall();
   el.hidden=false;
+  // Una volta sola per sessione: copre sia il caso Android (banner → prompt
+  // nativo del sistema) sia iOS (nessun prompt nativo esiste, solo
+  // istruzioni — qui è l'unico "gliel'abbiamo chiesto" misurabile per loro).
+  if(!installBannerTracciato){ installBannerTracciato=true; track("install_prompt_shown"); }
   el.innerHTML =
     '<button type="button" id="chiudiInstall" aria-label="Chiudi">×</button>'+
     '<b>Installa Notturnisti</b>'+
@@ -5595,11 +5622,15 @@ $("#doLink").onclick=salvaConfigurazione;
 async function condividiCiclo(){
   const url=location.origin+location.pathname+"#"+toHashCiclo();
   const testo="Il mio ciclo turni su Notturnisti — incollalo nell'app per confrontare i turni con i tuoi.";
+  track("share_started");
+  // share_created solo su una consegna vera del link (non se l'utente
+  // annulla il foglio di condivisione nativo: lì il link non è arrivato
+  // da nessuna parte).
   try{
-    if(navigator.share){ await navigator.share({title:"Notturnisti",text:testo,url}); return; }
+    if(navigator.share){ await navigator.share({title:"Notturnisti",text:testo,url}); track("share_created"); return; }
   }catch(e){ if(e && e.name==="AbortError") return; }
-  try{ await navigator.clipboard.writeText(url); toast("Link copiato"); }
-  catch(e){ prompt("Copia questo link:",url); }
+  try{ await navigator.clipboard.writeText(url); toast("Link copiato"); track("share_created"); }
+  catch(e){ prompt("Copia questo link:",url); track("share_created"); }
 }
 if($("#doCycShare")) $("#doCycShare").onclick=condividiCiclo;
 // Il QR codifica lo stesso identico link di "Condividi il tuo ciclo" — solo
@@ -5903,6 +5934,7 @@ if($("#doConfirmPersona")) $("#doConfirmPersona").onclick=()=>{
   const btn=$("#doConfirmPersona"), err=$("#personaLinkErr");
   const link=$("#personaLink")?.value||"", name=$("#personaName")?.value.trim()||"";
   let per=personaDaLink(link);
+  const daLinkCondiviso=!!per;   // share_accepted è solo per chi arriva da un link altrui, non dall'inserimento a mano
   // Il link è la via più veloce, ma non tutti quelli che si vogliono
   // seguire usano l'app — il caso classico è proprio chi fa un orario
   // fisso e non avrebbe motivo di aprirla mai. Per loro resta l'inserimento
@@ -5965,6 +5997,7 @@ if($("#doConfirmPersona")) $("#doConfirmPersona").onclick=()=>{
     state.people.push(per);
   }
   salva();
+  if(daLinkCondiviso) track("share_accepted");
   const nm=$("#personaName"), lk=$("#personaLink"), pp=$("#personaPattern"),
     pa=$("#personaAnchor"), pw=$("#personaWake"), pb=$("#personaBed"), pm=$("#personaMode");
   [nm,lk,pp,pa,pw,pb].forEach(el=>{ if(el) el.value=""; });
@@ -6036,6 +6069,12 @@ const hashPersonPre = hashOriginale ? personaDaLink(hashOriginale) : null;
 const hashDiffers = !!(hashPersonPre && savedPre && savedPre.pattern && hashPersonPre.pattern !== savedPre.pattern);
 
 const loaded = hashDiffers ? false : fromHash();
+// Un link applicato con successo qui è quasi sempre uno aperto DAVVERO da
+// qualcuno (proprio backup, o ciclo di un altro) — non c'è modo pulito di
+// distinguere "il tuo stesso link" da "il link di un altro" in questo
+// punto senza duplicare la logica di hashDiffers/hashPersonPre sopra per
+// il caso in cui NON differisce; approssimazione accettata.
+if(loaded) track("share_opened");
 // Un link è il modo più comune in cui un utente NUOVO arriva — qualcuno
 // che condivide il proprio per farsi seguire, o solo per far provare
 // l'app. Prima, in questo caso, il wizard di benvenuto non scattava mai
@@ -6208,7 +6247,7 @@ if($("#wizNext")) $("#wizNext").onclick=()=>{
     }
     const b=$("#doSetup"); if(b) b.click();
   }
-  else wizShow(WIZ.step+1);
+  else{ track("onboarding_step_completed",{step:WIZ.step}); wizShow(WIZ.step+1); }
 };
 if($("#doSaveWizEnd")) $("#doSaveWizEnd").onclick=async()=>{
   await salvaConfigurazione();
@@ -6219,6 +6258,11 @@ if($("#wizBack")) $("#wizBack").onclick=()=>wizShow(WIZ.step-1);
 function apriIntro(nascondiPiano){
   const o=$("#onboard"); if(!o) return;
   o.hidden=false;
+  // WIZ.edit non diventa mai true da nessuna parte in questo momento (unico
+  // ingresso al wizard a schermo pieno: doConfiguraEsempio/doConfiguraLaTua,
+  // entrambi al primo avvio) — apriIntro() è sempre un vero inizio, non una
+  // riapertura per modificare.
+  track("onboarding_started");
   WIZ.gotoOggi=true;   // di default "vedi il piano" porta a Oggi
   // "wiz-open" governa solo la disposizione (schermo pieno, navigazione
   // fissa in fondo) — sempre attiva quando il wizard è aperto, qualunque
@@ -6254,6 +6298,16 @@ function apriIntro(nascondiPiano){
   wizReset();
   if(!nascondiPiano && o.scrollIntoView) o.scrollIntoView({behavior:"smooth",block:"start"});
 }
+// Categoria grezza del piano appena configurato, per plan_generated — mai
+// il pattern vero (nt:X, lettere che potrebbero un giorno voler dire
+// qualcosa) o gli orari reali, solo "che tipo di turnista sei" a grandi
+// linee: riusa isNightCode(), già usata per colorare la striscia.
+function categoriaPattern(){
+  try{
+    const lettere=Object.keys(state.shifts||{});
+    return lettere.some(isNightCode) ? "notte" : "giorno";
+  }catch(e){ return "sconosciuto"; }
+}
 if($("#doSetup")) $("#doSetup").onclick=()=>{
   const wsc=$("#wizSaveConfirm");
   if(wsc ? !wsc.checked : !state.backupDone){
@@ -6262,10 +6316,15 @@ if($("#doSetup")) $("#doSetup").onclick=()=>{
     setTimeout(()=>{ const box=$("#wizSaveBox"); if(box && box.scrollIntoView) box.scrollIntoView({behavior:"smooth",block:"center"}); },60);
     return;
   }
+  track("onboarding_completed"); track("plan_generated",{pattern_type:categoriaPattern()});
   chiudiIntro(WIZ.gotoOggi);
 };
-if($("#doSkip")) $("#doSkip").onclick=()=>chiudiIntro(false);
-if($("#doVediSubito")) $("#doVediSubito").onclick=()=>{ usciteRapide=true; toast("Il tuo piano è pronto"); chiudiIntro(true); };
+if($("#doSkip")) $("#doSkip").onclick=()=>{ track("onboarding_abandoned",{step:WIZ.step}); chiudiIntro(false); };
+if($("#doVediSubito")) $("#doVediSubito").onclick=()=>{
+  usciteRapide=true; toast("Il tuo piano è pronto");
+  track("onboarding_completed"); track("plan_generated",{pattern_type:categoriaPattern()});
+  chiudiIntro(true);
+};
 if($("#doOpen")) $("#doOpen").onclick=()=>{
   // Il wizard a schermo pieno resta solo per il primo avvio — se qualche
   // sezione è già stata spostata dentro Opzioni (basta averne aperta una),
@@ -6351,8 +6410,9 @@ function ntChiediPermesso(){
   if(!("Notification" in window)) return;
   if(Notification.permission === "granted"){ ntNotifiche(); return; }
   if(Notification.permission === "denied") return;
+  track("notification_prompt_shown");
   Notification.requestPermission().then(p=>{
-    if(p === "granted") ntNotifiche();
+    if(p === "granted"){ ntNotifiche(); track("notifications_enabled"); }
     render(); // aggiorna UI (nasconde il banner se concesso)
   });
 }
@@ -6381,6 +6441,10 @@ function renderNotifRiga(){
 // partner, modifica. Più = calendario a pagamento ed extra.
 function setTab(t){
   const tab = (t==="turni"||t==="opzioni") ? t : "oggi";
+  // Stile "pageview", non "una volta sola": ogni volta che si arriva
+  // davvero su Oggi/Turni, non solo la primissima. Opzioni non ha un
+  // evento suo nella tassonomia (non è una delle due tab vere).
+  if(tab==="oggi") track("today_viewed"); else if(tab==="turni") track("calendar_viewed");
   document.body.classList.remove("tab-oggi","tab-turni","tab-opzioni","giornata");
   chiudiAndamenti();
   chiudiVederci();
@@ -6503,6 +6567,7 @@ addEventListener("nt:refresh", ()=>{ try{ render(); }catch(e){} });
     tools.appendChild(b);
   });
   addEventListener("appinstalled", function(){ var b=document.getElementById("doInstall"); if(b) b.remove();
+    track("pwa_installed");
     try{ installPromptEvento=null; renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderIcsExpireNudge(); renderClubBanner(); }catch(err){} });
   // iOS non manda mai beforeinstallprompt: qui non c'è un pulsante da
   // aggiungere, solo l'istruzione — sempre raggiungibile in Più, non solo
@@ -6534,6 +6599,5 @@ window.NT_PAY = {
 };
 </script>
 <script src="./paid.js" defer></script>
-<script src="./analytics.js" defer></script>
 </body>
 </html>
