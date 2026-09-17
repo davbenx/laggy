@@ -1148,41 +1148,14 @@ header b{font-size:23px}
 <div class="cap ciclo"><span class="eyebrow">Il tuo ciclo<span id="ciclNome"></span></span>
   <button class="lnk" id="tEdit">Modifica →</button></div>
 <div class="cyc" id="cyc"></div>
-<!-- Condividere il ciclo è un'azione che vogliamo prima vista, non
-     sepolta dentro "Quando sono disponibile" — subito sotto la
-     striscia a cui si riferisce, sempre visibile invece che dietro un
-     accordion. Stesso meccanismo di "Salva la configurazione"
-     (salvaConfigurazione/renderQR), richiamato da qui. -->
-<div id="cycShareBox" class="cycshare-btn" style="flex-direction:column;gap:8px;margin-top:var(--gap-sezione)">
-  <span class="eyebrow">Condividi</span>
-  <button type="button" id="doCycShare" class="cycshare-btn" style="width:100%;text-align:left;align-items:center;gap:14px;padding:14px;background:var(--blue-soft);border:1px solid var(--blue);border-radius:var(--r);box-shadow:var(--shadow-btn);cursor:pointer;">
-    <span style="flex:none;width:38px;height:38px;border-radius:999px;background:var(--blue);display:flex;align-items:center;justify-content:center;color:var(--su-blu);">
-      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg>
-    </span>
-    <span style="flex:1;">
-      <span style="display:block;font-size:15px;font-weight:700;color:var(--ink);">Condividi il tuo ciclo</span>
-      <span style="display:block;font-size:12.5px;color:var(--dim);margin-top:2px;">Chi apre il link può confrontare i turni con i tuoi</span>
-    </span>
-  </button>
-  <!-- QR e stampa erano link di testo: due alternative allo stesso livello
-       dell'azione primaria qui sopra, ma con meno peso visivo — card .tool
-       standard (stessa usata ovunque nell'app, es. "Foglio con i miei
-       orari liberi" in Quando sono disponibile), non lo stile blu
-       riservato all'azione primaria. -->
-  <div class="tools" style="margin:0">
-    <button type="button" id="doCycQR" class="tool">
-      <span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM19 14h2v2h-2zM14 19h2v2h-2zM19 19h2v2h-2z"/></svg></span>
-      <span class="tool-tx"><b>Mostra il codice QR</b><span>Per chi ti sta davanti — stesso link di "Condividi il tuo ciclo"</span></span>
-    </button>
-    <div class="ecc" id="qrBoxCyc" hidden><div id="qrHolderCyc" style="display:flex;justify-content:center;margin:14px 0"></div></div>
-    <!-- Stampare il ciclo era in Più (sparita): stesso cluster concettuale
-         di condividerlo, sta bene qui. -->
-    <button type="button" id="doPrint" class="tool">
-      <span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8V3h12v5"/><rect x="4" y="8" width="16" height="8" rx="1.5"/><path d="M8 13h8v7H8z"/></svg></span>
-      <span class="tool-tx"><b>Stampa il foglio del ciclo</b><span>Un giro completo, da attaccare al frigo</span></span>
-    </button>
-  </div>
-</div>
+<!-- Il cluster "Condividi" (link/QR/stampa) si è spostato più in basso,
+     dopo Quando sono disponibile e Andamenti: era la prima cosa vista
+     sotto la striscia, davanti a due sezioni usate più spesso (la propria
+     disponibilità, i propri andamenti) — un'azione occasionale non
+     dovrebbe precedere quelle due. Resta comunque sempre visibile (mai
+     dietro un accordion), solo più in basso. Vedi il markup più sotto,
+     dopo #andamentiPagina. -->
+
 <!-- "Turni diversi ogni settimana? Impostali a tocchi" (griglia
      #gridBox a parte) è sparito: era la stessa cosa di "Personalizza"
      + "non si ripete" nel wizard/Opzioni — due editor paralleli sullo
@@ -1313,6 +1286,37 @@ header b{font-size:23px}
     <h1 class="tab-title" style="margin:0">Andamenti</h1>
   </div>
   <div id="andamenti"></div>
+</div>
+
+<!-- Condividere il ciclo: tre azioni sorelle (link, QR, stampa — stesso
+     contenuto, tre formati), stesso peso visivo per tutte e tre — card
+     .tool standard, la stessa usata ovunque nell'app (es. "Foglio con i
+     miei orari liberi" in Quando sono disponibile), non più una card blu
+     su misura per la prima e due link di testo per le altre due.
+     "Condividi il tuo ciclo" resta la prima delle tre: non le serve un
+     colore diverso per segnalarlo, basta l'ordine. Sempre visibile (mai
+     dietro un accordion) — .cycshare-btn{display:flex} sul contenitore,
+     non uno stile inline, perché altrimenti batterebbe sempre le regole
+     body.tab-x #cycShareBox{display:none} che lo nascondono fuori da
+     Turni, qualunque sia la loro specificità (stesso bug di
+     specificità già trovato e corretto altrove in questo file). -->
+<div id="cycShareBox" class="cycshare-btn" style="flex-direction:column;gap:8px;margin-top:var(--gap-sezione)">
+  <span class="eyebrow">Condividi</span>
+  <div class="tools" style="margin:0">
+    <button type="button" id="doCycShare" class="tool">
+      <span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg></span>
+      <span class="tool-tx"><b>Condividi il tuo ciclo</b><span>Chi apre il link può confrontare i turni con i tuoi</span></span>
+    </button>
+    <button type="button" id="doCycQR" class="tool">
+      <span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM19 14h2v2h-2zM14 19h2v2h-2zM19 19h2v2h-2z"/></svg></span>
+      <span class="tool-tx"><b>Mostra il codice QR</b><span>Per chi ti sta davanti — stesso link di "Condividi il tuo ciclo"</span></span>
+    </button>
+    <div class="ecc" id="qrBoxCyc" hidden><div id="qrHolderCyc" style="display:flex;justify-content:center;margin:14px 0"></div></div>
+    <button type="button" id="doPrint" class="tool">
+      <span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8V3h12v5"/><rect x="4" y="8" width="16" height="8" rx="1.5"/><path d="M8 13h8v7H8z"/></svg></span>
+      <span class="tool-tx"><b>Stampa il foglio del ciclo</b><span>Un giro completo, da attaccare al frigo</span></span>
+    </button>
+  </div>
 </div>
 
 <div id="cards"></div>
