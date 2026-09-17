@@ -79,10 +79,11 @@
 
   // ── schermate ──
   function scUnlock() {
+    var prezzoFmt = PAY.price.replace(".", ",") + " " + (PAY.currency === "EUR" ? "€" : PAY.currency);
     return '<h2 class="pf-h">Il calendario che si aggiorna da solo</h2>' +
-      '<p class="pf-p">Iscrivi il tuo calendario una volta. Turni, sonno e ultimo caffè ' +
-      'ruotano col tuo ciclo, da soli — anche il calendario di coppia, se lo usi. Sblocca anche <b>Il tuo andamento</b>: debito di sonno, regolarità, correlazioni.</p>' +
-      '<p class="pf-p"><b>' + PAY.price + ' ' + PAY.currency + '</b> una volta, a vita.</p>' +
+      '<p class="pf-p">La versione gratis funziona bene, ma va riesportata ogni 28 giorni. Con questa, il calendario si aggiorna da solo — turni, sonno, ultimo caffè, anche quello di coppia se lo usi con qualcuno. Lo colleghi una volta, poi non ci pensi più.</p>' +
+      '<p class="pf-p">Sblocca anche <b>Il tuo andamento</b>: non solo grafici da interpretare — un consiglio concreto ogni settimana, calcolato sui tuoi turni e sul tuo diario.</p>' +
+      '<p class="pf-p"><b>' + prezzoFmt + '</b> una volta sola, per sempre. Niente abbonamento da ricordarsi di disdire.</p>' +
       (isPlaceholder() ? '<p class="pf-note">Il pagamento non è ancora configurato: il pulsante comparirà una volta impostato.</p>' :
         dentroTWA() ? '<p class="pf-note">Per ora lo sblocco si fa dal sito, non da qui dentro: apri <b>notturnisti.club</b> dal browser del telefono, funziona anche lì.</p>' :
         '<button class="pf-btn" id="pf-checkout" type="button">Sblocca ora →</button>' +
