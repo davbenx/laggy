@@ -2305,7 +2305,7 @@ const safeName = x => String(x==null?"":x).replace(/[<>"'\r\n\t:|]/g,"").trim().
 const encShifts = o => Object.entries(o).map(([k,v])=>[k,safeName(v.n)||k,v.s,v.e].join(":")).join("|");
 function decShifts(str){
   const o={};
-  for(const part of str.split("|")){
+  for(const part of String(str).split("|")){
     const [k,n,s,e] = part.split(":");
     if(!k || !/^[A-Z]$/.test(k) || k==="R") continue;
     const S=+s, E=+e; if(!isFinite(S)||!isFinite(E)||E<=S) continue;

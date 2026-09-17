@@ -9,6 +9,8 @@
 // che va oltre quello che si può validare da fuori in una prima passata.
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { createEngine, buildFeed, buildCoupleFeed, DEFAULTS } from "../engine.js";
 
 // Pattern di cicli comuni nel lavoro a turni italiano: N=notte, M=mattino,
@@ -278,4 +280,42 @@ test("buildCoupleFeed non va in crash con un partner configurato e produce ICS v
 
 test("buildCoupleFeed rifiuta esplicitamente una config senza partner", () => {
   assert.throws(() => buildCoupleFeed({ pattern: "NNNRR", anchor: "2026-07-13" }, { days: 30 }));
+});
+
+// index.html tiene una seconda copia di alcune utility pure di engine.js
+// (deliberatamente: sono generiche/stabili, mai state la sede di un bug
+// reale — unificarle vorrebbe dire toccare centinaia di punti di chiamata
+// scorrelati). Ma questa stessa sessione ha già trovato due divergenze nate
+// esattamente così tra le due copie di altra logica (LIMITI/normalizza,
+// busyOf) — un rischio strutturale che nessun test teneva sotto controllo.
+// Estrae il testo sorgente di ciascuna funzione da entrambi i file e lo
+// confronta byte per byte: non prova che siano corrette, solo che non sono
+// silenziosamente andate fuori sincrono.
+function estraiFunzione(sorgente, nome) {
+  const decl = new RegExp(`(?:^|\\n)(?:const ${nome} = |function ${nome}\\()`);
+  const m = decl.exec(sorgente);
+  if (!m) return null;
+  const start = m.index + (m[0].startsWith("\n") ? 1 : 0);
+  let i = start, depth = 0, started = false;
+  for (; i < sorgente.length; i++) {
+    const c = sorgente[i];
+    if (c === "{" || c === "(") { depth++; started = true; }
+    else if (c === "}" || c === ")") { depth--; if (started && depth === 0 && c === "}") { i++; break; } }
+    else if (c === ";" && depth === 0 && started) { i++; break; }
+    else if (c === ";" && depth === 0 && !started) { i++; break; } // const NAME = espressione-senza-parentesi;
+  }
+  return sorgente.slice(start, i).trim();
+}
+
+test("le utility pure duplicate tra engine.js e index.html restano identiche", () => {
+  const engineSrc = readFileSync(fileURLToPath(new URL("../engine.js", import.meta.url)), "utf8");
+  const htmlSrc = readFileSync(fileURLToPath(new URL("../index.html", import.meta.url)), "utf8");
+  const NOMI = ["iso", "day", "clamp", "mod1440", "hhmm", "hhmm15", "near", "safeName", "encShifts", "decShifts"];
+  const divergenti = [];
+  for (const nome of NOMI) {
+    const a = estraiFunzione(engineSrc, nome), b = estraiFunzione(htmlSrc, nome);
+    if (a === null || b === null) { divergenti.push(`${nome}: non trovata in ${a === null ? "engine.js" : "index.html"} — l'estrattore del test va aggiornato, non necessariamente il codice`); continue; }
+    if (a !== b) divergenti.push(`${nome}:\n  engine.js:   ${a}\n  index.html:  ${b}`);
+  }
+  assert.deepEqual(divergenti, [], "utility duplicate divergenti tra engine.js e index.html:\n" + divergenti.join("\n\n"));
 });
