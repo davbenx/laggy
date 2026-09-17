@@ -5544,24 +5544,36 @@ $("#doIcs").onclick=()=>{ const b=$("#icsBox"); const apri=b.hidden;
   soloUno(apri?"#icsBox":null); b.hidden=!apri;
   if(apri && b.scrollIntoView) b.scrollIntoView({behavior:"smooth",block:"nearest"}); };
 $("#icsVai").onclick=async ()=>{
-  const ics=NT.setIcs({
-    turni:$("#icsT").checked, sonno:$("#icsS").checked,
-    pisolini:$("#icsN").checked, caffe:$("#icsC").checked,
-    luce:$("#icsL")?$("#icsL").checked:true,
-    rientro:$("#icsR")?$("#icsR").checked:true,
-    pasti:$("#icsM")?$("#icsM").checked:false,
-    avviso:+$("#icsA").value||0
-  });
-  if(!(ics.turni||ics.sonno||ics.pisolini||ics.caffe||ics.luce||ics.rientro||ics.pasti)){ toast("Scegli almeno una cosa"); return; }
-  const r = await download("notturnisti-"+iso(state.focus)+".ics",NT.buildIcs(28),"text/calendar");
-  // Se l'utente ha annullato il foglio di condivisione, non è successo
-  // niente di davvero esportato: non ha senso segnarlo né dirgli "scaricati".
-  if(!r.ok){ if(r.msg) toast(r.msg); return; }
-  $("#icsBox").hidden=true; toast(r.msg || "28 giorni scaricati");
-  // Segna quando: il file è statico e scade dopo 28 giorni, senza questo
-  // l'app non ha modo di sapere se il calendario del telefono è ancora
-  // allineato al piano vero — vedi renderIcsExpireNudge().
-  state.icsExportedAt=iso(new Date()); salva();
+  // Tutto dentro un try/catch: "non compare nulla" con la build diagnostica
+  // precedente (che ne aveva uno solo dentro download()) punta a un'eccezione
+  // PRIMA che download() venga anche solo chiamato — NT.buildIcs(28), qui
+  // sotto, viene valutato come argomento prima che download() parta, quindi
+  // un suo errore saltava ogni diagnostica precedente in silenzio. Qui non
+  // può più succedere: qualunque eccezione, ovunque in questo blocco, ora
+  // finisce in un toast leggibile invece che nel nulla.
+  try{
+    const ics=NT.setIcs({
+      turni:$("#icsT").checked, sonno:$("#icsS").checked,
+      pisolini:$("#icsN").checked, caffe:$("#icsC").checked,
+      luce:$("#icsL")?$("#icsL").checked:true,
+      rientro:$("#icsR")?$("#icsR").checked:true,
+      pasti:$("#icsM")?$("#icsM").checked:false,
+      avviso:+$("#icsA").value||0
+    });
+    if(!(ics.turni||ics.sonno||ics.pisolini||ics.caffe||ics.luce||ics.rientro||ics.pasti)){ toast("Scegli almeno una cosa"); return; }
+    const contenuto=NT.buildIcs(28);
+    const r = await download("notturnisti-"+iso(state.focus)+".ics",contenuto,"text/calendar");
+    // Se l'utente ha annullato il foglio di condivisione, non è successo
+    // niente di davvero esportato: non ha senso segnarlo né dirgli "scaricati".
+    if(!r.ok){ if(r.msg) toast(r.msg); return; }
+    $("#icsBox").hidden=true; toast(r.msg || "28 giorni scaricati");
+    // Segna quando: il file è statico e scade dopo 28 giorni, senza questo
+    // l'app non ha modo di sapere se il calendario del telefono è ancora
+    // allineato al piano vero — vedi renderIcsExpireNudge().
+    state.icsExportedAt=iso(new Date()); salva();
+  }catch(e){
+    toast("Errore nell'esportazione: "+(e&&e.message||e));
+  }
 };
 $("#doFeed").onclick=()=>{
   const url=location.origin+location.pathname+"#"+toHash();
