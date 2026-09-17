@@ -12,9 +12,11 @@ export async function onRequestOptions({ env }) {
 export async function onRequestPost({ env, request }) {
   const o = cfgEnv(env).origin;
   if (!env.SUBS) return err(503, "servizio non configurato", o);
-  // Senza un pagamento a fare da freno naturale, un limite più stretto qui:
-  // un utente reale ne crea uno solo per dispositivo, mai a raffica.
-  if (!(await rateLimit(env, request, "account", 8, 600))) return err(429, "troppe richieste, riprova tra poco", o);
+  // Non troppo stretto: il CGNAT dei gestori mobili italiani mette centinaia
+  // di utenti diversi dietro lo stesso IP pubblico, quindi un limite basso
+  // qui blocca persone reali senza nessuna colpa, non solo abusi. 60/10min
+  // basta comunque a rendere costoso riempire il KV con accessi inutili.
+  if (!(await rateLimit(env, request, "account", 60, 600))) return err(429, "troppe richieste, riprova tra poco", o);
 
   let body; try { body = await request.json(); } catch (_) { return err(400, "JSON non valido", o); }
   const cfg = sanitizeConfig(body.cfg || {});

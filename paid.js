@@ -245,12 +245,18 @@
   function attiva() {
     setStatus("Attivo il calendario…");
     api("POST", "/account", { cfg: paramsObj() }).then(function (r) {
-      if (!r.ok || !r.data || !r.data.id) { setStatus("Non riesco ad attivare il calendario adesso — riprova."); return; }
+      if (!r.ok || !r.data || !r.data.id) {
+        // Il messaggio generico nascondeva la causa vera (config non valida,
+        // limite di richieste, errore server) — mostrarla aiuta a capire se
+        // ha senso riprovare subito o se manca prima un piano configurato.
+        var causa = (r.data && r.data.error) ? r.data.error : ("errore " + (r.status || "?"));
+        setStatus("Non riesco ad attivare il calendario (" + causa + ") — riprova."); return;
+      }
       setSub({ id: r.data.id, writeKey: r.data.writeKey, feedUrl: r.data.feedUrl });
       setStatus(""); screen = "account"; paint();
       try { if (window.render) window.render(); } catch (e) {}
       toast("Attivato — buon turno.");
-    }, function () { setStatus("Non riesco ad attivare il calendario adesso — riprova."); });
+    }, function () { setStatus("Non riesco ad attivare il calendario (connessione) — riprova."); });
   }
 
   function toast(t) {
