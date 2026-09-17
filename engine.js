@@ -626,21 +626,6 @@ function plan(){
           night:spansNight(b), lateStart:startsInNight(b), debitoScoperto};
 }
 
-const safeName = x => String(x==null?"":x).replace(/[<>"'\r\n\t:|]/g,"").trim().slice(0,24);
-
-const encShifts = o => Object.entries(o).map(([k,v])=>[k,safeName(v.n)||k,v.s,v.e].join(":")).join("|");
-
-function decShifts(str){
-  const o={};
-  for(const part of String(str).split("|")){
-    const [k,n,s,e] = part.split(":");
-    if(!k || !/^[A-Z]$/.test(k) || k==="R") continue;
-    const S=+s, E=+e; if(!isFinite(S)||!isFinite(E)||E<=S) continue;
-    o[k]={n:safeName(n)||k, s:S, e:E};
-  }
-  return Object.keys(o).length ? o : null;
-}
-
 function asPartner(fn){
   // Il partner è un'entità autonoma: ha una sua sequenza, le SUE definizioni di
   // turno (può fare un orario fisso di giorno mentre tu ruoti) e la SUA finestra
@@ -895,6 +880,27 @@ function buildIcs(days){
     // sua, stesso rischio di divergenza già visto altrove in questo file.
     normalizza
   };
+}
+
+// A livello di modulo, non dentro createEngine: parseConfig() (più sotto) le
+// chiama per decodificare la config in arrivo dal client, e prima di questo
+// fix erano annidate dentro createEngine — invisibili da fuori quella
+// chiusura. Bug reale: qualunque richiesta con turni personalizzati (il
+// parametro "s", presente in QUALUNQUE config reale, mai solo nei casi
+// limite) falliva con "decShifts is not defined", un 500 non gestito.
+const safeName = x => String(x==null?"":x).replace(/[<>"'\r\n\t:|]/g,"").trim().slice(0,24);
+
+const encShifts = o => Object.entries(o).map(([k,v])=>[k,safeName(v.n)||k,v.s,v.e].join(":")).join("|");
+
+function decShifts(str){
+  const o={};
+  for(const part of String(str).split("|")){
+    const [k,n,s,e] = part.split(":");
+    if(!k || !/^[A-Z]$/.test(k) || k==="R") continue;
+    const S=+s, E=+e; if(!isFinite(S)||!isFinite(E)||E<=S) continue;
+    o[k]={n:safeName(n)||k, s:S, e:E};
+  }
+  return Object.keys(o).length ? o : null;
 }
 
 export function buildFeed(config, opts={}){
