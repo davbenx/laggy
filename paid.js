@@ -4,7 +4,7 @@
    turni, coppia e storico. Config: window.NT_PAY = { clientId, price, currency, api }. */
 (function () {
   "use strict";
-  var PAY = Object.assign({ store: "LEMONSQUEEZY_STORE_PLACEHOLDER", variant: "LEMONSQUEEZY_VARIANT_PLACEHOLDER", price: "24.99", currency: "EUR", api: "" }, window.NT_PAY || {});
+  var PAY = Object.assign({ store: "LEMONSQUEEZY_STORE_PLACEHOLDER", variant: "LEMONSQUEEZY_VARIANT_PLACEHOLDER", price: "36.99", currency: "EUR", api: "" }, window.NT_PAY || {});
   var KEY = "nt:sub";
   var $ = function (s, r) { return (r || document).querySelector(s); };
 
