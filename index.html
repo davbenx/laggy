@@ -2619,30 +2619,43 @@ function finestreLibere(giorni){
 // Safari su iOS (comprese le PWA installate da schermata Home) spesso non fa
 // nulla con un download via <a download>+blob: URL — limite/bug noto di
 // quella piattaforma, non di questo codice: "tocco e non scarica niente" è
-// esattamente il sintomo, trovato con una prova reale. Il foglio di
-// condivisione nativo (già usato altrove per "Condividi il tuo ciclo") sa
-// condividere anche file, non solo testo, ed è molto più affidabile su
-// mobile — primo tentativo. Il download via blob resta il ripiego per chi
-// non condivide file (soprattutto desktop). Restituisce true se
-// l'esportazione è ragionevolmente riuscita (false se l'utente ha annullato
-// il foglio di condivisione) — il chiamante lo usa per decidere se segnare
-// "esportato adesso" o no.
-async function download(name, text, mime){
-  try{
-    const file=new File([text], name, {type:mime});
-    if(navigator.canShare && navigator.canShare({files:[file]})){
-      await navigator.share({files:[file]});
-      return true;
-    }
-  }catch(e){ if(e && e.name==="AbortError") return false; }
+// esattamente il sintomo, trovato con una prova reale. Il download via blob
+// resta il ripiego, primo tentativo è il foglio di condivisione nativo
+// (già usato altrove per "Condividi il tuo ciclo"), che sa condividere
+// anche file — molto più affidabile su mobile.
+function tentaBlob(name,text,mime){
   try{
     const blob=new Blob([text],{type:mime});
     const a=document.createElement("a");
     a.href=URL.createObjectURL(blob); a.download=name;
     document.body.appendChild(a); a.click();
     setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },400);
-    return true;
-  }catch(e){ return false; }
+    return {ok:true};
+  }catch(e){ return {ok:false, msg:"Esportazione non riuscita: "+(e&&e.message||"errore sconosciuto")}; }
+}
+// Restituisce {ok, msg}, non solo true/false: msg — quando presente — è
+// diagnostica temporanea (quale ramo ha preso, cosa è andato storto) da
+// mostrare al posto del solito toast di conferma, non in aggiunta — due
+// toast() ravvicinati si sovrascriverebbero e il primo non si leggerebbe
+// mai. Il primo tentativo di questo fix (solo condivisione+ripiego, senza
+// diagnostica) non ha risolto il problema segnalato su dispositivo reale,
+// e senza una console visibile lì non c'è altro modo di sapere COSA sta
+// fallendo — da riportare qui in chat quello che dice il toast.
+async function download(name, text, mime){
+  const file=new File([text], name, {type:mime});
+  let shareable=false;
+  try{ shareable = !!(navigator.canShare && navigator.canShare({files:[file]})); }catch(e){}
+  if(shareable){
+    try{ await navigator.share({files:[file]}); return {ok:true}; }
+    catch(e){
+      if(e && e.name==="AbortError") return {ok:false};
+      const msg="Condivisione non riuscita ("+(e&&e.name||"?")+"), uso il download diretto";
+      const r=tentaBlob(name,text,mime);
+      return r.ok ? {ok:true, msg} : {ok:false, msg:r.msg};
+    }
+  }
+  const r=tentaBlob(name,text,mime);
+  return r.ok ? {ok:true, msg: "Condivisione file non disponibile qui, uso il download diretto"} : r;
 }
 let toastT;
 function toast(msg){
@@ -5540,11 +5553,11 @@ $("#icsVai").onclick=async ()=>{
     avviso:+$("#icsA").value||0
   });
   if(!(ics.turni||ics.sonno||ics.pisolini||ics.caffe||ics.luce||ics.rientro||ics.pasti)){ toast("Scegli almeno una cosa"); return; }
-  const ok = await download("notturnisti-"+iso(state.focus)+".ics",NT.buildIcs(28),"text/calendar");
+  const r = await download("notturnisti-"+iso(state.focus)+".ics",NT.buildIcs(28),"text/calendar");
   // Se l'utente ha annullato il foglio di condivisione, non è successo
   // niente di davvero esportato: non ha senso segnarlo né dirgli "scaricati".
-  if(!ok) return;
-  $("#icsBox").hidden=true; toast("28 giorni scaricati");
+  if(!r.ok){ if(r.msg) toast(r.msg); return; }
+  $("#icsBox").hidden=true; toast(r.msg || "28 giorni scaricati");
   // Segna quando: il file è statico e scade dopo 28 giorni, senza questo
   // l'app non ha modo di sapere se il calendario del telefono è ancora
   // allineato al piano vero — vedi renderIcsExpireNudge().
