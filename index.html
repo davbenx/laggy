@@ -1321,7 +1321,7 @@ header b{font-size:23px}
     <span class="tool-val" id="opzValSonno"></span></button>
   <div class="ecc" id="opzBox3" hidden></div>
   <button class="tool" data-opz="4"><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h1.5a2.5 2.5 0 0 1 0 5H17"/><path d="M4 8h13v5a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V8z"/><path d="M8 2v3M12 2v3"/></svg></span>
-    <span class="tool-tx"><b>Dettagli del piano</b><span>Sensibilità alla caffeina, tempi di viaggio, quanto puoi anticipare, sonno bifasico.</span></span></button>
+    <span class="tool-tx"><b>Dettagli del piano</b><span>Sensibilità alla caffeina, tempi di viaggio, quanto puoi anticipare, come dividere il sonno prima di un turno molto presto.</span></span></button>
   <div class="ecc" id="opzBox4" hidden></div>
   <!-- Il bottone che chiedeva il permesso notifiche viveva in Più (sparita
        con la ristrutturazione della navigazione): la funzione ntChiediPermesso()
@@ -3446,8 +3446,11 @@ function render(){
   renderEssenziale(P, CARDS);          // si azzera da solo in dettaglio
   const tab = state.tab || (ess ? "oggi" : "ciclo");
   const giornata = document.body.classList.contains("giornata");
-  const showStrip = (tab==="turni") || (!ess && tab!=="oggi" && tab!=="piu"); // ciclo/dettaglio legacy
-  const showDay = (tab==="oggi" && giornata) || (!ess && tab!=="turni" && tab!=="piu");
+  // "piu" (la vecchia terza tab, eliminata) non è più un valore raggiungibile
+  // di state.tab/tab: oggi solo "oggi"/"turni"/"opzioni" lo sono davvero
+  // (verificato su ogni chiamata a setTab() e ogni data-tab nel markup).
+  const showStrip = (tab==="turni") || (!ess && tab!=="oggi"); // ciclo/dettaglio legacy
+  const showDay = (tab==="oggi" && giornata) || (!ess && tab!=="turni");
   if(showStrip){ renderStrip(P, f, S); renderAndamenti(); renderAndamentiPreview(); renderPartner(CARDS); renderPartnerPreview(); renderPiuCal(); }
   if(tab==="oggi") renderBand(P, CARDS);
   if(showDay){ renderCards(P, f, CARDS); }

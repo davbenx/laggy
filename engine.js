@@ -183,7 +183,11 @@ function saltatiIeri(){
       }
     }
   }
-  return Math.min(m, 180);
+  // Tetto e pavimento simmetrici: ogni singola voce di sonno "più lungo del
+  // previsto" è già cappata a -60 sopra, ma con più pisolini nello stesso
+  // giorno la somma poteva scendere sotto zero senza limite — asimmetria
+  // rispetto al tetto positivo, corretta in un audit.
+  return Math.max(Math.min(m, 180), -180);
 }
 
 const sleepsAfter = b => {
@@ -634,6 +638,14 @@ function asPartner(fn){
   // Il partner è un'entità autonoma: ha una sua sequenza, le SUE definizioni di
   // turno (può fare un orario fisso di giorno mentre tu ruoti) e la SUA finestra
   // di sonno. Se non le ha impostate, eredita le tue: retrocompatibile.
+  // Senza un partner impostato non c'è niente da scambiare — sharedDays() ha
+  // già questa guardia esplicita, e la versione multi-persona in index.html
+  // pure (via "if(!pp.pattern) return null"): senza, questa versione
+  // proseguiva trattando il partner assente come "sempre a riposo" invece di
+  // restituire null, un'incoerenza interna scoperta in un audit (mai
+  // raggiungibile dall'esterno: buildCoupleFeed() rifiuta già di chiamarla
+  // senza partner — qui è solo per coerenza propria del modulo).
+  if(!state.pPattern) return null;
   const p=state.pattern, a=state.anchor, sh=state.shifts, fw=state.freeWake, fb=state.freeBed;
   state.pattern=state.pPattern; state.anchor=state.pAnchor||a;
   if(state.pShifts) state.shifts=state.pShifts;

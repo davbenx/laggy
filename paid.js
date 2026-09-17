@@ -153,8 +153,22 @@
       var s = getSub();
       api("PUT", "/config/" + s.id, { cfg: paramsObj() }, s.writeKey).then(function (r) { toast(r.ok ? "Turni sincronizzati" : "Errore di sincronizzazione"); });
     };
+    // Nessun confirm() bloccante — coerente con lo stile del resto dell'app.
+    // Qui però l'azione è irreversibile lato server (a differenza di una
+    // rimozione locale, non si può "annullare dopo" con uno snapshot): primo
+    // tocco arma il bottone con un'etichetta esplicita, la cancellazione
+    // vera parte solo al secondo tocco entro pochi secondi.
     var del = $("#pf-del"); if (del) del.onclick = function () {
-      if (!confirm("Cancellare l'abbonamento e i dati dal server?")) return;
+      if (!del.dataset.armed) {
+        del.dataset.armed = "1"; del.dataset.testo = del.textContent;
+        del.textContent = "Tocca di nuovo per confermare";
+        clearTimeout(del._armTimer);
+        del._armTimer = setTimeout(function () {
+          delete del.dataset.armed; del.textContent = del.dataset.testo;
+        }, 4000);
+        return;
+      }
+      clearTimeout(del._armTimer); delete del.dataset.armed; del.textContent = del.dataset.testo;
       var s = getSub(); api("DELETE", "/config/" + s.id, null, s.writeKey).then(function () { clearSub(); screen = "unlock"; paint(); toast("Cancellato"); });
     };
     var cp = $("#pf-copy"); if (cp) cp.onclick = function () { copyText(restoreLink(getSub())); };
