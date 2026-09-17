@@ -6,7 +6,7 @@ export { buildFeed, buildCoupleFeed, parseConfig };
 // ── SEGNAPOSTO: impostali come variabili d'ambiente sul progetto Pages ──
 // LEMONSQUEEZY_WEBHOOK_SECRET (dalla dashboard, sezione Webhooks),
 // LEMONSQUEEZY_STORE_ID, LEMONSQUEEZY_VARIANT_ID (l'id del prodotto/variante),
-// PRICE (es. "24.99", solo per la vetrina — il prezzo vero vive sul prodotto
+// PRICE (es. "36.99", solo per la vetrina — il prezzo vero vive sul prodotto
 // Lemon Squeezy stesso), CURRENCY ("EUR"), SITE_ORIGIN (il dominio dell'app,
 // es. "https://app.notturnisti.club" — NON il sito notturnisti.club, che è
 // un dominio diverso e non chiama questi endpoint), e il binding KV: SUBS.
@@ -15,7 +15,7 @@ export function cfgEnv(env) {
     lsSecret: env.LEMONSQUEEZY_WEBHOOK_SECRET || "LEMONSQUEEZY_WEBHOOK_SECRET_PLACEHOLDER",
     lsStoreId: env.LEMONSQUEEZY_STORE_ID || "",
     lsVariantId: env.LEMONSQUEEZY_VARIANT_ID || "",
-    price: env.PRICE || "24.99",
+    price: env.PRICE || "36.99",
     currency: env.CURRENCY || "EUR",
     // Se SITE_ORIGIN non è impostata su Cloudflare Pages, NON aprire a "*":
     // /config/<id> accetta PUT/DELETE, quindi un CORS aperto a qualunque

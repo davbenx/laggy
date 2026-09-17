@@ -47,7 +47,7 @@
     "CURRENCY": "EUR",
     "LEMONSQUEEZY_STORE_ID": "notturnisti",
     "LEMONSQUEEZY_VARIANT_ID": "457255",
-    "PRICE": "24.99",
+    "PRICE": "36.99",
     "SITE_ORIGIN": "https://app.notturnisti.club"
   },
   // Deploy di anteprima (una per PR, via Workers Builds "wrangler preview"):
@@ -61,7 +61,7 @@
       "CURRENCY": "EUR",
       "LEMONSQUEEZY_STORE_ID": "notturnisti",
       "LEMONSQUEEZY_VARIANT_ID": "457255",
-      "PRICE": "24.99",
+      "PRICE": "36.99",
       "SITE_ORIGIN": "https://app.notturnisti.club"
     },
     "kv_namespaces": [
