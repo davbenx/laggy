@@ -2363,7 +2363,13 @@ function fromHash(hashStr){
   if(okTime(p.get("w"))) state.freeWake=p.get("w");
   if(okTime(p.get("wb"))) state.freeBed=p.get("wb");
   if(NT.CFG.caffScala[p.get("cs")]) state.caffSens=p.get("cs");
-  else if(okTime(p.get("w")) && +p.get("n")) state.freeBed=hhmm15(t(p.get("w"))-(+p.get("n")));
+  // Link vecchi (prima che "wb" fosse un parametro a sé) salvavano solo
+  // l'ora di sveglia e la durata del sonno: da qui si ricava l'ora di andare
+  // a letto. Era scritto come "else" dopo il controllo di caffSens — due
+  // condizioni senza nessuna relazione, agganciate per errore: un link con
+  // "wb" valido ma "cs" invalido/assente si vedeva riscrivere freeBed con
+  // un valore derivato al posto di quello esplicito appena letto sopra.
+  if(!okTime(p.get("wb")) && okTime(p.get("w")) && +p.get("n")) state.freeBed=hhmm15(t(p.get("w"))-(+p.get("n")));
   state.need=num("n",state.need,240,900); state.cTo=num("ct",state.cTo,0,240);
   state.cFrom=num("cf",state.cFrom,0,240); state.prep=num("pr",state.prep,5,240);
   state.maxAdvance=num("adv",state.maxAdvance,15,180);
