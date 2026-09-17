@@ -1,6 +1,11 @@
 # Archivi di deploy/backup: non vanno versionati, si rigenerano dal sorgente
 *.zip
 
+# Script Worker compilato da functions/ (build_command, vedi wrangler.jsonc)
+# e stato locale di wrangler: entrambi rigenerati a ogni deploy/dev.
+dist/
+.wrangler/
+
 # OS / editor
 .DS_Store
 Thumbs.db

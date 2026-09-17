@@ -1,0 +1,13 @@
+# Non vanno serviti come file statici pubblici: codice server (contiene la
+# logica delle Functions, compilata a parte in dist/worker/ per il Worker
+# vero e proprio), test, artefatti di build, stato locale di wrangler/git.
+functions/
+tests/
+dist/
+.wrangler/
+.git/
+.gitignore
+wrangler.jsonc
+.assetsignore
+README.md
+LICENSE
