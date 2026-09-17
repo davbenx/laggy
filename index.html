@@ -2194,6 +2194,37 @@ var qrcodegen;
 // stessa garanzia di ordine che un normalizzatore await avrebbe dato, senza
 // bisogno di riscrivere tutto in async. I moduli sono già strict di default.
 import { createEngine } from "./engine.js";
+// Diagnostica temporanea: dopo più fix mirati sull'esportazione calendario
+// senza risultato (il bottone non mostra letteralmente nulla, nemmeno con
+// un try/catch attorno a tutto il suo gestore — vedi commenti più sotto sul
+// gestore di #icsVai), il sospetto è che l'eccezione avvenga PRIMA che quel
+// bottone venga anche solo agganciato: da qualche parte più su in questo
+// stesso script, durante il primo giro di esecuzione. Un handler globale,
+// il prima possibile, cattura qualunque errore JS o promise non gestita
+// OVUNQUE nella pagina — non solo dentro un gestore specifico — e lo scrive
+// a schermo con un elemento creato a mano, senza dipendere da $()/toast()
+// che potrebbero non essere ancora pronti se l'errore avviene qui vicino
+// all'inizio. Va tolto una volta trovata la causa reale, non è pensato per
+// restare in produzione.
+function mostraErroreFatale(msg){
+  try{
+    let el=document.getElementById("erroreDiagnostico");
+    if(!el){
+      el=document.createElement("div");
+      el.id="erroreDiagnostico";
+      el.style.cssText="position:fixed;left:0;right:0;bottom:0;z-index:99999;background:#c0392b;color:#fff;padding:12px 16px;font:13px/1.4 sans-serif;white-space:pre-wrap;max-height:40vh;overflow:auto";
+      document.body.appendChild(el);
+    }
+    el.textContent += (el.textContent?"\n\n":"")+msg;
+  }catch(e){}
+}
+window.addEventListener("error", e=>{
+  mostraErroreFatale("Errore JS: "+(e.message||"?")+"\n"+(e.filename||"")+":"+(e.lineno||"")+":"+(e.colno||""));
+});
+window.addEventListener("unhandledrejection", e=>{
+  const r=e.reason;
+  mostraErroreFatale("Promise non gestita: "+(r&&r.message||r||"?"));
+});
 /* MOTORE NOTTURNISTI v4 — turni arbitrari.
    Nessuna regola guarda più la lettera del turno. Tutto si decide dalla
    geometria: dove cade il turno rispetto alla finestra di sonno naturale.
@@ -5544,6 +5575,11 @@ $("#doIcs").onclick=()=>{ const b=$("#icsBox"); const apri=b.hidden;
   soloUno(apri?"#icsBox":null); b.hidden=!apri;
   if(apri && b.scrollIntoView) b.scrollIntoView({behavior:"smooth",block:"nearest"}); };
 $("#icsVai").onclick=async ()=>{
+  // Conferma indipendente da toast()/$() che il tocco è arrivato fin qui —
+  // se non compare nemmeno questa, il problema è ancora più a monte
+  // (il bottone non è agganciato, o qualcos'altro intercetta il tocco prima
+  // che arrivi qui) e non dentro questo gestore.
+  mostraErroreFatale("Tocco ricevuto su Scarica 28 giorni — "+new Date().toLocaleTimeString("it-IT"));
   // Tutto dentro un try/catch: "non compare nulla" con la build diagnostica
   // precedente (che ne aveva uno solo dentro download()) punta a un'eccezione
   // PRIMA che download() venga anche solo chiamato — NT.buildIcs(28), qui
