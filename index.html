@@ -4753,6 +4753,39 @@ function renderCards(P, f, CARDS){
 // resta bloccato di default.
 function haPagato(){ return !!(window.NTPaid && window.NTPaid.paid()); }
 
+// La frase della correlazione umore/debito — estratta a parte perché serve
+// sia se diventa il consiglio principale (in cima), sia se resta la sua
+// card descrittiva più sotto (quando qualcos'altro ha la priorità).
+function fraseCorrDebito(corr){
+  const sopra = corr.sogliaDebito>0 ? "quando il debito supera "+hm(corr.sogliaDebito)
+    : "nei giorni con meno sonno accumulato rispetto al solito";
+  return corr.coerente
+    ? "Sembra che "+sopra+", il tuo voto scenda in media a "+corr.vAlto.toFixed(1)+
+      " (contro "+corr.vBasso.toFixed(1)+" negli altri giorni)."
+    : "Curioso: nei tuoi dati il voto è più alto proprio "+sopra+
+      " ("+corr.vAlto.toFixed(1)+" contro "+corr.vBasso.toFixed(1)+"). Potrebbe dipendere da altro — vale la pena osservarlo.";
+}
+// Non un'altra sezione da interpretare: la singola cosa più utile da sapere
+// ORA, scelta fra tutti gli insight già calcolati dalle sezioni sotto (che
+// restano — questa sceglie solo QUALE mettere per primo, non ne calcola di
+// nuovi). Priorità: prima quello che si risolve con un tocco solo
+// (data-apply-*, da wakeSummary), poi il giorno preciso del ciclo da
+// proteggere, poi il verdetto del diario, poi un consiglio di wakeSummary
+// senza azione, infine la correlazione umore/debito (interessante, ma senza
+// niente da fare a riguardo). "fonte" dice a renderAndamenti() quale
+// sezione, più sotto, deve evitare di ripetere la stessa frase.
+function insightSettimana(cs, ws, sm, corr){
+  if(ws){
+    const conAzione = ws.consigli.find(c=>c.action);
+    if(conAzione) return {testo:conAzione.text, action:conAzione.action, fonte:"ws", chiave:conAzione};
+  }
+  if(cs && cs.frase) return {testo:cs.frase, action:null, fonte:"cs"};
+  if(sm && sm.verdict) return {testo:sm.verdict, action:null, fonte:"sm"};
+  if(ws && ws.consigli.length) return {testo:ws.consigli[0].text, action:ws.consigli[0].action, fonte:"ws", chiave:ws.consigli[0]};
+  if(corr) return {testo:fraseCorrDebito(corr), action:null, fonte:"corr"};
+  return null;
+}
+
 function renderAndamenti(){
   const el=$("#andamenti"); if(!el) return;
   if(!haPagato()){
@@ -4762,13 +4795,29 @@ function renderAndamenti(){
     const b=$("#doSbloccaAndamento"); if(b) b.onclick=()=>{ if(window.NTPaid) window.NTPaid.open(); };
     return;
   }
+  // Tutti gli insight calcolati PRIMA di costruire qualunque HTML: serve
+  // guardarli tutti insieme per scegliere quale mettere in cima (vedi
+  // insightSettimana()) prima di sapere come si scrivono le sezioni sotto.
+  let cs=null, ws=null, sm=null, corr=null;
+  try{ cs=cycleSummary(); }catch(e){}
+  try{ ws=wakeSummary(); }catch(e){}
+  try{ sm=diarySummary(); }catch(e){}
+  try{ if(window.NTHistory) corr=correlazioneVotoDebito(); }catch(e){}
+  const capo=insightSettimana(cs, ws, sm, corr);
+
   // Come nel mockup: ogni sotto-sezione è la sua card (eyebrow fuori,
   // dettaglio dentro), non più tutto scaricato in un'unica card grande.
-  // Il debito di sonno resta il primo elemento, perché è il più
-  // immediatamente utile — hero (numero grande + sparkline) invece di
-  // un'altra riga di testo fra le altre. L'insight sulla correlazione
-  // umore/debito segue subito sotto, la sua card a parte.
-  let heroHtml="", sezioni=[];
+  // Il consiglio scelto sopra viene prima di tutto — non un'altra card fra
+  // le altre, è la cosa più utile da leggere in questa visita. Il debito di
+  // sonno resta subito sotto: hero (numero grande + sparkline), sempre
+  // presente perché è un cruscotto, non un consiglio che scade.
+  let capoHtml="", heroHtml="", sezioni=[];
+  if(capo){
+    capoHtml='<div class="andamento-insight"><span class="aic">'+ICON.sun+'</span>'+
+      '<div><span class="andamento-insight-eyebrow">'+(capo.action?"Da provare questa settimana":"Insight")+'</span>'+esc(capo.testo)+
+      (capo.action?'<div style="margin-top:8px"><button class="lnk" data-apply-field="'+esc(capo.action.field)+'" data-apply-value="'+esc(String(capo.action.value))+'">'+esc(capo.action.label)+' →</button></div>':'')+
+      '</div></div>';
+  }
   try{
     if(window.NTHistory){
       const trend=window.NTHistory.sleepTrend({beds:state.beds,wakes:state.wakes}, NT_planSafe, {days:30});
@@ -4793,17 +4842,11 @@ function renderAndamenti(){
           '</svg>'+
         '</div>';
       }
-      const corr=correlazioneVotoDebito();
-      if(corr){
-        const sopra = corr.sogliaDebito>0 ? "quando il debito supera "+hm(corr.sogliaDebito)
-          : "nei giorni con meno sonno accumulato rispetto al solito";
-        const testo = corr.coerente
-          ? "Sembra che "+sopra+", il tuo voto scenda in media a "+corr.vAlto.toFixed(1)+
-            " (contro "+corr.vBasso.toFixed(1)+" negli altri giorni)."
-          : "Curioso: nei tuoi dati il voto è più alto proprio "+sopra+
-            " ("+corr.vAlto.toFixed(1)+" contro "+corr.vBasso.toFixed(1)+"). Potrebbe dipendere da altro — vale la pena osservarlo.";
+      // La card descrittiva resta solo se la correlazione non è già il
+      // consiglio in cima — stessa frase due volte sarebbe rumore, non conferma.
+      if(corr && capo && capo.fonte!=="corr"){
         heroHtml+='<div class="andamento-insight"><span class="aic">'+ICON.sun+'</span>'+
-          '<div><span class="andamento-insight-eyebrow">Insight</span>'+esc(testo)+'</div></div>';
+          '<div><span class="andamento-insight-eyebrow">Insight</span>'+esc(fraseCorrDebito(corr))+'</div></div>';
       }
     }
   }catch(e){}
@@ -4818,7 +4861,6 @@ function renderAndamenti(){
     }
   }catch(e){}
 
-  const cs=cycleSummary();
   if(cs){
     let righe='';
     cs.righe.forEach(r=>{ const largh = r.avg===null ? 0 : Math.round((r.avg-1)/4*100);
@@ -4826,12 +4868,12 @@ function renderAndamenti(){
         '<span style="flex:1"><span class="cyb"><i style="width:'+largh+'%"></i></span></span>'+
         '<span style="min-width:62px;text-align:right;color:var(--dim)">'+
         (r.avg===null?"—":r.avg.toFixed(1)+" · "+r.n)+'</span></div>'; });
-    if(cs.frase) righe+='<div class="row" style="margin-top:6px"><span style="color:var(--amber)">'+cs.frase+'</span></div>';
+    // La frase resta qui SOLO se non è già stata promossa in cima.
+    if(cs.frase && !(capo && capo.fonte==="cs")) righe+='<div class="row" style="margin-top:6px"><span style="color:var(--amber)">'+cs.frase+'</span></div>';
     sezioni.push('<div><span class="eyebrow andamento-eyebrow">Il tuo ciclo giorno per giorno, da '+cs.voti+' voti</span>'+
       '<div class="andamento-sezione"><div class="rows">'+righe+'</div></div></div>');
   }
 
-  const ws=wakeSummary();
   if(ws && ws.consigli.length){
     let righe='';
     if(ws.liberi) righe+='<div class="row"><b style="min-width:148px">Nei giorni liberi</b><span>ti alzi verso le '+
@@ -4840,24 +4882,28 @@ function renderAndamenti(){
       (ws.anticipi.scarto>0?"ti alzi "+hm(ws.anticipi.scarto)+" dopo il piano":
        ws.anticipi.scarto<0?"ti alzi "+hm(-ws.anticipi.scarto)+" prima del piano":"sei puntuale")+
       ' ('+ws.anticipi.n+' volte)</span></div>';
-    ws.consigli.forEach(c=>righe+='<div class="row" style="margin-top:5px;flex-wrap:wrap"><span style="color:var(--amber)">'+c.text+'</span>'+
+    // Ogni consiglio, tranne quello già promosso in cima (per riferimento
+    // dell'oggetto, non del testo: due consigli diversi potrebbero avere
+    // per caso lo stesso testo).
+    ws.consigli.forEach(c=>{ if(capo && capo.fonte==="ws" && capo.chiave===c) return;
+      righe+='<div class="row" style="margin-top:5px;flex-wrap:wrap"><span style="color:var(--amber)">'+c.text+'</span>'+
       (c.action?'<button class="lnk" data-apply-field="'+esc(c.action.field)+'" data-apply-value="'+esc(String(c.action.value))+'" style="margin-top:4px">'+esc(c.action.label)+' →</button>':'')+
-      '</div>');
+      '</div>'; });
     sezioni.push('<div><span class="eyebrow andamento-eyebrow">Come scivola la tua sveglia, da '+ws.n+' annotate</span>'+
       '<div class="andamento-sezione"><div class="rows">'+righe+'</div></div></div>');
   }
 
-  const sm=diarySummary();
   if(sm){
-    let righe=(sm.verdict?'<div class="row"><span style="color:var(--amber)">'+sm.verdict+'</span></div>'
+    // Il verdetto resta qui SOLO se non è già stato promosso in cima.
+    let righe=(sm.verdict && !(capo && capo.fonte==="sm")?'<div class="row"><span style="color:var(--amber)">'+sm.verdict+'</span></div>'
         :'<div class="row"><span class="hint" style="width:100%">Su '+sm.tot+' notti annotate</span></div>');
     righe+='<div class="row" style="margin-top:6px"><button class="btn g" id="doSum">Copia il riepilogo</button></div>';
     sezioni.push('<div class="andamento-sezione"><div class="rows">'+righe+'</div></div>');
   }
 
   const rowsHtml = sezioni.join("");
-  el.innerHTML = (heroHtml || rowsHtml)
-    ? heroHtml+rowsHtml
+  el.innerHTML = (capoHtml || heroHtml || rowsHtml)
+    ? capoHtml+heroHtml+rowsHtml
     : '<div class="empty"><img src="./owl-mark.png" alt="" width="46" height="46"><p>Annota il sonno per qualche giorno dal glance di Oggi: qui comparirà quale giorno del ciclo ti pesa di più e come scivola la tua sveglia.</p></div>';
 }
 
