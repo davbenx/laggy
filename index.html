@@ -1411,7 +1411,7 @@ header b{font-size:23px}
 </details>
     <p class="hint" style="margin:12px 0 0" id="privacyNota">I tuoi turni e quello che annoti non escono da questa pagina: restano nel link e nel tuo browser.<span id="privacyNotaAbbonato" hidden> Se hai attivato il calendario che si aggiorna da solo, i turni restano comunque anche sul server che lo tiene aggiornato — solo quelli, il resto no.</span></p>
     <p style="margin:10px 0 0"><button class="lnk" id="doFeed" style="padding:0">Segnala cosa non torna</button> · <button class="lnk" id="doShare" style="padding:0">Consiglialo a un collega</button></p>
-    <p class="hint" style="margin:10px 0 0"><a href="https://notturnisti.club/planner" target="_blank" rel="noopener">Come si usa</a> · <a href="https://notturnisti.club/chi-siamo/" target="_blank" rel="noopener">Chi siamo</a> · <a href="https://notturnisti.club" target="_blank" rel="noopener">notturnisti.club</a></p>
+    <p class="hint" style="margin:10px 0 0"><a href="https://notturnisti.club/planner" target="_blank" rel="noopener">Come si usa</a> · <a href="https://notturnisti.club/chi-siamo/" target="_blank" rel="noopener">Chi siamo</a> · <a href="https://notturnisti.club" target="_blank" rel="noopener">notturnisti.club</a><span id="doDonateLnkWrap" hidden> · <a id="doDonateLnk" href="#" target="_blank" rel="noopener">Sostieni il progetto</a></span></p>
   </div>
 </div>
 </div>
@@ -5166,7 +5166,7 @@ function renderPiuCal(){
     '<span>Un tocco per collegarlo al telefono: da domani apri il calendario e trovi già scritto '+esempio+
     ', ogni giorno, da solo. Se hai un widget Calendario in home, lo leggi anche lì senza aprire l\'app.</span>'+
     '<span class="piu-line">'+rigaCoppia+'</span>'+
-    '<span class="piu-price">Gratis, per sempre. Nessun account da creare, nessun abbonamento.</span>';
+    '<span class="piu-price">Gratis, per sempre. Si attiva con un tocco qui sotto, nessuna email.</span>';
 }
 function NT_planSafe(d){ const f=state.focus; state.focus=new Date(d); let P=null; try{ P=NT.plan(); }catch(e){} state.focus=f; return P; }
 // Valore corrente a destra dei tre bottoni di Opzioni che ne hanno uno solo
@@ -5809,6 +5809,11 @@ if($("#doShare")) $("#doShare").onclick=async()=>{
 // perché il feed live deve poterlo rileggere da solo. Un tocco in più di
 // verità, non nascosto dietro il fatto che riguarda una minoranza di utenti.
 if(store.get("sub") && $("#privacyNotaAbbonato")) $("#privacyNotaAbbonato").hidden=false;
+// Punto permanente e silenzioso per chi vuole sostenere il progetto senza
+// aspettare il nudge periodico (donateNudge) o essere passato da Andamenti/
+// dal calendario attivo: sempre lì, mai un obbligo.
+{ const du=donateUrl(), dw=$("#doDonateLnkWrap"), dl=$("#doDonateLnk");
+  if(du && dw && dl){ dl.href=du; dw.hidden=false; } }
 
 /* --- editor turni --- */
 function renderShifts(){
