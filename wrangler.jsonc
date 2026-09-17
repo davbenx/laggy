@@ -1,0 +1,71 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // Prima di questo file, "wrangler deploy" non aveva nessun "main" da
+  // impacchettare: senza un entry-point, tratta l'intero repo come sito
+  // statico puro e ignora del tutto la cartella functions/ (una convenzione
+  // di Cloudflare Pages, non di Workers — i Worker non la leggono da soli).
+  // Risultato: /feed, /config, /claim, /couple, /pending, /webhook-ls non
+  // hanno mai risposto in produzione, nessun binding KV, nessuna variabile
+  // d'ambiente a runtime (quelle già impostate nei "build settings" di
+  // Workers Builds sono solo per il passo di build, non arrivano al Worker
+  // da sole — servono qui).
+  "name": "laggy",
+  "compatibility_date": "2026-09-16",
+  // Generato dal build_command (vedi Workers Builds, production settings)
+  // con lo strumento ufficiale: `npx wrangler pages functions build
+  // --outdir=./dist/worker/` compila functions/ (già scritta secondo la
+  // convenzione delle Pages Functions — onRequestGet/onRequestPost,
+  // routing dinamico [id].js) in un vero script Worker, con la stessa
+  // logica di sempre, zero duplicazione da mantenere a mano. dist/ non è
+  // versionato: si rigenera a ogni deploy da functions/, che resta l'unica
+  // fonte di verità.
+  "main": "./dist/worker/index.js",
+  "assets": {
+    // "." perché index.html, engine.js e gli altri script pubblici vivono
+    // nella root del repo — .assetsignore sotto esclude tutto ciò che non
+    // deve essere servito come file statico (codice server, test, il
+    // pacchetto del Worker stesso).
+    "directory": ".",
+    "binding": "ASSETS"
+    // Niente run_worker_first: le rotte API (/feed, /config, ecc.) non
+    // corrispondono a nessun asset statico, quindi Cloudflare le instrada
+    // già al Worker di default — lasciare invece gli asset veri (la stragrande
+    // maggioranza del traffico) serviti direttamente, senza invocare il
+    // Worker, è più veloce e non richiede nessuna configurazione in più.
+  },
+  "kv_namespaces": [
+    // Esisteva già sull'account (usato da _lib.js: readSub/writeSub),
+    // semplicemente non era mai stato collegato a nessuno script Worker.
+    { "binding": "SUBS", "id": "9d54b9285f17404da83f470695d2a001" }
+  ],
+  // Solo i valori NON sensibili: store/variante/prezzo/valuta sono già
+  // pubblici di fatto (paid.js li espone al browser via window.NT_PAY).
+  // LEMONSQUEEZY_WEBHOOK_SECRET va impostato a parte come secret vero
+  // (wrangler secret put, o dalla dashboard) — mai qui, finirebbe in chiaro
+  // nel repo.
+  "vars": {
+    "CURRENCY": "EUR",
+    "LEMONSQUEEZY_STORE_ID": "notturnisti",
+    "LEMONSQUEEZY_VARIANT_ID": "457255",
+    "PRICE": "24.99",
+    "SITE_ORIGIN": "https://app.notturnisti.club"
+  },
+  // Deploy di anteprima (una per PR, via Workers Builds "wrangler preview"):
+  // stesse variabili non sensibili di sopra (nessuna è davvero segreta), ma
+  // un KV SEPARATO — mai gli abbonamenti veri, un ramo aperto non deve
+  // poter scrivere/leggere dati di produzione. LEMONSQUEEZY_WEBHOOK_SECRET
+  // resta fuori anche qui: un'anteprima non deve mai poter verificare
+  // webhook reali.
+  "previews": {
+    "vars": {
+      "CURRENCY": "EUR",
+      "LEMONSQUEEZY_STORE_ID": "notturnisti",
+      "LEMONSQUEEZY_VARIANT_ID": "457255",
+      "PRICE": "24.99",
+      "SITE_ORIGIN": "https://app.notturnisti.club"
+    },
+    "kv_namespaces": [
+      { "binding": "SUBS", "id": "a7e988fb98ab45368a14d1031188aaaf" }
+    ]
+  }
+}
