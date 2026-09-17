@@ -1049,6 +1049,14 @@ header b{font-size:23px}
       <label class="p1" style="margin:0"><input type="checkbox" id="mattinoBif"> Il sonno prima di un turno molto presto: dividerlo se serve</label>
       <span class="hint">Se per essere pronto devi metterti a letto molto presto (prima delle 21), addormentarsi a quell'ora è spesso difficile per il corpo, non solo scomodo. Con questa spunta, in quei casi lo strumento accetta un sonno principale più corto ma a un'ora più naturale, e recupera il resto con un pisolino nel primo pomeriggio dopo il turno.</span>
     </div>
+    <!-- Le notifiche erano raggiungibili solo da un bottone sepolto in
+         Opzioni, mai menzionate qui — chi configura tutto il resto non
+         sapeva nemmeno che esistessero. Un accenno qui, non un prompt
+         automatico (quello resta vietato): il permesso vero lo chiede
+         comunque solo ntChiediPermesso(), solo al tocco. -->
+    <div class="q">
+      <p class="hint">Vuoi un promemoria sul telefono quando ti devi coricare o svegliare? <button class="lnk" type="button" id="doNotificheWiz" style="display:inline">Attiva i promemoria →</button></p>
+    </div>
     <!-- Questo pezzo appartiene alla CHIUSURA del wizard, non a "Dettagli
          del piano" in sé — apriSezioneInline(4) sposta fisicamente questa
          .wstep dentro #opzBox4 la prima volta che si apre da Opzioni, dove
@@ -4786,11 +4794,35 @@ function insightSettimana(cs, ws, sm, corr){
   return null;
 }
 
+// Esempio statico di "Il tuo andamento" per chi non ha ancora sbloccato —
+// stessa identica struttura/classi della pagina vera (renderAndamenti sotto),
+// numeri plausibili ma inventati, mai spacciati per dati reali: l'eyebrow
+// "Esempio" lo dice chiaro, in ogni card. Dimostra invece di spiegare, come
+// renderPiuCal() fa già per il calendario che si aggiorna da solo — qui non
+// si possono usare i dati VERI dell'utente (non li ha ancora, è per questo
+// che vede l'esempio), quindi l'onestà sta nell'etichetta, non nel dato.
+// Niente pulsanti "applica" veri: sarebbe pericoloso collegarli per sbaglio
+// al listener data-apply-field che scrive nello stato reale.
+function esempioAndamentoHtml(){
+  const ESB='<span class="andamento-insight-eyebrow" style="color:var(--faint)">Esempio</span>';
+  return '<div class="andamento-insight">'+
+      '<span class="aic">'+ICON.sun+'</span>'+
+      '<div>'+ESB+'Quando il piano ti chiede di alzarti prima, in media ti alzi 25 minuti dopo. Il valore che hai messo (60 min) è più di quanto reggi.'+
+      '<div style="margin-top:8px"><span class="lnk" style="cursor:default;opacity:.7">Prova 40 min →</span></div></div></div>'+
+    '<div class="andamento-hero" style="margin-top:10px">'+ESB+
+      '<div class="andamento-num" style="color:var(--orange)">-1h 20m</div>'+
+      '<span class="hint" style="display:block">Dormi in media 6h40 contro 8h00 pianificate</span>'+
+      '<svg viewBox="0 0 280 44" style="width:100%;height:44px;display:block;margin-top:10px" role="img" aria-label="Esempio di andamento del debito di sonno">'+
+        '<polyline points="4,30 43,26 82,32 121,20 160,14 199,18 238,10 276,8" fill="none" stroke="var(--orange)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>'+
+        '<circle cx="276" cy="8" r="3.5" fill="var(--orange)"/>'+
+      '</svg>'+
+    '</div>';
+}
 function renderAndamenti(){
   const el=$("#andamenti"); if(!el) return;
   if(!haPagato()){
-    el.innerHTML =
-      '<span class="hint" style="width:100%">Non solo grafici da interpretare: un consiglio concreto ogni settimana, calcolato sui tuoi turni e sul tuo diario — quale giorno del ciclo ti pesa di più, come cambia il tuo umore col debito di sonno, quanto sono regolari i tuoi orari. Con settimane di dati dietro, non è più solo un piano: è un ritratto di come il tuo corpo reagisce ai turni.</span>'+
+    el.innerHTML = esempioAndamentoHtml()+
+      '<span class="hint" style="width:100%;margin-top:14px;display:block">Non solo grafici da interpretare: un consiglio concreto ogni settimana, calcolato sui tuoi turni e sul tuo diario — quale giorno del ciclo ti pesa di più, come cambia il tuo umore col debito di sonno, quanto sono regolari i tuoi orari. Con settimane di dati dietro, non è più solo un piano: è un ritratto di come il tuo corpo reagisce ai turni.</span>'+
       '<button class="btn g" type="button" id="doSbloccaAndamento" style="margin-top:10px">Sblocca il tuo andamento →</button>';
     const b=$("#doSbloccaAndamento"); if(b) b.onclick=()=>{ if(window.NTPaid) window.NTPaid.open(); };
     return;
@@ -6472,6 +6504,7 @@ function ntChiediPermesso(){
 }
 window.ntChiediPermesso = ntChiediPermesso;
 if($("#doNotifiche")) $("#doNotifiche").onclick=ntChiediPermesso;
+if($("#doNotificheWiz")) $("#doNotificheWiz").onclick=ntChiediPermesso;
 // Stato del bottone "Promemoria" in Opzioni: solo lettura di
 // Notification.permission, costa nulla, ma non serve calcolarlo se Opzioni
 // non è nemmeno aperta — stessa idea di renderOpzSummaries().
