@@ -1,6 +1,6 @@
 // GET /couple/<id> — il calendario "insieme": eventi tutto-il-giorno sui riposi in
 // comune con il partner. Stesso gate del feed personale. Richiede che nella config
-// dell'abbonamento sia impostato il partner (pPattern/pAnchor).
+// dell'accesso sia impostato il partner (pPattern/pAnchor).
 import { buildCoupleFeed, readSub, isActive } from "../_lib.js";
 
 function withRefresh(ics) {
@@ -14,7 +14,7 @@ export async function onRequestGet({ params, env }) {
   catch (e) { return new Response("Servizio non configurato.", { status: 503, headers: { "content-type": "text/plain; charset=utf-8" } }); }
 
   if (!sub) return new Response("Calendario non trovato.", { status: 404, headers: { "content-type": "text/plain; charset=utf-8" } });
-  if (!isActive(sub)) return new Response("Abbonamento non attivo o scaduto.", { status: 402, headers: { "content-type": "text/plain; charset=utf-8" } });
+  if (!isActive(sub)) return new Response("Accesso non attivo.", { status: 402, headers: { "content-type": "text/plain; charset=utf-8" } });
   if (!sub.cfg || !sub.cfg.pPattern) return new Response("Partner non configurato.", { status: 409, headers: { "content-type": "text/plain; charset=utf-8" } });
 
   let ics;

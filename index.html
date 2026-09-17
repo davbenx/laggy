@@ -636,7 +636,7 @@ line-height:1.2;min-height:2.4em}
 #band{margin:2px 0 var(--gap-sezione)}
 .ora-kss .hint{width:100%;margin:0 0 2px}
 .ora-dis{font-size:11px;color:var(--faint);line-height:1.45;margin-top:10px}
-/* collegamento gratis → a pagamento, in contesto (sobrio) */
+/* non più in uso (era il collegamento verso l'upsell a pagamento) */
 .ladder{font-size:12.5px;color:var(--faint);line-height:1.55;margin:11px 2px 4px}
 .ladder b{color:var(--dim)}
 /* griglia turni variabili (gratis) */
@@ -1104,6 +1104,7 @@ header b{font-size:23px}
 <div id="icsNudge" class="card" hidden></div>
 <div id="icsExpireNudge" class="card" hidden></div>
 <div id="clubBanner" class="card" hidden></div>
+<div id="donateNudge" class="card" hidden></div>
 <!-- Data sopra Adesso, non sotto: prima di sapere "cosa fare adesso" serve
      sapere di quale giorno si sta parlando (specie sfogliando avanti). -->
 <div class="datebar">
@@ -1270,11 +1271,12 @@ header b{font-size:23px}
     <button class="btn g" type="button" id="doConfirmPersona" style="margin-top:10px">Aggiungi alla lista</button>
     </div>
   </div>
-  <!-- "Calendario di coppia" (a pagamento) era in Più (sparita): è
-       l'upsell naturale di QUESTA pagina, non di un cassetto a parte —
+  <!-- "Calendario di coppia" era in Più (sparita): è la naturale
+       continuazione di QUESTA pagina, non di un cassetto a parte —
        gli stessi riposi in comune, ma nel calendario del telefono di
-       entrambi. #piuCal/#piuCalTx: id invariati, paid.js li cerca per
-       nome (querySelector("#piuCal")), non serve toccare quel modulo. -->
+       entrambi (gratis, come tutto il resto). #piuCal/#piuCalTx: id
+       invariati, paid.js li cerca per nome (querySelector("#piuCal")),
+       non serve toccare quel modulo. -->
   <div class="piu-cal" id="piuCal" style="margin-top:var(--gap-sezione)">
     <div id="piuCalTx"></div>
   </div>
@@ -1407,7 +1409,7 @@ header b{font-size:23px}
     <p><b>Melatonina.</b> Non ne parliamo qui perché i dosaggi degli studi sul jet lag e sui turni non coincidono con quelli in vendita come integratore in Italia — proporre un numero sarebbe fuorviante. Se pensi possa servirti, parlane con un medico o un farmacista: possono valutare il tuo caso, non un piano generico.</p>
   </div>
 </details>
-    <p class="hint" style="margin:12px 0 0" id="privacyNota">I tuoi turni e quello che annoti non escono da questa pagina: restano nel link e nel tuo browser.<span id="privacyNotaAbbonato" hidden> Se hai il calendario di coppia a pagamento, i turni restano comunque anche sul server che lo tiene aggiornato — solo quelli, il resto no.</span></p>
+    <p class="hint" style="margin:12px 0 0" id="privacyNota">I tuoi turni e quello che annoti non escono da questa pagina: restano nel link e nel tuo browser.<span id="privacyNotaAbbonato" hidden> Se hai attivato il calendario che si aggiorna da solo, i turni restano comunque anche sul server che lo tiene aggiornato — solo quelli, il resto no.</span></p>
     <p style="margin:10px 0 0"><button class="lnk" id="doFeed" style="padding:0">Segnala cosa non torna</button> · <button class="lnk" id="doShare" style="padding:0">Consiglialo a un collega</button></p>
     <p class="hint" style="margin:10px 0 0"><a href="https://notturnisti.club/planner" target="_blank" rel="noopener">Come si usa</a> · <a href="https://notturnisti.club/chi-siamo/" target="_blank" rel="noopener">Chi siamo</a> · <a href="https://notturnisti.club" target="_blank" rel="noopener">notturnisti.club</a></p>
   </div>
@@ -2254,9 +2256,9 @@ Object.assign(state, {
   // rimanda alla spunta del sonno bifasico — disattivabile, non
   // obbligatorio vederlo ogni volta una volta capito il meccanismo
   avvisoBifasicoOff:false,
-  // "non mostrarlo più" sui banner di installazione/notturnisti.club —
+  // "non mostrarlo più" sui banner di installazione/notturnisti.club/donazione —
   // persistenti fra sessioni, altrimenti ricomparirebbero ogni apertura
-  installBannerOff:false, clubBannerOff:false,
+  installBannerOff:false, clubBannerOff:false, donateNudgeOff:false,
   // Quali correzioni del diario (sonno o pisolino) sono aperte in modifica
   // adesso — non salvato, si azzera a ogni ricarica: è solo lo stato della
   // sessione corrente, non parte della configurazione.
@@ -3370,13 +3372,6 @@ function summaryText(){
     const t=window.NTHistory.sleepTrend({beds:state.beds,wakes:state.wakes}, NT_planSafe, {days:30});
     if(t && t.n>=3) trend=t;
   } }catch(e){}
-  // "Il tuo andamento" (debito, regolarità, ciclo, sveglia, diario) è a
-  // pagamento — il riepilogo copiato è un'altra via per vedere lo stesso
-  // contenuto, non deve bypassare lo stesso confine. Bloccato qui, alla
-  // fonte, non al singolo punto di chiamata: un domani in più non deve
-  // ricordarsi da solo di controllare haPagato().
-  const sbloccato = haPagato();
-  if(!sbloccato){ sm=null; ws=null; cs=null; trend=null; }
   if(!sm && !ws && !cs && !trend) return null;
   const testa=["Riepilogo Notturnisti — nessun dato personale, nessuna data",
     "Turni: "+state.pattern,
@@ -3499,6 +3494,7 @@ function render(){
   renderIcsNudge();
   renderIcsExpireNudge();
   renderClubBanner();
+  renderDonateNudge();
   renderFormaGiorno(P);                // si azzera da solo in dettaglio
   renderEssenziale(P, CARDS);          // si azzera da solo in dettaglio
   const tab = state.tab || (ess ? "oggi" : "ciclo");
@@ -3937,7 +3933,7 @@ if($("#installBanner")) $("#installBanner").addEventListener("click", e=>{
   if(e.target.closest("#chiudiInstall")){ state.installBannerOff=true; salva(); renderInstallBanner(); return; }
   if(e.target.closest("#doInstallOra") && installPromptEvento){
     installPromptEvento.prompt();
-    installPromptEvento.userChoice.finally(()=>{ installPromptEvento=null; renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderIcsExpireNudge(); renderClubBanner(); });
+    installPromptEvento.userChoice.finally(()=>{ installPromptEvento=null; renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderIcsExpireNudge(); renderClubBanner(); renderDonateNudge(); });
   }
 });
 
@@ -4013,17 +4009,17 @@ function renderIcsExpireNudge(){
   const el=$("#icsExpireNudge"); if(!el) return;
   if(!icsExpireNudgeVisibile()){ el.hidden=true; return; }
   el.hidden=false;
-  // Il momento in cui il fastidio della versione gratis si sente per
+  // Il momento in cui il fastidio della versione statica si sente per
   // davvero — "devo rifarlo di nuovo" — è anche il momento migliore per
-  // dire che pagando sparisce per sempre. Prima non c'era nessun accenno
-  // qui: unico punto dove l'attrito è vissuto, non solo descritto. Non lo
-  // mostra a chi ha già pagato (window.NTPaid.paid()) — a loro non serve.
+  // ricordare che esiste un calendario che si aggiorna da solo, gratis:
+  // unico punto dove l'attrito è vissuto, non solo descritto. Non lo mostra
+  // a chi l'ha già attivato (window.NTPaid.paid()) — a loro non serve.
   const gia = window.NTPaid && window.NTPaid.paid();
   el.innerHTML =
     '<button type="button" id="chiudiIcsExpireNudge" aria-label="Chiudi">×</button>'+
     '<b>Il calendario esportato sta per scadere</b>'+
     '<p class="hint" style="margin-top:6px">I 28 giorni dell\'ultimo export finiscono presto: se non lo rifai, il telefono continua a mostrare turni vecchi.'+
-    (gia?'':' O smetti di doverci pensare: con il calendario a pagamento si aggiorna da solo, per sempre.')+'</p>'+
+    (gia?'':' O smetti di doverci pensare: con il calendario automatico (gratis) si aggiorna da solo, per sempre.')+'</p>'+
     '<button class="btn g" type="button" id="doIcsExpireNudge">Esporta di nuovo →</button>'+
     (gia?'':'<button class="lnk" type="button" id="doIcsExpireNudgePay" style="margin-left:10px">O aggiornalo da solo →</button>');
 }
@@ -4042,13 +4038,14 @@ if($("#icsExpireNudge")) $("#icsExpireNudge").addEventListener("click", e=>{
 // era non essere mai portati lì in un momento sensato. Ultimo della fila:
 // cede il passo a tutti i banner sopra, non si accumulano richieste sullo
 // stesso schermo.
-function renderClubBanner(){
-  const el=$("#clubBanner"); if(!el) return;
+function clubBannerVisibile(){
   const mostraBenvenuto = primaVoltaDaLink && !benvenutoLinkChiuso;
   const pronto = !!(state.pattern && Object.keys(state.shifts||{}).length);
-  if(state.clubBannerOff || mostraBenvenuto || backupNudgeVisibile() || installBannerVisibile() || shareNudgeVisibile() || icsNudgeVisibile() || icsExpireNudgeVisibile() || !pronto){
-    el.hidden=true; return;
-  }
+  return !(state.clubBannerOff || mostraBenvenuto || backupNudgeVisibile() || installBannerVisibile() || shareNudgeVisibile() || icsNudgeVisibile() || icsExpireNudgeVisibile() || !pronto);
+}
+function renderClubBanner(){
+  const el=$("#clubBanner"); if(!el) return;
+  if(!clubBannerVisibile()){ el.hidden=true; return; }
   el.hidden=false;
   el.innerHTML =
     '<button type="button" id="chiudiClub" aria-label="Chiudi">×</button>'+
@@ -4058,6 +4055,32 @@ function renderClubBanner(){
 }
 if($("#clubBanner")) $("#clubBanner").addEventListener("click", e=>{
   if(e.target.closest("#chiudiClub")){ state.clubBannerOff=true; salva(); renderClubBanner(); return; }
+});
+
+// Invito a sostenere il progetto — l'ultimo della fila, il più silenzioso di
+// tutti: non prima che l'app abbia dato valore per un po' (tre settimane
+// d'uso reale, non al primo avvio), sparisce per sempre al primo tocco
+// (chiusura o click), come club/share/install. Notturnisti è gratis e lo
+// resta comunque — questo non è mai una condizione, solo un modo per chi
+// vuole ricambiare a scoprire come farlo.
+function donateNudgeVisibile(){
+  const pronto = !!(state.pattern && Object.keys(state.shifts||{}).length);
+  const giorniUso = state.firstSeenAt ? (new Date()-new Date(state.firstSeenAt+"T00:00:00"))/86400000 : 0;
+  return !(state.donateNudgeOff || !donateUrl() || clubBannerVisibile() || !pronto || giorniUso<21);
+}
+function renderDonateNudge(){
+  const el=$("#donateNudge"); if(!el) return;
+  if(!donateNudgeVisibile()){ el.hidden=true; return; }
+  el.hidden=false;
+  el.innerHTML =
+    '<button type="button" id="chiudiDonateNudge" aria-label="Chiudi">×</button>'+
+    '<b>Notturnisti resta gratis per tutti</b>'+
+    '<p class="hint" style="margin-top:6px">Nessuna funzione a pagamento, nessun account obbligatorio: lo sviluppo lo copro io. Se in queste settimane ti è stato utile, un contributo libero — anche piccolo — aiuta a tenerlo in piedi.</p>'+
+    '<a class="btn g" href="'+esc(donateUrl())+'" target="_blank" rel="noopener" id="doDonateNudge" style="display:inline-block;text-decoration:none;text-align:center">Offrimi un caffè →</a>';
+}
+if($("#donateNudge")) $("#donateNudge").addEventListener("click", e=>{
+  if(e.target.closest("#chiudiDonateNudge")){ state.donateNudgeOff=true; salva(); renderDonateNudge(); return; }
+  if(e.target.closest("#doDonateNudge")){ state.donateNudgeOff=true; salva(); }
 });
 
 // Sensibilità all'ora: cosa conta ADESSO, in base al momento della giornata
@@ -4772,19 +4795,10 @@ function renderCards(P, f, CARDS){
     '</ol></details>';
 }
 
-// Turni: come ti tratta il ciclo (andamenti gratis, dal diario)
-// Il check dell'abbonamento vive in paid.js (modulo separato, additivo per
-// costruzione — se non carica, l'app gratis resta intatta). Fallisce chiuso,
-// non aperto: se paid.js non ha ancora risposto, o non è mai arrivato,
-// "Il tuo andamento" resta bloccato — è la parte a pagamento adesso, non più
-// quella gratuita di prima.
-// Blocco vero, riattivato: il premium (checkout, webhook, /feed/config/
-// claim) è stato verificato funzionante in produzione in questa sessione —
-// lo sblocco temporaneo non serve più. Fallisce chiuso, non aperto: se
-// paid.js non ha ancora risposto, o non è mai arrivato, "Il tuo andamento"
-// resta bloccato di default.
-function haPagato(){ return !!(window.NTPaid && window.NTPaid.paid()); }
-
+// Turni: come ti tratta il ciclo (andamenti dal diario)
+// Unico punto che legge il link di sostegno — se non è configurato (window.NT_DONATE
+// mancante o vuoto) chi chiama deve ricevere stringa vuota, mai un link rotto.
+function donateUrl(){ try{ return (window.NT_DONATE && window.NT_DONATE.url) || ""; }catch(e){ return ""; } }
 // La frase della correlazione umore/debito — estratta a parte perché serve
 // sia se diventa il consiglio principale (in cima), sia se resta la sua
 // card descrittiva più sotto (quando qualcos'altro ha la priorità).
@@ -4818,13 +4832,13 @@ function insightSettimana(cs, ws, sm, corr){
   return null;
 }
 
-// Esempio statico di "Il tuo andamento" per chi non ha ancora sbloccato —
-// stessa identica struttura/classi della pagina vera (renderAndamenti sotto),
-// numeri plausibili ma inventati, mai spacciati per dati reali: l'eyebrow
-// "Esempio" lo dice chiaro, in ogni card. Dimostra invece di spiegare, come
-// renderPiuCal() fa già per il calendario che si aggiorna da solo — qui non
-// si possono usare i dati VERI dell'utente (non li ha ancora, è per questo
-// che vede l'esempio), quindi l'onestà sta nell'etichetta, non nel dato.
+// Esempio statico di "Il tuo andamento" per chi non ha ancora abbastanza dati
+// (diario troppo giovane) — stessa identica struttura/classi della pagina vera
+// (renderAndamenti sotto), numeri plausibili ma inventati, mai spacciati per
+// dati reali: l'eyebrow "Esempio" lo dice chiaro, in ogni card. Dimostra
+// invece di spiegare, come renderPiuCal() fa già per il calendario che si
+// aggiorna da solo — qui non si possono usare i dati VERI dell'utente (non li
+// ha ancora abbastanza), quindi l'onestà sta nell'etichetta, non nel dato.
 // Niente pulsanti "applica" veri: sarebbe pericoloso collegarli per sbaglio
 // al listener data-apply-field che scrive nello stato reale.
 function esempioAndamentoHtml(){
@@ -4844,13 +4858,6 @@ function esempioAndamentoHtml(){
 }
 function renderAndamenti(){
   const el=$("#andamenti"); if(!el) return;
-  if(!haPagato()){
-    el.innerHTML = esempioAndamentoHtml()+
-      '<span class="hint" style="width:100%;margin-top:14px;display:block">Non solo grafici da interpretare: un consiglio concreto ogni settimana, calcolato sui tuoi turni e sul tuo diario — quale giorno del ciclo ti pesa di più, come cambia il tuo umore col debito di sonno, quanto sono regolari i tuoi orari. Con settimane di dati dietro, non è più solo un piano: è un ritratto di come il tuo corpo reagisce ai turni.</span>'+
-      '<button class="btn g" type="button" id="doSbloccaAndamento" style="margin-top:10px">Sblocca il tuo andamento →</button>';
-    const b=$("#doSbloccaAndamento"); if(b) b.onclick=()=>{ if(window.NTPaid) window.NTPaid.open(); };
-    return;
-  }
   // Tutti gli insight calcolati PRIMA di costruire qualunque HTML: serve
   // guardarli tutti insieme per scegliere quale mettere in cima (vedi
   // insightSettimana()) prima di sapere come si scrivono le sezioni sotto.
@@ -4958,9 +4965,15 @@ function renderAndamenti(){
   }
 
   const rowsHtml = sezioni.join("");
+  const url = donateUrl();
+  // Solo quando c'è già qualcosa di vero da vedere — mai sull'esempio,
+  // mai prima che l'app abbia dato qualcosa in cambio.
+  const doneHtml = (capoHtml || heroHtml || rowsHtml) && url
+    ? '<p class="hint" style="width:100%;margin-top:14px">Questa pagina, come tutta l\'app, resta gratis. Se ti è utile, <a href="'+esc(url)+'" target="_blank" rel="noopener">un contributo libero</a> è benvenuto, mai necessario.</p>'
+    : '';
   el.innerHTML = (capoHtml || heroHtml || rowsHtml)
-    ? capoHtml+heroHtml+rowsHtml
-    : '<div class="empty"><img src="./owl-mark.png" alt="" width="46" height="46"><p>Annota il sonno per qualche giorno dal glance di Oggi: qui comparirà quale giorno del ciclo ti pesa di più e come scivola la tua sveglia.</p></div>';
+    ? capoHtml+heroHtml+rowsHtml+doneHtml
+    : esempioAndamentoHtml()+'<span class="hint" style="width:100%;margin-top:14px;display:block">Annota il sonno per qualche giorno dal glance di Oggi: con qualche notte dietro, questa pagina comincia a mostrare cose vere — quale giorno del ciclo ti pesa di più, come cambia il tuo umore col debito di sonno, quanto sono regolari i tuoi orari.</span>';
 }
 
 // Anteprima del bottone "Andamenti" in Turni: legge il numero già
@@ -5132,12 +5145,10 @@ function renderPartner(CARDS){
   el.innerHTML=h;
 }
 
-// Più: il riquadro del calendario a pagamento. Dimostra invece di spiegare, e
+// Più: il riquadro del calendario automatico. Dimostra invece di spiegare, e
 // usa gli orari VERI dell'utente invece di un esempio generico.
 function renderPiuCal(){
   const el=$("#piuCalTx"); if(!el) return;
-  let prezzo="36,99 €";
-  try{ if(window.NT_PAY&&window.NT_PAY.price) prezzo=String(window.NT_PAY.price).replace(/\.00$/,"").replace(".", ",")+" "+(window.NT_PAY.currency==="EUR"?"€":window.NT_PAY.currency||"€"); }catch(e){}
   let dom=null;
   try{ const t=new Date(); t.setDate(t.getDate()+1); dom=NT_planSafe(t); }catch(e){}
   const esempio = dom
@@ -5155,7 +5166,7 @@ function renderPiuCal(){
     '<span>Un tocco per collegarlo al telefono: da domani apri il calendario e trovi già scritto '+esempio+
     ', ogni giorno, da solo. Se hai un widget Calendario in home, lo leggi anche lì senza aprire l\'app.</span>'+
     '<span class="piu-line">'+rigaCoppia+'</span>'+
-    '<span class="piu-price">'+prezzo+' una volta sola. Nessun abbonamento.</span>';
+    '<span class="piu-price">Gratis, per sempre. Nessun account da creare, nessun abbonamento.</span>';
 }
 function NT_planSafe(d){ const f=state.focus; state.focus=new Date(d); let P=null; try{ P=NT.plan(); }catch(e){} state.focus=f; return P; }
 // Valore corrente a destra dei tre bottoni di Opzioni che ne hanno uno solo
@@ -6130,8 +6141,8 @@ if($("#doConfirmPersona")) $("#doConfirmPersona").onclick=()=>{
   if(name) per.name=name;
   // Il primo che aggiungi diventa il "principale" internamente — è quello
   // che il motore usa per la card riassuntiva e per il calendario di
-  // coppia a pagamento. Da fuori non si vede differenza: è sempre lo
-  // stesso identico modulo, non un percorso speciale per il primo.
+  // coppia. Da fuori non si vede differenza: è sempre lo stesso identico
+  // modulo, non un percorso speciale per il primo.
   if(!state.pPattern){
     state.pPattern=per.pattern; state.pAnchor=per.anchor||null;
     state.pShifts=per.shifts||null; state.pWake=per.wake||null;
@@ -6462,9 +6473,9 @@ function salva(){
     maxAdvance:state.maxAdvance,pPattern:state.pPattern,pAnchor:state.pAnchor,
     pShifts:state.pShifts,pWake:state.pWake,pBed:state.pBed,pName:state.pName,people:state.people,personaGlance:state.personaGlance,
     repeat:state.repeat,ecc:state.ecc,evento:state.evento,
-    napTurno:state.napTurno,sonnoDiurno:state.sonnoDiurno,mattinoBifasico:state.mattinoBifasico,avvisoBifasicoOff:state.avvisoBifasicoOff,installBannerOff:state.installBannerOff,shareNudgeOff:state.shareNudgeOff,icsNudgeOff:state.icsNudgeOff,icsExportedAt:state.icsExportedAt,icsExpireNudgeSeenAt:state.icsExpireNudgeSeenAt,firstSeenAt:state.firstSeenAt,clubBannerOff:state.clubBannerOff,pausa:state.pausa,caffSens:state.caffSens,vista:state.vista});
-  // segnala i cambi di configurazione (non di vista) così il modulo a pagamento
-  // può tenere allineato il feed del calendario. Il primo salva non conta.
+    napTurno:state.napTurno,sonnoDiurno:state.sonnoDiurno,mattinoBifasico:state.mattinoBifasico,avvisoBifasicoOff:state.avvisoBifasicoOff,installBannerOff:state.installBannerOff,shareNudgeOff:state.shareNudgeOff,icsNudgeOff:state.icsNudgeOff,icsExportedAt:state.icsExportedAt,icsExpireNudgeSeenAt:state.icsExpireNudgeSeenAt,firstSeenAt:state.firstSeenAt,clubBannerOff:state.clubBannerOff,donateNudgeOff:state.donateNudgeOff,pausa:state.pausa,caffSens:state.caffSens,vista:state.vista});
+  // segnala i cambi di configurazione (non di vista) così il modulo del
+  // calendario automatico può tenere allineato il feed. Il primo salva non conta.
   try{
     const sig=JSON.stringify([state.pattern,state.shifts,state.anchor,state.repeat,
       state.freeWake,state.freeBed,state.cTo,state.cFrom,state.need,state.prep,state.maxAdvance,
@@ -6563,7 +6574,7 @@ function renderNotifRiga(){
 // ── navigazione a tab (feel da app): Oggi · Turni · Più ──
 // Nessuno spostamento nel DOM: mostra/nasconde le sezioni per destinazione.
 // Oggi = il giorno (glance + "La giornata" a scomparsa). Turni = ciclo, liberi,
-// partner, modifica. Più = calendario a pagamento ed extra.
+// partner, modifica. Più = calendario automatico ed extra.
 function setTab(t){
   const tab = (t==="turni"||t==="opzioni") ? t : "oggi";
   // Stile "pageview", non "una volta sola": ogni volta che si arriva
@@ -6629,9 +6640,10 @@ document.body.classList.add("tabs");
 
 
 
-// Ponte per il modulo a pagamento (paid.js): una superficie minima e stabile per
-// leggere la config, il diario e i piani, e per aggiornare turni/partner dal di
-// fuori. Non espone lo stato interno: solo copie e azioni controllate.
+// Ponte per il modulo del calendario automatico (paid.js): una superficie minima
+// e stabile per leggere la config, il diario e i piani, e per aggiornare
+// turni/partner dal di fuori. Non espone lo stato interno: solo copie e azioni
+// controllate.
 window.NT = {
   read(){ return { pattern:state.pattern, anchor:state.anchor, shifts:JSON.parse(JSON.stringify(state.shifts)),
     repeat:state.repeat, pPattern:state.pPattern, pAnchor:state.pAnchor,
@@ -6682,18 +6694,18 @@ addEventListener("nt:refresh", ()=>{ try{ render(); }catch(e){} });
   var deferred=null;
   addEventListener("beforeinstallprompt", function(e){
     e.preventDefault(); deferred=e;
-    try{ installPromptEvento=e; renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderIcsExpireNudge(); renderClubBanner(); }catch(err){}
+    try{ installPromptEvento=e; renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderIcsExpireNudge(); renderClubBanner(); renderDonateNudge(); }catch(err){}
     var tools=document.querySelector(".tools"); if(!tools || document.getElementById("doInstall")) return;
     var b=document.createElement("button");
     b.className="lnk"; b.id="doInstall"; b.textContent="Installa l'app";
     b.onclick=function(){ if(!deferred) return; deferred.prompt();
       deferred.userChoice.finally(function(){ deferred=null; b.remove();
-        try{ installPromptEvento=null; renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderIcsExpireNudge(); renderClubBanner(); }catch(err){} }); };
+        try{ installPromptEvento=null; renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderIcsExpireNudge(); renderClubBanner(); renderDonateNudge(); }catch(err){} }); };
     tools.appendChild(b);
   });
   addEventListener("appinstalled", function(){ var b=document.getElementById("doInstall"); if(b) b.remove();
     track("pwa_installed");
-    try{ installPromptEvento=null; renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderIcsExpireNudge(); renderClubBanner(); }catch(err){} });
+    try{ installPromptEvento=null; renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderIcsExpireNudge(); renderClubBanner(); renderDonateNudge(); }catch(err){} });
   // iOS non manda mai beforeinstallprompt: qui non c'è un pulsante da
   // aggiungere, solo l'istruzione — sempre raggiungibile in Più, non solo
   // nel banner che si può chiudere.
@@ -6713,15 +6725,10 @@ addEventListener("nt:refresh", ()=>{ try{ render(); }catch(e){} });
 <script type="module" src="./alertness.js"></script>
 <script type="module" src="./history.js"></script>
 <script>
-// Valori reali di Lemon Squeezy — sostituisci i tre segnaposto una volta creato
-// il negozio e il prodotto. Deve stare PRIMA di paid.js: paid.js legge questi
-// valori una sola volta, al caricamento.
-window.NT_PAY = {
-  store: "notturnisti",   // lo slug del negozio Lemon Squeezy
-  variant: "457255",      // l'id della variante del prodotto
-  price: "36.99",
-  currency: "EUR"
-};
+// Il link a Ko-fi per chi vuole sostenere il progetto — mai un obbligo, mai
+// una condizione per usare l'app. Deve stare PRIMA di paid.js e del resto del
+// modulo core: entrambi lo leggono una sola volta, al caricamento.
+window.NT_DONATE = { url: "https://ko-fi.com/notturnisti" };
 </script>
 <script src="./paid.js" defer></script>
 </body>

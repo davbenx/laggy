@@ -3,20 +3,12 @@
 import { buildFeed, buildCoupleFeed, parseConfig } from "../engine.js";
 export { buildFeed, buildCoupleFeed, parseConfig };
 
-// ── SEGNAPOSTO: impostali come variabili d'ambiente sul progetto Pages ──
-// LEMONSQUEEZY_WEBHOOK_SECRET (dalla dashboard, sezione Webhooks),
-// LEMONSQUEEZY_STORE_ID, LEMONSQUEEZY_VARIANT_ID (l'id del prodotto/variante),
-// PRICE (es. "36.99", solo per la vetrina — il prezzo vero vive sul prodotto
-// Lemon Squeezy stesso), CURRENCY ("EUR"), SITE_ORIGIN (il dominio dell'app,
-// es. "https://app.notturnisti.club" — NON il sito notturnisti.club, che è
-// un dominio diverso e non chiama questi endpoint), e il binding KV: SUBS.
+// ── SEGNAPOSTO: impostalo come variabile d'ambiente sul progetto Pages ──
+// SITE_ORIGIN (il dominio dell'app, es. "https://app.notturnisti.club" — NON
+// il sito notturnisti.club, che è un dominio diverso e non chiama questi
+// endpoint), e il binding KV: SUBS.
 export function cfgEnv(env) {
   return {
-    lsSecret: env.LEMONSQUEEZY_WEBHOOK_SECRET || "LEMONSQUEEZY_WEBHOOK_SECRET_PLACEHOLDER",
-    lsStoreId: env.LEMONSQUEEZY_STORE_ID || "",
-    lsVariantId: env.LEMONSQUEEZY_VARIANT_ID || "",
-    price: env.PRICE || "36.99",
-    currency: env.CURRENCY || "EUR",
     // Se SITE_ORIGIN non è impostata su Cloudflare Pages, NON aprire a "*":
     // /config/<id> accetta PUT/DELETE, quindi un CORS aperto a qualunque
     // origine è una configurazione che non deve poter capitare per errore.
@@ -49,7 +41,7 @@ export const isActive = sub => !!(sub && sub.paid && (!sub.expiry || sub.expiry 
 // il conteggio può sottostimare di qualche richiesta. Non è una difesa da sola
 // (Cloudflare fa già mitigazione DDoS a livello di edge), ma alza il costo di
 // abuso applicativo su endpoint pubblici senza altra protezione — riempire il
-// KV di record "pending:*", o interrogare "/claim/<token>" a raffica.
+// KV di accessi gratuiti creando "/account" a raffica, ad esempio.
 export async function rateLimit(env, request, bucket, limit, windowSec) {
   if (!env.SUBS) return true; // fail-open: se il KV manca, non è compito del rate limiter bloccare
   const ip = request.headers.get("CF-Connecting-IP") || "unknown";
@@ -59,13 +51,6 @@ export async function rateLimit(env, request, bucket, limit, windowSec) {
   if (count >= limit) return false;
   await env.SUBS.put(key, String(count + 1), { expirationTtl: windowSec });
   return true;
-}
-
-// hash SHA-256 esadecimale (per mappare l'email SENZA salvarla in chiaro)
-export async function sha256hex(s) {
-  const data = new TextEncoder().encode(String(s || "").trim().toLowerCase());
-  const buf = await crypto.subtle.digest("SHA-256", data);
-  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
 }
 
 // ── KV ──
@@ -106,20 +91,3 @@ export function json(data, status, origin) {
   });
 }
 export const err = (status, msg, origin) => json({ error: msg }, status, origin);
-
-// ── Lemon Squeezy: verifica lato server che il webhook sia autentico ──
-// Lemon Squeezy firma ogni webhook con HMAC-SHA256 sul corpo GREZZO della
-// richiesta (prima di qualunque parsing), usando il secret impostato nella
-// dashboard (Settings → Webhooks). La firma arriva nell'header
-// X-Signature, in esadecimale. Verificare PRIMA di leggere il contenuto:
-// un corpo non firmato correttamente non va mai fidato, qualunque cosa dica.
-export async function lemonSqueezyVerify(e, rawBody, signatureHeader) {
-  if (!signatureHeader) return false;
-  if (e.lsSecret.indexOf("PLACEHOLDER") >= 0) return false;   // non ancora configurato: mai accettare
-  const key = await crypto.subtle.importKey(
-    "raw", new TextEncoder().encode(e.lsSecret),
-    { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
-  const mac = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(rawBody));
-  const hex = [...new Uint8Array(mac)].map(b => b.toString(16).padStart(2, "0")).join("");
-  return ctEqual(hex, signatureHeader);
-}

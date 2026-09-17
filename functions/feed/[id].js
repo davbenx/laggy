@@ -1,7 +1,8 @@
 // GET /feed/<id> — il calendario "vivo", protetto: esce solo se l'id è di un
-// abbonamento attivo. L'id è la capacità di lettura (lungo e non indovinabile),
-// come l'indirizzo ICS privato di Google. La config vive in KV, quindi il
-// calendario segue le modifiche dei turni senza ri-iscriversi.
+// accesso attivo (gratuito, creato da /account). L'id è la capacità di
+// lettura (lungo e non indovinabile), come l'indirizzo ICS privato di
+// Google. La config vive in KV, quindi il calendario segue le modifiche dei
+// turni senza ri-iscriversi.
 import { buildFeed, readSub, isActive } from "../_lib.js";
 
 // suggerisce ai calendari ogni quanto ripollare
@@ -16,7 +17,7 @@ export async function onRequestGet({ params, env }) {
   catch (e) { return new Response("Servizio non configurato.", { status: 503, headers: { "content-type": "text/plain; charset=utf-8" } }); }
 
   if (!sub) return new Response("Calendario non trovato.", { status: 404, headers: { "content-type": "text/plain; charset=utf-8" } });
-  if (!isActive(sub)) return new Response("Abbonamento non attivo o scaduto.", { status: 402, headers: { "content-type": "text/plain; charset=utf-8" } });
+  if (!isActive(sub)) return new Response("Accesso non attivo.", { status: 402, headers: { "content-type": "text/plain; charset=utf-8" } });
 
   let ics;
   try {
