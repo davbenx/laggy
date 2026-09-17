@@ -32,8 +32,8 @@
     if ($("#pf-style")) return;
     var s = document.createElement("style"); s.id = "pf-style";
     s.textContent =
-      "#pf-open{display:inline-flex;align-items:center;gap:6px;background:var(--blue);color:#fff;border:none;" +
-      "border-radius:var(--r);padding:11px 16px;font:inherit;font-weight:600;font-size:14px;cursor:pointer;min-height:44px;margin-top:10px}" +
+      "#pf-open{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;background:var(--blue);color:#fff;border:none;" +
+      "border-radius:var(--r);padding:13px 16px;font:inherit;font-weight:700;font-size:15px;cursor:pointer;min-height:48px;margin-top:12px}" +
       ".pf-modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center;z-index:9999}" +
       "@media(min-width:560px){.pf-modal{align-items:center}}" +
       ".pf-card{background:var(--bg);color:var(--ink);width:100%;max-width:560px;max-height:92vh;overflow:auto;" +
