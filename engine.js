@@ -718,6 +718,25 @@ function esc7986(t){   // nel formato iCalendar virgole e punti e virgola vanno 
   return String(t).replace(/\\/g,"\\\\").replace(/;/g,"\\;").replace(/,/g,"\\,").replace(/\n/g,"\\n");
 }
 
+// RFC 5545 §3.1: una riga di contenuto non dovrebbe superare i 75 ottetti;
+// oltre, va "piegata" — CRLF seguito da uno spazio, che il parser riconosce
+// come continuazione della stessa riga logica. Le DESCRIPTION in italiano
+// di questo file superano spesso quel limite (parole accentate = 2 ottetti
+// ciascuna in UTF-8); mai piegate finora — alcuni parser rigorosi possono
+// scartare l'intero file per una riga fuori norma, non solo quella riga.
+// Va per code point (non per indice), altrimenti si rischia di tagliare in
+// mezzo a un carattere UTF-8 multi-ottetto e corrompere la riga piegata.
+function foldLine(line){
+  const enc = new TextEncoder();
+  if(enc.encode(line).length<=75) return line;
+  let out="", cur="";
+  for(const ch of line){
+    if(enc.encode(cur+ch).length>75){ out += (out?"\r\n ":"")+cur; cur=ch; }
+    else cur+=ch;
+  }
+  return out + (out?"\r\n ":"")+cur;
+}
+
 function buildIcs(days){
   const L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//notturnisti.club//pianificatore//IT",
            "CALSCALE:GREGORIAN","METHOD:PUBLISH","X-WR-CALNAME:Notturnisti",
@@ -778,7 +797,7 @@ function buildIcs(days){
   }
   state.focus=f0;
   L.push("END:VCALENDAR");
-  return L.filter(Boolean).join("\r\n");
+  return L.filter(Boolean).map(foldLine).join("\r\n");
 }
 
   // feed coppia: eventi tutto-il-giorno sui riposi in comune. Riusa asPartner /
@@ -813,7 +832,7 @@ function buildIcs(days){
     }
     state.focus=f0;
     L.push("END:VCALENDAR");
-    return L.filter(Boolean).join("\r\n");
+    return L.filter(Boolean).map(foldLine).join("\r\n");
   }
 
 

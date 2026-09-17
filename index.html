@@ -2616,12 +2616,33 @@ function finestreLibere(giorni){
   state.focus=f0;
   return out;
 }
-function download(name, text, mime){
-  const blob=new Blob([text],{type:mime});
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(blob); a.download=name;
-  document.body.appendChild(a); a.click();
-  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },400);
+// Safari su iOS (comprese le PWA installate da schermata Home) spesso non fa
+// nulla con un download via <a download>+blob: URL — limite/bug noto di
+// quella piattaforma, non di questo codice: "tocco e non scarica niente" è
+// esattamente il sintomo, trovato con una prova reale. Il foglio di
+// condivisione nativo (già usato altrove per "Condividi il tuo ciclo") sa
+// condividere anche file, non solo testo, ed è molto più affidabile su
+// mobile — primo tentativo. Il download via blob resta il ripiego per chi
+// non condivide file (soprattutto desktop). Restituisce true se
+// l'esportazione è ragionevolmente riuscita (false se l'utente ha annullato
+// il foglio di condivisione) — il chiamante lo usa per decidere se segnare
+// "esportato adesso" o no.
+async function download(name, text, mime){
+  try{
+    const file=new File([text], name, {type:mime});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({files:[file]});
+      return true;
+    }
+  }catch(e){ if(e && e.name==="AbortError") return false; }
+  try{
+    const blob=new Blob([text],{type:mime});
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(blob); a.download=name;
+    document.body.appendChild(a); a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },400);
+    return true;
+  }catch(e){ return false; }
 }
 let toastT;
 function toast(msg){
@@ -5509,7 +5530,7 @@ $("#swapB").addEventListener("change",()=>{
 $("#doIcs").onclick=()=>{ const b=$("#icsBox"); const apri=b.hidden;
   soloUno(apri?"#icsBox":null); b.hidden=!apri;
   if(apri && b.scrollIntoView) b.scrollIntoView({behavior:"smooth",block:"nearest"}); };
-$("#icsVai").onclick=()=>{
+$("#icsVai").onclick=async ()=>{
   const ics=NT.setIcs({
     turni:$("#icsT").checked, sonno:$("#icsS").checked,
     pisolini:$("#icsN").checked, caffe:$("#icsC").checked,
@@ -5519,7 +5540,10 @@ $("#icsVai").onclick=()=>{
     avviso:+$("#icsA").value||0
   });
   if(!(ics.turni||ics.sonno||ics.pisolini||ics.caffe||ics.luce||ics.rientro||ics.pasti)){ toast("Scegli almeno una cosa"); return; }
-  download("notturnisti-"+iso(state.focus)+".ics",NT.buildIcs(28),"text/calendar");
+  const ok = await download("notturnisti-"+iso(state.focus)+".ics",NT.buildIcs(28),"text/calendar");
+  // Se l'utente ha annullato il foglio di condivisione, non è successo
+  // niente di davvero esportato: non ha senso segnarlo né dirgli "scaricati".
+  if(!ok) return;
   $("#icsBox").hidden=true; toast("28 giorni scaricati");
   // Segna quando: il file è statico e scade dopo 28 giorni, senza questo
   // l'app non ha modo di sapere se il calendario del telefono è ancora

@@ -83,6 +83,21 @@ test("buildFeed non mette nessun VALARM se l'utente ha scelto \"nessun promemori
   assert.doesNotMatch(sonno, /BEGIN:VALARM/, "la sveglia non deve ignorare la scelta esplicita \"nessun promemoria\"");
 });
 
+// RFC 5545 §3.1: una riga di contenuto non dovrebbe superare i 75 ottetti —
+// le DESCRIPTION in italiano di questo motore ci arrivano spesso (parole
+// accentate = 2 ottetti ciascuna in UTF-8). Trovato con la configurazione
+// reale di un utente: parser rigorosi possono scartare l'intero file per
+// una riga fuori norma, non solo quella riga.
+test("buildFeed piega ogni riga di contenuto a 75 ottetti (RFC 5545)", () => {
+  const ics = buildFeed({
+    pattern: "MMMMPPPPNNNNRRRR", anchor: "2026-09-07",
+    shifts: { M: { n: "Mattino", s: 360, e: 840 }, P: { n: "Pomeriggio", s: 840, e: 1320 }, N: { n: "Notte", s: 1320, e: 1800 } },
+    freeWake: "09:15", freeBed: "00:30", caffSens: "alta", need: 525
+  }, { days: 28 });
+  const oltre = ics.split("\r\n").filter(l => Buffer.byteLength(l, "utf8") > 75);
+  assert.deepEqual(oltre, [], "righe non piegate entro 75 ottetti: " + JSON.stringify(oltre.slice(0, 3)));
+});
+
 test("createEngine: il piano del giorno corrente ha una finestra di sonno con durata positiva", () => {
   const e = createEngine({ pattern: "NNNRR", anchor: "2026-07-13", focus: "2026-07-15" });
   const p = e.plan();
