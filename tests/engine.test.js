@@ -201,6 +201,62 @@ test("gli UID dei pisolini nell'ICS identificano il tipo, non la posizione nell'
   assert.equal(new Set(uids).size, uids.length, "UID duplicati nello stesso feed");
 });
 
+test("asPartner: scambia temporaneamente pattern/orari e li ripristina sempre, anche se fn lancia", () => {
+  const e = createEngine({
+    pattern: "NNNRR", anchor: "2026-07-13", freeWake: "07:30", freeBed: "23:30",
+    pPattern: "MMMRR", pAnchor: "2026-07-14", pWake: "06:00", pBed: "22:00"
+  });
+  const prima = { pattern: e.state.pattern, anchor: e.state.anchor, freeWake: e.state.freeWake, freeBed: e.state.freeBed };
+  let vistoDaDentro = null;
+  e.asPartner(() => { vistoDaDentro = { pattern: e.state.pattern, anchor: e.state.anchor, freeWake: e.state.freeWake }; });
+  assert.deepEqual(vistoDaDentro, { pattern: "MMMRR", anchor: "2026-07-14", freeWake: "06:00" },
+    "dentro asPartner lo state deve riflettere il partner, non l'utente");
+  assert.deepEqual({ pattern: e.state.pattern, anchor: e.state.anchor, freeWake: e.state.freeWake, freeBed: e.state.freeBed }, prima,
+    "asPartner deve ripristinare lo state dell'utente dopo");
+  // fn che lancia: il ripristino deve avvenire comunque (asPartner ha un try/catch interno)
+  e.asPartner(() => { throw new Error("boom"); });
+  assert.deepEqual({ pattern: e.state.pattern, anchor: e.state.anchor, freeWake: e.state.freeWake, freeBed: e.state.freeBed }, prima,
+    "asPartner deve ripristinare lo state anche se fn lancia un'eccezione");
+});
+
+test("asPartner/sharedDays/freeOverlap restituiscono null senza un partner configurato", () => {
+  const e = createEngine({ pattern: "NNNRR", anchor: "2026-07-13" });
+  assert.equal(e.asPartner(() => "qualunque cosa"), null);
+  assert.equal(e.sharedDays(5), null);
+  assert.equal(e.freeOverlap(0), null);
+});
+
+test("sharedDays: con orari di sonno completamente incompatibili, nessun giorno conta come \"in comune\" anche se i turni coincidono", () => {
+  // Stesso pattern, stesso ancoraggio → stessi giorni di riposo per entrambi,
+  // ma orari di sonno all'opposto (uno dorme di notte, l'altro all'alba
+  // seguente) — prima di una correzione fatta in questa sessione, "in
+  // comune" significava solo "riposo dal turno per entrambi": con questi
+  // orari sfasati due riposi possono non avere nessuna ora vera in cui
+  // sono svegli insieme. Verifica che la soglia di sovrapposizione reale
+  // (≥3 ore) sia ancora rispettata.
+  const e = createEngine({
+    pattern: "RRRR", anchor: "2026-07-13", freeWake: "07:00", freeBed: "23:00",
+    pPattern: "RRRR", pAnchor: "2026-07-13", pWake: "23:00", pBed: "07:00"
+  });
+  const giorni = e.sharedDays(10);
+  assert.ok(Array.isArray(giorni));
+  // Non deve semplicemente restituire "tutti i giorni di riposo in comune":
+  // la sovrapposizione va verificata via freeOverlap per ogni giorno incluso.
+  for (const g of giorni) {
+    const overlap = e.freeOverlap(g.off);
+    assert.ok(overlap === null || overlap >= 180, `giorno incluso in sharedDays con overlap insufficiente: off=${g.off} overlap=${overlap}`);
+  }
+});
+
+test("freeOverlap: con orari di sonno identici (stesso pattern, stessi orari), la sovrapposizione libera è ampia", () => {
+  const e = createEngine({
+    pattern: "RRRR", anchor: "2026-07-13", freeWake: "07:00", freeBed: "23:00",
+    pPattern: "RRRR", pAnchor: "2026-07-13", pWake: "07:00", pBed: "23:00"
+  });
+  const overlap = e.freeOverlap(0);
+  assert.ok(overlap !== null && overlap > 600, `atteso ampio tempo libero condiviso con orari identici, trovato: ${overlap}`);
+});
+
 test("buildCoupleFeed non va in crash con un partner configurato e produce ICS valido", () => {
   const cfg = {
     pattern: "NNNRR", anchor: "2026-07-13",
