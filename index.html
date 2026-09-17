@@ -2647,46 +2647,20 @@ function finestreLibere(giorni){
   state.focus=f0;
   return out;
 }
-// Safari su iOS (comprese le PWA installate da schermata Home) spesso non fa
-// nulla con un download via <a download>+blob: URL — limite/bug noto di
-// quella piattaforma, non di questo codice: "tocco e non scarica niente" è
-// esattamente il sintomo, trovato con una prova reale. Il download via blob
-// resta il ripiego, primo tentativo è il foglio di condivisione nativo
-// (già usato altrove per "Condividi il tuo ciclo"), che sa condividere
-// anche file — molto più affidabile su mobile.
-function tentaBlob(name,text,mime){
-  try{
-    const blob=new Blob([text],{type:mime});
-    const a=document.createElement("a");
-    a.href=URL.createObjectURL(blob); a.download=name;
-    document.body.appendChild(a); a.click();
-    setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },400);
-    return {ok:true};
-  }catch(e){ return {ok:false, msg:"Esportazione non riuscita: "+(e&&e.message||"errore sconosciuto")}; }
-}
-// Restituisce {ok, msg}, non solo true/false: msg — quando presente — è
-// diagnostica temporanea (quale ramo ha preso, cosa è andato storto) da
-// mostrare al posto del solito toast di conferma, non in aggiunta — due
-// toast() ravvicinati si sovrascriverebbero e il primo non si leggerebbe
-// mai. Il primo tentativo di questo fix (solo condivisione+ripiego, senza
-// diagnostica) non ha risolto il problema segnalato su dispositivo reale,
-// e senza una console visibile lì non c'è altro modo di sapere COSA sta
-// fallendo — da riportare qui in chat quello che dice il toast.
-async function download(name, text, mime){
-  const file=new File([text], name, {type:mime});
-  let shareable=false;
-  try{ shareable = !!(navigator.canShare && navigator.canShare({files:[file]})); }catch(e){}
-  if(shareable){
-    try{ await navigator.share({files:[file]}); return {ok:true}; }
-    catch(e){
-      if(e && e.name==="AbortError") return {ok:false};
-      const msg="Condivisione non riuscita ("+(e&&e.name||"?")+"), uso il download diretto";
-      const r=tentaBlob(name,text,mime);
-      return r.ok ? {ok:true, msg} : {ok:false, msg:r.msg};
-    }
-  }
-  const r=tentaBlob(name,text,mime);
-  return r.ok ? {ok:true, msg: "Condivisione file non disponibile qui, uso il download diretto"} : r;
+// Tornato al meccanismo originale, precedente a questa sessione: un utente
+// ha confermato che su questo stesso telefono (Android, Brave) funzionava
+// prima. Il tentativo con navigator.share({files}) (per un limite di iOS
+// Safari che qui non c'entra affatto — sbagliato applicarlo a un problema
+// Android) non ha risolto niente e potrebbe essere lui stesso la causa:
+// tolto. Resta solo la diagnostica (window.onerror/unhandledrejection e il
+// try/catch nel gestore di #icsVai, invariati) — se il problema persiste
+// anche così, non è questa funzione.
+function download(name, text, mime){
+  const blob=new Blob([text],{type:mime});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob); a.download=name;
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },400);
 }
 let toastT;
 function toast(msg){
@@ -5574,19 +5548,14 @@ $("#swapB").addEventListener("change",()=>{
 $("#doIcs").onclick=()=>{ const b=$("#icsBox"); const apri=b.hidden;
   soloUno(apri?"#icsBox":null); b.hidden=!apri;
   if(apri && b.scrollIntoView) b.scrollIntoView({behavior:"smooth",block:"nearest"}); };
-$("#icsVai").onclick=async ()=>{
+$("#icsVai").onclick=()=>{
   // Conferma indipendente da toast()/$() che il tocco è arrivato fin qui —
   // se non compare nemmeno questa, il problema è ancora più a monte
   // (il bottone non è agganciato, o qualcos'altro intercetta il tocco prima
-  // che arrivi qui) e non dentro questo gestore.
+  // che arrivi qui) e non dentro questo gestore. Tenuta anche ora che
+  // download() è tornato sincrono: costa nulla e resta utile finché il
+  // problema segnalato su dispositivo reale non è confermato risolto.
   mostraErroreFatale("Tocco ricevuto su Scarica 28 giorni — "+new Date().toLocaleTimeString("it-IT"));
-  // Tutto dentro un try/catch: "non compare nulla" con la build diagnostica
-  // precedente (che ne aveva uno solo dentro download()) punta a un'eccezione
-  // PRIMA che download() venga anche solo chiamato — NT.buildIcs(28), qui
-  // sotto, viene valutato come argomento prima che download() parta, quindi
-  // un suo errore saltava ogni diagnostica precedente in silenzio. Qui non
-  // può più succedere: qualunque eccezione, ovunque in questo blocco, ora
-  // finisce in un toast leggibile invece che nel nulla.
   try{
     const ics=NT.setIcs({
       turni:$("#icsT").checked, sonno:$("#icsS").checked,
@@ -5597,12 +5566,8 @@ $("#icsVai").onclick=async ()=>{
       avviso:+$("#icsA").value||0
     });
     if(!(ics.turni||ics.sonno||ics.pisolini||ics.caffe||ics.luce||ics.rientro||ics.pasti)){ toast("Scegli almeno una cosa"); return; }
-    const contenuto=NT.buildIcs(28);
-    const r = await download("notturnisti-"+iso(state.focus)+".ics",contenuto,"text/calendar");
-    // Se l'utente ha annullato il foglio di condivisione, non è successo
-    // niente di davvero esportato: non ha senso segnarlo né dirgli "scaricati".
-    if(!r.ok){ if(r.msg) toast(r.msg); return; }
-    $("#icsBox").hidden=true; toast(r.msg || "28 giorni scaricati");
+    download("notturnisti-"+iso(state.focus)+".ics",NT.buildIcs(28),"text/calendar");
+    $("#icsBox").hidden=true; toast("28 giorni scaricati");
     // Segna quando: il file è statico e scade dopo 28 giorni, senza questo
     // l'app non ha modo di sapere se il calendario del telefono è ancora
     // allineato al piano vero — vedi renderIcsExpireNudge().
