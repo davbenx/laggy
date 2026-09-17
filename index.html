@@ -5547,6 +5547,38 @@ const cycGo=n=>{
 // giorno del ciclo) — la sua stessa descrizione lo prometteva già, ma
 // prima nessuno dei tre bottoni ci portava davvero: un buco vero, non
 // solo di questo giro di lavoro.
+// Estratta da apriIntro() (dove viveva da sola): i campi dei passi del
+// wizard mostrano il valore salvato SOLO se qualcosa li ripopola da state
+// — apriIntro() lo faceva, ma solo lei, e solo al primo avvio/dalla
+// schermata intera. Aprendo lo stesso passo più tardi da Opzioni
+// (apriSezioneInline sotto) nessuno lo richiamava: i campi restavano al
+// valore che il markup mostra di default (la prima opzione, deselezionato)
+// invece del valore vero — sembrava che il salvataggio non avesse
+// funzionato, quando invece stava salvando bene, solo non lo si vedeva più
+// una volta chiusa la pagina. Trovato da uno screenshot reale (Sonno
+// diceva giustamente 00:30→09:15 nel riepilogo, ma il selettore sotto
+// mostrava 19:00). Richiamata da entrambi i punti da cui questi campi
+// diventano visibili: nessuno dei due deve ricordarsi a mano quali campi
+// popolare, un solo posto che lo sa davvero.
+function sincronizzaCampiPiano(){
+  if(selWake){
+    const val=NT.freeWakeOk()? state.freeWake : hhmm(Math.round(NT.freeWakeUsata()/15)*15);
+    selWake.value = val;
+    if(selWake.value!==val) selWake.value="07:30";
+  }
+  if(selBed){ selBed.value=state.freeBed; if(!selBed.value) selBed.value="23:30"; }
+  mostraDurata();
+  if(oSel){
+    const pi=presetIndex();
+    oSel.value = pi>=0 ? String(pi) : "x";
+  }
+  if($("#caffS")) $("#caffS").value=state.caffSens||"alta";
+  if($("#napT")) $("#napT").value=state.napTurno||"no";
+  if($("#sonnoD")) $("#sonnoD").value=state.sonnoDiurno||"diviso";
+  if($("#mattinoBif")) $("#mattinoBif").checked=!!state.mattinoBifasico;
+  { const wc=$("#wantCross"), cb=$("#crossBox");
+    if(wc){ wc.checked = tuttePersone().length>0; if(cb) cb.hidden=!wc.checked; } }
+}
 const OPZ_PASSI = {1:[1,2], 3:[3], 4:[4]};
 function apriSezioneInline(n){
   const box=$("#opzBox"+n); if(!box) return;
@@ -5559,6 +5591,7 @@ function apriSezioneInline(n){
     const step=document.querySelector('.wstep[data-step="'+p+'"]');
     if(step && step.parentElement!==box){ box.appendChild(step); step.hidden=false; }
   });
+  sincronizzaCampiPiano();
   if(passi.includes(1)){ renderWizSeqGrid(); mostraAvanzate(); }
   if(n===4){ const wsc=$("#wizSaveConfirm"); if(wsc) wsc.checked = !!state.backupDone; }
   render();
@@ -6383,26 +6416,7 @@ function apriIntro(nascondiPiano){
     document.body.classList.add("wiz-open");
     if(nascondiPiano) document.body.classList.add("intro");
   }
-  if(selWake){
-    // se il valore salvato non è fra le scelte (link vecchio, ora impossibile) lo avvicino
-    const val=NT.freeWakeOk()? state.freeWake : hhmm(Math.round(NT.freeWakeUsata()/15)*15);
-    selWake.value = val;
-    if(selWake.value!==val) selWake.value="07:30";
-  }
-  if(selBed){ selBed.value=state.freeBed; if(!selBed.value) selBed.value="23:30"; }
-  mostraDurata();
-  if(oSel){
-    const pi=presetIndex();
-    oSel.value = pi>=0 ? String(pi) : "x";
-  }
-  if($("#caffS")) $("#caffS").value=state.caffSens||"alta";
-  if($("#napT")) $("#napT").value=state.napTurno||"no";
-  if($("#sonnoD")) $("#sonnoD").value=state.sonnoDiurno||"diviso";
-  if($("#mattinoBif")) $("#mattinoBif").checked=!!state.mattinoBifasico;
-  // Se c'è già qualcuno in elenco, la sezione si apre da sola — non deve
-  // sembrare sparito qualcosa che l'utente aveva già configurato.
-  { const wc=$("#wantCross"), cb=$("#crossBox");
-    if(wc){ wc.checked = tuttePersone().length>0; if(cb) cb.hidden=!wc.checked; } }
+  sincronizzaCampiPiano();
   mostraAvanzate();
   renderToday();
   wizReset();
