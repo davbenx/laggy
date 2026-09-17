@@ -643,34 +643,30 @@ function busyOf(off){
   const f=state.focus; state.focus=day(f,off);
   let out=[];
   try{
-    // Usa plan() invece di simulate(): plan() include i pisolini nel campo .naps.
-    // simulate() non li conosce, quindi busyOf() precedente segnava come "libere"
-    // le ore dei pisolini — divergenza tra il feed ICS e l'UI dell'app.
+    // Usa P.busy (sleeps.concat(naps), da plan()) invece di ricostruire a mano
+    // l'intervallo del sonno principale: la vecchia riga spingeva [s.onset,1440],
+    // cioè "occupato da quando ti addormenti fino a mezzanotte" — corretto solo
+    // per chi dorme a cavallo di mezzanotte. Per chi dorme di giorno, tutto
+    // dentro la stessa giornata (il caso più comune per un turnista: es. dorme
+    // 09:00-17:00), quella riga segnava come occupate anche le ore della sera
+    // dopo il risveglio vero — sottostimando il tempo libero condiviso nel
+    // feed "Riposo in comune" (buildCouple, più sotto). P.busy usa invece la
+    // fine reale del sonno (s.onset+s.dur), stessa correzione già fatta in
+    // index.html per lo stesso motivo.
     const P=plan();
-    const b=block(0);
+    const b=P.b;
     const sp=P.sp||{}; // sonno di ieri (onset+dur relativi a ieri+1440)
-    const s=P.s;       // sonno di oggi
     const wake=(sp.onset||0)+(sp.dur||0)-1440;
     if(wake>0) out.push([0,Math.min(wake,1440)]);
-    if(s.onset<1440) out.push([Math.max(s.onset,0),1440]);
+    for(const iv of P.busy){
+      const a=iv.a, z=iv.b;
+      if(a<1440 && z>0) out.push([Math.max(a,0),Math.min(z,1440)]);
+    }
     if(!b.rest) out.push([Math.max(b.start,0),Math.min(b.end,1440)]);
     // turno di ieri che sconfina oltre mezzanotte
     const yb=block(-1);
     if(!yb.rest && yb.end>1440) out.push([Math.max(yb.start-1440,0),Math.min(yb.end-1440,1440)]);
-    // pisolini — il motivo per cui serviva plan() invece di simulate()
-    for(const n of (P.naps||[])) out.push([Math.max(n.a,0),Math.min(n.b,1440)]);
-  }catch(e){
-    // fallback su simulate() per robustezza
-    try{
-      const S=simulate(), s=at(S,0), sp=at(S,-1), b=block(0);
-      const wake=(sp.onset+sp.dur)-1440;
-      if(wake>0) out.push([0,Math.min(wake,1440)]);
-      if(s.onset<1440) out.push([Math.max(s.onset,0),1440]);
-      if(!b.rest) out.push([Math.max(b.start,0),Math.min(b.end,1440)]);
-      const yb=block(-1);
-      if(!yb.rest && yb.end>1440) out.push([Math.max(yb.start-1440,0),Math.min(yb.end-1440,1440)]);
-    }catch(e2){}
-  }
+  }catch(e){}
   state.focus=f;
   return out.filter(([a,z])=>z>a).sort((x,y)=>x[0]-y[0]);
 }
