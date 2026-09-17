@@ -4746,12 +4746,12 @@ function renderCards(P, f, CARDS){
 // non aperto: se paid.js non ha ancora risposto, o non è mai arrivato,
 // "Il tuo andamento" resta bloccato — è la parte a pagamento adesso, non più
 // quella gratuita di prima.
-// Sblocco temporaneo: "Il tuo andamento" era a pagamento, ma il premium
-// non è ancora stato attivato — su richiesta, resta visibile a tutti fino
-// a quando non verrà riacceso davvero. Per riattivare il blocco, basta
-// tornare a `return !!(window.NTPaid && window.NTPaid.paid());` qui sotto:
-// un solo punto, niente altro nel resto del file da cambiare.
-function haPagato(){ return true; }
+// Blocco vero, riattivato: il premium (checkout, webhook, /feed/config/
+// claim) è stato verificato funzionante in produzione in questa sessione —
+// lo sblocco temporaneo non serve più. Fallisce chiuso, non aperto: se
+// paid.js non ha ancora risposto, o non è mai arrivato, "Il tuo andamento"
+// resta bloccato di default.
+function haPagato(){ return !!(window.NTPaid && window.NTPaid.paid()); }
 
 function renderAndamenti(){
   const el=$("#andamenti"); if(!el) return;
