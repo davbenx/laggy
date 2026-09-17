@@ -1,7 +1,7 @@
 {
   "name": "Notturnisti · Pianificatore turni",
   "short_name": "Notturnisti",
-  "description": "Dai tuoi turni: quando dormire, l'ultimo caffè, la luce, i pasti. Gira sul tuo dispositivo, senza mandare niente a un server.",
+  "description": "Dai tuoi turni: quando dormire, l'ultimo caffè, la luce, i pasti. Il tuo piano viene calcolato sul dispositivo nel rispetto della tua privacy.",
   "start_url": "/?standalone=true",
   "scope": "/",
   "display": "standalone",

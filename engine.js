@@ -947,3 +947,179 @@ export function parseConfig(params){
     if(okTime(p.get("pwb"))) cfg.pBed=p.get("pwb"); }
   return cfg;
 }
+
+function _inWin(m, a, b) { return m >= a && m < b; }
+function _hhmm(mins) {
+  const mod = ((Math.round(mins) % 1440) + 1440) % 1440;
+  const h = Math.floor(mod / 60), m = mod % 60;
+  return String(h).padStart(2, "0") + ":" + String(m).padStart(2, "0");
+}
+
+export function resolveNextAction(params) {
+  const m = params.nowMins, P = params.P, b = params.b || P.b;
+  let status = "", next = null;
+
+  // 1. Finestra di sonno in corso
+  if (_inWin(m, P.s.onset, P.end)) {
+    status = "Finestra di sonno pianificata";
+    next = {
+      type: "wake", at: _hhmm(P.end),
+      title: "Sveglia programmata",
+      desc: "Rimani a letto fino all'orario per completare i cicli di sonno profondo e REM.",
+      urgency: "sleep"
+    };
+    return { status, next };
+  }
+
+  // 2. Pisolino programmato in corso
+  for (const n of (P.naps || [])) {
+    if (_inWin(m, n.a, n.b)) {
+      status = "Pisolino in corso (" + (n.b - n.a) + " min)";
+      next = {
+        type: "nap_end", at: _hhmm(n.b),
+        title: "Fine pisolino",
+        desc: "Sveglia all'orario per evitare l'inerzia del sonno profondo.",
+        urgency: "sleep"
+      };
+      return { status, next };
+    }
+  }
+
+  // 3. Turno attualmente in corso
+  if (!b.rest && _inWin(m, b.start, b.end)) {
+    status = "Sei nel turno di " + (b.name || "lavoro");
+    if (isFinite(P.cut) && m < P.cut) {
+      next = {
+        type: "coffee", at: _hhmm(P.cut),
+        title: "Ultimo caffè consentito",
+        desc: "Da qui in poi evita la caffeina per proteggere il sonno al rientro.",
+        urgency: "normal"
+      };
+    } else if ((P.night || (b.name && b.name.toLowerCase().includes("notte"))) && m < (P.cbt - 60)) {
+      next = {
+        type: "drowsiness_soon", at: _hhmm(P.cbt - 60),
+        title: "Picco di sonnolenza in arrivo",
+        desc: "Finestra " + _hhmm(P.cbt - 60) + " → " + _hhmm(P.cbt + 60) + " (minimo circadiano). Luci accese, muoviti e bevi acqua.",
+        urgency: "warning"
+      };
+    } else if ((P.night || (b.name && b.name.toLowerCase().includes("notte"))) && m >= (P.cbt - 60) && m < (P.cbt + 60)) {
+      next = {
+        type: "drowsiness_peak", at: _hhmm(b.end),
+        title: "Fine turno alle " + _hhmm(b.end),
+        desc: "Sei nella finestra di minima temperatura corporea. Mantieni l'attenzione attiva.",
+        urgency: "warning"
+      };
+    } else {
+      next = {
+        type: "shift_end", at: _hhmm(b.end),
+        title: "Fine turno alle " + _hhmm(b.end),
+        desc: (P.night || P.lateStart)
+          ? "Rientro a casa: occhiali scuri sulla strada per non bloccare la melatonina e prudenza alla guida."
+          : "Termine del turno lavorativo.",
+        urgency: (P.night || P.lateStart) ? "warning" : "normal"
+      };
+    }
+    return { status, next };
+  }
+
+  // 4. Decompressione post-turno / viaggio verso casa
+  if (!b.rest && (P.night || P.lateStart) && m >= b.end && m < P.s.onset) {
+    status = "Turno terminato — rientro e decompressione";
+    if (m < b.end + 45) {
+      next = {
+        type: "commute", at: _hhmm(P.s.onset),
+        title: "Massima prudenza alla guida",
+        desc: "L'ora più critica per i colpi di sonno. Se hai gli occhi pesanti fermati 15 min. A letto alle " + _hhmm(P.s.onset) + ".",
+        urgency: "warning"
+      };
+    } else {
+      next = {
+        type: "bedtime", at: _hhmm(P.s.onset),
+        title: "È ora di dormire",
+        desc: "Stanza fresca, buia e silenziosa. Proteggi il tuo sonno diurno per recuperare.",
+        urgency: "sleep"
+      };
+    }
+    return { status, next };
+  }
+
+  // 5. Appena svegliato: inerzia del sonno
+  if (m >= P.end && m < P.end + 30) {
+    status = "Inerzia del sonno post-risveglio";
+    next = {
+      type: "light_movement", at: _hhmm(P.end + 30),
+      title: "Attivazione circadiana",
+      desc: "Luce naturale o lampada luminosa, bevi un bicchiere d'acqua e fai qualche passo.",
+      urgency: "normal"
+    };
+    return { status, next };
+  }
+
+  // 6. Preparazione pre-turno / pisolino prima della notte
+  if (!b.rest && m < b.start) {
+    if (P.naps && P.naps.length > 0) {
+      const nextNap = P.naps.find(n => n.a > m);
+      if (nextNap) {
+        status = "Fase pre-turno";
+        next = {
+          type: "nap", at: _hhmm(nextNap.a),
+          title: "Pisolino preventivo alle " + _hhmm(nextNap.a),
+          desc: "Dormi fino alle " + _hhmm(nextNap.b) + " per ridurre la pressione del sonno durante il turno.",
+          urgency: "sleep"
+        };
+        return { status, next };
+      }
+    }
+    const preLead = Math.max(30, P.b.start - 60);
+    if (m < preLead) {
+      status = "Prima del turno";
+      next = {
+        type: "prep", at: _hhmm(preLead),
+        title: "Preparazione al turno",
+        desc: "Pasto leggero, idratazione e controllo del percorso.",
+        urgency: "normal"
+      };
+      return { status, next };
+    } else {
+      status = "Turno imminente";
+      next = {
+        type: "shift_start", at: _hhmm(b.start),
+        title: "Inizio turno alle " + _hhmm(b.start),
+        desc: "Raggiungi la postazione e attiva la modalità operativa.",
+        urgency: "normal"
+      };
+      return { status, next };
+    }
+  }
+
+  // 7. Giorno di riposo o serata libera
+  if (b.rest) {
+    status = "Giorno di riposo";
+    if (m < P.s.onset) {
+      next = {
+        type: "bedtime", at: _hhmm(P.s.onset),
+        title: "Sonno alle " + _hhmm(P.s.onset),
+        desc: "Mantieni l'orario di coricamento costante per non sballare i ritmi circadiani.",
+        urgency: "normal"
+      };
+    } else {
+      next = {
+        type: "rest", at: "Domani",
+        title: "Riposo e recupero",
+        desc: "Tempo libero e ricarica fisica.",
+        urgency: "normal"
+      };
+    }
+    return { status, next };
+  }
+
+  // Fallback di default
+  status = "In giornata";
+  next = {
+    type: "bedtime", at: _hhmm(P.s.onset),
+    title: "Prossimo sonno alle " + _hhmm(P.s.onset),
+    desc: "Segui le finestre di luce e caffeina per prepararti al riposo.",
+    urgency: "normal"
+  };
+  return { status, next };
+}

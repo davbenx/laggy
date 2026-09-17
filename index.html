@@ -105,6 +105,18 @@ try{
    valori del chiaro "di sistema" sopra, ma su un selettore d'attributo,
    che vince sempre — di sistema o no — perché più specifico del bare
    :root. Non è un terzo tema: è lo stesso chiaro, scelto invece che subito. */
+:root[data-theme="dark"]{
+  --bg:#14161A; --s1:#1C1F24; --s2:#252930; --line:#2E343D;
+  --ink:#F0F3F6; --dim:#8A94A0; --faint:#555E68;
+  --blue:#5B87B5; --blue-fill:#2D5A8C; --blue-soft:#1A2736; --blue-lt:#4A75A0; --su-blu:#F0F3F6;
+  --orange:#FF6B35; --orange-fill:#FF6B35; --orange-bar:#E8551B; --orange-soft:#2E1A12;
+  --risk:#E57368; --risk-soft:#2A1412; --risk-line:#5C2420;
+  --sleep-fill:#2D5A8C; --ok:#4E9F6E; --on-warm:#F0F3F6;
+  --bg-blur:rgba(20,22,26,.82);
+  --warm-tint:#201812; --cool-tint:#141F2C;
+  --shadow-card:0 2px 8px -2px rgba(0,0,0,.45);
+  --shadow-btn:0 8px 18px -6px rgba(0,0,0,.5);
+}
 :root[data-theme="light"]{
   --bg:#FFFFFF; --s1:#F7F9FB; --s2:#EDF1F5; --line:#DDE3EA;
   --ink:#15171A; --dim:#5C6670; --faint:#5F6871;
@@ -200,7 +212,40 @@ font-weight:700;padding:5px 10px;border-radius:999px;white-space:nowrap}
 .cap p{font-size:12.5px;color:var(--faint);text-align:right}
 .cyc{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:11px 13px 5px;
 margin-bottom:26px;box-shadow:var(--shadow-card)}
-.crow{display:flex;align-items:center;gap:10px;min-height:32px;cursor:pointer}
+.crow{display:flex;align-items:center;gap:10px;min-height:44px;padding:3px 0;cursor:pointer}
+.ora-card{background:var(--s1);border:1px solid var(--blue-lt);border-left:4px solid var(--blue);border-radius:18px;
+padding:16px;margin:12px 0 16px;box-shadow:var(--shadow-card);transition:all .2s ease}
+.ora-card.risk{background:var(--risk-soft);border-color:var(--risk-line);border-left-color:var(--risk)}
+.ora-card.sleep{background:var(--cool-tint);border-color:var(--blue-soft);border-left-color:var(--blue)}
+.ora-top-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.now-badge{font-size:10.5px;letter-spacing:.08em;font-weight:700;text-transform:uppercase;color:var(--blue);
+background:var(--blue-soft);padding:3px 8px;border-radius:20px}
+.ora-card.risk .now-badge{background:var(--bg);color:var(--risk)}
+.ora-card.sleep .now-badge{background:var(--bg);color:var(--blue)}
+.now-status-title{font-size:13px;font-weight:600;color:var(--ink);flex:1;text-align:right}
+.ora-action-row{display:flex;align-items:center;gap:14px}
+.now-time-col{display:flex;flex-direction:column;align-items:center;min-width:64px}
+.now-time-box{font-size:24px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1;color:var(--blue);
+background:var(--bg);padding:8px 10px;border-radius:12px;border:1px solid var(--line)}
+.ora-card.risk .now-time-box{color:var(--risk);border-color:var(--risk-line)}
+.now-time-sub{font-size:10px;color:var(--dim);margin-top:4px;text-transform:uppercase;letter-spacing:.05em}
+.now-action-content{flex:1}
+.now-action-title{font-size:15px;font-weight:700;color:var(--ink);display:block;margin-bottom:2px}
+.ora-card.risk .now-action-title{color:var(--risk)}
+.now-action-desc{font-size:12.5px;line-height:1.45;color:var(--dim);margin:0}
+.ora-dis{font-size:11px;color:var(--faint);margin-top:10px;line-height:1.35}
+
+.qh-card{background:var(--s1);border:2px solid var(--blue);border-radius:20px;padding:18px;margin:12px 0 16px;box-shadow:var(--shadow-card)}
+.qh-title{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:4px}
+.qh-h{font-size:20px;font-weight:800;color:var(--ink);margin:0 0 4px;line-height:1.25}
+.qh-sub{font-size:13px;color:var(--dim);margin:0 0 14px;line-height:1.4}
+.qh-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.qh-btn{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:12px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;min-height:74px;transition:all .15s;font:inherit}
+.qh-btn:hover{border-color:var(--blue);transform:translateY(-1px);background:var(--s2)}
+.qh-btn span{font-size:22px;line-height:1}
+.qh-btn b{font-size:14px;color:var(--ink);font-weight:700}
+.qh-btn small{font-size:11.5px;color:var(--dim);font-weight:500}
+.qh-foot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding-top:10px}
 .crow:hover .crail{background:var(--s2)}
 /* pillola, come nel mockup: bordo pieno invece di uno shadow interno, e
    un filo più alta (10px contro 8px) — lo stesso trattamento che lì
@@ -672,7 +717,7 @@ body.tab-oggi #status:not(.warn){display:none}
 /* OGGI: il giorno. "La giornata" (datebar + dettaglio + diario) è a scomparsa. */
 body.tab-oggi .cap.ciclo,body.tab-oggi #cyc,body.tab-oggi #cycShareBox,
 body.tab-oggi #doPartner,body.tab-oggi .cycbar,body.tab-oggi #cycRange,body.tab-oggi #doAndamenti,
-body.tab-oggi #icsBox,body.tab-oggi #dayBox,body.tab-oggi #andamentiPagina,
+body.tab-oggi #icsBox,body.tab-oggi #andamentiPagina,
 body.tab-oggi #vederciPagina,body.tab-oggi #partner,body.tab-oggi .piu-cal,
 body.tab-oggi .tools,body.tab-oggi .piu-h,body.tab-oggi .piu-info,body.tab-oggi footer{display:none}
 /* OGGI: la datebar (navigatore giorni) resta sempre; solo il DETTAGLIO è a scomparsa */
@@ -1313,6 +1358,10 @@ header b{font-size:23px}
 <div id="cycShareBox" class="cycshare-btn" style="flex-direction:column;gap:8px;margin-top:var(--gap-sezione)">
   <span class="eyebrow">Condividi</span>
   <div class="tools" style="margin:0">
+    <button type="button" id="doShareWhatsApp" class="tool">
+      <span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.41a8.204 8.204 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.19 8.19 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24m4.52 11.66c-.19.53-1.06 1.04-1.47 1.08-.38.04-.88.06-2.84-.73-2.34-.95-3.84-3.34-3.96-3.49-.11-.16-.96-1.27-.96-2.42 0-1.15.6-1.72.82-1.95.21-.23.46-.29.62-.29.15 0 .31 0 .44.01.14.01.33-.05.51.39.19.46.66 1.6.72 1.72.06.12.1.26.02.42-.08.16-.12.26-.24.4-.12.14-.26.31-.37.42-.12.12-.24.25-.1.5.14.24.62 1.03 1.34 1.67.92.82 1.7 1.08 1.94 1.2.24.12.39.1.53-.06.15-.17.62-.72.79-.97.16-.25.33-.21.55-.13.22.08 1.41.67 1.65.79.24.12.4.18.46.28.06.11.06.63-.13 1.16"/></svg></span>
+      <span class="tool-tx"><b>Invia i miei turni su WhatsApp</b><span>Formatta i turni della settimana per colleghi o partner</span></span>
+    </button>
     <button type="button" id="doCycShare" class="tool">
       <span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg></span>
       <span class="tool-tx"><b>Condividi il tuo ciclo</b><span>Chi apre il link può confrontare i turni con i tuoi</span></span>
@@ -1409,7 +1458,7 @@ header b{font-size:23px}
     <p><b>Melatonina.</b> Non ne parliamo qui perché i dosaggi degli studi sul jet lag e sui turni non coincidono con quelli in vendita come integratore in Italia — proporre un numero sarebbe fuorviante. Se pensi possa servirti, parlane con un medico o un farmacista: possono valutare il tuo caso, non un piano generico.</p>
   </div>
 </details>
-    <p class="hint" style="margin:12px 0 0" id="privacyNota">I tuoi turni e quello che annoti non escono da questa pagina: restano nel link e nel tuo browser.<span id="privacyNotaAbbonato" hidden> Se hai attivato il calendario che si aggiorna da solo, i turni restano comunque anche sul server che lo tiene aggiornato — solo quelli, il resto no.</span></p>
+    <p class="hint" style="margin:12px 0 0" id="privacyNota">I tuoi turni e il tuo diario vengono elaborati localmente sul tuo telefono. Nessuna profilazione pubblicitaria.<span id="privacyNotaAbbonato" hidden> Se hai attivato il calendario che si aggiorna da solo, i turni restano comunque anche sul server che lo tiene aggiornato — solo quelli, il resto no.</span></p>
     <p style="margin:10px 0 0"><button class="lnk" id="doFeed" style="padding:0">Segnala cosa non torna</button> · <button class="lnk" id="doShare" style="padding:0">Consiglialo a un collega</button></p>
     <p class="hint" style="margin:10px 0 0"><a href="https://notturnisti.club/planner" target="_blank" rel="noopener">Come si usa</a> · <a href="https://notturnisti.club/chi-siamo/" target="_blank" rel="noopener">Chi siamo</a> · <a href="https://notturnisti.club" target="_blank" rel="noopener">notturnisti.club</a><span id="doDonateLnkWrap" hidden> · <a id="doDonateLnk" href="#" target="_blank" rel="noopener">Sostieni il progetto</a></span></p>
   </div>
@@ -2229,7 +2278,7 @@ var qrcodegen;
 // prima che il resto di questo script (che lo usa ovunque, via NT.) parta —
 // stessa garanzia di ordine che un normalizzatore await avrebbe dato, senza
 // bisogno di riscrivere tutto in async. I moduli sono già strict di default.
-import { createEngine } from "./engine.js";
+import { createEngine, resolveNextAction } from "./engine.js";
 /* MOTORE NOTTURNISTI v4 — turni arbitrari.
    Nessuna regola guarda più la lettera del turno. Tutto si decide dalla
    geometria: dove cade il turno rispetto alla finestra di sonno naturale.
@@ -2369,6 +2418,24 @@ function hashParamsBase(){
 // tracciava un partner gli mandava involontariamente anche i suoi turni e i
 // suoi orari di sonno insieme al proprio ciclo.
 function toHashCiclo(){ return hashParamsBase().toString(); }
+function toCompactHash(){
+  const p=new URLSearchParams();
+  if(state.pattern) p.set("p",state.pattern);
+  if(state.anchor) p.set("a",state.anchor);
+  const defShifts = "M:Mattino:420:840|P:Pomeriggio:840:1260|N:Notte:1260:1860";
+  const curShifts = encShifts(state.shifts||{});
+  if(curShifts && curShifts !== defShifts) p.set("s", curShifts);
+  if(state.freeWake && state.freeWake !== "07:30") p.set("w", state.freeWake);
+  if(state.freeBed && state.freeBed !== "23:30") p.set("wb", state.freeBed);
+  if(state.caffSens && state.caffSens !== "alta") p.set("cs", state.caffSens);
+  if(state.need && state.need !== 480) p.set("n", state.need);
+  if(state.cTo && state.cTo !== 25) p.set("ct", state.cTo);
+  if(state.cFrom && state.cFrom !== 25) p.set("cf", state.cFrom);
+  if(state.prep && state.prep !== 45) p.set("pr", state.prep);
+  if(state.maxAdvance && state.maxAdvance !== 60) p.set("adv", state.maxAdvance);
+  if(state.repeat === false) p.set("rep","0");
+  return p.toString();
+}
 // Link di "Salva la configurazione": backup personale completo, non
 // qualcosa che si manda a un collega — include anche la persona principale
 // tracciata e l'elenco di chi altro segui (prima si perdevano nome e
@@ -2486,6 +2553,9 @@ state.beds  = store.get("beds",{});
 state.pisolini = store.get("pisolini",{});
 state.backupDone = store.get("backupDone", false);
 const wakes = state.wakes;   // stesso oggetto: il motore lo legge da state
+function haptic(ms){
+  try{ if("vibrate" in navigator) navigator.vibrate(ms||8); }catch(e){}
+}
 
 
 /* ===================== PARTNER ===================== */
@@ -3749,50 +3819,32 @@ function renderOra(Pfocus){
     try{ P=NT.plan(); }catch(e){ P=Pfocus; }
     state.focus=f;
   }
-  const isToday = true;
-  let r=null;
-  try{ if(window.NTAlert){
-    const now=new Date();
-    let lastEnd=null; const ks=Object.keys(wakes).sort();
-    if(ks.length){ const kk=ks[ks.length-1], mm=/^(\d{1,2}):(\d{2})$/.exec(wakes[kk]||""); if(mm){ lastEnd=new Date(kk+"T00:00:00"); lastEnd.setMinutes((+mm[1])*60+(+mm[2])); } }
-    // vero, non state.focus: qui sotto state.focus è già stato ripristinato
-    // al giorno sfogliato (riga sopra), ma "Adesso" deve restare ancorato
-    // al giorno vero anche per questo calcolo — altrimenti sfogliare in
-    // avanti sposta in avanti anche la mezzanotte di riferimento, e con
-    // lei tutto l'orario del prossimo sonno usato per il rischio fatica.
-    const midnight=new Date(vero.getFullYear(),vero.getMonth(),vero.getDate());
-    const nextSleep=(P.s&&typeof P.s.onset==="number")?new Date(midnight.getTime()+P.s.onset*60000):null;
-    r=window.NTAlert.alertness({now, freeWake:state.freeWake, freeBed:state.freeBed, lastSleepEnd:lastEnd, nextSleepStart:nextSleep});
-  } }catch(e){}
-  const kssSleepy = votoOraRecente();
-  const A = isToday ? adessoLine(P, vero) : null;
-  const sleeping = A && A.t==="Dovresti dormire";   // non chiedere l'umore mentre dovresti dormire
-  // Se dovresti già essere a dormire o a fare un pisolino, quello resta il
-  // consiglio più utile che il modulo possa dare — un avviso di fatica
-  // sopra non aggiunge nulla (anzi confonde: due modi diversi di dire "è
-  // tardi, il corpo è a terra"). Il rischio fatica vince su tutto il resto
-  // SOLO fuori da queste due finestre, dove sì è l'informazione più urgente
-  // (in turno, alla guida, sveglio senza un riposo già programmato adesso).
-  const inFinestraRiposo = A && (A.t==="Dovresti dormire" || A.t==="È l'ora del pisolino");
-  const risk = r&&r.risk, severe = !inFinestraRiposo && ((risk&&risk.severe) || kssSleepy);
-  let title, sub, accent=false;
-  if(inFinestraRiposo){ title=A.t; sub=A.s; }
-  else if(severe){ accent=true;
-    title = kssSleepy ? "Sei assonnato" : "Rischio fatica alto verso le "+risk.hhmm;
-    sub = kssSleepy ? "Se devi guidare o decidere, fermati: 20 minuti e un caffè."
-      : "Evita decisioni critiche; se guidi al rientro, non farlo stanco.";
-  } else if(A && !A.fallback){ title=A.t; sub=A.s; }
-  else if(risk){ title="Lucidità ok"; sub="Prossimo calo verso le "+risk.hhmm+(r.peak?" · meglio verso le "+r.peak.hhmm:""); }
-  else { title=A.t; sub=A.s; }   // A esiste sempre quando è oggi: il fallback (mai più vuoto)
-  const oraIc = severe ? ICON.warn : sleeping ? ICON.moon
-    : (A && A.t==="È l'ora del pisolino") ? ICON.bed
-    : (A && /insieme/.test(A.t)) ? ICON.duo
-    : (title && /caff/.test(sub||"")) ? ICON.coffee : ICON.eye;
-  el.innerHTML='<div class="ora-card'+(accent?" risk":"")+'">'+
-    '<div class="ora-h"><span class="ora-ic">'+oraIc+'</span>'+
-    '<div class="ora-tx"><span class="eyebrow">Adesso</span>'+
-    '<b>'+esc(title)+'</b></div></div>'+
-    '<span class="ora-sub">'+esc(sub)+'</span>'+
+  const now = new Date();
+  const nowMins = now.getHours()*60 + now.getMinutes();
+  const action = resolveNextAction({ nowMins, P, b: P.b, vero });
+  const isRisk = action.next && action.next.urgency === "warning";
+  const isSleep = action.next && action.next.urgency === "sleep";
+
+  let badgeText = "ADESSO";
+  if(!P.b.rest && nowMins >= P.b.start && nowMins < P.b.end) badgeText = "ADESSO · IN TURNO";
+  else if(!P.b.rest && (P.night||P.lateStart) && nowMins >= P.b.end && nowMins < P.s.onset) badgeText = "ADESSO · RIENTRO";
+  else if(nowMins >= P.s.onset && nowMins < P.end) badgeText = "ADESSO · SONNO";
+
+  el.innerHTML =
+    '<div class="ora-card' + (isRisk ? ' risk' : isSleep ? ' sleep' : '') + '">' +
+      '<div class="ora-top-row">' +
+        '<span class="now-badge">' + badgeText + '</span>' +
+        '<span class="now-status-title">' + esc(action.status) + '</span>' +
+      '</div>' +
+      '<div class="ora-action-row">' +
+        (action.next && action.next.at ? '<div class="now-time-col"><div class="now-time-box">' + esc(action.next.at) + '</div><span class="now-time-sub">prossimo</span></div>' : '') +
+        '<div class="now-action-content">' +
+          '<b class="now-action-title">' + esc(action.next ? action.next.title : "Continua il turno") + '</b>' +
+          '<p class="now-action-desc">' + esc(action.next ? action.next.desc : "") + '</p>' +
+        '</div>' +
+      '</div>' +
+      '<div class="ora-dis">Stima operativa basata sui tuoi orari di sonno e turno.</div>' +
+      (sfoglioAltrove ? '<div class="ora-dis" style="color:var(--blue);margin-top:4px">Stai sfogliando un giorno diverso: qui sopra vedi il momento presente.</div>' : '') +
     '</div>';
 }
 
@@ -3841,15 +3893,38 @@ function renderDemoEsempio(){
   // "sta vedendo l'esempio" è vero dal primo istante in cui il banner
   // compare, non da ogni ridisegno successivo dello stesso banner.
   if(!demoEsempioTracciato){ demoEsempioTracciato=true; track("example_started"); }
+  el.className = "card qh-card";
   el.innerHTML =
-    '<button type="button" id="chiudiDemoEsempio" aria-label="Chiudi">×</button>'+
-    '<b>Stai vedendo un turno d\'esempio</b>'+
-    '<p class="hint" style="margin-top:6px">Per farti capire subito come funziona, il piano qui sotto è calcolato su un turno generico — non il tuo. Configuralo con i tuoi orari in due minuti, o continua a guardarlo così com\'è.</p>'+
-    '<button class="btn g" type="button" id="doConfiguraEsempio">Configura i tuoi turni →</button>';
+    '<div class="qh-title">NOTTURNISTI</div>'+
+    '<h2 class="qh-h">Dimmi quando lavori.</h2>'+
+    '<p class="qh-sub">Ti diciamo subito come organizzare sonno, pause e recupero attorno al tuo turno di oggi.</p>'+
+    '<div class="qh-grid">'+
+      '<button type="button" class="qh-btn" data-quick-pick="N"><span>🌙</span><b>Notte</b><small>21:00 → 07:00</small></button>'+
+      '<button type="button" class="qh-btn" data-quick-pick="M"><span>☀️</span><b>Mattino</b><small>07:00 → 14:00</small></button>'+
+      '<button type="button" class="qh-btn" data-quick-pick="P"><span>⛅</span><b>Pomeriggio</b><small>14:00 → 21:00</small></button>'+
+      '<button type="button" class="qh-btn" data-quick-pick="R"><span>✨</span><b>Riposo</b><small>Giorno libero</small></button>'+
+    '</div>'+
+    '<div class="qh-foot">'+
+      '<button type="button" class="lnk" id="doConfiguraEsempio" style="font-size:13px">Ho un ciclo turni a rotazione (es. M-P-N-R) →</button>'+
+      '<button type="button" id="chiudiDemoEsempio" class="lnk" style="color:var(--faint);font-size:12px;padding:6px">Chiudi</button>'+
+    '</div>';
 }
 if($("#demoEsempio")) $("#demoEsempio").addEventListener("click", e=>{
-  if(e.target.closest("#chiudiDemoEsempio")){ demoEsempioChiuso=true; renderDemoEsempio(); return; }
-  if(e.target.closest("#doConfiguraEsempio")){ demoEsempioChiuso=true; track("example_completed"); renderDemoEsempio(); apriIntro(true); wizShow(1); }
+  const b=e.target.closest("[data-quick-pick]");
+  if(b){
+    const k=b.dataset.quickPick;
+    state.ecc[iso(new Date())]=k;
+    demoEsempioChiuso=true;
+    primaVolta=false;
+    salva();
+    haptic(15);
+    try{ if(window.NTAnalytics) window.NTAnalytics.track("plan_generated", {pattern_type: k}); }catch(err){}
+    toast("Ecco il tuo piano operativo per oggi");
+    render();
+    return;
+  }
+  if(e.target.closest("#chiudiDemoEsempio")){ demoEsempioChiuso=true; render(); return; }
+  if(e.target.closest("#doConfiguraEsempio")){ demoEsempioChiuso=true; track("example_completed"); render(); apriIntro(true); wizShow(1); }
 });
 
 // Chi usa "Vedi il mio piano ora →" al passo 2 esce dal wizard SENZA passare
@@ -3909,7 +3984,8 @@ function installBannerVisibile(){
   const mostraBenvenuto = primaVoltaDaLink && !benvenutoLinkChiuso;
   const pronto = !!(state.pattern && Object.keys(state.shifts||{}).length);
   const ios = isIOSPerInstall();
-  return !(state.installBannerOff || giaInstallata() || mostraBenvenuto || backupNudgeVisibile() || !pronto || !(installPromptEvento || ios));
+  const heroAttivo = (primaVolta && !demoEsempioChiuso);
+  return !(state.installBannerOff || giaInstallata() || mostraBenvenuto || backupNudgeVisibile() || !pronto || heroAttivo || !(installPromptEvento || ios));
 }
 let installBannerTracciato=false;
 function renderInstallBanner(){
@@ -4041,7 +4117,8 @@ if($("#icsExpireNudge")) $("#icsExpireNudge").addEventListener("click", e=>{
 function clubBannerVisibile(){
   const mostraBenvenuto = primaVoltaDaLink && !benvenutoLinkChiuso;
   const pronto = !!(state.pattern && Object.keys(state.shifts||{}).length);
-  return !(state.clubBannerOff || mostraBenvenuto || backupNudgeVisibile() || installBannerVisibile() || shareNudgeVisibile() || icsNudgeVisibile() || icsExpireNudgeVisibile() || !pronto);
+  const heroAttivo = (primaVolta && !demoEsempioChiuso);
+  return !(state.clubBannerOff || mostraBenvenuto || backupNudgeVisibile() || installBannerVisibile() || shareNudgeVisibile() || icsNudgeVisibile() || icsExpireNudgeVisibile() || !pronto || heroAttivo);
 }
 function renderClubBanner(){
   const el=$("#clubBanner"); if(!el) return;
@@ -4436,7 +4513,12 @@ function renderHeader(P, f){
   // bisogno di un calcolo a parte per quel caso).
   const serie=serieTurnoCorrente();
   const pillEl=$("#shiftPill");
-  if(pillEl) pillEl.textContent = serie ? nameOf(c)+" "+serie.posizione+"/"+serie.totale : nameOf(c);
+  if(pillEl){
+    pillEl.textContent = serie ? nameOf(c)+" "+serie.posizione+"/"+serie.totale : nameOf(c);
+    pillEl.style.cursor = "pointer";
+    pillEl.title = "Tocca per cambiare turno o inserire un'eccezione";
+    pillEl.onclick = () => { haptic(10); apriEcc(state.focus); };
+  }
   const cov=$("#cover"); if(cov) cov.textContent=coverage()||"";
   renderToday();
   const avv = NT.freeWakeOk() ? "" : "Questa risposta non è plausibile: sto usando "+hhmm(NT.freeWakeUsata())+".";
@@ -5778,14 +5860,35 @@ async function condividiCiclo(){
   try{ await navigator.clipboard.writeText(url); toast("Link copiato"); track("share_created"); }
   catch(e){ prompt("Copia questo link:",url); track("share_created"); }
 }
+function condividiSettimanaWhatsApp(){
+  const d = new Date(state.focus);
+  const giorni = ["Dom","Lun","Mar","Mer","Gio","Ven","Sab"];
+  let testo = "📅 I miei turni per i prossimi giorni:\n\n";
+  for(let i=0; i<7; i++){
+    const dd = new Date(d); dd.setDate(dd.getDate() + i);
+    const isoStr = iso(dd);
+    const code = state.ecc && state.ecc[isoStr] ? state.ecc[isoStr] : NT.codeAt(dnum(dd) - dnum(state.focus));
+    const nome = nameOf(code);
+    let emoji = "✨";
+    if(code === "N") emoji = "🌙";
+    else if(code === "M") emoji = "☀️";
+    else if(code === "P") emoji = "⛅";
+    testo += emoji + " " + giorni[dd.getDay()] + " " + dd.getDate() + ": " + nome + "\n";
+  }
+  const link = location.origin + location.pathname + "#" + toCompactHash();
+  testo += "\n🔗 Confronta i tuoi turni con i miei:\n" + link;
+  const url = "https://wa.me/?text=" + encodeURIComponent(testo);
+  window.open(url, "_blank");
+}
+if($("#doShareWhatsApp")) $("#doShareWhatsApp").onclick=()=>{ haptic(10); condividiSettimanaWhatsApp(); };
 if($("#doCycShare")) $("#doCycShare").onclick=condividiCiclo;
 // Il QR codifica lo stesso identico link di "Condividi il tuo ciclo" — solo
-// i tuoi dati (toHashCiclo()), mai quelli di una persona che segui. Solo
+// i tuoi dati (toCompactHash()), mai quelli di una persona che segui. Solo
 // generazione: la lettura la fa già la fotocamera nativa del telefono, che
 // riconosce il link e lo apre da sola — non serve costruire anche quella metà.
 function renderQR(holderSel){
   const holder=$(holderSel||"#qrHolder"); if(!holder || typeof window.qrcodegen==="undefined") return;
-  const url=location.origin+location.pathname+"#"+toHashCiclo();
+  const url=location.origin+location.pathname+"#"+toCompactHash();
   let qr; try{ qr=window.qrcodegen.QrCode.encodeText(url, window.qrcodegen.QrCode.Ecc.MEDIUM); }catch(e){ holder.textContent="Configurazione troppo estesa per un QR — usa il link."; return; }
   const n=qr.size, border=2, dim=n+border*2;
   let path="";
@@ -6222,10 +6325,23 @@ bind("#adv","maxAdvance");
 // silenzio anche quando l'intento era il secondo. Ora, se le sequenze non
 // coincidono, l'app si avvia con i TUOI dati salvati (mai a rischio) e
 // chiede esplicitamente dopo, invece di decidere da sola.
+function configDiffers(linkPerson, mySaved){
+  if(!linkPerson || !mySaved || !mySaved.pattern) return false;
+  if(linkPerson.pattern !== mySaved.pattern) return true;
+  if(linkPerson.anchor && mySaved.anchor && linkPerson.anchor !== mySaved.anchor) return true;
+  if(linkPerson.shifts && mySaved.shifts){
+    const lKeys = Object.keys(linkPerson.shifts);
+    for(const k of lKeys){
+      const ls = linkPerson.shifts[k], ms = mySaved.shifts[k];
+      if(!ms || ls.start !== ms.start || ls.end !== ms.end) return true;
+    }
+  }
+  return false;
+}
 const savedPre = store.get("state", null);
 const hashOriginale = location.hash;
 const hashPersonPre = hashOriginale ? personaDaLink(hashOriginale) : null;
-const hashDiffers = !!(hashPersonPre && savedPre && savedPre.pattern && hashPersonPre.pattern !== savedPre.pattern);
+const hashDiffers = configDiffers(hashPersonPre, savedPre);
 
 const loaded = hashDiffers ? false : fromHash();
 // Un link applicato con successo qui è quasi sempre uno aperto DAVVERO da
@@ -6325,29 +6441,50 @@ renderWizSeqGrid();
 render();
 // L'app è già partita con i TUOI dati, mai a rischio — questo compare
 // SOPRA, come scelta esplicita, solo se serve davvero.
-if(hashDiffers && $("#linkChoice")){
-  $("#linkChoice").hidden=false;
-  $("#linkAsPerson").onclick=()=>{
+function gestisciLinkChoice(person, rawHash){
+  const lc = $("#linkChoice");
+  if(!lc || !person) return;
+  lc.hidden = false;
+  const who = $("#linkChoiceWho");
+  if(who) who.textContent = person.name ? ("Configurazione di " + person.name) : "Non coincide con la configurazione che hai già su questo telefono.";
+  const btnAsPerson = $("#linkAsPerson");
+  if(btnAsPerson) btnAsPerson.onclick = ()=>{
     if(!state.pPattern){
-      state.pPattern=hashPersonPre.pattern; state.pAnchor=hashPersonPre.anchor||null;
-      state.pShifts=hashPersonPre.shifts||null; state.pWake=hashPersonPre.wake||null;
-      state.pBed=hashPersonPre.bed||null; state.pName="";
+      state.pPattern = person.pattern; state.pAnchor = person.anchor || null;
+      state.pShifts = person.shifts || null; state.pWake = person.wake || null;
+      state.pBed = person.bed || null; state.pName = person.name || "";
     } else {
-      state.people.push(hashPersonPre);
+      state.people = state.people || [];
+      state.people.push(person);
     }
-    salva(); $("#linkChoice").hidden=true; render(); toast("Aggiunta all'elenco");
+    salva(); lc.hidden = true; render(); toast("Aggiunta all'elenco");
   };
-  $("#linkReplace").onclick=()=>{
-    fromHash(hashOriginale); salva(); $("#linkChoice").hidden=true; normalizza(); render();
+  const btnReplace = $("#linkReplace");
+  if(btnReplace) btnReplace.onclick = ()=>{
+    fromHash(rawHash || location.hash); salva(); lc.hidden = true; normalizza(); render();
   };
-  $("#linkIgnore").onclick=()=>{
+  const btnIgnore = $("#linkIgnore");
+  if(btnIgnore) btnIgnore.onclick = ()=>{
     // Nessun cambiamento di stato: chiamare render() qui basta a far
     // scrivere di nuovo nell'URL LA MIA configurazione invariata (lo fa
     // già ogni render, in fondo alla funzione) — così il link in arrivo
     // non resta nella barra degli indirizzi a ripresentarsi a ogni refresh.
-    $("#linkChoice").hidden=true; render();
+    lc.hidden = true; render();
   };
 }
+
+if(hashDiffers && hashPersonPre){
+  gestisciLinkChoice(hashPersonPre, hashOriginale);
+}
+
+window.addEventListener("hashchange", ()=>{
+  const h = location.hash;
+  if(!h) return;
+  const p = personaDaLink(h);
+  if(p && configDiffers(p, state)){
+    gestisciLinkChoice(p, h);
+  }
+});
 function chiudiIntro(gotoOggi){
   const o=$("#onboard"); if(o) o.hidden=true;
   if(document.body && document.body.classList){ document.body.classList.remove("intro"); document.body.classList.remove("wiz-open"); }
@@ -6395,15 +6532,6 @@ function wizShow(n){
 function wizReset(){ wizShow(1); }
 if($("#wizNext")) $("#wizNext").onclick=()=>{
   if(WIZ.step>=WIZ.total){
-    // Solo sull'ultimo passo: la spunta è obbligatoria per chiudere da lì.
-    // Il salvataggio anticipato da un passo precedente (#doSetup, quando
-    // visibile lì) resta un'altra cosa, non gated da questa spunta.
-    const wsc=$("#wizSaveConfirm");
-    if(wsc && !wsc.checked){
-      const box=$("#wizSaveBox"); if(box && box.scrollIntoView) box.scrollIntoView({behavior:"smooth",block:"center"});
-      toast("Salva la configurazione prima di continuare");
-      return;
-    }
     const b=$("#doSetup"); if(b) b.click();
   }
   else{ track("onboarding_step_completed",{step:WIZ.step}); wizShow(WIZ.step+1); }
@@ -6449,14 +6577,9 @@ function categoriaPattern(){
   }catch(e){ return "sconosciuto"; }
 }
 if($("#doSetup")) $("#doSetup").onclick=()=>{
-  const wsc=$("#wizSaveConfirm");
-  if(wsc ? !wsc.checked : !state.backupDone){
-    wizShow(4);
-    toast("Salva la configurazione prima di continuare");
-    setTimeout(()=>{ const box=$("#wizSaveBox"); if(box && box.scrollIntoView) box.scrollIntoView({behavior:"smooth",block:"center"}); },60);
-    return;
-  }
   track("onboarding_completed"); track("plan_generated",{pattern_type:categoriaPattern()});
+  salva();
+  toast("Configurazione completata!");
   chiudiIntro(WIZ.gotoOggi);
 };
 if($("#doSkip")) $("#doSkip").onclick=()=>{ track("onboarding_abandoned",{step:WIZ.step}); chiudiIntro(false); };
@@ -6727,6 +6850,7 @@ addEventListener("nt:refresh", ()=>{ try{ render(); }catch(e){} });
   }catch(err){}
 })();
 </script>
+<script type="module" src="./notifications.js"></script>
 <script type="module" src="./alertness.js"></script>
 <script type="module" src="./history.js"></script>
 <script>
