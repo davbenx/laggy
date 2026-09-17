@@ -1,10 +1,13 @@
-/* paid.js — modulo a pagamento (classico, additivo: se non carica, il tool gratis
-   resta intatto). Dialoga col core via window.NT, e con lo storico via NTHistory.
-   Gate unico: un abbonamento salvato in locale sblocca calendario vivo, griglia
-   turni, coppia e storico. Config: window.NT_PAY = { clientId, price, currency, api }. */
+/* paid.js — modulo del calendario automatico (nome storico, non più "a
+   pagamento": Notturnisti è gratis per chiunque). Dialoga col core via
+   window.NT, e con lo storico via NTHistory. Un accesso gratuito, creato al
+   primo tocco, sblocca calendario vivo, griglia turni, coppia e storico —
+   nessun pagamento richiesto. Sostenere il progetto (Ko-fi, window.NT_DONATE)
+   è un modo per chi vuole ricambiare, mai una condizione. Config: window.NT_CAL
+   = { api }. */
 (function () {
   "use strict";
-  var PAY = Object.assign({ store: "LEMONSQUEEZY_STORE_PLACEHOLDER", variant: "LEMONSQUEEZY_VARIANT_PLACEHOLDER", price: "36.99", currency: "EUR", api: "" }, window.NT_PAY || {});
+  var CAL = Object.assign({ api: "" }, window.NT_CAL || {});
   var KEY = "nt:sub";
   var $ = function (s, r) { return (r || document).querySelector(s); };
 
@@ -18,10 +21,11 @@
   function api(method, path, body, writeKey) {
     var h = { "content-type": "application/json" };
     if (writeKey) h["x-write-key"] = writeKey;
-    return fetch(PAY.api + path, { method: method, headers: h, body: body ? JSON.stringify(body) : undefined })
+    return fetch(CAL.api + path, { method: method, headers: h, body: body ? JSON.stringify(body) : undefined })
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, status: r.status, data: j }; }, function () { return { ok: r.ok, status: r.status, data: {} }; }); });
   }
   function paramsObj() { return Object.fromEntries(new URLSearchParams(window.NT.read().params)); }
+  function donateUrl() { try { return (window.NT_DONATE && window.NT_DONATE.url) || ""; } catch (e) { return ""; } }
 
   // ── stile ──
   function css() {
@@ -51,7 +55,7 @@
 
   // ── modale ──
   var screen = "account";
-  function open(to) { css(); screen = to || (paid() ? "account" : "unlock"); if (!$("#pf-modal")) mount(); paint(); }
+  function open(to) { css(); screen = to || (paid() ? "account" : "attiva"); if (!$("#pf-modal")) mount(); paint(); }
   function close() { var m = $("#pf-modal"); if (m) m.remove(); }
   function mount() {
     var m = document.createElement("div"); m.className = "pf-modal"; m.id = "pf-modal";
@@ -70,7 +74,7 @@
   function paint() {
     var b = $("#pf-body"); if (!b) return;
     var body = paid() ? ({ account: scAccount, couple: scCouple }[screen] || scAccount)()
-                      : scUnlock();
+                      : scAttiva();
     b.innerHTML = nav() + body;
     var nb = b.querySelectorAll("[data-pf-nav]");
     nb.forEach(function (el) { el.onclick = function () { screen = el.getAttribute("data-pf-nav"); paint(); }; });
@@ -78,17 +82,14 @@
   }
 
   // ── schermate ──
-  function scUnlock() {
-    var prezzoFmt = PAY.price.replace(".", ",") + " " + (PAY.currency === "EUR" ? "€" : PAY.currency);
+  function scAttiva() {
+    var url = donateUrl();
     return '<h2 class="pf-h">Il calendario che si aggiorna da solo</h2>' +
-      '<p class="pf-p">La versione gratis funziona bene, ma va riesportata ogni 28 giorni. Con questa, il calendario si aggiorna da solo — turni, sonno, ultimo caffè, anche quello di coppia se lo usi con qualcuno. Lo colleghi una volta, poi non ci pensi più.</p>' +
-      '<p class="pf-p">Sblocca anche <b>Il tuo andamento</b>: non solo grafici da interpretare — un consiglio concreto ogni settimana, calcolato sui tuoi turni e sul tuo diario.</p>' +
-      '<p class="pf-p"><b>' + prezzoFmt + '</b> una volta sola, per sempre. Niente abbonamento da ricordarsi di disdire.</p>' +
-      (isPlaceholder() ? '<p class="pf-note">Il pagamento non è ancora configurato: il pulsante comparirà una volta impostato.</p>' :
-        dentroTWA() ? '<p class="pf-note">Per ora lo sblocco si fa dal sito, non da qui dentro: apri <b>notturnisti.club</b> dal browser del telefono, funziona anche lì.</p>' :
-        '<button class="pf-btn" id="pf-checkout" type="button">Sblocca ora →</button>' +
-        '<p class="pf-note" id="pf-checkout-status" style="display:none"></p>') +
-      '<p class="pf-note">Hai già pagato su un altro dispositivo? <button class="pf-danger" id="pf-restore" style="color:var(--blue)">Ripristina</button></p>' +
+      '<p class="pf-p">Gratis, per chiunque. Turni, sonno, ultimo caffè — anche quello di coppia se lo usi con qualcuno — scritti da soli nel calendario del telefono, aggiornati ogni volta che cambi qualcosa qui. Lo attivi una volta, poi non ci pensi più.</p>' +
+      '<button class="pf-btn" id="pf-activate" type="button">Attiva il calendario →</button>' +
+      '<p class="pf-note" id="pf-activate-status" style="display:none"></p>' +
+      (url ? '<p class="pf-note">L\'app è gratis e lo resta. Se vuoi <a href="' + url + '" target="_blank" rel="noopener" style="color:var(--blue)">offrire un caffè</a>, è benvenuto ma mai necessario.</p>' : '') +
+      '<p class="pf-note">Hai già attivato il calendario su un altro dispositivo? <button class="pf-danger" id="pf-restore" style="color:var(--blue)">Ripristina</button></p>' +
       '<div id="pf-restore-box" hidden><input class="pf-in" id="pf-rid" placeholder="id"><input class="pf-in" id="pf-rkey" placeholder="chiave di scrittura">' +
       '<button class="pf-btn" id="pf-rgo">Ripristina l\'accesso</button></div>';
   }
@@ -96,6 +97,7 @@
     var s = getSub();
     var feed = s.feedUrl || "";
     var https = feed.replace(/^webcal/, "https");
+    var url = donateUrl();
     // Il link di ripristino contiene la writeKey — non lo rendiamo mai navigabile
     // (href) per evitare che finisca in cronologia browser, preview WhatsApp,
     // iCloud Backup URL, ecc. Solo copia-clipboard e download .txt.
@@ -114,7 +116,8 @@
       '<code class="pf-lnk" id="pf-rlink" style="word-break:break-all;user-select:all;cursor:text;display:block;padding:8px;background:var(--s2);border-radius:6px">' + restoreText + '</code>' +
       '<button class="pf-btn" id="pf-copy">Copia il link</button>' +
       '<button class="pf-btn" id="pf-dl" style="margin-top:8px;background:var(--s2);color:var(--ink);border:1px solid var(--line)">Scarica come file .txt</button>' +
-      '</div>';
+      '</div>' +
+      (url ? '<p class="pf-note" style="margin-top:16px">Notturnisti è gratis, e lo resta. Se ti è utile, <a href="' + url + '" target="_blank" rel="noopener" style="color:var(--blue)">offrimi un caffè</a> — mai necessario, sempre benvenuto.</p>' : '');
   }
   function scCouple() {
     var r = window.NT.read();
@@ -137,7 +140,8 @@
   // ── azioni ──
   function wire() {
     var b = $("#pf-body"); if (!b) return;
-    // unlock: restore
+    // attivazione + restore
+    if ($("#pf-activate")) $("#pf-activate").onclick = attiva;
     var rb = $("#pf-restore"); if (rb) rb.onclick = function () { var x = $("#pf-restore-box"); x.hidden = !x.hidden; };
     var rgo = $("#pf-rgo"); if (rgo) rgo.onclick = function () {
       var id = ($("#pf-rid").value || "").trim(), key = ($("#pf-rkey").value || "").trim();
@@ -148,7 +152,6 @@
         else toast("Credenziali non valide");
       });
     };
-    if ($("#pf-checkout")) $("#pf-checkout").onclick = avviaCheckout;
     // account
     var sync = $("#pf-sync"); if (sync) sync.onclick = function () {
       var s = getSub();
@@ -170,7 +173,7 @@
         return;
       }
       clearTimeout(del._armTimer); delete del.dataset.armed; del.textContent = del.dataset.testo;
-      var s = getSub(); api("DELETE", "/config/" + s.id, null, s.writeKey).then(function () { clearSub(); screen = "unlock"; paint(); toast("Cancellato"); });
+      var s = getSub(); api("DELETE", "/config/" + s.id, null, s.writeKey).then(function () { clearSub(); screen = "attiva"; paint(); toast("Cancellato"); });
     };
     var cp = $("#pf-copy"); if (cp) cp.onclick = function () { copyText(restoreLink(getSub())); };
     var dl = $("#pf-dl"); if (dl) dl.onclick = function () {
@@ -235,103 +238,19 @@
     });
   }
 
-  // Dentro il wrapper Android (TWA), il referrer comincia con "android-app://" —
-  // è il modo standard per riconoscere questo contesto. Un acquisto avviato da
-  // lì, con Lemon Squeezy dentro l'app impacchettata, rischia di contare come
-  // "acquisto dentro l'app" secondo le regole di Google — le stesse che
-  // richiedono Play Billing o l'iscrizione ai programmi di fatturazione
-  // alternativa. Per ora il negozio resta sul web, non dentro l'app: più
-  // semplice, e coerente con l'idea di aggiungere il pagamento nativo dopo,
-  // non di scontrarsi con quella regola adesso.
-  function dentroTWA() { try { return /^android-app:\/\//.test(document.referrer || ""); } catch (e) { return false; } }
+  function setStatus(msg) { var s = $("#pf-activate-status"); if (s) { s.textContent = msg; s.style.display = msg ? "block" : "none"; } }
 
-  function isPlaceholder() { return PAY.store.indexOf("PLACEHOLDER") >= 0 || PAY.variant.indexOf("PLACEHOLDER") >= 0; }
-
-  function randomToken() {
-    var bytes = crypto.getRandomValues(new Uint8Array(24)), s = "";
-    for (var i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
-    return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-  }
-  function setStatus(msg) { var s = $("#pf-checkout-status"); if (s) { s.textContent = msg; s.style.display = msg ? "block" : "none"; } }
-
-  function loadLemonJs() {
-    if (window.LemonSqueezy) return Promise.resolve();
-    return new Promise(function (resolve) {
-      var sc = document.createElement("script");
-      sc.src = "https://assets.lemonsqueezy.com/lemon.squeezy.js"; sc.defer = true;
-      sc.onload = resolve; document.head.appendChild(sc);
-    });
-  }
-
-  // Dopo "Checkout.Success", il pagamento è fatto ma le credenziali arrivano
-  // dal webhook (che verifica la firma prima di creare l'accesso) — non subito,
-  // quasi sempre entro pochi secondi ma mai garantito. Si interroga /claim
-  // finché non è pronto, non una volta sola: un webhook un po' lento non deve
-  // sembrare un pagamento fallito.
-  var _pollActive = false;   // evita polling paralleli se l'utente tocca più volte
-
-  function pollClaim(token, tentativo) {
-    tentativo = tentativo || 0;
-    _pollActive = true;
-
-    // Su iOS/Safari i setTimeout ricorsivi vengono congelati quando il tab va in
-    // background (es. l'utente apre LemonSqueezy in un popup). Questo listener
-    // si aggancia alla riapertura del tab e riprende da dove si era fermato.
-    function onVisible() {
-      if (document.visibilityState === "visible" && _pollActive) {
-        document.removeEventListener("visibilitychange", onVisible);
-        pollClaim(token, tentativo);
-      }
-    }
-    document.addEventListener("visibilitychange", onVisible);
-
-    api("GET", "/claim/" + encodeURIComponent(token)).then(function (r) {
-      if (r.ok && r.data && r.data.ready) {
-        _pollActive = false;
-        document.removeEventListener("visibilitychange", onVisible);
-        setSub({ id: r.data.id, writeKey: r.data.writeKey, feedUrl: r.data.feedUrl });
-        setStatus(""); screen = "account"; paint();
-        try { if (window.render) window.render(); } catch (e) {}
-        toast("Sbloccato — buon turno.");
-        return;
-      }
-      if (tentativo >= 12) {
-        _pollActive = false;
-        document.removeEventListener("visibilitychange", onVisible);
-        setStatus("Il pagamento risulta fatto, ma lo sblocco sta impiegando più del solito. Riapri questa schermata fra un minuto, o scrivimi con l'ordine a portata di mano.");
-        return;
-      }
-      setStatus("Pagamento ricevuto, sto confermando lo sblocco…");
-      setTimeout(function () { pollClaim(token, tentativo + 1); }, 1800);
-    }, function () {
-      if (tentativo >= 12) {
-        _pollActive = false;
-        document.removeEventListener("visibilitychange", onVisible);
-        setStatus("Connessione instabile: riprova ad aprire questa schermata fra poco.");
-        return;
-      }
-      setTimeout(function () { pollClaim(token, tentativo + 1); }, 1800);
-    });
-  }
-
-  function avviaCheckout() {
-    if (isPlaceholder()) return;
-    var token = randomToken();
-    setStatus("Preparo il checkout…");
-    api("POST", "/pending", { token: token, cfg: paramsObj() }).then(function (r) {
-      if (!r.ok) { setStatus("Non riesco a preparare il checkout — riprova."); return; }
-      loadLemonJs().then(function () {
-        window.LemonSqueezy.Setup({
-          eventHandler: function (ev) {
-            if (ev && ev.event === "Checkout.Success") { setStatus("Pagamento ricevuto, sto confermando lo sblocco…"); pollClaim(token); }
-          }
-        });
-        var url = "https://" + PAY.store + ".lemonsqueezy.com/buy/" + PAY.variant +
-          "?embed=1&checkout[custom][token]=" + encodeURIComponent(token);
-        setStatus("");
-        window.LemonSqueezy.Url.Open(url);
-      });
-    }, function () { setStatus("Non riesco a preparare il checkout — riprova."); });
+  // Crea l'accesso gratuito al volo — nessun checkout, nessuna attesa di
+  // conferma esterna: il server risponde direttamente con le credenziali.
+  function attiva() {
+    setStatus("Attivo il calendario…");
+    api("POST", "/account", { cfg: paramsObj() }).then(function (r) {
+      if (!r.ok || !r.data || !r.data.id) { setStatus("Non riesco ad attivare il calendario adesso — riprova."); return; }
+      setSub({ id: r.data.id, writeKey: r.data.writeKey, feedUrl: r.data.feedUrl });
+      setStatus(""); screen = "account"; paint();
+      try { if (window.render) window.render(); } catch (e) {}
+      toast("Attivato — buon turno.");
+    }, function () { setStatus("Non riesco ad attivare il calendario adesso — riprova."); });
   }
 
   function toast(t) {
@@ -352,18 +271,18 @@
     if ($("#pf-open")) return;
     css();
     var b = document.createElement("button"); b.id = "pf-open";
-    b.textContent = paid() ? "Il mio calendario" : "Calendario che si aggiorna →";
+    b.textContent = paid() ? "Il mio calendario" : "Attiva il calendario →";
     b.onclick = function () { open(); };
     var host = document.querySelector("#piuCal") || document.querySelector(".cta") || document.querySelector(".tools") || document.body;
     host.appendChild(b);
     // paid.js carica differito, dopo il primo render del core: senza questo,
-    // "Il tuo andamento" (a pagamento) mostrerebbe lo stato bloccato anche a
-    // chi ha già pagato, finché non cambia tab a mano.
+    // "Il tuo andamento" mostrerebbe lo stato sbagliato a chi ha già attivato
+    // il calendario, finché non cambia tab a mano.
     try { if (window.render) window.render(); } catch (e) {}
   }
   autoRestore();
   // Sync del feed su qualunque cambio di configurazione (griglia gratis in Turni,
-  // wizard, eccezioni): teniamo allineato il calendario a pagamento senza un bottone.
+  // wizard, eccezioni): teniamo allineato il calendario automatico senza un bottone.
   var _syncT = null;
   try {
     window.addEventListener("nt:config-changed", function () {
