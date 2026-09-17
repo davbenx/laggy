@@ -49,5 +49,23 @@
     "LEMONSQUEEZY_VARIANT_ID": "457255",
     "PRICE": "24.99",
     "SITE_ORIGIN": "https://app.notturnisti.club"
+  },
+  // Deploy di anteprima (una per PR, via Workers Builds "wrangler preview"):
+  // stesse variabili non sensibili di sopra (nessuna è davvero segreta), ma
+  // un KV SEPARATO — mai gli abbonamenti veri, un ramo aperto non deve
+  // poter scrivere/leggere dati di produzione. LEMONSQUEEZY_WEBHOOK_SECRET
+  // resta fuori anche qui: un'anteprima non deve mai poter verificare
+  // webhook reali.
+  "previews": {
+    "vars": {
+      "CURRENCY": "EUR",
+      "LEMONSQUEEZY_STORE_ID": "notturnisti",
+      "LEMONSQUEEZY_VARIANT_ID": "457255",
+      "PRICE": "24.99",
+      "SITE_ORIGIN": "https://app.notturnisti.club"
+    },
+    "kv_namespaces": [
+      { "binding": "SUBS", "id": "a7e988fb98ab45368a14d1031188aaaf" }
+    ]
   }
 }
