@@ -4790,7 +4790,7 @@ function renderAndamenti(){
   const el=$("#andamenti"); if(!el) return;
   if(!haPagato()){
     el.innerHTML =
-      '<span class="hint" style="width:100%">Il debito di sonno accumulato, come cambia il tuo umore quando sali, quanto sono regolari i tuoi orari, quale giorno del ciclo ti pesa di più — con settimane di dati dietro, non è più solo un piano, è un ritratto di come il tuo corpo reagisce ai turni.</span>'+
+      '<span class="hint" style="width:100%">Non solo grafici da interpretare: un consiglio concreto ogni settimana, calcolato sui tuoi turni e sul tuo diario — quale giorno del ciclo ti pesa di più, come cambia il tuo umore col debito di sonno, quanto sono regolari i tuoi orari. Con settimane di dati dietro, non è più solo un piano: è un ritratto di come il tuo corpo reagisce ai turni.</span>'+
       '<button class="btn g" type="button" id="doSbloccaAndamento" style="margin-top:10px">Sblocca il tuo andamento →</button>';
     const b=$("#doSbloccaAndamento"); if(b) b.onclick=()=>{ if(window.NTPaid) window.NTPaid.open(); };
     return;
@@ -5081,7 +5081,7 @@ function renderPartner(CARDS){
 function renderPiuCal(){
   const el=$("#piuCalTx"); if(!el) return;
   let prezzo="36,99 €";
-  try{ if(window.NT_PAY&&window.NT_PAY.price) prezzo=String(window.NT_PAY.price).replace(/\.00$/,"")+" "+(window.NT_PAY.currency==="EUR"?"€":window.NT_PAY.currency||"€"); }catch(e){}
+  try{ if(window.NT_PAY&&window.NT_PAY.price) prezzo=String(window.NT_PAY.price).replace(/\.00$/,"").replace(".", ",")+" "+(window.NT_PAY.currency==="EUR"?"€":window.NT_PAY.currency||"€"); }catch(e){}
   let dom=null;
   try{ const t=new Date(); t.setDate(t.getDate()+1); dom=NT_planSafe(t); }catch(e){}
   const esempio = dom
