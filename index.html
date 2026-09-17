@@ -1164,11 +1164,24 @@ header b{font-size:23px}
       <span style="display:block;font-size:12.5px;color:var(--dim);margin-top:2px;">Chi apre il link può confrontare i turni con i tuoi</span>
     </span>
   </button>
-  <button type="button" id="doCycQR" class="lnk" style="align-self:flex-start;margin-top:-2px">Mostra invece il codice QR →</button>
-  <div class="ecc" id="qrBoxCyc" hidden><div id="qrHolderCyc" style="display:flex;justify-content:center;margin:14px 0"></div></div>
-  <!-- Stampare il ciclo era in Più (sparita): stesso cluster concettuale
-       di condividerlo, sta bene qui. -->
-  <button type="button" id="doPrint" class="lnk" style="align-self:flex-start;margin-top:-2px">Stampa il foglio del ciclo →</button>
+  <!-- QR e stampa erano link di testo: due alternative allo stesso livello
+       dell'azione primaria qui sopra, ma con meno peso visivo — card .tool
+       standard (stessa usata ovunque nell'app, es. "Foglio con i miei
+       orari liberi" in Quando sono disponibile), non lo stile blu
+       riservato all'azione primaria. -->
+  <div class="tools" style="margin:0">
+    <button type="button" id="doCycQR" class="tool">
+      <span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM19 14h2v2h-2zM14 19h2v2h-2zM19 19h2v2h-2z"/></svg></span>
+      <span class="tool-tx"><b>Mostra il codice QR</b><span>Per chi ti sta davanti — stesso link di "Condividi il tuo ciclo"</span></span>
+    </button>
+    <div class="ecc" id="qrBoxCyc" hidden><div id="qrHolderCyc" style="display:flex;justify-content:center;margin:14px 0"></div></div>
+    <!-- Stampare il ciclo era in Più (sparita): stesso cluster concettuale
+         di condividerlo, sta bene qui. -->
+    <button type="button" id="doPrint" class="tool">
+      <span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8V3h12v5"/><rect x="4" y="8" width="16" height="8" rx="1.5"/><path d="M8 13h8v7H8z"/></svg></span>
+      <span class="tool-tx"><b>Stampa il foglio del ciclo</b><span>Un giro completo, da attaccare al frigo</span></span>
+    </button>
+  </div>
 </div>
 <!-- "Turni diversi ogni settimana? Impostali a tocchi" (griglia
      #gridBox a parte) è sparito: era la stessa cosa di "Personalizza"
