@@ -17,7 +17,7 @@ export const DEFAULTS = {
   mattinoBifasico:false  // sonno bifasico prima dei turni di mattina molto presto
 };
 
-const LIMITI = {need:[300,660,480], cTo:[0,240,25], cFrom:[0,240,25],
+const LIMITI = {cTo:[0,240,25], cFrom:[0,240,25],
                 prep:[10,180,45], maxAdvance:[20,120,60]};
 
 export function createEngine(config){
@@ -29,6 +29,11 @@ export function createEngine(config){
   const ICS = {turni:true, sonno:true, pisolini:true, caffe:true, luce:true, pasti:false, rientro:true, avviso:30};
 
   function normalizza(){
+    // "need" (il fabbisogno di sonno) non è qui: non è un valore configurabile
+    // a sé, è sempre derivato da freeBed/freeWake da sincronizzaNeed() qui
+    // sotto. Un vecchio LIMITI.need lo clampava un attimo prima di essere
+    // comunque sovrascritto — codice morto e fuorviante (dava l'impressione
+    // che need si potesse impostare direttamente), tolto in un audit.
     for(const k in LIMITI){
       const [lo,hi,def]=LIMITI[k], v=+state[k];
       state[k] = (isFinite(v) && v>0) ? Math.min(Math.max(Math.round(v),lo),hi) : def;
@@ -714,6 +719,25 @@ function esc7986(t){   // nel formato iCalendar virgole e punti e virgola vanno 
   return String(t).replace(/\\/g,"\\\\").replace(/;/g,"\\;").replace(/,/g,"\\,").replace(/\n/g,"\\n");
 }
 
+// L'UID di un pisolino nell'ICS deve identificare IL TIPO di pisolino, non la
+// sua posizione nell'array naps: plan() lo popola con più push() condizionali
+// indipendenti (non tutti mutuamente esclusivi — un turno può generare sia un
+// pisolino di recupero sia uno in-turno lo stesso giorno), quindi se cambi
+// un'impostazione (es. napTurno) tra due esportazioni ravvicinate, l'insieme
+// e l'ordine dei pisolini di un giorno possono cambiare: un UID basato
+// sull'indice si riassegna a un pisolino diverso invece di sparire/comparire
+// pulito, e l'evento nel calendario del telefono cambia contenuto invece di
+// essere sostituito. Ogni ramo di plan() produce al più un pisolino per
+// tipo/giorno, quindi il tipo da solo è già un identificatore stabile.
+function tipoPisolino(n){
+  if(n.turno) return "inturno";
+  if(n.bifasico) return "recuperobif";
+  if(n.rec) return "recupero";
+  if(n.lungo) return "veglialunga";
+  if(n.debito!=null) return "debito"+(n.livello!=null?n.livello:"");
+  return "prenotte";
+}
+
 // RFC 5545 §3.1: una riga di contenuto non dovrebbe superare i 75 ottetti;
 // oltre, va "piegata" — CRLF seguito da uno spazio, che il parser riconosce
 // come continuazione della stessa riga logica. Le DESCRIPTION in italiano
@@ -773,7 +797,7 @@ function buildIcs(days){
     if(ICS.turni && !P.b.rest) ev(base,P.b.start,P.b.end,"turno","Turno "+(P.b.name||P.b.c),"",false);
     if(ICS.sonno) ev(base,P.s.onset,P.s.onset+P.s.dur,"sonno","Sonno",
       "Pianificato da notturnisti.club",true,true);
-    if(ICS.pisolini) P.naps.forEach((n,i)=>ev(base,n.a,n.b,"pisolino"+i,
+    if(ICS.pisolini) P.naps.forEach(n=>ev(base,n.a,n.b,"pisolino-"+tipoPisolino(n),
       (n.rec||n.debito)?"Pisolino di recupero":((n.b-n.a)<40?"Pisolino breve":"Pisolino"),"",true));
     if(ICS.caffe) ev(base,P.cut,P.cut+15,"caffe","Ultimo caffè",
       "Dopo quest'ora la caffeina è ancora in circolo quando provi a dormire.",true);
@@ -884,7 +908,9 @@ export function parseConfig(params){
   if(okTime(p.get("w"))) cfg.freeWake=p.get("w");
   if(okTime(p.get("wb"))) cfg.freeBed=p.get("wb");
   if(_CAFF[p.get("cs")]) cfg.caffSens=p.get("cs");
-  const n=num("n",240,900);   if(n!==undefined) cfg.need=n;
+  // "n" (need) non va letto qui: createEngine() lo sovrascrive sempre subito
+  // con sincronizzaNeed(), derivandolo da freeBed/freeWake — leggerlo in cfg
+  // non avrebbe mai alcun effetto (era così anche prima, solo non dichiarato).
   const ct=num("ct",0,240);   if(ct!==undefined) cfg.cTo=ct;
   const cf=num("cf",0,240);   if(cf!==undefined) cfg.cFrom=cf;
   const pr=num("pr",5,240);   if(pr!==undefined) cfg.prep=pr;

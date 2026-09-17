@@ -184,6 +184,23 @@ for (const napTurno of ["pausa", "libero", "no"]) {
   });
 }
 
+test("gli UID dei pisolini nell'ICS identificano il tipo, non la posizione nell'array", () => {
+  // Prima l'UID era "pisolino"+indice nell'array naps: se l'insieme dei
+  // pisolini di un giorno cambia forma tra due esportazioni (es. cambiando
+  // napTurno), un vecchio "pisolino1" può riassegnarsi a un pisolino
+  // semanticamente diverso invece di sparire/comparire pulito nel calendario
+  // del telefono. Ogni tipo compare al più una volta per giorno (verificato
+  // leggendo plan(): i rami sono a vicenda esclusivi o gated da
+  // !naps.length), quindi il tipo da solo è già un identificatore stabile e
+  // gli UID nello stesso feed devono essere tutti diversi.
+  const ics = buildFeed({ pattern: "NNNRR", anchor: "2026-07-13", napTurno: "libero" }, { days: 14 });
+  const uids = [...ics.matchAll(/UID:(nt-[^\r\n@]+)@/g)].map(m => m[1]);
+  const pisoliniUids = uids.filter(u => u.includes("-pisolino-"));
+  assert.ok(pisoliniUids.length > 0, "nessun pisolino generato: il test non verifica nulla");
+  for (const u of pisoliniUids) assert.ok(!/-pisolino\d+$/.test(u), `UID ancora basato sulla posizione: ${u}`);
+  assert.equal(new Set(uids).size, uids.length, "UID duplicati nello stesso feed");
+});
+
 test("buildCoupleFeed non va in crash con un partner configurato e produce ICS valido", () => {
   const cfg = {
     pattern: "NNNRR", anchor: "2026-07-13",
