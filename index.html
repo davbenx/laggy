@@ -3998,15 +3998,24 @@ function renderIcsExpireNudge(){
   const el=$("#icsExpireNudge"); if(!el) return;
   if(!icsExpireNudgeVisibile()){ el.hidden=true; return; }
   el.hidden=false;
+  // Il momento in cui il fastidio della versione gratis si sente per
+  // davvero — "devo rifarlo di nuovo" — è anche il momento migliore per
+  // dire che pagando sparisce per sempre. Prima non c'era nessun accenno
+  // qui: unico punto dove l'attrito è vissuto, non solo descritto. Non lo
+  // mostra a chi ha già pagato (window.NTPaid.paid()) — a loro non serve.
+  const gia = window.NTPaid && window.NTPaid.paid();
   el.innerHTML =
     '<button type="button" id="chiudiIcsExpireNudge" aria-label="Chiudi">×</button>'+
     '<b>Il calendario esportato sta per scadere</b>'+
-    '<p class="hint" style="margin-top:6px">I 28 giorni dell\'ultimo export finiscono presto: se non lo rifai, il telefono continua a mostrare turni vecchi.</p>'+
-    '<button class="btn g" type="button" id="doIcsExpireNudge">Esporta di nuovo →</button>';
+    '<p class="hint" style="margin-top:6px">I 28 giorni dell\'ultimo export finiscono presto: se non lo rifai, il telefono continua a mostrare turni vecchi.'+
+    (gia?'':' O smetti di doverci pensare: con il calendario a pagamento si aggiorna da solo, per sempre.')+'</p>'+
+    '<button class="btn g" type="button" id="doIcsExpireNudge">Esporta di nuovo →</button>'+
+    (gia?'':'<button class="lnk" type="button" id="doIcsExpireNudgePay" style="margin-left:10px">O aggiornalo da solo →</button>');
 }
 if($("#icsExpireNudge")) $("#icsExpireNudge").addEventListener("click", e=>{
   if(e.target.closest("#chiudiIcsExpireNudge")){ state.icsExpireNudgeSeenAt=state.icsExportedAt; salva(); renderIcsExpireNudge(); return; }
-  if(e.target.closest("#doIcsExpireNudge")){ state.icsExpireNudgeSeenAt=state.icsExportedAt; salva(); apriCalendarioDaWizard(); }
+  if(e.target.closest("#doIcsExpireNudge")){ state.icsExpireNudgeSeenAt=state.icsExportedAt; salva(); apriCalendarioDaWizard(); return; }
+  if(e.target.closest("#doIcsExpireNudgePay")){ if(window.NTPaid) window.NTPaid.open(); }
 });
 
 // Invito a notturnisti.club — prima l'unico collegamento per l'utente
