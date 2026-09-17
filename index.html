@@ -5925,7 +5925,15 @@ function bind(id,key,fn){
     if(LIMITI[key] || el.type==="number") v=+v||0;
 
     if(key==="pattern"||key==="pPattern"){ v=v.toUpperCase().slice(0,400); oSel.value="x"; }
-    state[key]=v; render();
+    state[key]=v;
+    // salva() qui, non solo affidarsi al giro periodico (setInterval(salva,4000)
+    // più sotto): senza, un cambio fatto qui e seguito a stretto giro da una
+    // scheda chiusa o un'app messa in background (comune su telefono) si perde
+    // in silenzio — bug vero, scoperto perché segnalato da un utente reale.
+    // Ogni altro campo dell'app salva già subito al cambiamento; questi cinque
+    // (pattern, anchor, cTo, cFrom, prep, tutti passati da bind()) erano la
+    // sola eccezione.
+    salva(); render();
   });
 }
 ["pattern","anchor","cTo","cFrom","prep"].forEach(k=>bind("#"+k,k));
@@ -6380,7 +6388,7 @@ if($("#doOpen")) $("#doOpen").onclick=()=>{
 };
 function salva(){
   store.set("state",{pattern:state.pattern,anchor:state.anchor,shifts:state.shifts,
-    cTo:state.cTo,cFrom:state.cFrom,need:state.need,prep:state.prep,freeWake:state.freeWake,
+    cTo:state.cTo,cFrom:state.cFrom,need:state.need,prep:state.prep,freeWake:state.freeWake,freeBed:state.freeBed,
     maxAdvance:state.maxAdvance,pPattern:state.pPattern,pAnchor:state.pAnchor,
     pShifts:state.pShifts,pWake:state.pWake,pBed:state.pBed,pName:state.pName,people:state.people,personaGlance:state.personaGlance,
     repeat:state.repeat,ecc:state.ecc,evento:state.evento,
