@@ -3833,6 +3833,10 @@ function votoOraRecente(){
 function renderOra(Pfocus){
   const el=$("#ora"); if(!el) return;
   if(state.vista==="dettaglio"){ el.innerHTML=""; return; }
+  // "Ora" parla del momento presente: non cambia se sfogli i giorni.
+  // Va quindi calcolato SEMPRE sul giorno vero, non su quello a fuoco —
+  // ma "vero" tiene conto anche di un turno o un sonno di ieri sera
+  // ancora in corso, non solo della mezzanotte del calendario.
   let P=Pfocus;
   const vero = giornoVero();
   const sfoglioAltrove = dnum(state.focus)!==dnum(vero);
@@ -3841,74 +3845,48 @@ function renderOra(Pfocus){
     try{ P=NT.plan(); }catch(e){ P=Pfocus; }
     state.focus=f;
   }
-  const now = new Date();
-  const nowMins = now.getHours()*60 + now.getMinutes();
-  const action = resolveNextAction({ nowMins, P, b: P.b, vero });
-  const isRisk = action.next && action.next.urgency === "warning";
-  const isSleep = action.next && action.next.urgency === "sleep";
-
-  const h = now.getHours();
-  const saluto = h >= 5 && h < 12 ? "Buongiorno" : (h >= 12 && h < 18 ? "Buon pomeriggio" : "Buonasera");
-  const nomeUtente = state.pName ? (", " + esc(state.pName)) : "";
-
-  let turnoTitolo = "Giorno di riposo";
-  if(!P.b.rest){
-    turnoTitolo = (P.b.name || "Turno") + " · " + hhmm(P.b.start) + " → " + hhmm(P.b.end);
-  }
-
-  const oraIc = isRisk ? ICON.warn : isSleep ? ICON.moon : (action.next && action.next.type === "coffee") ? ICON.coffee : ICON.eye;
-  const nextIco = (action.next && action.next.type === "coffee") ? ICON.coffee : isSleep ? ICON.moon : isRisk ? ICON.warn : ICON.eye;
-
-  // Timeline essenziale
-  const timeline = [];
-  if(P.cut && nowMins < P.cut){
-    timeline.push('<div class="ora-timeline-row"><span class="tl-ic">' + ICON.coffee + '</span><span class="ora-timeline-time">' + hhmm(P.cut) + '</span><span>Ultimo caffè prima del sonno</span></div>');
-  }
-  if(P.night && P.cbt){
-    timeline.push('<div class="ora-timeline-row"><span class="tl-ic" style="color:var(--risk)">' + ICON.warn + '</span><span class="ora-timeline-time">' + hhmm(P.cbt - 60) + '–' + hhmm(P.cbt + 60) + '</span><span>Finestra di maggiore sonnolenza prevista</span></div>');
-  }
-  if(!P.b.rest && P.b.end){
-    timeline.push('<div class="ora-timeline-row"><span class="tl-ic">' + ICON.alarm + '</span><span class="ora-timeline-time">' + hhmm(P.b.end) + '</span><span>Fine turno</span></div>');
-  }
-  if(P.s && P.s.onset){
-    timeline.push('<div class="ora-timeline-row"><span class="tl-ic">' + ICON.moon + '</span><span class="ora-timeline-time">' + hhmm(P.s.onset) + '–' + hhmm(P.end) + '</span><span>Quando dormire (sonno principale)</span></div>');
-  }
-  if(P.naps && P.naps.length){
-    P.naps.forEach(n=>{
-      timeline.push('<div class="ora-timeline-row"><span class="tl-ic">' + ICON.bed + '</span><span class="ora-timeline-time">' + hhmm(n.a) + '–' + hhmm(n.b) + '</span><span>Pisolino consigliato</span></div>');
-    });
-  }
-
-  el.innerHTML =
-    '<div class="ora-card' + (isRisk ? ' risk' : isSleep ? ' sleep' : '') + '">' +
-      '<div class="ora-h">' +
-        '<span class="ora-ic">' + oraIc + '</span>' +
-        '<div class="ora-tx">' +
-          '<span class="eyebrow">' + saluto + nomeUtente + ' · Cosa faccio adesso?</span>' +
-          '<b>' + esc(turnoTitolo) + '</b>' +
-        '</div>' +
-      '</div>' +
-      '<div class="ora-sub">' +
-        (action.next ? (
-          '<div class="ora-prossimo">' +
-            '<span class="ora-tag">PROSSIMO APPUNTAMENTO</span>' +
-            '<div style="font-size:15px;font-weight:700;color:var(--ink);margin:1px 0 2px;display:flex;align-items:center;gap:6px">' +
-              '<span class="tl-ic">' + nextIco + '</span> ' + (action.next.at ? esc(action.next.at) + ' · ' : '') + esc(action.next.title) +
-            '</div>' +
-            '<p style="margin:0;font-size:13px;color:var(--dim);line-height:1.4">' + esc(action.next.desc) + '</p>' +
-          '</div>'
-        ) : '') +
-        (timeline.length ? (
-          '<div class="ora-timeline">' +
-            timeline.join("") +
-          '</div>'
-        ) : '') +
-        '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;gap:8px">' +
-          '<span class="ora-dis" style="margin:0">Stima basata sui tuoi orari, non una misura della vigilanza.</span>' +
-          '<a href="#formaGiorno" class="lnk" style="font-size:12.5px;white-space:nowrap" onclick="$(\'#formaGiorno\')&&$(\'#formaGiorno\').scrollIntoView({behavior:\'smooth\'});return false;">Vedi tutto il piano →</a>' +
-        '</div>' +
-        (sfoglioAltrove ? '<div class="ora-dis" style="color:var(--blue);margin-top:4px">Stai sfogliando un giorno diverso: qui sopra vedi il momento presente.</div>' : '') +
-      '</div>' +
+  const isToday = true;
+  let r=null;
+  try{ if(window.NTAlert){
+    const now=new Date();
+    let lastEnd=null; const ks=Object.keys(wakes).sort();
+    if(ks.length){ const kk=ks[ks.length-1], mm=/^(\d{1,2}):(\d{2})$/.exec(wakes[kk]||""); if(mm){ lastEnd=new Date(kk+"T00:00:00"); lastEnd.setMinutes((+mm[1])*60+(+mm[2])); } }
+    // vero, non state.focus: qui sotto state.focus è già stato ripristinato
+    // al giorno sfogliato (riga sopra), ma "Adesso" deve restare ancorato
+    // al giorno vero anche per questo calcolo — altrimenti sfogliare in
+    // avanti sposta in avanti anche la mezzanotte di riferimento, e con
+    // lei tutto l'orario del prossimo sonno usato per il rischio fatica.
+    const midnight=new Date(vero.getFullYear(),vero.getMonth(),vero.getDate());
+    const nextSleep=(P.s&&typeof P.s.onset==="number")?new Date(midnight.getTime()+P.s.onset*60000):null;
+    r=window.NTAlert.alertness({now, freeWake:state.freeWake, freeBed:state.freeBed, lastSleepEnd:lastEnd, nextSleepStart:nextSleep});
+  } }catch(e){}
+  const kssSleepy = votoOraRecente();
+  const A = isToday ? adessoLine(P, vero) : null;
+  const sleeping = A && A.t==="Dovresti dormire";   // non chiedere l'umore mentre dovresti dormire
+  const risk = r&&r.risk, severe = (risk&&risk.severe) || kssSleepy;
+  let title, sub, accent=false;
+  if(severe){ accent=true;
+    title = kssSleepy ? "Sei assonnato adesso" : "Rischio fatica alto verso le "+risk.hhmm;
+    sub = kssSleepy ? "Se devi guidare o decidere, fermati: 20 minuti e un caffè."
+      : "Evita decisioni critiche; se guidi al rientro, non farlo stanco.";
+  } else if(A && !A.fallback){ title=A.t; sub=A.s; }
+  else if(risk){ title="Lucidità ok"; sub="Prossimo calo verso le "+risk.hhmm+(r.peak?" · meglio verso le "+r.peak.hhmm:""); }
+  else { title=A.t; sub=A.s; }   // A esiste sempre quando è oggi: il fallback (mai più vuoto)
+  const oraIc = severe ? ICON.warn : sleeping ? ICON.moon
+    : (A && /insieme/.test(A.t)) ? ICON.duo
+    : (title && /caff/.test(sub||"")) ? ICON.coffee : ICON.eye;
+  el.innerHTML='<div class="ora-card'+(accent?" risk":"")+'">'+
+    '<div class="ora-h"><span class="ora-ic">'+oraIc+'</span>'+
+    '<div class="ora-tx"><span class="eyebrow">Adesso</span>'+
+    '<b>'+esc(title)+'</b></div></div>'+
+    '<span class="ora-sub">'+esc(sub)+'</span>'+
+    (r?'<div class="ora-dis">Modellato dai tuoi orari di sonno, non una misura.</div>':'')+
+    // "Ora" parla sempre del momento vero, per progetto — ma le card sotto
+    // seguono il giorno che si sta sfogliando: stesso schermo, due giorni
+    // diversi, senza nessun segnale che lo dicesse. Non un errore di calcolo,
+    // un buco di presentazione — ora reso esplicito invece di lasciarlo intuire.
+    (sfoglioAltrove ? '<div class="ora-dis">Qui sopra: adesso. Le schede sotto mostrano '+
+      esc(state.focus.toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"}))+'.</div>' : '')+
     '</div>';
 }
 
