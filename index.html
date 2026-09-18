@@ -213,36 +213,45 @@ font-weight:700;padding:5px 10px;border-radius:999px;white-space:nowrap}
 .cyc{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:11px 13px 5px;
 margin-bottom:26px;box-shadow:var(--shadow-card)}
 .crow{display:flex;align-items:center;gap:10px;min-height:44px;padding:3px 0;cursor:pointer}
-.ora-card{background:var(--s1);border:1px solid var(--blue-lt);border-left:4px solid var(--blue);border-radius:18px;
-padding:16px;margin:12px 0 16px;box-shadow:var(--shadow-card);transition:all .2s ease}
-.ora-card.risk{background:var(--risk-soft);border-color:var(--risk-line);border-left-color:var(--risk)}
-.ora-card.sleep{background:var(--cool-tint);border-color:var(--blue-soft);border-left-color:var(--blue)}
-.ora-top-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
-.now-badge{font-size:10.5px;letter-spacing:.08em;font-weight:700;text-transform:uppercase;color:var(--blue);
-background:var(--blue-soft);padding:3px 8px;border-radius:20px}
-.ora-card.risk .now-badge{background:var(--bg);color:var(--risk)}
-.ora-card.sleep .now-badge{background:var(--bg);color:var(--blue)}
-.now-status-title{font-size:13px;font-weight:600;color:var(--ink);flex:1;text-align:right}
-.ora-action-row{display:flex;align-items:center;gap:14px}
-.now-time-col{display:flex;flex-direction:column;align-items:center;min-width:64px}
-.now-time-box{font-size:24px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1;color:var(--blue);
-background:var(--bg);padding:8px 10px;border-radius:12px;border:1px solid var(--line)}
-.ora-card.risk .now-time-box{color:var(--risk);border-color:var(--risk-line)}
-.now-time-sub{font-size:10px;color:var(--dim);margin-top:4px;text-transform:uppercase;letter-spacing:.05em}
-.now-action-content{flex:1}
-.now-action-title{font-size:15px;font-weight:700;color:var(--ink);display:block;margin-bottom:2px}
-.ora-card.risk .now-action-title{color:var(--risk)}
-.now-action-desc{font-size:12.5px;line-height:1.45;color:var(--dim);margin:0}
+.ora-card{background:var(--blue-soft);border:1px solid var(--blue-lt);border-radius:20px;
+padding:16px 18px;margin:2px 0 var(--gap-sezione);box-shadow:0 4px 20px rgba(45,90,140,0.12),var(--shadow-btn);transition:all .2s ease}
+.ora-card .eyebrow{color:var(--blue)}
+.ora-card b{display:block;font-family:var(--serif);font-size:20px;font-weight:600;line-height:1.25;margin-top:3px}
+.ora-sub{display:block;font-size:14px;color:var(--dim);line-height:1.5;margin-top:10px}
+.ora-card.risk{background:var(--risk-soft);border-color:var(--risk-line);box-shadow:0 4px 20px rgba(220,80,50,0.14),var(--shadow-card)}
+.ora-card.risk .eyebrow{color:var(--risk)}
+.ora-card.risk b{color:var(--risk)}
+.ora-prossimo{background:var(--bg);border:1px solid var(--blue-lt);border-radius:14px;padding:10px 13px;margin:10px 0 12px}
+.ora-card.risk .ora-prossimo{border-color:var(--risk-line)}
+.ora-tag{display:inline-block;font-size:9.5px;font-weight:800;letter-spacing:.08em;color:var(--blue);text-transform:uppercase;margin-bottom:2px}
+.ora-card.risk .ora-tag{color:var(--risk)}
+.ora-timeline{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--dim);margin:8px 0 10px;padding-left:8px;border-left:2px solid var(--blue-lt)}
+.ora-card.risk .ora-timeline{border-left-color:var(--risk-line)}
+.ora-timeline-row{display:flex;align-items:center;gap:8px}
+.ora-timeline-time{font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;min-width:44px}
+.tl-ic{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;color:var(--blue);flex:none}
+.tl-ic svg{width:16px;height:16px}
+.ora-card.risk .tl-ic{color:var(--risk)}
 .ora-dis{font-size:11px;color:var(--faint);margin-top:10px;line-height:1.35}
 
-.qh-card{background:var(--s1);border:2px solid var(--blue);border-radius:20px;padding:18px;margin:12px 0 16px;box-shadow:var(--shadow-card)}
+.qh-card{background:var(--s1);border:1px solid var(--blue-lt);border-radius:20px;padding:18px;margin:12px 0 16px;box-shadow:0 4px 24px rgba(45,90,140,0.14),var(--shadow-card)}
 .qh-title{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:4px}
 .qh-h{font-size:20px;font-weight:800;color:var(--ink);margin:0 0 4px;line-height:1.25}
 .qh-sub{font-size:13px;color:var(--dim);margin:0 0 14px;line-height:1.4}
+.qh-flow-options{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.qh-opt-btn{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:12px;text-align:left;transition:all .15s;font:inherit;width:100%}
+.qh-opt-btn:hover{border-color:var(--blue);background:var(--s2);transform:translateX(2px)}
+.qh-opt-ic{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;color:var(--blue);flex:none}
+.qh-opt-ic svg{width:24px;height:24px}
+.qh-opt-tx{flex:1;min-width:0}
+.qh-opt-tx b{display:block;font-size:14.5px;color:var(--ink);font-weight:700}
+.qh-opt-tx small{display:block;font-size:12px;color:var(--dim);margin-top:2px;line-height:1.3}
+.qh-opt-arrow{color:var(--faint);font-size:16px;font-weight:600}
 .qh-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
 .qh-btn{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:12px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;min-height:74px;transition:all .15s;font:inherit}
 .qh-btn:hover{border-color:var(--blue);transform:translateY(-1px);background:var(--s2)}
-.qh-btn span{font-size:22px;line-height:1}
+.qh-btn .qh-ic{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;color:var(--blue);margin-bottom:2px}
+.qh-btn .qh-ic svg{width:22px;height:22px}
 .qh-btn b{font-size:14px;color:var(--ink);font-weight:700}
 .qh-btn small{font-size:11.5px;color:var(--dim);font-weight:500}
 .qh-foot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding-top:10px}
@@ -488,6 +497,14 @@ body.wiz-open .onboard{display:flex;flex-direction:column;min-height:calc(100dvh
    non fa nulla, mostrato senza motivo. Questa regola più specifica vince
    sempre sull'altra quando il suo hidden dice di stare nascosto. */
 body.wiz-open #linkChoice[hidden]{display:none}
+body.wiz-open #shareNudge, body.intro #shareNudge,
+body.wiz-open #demoEsempio, body.intro #demoEsempio,
+body.wiz-open #backupNudge, body.intro #backupNudge,
+body.wiz-open #installBanner, body.intro #installBanner,
+body.wiz-open #icsNudge, body.intro #icsNudge,
+body.wiz-open #icsExpireNudge, body.intro #icsExpireNudge,
+body.wiz-open #clubBanner, body.intro #clubBanner,
+body.wiz-open #donateNudge, body.intro #donateNudge{display:none!important}
 body.wiz-open .wsteps{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:8px}
 body.wiz-open .wiznav{position:sticky;bottom:0;background:var(--bg-blur);padding:10px 0 env(safe-area-inset-bottom,0)}
 @supports (backdrop-filter:blur(1px)){body.wiz-open .wiznav{backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}}
@@ -1143,6 +1160,8 @@ header b{font-size:23px}
 </div>
 <div id="benvenutoLink" class="card" hidden></div>
 <div id="demoEsempio" class="card" hidden></div>
+<div id="firstPlanBanner" class="card" hidden></div>
+<div id="setupNudge" class="card" hidden></div>
 <div id="backupNudge" class="card" hidden></div>
 <div id="installBanner" class="card" hidden></div>
 <div id="shareNudge" class="card" hidden></div>
@@ -2939,8 +2958,8 @@ function cards(P){
   }
   out.push(pc);
 
-  const sc={k:"s",lab:"Imposta la sveglia",val:hhmm(end),
-    small:"sonno consigliato dalle "+hhmm(s.onset)+" · "+dur(s.dur),
+  const sc={k:"s",lab:"Quando dormire",val:hhmm(s.onset)+" → "+hhmm(end),
+    small:"sveglia alle "+hhmm(end)+" · "+dur(s.dur),
     rows:[]};
   if(s.kind==="diurno"){
     sc.sub="A letto appena rientri, senza fermate. Di giorno si dorme meno, è normale: le ore che mancano le recuperi col pisolino del pomeriggio.";
@@ -3150,10 +3169,10 @@ function cards(P){
   // quando sei davvero libero): resta comunque un momento in cui sei
   // sveglio e attivo, non dentro il sonno — quello lo copre già "Dormi". ──
   if(!b.rest && isFinite(cbt) && cbt>=b.start-state.cTo && cbt<=b.end+state.cFrom){
-    out.push({k:"cbt", lab:"Sonnolenza massima",
-      val: hhmm(cbt-20)+"–"+hhmm(cbt+20),
-      small: "il punto più basso del ritmo biologico",
-      why: "Il corpo ha un minimo naturale di attivazione, indipendente da quanto hai dormito: è il punto in cui la temperatura corporea profonda tocca il fondo. Cadere in turno proprio in quella finestra pesa più delle altre ore, a parità di riposo.",
+    out.push({k:"cbt", lab:"Finestra di sonnolenza prevista",
+      val: hhmm(cbt-60)+"–"+hhmm(cbt+60),
+      small: "minimo biologico (stima, non misurazione)",
+      why: "Il corpo ha un minimo naturale di attivazione, indipendente da quanto hai dormito: è il punto in cui la temperatura corporea tocca il fondo. Cadere in turno in quella finestra richiede massima cautela alla guida e nei compiti critici. È una stima circadiana, non una misurazione della tua vigilanza reale.",
       at: cbt});
   }
 
@@ -3558,6 +3577,8 @@ function render(){
   renderOra(P);
   renderBenvenutoLink();
   renderDemoEsempio();
+  renderFirstPlanBanner();
+  renderSetupNudge();
   renderBackupNudge();
   renderInstallBanner();
   renderShareNudge();
@@ -3687,7 +3708,7 @@ function diaryReminder(P, CARDS){
     // dati diversi (questo è permanente, legato a questa notte; l'altro
     // scade in due ore e parla di adesso), solo vestiti allo stesso modo.
     x+='<div style="border-top:1px solid var(--line);margin:14px 0 8px;padding-top:12px;'+
-       'font-size:12.5px;font-weight:600;color:var(--faint)">Come ti senti, dopo questo sonno? '+
+       'font-size:12.5px;font-weight:600;color:var(--faint)">Com\'è andata oggi? '+
        '<span style="font-weight:400">(facoltativo)</span></div>'+
        '<div class="ora-kss" style="margin-top:0">'+
        // Un colore per punto della scala (rosso→verde, lo stesso vocabolario
@@ -3783,7 +3804,12 @@ const ICON={
   alarm: ICO('<circle cx="12" cy="13" r="7"/><path d="M12 10v3l2 1.5"/><path d="M5 3L2.5 5.5M19 3l2.5 2.5"/>'),
   plate: ICO('<path d="M5 3v5a1.5 1.5 0 0 0 1.5 1.5h3a1.5 1.5 0 0 0 1.5-1.5V3"/><path d="M8 3v6.5"/><path d="M8 9.5v11.5"/><path d="M17 3c-1.4 1.6-2 3.4-2 5.5 0 1.6.7 2.6 2 3V21"/>'),
   duo:   ICO('<circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M16 5.5a3 3 0 0 1 0 5"/><path d="M18 14.5a6 6 0 0 1 3 5.5"/>'),
-  eye:   ICO('<circle cx="12" cy="12" r="3"/><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/>')
+  eye:   ICO('<circle cx="12" cy="12" r="3"/><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/>'),
+  cycle: ICO('<path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>'),
+  calendar: ICO('<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>'),
+  sparkles: ICO('<path d="M12 3l1.9 4.8 4.8 1.9-4.8 1.9L12 16.4l-1.9-4.8L5.3 9.7l4.8-1.9z"/>'),
+  check: ICO('<path d="M20 6L9 17l-5-5"/>'),
+  zap:   ICO('<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>')
 };
 
 // Blocco unico "Ora": un solo eroe in cima che, a seconda del momento, mostra IL
@@ -3807,10 +3833,6 @@ function votoOraRecente(){
 function renderOra(Pfocus){
   const el=$("#ora"); if(!el) return;
   if(state.vista==="dettaglio"){ el.innerHTML=""; return; }
-  // "Ora" parla del momento presente: non cambia se sfogli i giorni.
-  // Va quindi calcolato SEMPRE sul giorno vero, non su quello a fuoco —
-  // ma "vero" tiene conto anche di un turno o un sonno di ieri sera
-  // ancora in corso, non solo della mezzanotte del calendario.
   let P=Pfocus;
   const vero = giornoVero();
   const sfoglioAltrove = dnum(state.focus)!==dnum(vero);
@@ -3825,26 +3847,68 @@ function renderOra(Pfocus){
   const isRisk = action.next && action.next.urgency === "warning";
   const isSleep = action.next && action.next.urgency === "sleep";
 
-  let badgeText = "ADESSO";
-  if(!P.b.rest && nowMins >= P.b.start && nowMins < P.b.end) badgeText = "ADESSO · IN TURNO";
-  else if(!P.b.rest && (P.night||P.lateStart) && nowMins >= P.b.end && nowMins < P.s.onset) badgeText = "ADESSO · RIENTRO";
-  else if(nowMins >= P.s.onset && nowMins < P.end) badgeText = "ADESSO · SONNO";
+  const h = now.getHours();
+  const saluto = h >= 5 && h < 12 ? "Buongiorno" : (h >= 12 && h < 18 ? "Buon pomeriggio" : "Buonasera");
+  const nomeUtente = state.pName ? (", " + esc(state.pName)) : "";
+
+  let turnoTitolo = "Giorno di riposo";
+  if(!P.b.rest){
+    turnoTitolo = (P.b.name || "Turno") + " · " + hhmm(P.b.start) + " → " + hhmm(P.b.end);
+  }
+
+  const oraIc = isRisk ? ICON.warn : isSleep ? ICON.moon : (action.next && action.next.type === "coffee") ? ICON.coffee : ICON.eye;
+  const nextIco = (action.next && action.next.type === "coffee") ? ICON.coffee : isSleep ? ICON.moon : isRisk ? ICON.warn : ICON.eye;
+
+  // Timeline essenziale
+  const timeline = [];
+  if(P.cut && nowMins < P.cut){
+    timeline.push('<div class="ora-timeline-row"><span class="tl-ic">' + ICON.coffee + '</span><span class="ora-timeline-time">' + hhmm(P.cut) + '</span><span>Ultimo caffè prima del sonno</span></div>');
+  }
+  if(P.night && P.cbt){
+    timeline.push('<div class="ora-timeline-row"><span class="tl-ic" style="color:var(--risk)">' + ICON.warn + '</span><span class="ora-timeline-time">' + hhmm(P.cbt - 60) + '–' + hhmm(P.cbt + 60) + '</span><span>Finestra di maggiore sonnolenza prevista</span></div>');
+  }
+  if(!P.b.rest && P.b.end){
+    timeline.push('<div class="ora-timeline-row"><span class="tl-ic">' + ICON.alarm + '</span><span class="ora-timeline-time">' + hhmm(P.b.end) + '</span><span>Fine turno</span></div>');
+  }
+  if(P.s && P.s.onset){
+    timeline.push('<div class="ora-timeline-row"><span class="tl-ic">' + ICON.moon + '</span><span class="ora-timeline-time">' + hhmm(P.s.onset) + '–' + hhmm(P.end) + '</span><span>Quando dormire (sonno principale)</span></div>');
+  }
+  if(P.naps && P.naps.length){
+    P.naps.forEach(n=>{
+      timeline.push('<div class="ora-timeline-row"><span class="tl-ic">' + ICON.bed + '</span><span class="ora-timeline-time">' + hhmm(n.a) + '–' + hhmm(n.b) + '</span><span>Pisolino consigliato</span></div>');
+    });
+  }
 
   el.innerHTML =
     '<div class="ora-card' + (isRisk ? ' risk' : isSleep ? ' sleep' : '') + '">' +
-      '<div class="ora-top-row">' +
-        '<span class="now-badge">' + badgeText + '</span>' +
-        '<span class="now-status-title">' + esc(action.status) + '</span>' +
-      '</div>' +
-      '<div class="ora-action-row">' +
-        (action.next && action.next.at ? '<div class="now-time-col"><div class="now-time-box">' + esc(action.next.at) + '</div><span class="now-time-sub">prossimo</span></div>' : '') +
-        '<div class="now-action-content">' +
-          '<b class="now-action-title">' + esc(action.next ? action.next.title : "Continua il turno") + '</b>' +
-          '<p class="now-action-desc">' + esc(action.next ? action.next.desc : "") + '</p>' +
+      '<div class="ora-h">' +
+        '<span class="ora-ic">' + oraIc + '</span>' +
+        '<div class="ora-tx">' +
+          '<span class="eyebrow">' + saluto + nomeUtente + ' · Cosa faccio adesso?</span>' +
+          '<b>' + esc(turnoTitolo) + '</b>' +
         '</div>' +
       '</div>' +
-      '<div class="ora-dis">Stima operativa basata sui tuoi orari di sonno e turno.</div>' +
-      (sfoglioAltrove ? '<div class="ora-dis" style="color:var(--blue);margin-top:4px">Stai sfogliando un giorno diverso: qui sopra vedi il momento presente.</div>' : '') +
+      '<div class="ora-sub">' +
+        (action.next ? (
+          '<div class="ora-prossimo">' +
+            '<span class="ora-tag">PROSSIMO APPUNTAMENTO</span>' +
+            '<div style="font-size:15px;font-weight:700;color:var(--ink);margin:1px 0 2px;display:flex;align-items:center;gap:6px">' +
+              '<span class="tl-ic">' + nextIco + '</span> ' + (action.next.at ? esc(action.next.at) + ' · ' : '') + esc(action.next.title) +
+            '</div>' +
+            '<p style="margin:0;font-size:13px;color:var(--dim);line-height:1.4">' + esc(action.next.desc) + '</p>' +
+          '</div>'
+        ) : '') +
+        (timeline.length ? (
+          '<div class="ora-timeline">' +
+            timeline.join("") +
+          '</div>'
+        ) : '') +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;gap:8px">' +
+          '<span class="ora-dis" style="margin:0">Stima basata sui tuoi orari, non una misura della vigilanza.</span>' +
+          '<a href="#formaGiorno" class="lnk" style="font-size:12.5px;white-space:nowrap" onclick="$(\'#formaGiorno\')&&$(\'#formaGiorno\').scrollIntoView({behavior:\'smooth\'});return false;">Vedi tutto il piano →</a>' +
+        '</div>' +
+        (sfoglioAltrove ? '<div class="ora-dis" style="color:var(--blue);margin-top:4px">Stai sfogliando un giorno diverso: qui sopra vedi il momento presente.</div>' : '') +
+      '</div>' +
     '</div>';
 }
 
@@ -3885,37 +3949,157 @@ if($("#benvenutoLink")) $("#benvenutoLink").addEventListener("click", e=>{
 // per la sessione corrente.
 let demoEsempioChiuso = false;
 let demoEsempioTracciato = false;
+let demoEsempioSubflow = "home";
+let firstPlanBannerChiuso = !!store.get("firstPlanBannerChiuso", false);
+
 function renderDemoEsempio(){
   const el=$("#demoEsempio"); if(!el) return;
-  if(!primaVolta || demoEsempioChiuso){ el.hidden=true; return; }
+  if(document.body && (document.body.classList.contains("wiz-open") || document.body.classList.contains("intro"))){ el.hidden=true; return; }
+  if(state.turniConfigurati || demoEsempioChiuso){ el.hidden=true; return; }
   el.hidden=false;
-  // Una volta sola per sessione, non a ogni render() (chiamato spesso):
-  // "sta vedendo l'esempio" è vero dal primo istante in cui il banner
-  // compare, non da ogni ridisegno successivo dello stesso banner.
   if(!demoEsempioTracciato){ demoEsempioTracciato=true; track("example_started"); }
   el.className = "card qh-card";
-  el.innerHTML =
-    '<div class="qh-title">NOTTURNISTI</div>'+
-    '<h2 class="qh-h">Dimmi quando lavori.</h2>'+
-    '<p class="qh-sub">Ti diciamo subito come organizzare sonno, pause e recupero attorno al tuo turno di oggi.</p>'+
-    '<div class="qh-grid">'+
-      '<button type="button" class="qh-btn" data-quick-pick="N"><span>🌙</span><b>Notte</b><small>21:00 → 07:00</small></button>'+
-      '<button type="button" class="qh-btn" data-quick-pick="M"><span>☀️</span><b>Mattino</b><small>07:00 → 14:00</small></button>'+
-      '<button type="button" class="qh-btn" data-quick-pick="P"><span>⛅</span><b>Pomeriggio</b><small>14:00 → 21:00</small></button>'+
-      '<button type="button" class="qh-btn" data-quick-pick="R"><span>✨</span><b>Riposo</b><small>Giorno libero</small></button>'+
-    '</div>'+
-    '<div class="qh-foot">'+
-      '<button type="button" class="lnk" id="doConfiguraEsempio" style="font-size:13px">Ho un ciclo turni a rotazione (es. M-P-N-R) →</button>'+
-      '<button type="button" id="chiudiDemoEsempio" class="lnk" style="color:var(--faint);font-size:12px;padding:6px">Chiudi</button>'+
-    '</div>';
+
+  if(demoEsempioSubflow === "home"){
+    el.innerHTML =
+      '<div class="qh-title">DAL TURNO AL PIANO</div>'+
+      '<h2 class="qh-h">Che turni fai?</h2>'+
+      '<p class="qh-sub">Dicci quando lavori. Notturnisti organizza sonno, pause, caffeina e recupero intorno ai tuoi orari.</p>'+
+      '<div style="font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin:12px 0 8px">Pianifica subito per oggi:</div>'+
+      '<div class="qh-grid">'+
+        '<button type="button" class="qh-btn" data-quick-pick="N"><span class="qh-ic">' + ICON.moon + '</span><b>Notte</b><small>21:00 → 07:00</small></button>'+
+        '<button type="button" class="qh-btn" data-quick-pick="M"><span class="qh-ic">' + ICON.sun + '</span><b>Mattino</b><small>07:00 → 14:00</small></button>'+
+        '<button type="button" class="qh-btn" data-quick-pick="P"><span class="qh-ic">' + ICON.dim + '</span><b>Pomeriggio</b><small>14:00 → 21:00</small></button>'+
+        '<button type="button" class="qh-btn" data-quick-pick="R"><span class="qh-ic">' + ICON.sparkles + '</span><b>Riposo</b><small>Giorno libero</small></button>'+
+      '</div>'+
+      '<div style="font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin:14px 0 8px">Oppure scegli il tuo schema:</div>'+
+      '<div class="qh-flow-options">'+
+        '<button type="button" class="qh-opt-btn" data-subflow="rotazione">'+
+          '<span class="qh-opt-ic">' + ICON.cycle + '</span>'+
+          '<div class="qh-opt-tx">'+
+            '<b>Ciclo a rotazione regolare</b>'+
+            '<small>I turni si ripetono in sequenza (es. M-P-N-S-R, 2M-2P-2N-2R, 12h)</small>'+
+          '</div>'+
+          '<span class="qh-opt-arrow">→</span>'+
+        '</button>'+
+        '<button type="button" class="qh-opt-btn" data-subflow="variabile">'+
+          '<span class="qh-opt-ic">' + ICON.calendar + '</span>'+
+          '<div class="qh-opt-tx">'+
+            '<b>Turni variabili ogni mese</b>'+
+            '<small>Senza ciclo fisso: orari stabiliti da calendario mensile o a chiamata</small>'+
+          '</div>'+
+          '<span class="qh-opt-arrow">→</span>'+
+        '</button>'+
+        '<button type="button" class="qh-opt-btn" data-subflow="fisso">'+
+          '<span class="qh-opt-ic">' + ICON.moon + '</span>'+
+          '<div class="qh-opt-tx">'+
+            '<b>Turno fisso</b>'+
+            '<small>Lavori sempre nello stesso orario (es. sempre notte o sempre mattina)</small>'+
+          '</div>'+
+          '<span class="qh-opt-arrow">→</span>'+
+        '</button>'+
+      '</div>'+
+      '<div class="qh-foot" style="margin-top:14px">'+
+        '<button type="button" class="lnk" id="doConfiguraEsempio" style="font-size:13px">Configurazione guidata completa →</button>'+
+        '<button type="button" id="chiudiDemoEsempio" class="lnk" style="color:var(--faint);font-size:12px;padding:6px">Nascondi per ora</button>'+
+      '</div>';
+  } else if(demoEsempioSubflow === "rotazione"){
+    el.innerHTML =
+      '<button type="button" class="lnk" data-subflow="home" style="margin-bottom:10px;display:inline-flex;align-items:center;gap:6px;font-size:13px">← Torna alla scelta turni</button>'+
+      '<div class="qh-title">ROTAZIONE REGOLARE</div>'+
+      '<h2 class="qh-h">Qual è il tuo schema?</h2>'+
+      '<p class="qh-sub">Scegli la tua sequenza abituale, o componi un ciclo con lettere personalizzate:</p>'+
+      '<div class="qh-flow-options">'+
+        '<button type="button" class="qh-opt-btn" data-set-rot="sanita">'+
+          '<span class="qh-opt-ic">' + ICON.cycle + '</span>'+
+          '<div class="qh-opt-tx">'+
+            '<b>Sanità: In quinta (5 giorni)</b>'+
+            '<small>Mattina · Pomeriggio · Notte · Smonto · Riposo</small>'+
+          '</div>'+
+          '<span class="qh-opt-arrow">Scegli</span>'+
+        '</button>'+
+        '<button type="button" class="qh-opt-btn" data-set-rot="222">'+
+          '<span class="qh-opt-ic">' + ICON.cycle + '</span>'+
+          '<div class="qh-opt-tx">'+
+            '<b>Industria: 2M - 2P - 2N - 2R (8 giorni)</b>'+
+            '<small>2 Mattine · 2 Pomeriggi · 2 Notti · 2 Riposi</small>'+
+          '</div>'+
+          '<span class="qh-opt-arrow">Scegli</span>'+
+        '</button>'+
+        '<button type="button" class="qh-opt-btn" data-set-rot="12h">'+
+          '<span class="qh-opt-ic">' + ICON.cycle + '</span>'+
+          '<div class="qh-opt-tx">'+
+            '<b>Dodici ore (D · N · R · R)</b>'+
+            '<small>Giorno 07:00→19:00 · Notte 19:00→07:00 · Due riposi</small>'+
+          '</div>'+
+          '<span class="qh-opt-arrow">Scegli</span>'+
+        '</button>'+
+      '</div>'+
+      '<div style="margin-top:12px">'+
+        '<button type="button" class="btn g" id="doCustomRot" style="width:100%;font-size:13.5px">Componi un altro ciclo (lettere personalizzate) →</button>'+
+      '</div>';
+  } else if(demoEsempioSubflow === "variabile"){
+    el.innerHTML =
+      '<button type="button" class="lnk" data-subflow="home" style="margin-bottom:10px;display:inline-flex;align-items:center;gap:6px;font-size:13px">← Torna alla scelta turni</button>'+
+      '<div class="qh-title">TURNI VARIABILI</div>'+
+      '<h2 class="qh-h">Che turno fai oggi?</h2>'+
+      '<p class="qh-sub">Non hai una rotazione fissa. Iniziamo dal turno di oggi, poi potrai segnare i prossimi giorni dal calendario quando ricevi il tabellone.</p>'+
+      '<div class="qh-grid">'+
+        '<button type="button" class="qh-btn" data-set-var="N"><span class="qh-ic">' + ICON.moon + '</span><b>Notte</b><small>21:00 → 07:00</small></button>'+
+        '<button type="button" class="qh-btn" data-set-var="M"><span class="qh-ic">' + ICON.sun + '</span><b>Mattino</b><small>07:00 → 14:00</small></button>'+
+        '<button type="button" class="qh-btn" data-set-var="P"><span class="qh-ic">' + ICON.dim + '</span><b>Pomeriggio</b><small>14:00 → 21:00</small></button>'+
+        '<button type="button" class="qh-btn" data-set-var="R"><span class="qh-ic">' + ICON.sparkles + '</span><b>Riposo</b><small>Giorno libero</small></button>'+
+      '</div>';
+  } else if(demoEsempioSubflow === "fisso"){
+    el.innerHTML =
+      '<button type="button" class="lnk" data-subflow="home" style="margin-bottom:10px;display:inline-flex;align-items:center;gap:6px;font-size:13px">← Torna alla scelta turni</button>'+
+      '<div class="qh-title">TURNO FISSO</div>'+
+      '<h2 class="qh-h">Qual è il tuo orario abituale?</h2>'+
+      '<p class="qh-sub">Lavori sempre nella stessa fascia oraria (5 giorni a settimana e 2 riposi). Scegli il tuo turno:</p>'+
+      '<div class="qh-flow-options">'+
+        '<button type="button" class="qh-opt-btn" data-set-fisso="N">'+
+          '<span class="qh-opt-ic">' + ICON.moon + '</span>'+
+          '<div class="qh-opt-tx">'+
+            '<b>Notte fissa (es. 22:00 → 06:00)</b>'+
+            '<small>5 notti a settimana · Protezione sonno diurno e ancoraggio nei riposi</small>'+
+          '</div>'+
+          '<span class="qh-opt-arrow">Scegli</span>'+
+        '</button>'+
+        '<button type="button" class="qh-opt-btn" data-set-fisso="M">'+
+          '<span class="qh-opt-ic">' + ICON.sun + '</span>'+
+          '<div class="qh-opt-tx">'+
+            '<b>Mattino fisso (es. 06:00 → 14:00)</b>'+
+            '<small>5 mattine a settimana · Sveglia presto e orari sonno regolari</small>'+
+          '</div>'+
+          '<span class="qh-opt-arrow">Scegli</span>'+
+        '</button>'+
+        '<button type="button" class="qh-opt-btn" data-set-fisso="P">'+
+          '<span class="qh-opt-ic">' + ICON.dim + '</span>'+
+          '<div class="qh-opt-tx">'+
+            '<b>Pomeriggio fisso (es. 14:00 → 22:00)</b>'+
+            '<small>5 pomeriggi a settimana · Ritmo serale stabile</small>'+
+          '</div>'+
+          '<span class="qh-opt-arrow">Scegli</span>'+
+        '</button>'+
+      '</div>';
+  }
 }
+
 if($("#demoEsempio")) $("#demoEsempio").addEventListener("click", e=>{
-  const b=e.target.closest("[data-quick-pick]");
-  if(b){
-    const k=b.dataset.quickPick;
-    state.ecc[iso(new Date())]=k;
-    demoEsempioChiuso=true;
-    primaVolta=false;
+  const subBtn = e.target.closest("[data-subflow]");
+  if(subBtn){
+    demoEsempioSubflow = subBtn.dataset.subflow;
+    renderDemoEsempio();
+    return;
+  }
+  const qp = e.target.closest("[data-quick-pick]");
+  if(qp){
+    const k = qp.dataset.quickPick;
+    state.ecc[iso(new Date())] = k;
+    state.turniConfigurati = true;
+    store.set("turniConfigurati", true);
+    demoEsempioChiuso = true;
+    primaVolta = false;
     salva();
     haptic(15);
     try{ if(window.NTAnalytics) window.NTAnalytics.track("plan_generated", {pattern_type: k}); }catch(err){}
@@ -3923,8 +4107,163 @@ if($("#demoEsempio")) $("#demoEsempio").addEventListener("click", e=>{
     render();
     return;
   }
-  if(e.target.closest("#chiudiDemoEsempio")){ demoEsempioChiuso=true; render(); return; }
-  if(e.target.closest("#doConfiguraEsempio")){ demoEsempioChiuso=true; track("example_completed"); render(); apriIntro(true); wizShow(1); }
+  const rotBtn = e.target.closest("[data-set-rot]");
+  if(rotBtn){
+    const tipo = rotBtn.dataset.setRot;
+    if(tipo === "sanita"){
+      state.pattern = "MPNSR";
+      state.shifts = {M:{n:"Mattino",s:420,e:840},P:{n:"Pomeriggio",s:840,e:1260},N:{n:"Notte",s:1260,e:1860},S:{rest:true,n:"Smonto"},R:{rest:true,n:"Riposo"}};
+    } else if(tipo === "222"){
+      state.pattern = "MMPPNNRR";
+      state.shifts = {M:{n:"Mattino",s:360,e:840},P:{n:"Pomeriggio",s:840,e:1320},N:{n:"Notte",s:1320,e:1800},R:{rest:true,n:"Riposo"}};
+    } else if(tipo === "12h"){
+      state.pattern = "DDNNRRRR";
+      state.shifts = {D:{n:"Giorno 12h",s:420,e:1140},N:{n:"Notte 12h",s:1140,e:1860},R:{rest:true,n:"Riposo"}};
+    }
+    state.repeat = true;
+    const d = new Date(); d.setDate(d.getDate() - ((d.getDay()+6)%7)); state.anchor = iso(d);
+    state.turniConfigurati = true;
+    store.set("turniConfigurati", true);
+    demoEsempioChiuso = true;
+    primaVolta = false;
+    renderShifts();
+    salva();
+    haptic(15);
+    try{ if(window.NTAnalytics) window.NTAnalytics.track("plan_generated", {pattern_type: state.pattern}); }catch(err){}
+    toast("Ciclo impostato! Ecco il tuo piano");
+    render();
+    return;
+  }
+  const varBtn = e.target.closest("[data-set-var]");
+  if(varBtn){
+    const k = varBtn.dataset.setVar;
+    state.repeat = false;
+    state.ecc[iso(new Date())] = k;
+    state.turniConfigurati = true;
+    store.set("turniConfigurati", true);
+    demoEsempioChiuso = true;
+    primaVolta = false;
+    salva();
+    haptic(15);
+    try{ if(window.NTAnalytics) window.NTAnalytics.track("plan_generated", {pattern_type: "variabile"}); }catch(err){}
+    toast("Turno impostato! Ecco il tuo piano");
+    render();
+    return;
+  }
+  const fisBtn = e.target.closest("[data-set-fisso]");
+  if(fisBtn){
+    const k = fisBtn.dataset.setFisso;
+    if(k === "N"){
+      state.pattern = "NNNNNRR";
+      state.shifts.N = state.shifts.N || {n:"Notte", s:1320, e:1800};
+    } else if(k === "M"){
+      state.pattern = "MMMMMRR";
+      state.shifts.M = state.shifts.M || {n:"Mattino", s:360, e:840};
+    } else if(k === "P"){
+      state.pattern = "PPPPPRR";
+      state.shifts.P = state.shifts.P || {n:"Pomeriggio", s:840, e:1320};
+    }
+    state.repeat = true;
+    const d = new Date(); d.setDate(d.getDate() - ((d.getDay()+6)%7)); state.anchor = iso(d);
+    state.turniConfigurati = true;
+    store.set("turniConfigurati", true);
+    demoEsempioChiuso = true;
+    primaVolta = false;
+    renderShifts();
+    salva();
+    haptic(15);
+    try{ if(window.NTAnalytics) window.NTAnalytics.track("plan_generated", {pattern_type: "fisso_"+k}); }catch(err){}
+    toast("Turno fisso impostato! Ecco il tuo piano");
+    render();
+    return;
+  }
+  if(e.target.closest("#doCustomRot")){
+    demoEsempioChiuso = true;
+    render();
+    apriIntro(true);
+    wizShow(1);
+    return;
+  }
+  if(e.target.closest("#chiudiDemoEsempio")){
+    demoEsempioChiuso = true;
+    render();
+    return;
+  }
+  if(e.target.closest("#doConfiguraEsempio")){
+    demoEsempioChiuso = true;
+    track("example_completed");
+    render();
+    apriIntro(true);
+    wizShow(1);
+    return;
+  }
+});
+
+function firstPlanBannerVisibile(){
+  if(document.body && (document.body.classList.contains("wiz-open") || document.body.classList.contains("intro"))) return false;
+  const mostraBenvenuto = primaVoltaDaLink && !benvenutoLinkChiuso;
+  return !!(state.turniConfigurati && !firstPlanBannerChiuso && !mostraBenvenuto);
+}
+function renderFirstPlanBanner(){
+  const el=$("#firstPlanBanner"); if(!el) return;
+  if(!firstPlanBannerVisibile()){ el.hidden=true; return; }
+  el.hidden=false;
+  el.className = "card";
+  el.style.cssText = "background:var(--blue-soft);border:1px solid var(--blue-lt);border-radius:18px;padding:16px;margin:12px 0 16px;box-shadow:0 4px 18px rgba(45,90,140,0.12)";
+  el.innerHTML =
+    '<div style="display:flex;align-items:flex-start;gap:12px">'+
+      '<span class="ora-ic" style="flex:none;margin-top:2px;background:var(--blue);color:var(--su-blu);width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center">' + ICON.check + '</span>'+
+      '<div style="flex:1;min-width:0">'+
+        '<b style="display:block;font-size:15px;color:var(--ink)">Il tuo primo piano è pronto.</b>'+
+        '<p style="margin:4px 0 12px;font-size:13px;color:var(--dim);line-height:1.4">'+
+          'Calcolato con orari standard per il tuo turno. Vuoi renderlo su misura indicando tempi di viaggio e abitudini di sonno?'+
+        '</p>'+
+        '<div style="display:flex;gap:8px;flex-wrap:wrap">'+
+          '<button type="button" class="btn" id="doPersonalizzaPrimoPiano" style="min-height:36px;font-size:13px;padding:6px 14px">Personalizza il mio piano →</button>'+
+          '<button type="button" class="btn g" id="doChiudiPrimoPiano" style="min-height:36px;font-size:13px;padding:6px 14px">Va bene così</button>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+}
+if($("#firstPlanBanner")) $("#firstPlanBanner").addEventListener("click", e=>{
+  if(e.target.closest("#doChiudiPrimoPiano")){
+    firstPlanBannerChiuso = true;
+    store.set("firstPlanBannerChiuso", true);
+    render();
+    return;
+  }
+  if(e.target.closest("#doPersonalizzaPrimoPiano")){
+    firstPlanBannerChiuso = true;
+    store.set("firstPlanBannerChiuso", true);
+    render();
+    apriOpzioni();
+    return;
+  }
+});
+
+function renderSetupNudge(){
+  const el=$("#setupNudge"); if(!el) return;
+  if(document.body && (document.body.classList.contains("wiz-open") || document.body.classList.contains("intro"))){ el.hidden=true; return; }
+  const mostraBenvenuto = primaVoltaDaLink && !benvenutoLinkChiuso;
+  if(state.turniConfigurati || !demoEsempioChiuso || mostraBenvenuto){ el.hidden=true; return; }
+  el.hidden=false;
+  el.className = "card";
+  el.style.cssText = "border:1px solid var(--blue-lt);border-radius:14px;padding:12px 14px;margin:10px 0 14px;background:var(--s1)";
+  el.innerHTML =
+    '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">'+
+      '<div style="flex:1;min-width:180px">'+
+        '<b style="display:block;font-size:13.5px;color:var(--ink)">Stai vedendo un piano di prova</b>'+
+        '<p class="hint" style="margin:2px 0 0;font-size:12px">Configura i tuoi turni per avere consigli personalizzati su sonno e pause.</p>'+
+      '</div>'+
+      '<button class="btn" type="button" id="doApriConfiguraTurni" style="flex:none;min-height:34px;font-size:12.5px;padding:6px 14px">Imposta turni →</button>'+
+    '</div>';
+}
+if($("#setupNudge")) $("#setupNudge").addEventListener("click", e=>{
+  if(e.target.closest("#doApriConfiguraTurni")){
+    demoEsempioChiuso = false;
+    demoEsempioSubflow = "home";
+    render();
+  }
 });
 
 // Chi usa "Vedi il mio piano ora →" al passo 2 esce dal wizard SENZA passare
@@ -3984,32 +4323,34 @@ function installBannerVisibile(){
   const mostraBenvenuto = primaVoltaDaLink && !benvenutoLinkChiuso;
   const pronto = !!(state.pattern && Object.keys(state.shifts||{}).length);
   const ios = isIOSPerInstall();
-  const heroAttivo = (primaVolta && !demoEsempioChiuso);
-  return !(state.installBannerOff || giaInstallata() || mostraBenvenuto || backupNudgeVisibile() || !pronto || heroAttivo || !(installPromptEvento || ios));
+  const heroAttivo = (!state.turniConfigurati && !demoEsempioChiuso);
+  return !(state.installBannerOff || giaInstallata() || mostraBenvenuto || firstPlanBannerVisibile() || backupNudgeVisibile() || !pronto || heroAttivo || !(installPromptEvento || ios));
 }
 let installBannerTracciato=false;
 function renderInstallBanner(){
   const el=$("#installBanner"); if(!el) return;
   if(!installBannerVisibile()){ el.hidden=true; return; }
   const ios = isIOSPerInstall();
+  if(!installBannerTracciato){ installBannerTracciato=true; track("pwa_prompt_shown"); }
   el.hidden=false;
-  // Una volta sola per sessione: copre sia il caso Android (banner → prompt
-  // nativo del sistema) sia iOS (nessun prompt nativo esiste, solo
-  // istruzioni — qui è l'unico "gliel'abbiamo chiesto" misurabile per loro).
-  if(!installBannerTracciato){ installBannerTracciato=true; track("install_prompt_shown"); }
   el.innerHTML =
     '<button type="button" id="chiudiInstall" aria-label="Chiudi">×</button>'+
-    '<b>Installa Notturnisti</b>'+
+    '<b>Usa Notturnisti come app</b>'+
+    '<p class="hint" style="margin-top:6px">'+(ios
+      ? 'Aggiungila alla schermata Home dal menu Condividi di Safari: si apre a tutto schermo e ricorda sempre i tuoi turni.'
+      : 'Installala sulla schermata principale: si apre subito, funziona offline e non perdi mai i tuoi turni.')+'</p>'+
     (ios
-      ? '<p class="hint" style="margin-top:6px">Aggiungilo alla schermata Home: tocca <b>Condividi</b> (il riquadro con la freccia, in basso nel browser), poi <b>«Aggiungi a Home»</b>. Si apre come un\'app vera, anche offline.</p>'
-      : '<p class="hint" style="margin-top:6px">Aggiungilo alla schermata Home: si apre come un\'app vera, funziona anche offline.</p>'+
-        '<button class="btn g" type="button" id="doInstallOra">Installa →</button>');
+      ? '<div class="ios-hint" style="margin-top:10px;font-size:13px;color:var(--ink)">Tocca <span style="font-size:16px">⎋</span> in basso su Safari, poi <b>"Aggiungi a schermata Home"</b>.</div>'
+      : '<button class="btn g" type="button" id="doInstallApp">Aggiungi alla schermata Home →</button>');
 }
 if($("#installBanner")) $("#installBanner").addEventListener("click", e=>{
   if(e.target.closest("#chiudiInstall")){ state.installBannerOff=true; salva(); renderInstallBanner(); return; }
-  if(e.target.closest("#doInstallOra") && installPromptEvento){
+  if(e.target.closest("#doInstallApp") && installPromptEvento){
     installPromptEvento.prompt();
-    installPromptEvento.userChoice.finally(()=>{ installPromptEvento=null; renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderIcsExpireNudge(); renderClubBanner(); renderDonateNudge(); });
+    installPromptEvento.userChoice.then(r=>{
+      if(r.outcome==="accepted"){ track("pwa_installed"); state.installBannerOff=true; salva(); }
+      installPromptEvento=null; renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderIcsExpireNudge(); renderClubBanner(); renderDonateNudge();
+    });
   }
 });
 
@@ -4022,6 +4363,10 @@ if($("#installBanner")) $("#installBanner").addEventListener("click", e=>{
 // non se l'utente ha già almeno una persona in elenco — a quel punto lo
 // sta già facendo.
 function shareNudgeVisibile(){
+  if(document.body && (document.body.classList.contains("wiz-open") || document.body.classList.contains("intro"))) return false;
+  const ob=$("#onboard"); if(ob && !ob.hidden) return false;
+  if(!state.turniConfigurati) return false;
+  if(firstPlanBannerVisibile()) return false;
   const mostraBenvenuto = primaVoltaDaLink && !benvenutoLinkChiuso;
   const pronto = !!(state.pattern && Object.keys(state.shifts||{}).length);
   return !(state.shareNudgeOff || mostraBenvenuto || backupNudgeVisibile() || installBannerVisibile() || !pronto || tuttePersone().length);
@@ -4032,9 +4377,9 @@ function renderShareNudge(){
   el.hidden=false;
   el.innerHTML =
     '<button type="button" id="chiudiShareNudge" aria-label="Chiudi">×</button>'+
-    '<b>Lavori con qualcuno che fa turni come te?</b>'+
-    '<p class="hint" style="margin-top:6px">Condividi il tuo ciclo: saprete subito quando siete liberi insieme, senza confrontare gli orari a voce ogni volta.</p>'+
-    '<button class="btn g" type="button" id="doShareNudge">Condividi il tuo ciclo →</button>';
+    '<b>Condividi il tuo ciclo</b>'+
+    '<p class="hint" style="margin-top:6px">Hai un collega con i tuoi stessi turni? Mandagli il tuo ciclo: potrà importarlo direttamente in Notturnisti.</p>'+
+    '<button class="btn g" type="button" id="doShareNudge">Condividi il mio ciclo →</button>';
 }
 if($("#shareNudge")) $("#shareNudge").addEventListener("click", e=>{
   if(e.target.closest("#chiudiShareNudge")){ state.shareNudgeOff=true; salva(); renderShareNudge(); return; }
@@ -4117,8 +4462,8 @@ if($("#icsExpireNudge")) $("#icsExpireNudge").addEventListener("click", e=>{
 function clubBannerVisibile(){
   const mostraBenvenuto = primaVoltaDaLink && !benvenutoLinkChiuso;
   const pronto = !!(state.pattern && Object.keys(state.shifts||{}).length);
-  const heroAttivo = (primaVolta && !demoEsempioChiuso);
-  return !(state.clubBannerOff || mostraBenvenuto || backupNudgeVisibile() || installBannerVisibile() || shareNudgeVisibile() || icsNudgeVisibile() || icsExpireNudgeVisibile() || !pronto || heroAttivo);
+  const heroAttivo = (!state.turniConfigurati && !demoEsempioChiuso);
+  return !(state.clubBannerOff || firstPlanBannerVisibile() || mostraBenvenuto || backupNudgeVisibile() || installBannerVisibile() || shareNudgeVisibile() || icsNudgeVisibile() || icsExpireNudgeVisibile() || !pronto || heroAttivo);
 }
 function renderClubBanner(){
   const el=$("#clubBanner"); if(!el) return;
@@ -6358,7 +6703,11 @@ if(loaded) track("share_opened");
 // sono quei turni. Non serve il wizard intero — i turni sono già
 // configurati dal link — ma un orientamento minimo sì.
 const primaVoltaDaLink = loaded && !savedPre;
-let primaVolta=false;
+const turniConfiguratiSaved = store.get("turniConfigurati", null);
+const isConfigured = loaded ? true : (turniConfiguratiSaved !== null ? !!turniConfiguratiSaved : (savedPre ? !!savedPre.turniConfigurati : false));
+state.turniConfigurati = isConfigured;
+if(loaded && !turniConfiguratiSaved){ store.set("turniConfigurati", true); }
+let primaVolta = !isConfigured;
 if(!loaded){
   const saved=hashDiffers ? savedPre : store.get("state",null);
   if(saved){ Object.assign(state,saved);
@@ -6370,7 +6719,7 @@ if(!loaded){
       if(isFinite(w)) state.freeBed=hhmm15(w-(+saved.need||480));
     }
   }
-  else{ primaVolta=true; const d=new Date(); d.setDate(d.getDate()-((d.getDay()+6)%7)); state.anchor=iso(d); }
+  else{ const d=new Date(); d.setDate(d.getDate()-((d.getDay()+6)%7)); state.anchor=iso(d); }
 }
 // Le preferenze qui sotto non stanno mai nel link condiviso — quindi
 // fromHash() non le tocca mai. Il ramo sopra le carica solo quando NON
@@ -6577,16 +6926,22 @@ function categoriaPattern(){
   }catch(e){ return "sconosciuto"; }
 }
 if($("#doSetup")) $("#doSetup").onclick=()=>{
+  state.turniConfigurati = true;
+  store.set("turniConfigurati", true);
   track("onboarding_completed"); track("plan_generated",{pattern_type:categoriaPattern()});
   salva();
   toast("Configurazione completata!");
   chiudiIntro(WIZ.gotoOggi);
+  render();
 };
 if($("#doSkip")) $("#doSkip").onclick=()=>{ track("onboarding_abandoned",{step:WIZ.step}); chiudiIntro(false); };
 if($("#doVediSubito")) $("#doVediSubito").onclick=()=>{
+  state.turniConfigurati = true;
+  store.set("turniConfigurati", true);
   usciteRapide=true; toast("Il tuo piano è pronto");
   track("onboarding_completed"); track("plan_generated",{pattern_type:categoriaPattern()});
   chiudiIntro(true);
+  render();
 };
 if($("#doOpen")) $("#doOpen").onclick=()=>{
   // Il wizard a schermo pieno resta solo per il primo avvio — se qualche
@@ -6596,7 +6951,8 @@ if($("#doOpen")) $("#doOpen").onclick=()=>{
   apriOpzioni();
 };
 function salva(){
-  store.set("state",{pattern:state.pattern,anchor:state.anchor,shifts:state.shifts,
+  store.set("turniConfigurati", !!state.turniConfigurati);
+  store.set("state",{turniConfigurati:state.turniConfigurati,pattern:state.pattern,anchor:state.anchor,shifts:state.shifts,
     cTo:state.cTo,cFrom:state.cFrom,need:state.need,prep:state.prep,freeWake:state.freeWake,freeBed:state.freeBed,
     maxAdvance:state.maxAdvance,pPattern:state.pPattern,pAnchor:state.pAnchor,
     pShifts:state.pShifts,pWake:state.pWake,pBed:state.pBed,pName:state.pName,people:state.people,personaGlance:state.personaGlance,
