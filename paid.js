@@ -85,7 +85,7 @@
   function scAttiva() {
     var url = donateUrl();
     return '<h2 class="pf-h">Il calendario che si aggiorna da solo</h2>' +
-      '<p class="pf-p">Gratis, per chiunque. Turni, sonno, ultimo caffè — anche quello di coppia se lo usi con qualcuno — scritti da soli nel calendario del telefono, aggiornati ogni volta che cambi qualcosa qui. Lo attivi una volta, poi non ci pensi più.</p>' +
+      '<p class="pf-p">Gratis, per chiunque. Turni, sonno, ultimo caffè — anche quello di coppia — scritti da soli nel calendario del telefono, aggiornati ogni volta che cambi qualcosa qui. I tuoi orari sempre pronti in agenda, senza aprire l\'app.</p>' +
       '<button class="pf-btn" id="pf-activate" type="button">Attiva il calendario →</button>' +
       '<p class="pf-note" id="pf-activate-status" style="display:none"></p>' +
       (url ? '<p class="pf-note">L\'app è gratis e lo resta. Se vuoi <a href="' + url + '" target="_blank" rel="noopener" style="color:var(--blue)">offrire un caffè</a>, è benvenuto ma mai necessario.</p>' : '') +
@@ -244,19 +244,24 @@
   // conferma esterna: il server risponde direttamente con le credenziali.
   function attiva() {
     setStatus("Attivo il calendario…");
+    toast("Attivazione in corso…");
     api("POST", "/account", { cfg: paramsObj() }).then(function (r) {
       if (!r.ok || !r.data || !r.data.id) {
         // Il messaggio generico nascondeva la causa vera (config non valida,
         // limite di richieste, errore server) — mostrarla aiuta a capire se
         // ha senso riprovare subito o se manca prima un piano configurato.
         var causa = (r.data && r.data.error) ? r.data.error : ("errore " + (r.status || "?"));
+        open("attiva");
         setStatus("Non riesco ad attivare il calendario (" + causa + ") — riprova."); return;
       }
       setSub({ id: r.data.id, writeKey: r.data.writeKey, feedUrl: r.data.feedUrl });
       setStatus(""); screen = "account"; paint();
       try { if (window.render) window.render(); } catch (e) {}
       toast("Attivato — buon turno.");
-    }, function () { setStatus("Non riesco ad attivare il calendario (connessione) — riprova."); });
+    }, function () {
+      open("attiva");
+      setStatus("Non riesco ad attivare il calendario (connessione) — riprova.");
+    });
   }
 
   function toast(t) {
@@ -302,5 +307,5 @@
   } catch (e) {}
   if (document.readyState === "loading") addEventListener("DOMContentLoaded", launcher);
   else launcher();
-  window.NTPaid = { open: open, paid: paid };   // per test/uso esterno
+  window.NTPaid = { open: open, paid: paid, getSub: getSub, attiva: attiva };   // per test/uso esterno
 })();

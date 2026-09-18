@@ -770,12 +770,14 @@ body.tab-turni.vederci-aperta #doAndamenti{display:none}
    salvare/esportare → Opzioni, calendario di coppia → "Quando sono
    disponibile"). Barra a due tab (Oggi, Turni) + Opzioni dietro
    l'icona in header. */
-.piu-cal{background:var(--blue-soft);border:1px solid var(--blue-lt);border-radius:var(--r);padding:16px 17px;margin:0 0 16px}
-.piu-cal b{display:block;font-family:var(--serif);font-size:16px;margin-bottom:5px;color:var(--blue)}
-.piu-cal span{display:block;font-size:14px;color:var(--dim);line-height:1.5}
-.piu-line{margin-top:9px}
-.piu-line b{color:var(--ink)}
-.piu-price{display:block;margin-top:11px;font-weight:600;color:var(--ink)!important;font-size:14px!important}
+.cal-sync-card, .piu-cal{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;box-shadow:var(--shadow-card)}
+.switch{position:relative;display:inline-block;width:46px;height:26px;flex:none}
+.switch input{opacity:0;width:0;height:0}
+.switch .slider{position:absolute;cursor:pointer;inset:0;background:var(--s2);border:1.5px solid var(--line);border-radius:999px;transition:.2s cubic-bezier(0.2,0.8,0.4,1)}
+.switch .slider::before{position:absolute;content:"";height:18px;width:18px;left:3px;bottom:2.5px;background:#fff;border-radius:50%;transition:.2s cubic-bezier(0.2,0.8,0.4,1);box-shadow:0 2px 5px rgba(0,0,0,0.25)}
+.switch input:checked + .slider{background:var(--blue-fill);border-color:var(--blue-fill)}
+.switch input:checked + .slider::before{transform:translateX(18px)}
+#piuCal #pf-open{display:none}
 .tools{flex-direction:column;gap:10px}
 .tool{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;background:var(--s1);border:1px solid var(--line);
 border-radius:var(--r);padding:13px 15px;font:inherit;cursor:pointer;color:inherit;min-height:44px;
@@ -1126,7 +1128,18 @@ header b{font-size:23px}
       </label>
     </div>
     <div class="q" style="margin-top:14px">
-      <p class="hint">Non vuoi doverti ricordare di aprire l'app? <button class="lnk" type="button" id="doOpenCalendario" style="display:inline">Metti i turni nel calendario del telefono →</button></p>
+      <div style="background:var(--s1);border:1px solid var(--blue);border-radius:var(--r);padding:14px 16px;box-shadow:var(--shadow-btn)">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+          <span style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;background:var(--blue-soft);color:var(--blue)">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+          </span>
+          <b style="font-size:15px;color:var(--ink)">Metti i tuoi orari nel calendario del telefono</b>
+        </div>
+        <p class="hint" style="margin:0 0 10px;color:var(--dim);line-height:1.4">Trovi sonno, sveglie e ultimo caffè sincronizzati in automatico ogni giorno, senza dover aprire l'app.</p>
+        <button class="btn pri" type="button" id="doOpenCalendario" style="display:block;width:100%;text-align:center;font-weight:700">Sincronizza con il calendario →</button>
+      </div>
     </div>
     </div>
   </section>
@@ -1364,20 +1377,43 @@ header b{font-size:23px}
      Turni, qualunque sia la loro specificità (stesso bug di
      specificità già trovato e corretto altrove in questo file). -->
 <div id="cycShareBox" class="cycshare-btn" style="flex-direction:column;gap:8px;margin-top:var(--gap-sezione)">
-  <span class="eyebrow">Condividi</span>
+  <span class="eyebrow">Sincronizzazione & Condivisione</span>
+  <div class="cal-sync-card" id="turniCalSyncCard" style="background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;box-shadow:var(--shadow-card);margin-bottom:4px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+      <div style="display:flex;align-items:center;gap:12px;min-width:0">
+        <span class="tool-ic" style="background:var(--blue-soft);color:var(--blue);flex:none;width:38px;height:38px">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+        </span>
+        <div style="min-width:0">
+          <b style="display:block;font-size:15px;color:var(--ink);line-height:1.25">Sincronizza col calendario</b>
+          <span style="display:block;font-size:12.5px;color:var(--dim);margin-top:2px">I tuoi orari sempre sul telefono, senza aprire l'app</span>
+        </div>
+      </div>
+      <label class="switch" title="Attiva o disattiva sincronizzazione">
+        <input type="checkbox" id="cycCalToggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div id="cycCalDetails" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-size:13px;color:var(--dim)"></div>
+  </div>
+
   <div class="tools" style="margin:0">
     <button type="button" id="doShareWhatsApp" class="tool">
       <span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.41a8.204 8.204 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.19 8.19 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24m4.52 11.66c-.19.53-1.06 1.04-1.47 1.08-.38.04-.88.06-2.84-.73-2.34-.95-3.84-3.34-3.96-3.49-.11-.16-.96-1.27-.96-2.42 0-1.15.6-1.72.82-1.95.21-.23.46-.29.62-.29.15 0 .31 0 .44.01.14.01.33-.05.51.39.19.46.66 1.6.72 1.72.06.12.1.26.02.42-.08.16-.12.26-.24.4-.12.14-.26.31-.37.42-.12.12-.24.25-.1.5.14.24.62 1.03 1.34 1.67.92.82 1.7 1.08 1.94 1.2.24.12.39.1.53-.06.15-.17.62-.72.79-.97.16-.25.33-.21.55-.13.22.08 1.41.67 1.65.79.24.12.4.18.46.28.06.11.06.63-.13 1.16"/></svg></span>
       <span class="tool-tx"><b>Invia i miei turni su WhatsApp</b><span>Formatta i turni della settimana per colleghi o partner</span></span>
     </button>
-    <button type="button" id="doCycShare" class="tool">
-      <span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg></span>
-      <span class="tool-tx"><b>Condividi il tuo ciclo</b><span>Chi apre il link può confrontare i turni con i tuoi</span></span>
-    </button>
-    <button type="button" id="doCycQR" class="tool">
-      <span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM19 14h2v2h-2zM14 19h2v2h-2zM19 19h2v2h-2z"/></svg></span>
-      <span class="tool-tx"><b>Mostra il codice QR</b><span>Per chi ti sta davanti — stesso link di "Condividi il tuo ciclo"</span></span>
-    </button>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <button type="button" id="doCycShare" class="tool" style="margin:0;padding:12px;flex-direction:column;align-items:flex-start;gap:6px">
+        <span class="tool-ic" style="margin:0"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg></span>
+        <span class="tool-tx"><b>Condividi il ciclo</b><span style="font-size:12px">Link per confrontare i turni</span></span>
+      </button>
+      <button type="button" id="doCycQR" class="tool" style="margin:0;padding:12px;flex-direction:column;align-items:flex-start;gap:6px">
+        <span class="tool-ic" style="margin:0"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM19 14h2v2h-2zM14 19h2v2h-2zM19 19h2v2h-2z"/></svg></span>
+        <span class="tool-tx"><b>Mostra codice QR</b><span style="font-size:12px">Per chi ti sta davanti</span></span>
+      </button>
+    </div>
     <div class="ecc" id="qrBoxCyc" hidden><div id="qrHolderCyc" style="display:flex;justify-content:center;margin:14px 0"></div></div>
     <button type="button" id="doPrint" class="tool">
       <span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8V3h12v5"/><rect x="4" y="8" width="16" height="8" rx="1.5"/><path d="M8 13h8v7H8z"/></svg></span>
@@ -3584,7 +3620,7 @@ function render(){
   // (verificato su ogni chiamata a setTab() e ogni data-tab nel markup).
   const showStrip = (tab==="turni") || (!ess && tab!=="oggi"); // ciclo/dettaglio legacy
   const showDay = (tab==="oggi" && giornata) || (!ess && tab!=="turni");
-  if(showStrip){ renderStrip(P, f, S); renderAndamenti(); renderAndamentiPreview(); renderPartner(CARDS); renderPartnerPreview(); renderPiuCal(); }
+  if(showStrip){ renderStrip(P, f, S); renderAndamenti(); renderAndamentiPreview(); renderPartner(CARDS); renderPartnerPreview(); renderPiuCal(); renderCycCalSync(); }
   if(tab==="oggi") renderBand(P, CARDS);
   if(showDay){ renderCards(P, f, CARDS); }
   renderOpzSummaries();
@@ -3646,7 +3682,7 @@ function diaryReminder(P, CARDS){
       // Ora confronta la durata vera, la stessa cosa che decide "debt" qui
       // sopra: il testo e il comportamento non si contraddicono più.
       const dd = mins - P.s.dur;
-      cmp = Math.abs(dd)<=10 ? "in orario col piano" : (dd>0?"+"+hm(dd)+" sul piano":hm(dd)+" sul piano");
+      cmp = Math.abs(dd)<=10 ? "(in linea col piano)" : (dd>0 ? "(+" + hm(dd) + " rispetto al piano)" : "(–" + hm(dd) + " rispetto al piano)");
     } }
   // Il cerchio si chiude a schermo: se hai annotato meno sonno e oggi il piano
   // prescrive un recupero, dillo — così vedi che il TUO dato ha cambiato il piano.
@@ -3673,8 +3709,9 @@ function diaryReminder(P, CARDS){
     // deviazione detta due volte, in due unità diverse. Il bottone
     // "Modifica" ora è sempre qui: gli orari esatti si vedono aprendo il
     // modulo di modifica (che li precompila già), non anche prima di aprirlo.
-    x+='<div class="drem-done"><span class="drem-ok">✓</span> Hai dormito <b>'+durTxt+'</b>'+
-       (cmp?' · '+cmp:'')+' <button class="lnk drem-edit" data-open="1" aria-label="Modifica gli orari del sonno">Modifica</button></div>'+
+    x+='<div class="drem-done"><span class="drem-ok">✓</span> Hai dormito <b>'+durTxt+'</b> '+
+       (cmp?'<span class="drem-cmp" style="color:var(--dim);font-size:13px;font-weight:500">'+cmp+'</span> ':'')+
+       '<button class="lnk drem-edit" data-open="1" aria-label="Modifica gli orari del sonno">Modifica</button></div>'+
        (recupero?'<div class="drem-rec">Hai dormito meno del previsto: il piano ha aggiunto un pisolino di recupero qui sotto.</div>':'');
     if(diverso && sleepEditing)
       x+='<div class="diary" style="gap:10px;margin-top:8px">'+
@@ -5577,28 +5614,144 @@ function renderPartner(CARDS){
   el.innerHTML=h;
 }
 
-// Più: il riquadro del calendario automatico. Dimostra invece di spiegare, e
-// usa gli orari VERI dell'utente invece di un esempio generico.
+// Sezione "Quando sono disponibile": modulo Calendario di coppia.
+// Meno testuale, toggle diretto "Attiva sincronizzazione" per massimizzare l'adozione.
 function renderPiuCal(){
   const el=$("#piuCalTx"); if(!el) return;
-  let dom=null;
-  try{ const t=new Date(); t.setDate(t.getDate()+1); dom=NT_planSafe(t); }catch(e){}
-  const esempio = dom
-    ? '<b>Dormi '+hhmm(dom.s.onset)+' → '+hhmm(dom.end)+'</b> e <b>Ultimo caffè entro le '+hhmm(dom.cut)+'</b>'
-    : '<b>Dormi</b> e <b>Ultimo caffè</b> con i tuoi orari';
-  // Se c'è già qualcuno in elenco, dirlo per nome è più concreto di una
-  // descrizione generica — la stessa idea dell'esempio con gli orari veri
-  // sopra, applicata anche qui.
-  const primaPersona = tuttePersone()[0];
-  const rigaCoppia = primaPersona && primaPersona.name
-    ? '<b>Calendario di coppia</b> — gli stessi riposi con '+esc(primaPersona.name)+' che vedi già gratis in Turni, ma nel calendario del telefono di entrambi, non solo nell\'app.'
-    : '<b>Calendario di coppia</b> — gli stessi riposi in comune che vedi già gratis in Turni, ma nel calendario del telefono di entrambi, non solo nell\'app.';
+  const isPaid = !!(window.NTPaid && window.NTPaid.paid());
+  const sub = isPaid ? window.NTPaid.getSub() : null;
+  const persona = tuttePersone()[0];
+  const pName = persona && persona.name ? persona.name : "partner";
+  const hasPartner = !!(persona || (typeof state!=="undefined" && state.pPattern));
+
+  const coupleUrl = (sub && sub.feedUrl ? sub.feedUrl : "").replace("/feed/", "/couple/");
+  const https = coupleUrl.replace(/^webcal/, "https");
+
+  let detailsHtml = "";
+  if(!hasPartner){
+    detailsHtml =
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">' +
+        '<span>Aggiungi prima una persona qui sopra per sincronizzare i riposi in comune.</span>' +
+        '<button type="button" class="btn b" id="coupleAddPartnerBtn" style="padding:7px 12px;font-size:13px;white-space:nowrap">Aggiungi persona</button>' +
+      '</div>';
+  } else if(!isPaid){
+    detailsHtml =
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">' +
+        '<span>I riposi in comune con <b>'+esc(pName)+'</b> sempre in agenda sul telefono di entrambi, aggiornati da soli.</span>' +
+        '<button type="button" class="btn b" id="coupleCalActivateBtn" style="padding:7px 12px;font-size:13px;white-space:nowrap">Attiva sincronizzazione</button>' +
+      '</div>';
+  } else {
+    detailsHtml =
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px">' +
+        '<span style="color:#2ecc71;font-weight:600;display:flex;align-items:center;gap:6px">' +
+          '<span style="width:7px;height:7px;border-radius:50%;background:#2ecc71;display:inline-block"></span>' +
+          'Sincronizzazione attiva con '+esc(pName) +
+        '</span>' +
+        '<button type="button" id="coupleCalManageBtn" style="color:var(--blue);font-size:13px;font-weight:600;padding:0;background:none;border:none;cursor:pointer">Gestisci →</button>' +
+      '</div>' +
+      '<a href="'+coupleUrl+'" class="pf-lnk" style="margin:6px 0;padding:9px 12px;font-size:13px;text-align:center;display:block;text-decoration:none">Aggiungi al calendario (iPhone/Mac) →</a>' +
+      '<div style="font-size:12px;color:var(--dim);margin-top:4px">Per Google Calendar: apri da web → Altri calendari → Da URL → incolla:<br><code style="word-break:break-all;user-select:all;display:block;margin-top:4px;padding:4px 6px;background:var(--s2);border-radius:4px">'+https+'</code></div>';
+  }
+
   el.innerHTML =
-    '<b>Colleghi il calendario, poi non ci pensi più</b>'+
-    '<span>Un tocco per collegarlo al telefono: da domani apri il calendario e trovi già scritto '+esempio+
-    ', ogni giorno, da solo. Se hai un widget Calendario in home, lo leggi anche lì senza aprire l\'app.</span>'+
-    '<span class="piu-line">'+rigaCoppia+'</span>'+
-    '<span class="piu-price">Gratis, per sempre. Si attiva con un tocco qui sotto, nessuna email.</span>';
+    '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px">' +
+      '<div style="display:flex;align-items:center;gap:12px;min-width:0">' +
+        '<span class="tool-ic" style="background:var(--blue-soft);color:var(--blue);flex:none;width:38px;height:38px">' +
+          '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+            '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>' +
+          '</svg>' +
+        '</span>' +
+        '<div style="min-width:0">' +
+          '<b style="display:block;font-size:15px;color:var(--ink);line-height:1.25">Calendario di coppia</b>' +
+          '<span style="display:block;font-size:12.5px;color:var(--dim);margin-top:2px">I vostri riposi in comune sempre sul telefono</span>' +
+        '</div>' +
+      '</div>' +
+      '<label class="switch" title="Attiva o disattiva calendario di coppia">' +
+        '<input type="checkbox" id="coupleCalToggle"'+(isPaid && hasPartner ? ' checked' : '')+'>' +
+        '<span class="slider"></span>' +
+      '</label>' +
+    '</div>' +
+    '<div id="coupleCalDetails" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-size:13px;color:var(--dim)">' +
+      detailsHtml +
+    '</div>';
+
+  const toggle = $("#coupleCalToggle");
+  if(toggle){
+    toggle.onchange = ()=>{
+      if(!hasPartner){
+        toggle.checked = false;
+        apriPartner();
+        return;
+      }
+      if(toggle.checked){
+        if(window.NTPaid && window.NTPaid.attiva) window.NTPaid.attiva();
+        else if(window.NTPaid && window.NTPaid.open) window.NTPaid.open("couple");
+      } else {
+        if(window.NTPaid && window.NTPaid.open) window.NTPaid.open("couple");
+      }
+    };
+  }
+  const addBtn = $("#coupleAddPartnerBtn");
+  if(addBtn) addBtn.onclick = ()=>apriPartner();
+  const actBtn = $("#coupleCalActivateBtn");
+  if(actBtn) actBtn.onclick = ()=>{
+    if(window.NTPaid && window.NTPaid.attiva) window.NTPaid.attiva();
+    else if(window.NTPaid && window.NTPaid.open) window.NTPaid.open("couple");
+  };
+  const mgBtn = $("#coupleCalManageBtn");
+  if(mgBtn) mgBtn.onclick = ()=>{
+    if(window.NTPaid && window.NTPaid.open) window.NTPaid.open("couple");
+  };
+}
+
+// Tab Turni: Sincronizzazione del calendario normale con toggle diretto e copy Opzione A.
+function renderCycCalSync(){
+  const toggle = $("#cycCalToggle");
+  const details = $("#cycCalDetails");
+  if(!toggle || !details) return;
+
+  const isPaid = !!(window.NTPaid && window.NTPaid.paid());
+  const sub = isPaid ? window.NTPaid.getSub() : null;
+  toggle.checked = isPaid;
+
+  if(!isPaid){
+    details.innerHTML =
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">' +
+        '<span>Turni, sonno e ultimo caffè sempre pronti in agenda, senza aprire l\'app.</span>' +
+        '<button type="button" class="btn b" id="cycCalActivateBtn" style="padding:7px 12px;font-size:13px;white-space:nowrap">Attiva sincronizzazione</button>' +
+      '</div>';
+  } else {
+    const feed = (sub && sub.feedUrl) || "";
+    const https = feed.replace(/^webcal/, "https");
+    details.innerHTML =
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px">' +
+        '<span style="color:#2ecc71;font-weight:600;display:flex;align-items:center;gap:6px">' +
+          '<span style="width:7px;height:7px;border-radius:50%;background:#2ecc71;display:inline-block"></span>' +
+          'Sincronizzazione attiva' +
+        '</span>' +
+        '<button type="button" id="cycCalManageBtn" style="color:var(--blue);font-size:13px;font-weight:600;padding:0;background:none;border:none;cursor:pointer">Gestisci →</button>' +
+      '</div>' +
+      '<a href="'+feed+'" class="pf-lnk" style="margin:6px 0;padding:9px 12px;font-size:13px;text-align:center;display:block;text-decoration:none">Aggiungi al calendario (iPhone/Mac) →</a>' +
+      '<div style="font-size:12px;color:var(--dim);margin-top:4px">Per Google Calendar: apri da web → Altri calendari → Da URL → incolla:<br><code style="word-break:break-all;user-select:all;display:block;margin-top:4px;padding:4px 6px;background:var(--s2);border-radius:4px">'+https+'</code></div>';
+  }
+
+  toggle.onchange = ()=>{
+    if(toggle.checked){
+      if(window.NTPaid && window.NTPaid.attiva) window.NTPaid.attiva();
+      else if(window.NTPaid && window.NTPaid.open) window.NTPaid.open("attiva");
+    } else {
+      if(window.NTPaid && window.NTPaid.open) window.NTPaid.open("account");
+    }
+  };
+  const actBtn = $("#cycCalActivateBtn");
+  if(actBtn) actBtn.onclick = ()=>{
+    if(window.NTPaid && window.NTPaid.attiva) window.NTPaid.attiva();
+    else if(window.NTPaid && window.NTPaid.open) window.NTPaid.open("attiva");
+  };
+  const mgBtn = $("#cycCalManageBtn");
+  if(mgBtn) mgBtn.onclick = ()=>{
+    if(window.NTPaid && window.NTPaid.open) window.NTPaid.open("account");
+  };
 }
 function NT_planSafe(d){ const f=state.focus; state.focus=new Date(d); let P=null; try{ P=NT.plan(); }catch(e){} state.focus=f; return P; }
 // Valore corrente a destra dei tre bottoni di Opzioni che ne hanno uno solo
@@ -5693,10 +5846,13 @@ function apriFinestraSonno(){
 // nascosta.
 function apriCalendarioDaWizard(){
   if(document.body.classList.contains("wiz-open")) chiudiIntro(false);
-  apriOpzioni();
-  const box=$("#icsBox");
-  if(box){ soloUno("#icsBox"); box.hidden=false; }
-  if(box && box.scrollIntoView) setTimeout(()=>box.scrollIntoView({behavior:"smooth",block:"center"}),80);
+  if(window.NTPaid && window.NTPaid.open){
+    window.NTPaid.open(window.NTPaid.paid() ? "account" : "attiva");
+    return;
+  }
+  setTab("turni");
+  const el=$("#turniCalSyncCard");
+  if(el && el.scrollIntoView) setTimeout(()=>el.scrollIntoView({behavior:"smooth",block:"center"}),80);
 }
 // dall'avviso "letto troppo presto": apre Dettagli del piano sulla spunta bifasica
 function apriBifasico(){
@@ -5960,6 +6116,7 @@ function apriVederci(){
   chiudiAndamenti();
   document.body.classList.add("vederci-aperta");
   const p=$("#vederciPagina"); if(p) p.hidden=false;
+  renderPiuCal();
   try{ window.scrollTo(0,0); }catch(e){}
 }
 function chiudiVederci(){
@@ -6182,13 +6339,23 @@ async function salvaConfigurazione(){
   // WhatsApp o SMS dalla lista che il telefono stesso propone, invece di
   // copiare e dover cambiare app a mano.
   const testo="La mia configurazione Notturnisti — salvala per non perderla, o passarla a un altro dispositivo.";
+  const isFirstSave = !state.backupDone;
   try{
-    if(navigator.share){ await navigator.share({title:"Notturnisti",text:testo,url});
-      state.backupDone=true; store.set("backupDone",true); render(); return; }
+    if(navigator.share){
+      await navigator.share({title:"Notturnisti",text:testo,url});
+      state.backupDone=true; store.set("backupDone",true); render();
+      if(isFirstSave && window.NTPaid && !window.NTPaid.paid()){
+        setTimeout(()=>{ if(window.NTPaid && !window.NTPaid.paid()) window.NTPaid.open("attiva"); }, 600);
+      }
+      return;
+    }
   }catch(e){ if(e && e.name==="AbortError") return; }
   try{ await navigator.clipboard.writeText(url); toast("Link copiato"); }
   catch(e){ prompt("Copia questo link:",url); }
   state.backupDone=true; store.set("backupDone",true); render();
+  if(isFirstSave && window.NTPaid && !window.NTPaid.paid()){
+    setTimeout(()=>{ if(window.NTPaid && !window.NTPaid.paid()) window.NTPaid.open("attiva"); }, 600);
+  }
 }
 $("#doLink").onclick=salvaConfigurazione;
 // "Condividi il tuo ciclo" (Turni): stesso meccanismo di salvaConfigurazione,
