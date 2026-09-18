@@ -1405,7 +1405,7 @@ header b{font-size:23px}
   <div class="tools" style="margin:0">
     <button type="button" id="doShareWhatsApp" class="tool">
       <span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.41a8.204 8.204 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.19 8.19 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24m4.52 11.66c-.19.53-1.06 1.04-1.47 1.08-.38.04-.88.06-2.84-.73-2.34-.95-3.84-3.34-3.96-3.49-.11-.16-.96-1.27-.96-2.42 0-1.15.6-1.72.82-1.95.21-.23.46-.29.62-.29.15 0 .31 0 .44.01.14.01.33-.05.51.39.19.46.66 1.6.72 1.72.06.12.1.26.02.42-.08.16-.12.26-.24.4-.12.14-.26.31-.37.42-.12.12-.24.25-.1.5.14.24.62 1.03 1.34 1.67.92.82 1.7 1.08 1.94 1.2.24.12.39.1.53-.06.15-.17.62-.72.79-.97.16-.25.33-.21.55-.13.22.08 1.41.67 1.65.79.24.12.4.18.46.28.06.11.06.63-.13 1.16"/></svg></span>
-      <span class="tool-tx"><b>Invia i miei turni su WhatsApp</b><span>Formatta i turni della settimana per colleghi o partner</span></span>
+      <span class="tool-tx"><b>Invia i miei turni su WhatsApp</b><span>Formatta l'intero ciclo per colleghi o partner</span></span>
     </button>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
       <button type="button" id="doCycShare" class="tool" style="margin:0;padding:12px;flex-direction:column;align-items:flex-start;gap:6px">
@@ -6433,26 +6433,74 @@ async function condividiCiclo(){
   try{ await navigator.clipboard.writeText(url); toast("Link copiato"); track("share_created"); }
   catch(e){ prompt("Copia questo link:",url); track("share_created"); }
 }
-function condividiSettimanaWhatsApp(){
-  const d = new Date(state.focus);
+function condividiCicloWhatsApp(){
+  const p = (state.pattern || "").toUpperCase().replace(/[^A-Z]/g, "");
+  const L = p.length || 7;
+  let start;
+  if(state.repeat === false){
+    start = state.anchor ? new Date(state.anchor + "T12:00:00") : new Date(state.focus);
+  } else {
+    const ref = day(state.focus, typeof cicloOff === "number" ? cicloOff : 0);
+    const anchorDate = state.anchor ? new Date(state.anchor + "T12:00:00") : new Date(state.focus);
+    const diff = dnum(ref) - dnum(anchorDate);
+    const pos = ((diff % L) + L) % L;
+    start = day(ref, -pos);
+  }
+
   const giorni = ["Dom","Lun","Mar","Mer","Gio","Ven","Sab"];
-  let testo = "📅 I miei turni per i prossimi giorni:\n\n";
-  for(let i=0; i<7; i++){
-    const dd = new Date(d); dd.setDate(dd.getDate() + i);
+  const mesi = ["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"];
+
+  const pi = typeof presetIndex === "function" ? presetIndex() : -1;
+  const nomeCiclo = (pi >= 0 && typeof PRESETS !== "undefined" && PRESETS[pi])
+    ? (typeof nomePreset === "function" ? nomePreset(PRESETS[pi]) : PRESETS[pi].title)
+    : (L > 1 ? ("Ciclo di " + L + " giorni") : "I miei turni");
+
+  const endDate = day(start, L - 1);
+  const annoCur = new Date().getFullYear();
+  const d1Str = start.getDate() + " " + mesi[start.getMonth()];
+  const d2Str = endDate.getDate() + " " + mesi[endDate.getMonth()] + (endDate.getFullYear() !== annoCur ? " " + endDate.getFullYear() : "");
+  const rangeStr = (start.getMonth() === endDate.getMonth() && start.getFullYear() === endDate.getFullYear())
+    ? (start.getDate() + "–" + d2Str)
+    : (d1Str + " – " + d2Str);
+
+  let testo = "📅 *I miei turni — " + nomeCiclo + "* (" + rangeStr + "):\n\n";
+
+  for(let i = 0; i < L; i++){
+    const dd = day(start, i);
     const isoStr = iso(dd);
-    const code = state.ecc && state.ecc[isoStr] ? state.ecc[isoStr] : NT.codeAt(dnum(dd) - dnum(state.focus));
-    const nome = nameOf(code);
+    const code = (state.ecc && state.ecc[isoStr]) ? state.ecc[isoStr] : NT.codeAt(dnum(dd) - dnum(state.focus));
+    let nome = nameOf(code);
+    if(code === "S" && (!state.shifts || !state.shifts["S"])) nome = "Smonto";
+
+    let orario = "";
+    const sh = state.shifts && state.shifts[code];
+    if(sh && !sh.rest && typeof sh.s === "number" && typeof sh.e === "number"){
+      orario = " (" + hhmm(sh.s) + "–" + hhmm(sh.e) + ")";
+    }
+
     let emoji = "✨";
-    if(code === "N") emoji = "🌙";
+    if(code === "N" || (typeof isNightCode === "function" && isNightCode(code))) emoji = "🌙";
     else if(code === "M") emoji = "☀️";
     else if(code === "P") emoji = "⛅";
-    testo += emoji + " " + giorni[dd.getDay()] + " " + dd.getDate() + ": " + nome + "\n";
+    else if(code === "S") emoji = "🛌";
+    else if(code === "R") emoji = "✨";
+    else if(code === "?") emoji = "❓";
+    else if(sh && !sh.rest) emoji = "💼";
+
+    const isOggi = iso(dd) === iso(giornoVero());
+    const badge = isOggi ? " · _oggi_" : "";
+    const dataLabel = giorni[dd.getDay()] + " " + dd.getDate() + " " + mesi[dd.getMonth()];
+
+    testo += emoji + " *" + dataLabel + "*: " + nome + orario + badge + "\n";
   }
+
   const link = location.origin + location.pathname + "#" + toCompactHash();
   testo += "\n🔗 Confronta i tuoi turni con i miei:\n" + link;
+  track("share_whatsapp");
   const url = "https://wa.me/?text=" + encodeURIComponent(testo);
   window.open(url, "_blank");
 }
+const condividiSettimanaWhatsApp = condividiCicloWhatsApp;
 if($("#doShareWhatsApp")) $("#doShareWhatsApp").onclick=()=>{ haptic(10); condividiSettimanaWhatsApp(); };
 if($("#doCycShare")) $("#doCycShare").onclick=condividiCiclo;
 // Il QR codifica lo stesso identico link di "Condividi il tuo ciclo" — solo
