@@ -183,16 +183,54 @@ border-radius:var(--r);font-family:inherit;font-size:12.5px;font-weight:600;curs
 .today:hover{border-color:var(--blue);color:var(--blue)}
 .today.full{background:var(--blue);border:1px solid var(--blue);color:var(--su-blu)}
 .today.full:hover{background:var(--blue-fill)}
-/* pillola del turno, in linea accanto alla data — come nel mockup */
-.shiftpill{flex:none;background:var(--blue-soft);color:var(--blue);font-size:12px;
-font-weight:700;padding:5px 10px;border-radius:999px;white-space:nowrap}
-/* pillola col turno (o "Riposo"), come nel mockup — non più testo semplice */
-.shiftpill{display:inline-block;background:var(--blue-soft);color:var(--blue);font-size:12px;
-font-weight:700;padding:5px 10px;border-radius:999px;white-space:nowrap}
+/* pillola del turno: affordance interattiva, hover, active, chevron rotante all'apertura */
+.shiftpill{display:inline-flex;align-items:center;gap:5px;background:var(--blue-soft);color:var(--blue);font-size:12px;
+font-weight:700;padding:5px 11px;border-radius:999px;white-space:nowrap;cursor:pointer;border:1px solid transparent;
+transition:all .15s ease;user-select:none}
+.shiftpill:hover{filter:brightness(1.08);border-color:var(--blue-lt);transform:translateY(-1px)}
+.shiftpill:active{transform:translateY(0);filter:brightness(0.96)}
+.shiftpill::after{content:"";display:inline-block;width:5px;height:5px;border-right:2px solid currentColor;
+border-bottom:2px solid currentColor;transform:rotate(45deg);margin-left:2px;margin-bottom:2px;opacity:.75;transition:transform .2s ease}
+.shiftpill.is-open::after{transform:rotate(-135deg);margin-bottom:-2px}
+.shiftpill.modificato{border-color:var(--blue);box-shadow:0 0 0 1px var(--blue-lt)}
 .shiftpill.warn{background:var(--risk-soft);color:var(--risk);border:1px solid var(--risk-lt)}
+
+/* Quick Shift Switcher */
+.qs-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+z-index:999;display:flex;align-items:flex-end;justify-content:center;animation:qsFadeIn .18s ease}
+.qs-backdrop[hidden]{display:none !important}
+@media(min-width:600px){.qs-backdrop{align-items:center}}
+.qs-sheet{background:var(--s1);border:1px solid var(--line);border-radius:18px;width:calc(100% - 24px);max-width:440px;
+margin:0 12px calc(72px + env(safe-area-inset-bottom, 0px));padding:18px 20px 20px;box-shadow:0 8px 32px rgba(0,0,0,0.4);
+animation:qsSlideUp .2s ease;display:flex;flex-direction:column;gap:13px;position:relative;z-index:1000}
+@media(min-width:600px){.qs-sheet{margin:0;border-radius:var(--r);box-shadow:var(--shadow-card)}}
+@keyframes qsFadeIn{from{opacity:0}to{opacity:1}}
+@keyframes qsSlideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.qs-header{display:flex;justify-content:space-between;align-items:center}
+.qs-title{display:block;font-family:var(--serif);font-size:18px;color:var(--ink)}
+.qs-close{background:var(--s2);border:none;color:var(--dim);width:30px;height:30px;border-radius:50%;font-size:14px;
+display:flex;align-items:center;justify-content:center;cursor:pointer}
+.qs-close:hover{color:var(--ink);background:var(--line)}
+.qs-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+.qs-btn{background:var(--bg);border:1.5px solid var(--line);border-radius:var(--r);padding:11px 13px;font-family:inherit;
+font-size:14.5px;font-weight:600;color:var(--ink);cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;
+gap:3px;transition:all .15s ease}
+.qs-btn:hover{border-color:var(--blue);background:var(--blue-soft);color:var(--blue)}
+.qs-btn.active{border-color:var(--blue-fill);background:var(--blue-fill);color:var(--su-blu)}
+.qs-shift-time{font-size:11.5px;font-weight:400;opacity:.8}
+.qs-reset{background:none;border:1px solid var(--line);border-radius:var(--r);color:var(--dim);padding:9px;font-size:13px;
+font-weight:600;cursor:pointer;transition:all .15s ease;font-family:inherit}
+.qs-reset:hover{border-color:var(--risk);color:var(--risk);background:var(--risk-soft)}
+
+/* Traffic light pill per Simulatore Scambio */
+.traffic-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700}
+.traffic-pill.green{background:rgba(16,185,129,0.15);color:#10b981;border:1px solid rgba(16,185,129,0.3)}
+.traffic-pill.yellow{background:rgba(245,158,11,0.15);color:#f59e0b;border:1px solid rgba(245,158,11,0.3)}
+.traffic-pill.red{background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.3)}
 .status{background:var(--s1);border-left:3px solid var(--blue);border-radius:var(--r);padding:13px 15px;margin-bottom:var(--gap-sezione)}
 .status p{font-size:16px;line-height:1.55}
 .status.warn{border-left-color:var(--risk);background:var(--risk-soft)}
+.status.info{border-left-color:var(--blue);background:var(--blue-soft)}
 .status.calm{border-left-color:var(--blue-lt)}
 .cap{display:flex;justify-content:space-between;align-items:baseline;gap:14px;margin-bottom:9px}
 .cap p{font-size:12.5px;color:var(--faint);text-align:right}
@@ -613,7 +651,7 @@ justify-content:center;flex:none;width:44px;height:44px;border-radius:999px}
 .essnudge button{background:none;border:none;color:var(--blue);font:inherit;cursor:pointer;
 text-decoration:underline;text-underline-offset:2px;padding:0}
 body.essenziale:not(.tabs) .cap,body.essenziale:not(.tabs) #cyc,
-body.essenziale:not(.tabs) #icsBox,body.essenziale:not(.tabs) #dayBox,body.essenziale:not(.tabs) #band,body.essenziale:not(.tabs) #cards,
+body.essenziale:not(.tabs) #icsBox,body.essenziale:not(.tabs) #scambioBox,body.essenziale:not(.tabs) #band,body.essenziale:not(.tabs) #cards,
 body.essenziale:not(.tabs) .tools{display:none}
 body:not(.essenziale) #essenziale{display:none}
 body.intro #vista,body.intro #formaGiorno,body.intro #essenziale{display:none}
@@ -721,8 +759,8 @@ color:var(--blue);display:inline-flex;align-items:center;justify-content:center}
 .drem-ok{color:var(--ok);font-weight:700;margin-right:2px}
 .drem-rec{font-size:12.5px;color:var(--blue);line-height:1.5;margin-top:8px;border-left:2px solid var(--blue-lt);padding-left:9px}
 .drem-edit{margin-left:8px;font-size:12.5px}
-/* in Oggi lo #status resta solo quando è un avviso; il resto lo dice il piano */
-body.tab-oggi #status:not(.warn){display:none}
+/* in Oggi lo #status resta solo quando è un avviso o nota informativa; il resto lo dice il piano */
+body.tab-oggi #status:not(.warn):not(.info){display:none}
 /* OGGI: il giorno. "La giornata" (datebar + dettaglio + diario) è a scomparsa. */
 body.tab-oggi .cap.ciclo,body.tab-oggi #cyc,body.tab-oggi #cycShareBox,
 body.tab-oggi #doPartner,body.tab-oggi .cycbar,body.tab-oggi #cycRange,body.tab-oggi #doAndamenti,
@@ -747,7 +785,7 @@ body.tab-oggi.giornata #cards{display:block}
 body.tab-oggi.essenziale #band{display:none}
 /* TURNI: ciclo, giorni liberi, partner, modifica */
 body.tab-turni #status,body.tab-turni #ora,body.tab-turni #benvenutoLink,body.tab-turni #demoEsempio,body.tab-turni #backupNudge,body.tab-turni #installBanner,body.tab-turni #shareNudge,body.tab-turni #icsNudge,body.tab-turni #icsExpireNudge,body.tab-turni #clubBanner,body.tab-turni #formaGiorno,body.tab-turni #essenziale,
-body.tab-turni .datebar,body.tab-turni .daynav,body.tab-turni .cap.giornata,body.tab-turni #band,body.tab-turni #cards,
+body.tab-turni .datebar,body.tab-turni .daynav,body.tab-turni .cap.giornata,body.tab-turni #band,body.tab-turni #cards,body.tab-turni #luciditaGiornoWrap,
 body.tab-turni #icsBox,body.tab-turni .piu-h,body.tab-turni .piu-info,
 body.tab-turni footer{display:none}
 /* Pagine Andamenti e "Quando possiamo vederci" (dentro la tab Turni,
@@ -759,13 +797,13 @@ body.tab-turni footer{display:none}
 body.tab-turni.andamenti-aperta .cap.ciclo,
 body.tab-turni.andamenti-aperta #cyc,body.tab-turni.andamenti-aperta #cycShareBox,
 body.tab-turni.andamenti-aperta .cycbar,body.tab-turni.andamenti-aperta #cycRange,
-body.tab-turni.andamenti-aperta #dayBox,
+body.tab-turni.andamenti-aperta #doScambioTurno,body.tab-turni.andamenti-aperta #scambioBox,
 body.tab-turni.andamenti-aperta #doPartner,
 body.tab-turni.andamenti-aperta #doAndamenti,
 body.tab-turni.vederci-aperta .cap.ciclo,
 body.tab-turni.vederci-aperta #cyc,body.tab-turni.vederci-aperta #cycShareBox,
 body.tab-turni.vederci-aperta .cycbar,body.tab-turni.vederci-aperta #cycRange,
-body.tab-turni.vederci-aperta #dayBox,
+body.tab-turni.vederci-aperta #doScambioTurno,body.tab-turni.vederci-aperta #scambioBox,
 body.tab-turni.vederci-aperta #doPartner,
 body.tab-turni.vederci-aperta #doAndamenti{display:none}
 /* La tab "Più" è sparita: ogni sua funzione si è spostata dove
@@ -840,12 +878,13 @@ list-style:none;min-height:44px;display:flex;align-items:center}
 .wdet .q:last-of-type{margin-bottom:14px}
 .piu-info-in b{color:var(--ink)}
 /* OPZIONI: solo la configurazione */
+body.tab-oggi #doScambioTurno,body.tab-oggi #scambioBox,
 body.tab-opzioni #status,body.tab-opzioni #ora,body.tab-opzioni #benvenutoLink,body.tab-opzioni #demoEsempio,body.tab-opzioni #backupNudge,body.tab-opzioni #installBanner,body.tab-opzioni #shareNudge,body.tab-opzioni #icsNudge,body.tab-opzioni #icsExpireNudge,body.tab-opzioni #clubBanner,body.tab-opzioni #formaGiorno,body.tab-opzioni #essenziale,
 body.tab-opzioni .datebar,body.tab-opzioni .daynav,body.tab-opzioni #band,body.tab-opzioni .cap.ciclo,body.tab-opzioni #cyc,
 body.tab-opzioni #cycShareBox,
-body.tab-opzioni .cycbar,body.tab-opzioni #cycRange,body.tab-opzioni #doAndamenti,body.tab-opzioni #dayBox,
+body.tab-opzioni .cycbar,body.tab-opzioni #cycRange,body.tab-opzioni #doAndamenti,body.tab-opzioni #doScambioTurno,body.tab-opzioni #scambioBox,
 body.tab-opzioni #andamentiPagina,body.tab-opzioni #vederciPagina,body.tab-opzioni #doPartner,
-body.tab-opzioni #partner,body.tab-opzioni #cards,body.tab-opzioni .piu-cal,body.tab-opzioni .piu-h,
+body.tab-opzioni #partner,body.tab-opzioni #cards,body.tab-opzioni #luciditaGiornoWrap,body.tab-opzioni .piu-cal,body.tab-opzioni .piu-h,
 /* la sezione Opzioni vive solo nella sua destinazione */
 body:not(.tab-opzioni) #opzioni{display:none}
 #opzioni .tool{margin-bottom:10px}
@@ -1240,23 +1279,35 @@ header b{font-size:23px}
      stesso state.pattern/anchor/repeat, che potevano disallinearsi tra
      loro. Ora quella griglia (con le date vere, la parte migliore
      delle due) vive solo dentro "Modifica →" / Opzioni → Turni e ciclo. -->
-<div class="ecc" id="dayBox" hidden>
-  <b id="dayTit">—</b>
+<!-- Simulatore Scambio Turno: strumento autonomo dentro la scheda Turni -->
+<button type="button" class="tsec" id="doScambioTurno">
+  <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:var(--blue);background:var(--blue-soft)"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
+  <span class="tsec-tx"><span class="eyebrow" style="display:block">Simulatore</span><b style="font-family:var(--serif)">Valuta uno scambio turno</b><span style="font-size:12.5px;color:var(--dim);display:block;margin-top:2px">Controlla se lo scambio ti costa in sonno o crea ritorni rapidi (&lt;11h)</span></span>
+  <span class="tchev" id="scambioChev">›</span>
+</button>
 
-  <p class="hint" style="margin-top:9px">Cosa fai davvero questo giorno</p>
-  <div class="tprow" id="eccScelte"></div>
-  <button class="btn g" id="eccVia" hidden style="margin-top:7px">Torna alla sequenza</button>
-
-  <p class="hint" style="margin-top:14px">È un giorno in cui devi essere lucido?</p>
-  <div class="inline">
-    <input id="evH" type="time" style="max-width:110px">
-    <button class="btn g" id="evVia" type="button">Togli</button>
+<div class="ecc" id="scambioBox" hidden style="margin-top:10px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <b style="font-size:16px">⇄ Valuta uno scambio turno</b>
+    <button type="button" class="btn g" id="chiudiScambioBtn" style="padding:2px 8px;font-size:12px;min-height:28px">Chiudi</button>
   </div>
-  <span class="hint">Un matrimonio, una visita, un viaggio. I giorni prima si piegano verso quell'ora.</span>
 
-  <p class="hint" style="margin-top:14px">Se scambiassi questo turno</p>
-  <div class="inline"><span>con</span><select id="swapB"></select></div>
-  <div id="swapOut" style="margin-top:8px"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+    <div>
+      <label style="display:block;font-size:12px;font-weight:600;color:var(--dim);margin-bottom:4px" for="swapA">Il tuo giorno:</label>
+      <select id="swapA" style="width:100%;font-size:13px;padding:7px 8px;border-radius:var(--r);background:var(--bg);border:1px solid var(--line);color:var(--ink)"></select>
+    </div>
+    <div>
+      <label style="display:block;font-size:12px;font-weight:600;color:var(--dim);margin-bottom:4px" for="swapB">Scambia con:</label>
+      <select id="swapB" style="width:100%;font-size:13px;padding:7px 8px;border-radius:var(--r);background:var(--bg);border:1px solid var(--line);color:var(--ink)"></select>
+    </div>
+  </div>
+
+  <div id="swapVerdict" style="margin-bottom:12px"></div>
+  <div id="swapOut"></div>
+  <div id="swapActionWrap" style="margin-top:14px">
+    <button type="button" class="btn pri" id="swapApplica" style="width:100%;min-height:42px;font-size:14px;font-weight:600">Applica questo scambio nel piano</button>
+  </div>
 </div>
 
 <!-- Anteprima, non il contenuto intero in linea: apre la sua pagina a
@@ -1425,6 +1476,7 @@ header b{font-size:23px}
   </div>
 </div>
 
+<div id="luciditaGiornoWrap"></div>
 <div id="cards"></div>
 
 <div id="opzioni">
@@ -1446,6 +1498,14 @@ header b{font-size:23px}
   <button class="tool" data-opz="4"><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h1.5a2.5 2.5 0 0 1 0 5H17"/><path d="M4 8h13v5a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V8z"/><path d="M8 2v3M12 2v3"/></svg></span>
     <span class="tool-tx"><b>Dettagli del piano</b><span>Sensibilità alla caffeina, tempi di viaggio, quanto puoi anticipare, come dividere il sonno prima di un turno molto presto.</span></span></button>
   <div class="ecc" id="opzBox4" hidden></div>
+  <button class="tool" id="doOpzLucidita"><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>
+    <span class="tool-tx"><b>Obiettivo Lucidità</b><span>Prepara una giornata importante (matrimonio, visita, esame) per arrivare sveglio e lucido a un'ora precisa.</span></span>
+    <span class="tool-val" id="opzValLucidita"></span></button>
+  <div class="ecc" id="opzBoxLucidita" hidden>
+    <b style="font-size:16px">🎯 Obiettivo Lucidità</b>
+    <p class="hint">Indica la data e l'ora in cui devi essere al massimo della forma. Il motore adatterà il sonno dei giorni precedenti per farti svegliare fresco e concentrato.</p>
+    <div id="opzLuciditaContent" style="margin-top:10px"></div>
+  </div>
   <!-- Il bottone che chiedeva il permesso notifiche viveva in Più (sparita
        con la ristrutturazione della navigazione): la funzione ntChiediPermesso()
        è rimasta nel codice, ma senza più nessun bottone da nessuna parte che
@@ -1510,7 +1570,22 @@ header b{font-size:23px}
     <p class="hint" style="margin:10px 0 0"><a href="https://notturnisti.club/planner" target="_blank" rel="noopener">Come si usa</a> · <a href="https://notturnisti.club/chi-siamo/" target="_blank" rel="noopener">Chi siamo</a> · <a href="https://notturnisti.club" target="_blank" rel="noopener">notturnisti.club</a><span id="doDonateLnkWrap" hidden> · <a id="doDonateLnk" href="#" target="_blank" rel="noopener">Sostieni il progetto</a></span></p>
   </div>
 </div>
+<!-- Quick Shift Switcher modal / sheet a 1 tocco -->
+<div id="quickShiftModal" class="qs-backdrop" hidden aria-hidden="true">
+  <div class="qs-sheet" role="dialog" aria-modal="true" aria-label="Cambio turno rapido">
+    <div class="qs-header">
+      <div>
+        <span class="eyebrow" id="qsDateSub" style="display:block">Cosa fai davvero</span>
+        <b class="qs-title" id="qsDateTitle">Oggi</b>
+      </div>
+      <button type="button" class="qs-close" id="qsClose" aria-label="Chiudi">✕</button>
+    </div>
+    <div class="qs-grid" id="qsGrid"></div>
+    <button type="button" class="qs-reset" id="qsReset" hidden>✕ Torna alla sequenza standard</button>
+    <button type="button" class="lnk" id="qsVaiScambio" style="font-size:12.5px;text-align:center;width:100%;margin-top:2px;padding:4px 0">⇄ Valuta uno scambio turno con un collega →</button>
+  </div>
 </div>
+
 <nav class="tabbar" id="tabbar" role="tablist" aria-label="Navigazione">
   <button class="tabbtn" data-tab="oggi" role="tab" aria-selected="true">
     <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
@@ -2418,6 +2493,7 @@ const hhmm15 = m => { const x=mod1440(Math.round(m/15)*15);
 const near = (m,r) => { while(m-r>720) m-=1440; while(m-r<-720) m+=1440; return m; };
 
 const iso = d => d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const parseIso = s => new Date(s + "T12:00:00");
 // Un solo sguardo avanti, condiviso da tutto quello che deve sapere "cosa mi
 // aspetta nei prossimi giorni" — invece di un ciclo diverso per ogni domanda
 // (nextDuty, restOptions, il conto dei giorni liberi, gli avvisi di rischio
@@ -4946,19 +5022,23 @@ function renderHeader(P, f){
   const serie=serieTurnoCorrente();
   const pillEl=$("#shiftPill");
   if(pillEl){
+    const haEcc = !!(state.ecc && state.ecc[iso(state.focus)]);
     if(c==="?"){
       pillEl.textContent = "Da impostare";
       pillEl.className = "shiftpill warn";
     } else {
       pillEl.textContent = serie ? nameOf(c)+" "+serie.posizione+"/"+serie.totale : nameOf(c);
-      pillEl.className = "shiftpill";
+      pillEl.className = "shiftpill" + (haEcc ? " modificato" : "");
     }
     pillEl.style.cursor = "pointer";
-    pillEl.title = "Tocca per cambiare turno o inserire un'eccezione";
-    pillEl.onclick = () => { haptic(10); apriEcc(state.focus); };
+    pillEl.title = haEcc ? "Turno modificato manualmente (tocca per cambiare)" : "Tocca per cambiare turno al volo";
+    pillEl.setAttribute("role", "button");
+    pillEl.setAttribute("aria-haspopup", "dialog");
+    pillEl.onclick = () => { haptic(10); apriQuickShift(state.focus); };
   }
   const cov=$("#cover"); if(cov) cov.textContent=coverage()||"";
   renderToday();
+  renderLuciditaCard();
   const avv = NT.freeWakeOk() ? "" : "Questa risposta non è plausibile: sto usando "+hhmm(NT.freeWakeUsata())+".";
   { const el=$("#oWakeWarn"); if(el) el.textContent=avv; }
   const bn=$("#setName"), bd=$("#setDesc"), pi=presetIndex();
@@ -4982,6 +5062,16 @@ function renderHeader(P, f){
         ", ma <button class=\"lnk\" data-goto=\"sonno\">correggila →</button> o il piano resta storto."; }
   else if(state.repeat===false && [1,2,3,4].some(o=>NT.codeAt(o)==="?"))
     msg+=" (Da qui a pochi giorni finisce il turno che hai inserito: da lì in poi il piano vale solo se resti a riposo.)";
+
+  if(state.evento && state.evento.d && state.evento.h){
+    const evD = parseIso(state.evento.d);
+    const diffDays = Math.round((dnum(evD) - dnum(giornoVero())) / 86400000);
+    if(diffDays >= 0 && diffDays <= 3 && dnum(state.focus) === dnum(giornoVero())){
+      cls = (cls ? cls + " " : "") + "info";
+      const evGiornoTxt = diffDays === 0 ? "oggi" : diffDays === 1 ? "domani" : evD.toLocaleDateString("it-IT", { weekday: "long" });
+      msg += '<br><span class="lucidita-banner" style="display:inline-block;margin-top:6px;font-size:13px;color:var(--blue);font-weight:600">🎯 In vista dell\'evento di ' + esc(evGiornoTxt) + ' alle ore ' + esc(state.evento.h) + ', oggi il sonno è anticipato per farti arrivare al picco di lucidità.</span>';
+    }
+  }
   $("#status").className="status "+cls; $("#status").innerHTML="<p>"+msg+"</p>";
 }
 
@@ -5890,6 +5980,10 @@ function renderOpzSummaries(){
   }
   const s=$("#opzValSonno");
   if(s) s.textContent = (state.freeBed && state.freeWake) ? state.freeBed+" → "+state.freeWake : "Da impostare";
+  const l=$("#opzValLucidita");
+  if(l){
+    l.textContent = (state.evento && state.evento.d && state.evento.h) ? state.evento.d.slice(5) + " " + state.evento.h : "";
+  }
   renderNotifRiga();
 }
 // La griglia del wizard, passo 1: sostituisce lo scrivere la sequenza a
@@ -6008,57 +6102,114 @@ function jump(e){ const el=e.target.closest(".crow"); if(!el) return;
 $("#cyc").addEventListener("click",jump);
 $("#cyc").addEventListener("keydown",jump);
 
-// ── giorni fuori sequenza ──
-// Si apre tenendo premuto un giorno del ciclo, o dal giorno stesso col bottone.
-let eccMirino=null;
-// Tutto ciò che riguarda UN giorno si fa da quel giorno: cosa fai davvero,
-// se devi essere lucido, cosa costerebbe scambiarlo. Prima erano tre posti diversi,
-// e due chiedevano di scegliere una data che l'utente aveva già davanti.
-function apriEcc(d){
-  eccMirino=d;
-  const box=$("#dayBox"); if(!box) return;
-  soloUno("#dayBox"); box.hidden=false;
-  $("#dayTit").textContent=d.toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"});
+// ── Quick Shift Switcher (Pillola / cambio turno a 1 tocco) ──
+let quickShiftTarget=null;
 
-  const attuale=state.ecc[iso(d)]||"";
-  $("#eccScelte").innerHTML=
-    '<button class="tp'+(attuale==="R"?" on":"")+'" data-ecc="R">Riposo</button>'+
-    Object.keys(state.shifts).map(k=>'<button class="tp'+(attuale===k?" on":"")+'" data-ecc="'+
-      esc(k)+'">'+esc(nameOf(k))+'</button>').join("");
-  $("#eccVia").hidden = !attuale;
+function apriQuickShift(d){
+  quickShiftTarget=d || state.focus || giornoVero();
+  const modal=$("#quickShiftModal");
+  if(!modal) return;
+  const pillEl=$("#shiftPill");
+  if(pillEl) pillEl.classList.add("is-open");
 
-  const ev=state.evento;
-  $("#evH").value = (ev && ev.d===iso(d)) ? ev.h : "";
-  $("#evVia").hidden = !(ev && ev.d===iso(d));
+  const isOggi=iso(quickShiftTarget)===iso(giornoVero());
+  const isDomani=iso(quickShiftTarget)===iso(day(giornoVero(),1));
+  const isIeri=iso(quickShiftTarget)===iso(day(giornoVero(),-1));
+  const dateStr=isOggi?"oggi":isDomani?"domani":isIeri?"ieri":quickShiftTarget.toLocaleDateString("it-IT",{weekday:"short",day:"numeric",month:"short"});
 
-  const off=dnum(d)-dnum(state.focus);
-  $("#swapB").innerHTML=opzioniGiorni(off);
-  mostraScambio(off);
+  $("#qsDateTitle").textContent=dateStr.charAt(0).toUpperCase()+dateStr.slice(1);
+  $("#qsDateSub").textContent=isOggi?"Cosa fai davvero":"Turno per";
 
-  if(box.scrollIntoView) box.scrollIntoView({behavior:"smooth",block:"nearest"});
+  const targetIso=iso(quickShiftTarget);
+  const eccAttuale=state.ecc[targetIso];
+  const off=Math.round((dnum(quickShiftTarget)-dnum(state.focus))/86400000);
+  const codeAttivo=NT.codeAt(off);
+
+  const keys=["R"].concat(Object.keys(state.shifts||{}));
+  let html="";
+  for(const k of keys){
+    const nome=(k==="R")?"Riposo":(state.shifts[k]?state.shifts[k].n:k);
+    const orario=(k==="R")?"Libero":(state.shifts[k]?hhmm(state.shifts[k].s)+"–"+hhmm(state.shifts[k].e):"");
+    const isActive=(eccAttuale?eccAttuale===k:codeAttivo===k);
+    html+='<button type="button" class="qs-btn'+(isActive?' active':'')+'" data-qs="'+esc(k)+'">'+
+      '<span>'+esc(nome)+'</span>'+
+      (orario?'<span class="qs-shift-time">'+esc(orario)+'</span>':'')+
+      '</button>';
+  }
+  $("#qsGrid").innerHTML=html;
+
+  const resetBtn=$("#qsReset");
+  if(resetBtn){
+    resetBtn.hidden=!eccAttuale;
+  }
+
+  modal.hidden=false;
+  modal.setAttribute("aria-hidden","false");
 }
-const PANNELLI=["#dayBox","#icsBox","#opzBox1","#opzBox3","#opzBox4"];
+
+function chiudiQuickShift(){
+  const modal=$("#quickShiftModal");
+  if(modal){
+    modal.hidden=true;
+    modal.setAttribute("aria-hidden","true");
+  }
+  const pillEl=$("#shiftPill");
+  if(pillEl) pillEl.classList.remove("is-open");
+  quickShiftTarget=null;
+}
+
+// Retrocompatibilità per chiamate pregresse ad apriEcc / chiudiEcc
+function apriEcc(d){ apriQuickShift(d); }
+function chiudiEcc(){ chiudiQuickShift(); }
+
+const PANNELLI=["#scambioBox","#opzBoxLucidita","#icsBox","#opzBox1","#opzBox3","#opzBox4"];
 function soloUno(id){
   for(const p of PANNELLI){ const el=$(p); if(el && p!==id) el.hidden=true; }
 }
-function chiudiEcc(){ const b=$("#dayBox"); if(b) b.hidden=true; eccMirino=null; }
-$("#eccScelte").addEventListener("click",e=>{
-  const b=e.target.closest("[data-ecc]"); if(!b||!eccMirino) return;
-  state.ecc[iso(eccMirino)]=b.dataset.ecc;
-  salva(); chiudiEcc(); render();
+
+if($("#qsGrid")) $("#qsGrid").addEventListener("click",e=>{
+  const btn=e.target.closest("[data-qs]");
+  if(!btn||!quickShiftTarget) return;
+  haptic(10);
+  const k=btn.dataset.qs;
+  state.ecc[iso(quickShiftTarget)]=k;
+  salva();
+  chiudiQuickShift();
+  render();
 });
-$("#eccVia").onclick=()=>{
-  if(!eccMirino) return;
-  delete state.ecc[iso(eccMirino)];
-  salva(); chiudiEcc(); render();
-};
-// tocco lungo su un giorno del ciclo
+
+if($("#qsReset")) $("#qsReset").addEventListener("click",()=>{
+  if(!quickShiftTarget) return;
+  haptic(10);
+  delete state.ecc[iso(quickShiftTarget)];
+  salva();
+  chiudiQuickShift();
+  render();
+});
+
+if($("#qsClose")) $("#qsClose").addEventListener("click",chiudiQuickShift);
+if($("#quickShiftModal")) $("#quickShiftModal").addEventListener("click",e=>{
+  if(e.target===$("#quickShiftModal")) chiudiQuickShift();
+});
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape"&&$("#quickShiftModal")&&!$("#quickShiftModal").hidden){
+    chiudiQuickShift();
+  }
+});
+if($("#qsVaiScambio")) $("#qsVaiScambio").addEventListener("click",()=>{
+  const d=quickShiftTarget||state.focus;
+  chiudiQuickShift();
+  setTab("turni");
+  apriScambioTurno(d);
+});
+
+// tocco lungo su un giorno del ciclo apre il quick shift per quel giorno
 {
   let timer=null, mosso=false;
   const giornoDi=e=>{ const el=e.target.closest(".crow"); return el? day(state.focus,+el.dataset.off) : null; };
   $("#cyc").addEventListener("pointerdown",e=>{
     const d=giornoDi(e); if(!d) return; mosso=false;
-    timer=setTimeout(()=>{ timer=null; eccAppena=true; apriEcc(d); }, 550);
+    timer=setTimeout(()=>{ timer=null; eccAppena=true; apriQuickShift(d); }, 550);
   });
   const stop=()=>{ if(timer){ clearTimeout(timer); timer=null; } };
   for(const ev of ["pointerup","pointercancel","pointerleave"]) $("#cyc").addEventListener(ev,stop);
@@ -6387,38 +6538,304 @@ if($("#seqLen")) $("#seqLen").addEventListener("change", ()=>{
   state.pattern=patternDaWizGrid(); oSel.value="x"; salva();
 });
 
-function opzioniGiorni(escludi){
-  let o="";
-  for(let i=-6;i<14;i++){
-    if(i===escludi) continue;
-    const d=day(state.focus,i);
-    o+='<option value="'+i+'">'+esc(d.toLocaleDateString("it-IT",{weekday:"short",day:"numeric"}))+
-       " · "+esc(nameOf(NT.codeAt(i)))+'</option>';
+// ── Simulatore Scambio Turno ──
+function calcolaRitorniRapidiScambio(){
+  let count=0;
+  for(let i=-3;i<=15;i++){
+    const a=NT.block(i), b=NT.block(i+1);
+    if(a.rest||b.rest||!isFinite(a.end)||!isFinite(b.start)) continue;
+    const margine=(b.start+1440)-a.end;
+    if(margine<660) count++;
   }
-  return o;
+  return count;
 }
-function mostraScambio(a){
-  const b=+$("#swapB").value;
-  if(a===b || !isFinite(b)){ $("#swapOut").innerHTML=""; return; }
-  const r=scambio(a,b,14);
-  const dS=r.dopo.sonno-r.prima.sonno, dV=r.dopo.vegliaMax-r.prima.vegliaMax;
-  const riga=(t,p,d,meglio)=>'<div class="row"><b style="min-width:132px">'+t+
-    '</b><span>'+p+" → "+d+(meglio?' <span style="color:var(--amber)">'+meglio+'</span>':'')+'</span></div>';
-  $("#swapOut").innerHTML='<div class="rows">'+
-    riga("Sonno in due settimane", dur(r.prima.sonno), dur(r.dopo.sonno),
-         Math.abs(dS)<15?"":(dS>0?"+"+dur(dS):"−"+dur(-dS)))+
-    riga("Veglia più lunga", dur(r.prima.vegliaMax), dur(r.dopo.vegliaMax),
-         Math.abs(dV)<15?"":(dV>0?"peggiora":"migliora"))+
-    riga("Pisolini necessari", r.prima.pisolini, r.dopo.pisolini,"")+
-    '</div><p class="hint" style="margin-top:8px">'+
-    (Math.abs(dS)<30 && Math.abs(dV)<30
-      ? "Differenza trascurabile: decidi in base a quello che ti serve, non al sonno."
-      : (dS<0||dV>0) ? "Lo scambio ti costa. Se lo fai, mettilo in conto." 
-                     : "Lo scambio ti conviene anche sul sonno.")+'</p>';
+
+function calcolaScambioDettagliato(offA, offB){
+  if(offA===offB || !isFinite(offA) || !isFinite(offB)) return null;
+  const ritorniPrima=calcolaRitorniRapidiScambio();
+  const r=scambio(offA, offB, 14);
+
+  const ecc0=state.ecc;
+  state.ecc=Object.assign({}, ecc0, {[r.dA]:r.cB, [r.dB]:r.cA});
+  const ritorniDopo=calcolaRitorniRapidiScambio();
+  state.ecc=ecc0;
+
+  const dS=r.dopo.sonno-r.prima.sonno;
+  const dV=r.dopo.vegliaMax-r.prima.vegliaMax;
+  const dP=r.dopo.pisolini-r.prima.pisolini;
+  const dR=ritorniDopo-ritorniPrima;
+
+  return { r, dS, dV, dP, dR, ritorniPrima, ritorniDopo };
 }
-$("#swapB").addEventListener("change",()=>{
-  if(eccMirino) mostraScambio(dnum(eccMirino)-dnum(state.focus));
-});
+
+function popolaSelettoriScambio(selA, selB){
+  const selAVal=(selA!==undefined && isFinite(selA)) ? selA : 0;
+  let oA="", oB="";
+  for(let i=-3;i<=14;i++){
+    const d=day(state.focus,i);
+    const isToday=iso(d)===iso(giornoVero());
+    const dayName=isToday?"Oggi":d.toLocaleDateString("it-IT",{weekday:"short",day:"numeric"});
+    const shiftCode=NT.codeAt(i);
+    const shiftName=nameOf(shiftCode);
+    const text=dayName+" ("+shiftName+")";
+    oA+='<option value="'+i+'"'+(i===selAVal?' selected':'')+'>'+esc(text)+'</option>';
+
+    let isBSelected=false;
+    if(selB!==undefined && isFinite(selB)) isBSelected=(i===selB);
+    else isBSelected=(selAVal===1?i===2:i===1);
+    oB+='<option value="'+i+'"'+(isBSelected?' selected':'')+'>'+esc(text)+'</option>';
+  }
+  const sA=$("#swapA"), sB=$("#swapB");
+  if(sA) sA.innerHTML=oA;
+  if(sB) sB.innerHTML=oB;
+}
+
+function aggiornaScambio(){
+  const swapA=$("#swapA"), swapB=$("#swapB");
+  if(!swapA || !swapB) return;
+  const a=+swapA.value, b=+swapB.value;
+  const vOut=$("#swapVerdict"), dOut=$("#swapOut"), actWrap=$("#swapActionWrap");
+
+  if(a===b || !isFinite(a) || !isFinite(b)){
+    if(vOut) vOut.innerHTML='<p class="hint" style="text-align:center">Seleziona due giorni diversi per confrontare lo scambio.</p>';
+    if(dOut) dOut.innerHTML="";
+    if(actWrap) actWrap.hidden=true;
+    return;
+  }
+  if(actWrap) actWrap.hidden=false;
+
+  const res=calcolaScambioDettagliato(a,b);
+  if(!res) return;
+  const { r, dS, dV, dP, dR, ritorniPrima, ritorniDopo }=res;
+
+  let pillHtml="", verdictDesc="";
+  if(dR>0 || dS<=-90 || dV>=120){
+    pillHtml='<span class="traffic-pill red">🔴 Sconsigliato</span>';
+    verdictDesc=dR>0
+      ? "Attenzione: questo scambio crea un rientro rapido (&lt;11h) fra turni consecutivi!"
+      : "Lo scambio ti costa parecchio: perdi "+dur(-dS)+" di sonno utile nelle due settimane.";
+  } else if(dS<-25 || dV>45 || dP>0){
+    pillHtml='<span class="traffic-pill yellow">🟡 Da valutare</span>';
+    verdictDesc="Lo scambio è fattibile ma ti costerà un po' di stanchezza in più ("+
+      (dS<0?"−"+dur(-dS)+" di sonno":"+ "+dur(dV)+" di veglia max")+").";
+  } else {
+    pillHtml='<span class="traffic-pill green">🟢 Favorevole</span>';
+    verdictDesc=dS>=30
+      ? "Ottimo scambio: guadagni +"+dur(dS)+" di sonno rispetto al piano attuale!"
+      : "Differenza di sonno minima e nessun rientro rapido. Puoi procedere serenamente.";
+  }
+
+  if(vOut){
+    vOut.innerHTML=
+      '<div style="background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px">'+
+        '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px">'+
+          '<b style="font-size:14px;color:var(--ink)">Valutazione biologica</b>'+
+          pillHtml+
+        '</div>'+
+        '<p style="font-size:13px;color:var(--dim);margin:0;line-height:1.45">'+verdictDesc+'</p>'+
+      '</div>';
+  }
+
+  const riga=(t,p,d,badge)=>'<div class="row"><b style="min-width:130px">'+t+
+    '</b><span>'+p+' → '+d+(badge?' '+badge:'')+'</span></div>';
+
+  const deltaSonnoTxt=Math.abs(dS)<15?"":(dS>0?'<span style="color:#10b981;font-weight:600">+'+dur(dS)+'</span>':'<span style="color:#ef4444;font-weight:600">−'+dur(-dS)+'</span>');
+  const deltaVegliaTxt=Math.abs(dV)<15?"":(dV>0?'<span style="color:#ef4444;font-weight:600">peggiora (+ '+dur(dV)+')</span>':'<span style="color:#10b981;font-weight:600">migliora</span>');
+  const ritorniTxt=(ritorniDopo>ritorniPrima)
+    ?'<span style="color:#ef4444;font-weight:600">+'+dR+' rapido (&lt;11h)!</span>'
+    :(ritorniDopo===0?'<span style="color:#10b981">Nessuno</span>':'');
+
+  if(dOut){
+    dOut.innerHTML='<div class="rows">'+
+      riga("Sonno (2 sett.)", dur(r.prima.sonno), dur(r.dopo.sonno), deltaSonnoTxt)+
+      riga("Veglia più lunga", dur(r.prima.vegliaMax), dur(r.dopo.vegliaMax), deltaVegliaTxt)+
+      riga("Pisolini necessari", r.prima.pisolini, r.dopo.pisolini, dP>0?'<span style="color:#f59e0b">+'+dP+'</span>':'')+
+      riga("Rientri rapidi (&lt;11h)", ritorniPrima, ritorniDopo, ritorniTxt)+
+      '</div>';
+  }
+}
+
+function apriScambioTurno(giornoA){
+  const box=$("#scambioBox");
+  if(!box) return;
+  const apri=box.hidden;
+  soloUno(apri?"#scambioBox":null);
+  box.hidden=!apri;
+  if($("#scambioChev")) $("#scambioChev").textContent=apri?"‹":"›";
+  if(!apri) return;
+
+  const targetA=giornoA || state.focus || giornoVero();
+  const offA=Math.round((dnum(targetA)-dnum(state.focus))/86400000);
+  popolaSelettoriScambio(offA);
+  aggiornaScambio();
+  if(box.scrollIntoView) box.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+
+if($("#doScambioTurno")) $("#doScambioTurno").onclick=()=>apriScambioTurno();
+if($("#chiudiScambioBtn")) $("#chiudiScambioBtn").onclick=()=>{
+  $("#scambioBox").hidden=true;
+  if($("#scambioChev")) $("#scambioChev").textContent="›";
+};
+if($("#swapA")) $("#swapA").addEventListener("change",aggiornaScambio);
+if($("#swapB")) $("#swapB").addEventListener("change",aggiornaScambio);
+
+if($("#swapApplica")) $("#swapApplica").onclick=()=>{
+  const a=+$("#swapA").value, b=+$("#swapB").value;
+  if(a===b || !isFinite(a) || !isFinite(b)) return;
+  haptic(10);
+  const dA=iso(day(state.focus,a)), dB=iso(day(state.focus,b));
+  const cA=NT.codeAt(a), cB=NT.codeAt(b);
+  state.ecc[dA]=cB;
+  state.ecc[dB]=cA;
+  salva();
+  render();
+  popolaSelettoriScambio(a,b);
+  aggiornaScambio();
+  const vOut=$("#swapVerdict");
+  if(vOut){
+    vOut.insertAdjacentHTML("afterbegin",'<div style="background:rgba(16,185,129,0.15);color:#10b981;border:1px solid rgba(16,185,129,0.3);padding:8px 12px;border-radius:var(--r);font-size:13px;font-weight:600;text-align:center;margin-bottom:8px">✓ Scambio applicato nel piano!</div>');
+  }
+};
+
+// ── Obiettivo Lucidità (Contextual in Tab Oggi e Hub in Opzioni) ──
+function renderLuciditaCard(){
+  const wrap=$("#luciditaGiornoWrap");
+  if(!wrap) return;
+
+  const focusIso=iso(state.focus);
+  const ev=state.evento;
+  const hasEvent=(ev && ev.d===focusIso && ev.h);
+
+  if(hasEvent){
+    wrap.innerHTML=
+      '<div class="lucidita-card set" style="background:var(--blue-soft);border:1px solid var(--blue-lt);border-radius:var(--r);padding:12px 15px;margin-bottom:var(--gap-sezione);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">'+
+        '<div style="display:flex;align-items:center;gap:10px;min-width:0">'+
+          '<span style="font-size:20px;flex:none">🎯</span>'+
+          '<div style="min-width:0">'+
+            '<b style="display:block;font-size:14.5px;color:var(--ink)">Sveglio e lucido per le '+esc(ev.h)+'</b>'+
+            '<span style="font-size:12px;color:var(--dim);display:block">Il piano sonno precedente è calibrato per farti arrivare in piena lucidità.</span>'+
+          '</div>'+
+        '</div>'+
+        '<div style="display:flex;align-items:center;gap:8px">'+
+          '<button type="button" class="btn g" id="luciditaModBtn" style="padding:4px 10px;font-size:12.5px;min-height:32px">Modifica</button>'+
+          '<button type="button" class="btn g" id="luciditaDelBtn" style="padding:4px 10px;font-size:12.5px;min-height:32px">Rimuovi</button>'+
+        '</div>'+
+      '</div>';
+
+    $("#luciditaModBtn").onclick=()=>{
+      wrap.innerHTML=
+        '<div class="lucidita-card edit" style="background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:12px 15px;margin-bottom:var(--gap-sezione)">'+
+          '<b style="display:block;font-size:14px;margin-bottom:6px">🎯 Modifica orario di lucidità</b>'+
+          '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'+
+            '<input type="time" id="luciditaInputH" value="'+esc(ev.h)+'" style="max-width:110px;padding:6px 8px;border-radius:var(--r);border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:14px">'+
+            '<button type="button" class="btn pri" id="luciditaSaveBtn" style="padding:6px 14px;font-size:13px;min-height:34px">Salva</button>'+
+            '<button type="button" class="btn g" id="luciditaCancelBtn" style="padding:6px 10px;font-size:13px;min-height:34px">Annulla</button>'+
+          '</div>'+
+        '</div>';
+      $("#luciditaSaveBtn").onclick=()=>{
+        const val=$("#luciditaInputH").value;
+        if(val){ state.evento={d:focusIso, h:val}; salva(); render(); }
+      };
+      $("#luciditaCancelBtn").onclick=()=>renderLuciditaCard();
+    };
+
+    $("#luciditaDelBtn").onclick=()=>{
+      state.evento=null;
+      salva();
+      render();
+    };
+    return;
+  }
+
+  if(dnum(state.focus)>=dnum(giornoVero())){
+    wrap.innerHTML=
+      '<div class="lucidita-card unset" style="background:var(--s1);border:1px dashed var(--line);border-radius:var(--r);padding:10px 14px;margin-bottom:var(--gap-sezione);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">'+
+        '<div style="display:flex;align-items:center;gap:9px">'+
+          '<span style="font-size:16px;opacity:0.8">🎯</span>'+
+          '<span style="font-size:13px;color:var(--dim)">Devi essere lucido a un\'ora precisa questo giorno?</span>'+
+        '</div>'+
+        '<button type="button" class="btn g" id="luciditaAddBtn" style="padding:5px 12px;font-size:12.5px;min-height:32px;font-weight:600;color:var(--blue)">+ Imposta orario</button>'+
+      '</div>';
+
+    $("#luciditaAddBtn").onclick=()=>{
+      wrap.innerHTML=
+        '<div class="lucidita-card edit" style="background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:12px 15px;margin-bottom:var(--gap-sezione)">'+
+          '<b style="display:block;font-size:14px;margin-bottom:4px">🎯 A che ora devi essere sveglio e lucido?</b>'+
+          '<span style="font-size:12px;color:var(--dim);display:block;margin-bottom:8px">Un matrimonio, un esame, una visita medica. Il sonno prima si adatterà.</span>'+
+          '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'+
+            '<input type="time" id="luciditaInputH" value="15:00" style="max-width:110px;padding:6px 8px;border-radius:var(--r);border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:14px">'+
+            '<button type="button" class="btn pri" id="luciditaSaveBtn" style="padding:6px 14px;font-size:13px;min-height:34px">Salva</button>'+
+            '<button type="button" class="btn g" id="luciditaCancelBtn" style="padding:6px 10px;font-size:13px;min-height:34px">Annulla</button>'+
+          '</div>'+
+        '</div>';
+      $("#luciditaSaveBtn").onclick=()=>{
+        const val=$("#luciditaInputH").value;
+        if(val){ state.evento={d:focusIso, h:val}; salva(); render(); }
+      };
+      $("#luciditaCancelBtn").onclick=()=>renderLuciditaCard();
+    };
+  } else {
+    wrap.innerHTML="";
+  }
+}
+
+function renderOpzLucidita(){
+  const cont=$("#opzLuciditaContent");
+  if(!cont) return;
+  const ev=state.evento;
+  if(ev && ev.d && ev.h){
+    const d=parseIso(ev.d);
+    const dStr=d.toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+    cont.innerHTML=
+      '<div style="background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;margin-bottom:10px">'+
+        '<span style="font-size:12px;color:var(--dim);text-transform:uppercase;font-weight:600;display:block">Evento programmato</span>'+
+        '<b style="font-size:15px;color:var(--ink);display:block;margin:3px 0">'+esc(dStr)+' alle '+esc(ev.h)+'</b>'+
+        '<span style="font-size:12.5px;color:var(--dim)">Il programma di sonno dei giorni precedenti è calibrato per farti svegliare lucido.</span>'+
+      '</div>'+
+      '<button type="button" class="btn g" id="opzLuciditaRimuovi" style="width:100%;min-height:38px;color:var(--risk)">Rimuovi obiettivo</button>';
+    $("#opzLuciditaRimuovi").onclick=()=>{
+      state.evento=null;
+      salva();
+      render();
+      renderOpzLucidita();
+    };
+  } else {
+    cont.innerHTML=
+      '<div style="display:flex;flex-direction:column;gap:10px">'+
+        '<div>'+
+          '<label style="display:block;font-size:12px;font-weight:600;color:var(--dim);margin-bottom:4px" for="opzEvDate">Data dell\'evento:</label>'+
+          '<input type="date" id="opzEvDate" style="width:100%;padding:8px;border-radius:var(--r);border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:14px" min="'+iso(giornoVero())+'" value="'+iso(day(giornoVero(),3))+'">'+
+        '</div>'+
+        '<div>'+
+          '<label style="display:block;font-size:12px;font-weight:600;color:var(--dim);margin-bottom:4px" for="opzEvTime">Ora in cui devi essere lucido:</label>'+
+          '<input type="time" id="opzEvTime" style="width:100%;padding:8px;border-radius:var(--r);border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:14px" value="15:00">'+
+        '</div>'+
+        '<button type="button" class="btn pri" id="opzEvSalva" style="width:100%;min-height:40px;margin-top:4px">Salva obiettivo lucidità</button>'+
+      '</div>';
+    $("#opzEvSalva").onclick=()=>{
+      const d=$("#opzEvDate").value;
+      const h=$("#opzEvTime").value;
+      if(d && h){
+        state.evento={d, h};
+        salva();
+        render();
+        renderOpzLucidita();
+      }
+    };
+  }
+}
+
+if($("#doOpzLucidita")) $("#doOpzLucidita").onclick=()=>{
+  const box=$("#opzBoxLucidita");
+  if(!box) return;
+  const apri=box.hidden;
+  soloUno(apri?"#opzBoxLucidita":null);
+  box.hidden=!apri;
+  if(apri){
+    renderOpzLucidita();
+    if(box.scrollIntoView) box.scrollIntoView({behavior:"smooth",block:"nearest"});
+  }
+};
 
 $("#doIcs").onclick=()=>{ const b=$("#icsBox"); const apri=b.hidden;
   soloUno(apri?"#icsBox":null); b.hidden=!apri;
@@ -6796,14 +7213,6 @@ oSel.onchange=()=>{
   state.pattern=p.p; state.shifts=JSON.parse(JSON.stringify(p.s));
   renderShifts(); render();
 };
-$("#evH").addEventListener("change",()=>{
-  if(!eccMirino) return;
-  const h=$("#evH").value;
-  state.evento = h ? {d:iso(eccMirino), h} : null;
-  $("#evVia").hidden = !h;
-  salva(); render();
-});
-$("#evVia").onclick=()=>{ $("#evH").value=""; state.evento=null; $("#evVia").hidden=true; salva(); render(); };
 $("#caffS").addEventListener("change",e=>{ state.caffSens=e.target.value; salva(); render(); });
 $("#napT").addEventListener("change",e=>{
   state.napTurno=e.target.value;
