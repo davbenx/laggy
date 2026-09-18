@@ -103,36 +103,39 @@
   function scCalAction(feedUrl, copyId, isCouple) {
     var os = osName();
     var https = feedUrl.replace(/^webcal/, "https");
-    var gcal = "https://calendar.google.com/calendar/render?cid=" + encodeURIComponent(https);
     var cosa = isCouple ? "i riposi in comune" : "i tuoi turni";
+    var icsName = isCouple ? "notturnisti-insieme.ics" : "notturnisti.ics";
+    var gcalSettingsUrl = "https://calendar.google.com/calendar/u/0/r/settings/addbyurl";
+
     if (os === "ios") {
       return '<div style="margin:12px 0">' +
         '<a class="pf-btn" id="pf-sub" href="' + feedUrl + '" style="display:flex;align-items:center;justify-content:center;text-decoration:none;text-align:center">Aggiungi ad Apple Calendar (1 tocco) →</a>' +
         '<div style="display:flex;justify-content:center;align-items:center;gap:14px;margin-top:8px;font-size:13px">' +
           '<button type="button" id="' + copyId + '" style="background:none;border:none;color:var(--blue);font-size:13px;font-weight:600;cursor:pointer;padding:4px 0">Copia link feed</button>' +
           '<span style="color:var(--line)">·</span>' +
-          '<a href="' + gcal + '" target="_blank" rel="noopener" style="color:var(--dim);text-decoration:none;padding:4px 0">Google Calendar</a>' +
+          '<a href="' + https + '" download="' + icsName + '" style="color:var(--dim);text-decoration:none;padding:4px 0">Scarica file .ics</a>' +
         '</div>' +
       '</div>';
     }
     if (os === "android") {
       return '<div style="margin:12px 0">' +
-        '<a class="pf-btn" id="pf-gcal" href="' + gcal + '" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;text-decoration:none;text-align:center">Aggiungi a Google Calendar (1 tocco) →</a>' +
-        '<div style="display:flex;justify-content:center;align-items:center;gap:14px;margin-top:8px;font-size:13px">' +
-          '<button type="button" id="' + copyId + '" style="background:none;border:none;color:var(--blue);font-size:13px;font-weight:600;cursor:pointer;padding:4px 0">Copia link feed</button>' +
+        '<a class="pf-btn" id="pf-ics" href="' + https + '" download="' + icsName + '" style="display:flex;align-items:center;justify-content:center;text-decoration:none;text-align:center">Importa in Google Calendar (.ics) →</a>' +
+        '<div style="display:flex;justify-content:center;align-items:center;gap:14px;margin-top:8px;font-size:13px;flex-wrap:wrap">' +
+          '<a href="' + feedUrl + '" style="color:var(--blue);text-decoration:none;font-weight:600;padding:4px 0">Samsung Calendar (1 tocco)</a>' +
           '<span style="color:var(--line)">·</span>' +
-          '<a href="' + feedUrl + '" style="color:var(--dim);text-decoration:none;padding:4px 0">Samsung / Altri</a>' +
+          '<button type="button" id="' + copyId + '" style="background:none;border:none;color:var(--dim);font-size:13px;cursor:pointer;padding:4px 0">Copia link per PC</button>' +
         '</div>' +
-        '<p class="pf-note" style="text-align:center;margin:6px 0 0">Si apre Google Calendar: tocca <b>Aggiungi</b> per sincronizzare ' + cosa + '.</p>' +
+        '<p class="pf-note" style="text-align:center;margin:6px 0 0">Tocca <b>Scarica</b> e poi <b>Apri</b>: Google Calendar si aprirà con i turni pronti da salvare.<br>Per la sincronizzazione da link, incolla il feed da computer in Google Calendar.</p>' +
       '</div>';
     }
     return '<div style="margin:12px 0">' +
-      '<a class="pf-btn" id="pf-gcal" href="' + gcal + '" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;text-decoration:none;text-align:center">Aggiungi a Google Calendar →</a>' +
+      '<a class="pf-btn" id="pf-gcal" href="' + gcalSettingsUrl + '" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;text-decoration:none;text-align:center">Aggiungi a Google Calendar (Web) →</a>' +
       '<div style="display:flex;justify-content:center;align-items:center;gap:14px;margin-top:8px;font-size:13px">' +
-        '<a href="' + feedUrl + '" style="color:var(--blue);text-decoration:none;font-weight:600;padding:4px 0">Apple Calendar</a>' +
+        '<button type="button" id="' + copyId + '" style="background:none;border:none;color:var(--blue);font-weight:600;font-size:13px;cursor:pointer;padding:4px 0">Copia link feed</button>' +
         '<span style="color:var(--line)">·</span>' +
-        '<button type="button" id="' + copyId + '" style="background:none;border:none;color:var(--dim);font-size:13px;cursor:pointer;padding:4px 0">Copia link</button>' +
+        '<a href="' + feedUrl + '" style="color:var(--dim);text-decoration:none;padding:4px 0">Apple Calendar</a>' +
       '</div>' +
+      '<p class="pf-note" style="text-align:center;margin:6px 0 0">Copia il link e incollalo nel campo "URL del calendario" su Google Calendar.</p>' +
     '</div>';
   }
 
