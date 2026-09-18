@@ -39,3 +39,24 @@ test("buildSchedule: genera notifiche per i giorni futuri senza errori", () => {
     assert.ok(item.at.getTime() >= Date.now(), "le notifiche devono essere future");
   }
 });
+
+test("resolveNextAction: turno non inserito (c === '?')", () => {
+  const e = createEngine({ pattern: "N", anchor: "2026-09-17", focus: "2026-09-25", repeat: false });
+  const P = e.plan();
+  assert.equal(P.b.c, "?");
+  const res = resolveNextAction({ nowMins: 600, P, b: P.b });
+  assert.equal(res.status, "Turno non impostato");
+  assert.equal(res.next.type, "missing_shift");
+});
+
+test("navigazione: turnazione ciclica infinita supporta offset arbitrari positivi e negativi", () => {
+  const e = createEngine({ pattern: "MMPNR", anchor: "2026-09-17", focus: "2026-09-17", repeat: true });
+  assert.notEqual(e.codeAt(100), "?");
+  assert.notEqual(e.codeAt(-500), "?");
+  assert.notEqual(e.codeAt(1000), "?");
+  // Con CFG.H esteso dinamicamente, la simulazione include giorni arbitrariamente lontani
+  e.CFG.H = 150;
+  const P = e.plan();
+  assert.ok(e.at(P.S, 100), "giorno +100 deve avere dati di simulazione");
+  assert.ok(e.at(P.S, -100), "giorno -100 deve avere dati di simulazione");
+});

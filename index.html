@@ -189,6 +189,7 @@ font-weight:700;padding:5px 10px;border-radius:999px;white-space:nowrap}
 /* pillola col turno (o "Riposo"), come nel mockup — non più testo semplice */
 .shiftpill{display:inline-block;background:var(--blue-soft);color:var(--blue);font-size:12px;
 font-weight:700;padding:5px 10px;border-radius:999px;white-space:nowrap}
+.shiftpill.warn{background:var(--risk-soft);color:var(--risk);border:1px solid var(--risk-lt)}
 .status{background:var(--s1);border-left:3px solid var(--blue);border-radius:var(--r);padding:13px 15px;margin-bottom:var(--gap-sezione)}
 .status p{font-size:16px;line-height:1.55}
 .status.warn{border-left-color:var(--risk);background:var(--risk-soft)}
@@ -2817,7 +2818,7 @@ const esc = x => String(x==null?"":x).replace(/[&<>"']/g,
 const COL={R:"var(--faint)"};
 const colorOf=c=>{ const k=Object.keys(state.shifts); const i=k.indexOf(c);
   return i<0?COL.R:["var(--orange-fill)","var(--blue)","var(--blue-lt)","var(--orange)","#7A6BB5","#3F8F7F"][i%6]; };
-const nameOf=c=>state.shifts[c]?state.shifts[c].n:"Riposo";
+const nameOf=c=>c==="?"?"Da inserire":(state.shifts[c]?state.shifts[c].n:"Riposo");
 // un codice turno è "notturno" se attraversa o parte nel cuore della notte
 function isNightCode(c){ const sh=state.shifts&&state.shifts[c]; if(!sh) return false;
   try{ const b={rest:false,start:sh.s,end:sh.e}; return NT.spansNight(b)||NT.startsInNight(b); }catch(e){ return false; } }
@@ -2901,6 +2902,7 @@ function conto(P){
   const q = m => hhmm(m);
 
   if(!b.rest) r.push("Oggi lavori dalle "+q(b.start)+" alle "+q(b.end)+" ("+nameOf(b.code||b.c)+").");
+  else if(b.c==="?") r.push("Turno di oggi non impostato: orari stimati su una giornata di riposo.");
   else r.push("Oggi è riposo: nessun orario obbligato.");
 
   if(s.kind === "pre-turno"){
@@ -3183,6 +3185,11 @@ function cards(P){
       val: hhmm(b.start)+" → "+hhmm(b.end),
       small: "<b>"+esc(nameOf(b.c))+"</b>",
       at: b.start});
+  } else if(b.c==="?"){
+    out.push({k:"turno_mancante", lab:"Turno non impostato",
+      val: "Nessun turno registrato",
+      small: "<b>Tocca per impostarlo</b>",
+      at: 480});
   }
 
   // ── Sonnolenza massima: il minimo corporeo (temperatura profonda), non
@@ -3592,7 +3599,9 @@ function render(){
   // render, prima di tutto il resto — così resta corretto anche se il
   // ciclo cambia lunghezza a sessione aperta.
   const lunghezzaCiclo = (state.pattern||"").replace(/[^A-Za-z]/g,"").length;
-  NT.CFG.H = Math.max(24, lunghezzaCiclo*2 + 14);
+  const largh = Math.max(13, passoCiclo());
+  const maxOff = Math.max(Math.abs(cicloOff - 2), Math.abs(cicloOff + largh));
+  NT.CFG.H = Math.max(24, lunghezzaCiclo*2 + 14, maxOff + 14);
   const P=NT.plan(), f=state.focus, S=P.S;
   const ess = state.vista!=="dettaglio";
   document.body.classList.toggle("essenziale", ess);
@@ -3635,6 +3644,8 @@ function render(){
 // parte) legge window.render dopo un acquisto/ripristino per aggiornare la
 // UI, quindi va esposta esplicitamente.
 window.render = render;
+window.state = state;
+window.salva = salva;
 
 function aggiornaVista(){
   const ess = state.vista!=="dettaglio";
@@ -3892,12 +3903,18 @@ function renderOra(Pfocus){
   const severeNow = r && r.now && r.now.value < -0.65 && !b.rest;
 
   const isSevere = kssSleepy || inNadir || inSmonto || riskImminent || severeNow;
+  const isMissing = b.c === "?";
 
   const A = isToday ? adessoLine(P, vero) : null;
   const sleeping = A && A.t==="Dovresti dormire";
   let title, sub, accent = false, oraIc = ICON.eye;
 
-  if(isSevere){
+  if(isMissing){
+    accent = true;
+    title = "Turno non impostato per oggi";
+    sub = "Tocca per inserire il turno e calcolare orari precisi di sonno, pause e caffeina.";
+    oraIc = ICON.alarm;
+  } else if(isSevere){
     accent = true;
     if(kssSleepy){
       title = "Sei assonnato adesso";
@@ -3944,13 +3961,19 @@ function renderOra(Pfocus){
     oraIc = (title && /caff/i.test(title)) ? ICON.coffee : ICON.eye;
   }
 
-  el.innerHTML = '<div class="ora-card' + (accent ? " risk" : "") + '">' +
+  el.innerHTML = '<div class="ora-card' + (accent ? " risk" : "") + '"' + (isMissing ? ' style="cursor:pointer" title="Tocca per inserire il turno di oggi"' : "") + '>' +
     '<div class="ora-h"><span class="ora-ic">' + oraIc + '</span>' +
     '<div class="ora-tx"><span class="eyebrow">Adesso</span>' +
     '<b>' + esc(title) + '</b></div></div>' +
     '<span class="ora-sub">' + esc(sub) + '</span>' +
     '</div>';
 }
+if($("#ora")) $("#ora").addEventListener("click", () => {
+  const vero = giornoVero();
+  let c = null;
+  try { c = NT.codeAt(dnum(vero) - dnum(state.focus)); } catch(e){}
+  if(c === "?") { haptic(10); apriEcc(vero); }
+});
 
 // Orientamento minimo per chi arriva da un link condiviso senza aver mai
 // usato l'app: non il wizard intero (i turni sono già configurati dal
@@ -4560,6 +4583,14 @@ function inWin(m,a,b){ return m>=a && m<b; }
 function adessoLine(P, riferimento){
   const rifMid = new Date(riferimento.getFullYear(), riferimento.getMonth(), riferimento.getDate());
   const m = Math.round((new Date() - rifMid) / 60000), b=P.b;
+  if(b.c === "?"){
+    return {
+      t: "Turno non impostato per oggi",
+      s: "Tocca per inserire il turno e calcolare sonno, riposo e caffeina.",
+      missingShift: true,
+      fallback: false
+    };
+  }
   if(inWin(m,P.s.onset,P.end)) return {t:"Dovresti dormire",s:hhmm(P.s.onset)+" → "+hhmm(P.end)};
   for(const n of (P.naps||[])) if(inWin(m,n.a,n.b)) return {t:"È l'ora del pisolino",s:hhmm(n.a)+" → "+hhmm(n.b)};
   let restoFallback=null;
@@ -4637,7 +4668,8 @@ let cicloOff=0;   // scorrimento della finestra del ciclo (0 = intorno a oggi)
 // alla lunghezza vera del ciclo (aggiornaFinestraSim, più sotto) — funzioni,
 // non costanti fisse: altrimenti resterebbero legate al valore di CFG.H di
 // quando lo script è partito, ignorando un ciclo più lungo caricato dopo.
-const cicloMin = () => -(NT.CFG.H-2), cicloMax = () => NT.CFG.H-10;
+const cicloMin = () => (state.repeat !== false ? -Infinity : -(NT.CFG.H-2));
+const cicloMax = () => (state.repeat !== false ? Infinity : NT.CFG.H-10);
 // Striscia compatta: la forma della giornata in un colpo d'occhio, senza
 // assi né legenda tecnica a fianco — come il grafico del sonno di Apple
 // Health, non come la timeline di dettaglio (#band) che resta un livello
@@ -4831,6 +4863,14 @@ function renderEssenziale(P, CARDS){
       voci.push({t, html:riga("pasti","Pasti",ora||cd.val,cd.small||"",false,ICON.plate,dett(cd))});
     } else if(cd.k==="t"){
       voci.push({t, html:riga("rientro",cd.lab,ora||cd.val,frase(cd.val,ora)||cd.small||"",!P.b.rest,ICON.car,dett(cd))});
+    } else if(cd.k==="turno_mancante"){
+      voci.push({t, html:
+        '<div class="essrow warn" style="cursor:pointer" onclick="haptic(10);apriEcc(state.focus);">'+
+        '<span class="eic">'+ICON.alarm+'</span>'+
+        '<div class="ev"><div class="el">Turno non impostato</div>'+
+        '<div class="es"><b>Tocca per impostarlo</b></div></div>'+
+        '<div class="en mono">?</div>'+
+        '</div>'});
     } else if(cd.k==="turno"){
       voci.push({t, html:riga("turno","Turno",cd.val,cd.small,false,ICON.alarm,null)});
     } else if(cd.k==="cbt"){
@@ -4886,11 +4926,14 @@ function renderHeader(P, f){
   // "saltava" di dimensione a seconda del giorno mostrato.
   const bt=$("#goToday");
   if(bt){ bt.textContent = scarto===0 ? "Naviga" : "Torna a oggi"; bt.classList.toggle("full", scarto!==0); }
-  // "Oggi, martedì 15" / "Domani, mercoledì 16" per i due giorni più
-  // vicini; più lontano (avanti o indietro) solo la data. Senza mese:
-  // la dimensione/formato di questo testo è la stessa di un titolo di
-  // sezione ("Turni"), e un mese in più lo allungava oltre quel ruolo.
-  const giornoTxt = f.toLocaleDateString("it-IT",{weekday:"long",day:"numeric"});
+  const stessoMese = f.getMonth() === giornoVero().getMonth() && f.getFullYear() === giornoVero().getFullYear();
+  const stessoAnno = f.getFullYear() === giornoVero().getFullYear();
+  const giornoTxt = f.toLocaleDateString("it-IT", {
+    weekday: "long",
+    day: "numeric",
+    ...(!stessoMese ? { month: "short" } : {}),
+    ...(!stessoAnno ? { year: "numeric" } : {})
+  });
   const dataTesto = scarto===0 ? "Oggi, "+giornoTxt
     : scarto===1 ? "Domani, "+giornoTxt
     : scarto===-1 ? "Ieri, "+giornoTxt
@@ -4903,7 +4946,13 @@ function renderHeader(P, f){
   const serie=serieTurnoCorrente();
   const pillEl=$("#shiftPill");
   if(pillEl){
-    pillEl.textContent = serie ? nameOf(c)+" "+serie.posizione+"/"+serie.totale : nameOf(c);
+    if(c==="?"){
+      pillEl.textContent = "Da impostare";
+      pillEl.className = "shiftpill warn";
+    } else {
+      pillEl.textContent = serie ? nameOf(c)+" "+serie.posizione+"/"+serie.totale : nameOf(c);
+      pillEl.className = "shiftpill";
+    }
     pillEl.style.cursor = "pointer";
     pillEl.title = "Tocca per cambiare turno o inserire un'eccezione";
     pillEl.onclick = () => { haptic(10); apriEcc(state.focus); };
@@ -4917,24 +4966,22 @@ function renderHeader(P, f){
   if(bn){
     bn.textContent = nomeCiclo;
     const oggi=NT.codeAt(dnum(giornoVero())-dnum(state.focus));
-    bd.textContent=state.pattern+" · oggi "+(state.shifts[oggi]?state.shifts[oggi].n:"riposo");
+    bd.textContent=state.pattern+" · oggi "+(oggi==="?"?"da inserire":(state.shifts[oggi]?state.shifts[oggi].n:"riposo"));
   }
   // "Il tuo ciclo — Sanità in quinta", come nel mockup: prima diceva solo
   // "Il tuo ciclo", il nome viveva solo nel vecchio #setbar (nascosto dai tab).
   const cn=$("#ciclNome"); if(cn) cn.textContent=" — "+nomeCiclo;
   let [cls,msg]=statusLine(P);
-  if(!NT.freeWakeOk()){ cls="warn";
+  if(c==="?") {
+    cls="warn";
+    msg='Non so che turno hai oggi: il turno che hai inserito copre altri giorni. <button class="lnk" data-act="apri-ecc-oggi">Inserisci il turno di oggi →</button>';
+  }
+  else if(!NT.freeWakeOk()){ cls="warn";
     msg="La risposta sul risveglio in ferie ("+esc(state.freeWake)+") non è plausibile: "+
         "nessuno apre gli occhi da solo a quell'ora. Sto calcolando tutto su "+hhmm(NT.freeWakeUsata())+
         ", ma <button class=\"lnk\" data-goto=\"sonno\">correggila →</button> o il piano resta storto."; }
-  else if(c==="?") { cls="warn"; msg="Non so che turno hai oggi: il turno che hai inserito copre altri giorni. Aggiungi in fondo alla sequenza quello nuovo appena te lo comunicano."; }
   else if(state.repeat===false && [1,2,3,4].some(o=>NT.codeAt(o)==="?"))
     msg+=" (Da qui a pochi giorni finisce il turno che hai inserito: da lì in poi il piano vale solo se resti a riposo.)";
-  // Il promemoria "Salvala ora" viveva qui prima — ora la spunta
-  // obbligatoria a fine wizard copre lo stesso bisogno in ogni via
-  // d'uscita (verificato: sia "Avanti" sull'ultimo passo sia il
-  // salvataggio anticipato da un passo precedente ci passano), quindi un
-  // secondo promemoria fuori dal wizard era solo rumore in più.
   $("#status").className="status "+cls; $("#status").innerHTML="<p>"+msg+"</p>";
 }
 
@@ -5062,11 +5109,10 @@ function renderStrip(P, f, S){
   if(rangeEl){
     const d1=day(f,finLo), d2=day(f,finHi);
     const stessoMese = d1.getMonth()===d2.getMonth() && d1.getFullYear()===d2.getFullYear();
-    // "Turni 13–27 settembre": fa anche da titolo della tab, non c'è più
-    // un h1 "Turni" separato sopra.
+    const annoCorrente = new Date().getFullYear();
     rangeEl.textContent = "Turni "+(stessoMese
-      ? d1.getDate()+"–"+d2.toLocaleDateString("it-IT",{day:"numeric",month:"long"})
-      : d1.toLocaleDateString("it-IT",{day:"numeric",month:"long"})+" – "+d2.toLocaleDateString("it-IT",{day:"numeric",month:"long"}));
+      ? d1.getDate()+"–"+d2.toLocaleDateString("it-IT",{day:"numeric",month:"long", ...(d2.getFullYear() !== annoCorrente ? {year:"numeric"} : {})})
+      : d1.toLocaleDateString("it-IT",{day:"numeric",month:"short"})+" – "+d2.toLocaleDateString("it-IT",{day:"numeric",month:"long", ...(d2.getFullYear() !== annoCorrente ? {year:"numeric"} : {})}));
   }
 }
 
@@ -5862,7 +5908,7 @@ function apriBifasico(){
   apriSezioneInline(4);
   const q=$("#mattinoBif"); if(q && q.scrollIntoView) setTimeout(()=>q.scrollIntoView({behavior:"smooth",block:"center"}),80);
 }
-$("#goToday").onclick=()=>{ state.focus=giornoVero(); render(); };
+$("#goToday").onclick=()=>{ state.focus=giornoVero(); cicloOff=0; render(); };
 $("#prev").onclick=()=>{state.focus=day(state.focus,-1);render()};
 $("#next").onclick=()=>{state.focus=day(state.focus,1);render()};
 // Il selettore nativo del telefono, non un calendario costruito da zero:
@@ -5880,14 +5926,14 @@ if($("#jumpDate")){
     const v=e.target.value;
     if(!/^\d{4}-\d{2}-\d{2}$/.test(v||"")) return;
     const d=new Date(v+"T12:00:00"); if(isNaN(+d)) return;
-    state.focus=d; render();
+    state.focus=d; cicloOff=0; render();
   });
 }
 let eccAppena=false;   // un tocco lungo non deve anche far saltare al giorno
 function jump(e){ const el=e.target.closest(".crow"); if(!el) return;
   if(e.type==="keydown"&&e.key!=="Enter"&&e.key!==" ") return;
   if(eccAppena){ eccAppena=false; e.preventDefault(); return; }
-  e.preventDefault(); state.focus=day(state.focus,+el.dataset.off); render(); }
+  e.preventDefault(); state.focus=day(state.focus,+el.dataset.off); cicloOff=0; render(); }
 $("#cyc").addEventListener("click",jump);
 $("#cyc").addEventListener("keydown",jump);
 
@@ -6131,12 +6177,20 @@ if($("#doPartner")) $("#doPartner").onclick=apriVederci;
 if($("#chiudiVederci")) $("#chiudiVederci").onclick=chiudiVederci;
 
 const cycGo=n=>{
-  cicloOff=Math.max(cicloMin(), Math.min(cicloMax(), n));
+  if(state.repeat !== false){
+    cicloOff = n;
+  } else {
+    cicloOff = Math.max(cicloMin(), Math.min(cicloMax(), n));
+  }
   const b=$("#cycToday");
-  if(b){ b.textContent = cicloOff===0 ? "Naviga" : "Torna a oggi"; b.classList.toggle("full", cicloOff!==0); }
+  if(b){
+    const diverso = cicloOff!==0 || dnum(state.focus)!==dnum(giornoVero());
+    b.textContent = diverso ? "Torna a oggi" : "Naviga";
+    b.classList.toggle("full", diverso);
+  }
   const p=$("#cycPrev"), nx=$("#cycNext");
-  if(p) p.disabled = cicloOff<=cicloMin();
-  if(nx) nx.disabled = cicloOff>=cicloMax();
+  if(p) p.disabled = state.repeat !== false ? false : cicloOff<=cicloMin();
+  if(nx) nx.disabled = state.repeat !== false ? false : cicloOff>=cicloMax();
   render();
 };
 // Le tre sezioni di Opzioni non aprono più il wizard a schermo pieno — lo
@@ -6233,7 +6287,7 @@ function finestraCiclo(){
 }
 if($("#cycPrev"))  $("#cycPrev").onclick =()=>cycGo(cicloOff-passoCiclo());
 if($("#cycNext"))  $("#cycNext").onclick =()=>cycGo(cicloOff+passoCiclo());
-if($("#cycToday")) $("#cycToday").onclick=()=>cycGo(0);
+if($("#cycToday")) $("#cycToday").onclick=()=>{ state.focus=giornoVero(); cycGo(0); };
 
 if($("#doCycQR")) $("#doCycQR").onclick=()=>{
   const b=$("#qrBoxCyc"); if(!b) return;
@@ -7276,6 +7330,7 @@ if($("#partner")) $("#partner").addEventListener("click", e=>{
 });
 if($("#status")) $("#status").addEventListener("click", e=>{
   if(e.target.closest('[data-goto="sonno"]')) apriFinestraSonno();
+  if(e.target.closest('[data-act="apri-ecc-oggi"]')) { haptic(10); apriEcc(state.focus); }
 });
 if($("#andamenti")) $("#andamenti").addEventListener("click", e=>{
   const ap=e.target.closest("[data-apply-field]");

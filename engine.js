@@ -1093,6 +1093,16 @@ export function resolveNextAction(params) {
   }
 
   // 7. Giorno di riposo o serata libera
+  if (b.c === "?") {
+    status = "Turno non impostato";
+    next = {
+      type: "missing_shift", at: "Oggi",
+      title: "Inserisci il turno",
+      desc: "Non è stato impostato alcun turno per oggi. Inseriscilo per calcolare gli orari corretti.",
+      urgency: "warning"
+    };
+    return { status, next };
+  }
   if (b.rest) {
     status = "Giorno di riposo";
     if (m < P.s.onset) {
