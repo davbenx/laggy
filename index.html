@@ -358,6 +358,7 @@ font-size:22px;line-height:1;cursor:pointer;padding:0 0 4px 10px;min-height:0}
 .ct{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:7px}
 .val{font-size:23px;font-weight:600;line-height:1.25;font-variant-numeric:tabular-nums}
 .val small{font-size:12.5px;color:var(--dim);font-weight:400}
+.val small b{font-weight:700;color:var(--ink)}
 .sub{color:var(--dim);font-size:16px;margin-top:5px;line-height:1.55}
 .rows{margin-top:10px;border-top:1px solid var(--line);padding-top:9px}
 /* Separatore fra sezioni impilate nello stesso riquadro (Il tuo andamento):
@@ -589,6 +590,7 @@ transition:transform .15s ease;padding-left:2px}
 .dwhen{display:block;font-size:12.5px;font-weight:600;letter-spacing:.03em;color:var(--dim);
 text-transform:none;margin-bottom:1px;font-variant-numeric:normal}
 .essrow .es{font-size:12.5px;color:var(--dim);margin-top:2px;line-height:1.4;text-transform:none;letter-spacing:normal}
+.essrow .es b{font-weight:700;color:var(--ink)}
 .essrow.warn .en{color:var(--risk)}
 /* icona di stato nel blocco Ora: badge a cerchio, stesso motivo ripreso
    in Turni e Più — prima l'icona era "nuda", senza nulla dietro. */
@@ -3179,7 +3181,7 @@ function cards(P){
   if(!b.rest){
     out.push({k:"turno", lab:"Il tuo turno",
       val: hhmm(b.start)+" → "+hhmm(b.end),
-      small: esc(nameOf(b.c)),
+      small: "<b>"+esc(nameOf(b.c))+"</b>",
       at: b.start});
   }
 
