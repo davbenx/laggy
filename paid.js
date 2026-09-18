@@ -97,6 +97,7 @@
     var s = getSub();
     var feed = s.feedUrl || "";
     var https = feed.replace(/^webcal/, "https");
+    var gcal = "https://calendar.google.com/calendar/render?cid=" + encodeURIComponent(https);
     var url = donateUrl();
     // Il link di ripristino contiene la writeKey — non lo rendiamo mai navigabile
     // (href) per evitare che finisca in cronologia browser, preview WhatsApp,
@@ -104,8 +105,27 @@
     var restoreText = restoreLink(s);
     return '<h2 class="pf-h">Il tuo calendario</h2>' +
       '<p class="pf-p">Iscrivi il calendario del telefono a questo indirizzo. Da lì in poi si aggiorna da solo.</p>' +
-      '<a class="pf-lnk" id="pf-sub" href="' + feed + '">Aggiungi al calendario (iPhone/Mac) →</a>' +
-      '<p class="pf-note"><b>Android / Google:</b> apri Google Calendar sul web → Altri calendari → <b>Da URL</b> → incolla:<br>' + https + '</p>' +
+      '<div style="display:flex;flex-direction:column;gap:8px;margin:12px 0">' +
+        '<a class="pf-btn" id="pf-gcal" href="' + gcal + '" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;text-decoration:none;text-align:center">Aggiungi a Google Calendar (Android / PC) →</a>' +
+        '<a class="pf-lnk" id="pf-sub" href="' + feed + '" style="margin:0;text-align:center">Apple / Samsung Calendar (1 tocco) →</a>' +
+        '<div style="display:flex;gap:8px;margin-top:4px">' +
+          '<button type="button" class="pf-btn" id="pf-copy-feed" style="flex:1;background:var(--s2);color:var(--ink);border:1px solid var(--line);min-height:40px;font-size:13px;padding:8px 10px">Copia link feed</button>' +
+          '<a href="' + https + '" download="notturnisti.ics" class="pf-btn" style="flex:1;background:var(--s2);color:var(--ink);border:1px solid var(--line);min-height:40px;font-size:13px;padding:8px 10px;text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center">Scarica file .ics</a>' +
+        '</div>' +
+      '</div>' +
+      '<details style="margin:10px 0 14px;font-size:12.5px;color:var(--dim);line-height:1.5">' +
+        '<summary style="cursor:pointer;font-weight:600;color:var(--blue)">Guida sincronizzazione Android ▾</summary>' +
+        '<div style="margin-top:8px;padding:10px;background:var(--s2);border-radius:6px;border:1px solid var(--line)">' +
+          '<ol style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:5px">' +
+            '<li>Tocca <b>Aggiungi a Google Calendar</b> (si apre nel browser).</li>' +
+            '<li>Conferma toccando <b>Aggiungi calendario</b>.</li>' +
+            '<li>Sull\'app Google Calendar dello smartphone: apri il menu <b>☰ &gt; Impostazioni &gt; tocca il tuo account &gt; Notturnisti</b> e spunta <b>Sincronizza</b>.</li>' +
+          '</ol>' +
+          '<div style="margin-top:6px;font-size:11.5px;color:var(--faint)">' +
+            'Su <b>Samsung Galaxy</b> tocca direttamente <i>Apple / Samsung Calendar</i> per collegarlo all\'app di sistema.' +
+          '</div>' +
+        '</div>' +
+      '</details>' +
       '<p class="pf-note">L\'aggiornamento non è istantaneo: ogni calendario decide da sé ogni quanto ricontrollare (spesso qualche ora, a volte un giorno intero) — non dipende da noi, e da qui non c\'è modo di farlo controllare più spesso.</p>' +
       '<button class="pf-btn" id="pf-sync" style="margin-top:12px">Sincronizza i turni di adesso</button>' +
       '<p class="pf-note">Aggiorna il feed con la configurazione attuale del pianificatore.</p>' +
@@ -124,14 +144,34 @@
     var s = getSub();
     var coupleUrl = (s.feedUrl || "").replace("/feed/", "/couple/");
     var https = coupleUrl.replace(/^webcal/, "https");
+    var gcalCouple = "https://calendar.google.com/calendar/render?cid=" + encodeURIComponent(https);
     if (!r.pPattern)
       return '<h2 class="pf-h">Calendario di coppia</h2>' +
         '<p class="pf-p">Il partner si imposta una volta sola, nella scheda <b>Quando sono disponibile → Aggiungi una persona</b>. ' +
         'Da lì i vostri riposi in comune arrivano anche qui, come calendario da iscrivere che si aggiorna da solo.</p>';
     return '<h2 class="pf-h">Calendario di coppia</h2>' +
       '<p class="pf-p">Partner impostato. Iscrivi questo calendario: mostra i <b>riposi in comune</b> nei prossimi 60 giorni e si aggiorna da solo.</p>' +
-      '<a class="pf-lnk" id="pf-csub" href="' + coupleUrl + '">Aggiungi il calendario di coppia →</a>' +
-      '<p class="pf-note">Android/Google: <b>Da URL</b> →<br>' + https + '</p>' +
+      '<div style="display:flex;flex-direction:column;gap:8px;margin:12px 0">' +
+        '<a class="pf-btn" id="pf-gcal-couple" href="' + gcalCouple + '" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;text-decoration:none;text-align:center">Aggiungi a Google Calendar (Android / PC) →</a>' +
+        '<a class="pf-lnk" id="pf-csub" href="' + coupleUrl + '" style="margin:0;text-align:center">Apple / Samsung Calendar (1 tocco) →</a>' +
+        '<div style="display:flex;gap:8px;margin-top:4px">' +
+          '<button type="button" class="pf-btn" id="pf-copy-couple" style="flex:1;background:var(--s2);color:var(--ink);border:1px solid var(--line);min-height:40px;font-size:13px;padding:8px 10px">Copia link feed</button>' +
+          '<a href="' + https + '" download="notturnisti-insieme.ics" class="pf-btn" style="flex:1;background:var(--s2);color:var(--ink);border:1px solid var(--line);min-height:40px;font-size:13px;padding:8px 10px;text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center">Scarica file .ics</a>' +
+        '</div>' +
+      '</div>' +
+      '<details style="margin:10px 0 14px;font-size:12.5px;color:var(--dim);line-height:1.5">' +
+        '<summary style="cursor:pointer;font-weight:600;color:var(--blue)">Guida sincronizzazione Android ▾</summary>' +
+        '<div style="margin-top:8px;padding:10px;background:var(--s2);border-radius:6px;border:1px solid var(--line)">' +
+          '<ol style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:5px">' +
+            '<li>Tocca <b>Aggiungi a Google Calendar</b> (si apre nel browser).</li>' +
+            '<li>Conferma toccando <b>Aggiungi calendario</b>.</li>' +
+            '<li>Sull\'app Google Calendar dello smartphone: apri il menu <b>☰ &gt; Impostazioni &gt; tocca il tuo account &gt; Notturnisti Insieme</b> e spunta <b>Sincronizza</b>.</li>' +
+          '</ol>' +
+          '<div style="margin-top:6px;font-size:11.5px;color:var(--faint)">' +
+            'Su <b>Samsung Galaxy</b> tocca direttamente <i>Apple / Samsung Calendar</i> per collegarlo all\'app di sistema.' +
+          '</div>' +
+        '</div>' +
+      '</details>' +
       '<p class="pf-note">Come sopra: l\'aggiornamento non è istantaneo, lo decide il calendario che usi, non c\'è modo di forzarlo da qui.</p>' +
       '<button class="pf-btn" id="pf-couple-sync">Sincronizza il partner</button>' +
       '<p class="pf-note">Aggiorna il feed con la sequenza del partner impostata in Turni.</p>';
@@ -176,6 +216,13 @@
       var s = getSub(); api("DELETE", "/config/" + s.id, null, s.writeKey).then(function () { clearSub(); screen = "attiva"; paint(); toast("Cancellato"); });
     };
     var cp = $("#pf-copy"); if (cp) cp.onclick = function () { copyText(restoreLink(getSub())); };
+    var cpFeed = $("#pf-copy-feed");
+    if (cpFeed) cpFeed.onclick = function () {
+      var s = getSub();
+      var feed = (s && s.feedUrl) || "";
+      var https = feed.replace(/^webcal/, "https");
+      copyText(https);
+    };
     var dl = $("#pf-dl"); if (dl) dl.onclick = function () {
       var s = getSub();
       downloadTxt("notturnisti-accesso.txt",
@@ -190,6 +237,13 @@
       api("PUT", "/config/" + s.id, { cfg: paramsObj() }, s.writeKey).then(function (r) {
         toast(r.ok ? "Partner sincronizzato" : "Errore di sincronizzazione");
       });
+    };
+    var cpCouple = $("#pf-copy-couple");
+    if (cpCouple) cpCouple.onclick = function () {
+      var s = getSub();
+      var coupleUrl = ((s && s.feedUrl) || "").replace("/feed/", "/couple/");
+      var https = coupleUrl.replace(/^webcal/, "https");
+      copyText(https);
     };
   }
 
@@ -270,7 +324,7 @@
       if (d) {
         d.textContent = t;
         // assegna direttamente per evitare accumulo "show show show..." in sessioni lunghe
-        d.className = "toast show";
+        d.className = "toast on show";
         clearTimeout(toast._tid);
         toast._tid = setTimeout(function () { d.className = "toast"; }, 2200);
       }

@@ -5674,6 +5674,7 @@ function renderPiuCal(){
 
   const coupleUrl = (sub && sub.feedUrl ? sub.feedUrl : "").replace("/feed/", "/couple/");
   const https = coupleUrl.replace(/^webcal/, "https");
+  const gcalCoupleUrl = "https://calendar.google.com/calendar/render?cid=" + encodeURIComponent(https);
 
   let detailsHtml = "";
   if(!hasPartner){
@@ -5690,15 +5691,39 @@ function renderPiuCal(){
       '</div>';
   } else {
     detailsHtml =
-      '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px">' +
         '<span style="color:#2ecc71;font-weight:600;display:flex;align-items:center;gap:6px">' +
           '<span style="width:7px;height:7px;border-radius:50%;background:#2ecc71;display:inline-block"></span>' +
           'Sincronizzazione attiva con '+esc(pName) +
         '</span>' +
         '<button type="button" id="coupleCalManageBtn" style="color:var(--blue);font-size:13px;font-weight:600;padding:0;background:none;border:none;cursor:pointer">Gestisci →</button>' +
       '</div>' +
-      '<a href="'+coupleUrl+'" class="pf-lnk" style="margin:6px 0;padding:9px 12px;font-size:13px;text-align:center;display:block;text-decoration:none">Aggiungi al calendario (iPhone/Mac) →</a>' +
-      '<div style="font-size:12px;color:var(--dim);margin-top:4px">Per Google Calendar: apri da web → Altri calendari → Da URL → incolla:<br><code style="word-break:break-all;user-select:all;display:block;margin-top:4px;padding:4px 6px;background:var(--s2);border-radius:4px">'+https+'</code></div>';
+      '<div style="display:flex;flex-direction:column;gap:8px;margin:8px 0">' +
+        '<a href="'+gcalCoupleUrl+'" target="_blank" rel="noopener" class="dbtn pri" style="text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center;padding:10px 14px;border-radius:var(--r);font-size:13.5px;font-weight:600">' +
+          '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;flex:none"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' +
+          'Aggiungi a Google Calendar (Android / PC) →' +
+        '</a>' +
+        '<a href="'+coupleUrl+'" class="dbtn" style="text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center;padding:9px 12px;border-radius:var(--r);font-size:13px;font-weight:600;background:var(--s2);color:var(--ink);border:1px solid var(--line)">' +
+          'Apple / Samsung Calendar (1 tocco) →' +
+        '</a>' +
+        '<div style="display:flex;gap:8px">' +
+          '<button type="button" id="coupleCalCopyBtn" class="btn g" style="flex:1;font-size:12.5px;padding:8px 10px;min-height:38px">Copia link feed</button>' +
+          '<a href="'+https+'" download="notturnisti-insieme.ics" class="btn g" style="flex:1;font-size:12.5px;padding:8px 10px;min-height:38px;text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center">Scarica file .ics</a>' +
+        '</div>' +
+      '</div>' +
+      '<details style="margin-top:10px;font-size:12px;color:var(--dim);line-height:1.5">' +
+        '<summary style="cursor:pointer;font-weight:600;color:var(--blue)">Guida sincronizzazione Android ▾</summary>' +
+        '<div style="margin-top:8px;padding:8px 10px;background:var(--s2);border-radius:6px;border:1px solid var(--line)">' +
+          '<ol style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:5px">' +
+            '<li>Tocca <b>Aggiungi a Google Calendar</b> qui sopra (si apre nel browser).</li>' +
+            '<li>Conferma premendo <b>Aggiungi calendario</b>.</li>' +
+            '<li>Sull\'app Google Calendar del telefono: apri il menu <b>☰ &gt; Impostazioni &gt; tocca il tuo account &gt; Notturnisti Insieme</b> e spunta <b>Sincronizza</b>.</li>' +
+          '</ol>' +
+          '<div style="margin-top:6px;font-size:11.5px;color:var(--faint)">' +
+            'Su <b>Samsung Galaxy</b> puoi usare direttamente il pulsante <i>Apple / Samsung Calendar</i> per aprirlo con l\'app Calendario di sistema.' +
+          '</div>' +
+        '</div>' +
+      '</details>';
   }
 
   el.innerHTML =
@@ -5750,6 +5775,16 @@ function renderPiuCal(){
   if(mgBtn) mgBtn.onclick = ()=>{
     if(window.NTPaid && window.NTPaid.open) window.NTPaid.open("couple");
   };
+  const coupleCopyBtn = $("#coupleCalCopyBtn");
+  if(coupleCopyBtn){
+    coupleCopyBtn.onclick = ()=>{
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(https).then(()=>{ toast("Link feed copiato"); }, ()=>{ prompt("Copia il link:", https); });
+      } else {
+        prompt("Copia il link:", https);
+      }
+    };
+  }
 }
 
 // Tab Turni: Sincronizzazione del calendario normale con toggle diretto e copy Opzione A.
@@ -5760,6 +5795,8 @@ function renderCycCalSync(){
 
   const isPaid = !!(window.NTPaid && window.NTPaid.paid());
   const sub = isPaid ? window.NTPaid.getSub() : null;
+  const feed = (sub && sub.feedUrl) || "";
+  const https = feed.replace(/^webcal/, "https");
   toggle.checked = isPaid;
 
   if(!isPaid){
@@ -5769,18 +5806,41 @@ function renderCycCalSync(){
         '<button type="button" class="btn b" id="cycCalActivateBtn" style="padding:7px 12px;font-size:13px;white-space:nowrap">Attiva sincronizzazione</button>' +
       '</div>';
   } else {
-    const feed = (sub && sub.feedUrl) || "";
-    const https = feed.replace(/^webcal/, "https");
+    const gcalUrl = "https://calendar.google.com/calendar/render?cid=" + encodeURIComponent(https);
     details.innerHTML =
-      '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px">' +
         '<span style="color:#2ecc71;font-weight:600;display:flex;align-items:center;gap:6px">' +
           '<span style="width:7px;height:7px;border-radius:50%;background:#2ecc71;display:inline-block"></span>' +
           'Sincronizzazione attiva' +
         '</span>' +
         '<button type="button" id="cycCalManageBtn" style="color:var(--blue);font-size:13px;font-weight:600;padding:0;background:none;border:none;cursor:pointer">Gestisci →</button>' +
       '</div>' +
-      '<a href="'+feed+'" class="pf-lnk" style="margin:6px 0;padding:9px 12px;font-size:13px;text-align:center;display:block;text-decoration:none">Aggiungi al calendario (iPhone/Mac) →</a>' +
-      '<div style="font-size:12px;color:var(--dim);margin-top:4px">Per Google Calendar: apri da web → Altri calendari → Da URL → incolla:<br><code style="word-break:break-all;user-select:all;display:block;margin-top:4px;padding:4px 6px;background:var(--s2);border-radius:4px">'+https+'</code></div>';
+      '<div style="display:flex;flex-direction:column;gap:8px;margin:8px 0">' +
+        '<a href="'+gcalUrl+'" target="_blank" rel="noopener" class="dbtn pri" style="text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center;padding:10px 14px;border-radius:var(--r);font-size:13.5px;font-weight:600">' +
+          '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;flex:none"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' +
+          'Aggiungi a Google Calendar (Android / PC) →' +
+        '</a>' +
+        '<a href="'+feed+'" class="dbtn" style="text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center;padding:9px 12px;border-radius:var(--r);font-size:13px;font-weight:600;background:var(--s2);color:var(--ink);border:1px solid var(--line)">' +
+          'Apple / Samsung Calendar (1 tocco) →' +
+        '</a>' +
+        '<div style="display:flex;gap:8px">' +
+          '<button type="button" id="cycCalCopyBtn" class="btn g" style="flex:1;font-size:12.5px;padding:8px 10px;min-height:38px">Copia link feed</button>' +
+          '<a href="'+https+'" download="notturnisti.ics" class="btn g" style="flex:1;font-size:12.5px;padding:8px 10px;min-height:38px;text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center">Scarica file .ics</a>' +
+        '</div>' +
+      '</div>' +
+      '<details style="margin-top:10px;font-size:12px;color:var(--dim);line-height:1.5">' +
+        '<summary style="cursor:pointer;font-weight:600;color:var(--blue)">Guida sincronizzazione Android ▾</summary>' +
+        '<div style="margin-top:8px;padding:8px 10px;background:var(--s2);border-radius:6px;border:1px solid var(--line)">' +
+          '<ol style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:5px">' +
+            '<li>Tocca <b>Aggiungi a Google Calendar</b> qui sopra (si apre nel browser).</li>' +
+            '<li>Conferma premendo <b>Aggiungi calendario</b>.</li>' +
+            '<li>Sull\'app Google Calendar del telefono: apri il menu <b>☰ &gt; Impostazioni &gt; tocca il tuo account &gt; Notturnisti</b> e spunta <b>Sincronizza</b>.</li>' +
+          '</ol>' +
+          '<div style="margin-top:6px;font-size:11.5px;color:var(--faint)">' +
+            'Su <b>Samsung Galaxy</b> puoi usare direttamente il pulsante <i>Apple / Samsung Calendar</i> per aprirlo con l\'app Calendario di sistema.' +
+          '</div>' +
+        '</div>' +
+      '</details>';
   }
 
   toggle.onchange = ()=>{
@@ -5800,6 +5860,16 @@ function renderCycCalSync(){
   if(mgBtn) mgBtn.onclick = ()=>{
     if(window.NTPaid && window.NTPaid.open) window.NTPaid.open("account");
   };
+  const copyBtn = $("#cycCalCopyBtn");
+  if(copyBtn){
+    copyBtn.onclick = ()=>{
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(https).then(()=>{ toast("Link feed copiato"); }, ()=>{ prompt("Copia il link:", https); });
+      } else {
+        prompt("Copia il link:", https);
+      }
+    };
+  }
 }
 function NT_planSafe(d){ const f=state.focus; state.focus=new Date(d); let P=null; try{ P=NT.plan(); }catch(e){} state.focus=f; return P; }
 // Valore corrente a destra dei tre bottoni di Opzioni che ne hanno uno solo
