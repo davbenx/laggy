@@ -58,76 +58,61 @@ try{
    forzato su tutti senza eccezioni, solo il default per chi non ha
    deciso nulla. */
 :root{
-  --bg:#14161A; --s1:#1C1F25; --s2:#23272E; --line:#333941;
-  --ink:#E6E8EB; --dim:#A8B0B8; --faint:#98A0A8;
-  --blue:#8CA4C0; --blue-fill:#4A78A8; --blue-soft:#22303F; --blue-lt:#A9BED6; --su-blu:#14161A;
-  --orange-bar:#FF6B35;
-  --orange:#FF9068; --orange-fill:#FF6B35; --orange-soft:#3A2119;
-  --risk:#FF6B5C; --risk-soft:#3A1C18; --risk-line:#7A342C;
-  --sleep-fill:#2C4E6E; --ok:#5FBF85; --on-warm:#15171A;
-  --bg-blur:rgba(11,10,14,.82);
-  --warm-tint:#241C15; --cool-tint:#182029;
-  /* nomi storici, così il resto del codice non cambia */
+  --bg:#090D16; --s1:#121824; --s2:#1A2333; --line:rgba(255,255,255,0.08);
+  --ink:#F1F5F9; --dim:#94A3B8; --faint:#64748B;
+  --blue:#38BDF8; --blue-fill:#0284C7; --blue-soft:rgba(56,189,248,0.12); --blue-lt:#7DD3FC; --su-blu:#090D16;
+  --orange-bar:#FF7A30;
+  --orange:#FB923C; --orange-fill:#FF7A30; --orange-soft:rgba(251,146,60,0.14);
+  --risk:#F87171; --risk-soft:rgba(248,113,113,0.14); --risk-line:rgba(248,113,113,0.35);
+  --sleep-fill:#0284C7; --ok:#34D399; --on-warm:#090D16;
+  --bg-blur:rgba(9,13,22,0.82);
+  --warm-tint:#1F1710; --cool-tint:#0E1724;
   --violet:var(--blue); --violetd:var(--blue-soft);
   --amber:var(--orange);
-  /* Raggio più morbido (era 4px): stessa identità cromatica, materialità
-     più moderna — un solo token, si applica ovunque senza toccare ogni
-     componente uno per uno. */
-  --r:14px;
-  /* Ritmo verticale di Oggi: un solo valore per la distanza fra i blocchi
-     principali (Adesso, data, striscia, lista) — prima erano sei numeri
-     diversi (20/7/14/22/18px) per lo stesso tipo di distacco. */
+  --r:16px;
   --gap-sezione:20px;
-  /* Elevazione: prima l'app non aveva quasi nessuna ombra. Usata con
-     misura: --shadow-card sulle card (leggera, si ripete spesso in
-     schermata), --shadow-btn sui pulsanti primari (più marcata, un solo
-     bottone alla volta). */
-  --shadow-card:0 2px 10px -3px rgba(0,0,0,.4);
-  --shadow-btn:0 8px 20px -6px rgba(140,164,192,.45);
-  --sans:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --shadow-card:0 4px 20px -2px rgba(0,0,0,0.45);
+  --shadow-btn:0 8px 24px -4px rgba(56,189,248,0.25);
+  --sans:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;
   --serif:"Noto Serif",Georgia,serif;
 }
 @media (prefers-color-scheme:light){
   :root{
-    --bg:#FFFFFF; --s1:#F7F9FB; --s2:#EDF1F5; --line:#DDE3EA;
-    --ink:#15171A; --dim:#5C6670; --faint:#5F6871;
-    --blue:#2D5A8C; --blue-fill:#2D5A8C; --blue-soft:#E4EBF3; --blue-lt:#5B87B5; --su-blu:#FFFFFF;
-    --orange:#B24B25; --orange-fill:#FF6B35; --orange-bar:#D9541F; --orange-soft:#FCE9E1;
-    --risk:#C0392B; --risk-soft:#FBE9E7; --risk-line:#E57368;
-    --sleep-fill:#24496F; --ok:#2E7D4F; --on-warm:#15171A;
-    --bg-blur:rgba(255,255,255,.82);
-    --warm-tint:#FBF1E9; --cool-tint:#EAF0F6;
-    --shadow-card:0 2px 8px -2px rgba(21,23,26,.22);
-    --shadow-btn:0 8px 18px -6px rgba(45,90,140,.3);
+    --bg:#F8FAFC; --s1:#FFFFFF; --s2:#F1F5F9; --line:#E2E8F0;
+    --ink:#0F172A; --dim:#475569; --faint:#64748B;
+    --blue:#0284C7; --blue-fill:#0284C7; --blue-soft:#E0F2FE; --blue-lt:#38BDF8; --su-blu:#FFFFFF;
+    --orange:#EA580C; --orange-fill:#FF7A30; --orange-bar:#EA580C; --orange-soft:#FFEDD5;
+    --risk:#DC2626; --risk-soft:#FEE2E2; --risk-line:#FCA5A5;
+    --sleep-fill:#0369A1; --ok:#059669; --on-warm:#0F172A;
+    --bg-blur:rgba(248,250,252,0.85);
+    --warm-tint:#FFF7ED; --cool-tint:#F0F9FF;
+    --shadow-card:0 2px 12px -2px rgba(15,23,42,0.08);
+    --shadow-btn:0 6px 18px -4px rgba(2,132,199,0.25);
   }
 }
-/* Chiaro forzato dall'interruttore in alto (vedi #themeToggle): stessi
-   valori del chiaro "di sistema" sopra, ma su un selettore d'attributo,
-   che vince sempre — di sistema o no — perché più specifico del bare
-   :root. Non è un terzo tema: è lo stesso chiaro, scelto invece che subito. */
 :root[data-theme="dark"]{
-  --bg:#14161A; --s1:#1C1F24; --s2:#252930; --line:#2E343D;
-  --ink:#F0F3F6; --dim:#8A94A0; --faint:#555E68;
-  --blue:#5B87B5; --blue-fill:#2D5A8C; --blue-soft:#1A2736; --blue-lt:#4A75A0; --su-blu:#F0F3F6;
-  --orange:#FF6B35; --orange-fill:#FF6B35; --orange-bar:#E8551B; --orange-soft:#2E1A12;
-  --risk:#E57368; --risk-soft:#2A1412; --risk-line:#5C2420;
-  --sleep-fill:#2D5A8C; --ok:#4E9F6E; --on-warm:#F0F3F6;
-  --bg-blur:rgba(20,22,26,.82);
-  --warm-tint:#201812; --cool-tint:#141F2C;
-  --shadow-card:0 2px 8px -2px rgba(0,0,0,.45);
-  --shadow-btn:0 8px 18px -6px rgba(0,0,0,.5);
+  --bg:#090D16; --s1:#121824; --s2:#1A2333; --line:rgba(255,255,255,0.08);
+  --ink:#F1F5F9; --dim:#94A3B8; --faint:#64748B;
+  --blue:#38BDF8; --blue-fill:#0284C7; --blue-soft:rgba(56,189,248,0.12); --blue-lt:#7DD3FC; --su-blu:#090D16;
+  --orange:#FB923C; --orange-fill:#FF7A30; --orange-bar:#FF7A30; --orange-soft:rgba(251,146,60,0.14);
+  --risk:#F87171; --risk-soft:rgba(248,113,113,0.14); --risk-line:rgba(248,113,113,0.35);
+  --sleep-fill:#0284C7; --ok:#34D399; --on-warm:#090D16;
+  --bg-blur:rgba(9,13,22,0.82);
+  --warm-tint:#1F1710; --cool-tint:#0E1724;
+  --shadow-card:0 4px 20px -2px rgba(0,0,0,0.45);
+  --shadow-btn:0 8px 24px -4px rgba(56,189,248,0.25);
 }
 :root[data-theme="light"]{
-  --bg:#FFFFFF; --s1:#F7F9FB; --s2:#EDF1F5; --line:#DDE3EA;
-  --ink:#15171A; --dim:#5C6670; --faint:#5F6871;
-  --blue:#2D5A8C; --blue-fill:#2D5A8C; --blue-soft:#E4EBF3; --blue-lt:#5B87B5; --su-blu:#FFFFFF;
-  --orange:#B24B25; --orange-fill:#FF6B35; --orange-bar:#D9541F; --orange-soft:#FCE9E1;
-  --risk:#C0392B; --risk-soft:#FBE9E7; --risk-line:#E57368;
-  --sleep-fill:#24496F; --ok:#2E7D4F; --on-warm:#15171A;
-  --bg-blur:rgba(255,255,255,.82);
-  --warm-tint:#FBF1E9; --cool-tint:#EAF0F6;
-  --shadow-card:0 2px 8px -2px rgba(21,23,26,.22);
-  --shadow-btn:0 8px 18px -6px rgba(45,90,140,.3);
+  --bg:#F8FAFC; --s1:#FFFFFF; --s2:#F1F5F9; --line:#E2E8F0;
+  --ink:#0F172A; --dim:#475569; --faint:#64748B;
+  --blue:#0284C7; --blue-fill:#0284C7; --blue-soft:#E0F2FE; --blue-lt:#38BDF8; --su-blu:#FFFFFF;
+  --orange:#EA580C; --orange-fill:#FF7A30; --orange-bar:#EA580C; --orange-soft:#FFEDD5;
+  --risk:#DC2626; --risk-soft:#FEE2E2; --risk-line:#FCA5A5;
+  --sleep-fill:#0369A1; --ok:#059669; --on-warm:#0F172A;
+  --bg-blur:rgba(248,250,252,0.85);
+  --warm-tint:#FFF7ED; --cool-tint:#F0F9FF;
+  --shadow-card:0 2px 12px -2px rgba(15,23,42,0.08);
+  --shadow-btn:0 6px 18px -4px rgba(2,132,199,0.25);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%}
@@ -390,10 +375,11 @@ font-size:14px;color:var(--orange);line-height:1.5}
 .oh .tm{font-size:16px;font-variant-numeric:tabular-nums;font-weight:600}
 .opt p{font-size:12.5px;color:var(--dim);margin-top:4px;line-height:1.5}
 details{margin-top:10px}
-summary{cursor:pointer;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--faint);
+summary{cursor:pointer;font-size:11px;letter-spacing:.07em;color:var(--faint);
 font-weight:600;list-style:none;display:inline-flex;gap:6px;align-items:center;padding:4px 0}
 summary::-webkit-details-marker{display:none}
 summary::after{content:"↓";font-size:11px}details[open] summary::after{content:"↑"}
+.erow>summary{text-transform:none}
 .erow>summary::after{content:none!important}
 summary:hover{color:var(--blue)}
 .why{font-size:14px;color:var(--dim);line-height:1.6;margin-top:8px;padding-left:12px;border-left:2px solid var(--line)}
@@ -528,17 +514,19 @@ font:inherit;font-weight:700;padding:0 0 0 10px;cursor:pointer}
    principali, non ripetuto su ognuno. .tabbtn resta fuori: ha già un suo
    :active dedicato sull'icona (.tabbtn:active svg) più avanti — sommare
    anche questo raddoppiava lo schiacciamento solo lì. */
-.tool,.btn,.dbtn,.wnext,#doSetup,.tp,.tsec,.gcell,button.lnk,.skip{
+.tool,.btn,.dbtn,.wnext,#doSetup,.tp,.tsec,.gcell,button.lnk,.skip,.qh-btn,.qh-opt-btn{
   transition:transform .1s ease, opacity .1s ease;
 }
 .tool:active,.btn:active,.dbtn:active,.wnext:active,#doSetup:active,
-.tp:active,.tsec:active,.gcell:active,button.lnk:active,.skip:active{
+.tp:active,.tsec:active,.gcell:active,button.lnk:active,.skip:active,
+.qh-btn:active,.qh-opt-btn:active{
   transform:scale(.97); opacity:.85;
 }
 @media (prefers-reduced-motion:reduce){
-  .tool,.btn,.dbtn,.wnext,#doSetup,.tp,.tsec,.gcell,button.lnk,.skip{transition:none}
+  .tool,.btn,.dbtn,.wnext,#doSetup,.tp,.tsec,.gcell,button.lnk,.skip,.qh-btn,.qh-opt-btn{transition:none}
   .tool:active,.btn:active,.dbtn:active,.wnext:active,#doSetup:active,
-  .tp:active,.tsec:active,.gcell:active,button.lnk:active,.skip:active{transform:none}
+  .tp:active,.tsec:active,.gcell:active,button.lnk:active,.skip:active,
+  .qh-btn:active,.qh-opt-btn:active{transform:none}
 }
 
 /* ── vista essenziale / dettaglio ──
@@ -567,7 +555,8 @@ font-weight:600;padding:16px 0 6px;margin-top:2px;border-top:1px solid var(--lin
    bordi con l'orario enorme al centro. */
 .essrow{display:flex;align-items:center;gap:12px;background:var(--s1);border:1px solid var(--line);
 border-left:3px solid var(--line);border-radius:var(--r);padding:13px 14px;margin-bottom:8px;
-box-shadow:var(--shadow-card)}
+box-shadow:var(--shadow-card);cursor:pointer;transition:transform .12s cubic-bezier(0.2,0.8,0.4,1),background .15s ease,border-color .15s ease}
+.essrow:active{transform:scale(.985)}
 .essrow.t-orange{border-left-color:var(--orange-fill)}
 .essrow.t-blue{border-left-color:var(--blue)}
 .essrow.warn{background:var(--risk-soft);border-left-color:var(--risk)}
@@ -576,7 +565,7 @@ color:var(--blue);display:flex;align-items:center;justify-content:center}
 .essrow .eic .ei{display:block;width:19px;height:19px}
 .essrow.t-orange .eic{background:var(--orange-soft);color:var(--orange)}
 .essrow.warn .eic{background:var(--bg);color:var(--risk)}
-.essrow .el{display:block;font-size:15px;font-weight:600;color:var(--ink);line-height:1.3}
+.essrow .el{display:block;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);line-height:1.3}
 .essrow .ev{flex:1;min-width:0}
 .essrow .en{font-size:14px;font-weight:600;line-height:1.3;font-variant-numeric:tabular-nums;
 flex:none;color:var(--ink)}
@@ -599,7 +588,7 @@ transition:transform .15s ease;padding-left:2px}
 @media (max-width:430px){.ed{padding-left:0}}
 .dwhen{display:block;font-size:12.5px;font-weight:600;letter-spacing:.03em;color:var(--dim);
 text-transform:none;margin-bottom:1px;font-variant-numeric:normal}
-.essrow .es{font-size:12.5px;color:var(--dim);margin-top:2px;line-height:1.4}
+.essrow .es{font-size:12.5px;color:var(--dim);margin-top:2px;line-height:1.4;text-transform:none;letter-spacing:normal}
 .essrow.warn .en{color:var(--risk)}
 /* icona di stato nel blocco Ora: badge a cerchio, stesso motivo ripreso
    in Turni e Più — prima l'icona era "nuda", senza nulla dietro. */
@@ -3833,10 +3822,6 @@ function votoOraRecente(){
 function renderOra(Pfocus){
   const el=$("#ora"); if(!el) return;
   if(state.vista==="dettaglio"){ el.innerHTML=""; return; }
-  // "Ora" parla del momento presente: non cambia se sfogli i giorni.
-  // Va quindi calcolato SEMPRE sul giorno vero, non su quello a fuoco —
-  // ma "vero" tiene conto anche di un turno o un sonno di ieri sera
-  // ancora in corso, non solo della mezzanotte del calendario.
   let P=Pfocus;
   const vero = giornoVero();
   const sfoglioAltrove = dnum(state.focus)!==dnum(vero);
@@ -3847,46 +3832,84 @@ function renderOra(Pfocus){
   }
   const isToday = true;
   let r=null;
+  const now = new Date();
   try{ if(window.NTAlert){
-    const now=new Date();
     let lastEnd=null; const ks=Object.keys(wakes).sort();
     if(ks.length){ const kk=ks[ks.length-1], mm=/^(\d{1,2}):(\d{2})$/.exec(wakes[kk]||""); if(mm){ lastEnd=new Date(kk+"T00:00:00"); lastEnd.setMinutes((+mm[1])*60+(+mm[2])); } }
-    // vero, non state.focus: qui sotto state.focus è già stato ripristinato
-    // al giorno sfogliato (riga sopra), ma "Adesso" deve restare ancorato
-    // al giorno vero anche per questo calcolo — altrimenti sfogliare in
-    // avanti sposta in avanti anche la mezzanotte di riferimento, e con
-    // lei tutto l'orario del prossimo sonno usato per il rischio fatica.
     const midnight=new Date(vero.getFullYear(),vero.getMonth(),vero.getDate());
     const nextSleep=(P.s&&typeof P.s.onset==="number")?new Date(midnight.getTime()+P.s.onset*60000):null;
     r=window.NTAlert.alertness({now, freeWake:state.freeWake, freeBed:state.freeBed, lastSleepEnd:lastEnd, nextSleepStart:nextSleep});
   } }catch(e){}
+
+  const rifMid = new Date(vero.getFullYear(), vero.getMonth(), vero.getDate());
+  const m = Math.round((now - rifMid) / 60000);
+  const b = P.b;
+
   const kssSleepy = votoOraRecente();
+  const inNadir = !b.rest && P.night && isFinite(P.cbt) && inWin(m, P.cbt - 60, P.cbt + 60);
+  const inSmonto = !b.rest && (P.night || P.lateStart) && m >= b.end && m < b.end + 90;
+  const risk = r && r.risk;
+  const riskImminent = !b.rest && risk && risk.severe && risk.at && (risk.at.getTime() - now.getTime()) <= 45 * 60000 && (risk.at.getTime() - now.getTime()) >= -30 * 60000;
+  const severeNow = r && r.now && r.now.value < -0.65 && !b.rest;
+
+  const isSevere = kssSleepy || inNadir || inSmonto || riskImminent || severeNow;
+
   const A = isToday ? adessoLine(P, vero) : null;
-  const sleeping = A && A.t==="Dovresti dormire";   // non chiedere l'umore mentre dovresti dormire
-  const risk = r&&r.risk, severe = (risk&&risk.severe) || kssSleepy;
-  let title, sub, accent=false;
-  if(severe){ accent=true;
-    title = kssSleepy ? "Sei assonnato adesso" : "Rischio fatica alto verso le "+risk.hhmm;
-    sub = kssSleepy ? "Se devi guidare o decidere, fermati: 20 minuti e un caffè."
-      : "Evita decisioni critiche; se guidi al rientro, non farlo stanco.";
-  } else if(A && !A.fallback){ title=A.t; sub=A.s; }
-  else if(risk){ title="Lucidità ok"; sub="Prossimo calo verso le "+risk.hhmm+(r.peak?" · meglio verso le "+r.peak.hhmm:""); }
-  else { title=A.t; sub=A.s; }   // A esiste sempre quando è oggi: il fallback (mai più vuoto)
-  const oraIc = severe ? ICON.warn : sleeping ? ICON.moon
-    : (A && /insieme/.test(A.t)) ? ICON.duo
-    : (title && /caff/.test(sub||"")) ? ICON.coffee : ICON.eye;
-  el.innerHTML='<div class="ora-card'+(accent?" risk":"")+'">'+
-    '<div class="ora-h"><span class="ora-ic">'+oraIc+'</span>'+
-    '<div class="ora-tx"><span class="eyebrow">Adesso</span>'+
-    '<b>'+esc(title)+'</b></div></div>'+
-    '<span class="ora-sub">'+esc(sub)+'</span>'+
-    (r?'<div class="ora-dis">Modellato dai tuoi orari di sonno, non una misura.</div>':'')+
-    // "Ora" parla sempre del momento vero, per progetto — ma le card sotto
-    // seguono il giorno che si sta sfogliando: stesso schermo, due giorni
-    // diversi, senza nessun segnale che lo dicesse. Non un errore di calcolo,
-    // un buco di presentazione — ora reso esplicito invece di lasciarlo intuire.
-    (sfoglioAltrove ? '<div class="ora-dis">Qui sopra: adesso. Le schede sotto mostrano '+
-      esc(state.focus.toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"}))+'.</div>' : '')+
+  const sleeping = A && A.t==="Dovresti dormire";
+  let title, sub, accent = false, oraIc = ICON.eye;
+
+  if(isSevere){
+    accent = true;
+    if(kssSleepy){
+      title = "Sei assonnato adesso";
+      sub = "Se devi guidare o decidere, fermati: 20 minuti e un caffè.";
+      oraIc = ICON.warn;
+    } else if(inNadir){
+      title = "Minimo biologico (WCOL)";
+      sub = "Finestra di massima sonnolenza circadiana: massima cautela nei compiti critici.";
+      oraIc = ICON.warn;
+    } else if(inSmonto){
+      title = "Rientro dal turno";
+      sub = "Momento critico per la guida: occhiali da sole, se sei stanco non metterti al volante.";
+      oraIc = ICON.car;
+    } else {
+      title = "Rischio fatica alto verso le " + (risk ? risk.hhmm : hhmm(m));
+      sub = "Evita compiti rischiosi e decisioni critiche; fai una pausa di recupero.";
+      oraIc = ICON.warn;
+    }
+  } else if(sleeping){
+    title = A.t;
+    sub = A.s;
+    oraIc = ICON.moon;
+  } else if(A && !A.fallback){
+    title = A.t;
+    sub = A.s;
+    oraIc = (/pisolino/i.test(title)) ? ICON.bed
+      : (/turno/i.test(title)) ? ICON.alarm
+      : (/rientro/i.test(title)) ? ICON.car
+      : (/caff/i.test(title)) ? ICON.coffee
+      : (/insieme/i.test(title)) ? ICON.duo
+      : (/pasto/i.test(title)) ? ICON.plate
+      : ICON.eye;
+  } else if(b.rest){
+    title = (A && A.t) ? A.t : "Giorno di riposo";
+    sub = (A && A.s) ? A.s : (m < 720 ? "Tieni il ritmo: luce naturale al mattino." : (m < 1200 ? "Pomeriggio libero: recupera energie e mantieni orari regolari." : "Sera di relax: luce soffusa prima di dormire."));
+    oraIc = m < 1200 ? ICON.sun : ICON.moon;
+  } else if(risk && risk.severe){
+    title = (A && A.t) ? A.t : "Lucidità ok";
+    sub = (A && A.s && !A.fallback) ? A.s : "Calo di vigilanza previsto verso le " + risk.hhmm + (r && r.peak ? " · picco verso le " + r.peak.hhmm : "");
+    oraIc = (title && /caff/i.test(title)) ? ICON.coffee : ICON.eye;
+  } else {
+    title = (A && A.t) ? A.t : "Lucidità ottimale";
+    sub = (A && A.s) ? A.s : (r && r.peak ? "Picco di lucidità previsto verso le " + r.peak.hhmm : "Ritmo biologico stabile.");
+    oraIc = (title && /caff/i.test(title)) ? ICON.coffee : ICON.eye;
+  }
+
+  el.innerHTML = '<div class="ora-card' + (accent ? " risk" : "") + '">' +
+    '<div class="ora-h"><span class="ora-ic">' + oraIc + '</span>' +
+    '<div class="ora-tx"><span class="eyebrow">Adesso</span>' +
+    '<b>' + esc(title) + '</b></div></div>' +
+    '<span class="ora-sub">' + esc(sub) + '</span>' +
     '</div>';
 }
 
@@ -4506,7 +4529,11 @@ function adessoLine(P, riferimento){
     // probabile e più rilevante — non deve restare nascosto dietro un
     // messaggio generico. "Oggi riposo" diventa la coda della stessa
     // cascata sotto, non un ritorno immediato che la salta del tutto.
-    restoFallback={t:"Oggi riposo",s:"tieni il ritmo: luce al mattino", fallback:true};
+    restoFallback={
+      t:"Giorno di riposo",
+      s: m < 720 ? "Tieni il ritmo: luce naturale al mattino" : (m < 1200 ? "Pomeriggio libero: mantieni orari regolari" : "Sera di relax: luce soffusa prima del sonno"),
+      fallback:true
+    };
   } else {
     if(inWin(m,b.start,b.end)){
       const toEnd=mod1440(b.end-m);
@@ -4516,7 +4543,7 @@ function adessoLine(P, riferimento){
       return {t:"In turno",s:P.night?"la parte dura arriva nelle ore piccole":"mantieni il ritmo"};
     }
     const toStart=mod1440(b.start-m);
-    if(toStart>0 && toStart<=6*60) return {t:"Tra "+hm(toStart)+" entri",s:"ultimo caffè entro le "+hhmm(P.cut)+(P.naps.length?", e c'è un pisolino prima":"")};
+    if(toStart>0 && toStart<=6*60) return {t:"Tra "+hm(toStart)+" entri in turno",s:"ultimo caffè entro le "+hhmm(P.cut)+(P.naps.length?", e c'è un pisolino prima":"")};
     const afterEnd=mod1440(m-b.end);
     if((P.night||P.lateStart) && afterEnd<=2*60) return {t:"Appena smontato",s:"è l'ora più rischiosa: non guidare stanco"};
   }

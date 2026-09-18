@@ -174,8 +174,8 @@ function _schedule(items) {
       // Azioni rapide sul check-in sonno (solo sveglia)
       if (n.kind === "wake") {
         opts.actions = [
-          { action: "ok",     title: "✅ Dormito bene" },
-          { action: "annota", title: "✏️ Annotare" }
+          { action: "ok",     title: "Dormito bene" },
+          { action: "annota", title: "Annota diario" }
         ];
       }
       self.registration.showNotification(n.title, opts).catch(() => {});
