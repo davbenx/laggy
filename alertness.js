@@ -47,7 +47,7 @@ export function alertness(opts) {
   const end = horizon;
   for (let t = now.getTime(); t <= end; t += 15 * 60000) {
     const a = A(t);
-    if (a < riskV) { riskV = a; riskT = t; }
+    if ((t - now.getTime()) >= 30 * 60000 && a < riskV) { riskV = a; riskT = t; }
     if (a > peakV) { peakV = a; peakT = t; }
   }
   const aNow = A(now.getTime());

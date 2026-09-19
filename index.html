@@ -2474,7 +2474,9 @@ function giornoVero(){
         const adessoRel = oraReale + 1440;
         const inTurnoIeri = Pieri.b && !Pieri.b.rest && isFinite(Pieri.b.start) && isFinite(Pieri.b.end)
           && adessoRel>=Pieri.b.start && adessoRel<Pieri.b.end;
-        const inSonnoIeri = Pieri.s && isFinite(Pieri.s.onset) && isFinite(Pieri.s.dur)
+        // Il sonno di ieri prolunga "ieri" solo nel cuore della notte profonda (prima delle 04:30).
+        // Dalle 04:30 in poi inizia la finestra mattutina e l'app apre sempre su Oggi.
+        const inSonnoIeri = oraReale < 270 && Pieri.s && isFinite(Pieri.s.onset) && isFinite(Pieri.s.dur)
           && adessoRel>=Pieri.s.onset && adessoRel<Pieri.s.onset+Pieri.s.dur;
         if(inTurnoIeri || inSonnoIeri) return ieri;
       }
@@ -3782,15 +3784,22 @@ function diaryReminder(P, CARDS){
   let x='<div class="drem'+(logged?" done":"")+'">';
   x+='<div class="drem-q"><span class="dic">'+ICON.moon+'</span>Il tuo sonno</div>';
   if(!logged){
-    // Prima chiedeva "com'è andato?" senza dire rispetto a cosa: per
-    // saperlo bisognava tornare al giorno prima e leggere l'orario
-    // previsto. L'orario del piano è già qui (P.s), non c'è motivo di
-    // farlo ricostruire a memoria.
-    x+='<div style="font-size:16px;font-weight:600;color:var(--ink);line-height:1.3;margin-bottom:10px">'+
-       'Hai dormito dalle '+hhmm(P.s.onset)+' alle '+hhmm(P.end)+'?</div>'+
+    const nowD = new Date();
+    const nowMin = nowD.getHours()*60 + nowD.getMinutes();
+    const isToday = dnum(f) === dnum(nowD);
+    const defBed = bd || cd.bedPiano || (P && P.sp ? hhmm(P.sp.onset) : "23:00");
+    const defWake = wk || (isToday && nowMin < t(cd.wakePiano) ? hhmm(nowMin) : cd.wakePiano) || (P && P.sp ? hhmm(P.sp.onset + P.sp.dur) : "07:00");
+    x+='<div style="font-size:15.5px;font-weight:600;color:var(--ink);line-height:1.3;margin-bottom:6px">'+
+       'Registra il tuo sonno</div>'+
+       '<div style="font-size:13px;color:var(--dim);margin-bottom:12px">'+
+       'Conferma o modifica gli orari reali:</div>'+
+       '<div class="diary" style="gap:12px;margin-bottom:12px;align-items:center;flex-wrap:wrap">'+
+       '<label style="display:flex;align-items:center;gap:6px;font-size:13.5px;color:var(--ink);font-weight:600">'+
+       'A letto <input type="time" data-sleep-bed="1" value="'+esc(defBed)+'" style="max-width:115px;flex:none"></label>'+
+       '<label style="display:flex;align-items:center;gap:6px;font-size:13.5px;color:var(--ink);font-weight:600">'+
+       'Sveglia <input type="time" data-sleep-wake="1" value="'+esc(defWake)+'" style="max-width:115px;flex:none"></label></div>'+
        '<div class="diary" style="gap:8px">'+
-       '<button class="dbtn wide pri" data-asplan="1">Conferma</button>'+
-       '<button class="dbtn wide" data-open="1" aria-label="Modifica gli orari del sonno">Modifica</button></div>';
+       '<button class="dbtn wide pri" data-confirm-sleep="1" aria-label="Registra il tuo sonno">Registra il tuo sonno</button></div>';
   } else {
     // Prima, con orari diversi dal piano, questa riga mostrava la
     // differenza ("+15 minuti sul piano") E una riga a parte con gli
@@ -3802,12 +3811,14 @@ function diaryReminder(P, CARDS){
        (cmp?'<span class="drem-cmp" style="color:var(--dim);font-size:13px;font-weight:500">'+cmp+'</span> ':'')+
        '<button class="lnk drem-edit" data-open="1" aria-label="Modifica gli orari del sonno">Modifica</button></div>'+
        (recupero?'<div class="drem-rec">Hai dormito meno del previsto: il piano ha aggiunto un pisolino di recupero qui sotto.</div>':'');
-    if(diverso && sleepEditing)
-      x+='<div class="diary" style="gap:10px;margin-top:8px">'+
-         '<span class="hint" style="width:100%">Orari corretti (sonno)</span>'+
-         '<input type="time" data-bed="1" value="'+esc(bd)+'" style="max-width:118px;flex:none">'+
-         '<input type="time" data-wake="1" value="'+esc(wk)+'" style="max-width:118px;flex:none"></div>'+
-         '<button class="btn g" data-confirm-sleep="1" style="display:block;width:100%;box-sizing:border-box;margin-top:8px;white-space:normal;overflow-wrap:break-word;text-align:center" aria-label="Conferma gli orari del sonno">Conferma</button>';
+    if(sleepEditing)
+      x+='<div class="diary" style="gap:10px;margin-top:8px;align-items:center;flex-wrap:wrap">'+
+         '<span class="hint" style="width:100%">Modifica orari effettivi</span>'+
+         '<label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink);font-weight:600">'+
+         'A letto <input type="time" data-sleep-bed="1" value="'+esc(bd||cd.bedPiano)+'" style="max-width:115px;flex:none"></label>'+
+         '<label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink);font-weight:600">'+
+         'Sveglia <input type="time" data-sleep-wake="1" value="'+esc(wk||cd.wakePiano)+'" style="max-width:115px;flex:none"></label></div>'+
+         '<button class="btn g" data-confirm-sleep="1" style="display:block;width:100%;box-sizing:border-box;margin-top:8px;white-space:normal;overflow-wrap:break-word;text-align:center" aria-label="Conferma gli orari del sonno">Conferma orari</button>';
     // Il voto da 1 a 5 alimenta "Il tuo andamento" (il ciclo giorno per
     // giorno, la correlazione col debito) — ma non c'era nessun modo di
     // inserirlo: il gestore del clic esisteva già, scritto e funzionante,
@@ -3959,26 +3970,58 @@ function renderOra(Pfocus){
   const isToday = true;
   let r=null;
   const now = new Date();
+  const rifMid = new Date(vero.getFullYear(), vero.getMonth(), vero.getDate());
+  const m = Math.round((now - rifMid) / 60000);
+  const b = P.b;
+
+  let lastEnd = null;
   try{ if(window.NTAlert){
-    let lastEnd=null; const ks=Object.keys(wakes).sort();
-    if(ks.length){ const kk=ks[ks.length-1], mm=/^(\d{1,2}):(\d{2})$/.exec(wakes[kk]||""); if(mm){ lastEnd=new Date(kk+"T00:00:00"); lastEnd.setMinutes((+mm[1])*60+(+mm[2])); } }
+    const todayIso = iso(vero);
+    const todayWake = wakes[todayIso];
+    if(todayWake && /^(\d{1,2}):(\d{2})$/.test(todayWake)){
+      const [h, min] = todayWake.split(":").map(Number);
+      lastEnd = new Date(vero.getFullYear(), vero.getMonth(), vero.getDate(), h, min);
+    } else {
+      let wakeMin = null;
+      if(P.sp && isFinite(P.sp.onset) && isFinite(P.sp.dur)){
+        wakeMin = mod1440(P.sp.onset + P.sp.dur);
+      } else if(b && !b.rest && isFinite(b.start)){
+        wakeMin = mod1440(b.start - 60);
+      } else {
+        const defWake = state.freeWake || "07:30";
+        const mm = /^(\d{1,2}):(\d{2})$/.exec(defWake);
+        if(mm) wakeMin = (+mm[1])*60 + (+mm[2]);
+      }
+      if(wakeMin != null){
+        const wakeDate = new Date(vero.getFullYear(), vero.getMonth(), vero.getDate(), Math.floor(wakeMin / 60), wakeMin % 60);
+        if(wakeDate.getTime() > now.getTime()){
+          if(b && !b.rest && isFinite(b.start) && m >= b.start){
+            const shiftWakeMin = mod1440(b.start - 45);
+            lastEnd = new Date(vero.getFullYear(), vero.getMonth(), vero.getDate(), Math.floor(shiftWakeMin / 60), shiftWakeMin % 60);
+          } else {
+            lastEnd = new Date(now.getTime() - 45 * 60000);
+          }
+        } else {
+          lastEnd = wakeDate;
+        }
+      }
+    }
     const midnight=new Date(vero.getFullYear(),vero.getMonth(),vero.getDate());
     const nextSleep=(P.s&&typeof P.s.onset==="number")?new Date(midnight.getTime()+P.s.onset*60000):null;
     r=window.NTAlert.alertness({now, freeWake:state.freeWake, freeBed:state.freeBed, lastSleepEnd:lastEnd, nextSleepStart:nextSleep});
   } }catch(e){}
 
-  const rifMid = new Date(vero.getFullYear(), vero.getMonth(), vero.getDate());
-  const m = Math.round((now - rifMid) / 60000);
-  const b = P.b;
-
   const kssSleepy = votoOraRecente();
   const inNadir = !b.rest && P.night && isFinite(P.cbt) && inWin(m, P.cbt - 60, P.cbt + 60);
   const inSmonto = !b.rest && (P.night || P.lateStart) && m >= b.end && m < b.end + 90;
+  const inDuty = !b.rest && inWin(m, b.start, b.end);
   const risk = r && r.risk;
-  const riskImminent = !b.rest && risk && risk.severe && risk.at && (risk.at.getTime() - now.getTime()) <= 45 * 60000 && (risk.at.getTime() - now.getTime()) >= -30 * 60000;
-  const severeNow = r && r.now && r.now.value < -0.65 && !b.rest;
+  const riskDiffMs = (risk && risk.at) ? (risk.at.getTime() - now.getTime()) : null;
+  const riskImminent = !b.rest && risk && risk.severe && riskDiffMs !== null && riskDiffMs <= 45 * 60000 && riskDiffMs >= 0;
+  const hoursAwake = lastEnd ? Math.max(0, (now.getTime() - lastEnd.getTime()) / 3600e3) : 6;
+  const severeNow = r && r.now && r.now.value < -0.65 && !b.rest && (hoursAwake >= 15 || inNadir || inSmonto);
 
-  const isSevere = kssSleepy || inNadir || inSmonto || riskImminent || severeNow;
+  const isSevere = kssSleepy || inNadir || inSmonto || (riskImminent && !inDuty) || severeNow;
   const isMissing = b.c === "?";
 
   const A = isToday ? adessoLine(P, vero) : null;
@@ -4005,7 +4048,8 @@ function renderOra(Pfocus){
       sub = "Momento critico per la guida: occhiali da sole, se sei stanco non metterti al volante.";
       oraIc = ICON.car;
     } else {
-      title = "Rischio fatica alto verso le " + (risk ? risk.hhmm : hhmm(m));
+      const riskFuture = (risk && risk.at && risk.at.getTime() > now.getTime());
+      title = riskFuture ? ("Rischio fatica alto verso le " + risk.hhmm) : "Rischio fatica elevato";
       sub = "Evita compiti rischiosi e decisioni critiche; fai una pausa di recupero.";
       oraIc = ICON.warn;
     }
@@ -4016,6 +4060,12 @@ function renderOra(Pfocus){
   } else if(A && !A.fallback){
     title = A.t;
     sub = A.s;
+    if(A.inDuty && risk && risk.severe && risk.at && risk.at.getTime() > now.getTime()){
+      const toRiskMin = Math.round((risk.at.getTime() - now.getTime()) / 60000);
+      if(toRiskMin > 0 && toRiskMin <= 360){
+        sub += " · Calo previsto verso le " + risk.hhmm;
+      }
+    }
     oraIc = (/pisolino/i.test(title)) ? ICON.bed
       : (/turno/i.test(title)) ? ICON.alarm
       : (/rientro/i.test(title)) ? ICON.car
@@ -4027,13 +4077,13 @@ function renderOra(Pfocus){
     title = (A && A.t) ? A.t : "Giorno di riposo";
     sub = (A && A.s) ? A.s : (m < 720 ? "Tieni il ritmo: luce naturale al mattino." : (m < 1200 ? "Pomeriggio libero: recupera energie e mantieni orari regolari." : "Sera di relax: luce soffusa prima di dormire."));
     oraIc = m < 1200 ? ICON.sun : ICON.moon;
-  } else if(risk && risk.severe){
+  } else if(risk && risk.severe && risk.at && risk.at.getTime() > now.getTime()){
     title = (A && A.t) ? A.t : "Lucidità ok";
-    sub = (A && A.s && !A.fallback) ? A.s : "Calo di vigilanza previsto verso le " + risk.hhmm + (r && r.peak ? " · picco verso le " + r.peak.hhmm : "");
+    sub = (A && A.s && !A.fallback) ? A.s : "Calo di vigilanza previsto verso le " + risk.hhmm + (r && r.peak && r.peak.at && r.peak.at.getTime() > now.getTime() ? " · picco verso le " + r.peak.hhmm : "");
     oraIc = (title && /caff/i.test(title)) ? ICON.coffee : ICON.eye;
   } else {
     title = (A && A.t) ? A.t : "Lucidità ottimale";
-    sub = (A && A.s) ? A.s : (r && r.peak ? "Picco di lucidità previsto verso le " + r.peak.hhmm : "Ritmo biologico stabile.");
+    sub = (A && A.s) ? A.s : (r && r.peak && r.peak.at && r.peak.at.getTime() > now.getTime() ? "Picco di lucidità previsto verso le " + r.peak.hhmm : "Ritmo biologico stabile.");
     oraIc = (title && /caff/i.test(title)) ? ICON.coffee : ICON.eye;
   }
 
@@ -4685,8 +4735,13 @@ function adessoLine(P, riferimento){
       const toEnd=mod1440(b.end-m);
       // Il rientro è il momento peggiore anche per i turni che iniziano nel cuore
       // della notte (verso le 2): non solo per chi ha fatto tutta la notte.
-      if((P.night||P.lateStart) && toEnd<=90) return {t:"Rientro tra "+hm(toEnd),s:"occhiali da sole, e se sei stanco non guidare: è l'ora peggiore"};
-      return {t:"In turno",s:P.night?"la parte dura arriva nelle ore piccole":"mantieni il ritmo"};
+      if((P.night||P.lateStart) && toEnd<=90) return {t:"Rientro tra "+hm(toEnd),s:"occhiali da sole, e se sei stanco non guidare: è l'ora peggiore",inDuty:true,toEnd};
+      return {
+        t: "In turno fino alle " + hhmm(b.end),
+        s: "Mancano " + hm(toEnd) + (P.night ? " · la parte dura arriva nelle ore piccole" : " · mantieni il ritmo"),
+        inDuty: true,
+        toEnd
+      };
     }
     const toStart=mod1440(b.start-m);
     if(toStart>0 && toStart<=6*60) return {t:"Tra "+hm(toStart)+" entri in turno",s:"ultimo caffè entro le "+hhmm(P.cut)+(P.naps.length?", e c'è un pisolino prima":"")};
@@ -6230,6 +6285,7 @@ function diaryChange(e){
     if(!g[key].min) g[key].min=+el.dataset.min||0;   // la durata prevista serve al conto del debito
     if(na) g[key].a=el.value; else g[key].b=el.value;
     store.set("pisolini",state.pisolini); render(); return; }
+  if(e.target.closest("[data-sleep-bed]") || e.target.closest("[data-sleep-wake]")) return;
   const bd=e.target.closest("[data-bed]");
   if(bd){ const k=iso(state.focus);
     if(bd.value) state.beds[k]=bd.value; else delete state.beds[k];
@@ -6250,25 +6306,38 @@ function diaryClick(e){
     return;
   }
   if(e.target.closest("[data-wake]") || e.target.closest("[data-bed]")
+     || e.target.closest("[data-sleep-wake]") || e.target.closest("[data-sleep-bed]")
      || e.target.closest("[data-napa]") || e.target.closest("[data-napb]")) return;   // i campi orario si gestiscono da soli
   const ap=e.target.closest("[data-asplan]");
   if(ap){ const k=iso(state.focus), c=cards(NT.plan()).find(x=>x.k==="d");
     if(c){ state.beds[k]=c.bedPiano; state.wakes[k]=c.wakePiano;
       state.diaryEditing.delete("sleep:"+k);
-      store.set("beds",state.beds); store.set("wakes",state.wakes); render(); }
+      store.set("beds",state.beds); store.set("wakes",state.wakes);
+      toast("Sonno registrato come da piano");
+      render(); }
     return; }
   const op=e.target.closest("[data-open]");
-  if(op){ const k=iso(state.focus), c=cards(NT.plan()).find(x=>x.k==="d");
-    // i campi si aprono precompilati col piano: si correggono, non si compilano da zero
-    if(c && state.beds[k]===c.bedPiano && state.wakes[k]===c.wakePiano){
-      state.wakes[k]=hhmm(t(c.wakePiano)+15);
-    } else if(c && !state.beds[k] && !state.wakes[k]){
-      state.beds[k]=c.bedPiano; state.wakes[k]=hhmm(t(c.wakePiano)+15);
-    }
+  if(op){ const k=iso(state.focus);
     state.diaryEditing.add("sleep:"+k);
-    store.set("beds",state.beds); store.set("wakes",state.wakes); render(); return; }
+    render(); return; }
   const cs=e.target.closest("[data-confirm-sleep]");
-  if(cs){ state.diaryEditing.delete("sleep:"+iso(state.focus)); render(); return; }
+  if(cs){
+    const k=iso(state.focus);
+    const cardEl=cs.closest(".drem")||document;
+    const bIn=cardEl.querySelector("[data-sleep-bed]")||cardEl.querySelector("[data-bed]");
+    const wIn=cardEl.querySelector("[data-sleep-wake]")||cardEl.querySelector("[data-wake]");
+    const c=cards(NT.plan()).find(x=>x.k==="d");
+    const bedVal=(bIn && bIn.value) ? bIn.value : (state.beds[k] || (c ? c.bedPiano : ""));
+    const wakeVal=(wIn && wIn.value) ? wIn.value : (wakes[k] || (c ? c.wakePiano : ""));
+    if(bedVal) state.beds[k]=bedVal;
+    if(wakeVal) wakes[k]=wakeVal;
+    store.set("beds",state.beds);
+    store.set("wakes",wakes);
+    state.diaryEditing.delete("sleep:"+k);
+    toast("Sonno registrato");
+    render();
+    return;
+  }
   const cn=e.target.closest("[data-confirm-nap]");
   if(cn){ state.diaryEditing.delete("nap:"+iso(state.focus)+":"+cn.dataset.confirmNap); render(); return; }
   const en=e.target.closest("[data-edit-nap]");
