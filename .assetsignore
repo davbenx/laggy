@@ -11,3 +11,4 @@ wrangler.jsonc
 .assetsignore
 README.md
 LICENSE
+docs/
