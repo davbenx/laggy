@@ -38,6 +38,17 @@
     // semplicemente non era mai stato collegato a nessuno script Worker.
     { "binding": "SUBS", "id": "9d54b9285f17404da83f470695d2a001" }
   ],
+  // Statistiche d'uso aggregate (functions/_analytics.js, pagina /stats).
+  // Finché questo blocco resta commentato, /collect accetta e scarta tutto e
+  // /stats dice "database non collegato": niente si rompe. Per attivarlo:
+  //   1. npx wrangler d1 create notturnisti-stats   → copia il database_id
+  //   2. togli il commento qui sotto e incolla l'id
+  //   3. npx wrangler secret put STATS_TOKEN        → una stringa lunga a caso
+  //   4. apri https://app.notturnisti.club/stats#t=<quel token>
+  // Le tabelle si creano da sole alla prima richiesta.
+  // "d1_databases": [
+  //   { "binding": "DB", "database_name": "notturnisti-stats", "database_id": "INCOLLA-QUI" }
+  // ],
   // Solo i valori NON sensibili: store/variante/prezzo/valuta sono già
   // pubblici di fatto (paid.js li espone al browser via window.NT_PAY).
   // LEMONSQUEEZY_WEBHOOK_SECRET va impostato a parte come secret vero

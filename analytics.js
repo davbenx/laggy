@@ -8,13 +8,12 @@
    track() con una proprietà non elencata la scarta e avvisa in console,
    invece di lasciarla passare in silenzio.
 
-   Finché NTAnalytics.configure({endpoint}) non viene chiamato con un vero
-   endpoint, track() non fa alcuna chiamata di rete: il modulo può restare
-   caricato senza che nulla lasci il dispositivo, coerente con il resto del
-   prodotto. Quando un endpoint verrà scelto, deve essere un servizio che non
-   fa fingerprinting/cookie-matching (es. Plausible, self-hosted o cloud) —
-   mai Google Analytics: comprometterebbe il posizionamento "i tuoi dati
-   restano sul telefono".
+   Dove finiscono: /collect sul nostro stesso Worker (functions/collect.js),
+   che NON salva eventi singoli ma solo contatori aggregati per giorno
+   ("plan_generated, pattern_type=notte, 2026-09-23: 14"). Niente IP, niente
+   id, niente cookie, niente servizi terzi. Si leggono su /stats.
+   Il server ricontrolla lo stesso elenco ALLOWED qui sotto
+   (functions/_analytics.js — un test verifica che restino identici).
 
    Uso:
      NTAnalytics.track("plan_generated", { pattern_type: "notte" });
@@ -55,16 +54,33 @@
 
     return_d1: [],
     return_d7: [],
-    return_d30: []
+    return_d30: [],
+
+    share_whatsapp: [],
+
+    // Una volta al giorno per dispositivo, senza id: "quanti dispositivi hanno
+    // aperto l'app oggi". platform ∈ web | pwa | android | ios.
+    active_day: ["platform"]
   };
 
   var LS_OPTOUT = "nt:analytics-optout";
   var LS_QUEUE = "nt:analytics-queue";
   var LS_FIRSTSEEN = "nt:analytics-firstseen";
   var LS_RETURNFIRED = "nt:analytics-return-fired"; // {d1:true,d7:true,d30:true}
+  var LS_ACTIVEDAY = "nt:analytics-active-day";     // ultima data in cui active_day è partito
   var QUEUE_MAX = 50;
 
-  var cfg = { endpoint: null };
+  // Stessa origine sul web; dall'app nativa (origine capacitor://, https://localhost)
+  // l'indirizzo assoluto del sito. Nessun endpoint su file:// (sviluppo locale).
+  function defaultEndpoint() {
+    try {
+      var nativo = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
+      if (nativo) return "https://app.notturnisti.club/collect";
+      if (/^https?:$/.test(location.protocol)) return "/collect";
+    } catch (e) {}
+    return null;
+  }
+  var cfg = { endpoint: defaultEndpoint() };
 
   function readJSON(key, fallback) {
     try { var v = JSON.parse(localStorage.getItem(key)); return v == null ? fallback : v; } catch (e) { return fallback; }
@@ -102,10 +118,13 @@
     try {
       var body = JSON.stringify(payload);
       if (navigator.sendBeacon) {
-        var blob = new Blob([body], { type: "application/json" });
+        // text/plain e non application/json: così è una richiesta "semplice"
+        // anche cross-origin (dall'app nativa), senza preflight CORS che
+        // sendBeacon non sa fare. Il server la legge comunque come JSON.
+        var blob = new Blob([body], { type: "text/plain" });
         return navigator.sendBeacon(cfg.endpoint, blob);
       }
-      fetch(cfg.endpoint, { method: "POST", headers: { "content-type": "application/json" }, body: body, keepalive: true }).catch(function () {});
+      fetch(cfg.endpoint, { method: "POST", headers: { "content-type": "text/plain" }, body: body, keepalive: true }).catch(function () {});
       return true;
     } catch (e) { return false; }
   }
@@ -151,13 +170,32 @@
     } catch (e) {}
   }
 
+  function platform() {
+    try {
+      if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform())
+        return window.Capacitor.getPlatform() === "ios" ? "ios" : "android";
+      if (window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true) return "pwa";
+    } catch (e) {}
+    return "web";
+  }
+  // Un booleano per giorno, come checkReturns: nessuna cronologia delle visite.
+  function checkActiveDay() {
+    try {
+      var today = new Date().toISOString().slice(0, 10);
+      if (readJSON(LS_ACTIVEDAY, null) === today) return;
+      writeJSON(LS_ACTIVEDAY, today);
+      track("active_day", { platform: platform() });
+    } catch (e) {}
+  }
+
   function configure(opts) {
     cfg = Object.assign({}, cfg, opts || {});
     if (cfg.endpoint) flushQueue();
   }
 
-  window.NTAnalytics = { track: track, setEnabled: setEnabled, isEnabled: isEnabled, configure: configure };
+  window.NTAnalytics = { track: track, setEnabled: setEnabled, isEnabled: isEnabled, configure: configure, ALLOWED: ALLOWED };
 
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", checkReturns);
-  else checkReturns();
+  function start() { checkReturns(); checkActiveDay(); flushQueue(); }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);
+  else start();
 })();

@@ -1566,6 +1566,10 @@ header b{font-size:23px}
   </div>
 </details>
     <p class="hint" style="margin:12px 0 0" id="privacyNota">I tuoi turni e il tuo diario vengono elaborati localmente sul tuo telefono. Nessuna profilazione pubblicitaria.<span id="privacyNotaAbbonato" hidden> Se hai attivato il calendario che si aggiorna da solo, i turni restano comunque anche sul server che lo tiene aggiornato — solo quelli, il resto no.</span></p>
+    <label class="hint" style="display:flex;gap:10px;align-items:center;margin:10px 0 0;cursor:pointer">
+      <span style="flex:1">Statistiche d'uso anonime: solo contatori del tipo "un piano è stato generato", senza identificativi né dati dei turni. Aiutano a capire cosa migliorare.</span>
+      <span class="switch"><input type="checkbox" id="optStats" aria-label="Statistiche d'uso anonime"><span class="slider"></span></span>
+    </label>
     <p style="margin:10px 0 0"><button class="lnk" id="doFeed" style="padding:0">Segnala cosa non torna</button> · <button class="lnk" id="doShare" style="padding:0">Consiglialo a un collega</button></p>
     <p class="hint" style="margin:10px 0 0"><a href="https://notturnisti.club/planner" target="_blank" rel="noopener">Come si usa</a> · <a href="https://notturnisti.club/chi-siamo/" target="_blank" rel="noopener">Chi siamo</a> · <a href="https://notturnisti.club" target="_blank" rel="noopener">notturnisti.club</a><span id="doDonateLnkWrap" hidden> · <a id="doDonateLnk" href="#" target="_blank" rel="noopener">Sostieni il progetto</a></span></p>
   </div>
@@ -2401,6 +2405,7 @@ var qrcodegen;
 // stessa garanzia di ordine che un normalizzatore await avrebbe dato, senza
 // bisogno di riscrivere tutto in async. I moduli sono già strict di default.
 import { createEngine, resolveNextAction } from "./engine.js";
+import platform from "./platform.js";
 /* MOTORE NOTTURNISTI v4 — turni arbitrari.
    Nessuna regola guarda più la lettera del turno. Tutto si decide dalla
    geometria: dove cade il turno rispetto alla finestra di sonno naturale.
@@ -4318,7 +4323,7 @@ if($("#demoEsempio")) $("#demoEsempio").addEventListener("click", e=>{
     renderShifts();
     salva();
     haptic(15);
-    try{ if(window.NTAnalytics) window.NTAnalytics.track("plan_generated", {pattern_type: state.pattern}); }catch(err){}
+    try{ if(window.NTAnalytics) window.NTAnalytics.track("plan_generated", {pattern_type: "ciclo"}); }catch(err){}
     toast("Ciclo impostato! Ecco il tuo piano");
     render();
     return;
@@ -4520,7 +4525,7 @@ function renderInstallBanner(){
   const el=$("#installBanner"); if(!el) return;
   if(!installBannerVisibile()){ el.hidden=true; return; }
   const ios = isIOSPerInstall();
-  if(!installBannerTracciato){ installBannerTracciato=true; track("pwa_prompt_shown"); }
+  if(!installBannerTracciato){ installBannerTracciato=true; track("install_prompt_shown"); }
   el.hidden=false;
   el.innerHTML =
     '<button type="button" id="chiudiInstall" aria-label="Chiudi">×</button>'+
@@ -7093,6 +7098,12 @@ if($("#doShare")) $("#doShare").onclick=async()=>{
 // perché il feed live deve poterlo rileggere da solo. Un tocco in più di
 // verità, non nascosto dietro il fatto che riguarda una minoranza di utenti.
 if(store.get("sub") && $("#privacyNotaAbbonato")) $("#privacyNotaAbbonato").hidden=false;
+// Interruttore statistiche: analytics.js è caricato con defer, quindi qui può
+// non esserci ancora — si legge al primo tocco e dopo il load.
+{ const cb=$("#optStats");
+  const sync=()=>{ try{ if(cb && window.NTAnalytics) cb.checked=window.NTAnalytics.isEnabled(); }catch(e){} };
+  if(cb){ cb.onchange=()=>{ try{ window.NTAnalytics && window.NTAnalytics.setEnabled(cb.checked); }catch(e){} sync(); };
+    sync(); addEventListener("load", sync); } }
 // Punto permanente e silenzioso per chi vuole sostenere il progetto senza
 // aspettare il nudge periodico (donateNudge) o essere passato da Andamenti/
 // dal calendario attivo: sempre lì, mai un obbligo.
@@ -7808,71 +7819,62 @@ addEventListener("nt:config-changed", ()=>{
   ntNotifiche(); // ricarica il piano notifiche quando la config cambia
 });
 
-/* ─── Notifiche locali: bridge app → SW ─────────────────────────────────────
-   Usa buildSchedule() da notifications.js (già caricato come module).
-   L'obiettivo: sveglia, pisolini, ultimo caffè e rientro arrivano sul telefono
-   anche quando l'app non è aperta. Zero backend, zero costi.
+/* ─── Notifiche locali ──────────────────────────────────────────────────────
+   Il piano arriva da buildSchedule() (notifications.js); DOVE viene armato lo
+   decide platform.js: service worker sul web, sistema operativo nell'app
+   nativa. Zero backend in entrambi i casi.
    ─────────────────────────────────────────────────────────────────────────── */
+// Permesso notifiche in cache: sul nativo si legge solo in modo asincrono,
+// mentre renderNotifRiga() è sincrona. var + funzione (entrambe "hoisted"),
+// non let: render() gira già più in alto in questo modulo, prima che questa
+// riga venga eseguita, e con let lì si romperebbe tutto (TDZ).
+var _notifPerm;
+function notifPerm(){
+  if(_notifPerm===undefined) _notifPerm = ("Notification" in window) ? Notification.permission : "unsupported";
+  return _notifPerm;
+}
+function aggiornaPermNotif(){
+  platform.notify.permission().then(p=>{ if(p!==notifPerm()){ _notifPerm=p; renderNotifRiga(); } }).catch(()=>{});
+}
 function ntNotifiche(){
   try{
-    if(!("serviceWorker" in navigator) || !("Notification" in window)) return;
-    if(Notification.permission !== "granted") return;
-    const sw = navigator.serviceWorker.controller;
-    if(!sw) return;
-    // Costruisce il piano con buildSchedule (da notifications.js, caricato come module)
     if(!window.NTNotif || !window.NTNotif.buildSchedule) return;
-    const items = window.NTNotif.buildSchedule(state, { days:7 });
-    sw.postMessage({ type:"NT_SCHEDULE", items });
-    ntPeriodicSync();
-  }catch(e){}
-}
-// Periodic Background Sync: dove il browser la concede (oggi solo
-// Chrome/Android, e solo in base a quanto l'utente usa l'app — Chrome non
-// lo dice mai con un prompt visibile, o c'è già o non c'è), risveglia il SW
-// da solo per riarmare i promemoria anche se l'app resta chiusa per giorni.
-// Nessun server coinvolto: il SW rilegge solo l'ultimo piano che ntNotifiche()
-// gli aveva già mandato (vedi sw.js). Su tutti gli altri browser questa
-// funzione non fa nulla, in silenzio — non è mai la strada principale,
-// solo un miglioramento quando capita di esserci.
-async function ntPeriodicSync(){
-  try{
-    if(!("serviceWorker" in navigator) || !("permissions" in navigator)) return;
-    const reg = await navigator.serviceWorker.ready;
-    if(!("periodicSync" in reg)) return;
-    const stato = await navigator.permissions.query({name:"periodic-background-sync"});
-    if(stato.state !== "granted") return;
-    await reg.periodicSync.register("nt-notif-refresh", {minInterval: 12*3600e3});
+    const items = window.NTNotif.buildSchedule(state, { days:platform.notify.days });
+    platform.notify.schedule(items).catch(()=>{});
   }catch(e){}
 }
 // Ricarica il piano al ritorno in foreground (SW potrebbe aver perso i timer)
 document.addEventListener("visibilitychange", ()=>{
-  if(document.visibilityState === "visible") ntNotifiche();
+  if(document.visibilityState === "visible"){ ntNotifiche(); aggiornaPermNotif(); }
 });
 // Prima attivazione dopo il load (se il permesso è già stato concesso)
-addEventListener("load", ()=>{ setTimeout(ntNotifiche, 1500); });
+addEventListener("load", ()=>{ setTimeout(ntNotifiche, 1500); aggiornaPermNotif(); });
 
 // Richiesta permesso notifiche: non immediata, non aggressiva.
 // Si mostra come bottone in Opzioni ("Promemoria"), mai come prompt automatico.
 function ntChiediPermesso(){
-  if(!("Notification" in window)) return;
-  if(Notification.permission === "granted"){ ntNotifiche(); return; }
-  if(Notification.permission === "denied") return;
+  const perm=notifPerm();
+  if(perm === "unsupported") return;
+  if(perm === "granted"){ ntNotifiche(); return; }
+  if(perm === "denied") return;
   track("notification_prompt_shown");
-  Notification.requestPermission().then(p=>{
+  platform.notify.request().then(p=>{
+    _notifPerm = p;
     if(p === "granted"){ ntNotifiche(); track("notifications_enabled"); }
     render(); // aggiorna UI (nasconde il banner se concesso)
-  });
+  }).catch(()=>{});
 }
 window.ntChiediPermesso = ntChiediPermesso;
 if($("#doNotifiche")) $("#doNotifiche").onclick=ntChiediPermesso;
 if($("#doNotificheWiz")) $("#doNotificheWiz").onclick=ntChiediPermesso;
-// Stato del bottone "Promemoria" in Opzioni: solo lettura di
-// Notification.permission, costa nulla, ma non serve calcolarlo se Opzioni
+// Stato del bottone "Promemoria" in Opzioni: solo lettura del permesso in
+// cache (_notifPerm), costa nulla, ma non serve calcolarlo se Opzioni
 // non è nemmeno aperta — stessa idea di renderOpzSummaries().
 function renderNotifRiga(){
   const btn=$("#doNotifiche"); if(!btn) return;
-  if(!("Notification" in window)){ btn.hidden=true; return; }
-  const t=$("#notifTesto"), v=$("#notifVal"), perm=Notification.permission;
+  const perm=notifPerm();
+  if(perm==="unsupported"){ btn.hidden=true; return; }
+  const t=$("#notifTesto"), v=$("#notifVal");
   if(perm==="granted"){
     if(t) t.textContent="Promemoria attivi"; if(v) v.textContent="Attivi"; btn.disabled=true;
   } else if(perm==="denied"){

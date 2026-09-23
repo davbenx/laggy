@@ -1,7 +1,7 @@
 // notifications.js — dal piano alle notifiche locali.
 // Riusa lo STESSO engine.js del browser e del feed: i numeri sono quelli provati.
 // Framework-agnostico: restituisce una lista di {id, title, body, at:Date, kind}.
-// Il ponte con Capacitor (@capacitor/local-notifications) è banale, sotto in fondo.
+// Il ponte con Capacitor (@capacitor/local-notifications) sta in platform.js.
 //
 // Differenza chiave col feed ICS: qui c'è una VERA sveglia AL risveglio (onset+durata),
 // non solo il promemoria PRIMA di andare a letto. È il pezzo che il calendario non fa bene.
@@ -85,24 +85,5 @@ try {
   }
 } catch (e) {}
 
-/* ─── Ponte Capacitor (nel progetto app nativa, non qui) ────────────────────
-import { LocalNotifications } from "@capacitor/local-notifications";
-import { buildSchedule } from "./notifications.js";
-
-export async function riprogramma(config) {
-  const perm = await LocalNotifications.requestPermissions();
-  if (perm.display !== "granted") return;
-  const pending = await LocalNotifications.getPending();
-  if (pending.notifications.length)
-    await LocalNotifications.cancel({ notifications: pending.notifications });
-  const items = buildSchedule(config, { days: 14 }).slice(0, 60); // margine sotto il 64 di iOS
-  await LocalNotifications.schedule({
-    notifications: items.map(n => ({
-      id: n.id, title: n.title, body: n.body,
-      schedule: { at: n.at, allowWhileIdle: true },   // allowWhileIdle: spara anche in Doze
-      sound: n.kind === "wake" ? "sveglia.wav" : undefined,
-      channelId: n.kind === "wake" ? "sveglie" : "promemoria"   // Android: canale ad alta priorità
-    }))
-  });
-}
-────────────────────────────────────────────────────────────────────────────── */
+/* Dove queste notifiche vengono armate (service worker sul web, sistema
+   operativo nell'app nativa) lo decide platform.js — notify.schedule(). */

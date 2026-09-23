@@ -3,6 +3,7 @@
 // lettura (lungo e non indovinabile), come l'indirizzo ICS privato di
 // Google. La config vive in KV, quindi il calendario segue le modifiche dei
 // turni senza ri-iscriversi.
+import { recordFeedPoll } from "../_analytics.js";
 import { buildFeed, readSub, isActive } from "../_lib.js";
 
 // suggerisce ai calendari ogni quanto ripollare
@@ -11,13 +12,17 @@ function withRefresh(ics) {
     "VERSION:2.0\r\nREFRESH-INTERVAL;VALUE=DURATION:PT12H\r\nX-PUBLISHED-TTL:PT12H\r\n");
 }
 
-export async function onRequestGet({ params, env }) {
+export async function onRequestGet({ params, env, waitUntil }) {
   let sub;
   try { sub = await readSub(env, params.id); }
   catch (e) { return new Response("Servizio non configurato.", { status: 503, headers: { "content-type": "text/plain; charset=utf-8" } }); }
 
   if (!sub) return new Response("Calendario non trovato.", { status: 404, headers: { "content-type": "text/plain; charset=utf-8" } });
   if (!isActive(sub)) return new Response("Accesso non attivo.", { status: 402, headers: { "content-type": "text/plain; charset=utf-8" } });
+
+  // Quanti calendari sono ancora vivi (per decidere quando spegnere il feed):
+  // solo un contatore e un hash troncato dell'id, vedi _analytics.js.
+  if (typeof waitUntil === "function") waitUntil(recordFeedPoll(env, "feed", params.id));
 
   let ics;
   try {

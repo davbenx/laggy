@@ -319,3 +319,44 @@ test("le utility pure duplicate tra engine.js e index.html restano identiche", (
   }
   assert.deepEqual(divergenti, [], "utility duplicate divergenti tra engine.js e index.html:\n" + divergenti.join("\n\n"));
 });
+
+// buildEvents è la fonte unica: l'ICS deve esserne solo la serializzazione, e
+// i Date (usati da calendario nativo e notifiche) devono coincidere con
+// DTSTART/DTEND.
+test("buildEvents: stessi eventi, stessi UID e stessi orari dell'ICS", () => {
+  for (const pattern of Object.values(CICLI)) {
+    const e = createEngine({ pattern, anchor: "2026-07-13", focus: "2026-10-20T09:00:00" });
+    const events = e.buildEvents(21);
+    const ics = e.buildIcs(21);
+    const uids = [...ics.matchAll(/UID:(\S+)/g)].map(m => m[1]);
+    assert.deepEqual(events.map(x => x.uid), uids);
+    const parsed = parseIcsEvents(ics);
+    events.forEach((ev, i) => {
+      assert.equal(ev.start.getTime(), toDate(parsed[i].start).getTime(), `start ${ev.uid}`);
+      assert.equal(ev.end.getTime(), toDate(parsed[i].end).getTime(), `end ${ev.uid}`);
+      assert.ok(ev.end > ev.start, `evento invertito ${ev.uid}`);
+    });
+    assert.equal(e.state.focus.toISOString(), new Date("2026-10-20T09:00:00").toISOString(), "focus ripristinato");
+  }
+});
+
+test("buildEvents: il sonno porta sveglia e preavviso, avviso:0 li toglie a tutti", () => {
+  const e = createEngine({ pattern: "NNNRR", anchor: "2026-07-13" });
+  const sonno = e.buildEvents(7).find(x => x.tipo === "sonno");
+  assert.equal(sonno.avvisa, 30);
+  assert.equal(sonno.sveglia, true);
+  e.setIcs({ avviso: 0 });
+  assert.ok(e.buildEvents(7).every(x => x.avvisa === 0 && x.sveglia === false));
+});
+
+test("buildCoupleEvents: eventi tutto-il-giorno coerenti con il feed di coppia", () => {
+  const e = createEngine({ pattern: "NNRR", anchor: "2026-07-13", pPattern: "NNRR", pAnchor: "2026-07-13" });
+  const events = e.buildCoupleEvents(30);
+  const ics = e.buildCouple(30);
+  assert.deepEqual(events.map(x => x.uid), [...ics.matchAll(/UID:(\S+)/g)].map(m => m[1]));
+  for (const ev of events) {
+    assert.equal(ev.allDay, true);
+    assert.equal(ev.start.getHours(), 0);
+    assert.equal(ev.end.getHours(), 0);
+  }
+});

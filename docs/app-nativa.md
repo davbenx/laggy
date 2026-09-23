@@ -1,6 +1,6 @@
 # App nativa (Android → iOS): notifiche, calendario, widget
 
-Stato: **proposta**, niente ancora implementato. Data: 2026-09-22.
+Stato: **fase 1 fatta** (2026-09-23): `buildEvents()`, `platform.js`, statistiche d'uso. Il resto è proposta.
 
 ## 1. Problema
 
@@ -186,3 +186,31 @@ contenuto digitale. Nasconderlo è l'opzione più lean e a rischio zero.
   verificare su dispositivo), policy Play sulle donazioni.
 - Da decidere: default calendario locale oppure Google; se e quando spegnere
   il feed ICS per gli utenti solo web (desktop, iPhone senza app).
+
+## 9. Statistiche d'uso (fatto)
+
+Servono a decidere con i dati: per esempio quando spegnere il feed ICS (§2 della
+raccomandazione) e dove si perdono le persone nell'onboarding.
+
+- **Raccolta**: `analytics.js` → `POST /collect` (`functions/collect.js`). Il
+  server salva solo **contatori per giorno** in D1 (`counts(day, event, prop, n)`).
+  Non salva IP, user-agent, id, cookie né orari. L'elenco degli eventi ammessi
+  è identico su client e server, e un test lo verifica. I valori liberi vengono
+  scartati.
+- **Feed ICS**: `/feed` e `/couple` contano letture e feed *distinti* per
+  giorno. Per i distinti si usa un hash troncato dell'id, cancellato dopo 90
+  giorni.
+- **Opt-out**: interruttore in Opzioni; viene rispettato anche il Do Not Track
+  del browser.
+- **Visualizzazione**: `https://app.notturnisti.club/stats#t=<STATS_TOKEN>`.
+  La pagina mostra gli indicatori principali, i dispositivi attivi al giorno,
+  il percorso principale, gli abbandoni nell'onboarding, le piattaforme, i
+  ritorni e i calendari vivi, più la tabella completa.
+- **Attivazione** (una volta sola, istruzioni anche in `wrangler.jsonc`):
+  `npx wrangler d1 create notturnisti-stats`, incollare l'id in
+  `wrangler.jsonc`, poi `npx wrangler secret put STATS_TOKEN`.
+- **Limiti**: sono conteggi di eventi, non di persone (non ci sono id per
+  deduplicare). "Dispositivi attivi" è l'unico numero che approssima le
+  persone: un dispositivo conta al massimo una volta al giorno. `/collect` è
+  pubblico, quindi qualcuno potrebbe gonfiare i numeri: va bene per decidere
+  una direzione, non per fatturare.
