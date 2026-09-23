@@ -389,6 +389,7 @@ justify-content:center;overflow:hidden}
 #shareNudge{border-left-color:var(--blue)}
 #icsNudge{border-left-color:var(--blue)}
 #clubBanner{border-left-color:var(--orange)}
+#statsNudge{border-left-color:var(--blue)}
 #chiudiBenvenuto,#chiudiDemoEsempio,#chiudiBackupNudge,#chiudiInstall,#chiudiShareNudge,#chiudiIcsNudge,#chiudiIcsExpireNudge,#chiudiClub{float:right;background:none;border:none;color:var(--faint);
 font-size:22px;line-height:1;cursor:pointer;padding:0 0 4px 10px;min-height:0}
 .card.s,.card.p{border-left-color:var(--blue)}
@@ -530,6 +531,7 @@ body.wiz-open #installBanner, body.intro #installBanner,
 body.wiz-open #icsNudge, body.intro #icsNudge,
 body.wiz-open #icsExpireNudge, body.intro #icsExpireNudge,
 body.wiz-open #clubBanner, body.intro #clubBanner,
+body.wiz-open #statsNudge, body.intro #statsNudge,
 body.wiz-open #donateNudge, body.intro #donateNudge{display:none!important}
 body.wiz-open .wsteps{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:8px}
 body.wiz-open .wiznav{position:sticky;bottom:0;background:var(--bg-blur);padding:10px 0 env(safe-area-inset-bottom,0)}
@@ -1179,7 +1181,7 @@ header b{font-size:23px}
           </span>
           <b style="font-size:15px;color:var(--ink)">Metti i tuoi orari nel calendario del telefono</b>
         </div>
-        <p class="hint" style="margin:0 0 10px;color:var(--dim);line-height:1.4">Trovi sonno, sveglie e ultimo caffè sincronizzati in automatico ogni giorno, senza dover aprire l'app.</p>
+        <p class="hint" style="margin:0 0 10px;color:var(--dim);line-height:1.4">Trovi sonno, sveglie e ultimo caffè nel calendario che guardi già, senza dover aprire l'app.</p>
         <button class="btn pri" type="button" id="doOpenCalendario" style="display:block;width:100%;text-align:center;font-weight:700">Sincronizza con il calendario →</button>
       </div>
     </div>
@@ -1211,6 +1213,7 @@ header b{font-size:23px}
 <div id="shareNudge" class="card" hidden></div>
 <div id="icsNudge" class="card" hidden></div>
 <div id="icsExpireNudge" class="card" hidden></div>
+<div id="statsNudge" class="card" hidden></div>
 <div id="clubBanner" class="card" hidden></div>
 <div id="donateNudge" class="card" hidden></div>
 <!-- Data sopra Adesso, non sotto: prima di sapere "cosa fare adesso" serve
@@ -1518,7 +1521,7 @@ header b{font-size:23px}
     <span class="tool-tx"><b id="notifTesto">Attiva i promemoria sul telefono</b></span>
     <span class="tool-val" id="notifVal"></span>
   </button>
-  <p class="hint" style="margin:8px 0 var(--gap-sezione)">Funzionano meglio se riapri l'app almeno una volta al giorno: restano programmati nel telefono, ma il sistema può interromperli se l'app resta chiusa a lungo — non sono una sveglia garantita.</p>
+  <p class="hint" id="notifHint" style="margin:8px 0 var(--gap-sezione)">Funzionano meglio se riapri l'app almeno una volta al giorno: restano programmati nel telefono, ma il sistema può interromperli se l'app resta chiusa a lungo — non sono una sveglia garantita.</p>
   <!-- Salva/Esporta erano in Più (sparita): sono azioni sulla TUA
        configurazione, hanno senso vicino a dove la modifichi. -->
   <span class="eyebrow" style="display:block;margin:var(--gap-sezione) 0 8px">Salva ed esporta</span>
@@ -1567,7 +1570,7 @@ header b{font-size:23px}
 </details>
     <p class="hint" style="margin:12px 0 0" id="privacyNota">I tuoi turni e il tuo diario vengono elaborati localmente sul tuo telefono. Nessuna profilazione pubblicitaria.<span id="privacyNotaAbbonato" hidden> Se hai attivato il calendario che si aggiorna da solo, i turni restano comunque anche sul server che lo tiene aggiornato — solo quelli, il resto no.</span></p>
     <label class="hint" style="display:flex;gap:10px;align-items:center;margin:10px 0 0;cursor:pointer">
-      <span style="flex:1">Statistiche d'uso anonime: solo contatori del tipo "un piano è stato generato", senza identificativi né dati dei turni. Aiutano a capire cosa migliorare.</span>
+      <span style="flex:1">Statistiche d'uso anonime (spente se non le attivi tu): solo contatori del tipo "un piano è stato generato", senza identificativi né dati dei turni.</span>
       <span class="switch"><input type="checkbox" id="optStats" aria-label="Statistiche d'uso anonime"><span class="slider"></span></span>
     </label>
     <p style="margin:10px 0 0"><button class="lnk" id="doFeed" style="padding:0">Segnala cosa non torna</button> · <button class="lnk" id="doShare" style="padding:0">Consiglialo a un collega</button></p>
@@ -3703,6 +3706,7 @@ function render(){
   renderShareNudge();
   renderIcsNudge();
   renderIcsExpireNudge();
+  renderStatsNudge();
   renderClubBanner();
   renderDonateNudge();
   renderFormaGiorno(P);                // si azzera da solo in dettaglio
@@ -4483,7 +4487,7 @@ function renderBackupNudge(){
   el.innerHTML =
     '<button type="button" id="chiudiBackupNudge" aria-label="Chiudi">×</button>'+
     '<b>Non hai ancora salvato i tuoi turni</b>'+
-    '<p class="hint" style="margin-top:6px">Stanno solo su questo telefono, in questo browser. Se li perdi (nuovo telefono, dati cancellati), li riscrivi da capo — salva il link ora, richiede un tocco.</p>'+
+    '<p class="hint" style="margin-top:6px">Stanno solo su questo telefono'+(window.NT_APP.nativo?'':', in questo browser')+'. Se li perdi (nuovo telefono, dati cancellati), li riscrivi da capo — salva il link ora, richiede un tocco.</p>'+
     '<button class="btn g" type="button" id="doSalvaOraNudge">Salva la configurazione →</button>';
 }
 if($("#backupNudge")) $("#backupNudge").addEventListener("click", e=>{
@@ -4509,6 +4513,7 @@ function isIOSPerInstall(){
   }catch(e){ return false; }
 }
 function giaInstallata(){
+  if(window.NT_APP && window.NT_APP.nativo) return true;
   try{ return window.matchMedia("(display-mode: standalone)").matches || navigator.standalone===true; }
   catch(e){ return false; }
 }
@@ -4543,7 +4548,7 @@ if($("#installBanner")) $("#installBanner").addEventListener("click", e=>{
     installPromptEvento.prompt();
     installPromptEvento.userChoice.then(r=>{
       if(r.outcome==="accepted"){ track("pwa_installed"); state.installBannerOff=true; salva(); }
-      installPromptEvento=null; renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderIcsExpireNudge(); renderClubBanner(); renderDonateNudge();
+      installPromptEvento=null; renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderIcsExpireNudge(); renderStatsNudge(); renderClubBanner(); renderDonateNudge();
     });
   }
 });
@@ -4586,6 +4591,7 @@ if($("#shareNudge")) $("#shareNudge").addEventListener("click", e=>{
 // installazione, condivisione) — dalla seconda in poi, quando l'utente è
 // chiaramente tornato, è il momento più naturale per "lo sapevi?".
 function icsNudgeVisibile(){
+  if(window.NT_APP.nativo) return false;   // nell'app: niente file da scaricare (vedi #doIcs)
   const mostraBenvenuto = primaVoltaDaLink && !benvenutoLinkChiuso;
   const pronto = !!(state.pattern && Object.keys(state.shifts||{}).length);
   const secondaSessione = state.firstSeenAt && state.firstSeenAt!==iso(new Date());
@@ -4614,6 +4620,7 @@ if($("#icsNudge")) $("#icsNudge").addEventListener("click", e=>{
 // icsExportedAt) e si riarma da sé al prossimo — a differenza di icsNudge
 // (che introduce la funzione una volta sola), questo deve tornare ogni ciclo.
 function icsExpireNudgeVisibile(){
+  if(window.NT_APP.nativo) return false;
   if(!state.icsExportedAt || state.icsExpireNudgeSeenAt===state.icsExportedAt) return false;
   const giorni=(new Date()-new Date(state.icsExportedAt+"T00:00:00"))/86400000;
   if(giorni<24) return false;
@@ -4634,7 +4641,7 @@ function renderIcsExpireNudge(){
     '<button type="button" id="chiudiIcsExpireNudge" aria-label="Chiudi">×</button>'+
     '<b>Il calendario esportato sta per scadere</b>'+
     '<p class="hint" style="margin-top:6px">I 28 giorni dell\'ultimo export finiscono presto: se non lo rifai, il telefono continua a mostrare turni vecchi.'+
-    (gia?'':' O smetti di doverci pensare: con il calendario automatico (gratis) si aggiorna da solo, per sempre.')+'</p>'+
+    (gia?'':' O smetti di doverci pensare: il calendario automatico (gratis) si aggiorna da solo.')+'</p>'+
     '<button class="btn g" type="button" id="doIcsExpireNudge">Esporta di nuovo →</button>'+
     (gia?'':'<button class="lnk" type="button" id="doIcsExpireNudgePay" style="margin-left:10px">O aggiornalo da solo →</button>');
 }
@@ -4642,6 +4649,36 @@ if($("#icsExpireNudge")) $("#icsExpireNudge").addEventListener("click", e=>{
   if(e.target.closest("#chiudiIcsExpireNudge")){ state.icsExpireNudgeSeenAt=state.icsExportedAt; salva(); renderIcsExpireNudge(); return; }
   if(e.target.closest("#doIcsExpireNudge")){ state.icsExpireNudgeSeenAt=state.icsExportedAt; salva(); apriCalendarioDaWizard(); return; }
   if(e.target.closest("#doIcsExpireNudgePay")){ if(window.NTPaid) window.NTPaid.open(); }
+});
+
+// Consenso alle statistiche d'uso (opt-in): la domanda si fa una volta sola,
+// dalla seconda sessione in poi, quando l'app ha già dimostrato qualcosa e
+// dopo gli inviti più urgenti. Due bottoni dello stesso peso, niente "×":
+// sì e no sono entrambe risposte, e restano modificabili in Opzioni.
+// Finché non c'è risposta, analytics.js non manda e non salva niente.
+function statsNudgeVisibile(){
+  if(!window.NTAnalytics || window.NTAnalytics.answered()) return false;
+  const mostraBenvenuto = primaVoltaDaLink && !benvenutoLinkChiuso;
+  const secondaSessione = state.firstSeenAt && state.firstSeenAt!==iso(new Date());
+  return !!(state.turniConfigurati && secondaSessione && !mostraBenvenuto && !firstPlanBannerVisibile() && !backupNudgeVisibile() && !installBannerVisibile() && !shareNudgeVisibile() && !icsNudgeVisibile() && !icsExpireNudgeVisibile());
+}
+function renderStatsNudge(){
+  const el=$("#statsNudge"); if(!el) return;
+  if(!statsNudgeVisibile()){ el.hidden=true; return; }
+  el.hidden=false;
+  el.innerHTML =
+    '<b>Ci aiuti a capire cosa migliorare?</b>'+
+    '<p class="hint" style="margin-top:6px">Solo conteggi anonimi del tipo "un piano è stato generato" o "le notifiche sono state attivate": nessun identificativo, nessun orario, nessun dato dei turni o del sonno. Puoi cambiare idea quando vuoi in Opzioni.</p>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">'+
+      '<button class="btn g" type="button" id="doStatsSi">Sì, va bene</button>'+
+      '<button class="btn g" type="button" id="doStatsNo">No, grazie</button>'+
+    '</div>';
+}
+if($("#statsNudge")) $("#statsNudge").addEventListener("click", e=>{
+  const si=e.target.closest("#doStatsSi"), no=e.target.closest("#doStatsNo");
+  if(!si && !no) return;
+  try{ window.NTAnalytics && window.NTAnalytics.setEnabled(!!si); }catch(err){}
+  render();
 });
 
 // Invito a notturnisti.club — prima l'unico collegamento per l'utente
@@ -4657,7 +4694,7 @@ function clubBannerVisibile(){
   const mostraBenvenuto = primaVoltaDaLink && !benvenutoLinkChiuso;
   const pronto = !!(state.pattern && Object.keys(state.shifts||{}).length);
   const heroAttivo = (!state.turniConfigurati && !demoEsempioChiuso);
-  return !(state.clubBannerOff || firstPlanBannerVisibile() || mostraBenvenuto || backupNudgeVisibile() || installBannerVisibile() || shareNudgeVisibile() || icsNudgeVisibile() || icsExpireNudgeVisibile() || !pronto || heroAttivo);
+  return !(state.clubBannerOff || firstPlanBannerVisibile() || mostraBenvenuto || backupNudgeVisibile() || installBannerVisibile() || shareNudgeVisibile() || icsNudgeVisibile() || icsExpireNudgeVisibile() || statsNudgeVisibile() || !pronto || heroAttivo);
 }
 function renderClubBanner(){
   const el=$("#clubBanner"); if(!el) return;
@@ -5844,7 +5881,7 @@ function calSyncHtml(feedUrl, copyBtnId, isCouple){
     return '<div style="margin:8px 0">' +
       '<a href="'+https+'" download="'+icsName+'" class="dbtn pri" style="text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center;padding:12px 14px;border-radius:var(--r);font-size:14px;font-weight:600">' +
         '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;flex:none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' +
-        'Importa in Google Calendar (.ics) →' +
+        'Importa una copia in Google Calendar →' +
       '</a>' +
       '<div style="display:flex;justify-content:center;align-items:center;gap:14px;margin-top:8px;font-size:12.5px;flex-wrap:wrap">' +
         '<a href="'+feedUrl+'" style="color:var(--blue);text-decoration:none;font-weight:600;padding:4px 0">Samsung Calendar (1 tocco)</a>' +
@@ -5852,8 +5889,8 @@ function calSyncHtml(feedUrl, copyBtnId, isCouple){
         '<button type="button" id="'+copyBtnId+'" style="background:none;border:none;color:var(--dim);font-size:12.5px;cursor:pointer;padding:4px 0">Copia link per PC</button>' +
       '</div>' +
       '<div style="font-size:11.5px;color:var(--faint);text-align:center;margin-top:5px;line-height:1.4">' +
-        'Tocca <b>Scarica</b> e poi <b>Apri</b>: Google Calendar si aprirà con i turni pronti da salvare.<br>' +
-        'Per la sincronizzazione continua da link, incolla il feed da computer in Google Calendar.' +
+        'La copia contiene i prossimi 42 giorni e <b>non si aggiorna</b> se cambi i turni.<br>' +
+        'Per l\'aggiornamento automatico: Samsung Calendar (1 tocco) oppure incolla il link in Google Calendar da computer.' +
       '</div>' +
     '</div>';
   }
@@ -6936,7 +6973,7 @@ $("#icsVai").onclick=()=>{
   }
 };
 $("#doFeed").onclick=()=>{
-  const url=location.origin+location.pathname+"#"+toHash();
+  const url=window.NT_APP.base+"#"+toHash();
   const body=["Non cancellare la riga qui sotto: mi serve per vedere esattamente il tuo ciclo.",
     url,"",
     "1. Che cosa ha sbagliato?","","",
@@ -6952,7 +6989,7 @@ $("#doFeed").onclick=()=>{
 // confuso con "Condividi il tuo ciclo" (condividiCiclo() sotto), che è per
 // un collega e non deve MAI portarsi dietro i dati di una terza persona.
 async function salvaConfigurazione(){
-  const url=location.origin+location.pathname+"#"+toHash();
+  const url=window.NT_APP.base+"#"+toHash();
   // Prima il foglio di condivisione nativo del telefono — un tocco, scegli
   // WhatsApp o SMS dalla lista che il telefono stesso propone, invece di
   // copiare e dover cambiare app a mano.
@@ -6983,7 +7020,7 @@ $("#doLink").onclick=salvaConfigurazione;
 // suoi orari di sonno insieme al proprio ciclo. Non segna backupDone: non è
 // un backup completo, è la condivisione di una sola parte.
 async function condividiCiclo(){
-  const url=location.origin+location.pathname+"#"+toHashCiclo();
+  const url=window.NT_APP.base+"#"+toHashCiclo();
   const testo="Il mio ciclo turni su Notturnisti — incollalo nell'app per confrontare i turni con i tuoi.";
   track("share_started");
   // share_created solo su una consegna vera del link (non se l'utente
@@ -7059,7 +7096,7 @@ function condividiCicloWhatsApp(){
     testo += emoji + " *" + dataLabel + "*: " + nome + orario + badge + "\n";
   }
 
-  const link = location.origin + location.pathname + "#" + toCompactHash();
+  const link = window.NT_APP.base + "#" + toCompactHash();
   testo += "\n🔗 Confronta i tuoi turni con i miei:\n" + link;
   track("share_whatsapp");
   const url = "https://wa.me/?text=" + encodeURIComponent(testo);
@@ -7074,7 +7111,7 @@ if($("#doCycShare")) $("#doCycShare").onclick=condividiCiclo;
 // riconosce il link e lo apre da sola — non serve costruire anche quella metà.
 function renderQR(holderSel){
   const holder=$(holderSel||"#qrHolder"); if(!holder || typeof window.qrcodegen==="undefined") return;
-  const url=location.origin+location.pathname+"#"+toCompactHash();
+  const url=window.NT_APP.base+"#"+toCompactHash();
   let qr; try{ qr=window.qrcodegen.QrCode.encodeText(url, window.qrcodegen.QrCode.Ecc.MEDIUM); }catch(e){ holder.textContent="Configurazione troppo estesa per un QR — usa il link."; return; }
   const n=qr.size, border=2, dim=n+border*2;
   let path="";
@@ -7098,12 +7135,19 @@ if($("#doShare")) $("#doShare").onclick=async()=>{
 // perché il feed live deve poterlo rileggere da solo. Un tocco in più di
 // verità, non nascosto dietro il fatto che riguarda una minoranza di utenti.
 if(store.get("sub") && $("#privacyNotaAbbonato")) $("#privacyNotaAbbonato").hidden=false;
-// Interruttore statistiche: analytics.js è caricato con defer, quindi qui può
-// non esserci ancora — si legge al primo tocco e dopo il load.
+// App nativa: il file .ics (download di un blob) non si può salvare dal
+// WebView, e i promemoria li programma il sistema — testo diverso, onesto.
+if(window.NT_APP.nativo){
+  if($("#doIcs")) $("#doIcs").hidden=true;
+  if($("#notifHint")) $("#notifHint").textContent="Li programma il telefono: arrivano anche ad app chiusa e dopo un riavvio. Se non arrivano, controlla che il risparmio batteria non limiti Notturnisti. Restano promemoria, non sostituiscono la sveglia.";
+}
+// Interruttore statistiche (opt-in: spento finché non lo accendi tu).
+// analytics.js è caricato con defer, quindi qui può non esserci ancora — si
+// legge dopo il load e a ogni cambio di consenso (anche dalla card in Oggi).
 { const cb=$("#optStats");
   const sync=()=>{ try{ if(cb && window.NTAnalytics) cb.checked=window.NTAnalytics.isEnabled(); }catch(e){} };
-  if(cb){ cb.onchange=()=>{ try{ window.NTAnalytics && window.NTAnalytics.setEnabled(cb.checked); }catch(e){} sync(); };
-    sync(); addEventListener("load", sync); } }
+  if(cb){ cb.onchange=()=>{ try{ window.NTAnalytics && window.NTAnalytics.setEnabled(cb.checked); }catch(e){} sync(); render(); };
+    sync(); addEventListener("load", ()=>{ sync(); render(); }); addEventListener("nt:analytics-consent", sync); } }
 // Punto permanente e silenzioso per chi vuole sostenere il progetto senza
 // aspettare il nudge periodico (donateNudge) o essere passato da Andamenti/
 // dal calendario attivo: sempre lì, mai un obbligo.
@@ -7989,7 +8033,7 @@ addEventListener("nt:refresh", ()=>{ try{ render(); }catch(e){} });
    alla schermata Home si fa da Condividi → Aggiungi a Home; lì non c'è prompt. */
 (function(){
   "use strict";
-  if("serviceWorker" in navigator){
+  if("serviceWorker" in navigator && !window.NT_APP.nativo){
     addEventListener("load", function(){
       navigator.serviceWorker.register("./sw.js").then(function(reg){
         // Ricezione messaggi dal SW (es. NT_NAV per cambio tab da notifica)
@@ -8009,18 +8053,18 @@ addEventListener("nt:refresh", ()=>{ try{ render(); }catch(e){} });
   var deferred=null;
   addEventListener("beforeinstallprompt", function(e){
     e.preventDefault(); deferred=e;
-    try{ installPromptEvento=e; renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderIcsExpireNudge(); renderClubBanner(); renderDonateNudge(); }catch(err){}
+    try{ installPromptEvento=e; renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderIcsExpireNudge(); renderStatsNudge(); renderClubBanner(); renderDonateNudge(); }catch(err){}
     var tools=document.querySelector(".tools"); if(!tools || document.getElementById("doInstall")) return;
     var b=document.createElement("button");
     b.className="lnk"; b.id="doInstall"; b.textContent="Installa l'app";
     b.onclick=function(){ if(!deferred) return; deferred.prompt();
       deferred.userChoice.finally(function(){ deferred=null; b.remove();
-        try{ installPromptEvento=null; renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderIcsExpireNudge(); renderClubBanner(); renderDonateNudge(); }catch(err){} }); };
+        try{ installPromptEvento=null; renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderIcsExpireNudge(); renderStatsNudge(); renderClubBanner(); renderDonateNudge(); }catch(err){} }); };
     tools.appendChild(b);
   });
   addEventListener("appinstalled", function(){ var b=document.getElementById("doInstall"); if(b) b.remove();
     track("pwa_installed");
-    try{ installPromptEvento=null; renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderIcsExpireNudge(); renderClubBanner(); renderDonateNudge(); }catch(err){} });
+    try{ installPromptEvento=null; renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderIcsExpireNudge(); renderStatsNudge(); renderClubBanner(); renderDonateNudge(); }catch(err){} });
   // iOS non manda mai beforeinstallprompt: qui non c'è un pulsante da
   // aggiungere, solo l'istruzione — sempre raggiungibile in Più, non solo
   // nel banner che si può chiudere.
@@ -8044,7 +8088,19 @@ addEventListener("nt:refresh", ()=>{ try{ render(); }catch(e){} });
 // Il link a Ko-fi per chi vuole sostenere il progetto — mai un obbligo, mai
 // una condizione per usare l'app. Deve stare PRIMA di paid.js e del resto del
 // modulo core: entrambi lo leggono una sola volta, al caricamento.
-window.NT_DONATE = { url: "https://ko-fi.com/notturnisti" };
+//
+// Nell'app nativa (Capacitor) la pagina gira su https://localhost: i link
+// condivisi, il feed e le API devono puntare comunque al sito vero. Il ponte
+// Capacitor è già iniettato prima di qualunque script della pagina.
+// Nell'app niente link di donazione: Google Play e App Store vietano i
+// pagamenti esterni per il contenuto digitale (docs/app-nativa.md §5).
+(function(){
+  var nativo = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+  var origin = nativo ? "https://app.notturnisti.club" : location.origin;
+  window.NT_APP = { nativo: nativo, origin: origin, base: nativo ? origin + "/" : location.origin + location.pathname };
+  window.NT_CAL = { api: nativo ? origin : "", origin: origin };
+  if(!nativo) window.NT_DONATE = { url: "https://ko-fi.com/notturnisti" };
+})();
 </script>
 <script src="./paid.js" defer></script>
 </body>

@@ -200,8 +200,12 @@ raccomandazione) e dove si perdono le persone nell'onboarding.
 - **Feed ICS**: `/feed` e `/couple` contano letture e feed *distinti* per
   giorno. Per i distinti si usa un hash troncato dell'id, cancellato dopo 90
   giorni.
-- **Opt-out**: interruttore in Opzioni; viene rispettato anche il Do Not Track
-  del browser.
+- **Opt-in** (dal 2026-09-23): spente finché la persona non dice sì. La card
+  "Ci aiuti a capire cosa migliorare?" compare una volta sola, dalla seconda
+  sessione, con due bottoni dello stesso peso; la scelta si cambia in
+  Opzioni. Senza consenso `analytics.js` non manda e non scrive niente, e
+  cancella le chiavi scritte dal vecchio modello opt-out. DNT e GPC valgono
+  come un no.
 - **Visualizzazione**: `https://app.notturnisti.club/stats#t=<STATS_TOKEN>`.
   La pagina mostra gli indicatori principali, i dispositivi attivi al giorno,
   il percorso principale, gli abbandoni nell'onboarding, le piattaforme, i
@@ -214,3 +218,25 @@ raccomandazione) e dove si perdono le persone nell'onboarding.
   persone: un dispositivo conta al massimo una volta al giorno. `/collect` è
   pubblico, quindi qualcuno potrebbe gonfiare i numeri: va bene per decidere
   una direzione, non per fatturare.
+
+## 10. Analisi dell'app esistente: cosa è stato tolto o cambiato
+
+| Dove | Problema | Intervento |
+|---|---|---|
+| Link condivisi, ripristino, feed (`index.html`, `paid.js`) | Nell'app nativa `location.origin` è `https://localhost`: i link mandati ai colleghi non si aprirebbero | Base assoluta `window.NT_APP.base` / `NT_CAL.origin` |
+| API `/account`, `/config` | Il CORS accettava solo il sito, e `x-write-key` non era negli header ammessi (nessun problema sul web, perché la richiesta è same-origin) | Ammesse anche le origini Capacitor, più l'header `x-write-key` |
+| Banner "Installa l'app" | Nell'app nativa non ha senso | `giaInstallata()` vale true nel nativo |
+| Donazioni (nudge, link, `paid.js`) | Policy degli store sui pagamenti esterni | `NT_DONATE` non viene definito nel nativo, e tutto si nasconde da solo |
+| Service worker | Nel nativo duplicherebbe le notifiche; l'offline è già garantito dal bundle | Non registrato nel nativo |
+| "Esporta nel calendario" (file .ics da blob) e i relativi nudge | Nel WebView il download di un blob non funziona | Nascosti nel nativo. Il calendario nativo arriva con la fase 3 |
+| Salvataggio credenziali in `.txt` (`paid.js`) | Stesso problema del blob | Nel nativo: copia negli appunti |
+| Android web: "Importa in Google Calendar (.ics)" con lo stato "Sincronizzazione attiva" | Importa una **copia** di 42 giorni che non si aggiorna, mentre l'interfaccia dice che la sincronizzazione è attiva | Testo onesto: "Importa una copia…", con la spiegazione di cosa si aggiorna davvero |
+| Nudge di scadenza ICS: "si aggiorna da solo, per sempre" | Promessa su un feed che prevediamo di spegnere | Tolto "per sempre" |
+| Wizard: "sincronizzati in automatico ogni giorno" | Non è vero su Android con Google Calendar | Testo ridimensionato |
+| Testo sotto "Promemoria" | Nel nativo le notifiche le programma il sistema, quindi il vecchio avviso non vale | Testo dedicato nel nativo |
+| Backup: "in questo browser" | Non vale nell'app | Testo condizionale |
+| `pattern_type` = sequenza reale dei turni, evento `pwa_prompt_shown` non ammesso | Dato ad alta cardinalità / evento perso | Categoria `ciclo` / `install_prompt_shown` |
+
+Resta com'è: nudge di backup, condivisione, Club, primo piano, diario.
+Da decidere quando l'app sarà sullo store: su Android web il banner
+"Installa" dovrebbe portare al Play Store invece di installare la PWA.

@@ -15,10 +15,17 @@
    Il server ricontrolla lo stesso elenco ALLOWED qui sotto
    (functions/_analytics.js — un test verifica che restino identici).
 
+   OPT-IN: finché la persona non dice sì in modo esplicito (card in Oggi o
+   interruttore in Opzioni), track() non fa niente e questo file non scrive
+   niente nel localStorage, a parte la risposta stessa. Chi dice no, o
+   toglie il consenso dopo, vede cancellate tutte le chiavi della
+   telemetria. Il "Do Not Track" del browser vale come un no.
+
    Uso:
      NTAnalytics.track("plan_generated", { pattern_type: "notte" });
-     NTAnalytics.setEnabled(false);           // opt-out esplicito, persiste
-     NTAnalytics.isEnabled();
+     NTAnalytics.setEnabled(true|false);      // risposta esplicita, persiste
+     NTAnalytics.isEnabled();                 // true solo con consenso dato
+     NTAnalytics.answered();                  // la domanda è già stata fatta?
      NTAnalytics.configure({ endpoint: "https://…/collect" });
 */
 (function () {
@@ -63,7 +70,8 @@
     active_day: ["platform"]
   };
 
-  var LS_OPTOUT = "nt:analytics-optout";
+  var LS_CONSENT = "nt:analytics-consent";          // true | false | assente = mai chiesto
+  var LS_OPTOUT_OLD = "nt:analytics-optout";         // modello opt-out precedente, da ripulire
   var LS_QUEUE = "nt:analytics-queue";
   var LS_FIRSTSEEN = "nt:analytics-firstseen";
   var LS_RETURNFIRED = "nt:analytics-return-fired"; // {d1:true,d7:true,d30:true}
@@ -87,12 +95,25 @@
   }
   function writeJSON(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {} }
 
-  function isEnabled() {
-    // Rispetta sia l'opt-out esplicito in-app sia il Do Not Track del browser.
-    try { if (navigator.doNotTrack === "1" || window.doNotTrack === "1") return false; } catch (e) {}
-    return readJSON(LS_OPTOUT, false) !== true;
+  function dnt() {
+    try { return navigator.doNotTrack === "1" || window.doNotTrack === "1" || navigator.globalPrivacyControl === true; } catch (e) { return false; }
   }
-  function setEnabled(on) { writeJSON(LS_OPTOUT, !on); if (!on) writeJSON(LS_QUEUE, []); }
+  function isEnabled() { return !dnt() && readJSON(LS_CONSENT, null) === true; }
+  // Con DNT/GPC attivo la domanda non si fa nemmeno: la risposta c'è già.
+  function answered() { return dnt() || readJSON(LS_CONSENT, null) !== null; }
+
+  // Tutto ciò che la telemetria può aver scritto sul dispositivo, compreso
+  // quanto scritto dalla versione opt-out precedente senza consenso.
+  function purge() {
+    [LS_QUEUE, LS_FIRSTSEEN, LS_RETURNFIRED, LS_ACTIVEDAY, LS_OPTOUT_OLD].forEach(function (k) {
+      try { localStorage.removeItem(k); } catch (e) {}
+    });
+  }
+  function setEnabled(on) {
+    writeJSON(LS_CONSENT, !!on);
+    if (on) start(); else purge();
+    try { window.dispatchEvent(new Event("nt:analytics-consent")); } catch (e) {}
+  }
 
   function sanitize(event, props) {
     var allowed = ALLOWED[event];
@@ -193,9 +214,12 @@
     if (cfg.endpoint) flushQueue();
   }
 
-  window.NTAnalytics = { track: track, setEnabled: setEnabled, isEnabled: isEnabled, configure: configure, ALLOWED: ALLOWED };
+  window.NTAnalytics = { track: track, setEnabled: setEnabled, isEnabled: isEnabled, answered: answered, configure: configure, ALLOWED: ALLOWED };
 
-  function start() { checkReturns(); checkActiveDay(); flushQueue(); }
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);
-  else start();
+  // Il conteggio dei ritorni (d1/d7/d30) parte dal giorno del consenso: prima
+  // non esiste nessuna data salvata da cui partire, ed è giusto così.
+  function start() { if (!isEnabled()) return; checkReturns(); checkActiveDay(); flushQueue(); }
+  function boot() { if (isEnabled()) start(); else purge(); }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+  else boot();
 })();

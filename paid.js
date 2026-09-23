@@ -7,7 +7,9 @@
    = { api }. */
 (function () {
   "use strict";
-  var CAL = Object.assign({ api: "" }, window.NT_CAL || {});
+  // origin: il sito vero anche quando la pagina gira nell'app nativa
+  // (https://localhost) — vedi window.NT_APP in index.html.
+  var CAL = Object.assign({ api: "", origin: location.origin }, window.NT_CAL || {});
   var KEY = "nt:sub";
   var $ = function (s, r) { return (r || document).querySelector(s); };
 
@@ -249,18 +251,20 @@
     };
   }
 
-  function feedFromId(id) { return location.origin.replace(/^https?/, "webcal") + "/feed/" + id; }
+  function feedFromId(id) { return CAL.origin.replace(/^https?/, "webcal") + "/feed/" + id; }
   // Il fragment (#) non viene mai inviato al server: a differenza di una query
   // string, non finisce nei log di accesso di Cloudflare/proxy intermedi né,
   // se l'utente preme Invio sulla barra indirizzi, nella cronologia del
   // browser. Per un link che contiene la chiave di scrittura dell'account è
   // l'unica forma sicura.
-  function restoreLink(s) { return location.origin + location.pathname + "#restore=" + s.id + "." + s.writeKey; }
+  function restoreLink(s) { return (window.NT_APP ? window.NT_APP.base : location.origin + location.pathname) + "#restore=" + s.id + "." + s.writeKey; }
   function copyText(txt) {
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(function () { toast("Link copiato"); }, function () { prompt("Copia il link:", txt); });
     else prompt("Copia il link:", txt);
   }
   function downloadTxt(name, text) {
+    // Nel WebView dell'app un blob non si scarica: si copia negli appunti.
+    if (window.NT_APP && window.NT_APP.nativo) { copyText(text); return; }
     try {
       var blob = new Blob([text], { type: "text/plain" }), url = URL.createObjectURL(blob);
       var a = document.createElement("a"); a.href = url; a.download = name; document.body.appendChild(a); a.click();

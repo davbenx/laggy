@@ -7,20 +7,48 @@ import vm from "node:vm";
 import { ALLOWED, sanitizeEvent, eventDay } from "../functions/_analytics.js";
 import { onRequestPost } from "../functions/collect.js";
 
-function clientAllowed() {
-  // Esegue analytics.js in una sandbox minima e legge l'elenco che espone.
-  const store = new Map();
-  const window = {};
+function loadClient(initial = {}) {
+  // Esegue analytics.js in una sandbox minima: localStorage finto, rete finta.
+  const store = new Map(Object.entries(initial));
+  const sent = [];
+  const window = { dispatchEvent() {} };
   const ctx = {
-    window, navigator: {}, location: { protocol: "https:" },
+    window, navigator: { sendBeacon: (url, blob) => { sent.push(blob.body); return true; } },
+    location: { protocol: "https:" },
     document: { readyState: "complete", addEventListener() {} },
-    localStorage: { getItem: k => store.get(k) ?? null, setItem: (k, v) => store.set(k, String(v)) },
-    Blob: class {}, fetch: () => Promise.resolve()
+    localStorage: { getItem: k => store.get(k) ?? null, setItem: (k, v) => store.set(k, String(v)), removeItem: k => store.delete(k) },
+    Blob: class { constructor(parts) { this.body = parts.join(""); } }, fetch: () => Promise.resolve(), Event: class {}
   };
   ctx.window.matchMedia = () => ({ matches: false });
   vm.runInNewContext(readFileSync(new URL("../analytics.js", import.meta.url), "utf8"), ctx);
-  return JSON.parse(JSON.stringify(window.NTAnalytics.ALLOWED));
+  return { A: window.NTAnalytics, store, sent };
 }
+function clientAllowed() {
+  return JSON.parse(JSON.stringify(loadClient().A.ALLOWED));
+}
+
+test("opt-in: senza consenso non parte niente e non si scrive niente", () => {
+  const { A, store, sent } = loadClient({ "nt:analytics-optout": "false", "nt:analytics-firstseen": '"2026-01-01"' });
+  A.track("today_viewed");
+  assert.equal(A.isEnabled(), false);
+  assert.equal(A.answered(), false);
+  assert.equal(sent.length, 0);
+  assert.deepEqual([...store.keys()], [], "le chiavi scritte dal vecchio modello opt-out vanno ripulite");
+});
+
+test("opt-in: dopo il sì gli eventi partono, dopo il no si cancella tutto", () => {
+  const { A, store, sent } = loadClient();
+  A.setEnabled(true);
+  A.track("today_viewed");
+  assert.ok(sent.some(b => JSON.parse(b).event === "today_viewed"));
+  assert.ok(sent.some(b => JSON.parse(b).event === "active_day"));
+  A.setEnabled(false);
+  const n = sent.length;
+  A.track("today_viewed");
+  assert.equal(sent.length, n);
+  assert.deepEqual([...store.keys()], ["nt:analytics-consent"]);
+  assert.equal(A.answered(), true);
+});
 
 test("ALLOWED lato server coincide con quello di analytics.js", () => {
   assert.deepEqual(ALLOWED, clientAllowed());

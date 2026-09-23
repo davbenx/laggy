@@ -17,6 +17,16 @@ export function cfgEnv(env) {
   };
 }
 
+// Origini ammesse per CORS: il sito, più l'app nativa (Capacitor serve la
+// pagina da https://localhost su Android e capacitor://localhost su iOS).
+// Le scritture restano comunque protette dalla writeKey.
+const NATIVE_ORIGINS = ["https://localhost", "capacitor://localhost"];
+export function corsOrigin(env, request) {
+  const site = cfgEnv(env).origin;
+  const o = request && request.headers.get("origin");
+  return o && (o === site || NATIVE_ORIGINS.includes(o)) ? o : site;
+}
+
 // ── id e chiavi (base64url da byte casuali) ──
 function b64url(bytes) {
   let s = ""; for (const b of bytes) s += String.fromCharCode(b);
@@ -80,8 +90,9 @@ export function cors(origin) {
   return {
     "access-control-allow-origin": origin,
     "access-control-allow-methods": "GET,POST,PUT,DELETE,OPTIONS",
-    "access-control-allow-headers": "content-type",
-    "access-control-max-age": "86400"
+    "access-control-allow-headers": "content-type, x-write-key",
+    "access-control-max-age": "86400",
+    "vary": "origin"
   };
 }
 export function json(data, status, origin) {
