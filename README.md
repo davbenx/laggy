@@ -60,6 +60,7 @@ notifications.js   local notifications (what to notify, when)
 platform.js        web vs native app (Capacitor): notifications, calendar, widget
 analytics.js       anonymous aggregate usage counters (opt-out in Options)
 paid.js            account, checkout, restore-link flow
+migrate.js         one-time data move from the old TWA to the native app
 sw.js              service worker (offline, caching)
 manifest.webmanifest  PWA manifest
 functions/         Cloudflare Pages Functions (API):
@@ -73,8 +74,10 @@ functions/         Cloudflare Pages Functions (API):
   pending.js         pending-checkout bookkeeping
 ```
 
-Deployed on Cloudflare Pages, packaged for Android as a Trusted Web
-Activity (`club.notturnisti.twa`).
+Deployed on Cloudflare Pages. The Android app (`club.notturnisti.twa`) is
+moving from a Trusted Web Activity to a Capacitor shell in `app/`, which
+bundles these same files unchanged and adds OS-level notifications — see
+`app/README.md` and `docs/app-nativa.md`.
 
 ## Local-first
 

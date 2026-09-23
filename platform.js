@@ -31,6 +31,8 @@ const IOS_MAX = 63; // 64 meno quella di "apri l'app per continuare"
 
 const webNotify = {
   days: NOTIFY_DAYS.web,
+  async exactStatus() { return "granted"; },
+  async requestExact() { return "granted"; },
   async permission() {
     if (!("Notification" in window)) return "unsupported";
     return Notification.permission;             // "granted" | "denied" | "default"
@@ -80,6 +82,19 @@ const nativeNotify = {
     if (p.display === "granted") await ensureChannels(LN);
     return p.display === "granted" ? "granted" : "denied";
   },
+  // Allarmi esatti (Android 12+): permesso "Sveglie e promemoria", che su
+  // Android 14+ è spento di default. Si chiede SOLO da un tocco esplicito
+  // (requestExact), mai da schedule(): il plugin, se una notifica vuole
+  // l'esattezza e il permesso manca, apre la schermata di sistema a ogni
+  // chiamata — cioè a ogni ritorno nell'app.
+  async exactStatus() {
+    const LN = plugin("LocalNotifications"); if (!LN || name !== "android") return "granted";
+    try { return (await LN.checkExactNotificationSetting()).exact_alarm; } catch (e) { return "granted"; }
+  },
+  async requestExact() {
+    const LN = plugin("LocalNotifications"); if (!LN || name !== "android") return "granted";
+    try { return (await LN.changeExactNotificationSetting()).exact_alarm; } catch (e) { return "denied"; }
+  },
   // Sostituisce in blocco tutto ciò che era in coda: il piano è la fonte di
   // verità, la coda del sistema operativo è solo una sua copia.
   async schedule(items) {
@@ -89,9 +104,13 @@ const nativeNotify = {
     const pending = await LN.getPending();
     if (pending.notifications.length) await LN.cancel({ notifications: pending.notifications.map(n => ({ id: n.id })) });
 
+    // Solo la sveglia merita l'esattezza, e solo se il permesso c'è già;
+    // tutto il resto va bene con qualche minuto di scarto (Doze).
+    const exactOk = (await this.exactStatus()) === "granted";
     let list = items.map(n => ({
       id: n.id, title: n.title, body: n.body,
       schedule: { at: new Date(n.at), allowWhileIdle: true },
+      isExactNotification: n.kind === "wake" && exactOk,
       channelId: n.kind === "wake" ? "sveglie" : "promemoria",
       extra: { kind: n.kind, tab: n.kind === "wake" ? "diario" : "oggi" }
     }));
@@ -101,7 +120,7 @@ const nativeNotify = {
       // dice, invece di lasciare che i promemoria smettano in silenzio.
       const last = list[list.length - 1].schedule.at;
       list.push({ id: 999999, title: "Notturnisti", body: "Apri l'app per continuare a ricevere i promemoria.",
-        schedule: { at: new Date(last.getTime() + 60 * 60e3) }, extra: { tab: "oggi" } });
+        schedule: { at: new Date(last.getTime() + 60 * 60e3) }, isExactNotification: false, extra: { tab: "oggi" } });
     }
     if (list.length) await LN.schedule({ notifications: list });
     return true;
@@ -135,6 +154,19 @@ export const widget = {
   async publish(snapshot) { return false; }
 };
 
-const NTPlatform = { isNative, name, notify, calendar, widget };
+/* ── Eventi dell'app nativa ────────────────────────────────────────────── */
+// Sul web non scattano mai: lì bastano visibilitychange e i messaggi del SW.
+export function onResume(cb) {
+  const App = plugin("App");
+  if (App) App.addListener("resume", () => { try { cb(); } catch (e) {} });
+}
+export function onNotificationTap(cb) {
+  const LN = plugin("LocalNotifications");
+  if (LN) LN.addListener("localNotificationActionPerformed", ev => {
+    try { cb((ev && ev.notification && ev.notification.extra && ev.notification.extra.tab) || "oggi"); } catch (e) {}
+  });
+}
+
+const NTPlatform = { isNative, name, notify, calendar, widget, onResume, onNotificationTap };
 try { if (typeof window !== "undefined") window.NTPlatform = NTPlatform; } catch (e) {}
 export default NTPlatform;

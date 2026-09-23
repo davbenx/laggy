@@ -22,6 +22,14 @@
 <meta name="description" content="Dai tuoi turni: quando dormire, l'ultimo caffè, la luce, i pasti. Turni personalizzabili, giorni liberi in comune con chi vuoi, export calendario.">
 <meta name="theme-color" content="#14161A">
 <script>
+// Dati importati dalla vecchia app (migrate.js): applicati QUI, prima che
+// qualunque altro script legga o salvi lo stato — altrimenti il salvataggio
+// automatico della pagina precedente potrebbe riscriverci sopra i dati vecchi.
+try{
+  const imp=sessionStorage.getItem("nt-import");
+  if(imp){ sessionStorage.removeItem("nt-import"); const d=JSON.parse(imp);
+    for(const k in d) if(k.indexOf("nt:")===0 && typeof d[k]==="string") localStorage.setItem(k,d[k]); }
+}catch(e){}
 // Applicato prima di qualunque CSS: se l'utente ha forzato il chiaro con
 // l'interruttore in alto (vedi più sotto), va impostato subito, non dopo
 // il primo render — altrimenti si vedrebbe un lampo nel tema sbagliato.
@@ -7140,6 +7148,15 @@ if(store.get("sub") && $("#privacyNotaAbbonato")) $("#privacyNotaAbbonato").hidd
 if(window.NT_APP.nativo){
   if($("#doIcs")) $("#doIcs").hidden=true;
   if($("#notifHint")) $("#notifHint").textContent="Li programma il telefono: arrivano anche ad app chiusa e dopo un riavvio. Se non arrivano, controlla che il risparmio batteria non limiti Notturnisti. Restano promemoria, non sostituiscono la sveglia.";
+  // Android 12+: senza "Sveglie e promemoria" la sveglia può arrivare con
+  // qualche minuto di ritardo. Si propone solo a chi ha già le notifiche.
+  const riga=document.createElement("p"); riga.className="hint"; riga.hidden=true; riga.style.margin="-4px 0 var(--gap-sezione)";
+  riga.innerHTML='La sveglia può arrivare con qualche minuto di ritardo. <button class="lnk" type="button" style="display:inline">Rendila puntuale →</button>';
+  if($("#notifHint")) $("#notifHint").after(riga);
+  const aggiornaEsatta=()=>Promise.all([platform.notify.permission(),platform.notify.exactStatus()])
+    .then(([p,x])=>{ riga.hidden=!(p==="granted" && x!=="granted"); }).catch(()=>{});
+  riga.querySelector("button").onclick=()=>platform.notify.requestExact().then(()=>{ aggiornaEsatta(); ntNotifiche(); });
+  aggiornaEsatta(); platform.onResume(aggiornaEsatta);
 }
 // Interruttore statistiche (opt-in: spento finché non lo accendi tu).
 // analytics.js è caricato con defer, quindi qui può non esserci ancora — si
@@ -7891,6 +7908,11 @@ function ntNotifiche(){
 document.addEventListener("visibilitychange", ()=>{
   if(document.visibilityState === "visible"){ ntNotifiche(); aggiornaPermNotif(); }
 });
+// App nativa: ritorno in primo piano (riarma) e tocco su una notifica (tab giusto).
+platform.onResume(()=>{ ntNotifiche(); aggiornaPermNotif(); });
+platform.onNotificationTap(tab=>{
+  try{ const t=String(tab||"oggi").replace(/\?.*/,""); setTab({oggi:"oggi",diario:"oggi",turni:"turni"}[t]||"oggi"); render(); }catch(e){}
+});
 // Prima attivazione dopo il load (se il permesso è già stato concesso)
 addEventListener("load", ()=>{ setTimeout(ntNotifiche, 1500); aggiornaPermNotif(); });
 
@@ -8103,5 +8125,6 @@ addEventListener("nt:refresh", ()=>{ try{ render(); }catch(e){} });
 })();
 </script>
 <script src="./paid.js" defer></script>
+<script src="./migrate.js" defer></script>
 </body>
 </html>

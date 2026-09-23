@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Notturnisti</string>
+    <string name="title_activity_main">Notturnisti</string>
+    <string name="package_name">club.notturnisti.twa</string>
+    <string name="custom_url_scheme">club.notturnisti.twa</string>
+</resources>

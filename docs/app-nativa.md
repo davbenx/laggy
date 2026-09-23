@@ -1,6 +1,6 @@
 # App nativa (Android → iOS): notifiche, calendario, widget
 
-Stato: **fase 1 fatta** (2026-09-23): `buildEvents()`, `platform.js`, statistiche d'uso. Il resto è proposta.
+Stato (2026-09-23): **fase 1 fatta** (`buildEvents()`, `platform.js`, statistiche); **fase 2 fatta nel codice** (`app/`, trasloco dati, notifiche native). Manca la prova su un telefono vero e il rilascio: vedi `app/README.md`. Fasi 3–5 da fare.
 
 ## 1. Problema
 

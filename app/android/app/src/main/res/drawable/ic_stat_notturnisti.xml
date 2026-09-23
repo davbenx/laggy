@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Icona piccola delle notifiche: una luna, solo sagoma bianca (Android
+     colora da sé; le icone a colori in barra di stato diventano quadrati). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="24" android:viewportHeight="24">
+    <path android:fillColor="#FFFFFFFF"
+        android:pathData="M20.2,15.3A8.5,8.5 0,0 1,8.7 3.8A8.5,8.5 0,1 0,20.2 15.3Z"/>
+</vector>
