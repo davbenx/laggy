@@ -30,6 +30,17 @@ try{
   if(imp){ sessionStorage.removeItem("nt-import"); const d=JSON.parse(imp);
     for(const k in d) if(k.indexOf("nt:")===0 && typeof d[k]==="string") localStorage.setItem(k,d[k]); }
 }catch(e){}
+// Link di ripristino del calendario (#restore=id.chiave): messo da parte
+// SUBITO. render() riscrive l'indirizzo con la configurazione a ogni giro,
+// e lo faceva prima che paid.js (caricato dopo) potesse leggerlo: il link
+// non ripristinava mai niente. sessionStorage: resta in questa scheda,
+// non nella cronologia.
+try{
+  if(/^#restore=/.test(location.hash)){
+    sessionStorage.setItem("nt-restore", decodeURIComponent(location.hash.slice(9)));
+    history.replaceState(null,"",location.pathname+location.search);
+  }
+}catch(e){}
 // Applicato prima di qualunque CSS: se l'utente ha forzato il chiaro con
 // l'interruttore in alto (vedi più sotto), va impostato subito, non dopo
 // il primo render — altrimenti si vedrebbe un lampo nel tema sbagliato.
@@ -2427,7 +2438,7 @@ var qrcodegen;
 // prima che il resto di questo script (che lo usa ovunque, via NT.) parta —
 // stessa garanzia di ordine che un normalizzatore await avrebbe dato, senza
 // bisogno di riscrivere tutto in async. I moduli sono già strict di default.
-import { createEngine, resolveNextAction } from "./engine.js";
+import { createEngine, resolveNextAction, encEcc, decEcc } from "./engine.js";
 import platform from "./platform.js";
 /* MOTORE NOTTURNISTI v4 — turni arbitrari.
    Nessuna regola guarda più la lettera del turno. Tutto si decide dalla
@@ -2562,6 +2573,9 @@ function hashParamsBase(){
   p.set("p",state.pattern); p.set("a",state.anchor); p.set("s",encShifts(state.shifts));
   p.set("w",state.freeWake); p.set("wb",state.freeBed); p.set("cs",state.caffSens); p.set("n",state.need); p.set("ct",state.cTo);
   p.set("cf",state.cFrom); p.set("pr",state.prep); p.set("adv",state.maxAdvance); if(state.repeat===false) p.set("rep","0");
+  // Eccezioni (cambi turno, turni variabili): senza, il link e il calendario
+  // automatico mostravano il ciclo nudo — vedi encEcc in engine.js.
+  const x=encEcc(state.ecc); if(x) p.set("x",x);
   return p;
 }
 // Link del "Condividi il tuo ciclo"/QR in Turni: pensato per un collega che
@@ -2631,6 +2645,7 @@ function fromHash(hashStr){
   state.cFrom=num("cf",state.cFrom,0,240); state.prep=num("pr",state.prep,5,240);
   state.maxAdvance=num("adv",state.maxAdvance,15,180);
   state.repeat = p.get("rep")!=="0";
+  if(p.get("x")){ const x=decEcc(p.get("x")); if(Object.keys(x).length) state.ecc=Object.assign({}, state.ecc||{}, x); }
   if(p.get("pp")){ state.pPattern=seq(p.get("pp"));
     state.pAnchor=okDate(p.get("pa"))?p.get("pa"):state.anchor;
     if(p.get("ps")){ const psh=decShifts(p.get("ps")); if(psh) state.pShifts=psh; }
@@ -4290,9 +4305,14 @@ if($("#demoEsempio")) $("#demoEsempio").addEventListener("click", e=>{
   // Un turno solo per oggi: niente ciclo inventato per gli altri giorni.
   const varBtn = e.target.closest("[data-set-var]");
   if(varBtn){
+    // Ciclo di un solo giorno (oggi), che non si ripete: tutti gli altri
+    // giorni restano "non impostati". Con il ciclo di esempio ancora lì,
+    // i 4 giorni dopo oggi venivano presi da M-P-N-S-R.
+    const k = varBtn.dataset.setVar;
     state.repeat = false;
+    state.pattern = k;
     state.anchor = iso(new Date());
-    state.ecc[iso(new Date())] = varBtn.dataset.setVar;
+    state.ecc[iso(new Date())] = k;
     primoPianoPronto("oggi", "Ecco il tuo piano di oggi");
     return;
   }
@@ -7980,7 +8000,18 @@ window.NT = {
     salva(); render(); },
   setPartner(seq, anchorISO){ state.pPattern=String(seq||"").toUpperCase().replace(/[^A-Z]/g,"").slice(0,400);
     state.pAnchor=anchorISO||state.anchor; salva(); render(); },
-  insights(){ let c=null,w=null; try{c=cycleSummary();}catch(e){} try{w=wakeSummary();}catch(e){} return {cycle:c, wake:w}; }
+  insights(){ let c=null,w=null; try{c=cycleSummary();}catch(e){} try{w=wakeSummary();}catch(e){} return {cycle:c, wake:w}; },
+  // Ripristino del calendario su un dispositivo nuovo: riporta anche i turni
+  // salvati sul server, ma SOLO se qui non ce ne sono ancora — altrimenti il
+  // primo tocco della persona avrebbe sovrascritto il server con un'app vuota.
+  // Solo i campi che parseConfig() del server produce, già validati lì.
+  applyConfig(cfg){
+    if(!cfg || !cfg.pattern || state.turniConfigurati) return false;
+    for(const k of ["pattern","anchor","shifts","repeat","ecc","freeWake","freeBed","caffSens","cTo","cFrom","prep","maxAdvance","pPattern","pAnchor","pShifts","pWake","pBed"])
+      if(cfg[k]!==undefined) state[k]=JSON.parse(JSON.stringify(cfg[k]));
+    state.turniConfigurati=true; store.set("turniConfigurati", true);
+    NT.normalizza(); salva(); render(); return true;
+  }
 };
 addEventListener("nt:refresh", ()=>{ try{ render(); }catch(e){} });
 

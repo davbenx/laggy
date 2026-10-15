@@ -13,7 +13,10 @@ const localMidnight = d => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 const at = (mid, mins) => new Date(mid.getTime() + mins * MIN);
 const hhmm = d => String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
 
-// tipi -> codice id (per id interi stabili: giorno*10 + tipo)
+// tipi -> codice id. id = giorno*100 + tipo*10 + progressivo: stabile per
+// giorno e tipo, e unico anche con più pisolini nello stesso giorno (prima
+// giorno*10+tipo: due pisolini avevano lo stesso id, e su Android il secondo
+// cancellava il primo).
 const KIND = { bedtime: 1, wake: 2, nap: 3, coffee: 4, ret: 5, prep: 6 };
 
 export function buildSchedule(config, opts = {}) {
@@ -29,11 +32,13 @@ export function buildSchedule(config, opts = {}) {
   const now = Date.now();
   const out = [];
   const want = k => types.includes(k);
+  const seq = {};
   const push = (base, mins, kind, title, body) => {
     const when = at(localMidnight(base), mins);
-    if (when.getTime() <= now) return;            // solo futuro
     const dayIdx = Math.round((localMidnight(base) - localMidnight(f0)) / (1440 * MIN));
-    out.push({ id: dayIdx * 10 + KIND[kind], kind, title, body, at: when });
+    const k = dayIdx + ":" + kind, n = seq[k] = (seq[k] || 0) + 1;   // contato anche se nel passato: id stabili
+    if (when.getTime() <= now) return;            // solo futuro
+    out.push({ id: dayIdx * 100 + KIND[kind] * 10 + (n - 1), kind, title, body, at: when });
   };
 
   for (let o = 0; o < days; o++) {

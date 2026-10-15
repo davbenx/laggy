@@ -948,6 +948,29 @@ function decShifts(str){
   return Object.keys(o).length ? o : null;
 }
 
+// Eccezioni al ciclo (cambi turno, turni variabili inseriti giorno per
+// giorno) in forma compatta per link e calendario automatico:
+// "20261015N.20261016R" — data + codice turno, separati da punto. Prima non
+// viaggiavano affatto: il feed ICS e il link "Salva la configurazione"
+// mostravano il ciclo nudo, cioè turni sbagliati o assenti proprio per chi
+// li inserisce a mano. Solo da `daGiorni` giorni fa in poi (il passato
+// remoto non serve a niente e allungherebbe il link), al massimo 400 voci.
+export function encEcc(ecc, daGiorni=60, oggi=new Date()){
+  if(!ecc || typeof ecc!=="object") return "";
+  const m = new Date(oggi); m.setDate(m.getDate()-daGiorni);
+  const minIso = m.getFullYear()+"-"+String(m.getMonth()+1).padStart(2,"0")+"-"+String(m.getDate()).padStart(2,"0");
+  return Object.keys(ecc).filter(k=>/^\d{4}-\d{2}-\d{2}$/.test(k) && k>=minIso && typeof ecc[k]==="string" && /^[A-Z]$/.test(ecc[k]))
+    .sort().slice(-400).map(k=>k.replace(/-/g,"")+ecc[k]).join(".");
+}
+export function decEcc(str){
+  const o={};
+  for(const part of String(str||"").split(".").slice(0,400)){
+    const m=/^(\d{4})(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])([A-Z])$/.exec(part); if(!m) continue;
+    o[m[1]+"-"+m[2]+"-"+m[3]]=m[4];
+  }
+  return o;
+}
+
 export function buildFeed(config, opts={}){
   const e = createEngine(config);
   if(opts.ics) e.setIcs(opts.ics);
@@ -986,6 +1009,7 @@ export function parseConfig(params){
   const pr=num("pr",5,240);   if(pr!==undefined) cfg.prep=pr;
   const adv=num("adv",15,180);if(adv!==undefined) cfg.maxAdvance=adv;
   cfg.repeat = p.get("rep")!=="0";
+  if(p.get("x")){ const x=decEcc(p.get("x")); if(Object.keys(x).length) cfg.ecc=x; }
   if(p.get("pp")){ cfg.pPattern=seq(p.get("pp")); cfg.pAnchor=okDate(p.get("pa"))?p.get("pa"):cfg.anchor;
     if(p.get("ps")){ const psh=decShifts(p.get("ps")); if(psh) cfg.pShifts=psh; }
     if(okTime(p.get("pw"))) cfg.pWake=p.get("pw");

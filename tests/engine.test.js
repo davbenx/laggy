@@ -360,3 +360,19 @@ test("buildCoupleEvents: eventi tutto-il-giorno coerenti con il feed di coppia",
     assert.equal(ev.end.getHours(), 0);
   }
 });
+
+// Le eccezioni (cambi turno, turni variabili) devono arrivare al calendario
+// automatico e al link di backup: prima il feed mostrava il ciclo nudo.
+import { encEcc, decEcc, parseConfig } from "../engine.js";
+test("eccezioni: andata e ritorno, e il feed le rispetta", () => {
+  const oggi = new Date(2026, 9, 15, 10);
+  const ecc = { "2026-10-15": "N", "2026-10-16": "R", "2026-01-01": "M", "2026-10-17": "notte", "x": "N" };
+  const s = encEcc(ecc, 60, oggi);
+  assert.equal(s, "20261015N.20261016R", "solo date valide, recenti, con codice di una lettera");
+  assert.deepEqual(decEcc(s), { "2026-10-15": "N", "2026-10-16": "R" });
+  assert.deepEqual(decEcc("2026101N.abc.20261016notte"), {}, "voci malformate scartate");
+  const cfg = parseConfig(new URLSearchParams("p=N&a=2026-10-15&rep=0&x=20261015N.20261016M&s=N:Notte:1260:1860|M:Mattino:420:840"));
+  const ics = buildFeed({ ...cfg, focus: "2026-10-15T10:00:00" }, { days: 3 });
+  const turni = [...ics.matchAll(/SUMMARY:(Turno [^\r]*)/g)].map(m => m[1]);
+  assert.deepEqual(turni, ["Turno Notte", "Turno Mattino"]);
+});

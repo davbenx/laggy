@@ -60,3 +60,21 @@ test("navigazione: turnazione ciclica infinita supporta offset arbitrari positiv
   assert.ok(e.at(P.S, 100), "giorno +100 deve avere dati di simulazione");
   assert.ok(e.at(P.S, -100), "giorno -100 deve avere dati di simulazione");
 });
+
+// Due pisolini nello stesso giorno avevano lo stesso id (giorno*10+tipo): su
+// Android il secondo cancellava il primo, sul web restava un timer orfano.
+test("buildSchedule: id unici anche con più pisolini nello stesso giorno", () => {
+  const items = buildSchedule({ pattern: "NNNRR", anchor: "2026-10-01", napTurno: "si" }, { days: 21 });
+  const ids = items.map(n => n.id);
+  assert.equal(new Set(ids).size, ids.length);
+  assert.ok(ids.every(x => Number.isInteger(x) && x >= 0 && x < 999999), "999999 è riservato all'avviso di fine coda su iOS");
+});
+
+// "Solo oggi" dal primo avvio: un ciclo di un giorno che non si ripete. Gli
+// altri giorni non devono ricevere promemoria inventati.
+test("buildSchedule: con un solo giorno impostato, promemoria solo per quel giorno", () => {
+  const oggi = new Date(); const iso = d => d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+  const items = buildSchedule({ pattern: "N", anchor: iso(oggi), repeat: false, ecc: { [iso(oggi)]: "N" } }, { days: 14 });
+  const dopodomani = new Date(oggi); dopodomani.setDate(dopodomani.getDate() + 2); dopodomani.setHours(12, 0, 0, 0);
+  assert.ok(items.every(n => n.at < dopodomani), "nessun promemoria oltre il turno di oggi");
+});

@@ -192,6 +192,7 @@
       if (!id || !key) return;
       api("GET", "/config/" + encodeURIComponent(id), null, key).then(function (r) {
         if (r.ok) { setSub({ id: id, writeKey: key, feedUrl: feedFromId(id) }); screen = "account"; paint();
+          try { window.NT.applyConfig(r.data && r.data.cfg); } catch (e) {}
           try { if (window.render) window.render(); } catch (e) {} }
         else toast("Credenziali non valide");
       });
@@ -285,15 +286,23 @@
       // Fragment prima (nuovo formato, mai inviato al server); la query
       // string resta come fallback di lettura solo per i link già generati
       // prima di questa modifica, così non si rompono per chi li ha salvati.
+      // Messo da parte dallo script in testa a index.html (vedi lì perché).
+      tok = sessionStorage.getItem("nt-restore");
+      if (tok) sessionStorage.removeItem("nt-restore");
       var h = location.hash || "";
-      if (/^#restore=/.test(h)) tok = decodeURIComponent(h.slice("#restore=".length));
-      else tok = new URLSearchParams(location.search).get("restore");
+      if (!tok && /^#restore=/.test(h)) tok = decodeURIComponent(h.slice("#restore=".length));
+      else if (!tok) tok = new URLSearchParams(location.search).get("restore");
     } catch (e) { return; }
     if (!tok) return;
     var i = tok.indexOf("."); if (i < 1) { cleanUrl(); return; }
     var id = tok.slice(0, i), key = tok.slice(i + 1); if (!id || !key) { cleanUrl(); return; }
     api("GET", "/config/" + encodeURIComponent(id), null, key).then(function (r) {
-      if (r.ok) { setSub({ id: id, writeKey: key, feedUrl: feedFromId(id) }); var b = $("#pf-open"); if (b) b.textContent = "Il mio calendario"; toast("Accesso ripristinato"); }
+      if (r.ok) {
+        setSub({ id: id, writeKey: key, feedUrl: feedFromId(id) });
+        var b = $("#pf-open"); if (b) b.textContent = "Il mio calendario";
+        var turni = false; try { turni = window.NT.applyConfig(r.data && r.data.cfg); } catch (e) {}
+        toast(turni ? "Calendario e turni ripristinati" : "Accesso ripristinato");
+      }
       cleanUrl();
     });
   }
