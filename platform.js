@@ -140,18 +140,112 @@ async function ensureChannels(LN) {
 export const notify = isNative ? nativeNotify : webNotify;
 
 /* ── Calendario ────────────────────────────────────────────────────────── */
-// Web: non disponibile (restano feed ICS e download .ics). Nativo: arriva con
-// la fase 3 del piano (docs/app-nativa.md §4.2). La firma è già quella finale.
+// Web: non disponibile (restano feed ICS e download .ics).
+// Nativo: un calendario "Notturnisti" sul telefono (Android: account LOCALE,
+// non sincronizzato con Google; resta sul dispositivo), riscritto da capo a
+// ogni cambio. Niente server, niente ritardi di aggiornamento: è la ragione
+// principale dell'app nativa (docs/app-nativa.md §4.2).
+// Gli eventi NON hanno promemoria: l'app manda già le sue notifiche, i
+// promemoria del calendario sarebbero doppi.
+const CAL_KEY = "nt:calNativo";
+const calState = () => { try { return JSON.parse(localStorage.getItem(CAL_KEY) || "null") || {}; } catch (e) { return {}; } };
+const calSave = st => { try { localStorage.setItem(CAL_KEY, JSON.stringify(st)); } catch (e) {} };
+let _calBusy = null;
+
+async function calPermesso(chiedi) {
+  const C = plugin("CapacitorCalendar");
+  const ok = r => r && r.result && r.result.readCalendar === "granted" && r.result.writeCalendar === "granted";
+  if (ok(await C.checkAllPermissions())) return true;
+  return chiedi ? ok(await C.requestAllPermissions()) : false;
+}
+async function calCrea(titolo, colore) {
+  const C = plugin("CapacitorCalendar");
+  const r = await C.createCalendar({ title: titolo, color: colore, accountName: "Notturnisti", ownerAccount: "Notturnisti" });
+  return r.id;
+}
+// Il calendario può essere stato cancellato a mano dall'utente: si controlla
+// che esista ancora prima di scriverci.
+async function calEsiste(id) {
+  if (!id) return false;
+  try { const r = await plugin("CapacitorCalendar").listCalendars(); return (r.result || []).some(c => String(c.id) === String(id)); }
+  catch (e) { return false; }
+}
+async function calScrivi(id, vecchi, eventi) {
+  const C = plugin("CapacitorCalendar");
+  if (vecchi && vecchi.length) { try { await C.deleteEventsById({ ids: vecchi }); } catch (e) {} }
+  const nuovi = [];
+  for (const e of eventi) {
+    // Occupato solo il turno; sonno, caffè, luce e riposi in comune non
+    // devono far risultare "impegnato" a chi guarda la tua disponibilità.
+    const opt = { calendarId: String(id), title: e.title, startDate: e.start.getTime(), endDate: e.end.getTime(),
+      isAllDay: !!e.allDay, availability: e.tipo === "turno" ? 0 : 1 };
+    if (e.desc) opt.description = e.desc;
+    const r = await C.createEvent(opt);
+    if (r && r.id) nuovi.push(String(r.id));
+  }
+  return nuovi;
+}
+
 export const calendar = {
-  available: false,
-  async sync(events, coupleEvents) { return false; }
+  available: isNative && !!plugin("CapacitorCalendar"),
+  attivo() { return !!calState().on; },
+  coppiaAttiva() { return !!calState().coppia; },
+  ultimoSync() { return calState().at || null; },
+  // Attiva (chiede il permesso). Restituisce "ok" | "negato".
+  async attiva({ coppia } = {}) {
+    if (!this.available) return "negato";
+    if (!(await calPermesso(true))) return "negato";
+    const st = calState(); st.on = true; if (coppia !== undefined) st.coppia = !!coppia; st.sig = null; calSave(st);
+    return "ok";
+  },
+  async impostaCoppia(on) { const st = calState(); st.coppia = !!on; st.sig = null; calSave(st); },
+  // Spegne e cancella i calendari creati dall'app (solo quelli).
+  async disattiva() {
+    const C = plugin("CapacitorCalendar"), st = calState();
+    for (const id of [st.id, st.idCoppia]) if (id) { try { await C.deleteCalendar({ id: String(id) }); } catch (e) {} }
+    calSave({});
+  },
+  // Riscrive gli eventi se sono cambiati. events/coupleEvents = buildEvents()/
+  // buildCoupleEvents() del motore. Due chiamate ravvicinate non si accavallano.
+  async sync(events, coupleEvents) {
+    if (!this.available || !this.attivo()) return false;
+    if (_calBusy) return _calBusy;
+    _calBusy = (async () => {
+      try {
+        if (!(await calPermesso(false))) return false;
+        const st = calState();
+        const coppia = st.coppia ? (coupleEvents || []) : [];
+        const sig = JSON.stringify([events.map(e => [e.uid, +e.start, +e.end, e.title]), coppia.map(e => [e.uid, e.desc])]);
+        if (sig === st.sig && await calEsiste(st.id)) return true;
+        if (!(await calEsiste(st.id))) { st.id = await calCrea("Notturnisti", "#3D7BE0"); st.ids = []; }
+        st.ids = await calScrivi(st.id, st.ids, events);
+        if (st.coppia) {
+          if (!(await calEsiste(st.idCoppia))) { st.idCoppia = await calCrea("Notturnisti · insieme", "#E0913D"); st.idsCoppia = []; }
+          st.idsCoppia = await calScrivi(st.idCoppia, st.idsCoppia, coppia);
+        } else if (st.idCoppia) {
+          try { await plugin("CapacitorCalendar").deleteCalendar({ id: String(st.idCoppia) }); } catch (e) {}
+          st.idCoppia = null; st.idsCoppia = [];
+        }
+        st.sig = sig; st.at = Date.now(); calSave(st);
+        return true;
+      } finally { _calBusy = null; }
+    })();
+    return _calBusy;
+  },
+  async apri() { try { await plugin("CapacitorCalendar").openCalendar({ date: Date.now() }); } catch (e) {} }
 };
 
 /* ── Widget ────────────────────────────────────────────────────────────── */
-// Fase 4 (Android) e 5 (iOS). Web: nessun widget possibile, no-op.
+// Android: widget "Il tuo piano" (app/android/.../NotturnistiWidget.java).
+// La pagina gli passa la timeline delle prossime ore già calcolata; il
+// widget sceglie solo cosa vale adesso. Web: nessun widget possibile, no-op.
 export const widget = {
-  available: false,
-  async publish(snapshot) { return false; }
+  available: isNative && !!plugin("NTWidget"),
+  async publish(voci) {
+    const W = plugin("NTWidget"); if (!W) return false;
+    try { await W.publish({ json: JSON.stringify({ v: 1, at: Date.now(), voci }) }); return true; }
+    catch (e) { return false; }
+  }
 };
 
 /* ── Eventi dell'app nativa ────────────────────────────────────────────── */
@@ -167,6 +261,46 @@ export function onNotificationTap(cb) {
   });
 }
 
-const NTPlatform = { isNative, name, notify, calendar, widget, onResume, onNotificationTap };
+/* ── Condivisione ──────────────────────────────────────────────────────── */
+// Nel WebView di Android navigator.share non esiste: senza il plugin si
+// finiva sempre sul "link copiato". Annullare dal pannello è un AbortError,
+// come per navigator.share, così i chiamanti lo gestiscono una volta sola.
+export function canShare() { return !!plugin("Share") || (typeof navigator !== "undefined" && !!navigator.share); }
+export async function share({ title, text, url }) {
+  const Sh = plugin("Share");
+  if (Sh) {
+    try { await Sh.share({ title, text, url, dialogTitle: title }); return true; }
+    catch (e) {
+      if (/cancel/i.test(String(e && (e.message || e)))) { const a = new Error("annullato"); a.name = "AbortError"; throw a; }
+      throw e;
+    }
+  }
+  await navigator.share({ title, text, url });
+  return true;
+}
+
+/* ── Barre di sistema ──────────────────────────────────────────────────── */
+// Icone della barra di stato e della barra dei gesti leggibili sul tema
+// dell'app: chiare su fondo scuro, scure su fondo chiaro. Senza, seguivano
+// il tema del telefono anche quando l'app era forzata sul chiaro.
+export function setSystemBars(chiaro) {
+  const SB = plugin("SystemBars");
+  if (SB) SB.setStyle({ style: chiaro ? "LIGHT" : "DARK" }).catch(() => {});
+}
+
+// Tasto "indietro" di Android. cb() restituisce true se ha chiuso qualcosa;
+// altrimenti l'app va in secondo piano (come le app native sulla schermata
+// principale), invece di chiudersi del tutto. Con un listener registrato il
+// plugin App non esegue più il suo comportamento di default.
+export function onBackButton(cb) {
+  const App = plugin("App");
+  if (App) App.addListener("backButton", () => {
+    let gestito = false;
+    try { gestito = !!cb(); } catch (e) {}
+    if (!gestito) App.minimizeApp();
+  });
+}
+
+const NTPlatform = { isNative, name, notify, calendar, widget, onResume, onNotificationTap, onBackButton, canShare, share, setSystemBars };
 try { if (typeof window !== "undefined") window.NTPlatform = NTPlatform; } catch (e) {}
 export default NTPlatform;

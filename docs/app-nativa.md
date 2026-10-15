@@ -1,6 +1,6 @@
 # App nativa (Android → iOS): notifiche, calendario, widget
 
-Stato (2026-09-23): **fase 1 fatta** (`buildEvents()`, `platform.js`, statistiche); **fase 2 fatta nel codice** (`app/`, trasloco dati, notifiche native). Manca la prova su un telefono vero e il rilascio: vedi `app/README.md`. Fasi 3–5 da fare.
+Stato (2026-10-15): fasi 1–4 fatte nel codice per Android (notifiche native, calendario nativo, widget, trasloco dati). Manca la prova su un telefono vero e il rilascio sullo store (`app/README.md`). Fase 5 (iOS) da fare.
 
 ## 1. Problema
 
@@ -240,3 +240,15 @@ raccomandazione) e dove si perdono le persone nell'onboarding.
 Resta com'è: nudge di backup, condivisione, Club, primo piano, diario.
 Da decidere quando l'app sarà sullo store: su Android web il banner
 "Installa" dovrebbe portare al Play Store invece di installare la PWA.
+
+## 11. Integrazione Android (2026-10-15)
+
+| Cosa | Come |
+|---|---|
+| Barre di sistema | Con Android 15 l'app è a tutto schermo: il CSS usa il valore più grande tra `env(safe-area-inset-*)` e le `--safe-area-inset-*` iniettate da Capacitor (variabili `--sat`/`--sab`) |
+| Colore delle icone di sistema | `SystemBars.setStyle` segue il tema effettivo (forzato chiaro, oppure quello del telefono) |
+| Tasto indietro | Chiude dialoghi e pannelli, torna dal wizard e dalle schede a Oggi; da Oggi l'app va in secondo piano (`App.minimizeApp`) invece di chiudersi |
+| Condivisione | `@capacitor/share`: pannello di sistema (WhatsApp ecc.). Sul web resta `navigator.share` o la copia negli appunti |
+| Font | Inter e Noto Serif serviti dal sito e inclusi nell'app (woff2 latini, licenza OFL in `fonts/`). Niente più richieste a Google Fonts, anche sul web |
+| Calendario nativo | `@ebarooni/capacitor-calendar`: calendario locale "Notturnisti" (account LOCAL, non va su Google), più "Notturnisti · insieme" per la coppia. Viene riscritto a ogni cambio, a ogni apertura e a ogni ritorno nell'app (la finestra di 42 giorni avanza), solo se gli eventi sono cambiati. Nessun promemoria sugli eventi: le notifiche dell'app bastano. Spegnendolo, i calendari vengono cancellati |
+| Widget | `NotturnistiWidget.java` (RemoteViews, 4×2 ridimensionabile): mostra cosa vale adesso e le prossime due cose. La timeline delle 48 ore arriva già calcolata dalla pagina (`WidgetPlugin`, `platform.widget.publish`); il widget si ridisegna da solo al prossimo cambio con un allarme inesatto, senza permessi speciali |

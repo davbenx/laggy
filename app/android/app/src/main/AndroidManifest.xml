@@ -36,6 +36,19 @@
 
         </activity>
 
+        <!-- Widget "Il tuo piano" (NotturnistiWidget.java). -->
+        <receiver
+            android:name=".NotturnistiWidget"
+            android:label="@string/widget_etichetta"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_piano_info" />
+        </receiver>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -50,4 +63,9 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Calendario del telefono: l'app scrive (e rilegge, per ritrovare il
+         proprio) il calendario locale "Notturnisti". Chiesto solo quando si
+         attiva la sincronizzazione. -->
+    <uses-permission android:name="android.permission.READ_CALENDAR" />
+    <uses-permission android:name="android.permission.WRITE_CALENDAR" />
 </manifest>

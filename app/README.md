@@ -13,9 +13,14 @@ come sono, e Capacitor li impacchetta. Il piano completo è in
 - **Trasloco dati** dalla vecchia TWA (`../migrate.js`): al primo avvio, se
   l'app è vuota, propone di recuperare i dati dal browser con
   `notturnisti://import#…`, senza server.
+- **Calendario del telefono**: calendario locale «Notturnisti» (non va su
+  Google), aggiornato a ogni cambio di turni. Permesso calendario chiesto
+  solo quando lo si attiva.
+- **Widget** «Notturnisti · adesso»: cosa fare adesso e le prossime due cose.
+- Tasto indietro, pannello di condivisione di sistema, barre di sistema
+  e font integrati.
 - Niente service worker, niente banner d'installazione, niente link alle
-  donazioni (policy Play), niente export `.ics` da file (arriva il
-  calendario nativo, fase 3).
+  donazioni (policy Play), niente export `.ics` da file.
 
 ## Comandi
 ```sh
@@ -53,6 +58,7 @@ Stesso `applicationId` della TWA (`club.notturnisti.twa`), quindi è un
    vecchia app, notifiche ad app chiusa e dopo un riavvio, link condivisi.
 4. **Scheda Play**: aggiorna la sezione "Sicurezza dei dati": statistiche
    anonime solo con consenso, nessun dato personale raccolto. Dichiara anche
-   il permesso `SCHEDULE_EXACT_ALARM` (sveglia del piano sonno).
+   il permesso `SCHEDULE_EXACT_ALARM` (sveglia del piano sonno) e i permessi
+   calendario (scrittura del calendario «Notturnisti» sul telefono).
 5. `/.well-known/assetlinks.json` serviva solo alla TWA. Toglilo **dopo**
    che l'aggiornamento è arrivato alla maggior parte degli utenti.
