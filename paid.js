@@ -7,7 +7,9 @@
    = { api }. */
 (function () {
   "use strict";
-  var CAL = Object.assign({ api: "" }, window.NT_CAL || {});
+  // origin: il sito vero anche quando la pagina gira nell'app nativa
+  // (https://localhost) — vedi window.NT_APP in index.html.
+  var CAL = Object.assign({ api: "", origin: location.origin }, window.NT_CAL || {});
   var KEY = "nt:sub";
   var $ = function (s, r) { return (r || document).querySelector(s); };
 
@@ -190,6 +192,7 @@
       if (!id || !key) return;
       api("GET", "/config/" + encodeURIComponent(id), null, key).then(function (r) {
         if (r.ok) { setSub({ id: id, writeKey: key, feedUrl: feedFromId(id) }); screen = "account"; paint();
+          try { window.NT.applyConfig(r.data && r.data.cfg); } catch (e) {}
           try { if (window.render) window.render(); } catch (e) {} }
         else toast("Credenziali non valide");
       });
@@ -249,18 +252,20 @@
     };
   }
 
-  function feedFromId(id) { return location.origin.replace(/^https?/, "webcal") + "/feed/" + id; }
+  function feedFromId(id) { return CAL.origin.replace(/^https?/, "webcal") + "/feed/" + id; }
   // Il fragment (#) non viene mai inviato al server: a differenza di una query
   // string, non finisce nei log di accesso di Cloudflare/proxy intermedi né,
   // se l'utente preme Invio sulla barra indirizzi, nella cronologia del
   // browser. Per un link che contiene la chiave di scrittura dell'account è
   // l'unica forma sicura.
-  function restoreLink(s) { return location.origin + location.pathname + "#restore=" + s.id + "." + s.writeKey; }
+  function restoreLink(s) { return (window.NT_APP ? window.NT_APP.base : location.origin + location.pathname) + "#restore=" + s.id + "." + s.writeKey; }
   function copyText(txt) {
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(function () { toast("Link copiato"); }, function () { prompt("Copia il link:", txt); });
     else prompt("Copia il link:", txt);
   }
   function downloadTxt(name, text) {
+    // Nel WebView dell'app un blob non si scarica: si copia negli appunti.
+    if (window.NT_APP && window.NT_APP.nativo) { copyText(text); return; }
     try {
       var blob = new Blob([text], { type: "text/plain" }), url = URL.createObjectURL(blob);
       var a = document.createElement("a"); a.href = url; a.download = name; document.body.appendChild(a); a.click();
@@ -281,15 +286,23 @@
       // Fragment prima (nuovo formato, mai inviato al server); la query
       // string resta come fallback di lettura solo per i link già generati
       // prima di questa modifica, così non si rompono per chi li ha salvati.
+      // Messo da parte dallo script in testa a index.html (vedi lì perché).
+      tok = sessionStorage.getItem("nt-restore");
+      if (tok) sessionStorage.removeItem("nt-restore");
       var h = location.hash || "";
-      if (/^#restore=/.test(h)) tok = decodeURIComponent(h.slice("#restore=".length));
-      else tok = new URLSearchParams(location.search).get("restore");
+      if (!tok && /^#restore=/.test(h)) tok = decodeURIComponent(h.slice("#restore=".length));
+      else if (!tok) tok = new URLSearchParams(location.search).get("restore");
     } catch (e) { return; }
     if (!tok) return;
     var i = tok.indexOf("."); if (i < 1) { cleanUrl(); return; }
     var id = tok.slice(0, i), key = tok.slice(i + 1); if (!id || !key) { cleanUrl(); return; }
     api("GET", "/config/" + encodeURIComponent(id), null, key).then(function (r) {
-      if (r.ok) { setSub({ id: id, writeKey: key, feedUrl: feedFromId(id) }); var b = $("#pf-open"); if (b) b.textContent = "Il mio calendario"; toast("Accesso ripristinato"); }
+      if (r.ok) {
+        setSub({ id: id, writeKey: key, feedUrl: feedFromId(id) });
+        var b = $("#pf-open"); if (b) b.textContent = "Il mio calendario";
+        var turni = false; try { turni = window.NT.applyConfig(r.data && r.data.cfg); } catch (e) {}
+        toast(turni ? "Calendario e turni ripristinati" : "Accesso ripristinato");
+      }
       cleanUrl();
     });
   }
@@ -360,6 +373,21 @@
         api("PUT", "/config/" + s.id, { cfg: paramsObj() }, s.writeKey).then(function () {}, function () {});
       }, 2000);
     });
+  } catch (e) {}
+  // Riallineamento una tantum: i feed creati prima che le eccezioni (cambi
+  // turno, turni variabili) viaggiassero col calendario hanno sul server una
+  // configurazione senza. Un PUT alla prima apertura dopo l'aggiornamento li
+  // corregge senza aspettare il prossimo cambio turno.
+  var SYNC_V = "2";
+  try {
+    if (paid() && localStorage.getItem("nt:subSyncV") !== SYNC_V) {
+      setTimeout(function () {
+        var s = getSub(); if (!s) return;
+        api("PUT", "/config/" + s.id, { cfg: paramsObj() }, s.writeKey).then(function (r) {
+          if (r.ok) try { localStorage.setItem("nt:subSyncV", SYNC_V); } catch (e) {}
+        }, function () {});
+      }, 3000);
+    }
   } catch (e) {}
   if (document.readyState === "loading") addEventListener("DOMContentLoaded", launcher);
   else launcher();

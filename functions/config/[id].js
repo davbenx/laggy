@@ -2,20 +2,20 @@
 // Richiede la writeKey (che solo chi ha pagato possiede). È ciò che rende il
 // calendario "vivo": la griglia di inserimento rapido dell'app scrive qui, e il
 // feed la rilegge. L'id da solo NON basta per scrivere: serve la writeKey.
-import { readSub, writeSub, sanitizeConfig, ctEqual, isActive, cfgEnv, json, err, cors, nowSec } from "../_lib.js";
+import { readSub, writeSub, sanitizeConfig, ctEqual, isActive, cfgEnv, corsOrigin, json, err, cors, nowSec } from "../_lib.js";
 
 function auth(request, sub) {
   const key = request.headers.get("x-write-key") || "";
   return sub && sub.writeKey && ctEqual(key, sub.writeKey);
 }
 
-export async function onRequestOptions({ env }) {
-  return new Response(null, { status: 204, headers: cors(cfgEnv(env).origin) });
+export async function onRequestOptions({ env, request }) {
+  return new Response(null, { status: 204, headers: cors(corsOrigin(env, request)) });
 }
 
 // GET: restituisce la config attuale (per far editare all'app). Serve la writeKey.
 export async function onRequestGet({ params, env, request }) {
-  const o = cfgEnv(env).origin;
+  const o = corsOrigin(env, request);
   const sub = await readSub(env, params.id);
   if (!sub) return err(404, "non trovato", o);
   if (!auth(request, sub)) return err(401, "writeKey mancante o errata", o);
@@ -24,7 +24,7 @@ export async function onRequestGet({ params, env, request }) {
 
 // PUT: aggiorna i turni (e opzionalmente l'anticipo avviso).
 export async function onRequestPut({ params, env, request }) {
-  const o = cfgEnv(env).origin;
+  const o = corsOrigin(env, request);
   const sub = await readSub(env, params.id);
   if (!sub) return err(404, "non trovato", o);
   if (!auth(request, sub)) return err(401, "writeKey mancante o errata", o);
@@ -42,7 +42,7 @@ export async function onRequestPut({ params, env, request }) {
 
 // DELETE: cancella l'abbonamento (pulizia / GDPR).
 export async function onRequestDelete({ params, env, request }) {
-  const o = cfgEnv(env).origin;
+  const o = corsOrigin(env, request);
   const sub = await readSub(env, params.id);
   if (!sub) return json({ ok: true }, 200, o);          // idempotente
   if (!auth(request, sub)) return err(401, "writeKey mancante o errata", o);

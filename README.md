@@ -56,28 +56,37 @@ index.html        UI shell
 engine.js          core scheduling / circadian engine
 alertness.js       drowsiness/alertness model
 history.js         sleep diary storage
-notifications.js   local notifications
+notifications.js   local notifications (what to notify, when)
+platform.js        web vs native app (Capacitor): notifications, calendar, widget
+analytics.js       anonymous aggregate usage counters (opt-out in Options)
 paid.js            account, checkout, restore-link flow
+migrate.js         one-time data move from the old TWA to the native app
 sw.js              service worker (offline, caching)
 manifest.webmanifest  PWA manifest
 functions/         Cloudflare Pages Functions (API):
   config/[id].js     read/write a saved plan (writeKey-gated)
   couple/[id].js     shared/partner view
   feed/[id].js       ICS calendar feed
+  collect.js         anonymous usage counters (D1, per-day aggregates only)
+  stats.js           private usage dashboard (/stats, token-gated)
   claim/[token].js   one-time license claim after checkout
   webhook-ls.js      Lemon Squeezy payment webhook (HMAC-verified)
   pending.js         pending-checkout bookkeeping
 ```
 
-Deployed on Cloudflare Pages, packaged for Android as a Trusted Web
-Activity (`club.notturnisti.twa`).
+Deployed on Cloudflare Pages. The Android app (`club.notturnisti.twa`) is
+moving from a Trusted Web Activity to a Capacitor shell in `app/`, which
+bundles these same files unchanged and adds OS-level notifications — see
+`app/README.md` and `docs/app-nativa.md`.
 
 ## Local-first
 
 The app is fully usable offline once installed (PWA / TWA): your schedule,
 diary and generated plans live in the browser, not in a database. The only
-network calls are to Lemon Squeezy (checkout) and to the optional
-share/restore/couple endpoints, which you trigger explicitly.
+network calls are to the optional share/restore/couple endpoints, which you
+trigger explicitly, and anonymous usage counters ("a plan was generated", no
+identifiers, no schedule data — stored only as per-day totals, switchable off
+in Options). See `docs/app-nativa.md` for the native-app plan.
 
 ## Roadmap
 

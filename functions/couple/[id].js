@@ -1,6 +1,7 @@
 // GET /couple/<id> — il calendario "insieme": eventi tutto-il-giorno sui riposi in
 // comune con il partner. Stesso gate del feed personale. Richiede che nella config
 // dell'accesso sia impostato il partner (pPattern/pAnchor).
+import { recordFeedPoll } from "../_analytics.js";
 import { buildCoupleFeed, readSub, isActive } from "../_lib.js";
 
 function withRefresh(ics) {
@@ -8,7 +9,7 @@ function withRefresh(ics) {
     "VERSION:2.0\r\nREFRESH-INTERVAL;VALUE=DURATION:PT12H\r\nX-PUBLISHED-TTL:PT12H\r\n");
 }
 
-export async function onRequestGet({ params, env }) {
+export async function onRequestGet({ params, env, waitUntil }) {
   let sub;
   try { sub = await readSub(env, params.id); }
   catch (e) { return new Response("Servizio non configurato.", { status: 503, headers: { "content-type": "text/plain; charset=utf-8" } }); }
@@ -16,6 +17,10 @@ export async function onRequestGet({ params, env }) {
   if (!sub) return new Response("Calendario non trovato.", { status: 404, headers: { "content-type": "text/plain; charset=utf-8" } });
   if (!isActive(sub)) return new Response("Accesso non attivo.", { status: 402, headers: { "content-type": "text/plain; charset=utf-8" } });
   if (!sub.cfg || !sub.cfg.pPattern) return new Response("Partner non configurato.", { status: 409, headers: { "content-type": "text/plain; charset=utf-8" } });
+
+  // Quanti calendari sono ancora vivi (per decidere quando spegnere il feed):
+  // solo un contatore e un hash troncato dell'id, vedi _analytics.js.
+  if (typeof waitUntil === "function") waitUntil(recordFeedPoll(env, "couple", params.id));
 
   let ics;
   try { ics = withRefresh(buildCoupleFeed(sub.cfg, { days: 60 })); }

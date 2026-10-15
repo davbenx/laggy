@@ -761,36 +761,33 @@ function foldLine(line){
   return out + (out?"\r\n ":"")+cur;
 }
 
-function buildIcs(days){
-  const L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//notturnisti.club//pianificatore//IT",
-           "CALSCALE:GREGORIAN","METHOD:PUBLISH","X-WR-CALNAME:Notturnisti",
-           // dice al calendario ogni quanto ricontrollare: senza, alcune app
-           // aggiornano di rado e "si aggiorna da solo" non si vede
-           "REFRESH-INTERVAL;VALUE=DURATION:PT12H","X-PUBLISHED-TTL:PT12H"];
-  const f0=state.focus, stamp=icsDate(new Date(),0)+"Z";
-  // L'identificativo dipende solo da giorno e tipo: riesportando, il calendario
-  // aggiorna gli eventi invece di duplicarli. Con un contatore progressivo,
-  // ogni esportazione creava una copia nuova di tutto.
+// Un istante locale reale (Date) da giorno di riferimento + minuti dalla sua
+// mezzanotte, con la stessa aritmetica di icsDate(): serve al calendario
+// nativo e alle notifiche, che vogliono un Date, non una stringa iCalendar.
+function localAt(base, mins){
+  const d=day(base, Math.floor(mins/1440));
+  const m=mod1440(mins);
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate(), Math.floor(m/60), m%60);
+}
+
+// Gli eventi del piano come dati, non come testo: UNA sola fonte per il file
+// ICS (buildIcs qui sotto lo serializza e basta), per il calendario nativo
+// dell'app (Android CalendarContract / iOS EventKit) e per i test. Prima la
+// lista esisteva solo dentro la stringa ICS: per scriverla altrove bisognava
+// riparsarla o duplicare la logica di cosa mettere nel calendario.
+//   uid     stabile per giorno+tipo: risincronizzare aggiorna, non duplica
+//   start/end  Date locali;  base/a/b  gli stessi valori in minuti (per l'ICS)
+//   avvisa  preavviso in minuti (0 = nessuno);  sveglia  promemoria a fine evento
+function buildEvents(days){
+  const out=[];
+  const f0=state.focus;
   const ev=(base,a,b,tipo,title,desc,avvisa,sveglia)=>{
-    L.push("BEGIN:VEVENT",
-      "UID:nt-"+iso(base)+"-"+tipo+"@notturnisti.club",
-      "DTSTAMP:"+stamp,"DTSTART:"+icsDate(base,a),"DTEND:"+icsDate(base,b),
-      "SUMMARY:"+esc7986(title));
-    if(desc) L.push("DESCRIPTION:"+esc7986(desc));
-    if(avvisa && ICS.avviso>0){
-      L.push("BEGIN:VALARM","ACTION:DISPLAY","TRIGGER:-PT"+ICS.avviso+"M",
-             "DESCRIPTION:"+esc7986(title),"END:VALARM");
-      // Promemoria vero e proprio della sveglia, non un preavviso: scatta
-      // esattamente alla fine del sonno (RELATED=END, offset zero), non
-      // prima — è l'unico canale qui dove "svegliati adesso" ha senso, il
-      // caso in cui l'affidabilità conta più di ogni altro. Stessa scelta
-      // dell'utente sopra (spento se ha messo "nessun promemoria"): un solo
-      // interruttore, non uno nascosto che ignora l'altro.
-      if(sveglia)
-        L.push("BEGIN:VALARM","ACTION:DISPLAY","TRIGGER;RELATED=END:PT0M",
-               "DESCRIPTION:"+esc7986("Sveglia"),"END:VALARM");
-    }
-    L.push("END:VEVENT");
+    const al=avvisa && ICS.avviso>0;
+    out.push({
+      uid:"nt-"+iso(base)+"-"+tipo+"@notturnisti.club", tipo,
+      start:localAt(base,a), end:localAt(base,b), base, a, b,
+      title, desc:desc||"", avvisa:al?ICS.avviso:0, sveglia:!!(al&&sveglia)
+    });
   };
   for(let o=0;o<days;o++){
     state.focus=day(f0,o);
@@ -820,6 +817,40 @@ function buildIcs(days){
         "Occhiali da sole appena esci. Se sei stanco, fermati 20 minuti e un caffè prima di ripartire.",true);
   }
   state.focus=f0;
+  return out;
+}
+
+function buildIcs(days){
+  const L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//notturnisti.club//pianificatore//IT",
+           "CALSCALE:GREGORIAN","METHOD:PUBLISH","X-WR-CALNAME:Notturnisti",
+           // dice al calendario ogni quanto ricontrollare: senza, alcune app
+           // aggiornano di rado e "si aggiorna da solo" non si vede
+           "REFRESH-INTERVAL;VALUE=DURATION:PT12H","X-PUBLISHED-TTL:PT12H"];
+  const stamp=icsDate(new Date(),0)+"Z";
+  // L'identificativo dipende solo da giorno e tipo: riesportando, il calendario
+  // aggiorna gli eventi invece di duplicarli. Con un contatore progressivo,
+  // ogni esportazione creava una copia nuova di tutto.
+  for(const e of buildEvents(days)){
+    L.push("BEGIN:VEVENT",
+      "UID:"+e.uid,
+      "DTSTAMP:"+stamp,"DTSTART:"+icsDate(e.base,e.a),"DTEND:"+icsDate(e.base,e.b),
+      "SUMMARY:"+esc7986(e.title));
+    if(e.desc) L.push("DESCRIPTION:"+esc7986(e.desc));
+    if(e.avvisa){
+      L.push("BEGIN:VALARM","ACTION:DISPLAY","TRIGGER:-PT"+e.avvisa+"M",
+             "DESCRIPTION:"+esc7986(e.title),"END:VALARM");
+      // Promemoria vero e proprio della sveglia, non un preavviso: scatta
+      // esattamente alla fine del sonno (RELATED=END, offset zero), non
+      // prima — è l'unico canale qui dove "svegliati adesso" ha senso, il
+      // caso in cui l'affidabilità conta più di ogni altro. Stessa scelta
+      // dell'utente sopra (spento se ha messo "nessun promemoria"): un solo
+      // interruttore, non uno nascosto che ignora l'altro.
+      if(e.sveglia)
+        L.push("BEGIN:VALARM","ACTION:DISPLAY","TRIGGER;RELATED=END:PT0M",
+               "DESCRIPTION:"+esc7986("Sveglia"),"END:VALARM");
+    }
+    L.push("END:VEVENT");
+  }
   L.push("END:VCALENDAR");
   return L.filter(Boolean).map(foldLine).join("\r\n");
 }
@@ -828,10 +859,11 @@ function buildIcs(days){
   // freeOverlap (estratti verbatim): stessi numeri della striscia partner in app.
   function icsDay(base, o){ const d=day(base,o);
     return [d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join(""); }
-  function buildCouple(days){
-    const L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//notturnisti.club//coppia//IT",
-             "CALSCALE:GREGORIAN","METHOD:PUBLISH","X-WR-CALNAME:Notturnisti - insieme"];
-    const f0=state.focus, stamp=icsDate(new Date(),0)+"Z";
+  // Come buildEvents, ma per il calendario "insieme": eventi tutto-il-giorno.
+  // start = mezzanotte del giorno, end = mezzanotte del giorno dopo.
+  function buildCoupleEvents(days){
+    const out=[];
+    const f0=state.focus;
     for(let o=0;o<days;o++){
       state.focus=day(f0,o);
       const mc=codeAt(0); if(mc==="?") continue;
@@ -846,23 +878,36 @@ function buildIcs(days){
       if(!libere || !libere.some(([a,z])=>z-a>=180)) continue;
       const ov=libere.reduce((s,[a,z])=>s+(z-a),0);
       const base=day(f0,o);
-      L.push("BEGIN:VEVENT",
-        "UID:nt-"+iso(base)+"-coppia@notturnisti.club",
-        "DTSTAMP:"+stamp,
-        "DTSTART;VALUE=DATE:"+icsDay(base,0),"DTEND;VALUE=DATE:"+icsDay(base,1),
-        "SUMMARY:"+esc7986("Riposo in comune"),
-        "DESCRIPTION:"+esc7986("Circa "+Math.round(ov/60)+" ore libere insieme."),
-        "TRANSP:TRANSPARENT","END:VEVENT");
+      out.push({
+        uid:"nt-"+iso(base)+"-coppia@notturnisti.club", tipo:"coppia", allDay:true,
+        start:localAt(base,0), end:localAt(base,1440), base,
+        title:"Riposo in comune", desc:"Circa "+Math.round(ov/60)+" ore libere insieme.",
+        avvisa:0, sveglia:false
+      });
     }
     state.focus=f0;
+    return out;
+  }
+  function buildCouple(days){
+    const L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//notturnisti.club//coppia//IT",
+             "CALSCALE:GREGORIAN","METHOD:PUBLISH","X-WR-CALNAME:Notturnisti - insieme"];
+    const stamp=icsDate(new Date(),0)+"Z";
+    for(const e of buildCoupleEvents(days)){
+      L.push("BEGIN:VEVENT",
+        "UID:"+e.uid,
+        "DTSTAMP:"+stamp,
+        "DTSTART;VALUE=DATE:"+icsDay(e.base,0),"DTEND;VALUE=DATE:"+icsDay(e.base,1),
+        "SUMMARY:"+esc7986(e.title),
+        "DESCRIPTION:"+esc7986(e.desc),
+        "TRANSP:TRANSPARENT","END:VEVENT");
+    }
     L.push("END:VCALENDAR");
     return L.filter(Boolean).map(foldLine).join("\r\n");
   }
 
-
   normalizza();
   return {
-    state, plan, buildIcs, buildCouple, codeAt, block,
+    state, plan, buildIcs, buildCouple, buildEvents, buildCoupleEvents, codeAt, block,
     sharedDays, freeOverlap, asPartner,
     setIcs(o){ Object.assign(ICS, o||{}); return ICS; },
     // Esposti anche questi: prima privati alla closure, ma index.html (che
@@ -903,6 +948,29 @@ function decShifts(str){
   return Object.keys(o).length ? o : null;
 }
 
+// Eccezioni al ciclo (cambi turno, turni variabili inseriti giorno per
+// giorno) in forma compatta per link e calendario automatico:
+// "20261015N.20261016R" — data + codice turno, separati da punto. Prima non
+// viaggiavano affatto: il feed ICS e il link "Salva la configurazione"
+// mostravano il ciclo nudo, cioè turni sbagliati o assenti proprio per chi
+// li inserisce a mano. Solo da `daGiorni` giorni fa in poi (il passato
+// remoto non serve a niente e allungherebbe il link), al massimo 400 voci.
+export function encEcc(ecc, daGiorni=60, oggi=new Date()){
+  if(!ecc || typeof ecc!=="object") return "";
+  const m = new Date(oggi); m.setDate(m.getDate()-daGiorni);
+  const minIso = m.getFullYear()+"-"+String(m.getMonth()+1).padStart(2,"0")+"-"+String(m.getDate()).padStart(2,"0");
+  return Object.keys(ecc).filter(k=>/^\d{4}-\d{2}-\d{2}$/.test(k) && k>=minIso && typeof ecc[k]==="string" && /^[A-Z]$/.test(ecc[k]))
+    .sort().slice(-400).map(k=>k.replace(/-/g,"")+ecc[k]).join(".");
+}
+export function decEcc(str){
+  const o={};
+  for(const part of String(str||"").split(".").slice(0,400)){
+    const m=/^(\d{4})(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])([A-Z])$/.exec(part); if(!m) continue;
+    o[m[1]+"-"+m[2]+"-"+m[3]]=m[4];
+  }
+  return o;
+}
+
 export function buildFeed(config, opts={}){
   const e = createEngine(config);
   if(opts.ics) e.setIcs(opts.ics);
@@ -941,6 +1009,7 @@ export function parseConfig(params){
   const pr=num("pr",5,240);   if(pr!==undefined) cfg.prep=pr;
   const adv=num("adv",15,180);if(adv!==undefined) cfg.maxAdvance=adv;
   cfg.repeat = p.get("rep")!=="0";
+  if(p.get("x")){ const x=decEcc(p.get("x")); if(Object.keys(x).length) cfg.ecc=x; }
   if(p.get("pp")){ cfg.pPattern=seq(p.get("pp")); cfg.pAnchor=okDate(p.get("pa"))?p.get("pa"):cfg.anchor;
     if(p.get("ps")){ const psh=decShifts(p.get("ps")); if(psh) cfg.pShifts=psh; }
     if(okTime(p.get("pw"))) cfg.pWake=p.get("pw");

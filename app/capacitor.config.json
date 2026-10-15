@@ -1,0 +1,16 @@
+{
+  "appId": "club.notturnisti.twa",
+  "appName": "Notturnisti",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": false,
+    "captureInput": false,
+    "webContentsDebuggingEnabled": false
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_notturnisti",
+      "iconColor": "#3D7BE0"
+    }
+  }
+}

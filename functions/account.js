@@ -3,14 +3,14 @@
 // + webhook Lemon Squeezy + /claim); ora l'app è gratis per chiunque, quindi
 // l'accesso si crea qui, subito, senza intermediari: il client manda la
 // configurazione turni e riceve le credenziali nella stessa risposta.
-import { cfgEnv, sanitizeConfig, genId, genKey, writeSub, json, err, cors, rateLimit, nowSec } from "./_lib.js";
+import { cfgEnv, corsOrigin, sanitizeConfig, genId, genKey, writeSub, json, err, cors, rateLimit, nowSec } from "./_lib.js";
 
-export async function onRequestOptions({ env }) {
-  return new Response(null, { status: 204, headers: cors(cfgEnv(env).origin) });
+export async function onRequestOptions({ env, request }) {
+  return new Response(null, { status: 204, headers: cors(corsOrigin(env, request)) });
 }
 
 export async function onRequestPost({ env, request }) {
-  const o = cfgEnv(env).origin;
+  const o = corsOrigin(env, request);
   if (!env.SUBS) return err(503, "servizio non configurato", o);
   // Non troppo stretto: il CGNAT dei gestori mobili italiani mette centinaia
   // di utenti diversi dietro lo stesso IP pubblico, quindi un limite basso

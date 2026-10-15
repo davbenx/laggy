@@ -22,6 +22,25 @@
 <meta name="description" content="Dai tuoi turni: quando dormire, l'ultimo caffè, la luce, i pasti. Turni personalizzabili, giorni liberi in comune con chi vuoi, export calendario.">
 <meta name="theme-color" content="#14161A">
 <script>
+// Dati importati dalla vecchia app (migrate.js): applicati QUI, prima che
+// qualunque altro script legga o salvi lo stato — altrimenti il salvataggio
+// automatico della pagina precedente potrebbe riscriverci sopra i dati vecchi.
+try{
+  const imp=sessionStorage.getItem("nt-import");
+  if(imp){ sessionStorage.removeItem("nt-import"); const d=JSON.parse(imp);
+    for(const k in d) if(k.indexOf("nt:")===0 && typeof d[k]==="string") localStorage.setItem(k,d[k]); }
+}catch(e){}
+// Link di ripristino del calendario (#restore=id.chiave): messo da parte
+// SUBITO. render() riscrive l'indirizzo con la configurazione a ogni giro,
+// e lo faceva prima che paid.js (caricato dopo) potesse leggerlo: il link
+// non ripristinava mai niente. sessionStorage: resta in questa scheda,
+// non nella cronologia.
+try{
+  if(/^#restore=/.test(location.hash)){
+    sessionStorage.setItem("nt-restore", decodeURIComponent(location.hash.slice(9)));
+    history.replaceState(null,"",location.pathname+location.search);
+  }
+}catch(e){}
 // Applicato prima di qualunque CSS: se l'utente ha forzato il chiaro con
 // l'interruttore in alto (vedi più sotto), va impostato subito, non dopo
 // il primo render — altrimenti si vedrebbe un lampo nel tema sbagliato.
@@ -272,6 +291,18 @@ padding:16px 18px;margin:2px 0 var(--gap-sezione);box-shadow:0 4px 20px rgba(45,
 .qh-opt-tx small{display:block;font-size:12px;color:var(--dim);margin-top:2px;line-height:1.3}
 .qh-opt-arrow{color:var(--faint);font-size:16px;font-weight:600}
 .qh-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.qh-pos{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px}
+.qh-pos-btn{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;min-height:58px;justify-content:center;font:inherit;color:var(--ink)}
+.qh-pos-btn small{color:var(--dim);font-size:11.5px}
+.qh-pos-btn:hover{border-color:var(--blue);background:var(--s2)}
+/* Primo avvio (e scelta del ciclo dal banner): solo la domanda. Il piano
+   sotto e gli altri inviti non servono finché non si sa che turno fai. */
+body.primo-avvio .datebar,body.primo-avvio .daynav,body.primo-avvio #ora,body.primo-avvio #band,
+body.primo-avvio #status,body.primo-avvio #vista,body.primo-avvio #formaGiorno,body.primo-avvio #essenziale,
+body.primo-avvio #luciditaGiornoWrap,body.primo-avvio #cards,body.primo-avvio #tabbar,
+body.primo-avvio #firstPlanBanner,body.primo-avvio #setupNudge,body.primo-avvio #backupNudge,body.primo-avvio #installBanner,
+body.primo-avvio #shareNudge,body.primo-avvio #icsNudge,body.primo-avvio #icsExpireNudge,body.primo-avvio #statsNudge,
+body.primo-avvio #clubBanner,body.primo-avvio #donateNudge{display:none!important}
 .qh-btn{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:12px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;min-height:74px;transition:all .15s;font:inherit}
 .qh-btn:hover{border-color:var(--blue);transform:translateY(-1px);background:var(--s2)}
 .qh-btn .qh-ic{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;color:var(--blue);margin-bottom:2px}
@@ -389,6 +420,7 @@ justify-content:center;overflow:hidden}
 #shareNudge{border-left-color:var(--blue)}
 #icsNudge{border-left-color:var(--blue)}
 #clubBanner{border-left-color:var(--orange)}
+#statsNudge{border-left-color:var(--blue)}
 #chiudiBenvenuto,#chiudiDemoEsempio,#chiudiBackupNudge,#chiudiInstall,#chiudiShareNudge,#chiudiIcsNudge,#chiudiIcsExpireNudge,#chiudiClub{float:right;background:none;border:none;color:var(--faint);
 font-size:22px;line-height:1;cursor:pointer;padding:0 0 4px 10px;min-height:0}
 .card.s,.card.p{border-left-color:var(--blue)}
@@ -530,6 +562,7 @@ body.wiz-open #installBanner, body.intro #installBanner,
 body.wiz-open #icsNudge, body.intro #icsNudge,
 body.wiz-open #icsExpireNudge, body.intro #icsExpireNudge,
 body.wiz-open #clubBanner, body.intro #clubBanner,
+body.wiz-open #statsNudge, body.intro #statsNudge,
 body.wiz-open #donateNudge, body.intro #donateNudge{display:none!important}
 body.wiz-open .wsteps{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:8px}
 body.wiz-open .wiznav{position:sticky;bottom:0;background:var(--bg-blur);padding:10px 0 env(safe-area-inset-bottom,0)}
@@ -1179,7 +1212,7 @@ header b{font-size:23px}
           </span>
           <b style="font-size:15px;color:var(--ink)">Metti i tuoi orari nel calendario del telefono</b>
         </div>
-        <p class="hint" style="margin:0 0 10px;color:var(--dim);line-height:1.4">Trovi sonno, sveglie e ultimo caffè sincronizzati in automatico ogni giorno, senza dover aprire l'app.</p>
+        <p class="hint" style="margin:0 0 10px;color:var(--dim);line-height:1.4">Trovi sonno, sveglie e ultimo caffè nel calendario che guardi già, senza dover aprire l'app.</p>
         <button class="btn pri" type="button" id="doOpenCalendario" style="display:block;width:100%;text-align:center;font-weight:700">Sincronizza con il calendario →</button>
       </div>
     </div>
@@ -1211,6 +1244,7 @@ header b{font-size:23px}
 <div id="shareNudge" class="card" hidden></div>
 <div id="icsNudge" class="card" hidden></div>
 <div id="icsExpireNudge" class="card" hidden></div>
+<div id="statsNudge" class="card" hidden></div>
 <div id="clubBanner" class="card" hidden></div>
 <div id="donateNudge" class="card" hidden></div>
 <!-- Data sopra Adesso, non sotto: prima di sapere "cosa fare adesso" serve
@@ -1518,7 +1552,7 @@ header b{font-size:23px}
     <span class="tool-tx"><b id="notifTesto">Attiva i promemoria sul telefono</b></span>
     <span class="tool-val" id="notifVal"></span>
   </button>
-  <p class="hint" style="margin:8px 0 var(--gap-sezione)">Funzionano meglio se riapri l'app almeno una volta al giorno: restano programmati nel telefono, ma il sistema può interromperli se l'app resta chiusa a lungo — non sono una sveglia garantita.</p>
+  <p class="hint" id="notifHint" style="margin:8px 0 var(--gap-sezione)">Funzionano meglio se riapri l'app almeno una volta al giorno: restano programmati nel telefono, ma il sistema può interromperli se l'app resta chiusa a lungo — non sono una sveglia garantita.</p>
   <!-- Salva/Esporta erano in Più (sparita): sono azioni sulla TUA
        configurazione, hanno senso vicino a dove la modifichi. -->
   <span class="eyebrow" style="display:block;margin:var(--gap-sezione) 0 8px">Salva ed esporta</span>
@@ -1566,6 +1600,10 @@ header b{font-size:23px}
   </div>
 </details>
     <p class="hint" style="margin:12px 0 0" id="privacyNota">I tuoi turni e il tuo diario vengono elaborati localmente sul tuo telefono. Nessuna profilazione pubblicitaria.<span id="privacyNotaAbbonato" hidden> Se hai attivato il calendario che si aggiorna da solo, i turni restano comunque anche sul server che lo tiene aggiornato — solo quelli, il resto no.</span></p>
+    <label class="hint" style="display:flex;gap:10px;align-items:center;margin:10px 0 0;cursor:pointer">
+      <span style="flex:1">Statistiche d'uso anonime (spente se non le attivi tu): solo contatori del tipo "un piano è stato generato", senza identificativi né dati dei turni.</span>
+      <span class="switch"><input type="checkbox" id="optStats" aria-label="Statistiche d'uso anonime"><span class="slider"></span></span>
+    </label>
     <p style="margin:10px 0 0"><button class="lnk" id="doFeed" style="padding:0">Segnala cosa non torna</button> · <button class="lnk" id="doShare" style="padding:0">Consiglialo a un collega</button></p>
     <p class="hint" style="margin:10px 0 0"><a href="https://notturnisti.club/planner" target="_blank" rel="noopener">Come si usa</a> · <a href="https://notturnisti.club/chi-siamo/" target="_blank" rel="noopener">Chi siamo</a> · <a href="https://notturnisti.club" target="_blank" rel="noopener">notturnisti.club</a><span id="doDonateLnkWrap" hidden> · <a id="doDonateLnk" href="#" target="_blank" rel="noopener">Sostieni il progetto</a></span></p>
   </div>
@@ -2400,7 +2438,8 @@ var qrcodegen;
 // prima che il resto di questo script (che lo usa ovunque, via NT.) parta —
 // stessa garanzia di ordine che un normalizzatore await avrebbe dato, senza
 // bisogno di riscrivere tutto in async. I moduli sono già strict di default.
-import { createEngine, resolveNextAction } from "./engine.js";
+import { createEngine, resolveNextAction, encEcc, decEcc } from "./engine.js";
+import platform from "./platform.js";
 /* MOTORE NOTTURNISTI v4 — turni arbitrari.
    Nessuna regola guarda più la lettera del turno. Tutto si decide dalla
    geometria: dove cade il turno rispetto alla finestra di sonno naturale.
@@ -2534,6 +2573,9 @@ function hashParamsBase(){
   p.set("p",state.pattern); p.set("a",state.anchor); p.set("s",encShifts(state.shifts));
   p.set("w",state.freeWake); p.set("wb",state.freeBed); p.set("cs",state.caffSens); p.set("n",state.need); p.set("ct",state.cTo);
   p.set("cf",state.cFrom); p.set("pr",state.prep); p.set("adv",state.maxAdvance); if(state.repeat===false) p.set("rep","0");
+  // Eccezioni (cambi turno, turni variabili): senza, il link e il calendario
+  // automatico mostravano il ciclo nudo — vedi encEcc in engine.js.
+  const x=encEcc(state.ecc); if(x) p.set("x",x);
   return p;
 }
 // Link del "Condividi il tuo ciclo"/QR in Turni: pensato per un collega che
@@ -2603,6 +2645,7 @@ function fromHash(hashStr){
   state.cFrom=num("cf",state.cFrom,0,240); state.prep=num("pr",state.prep,5,240);
   state.maxAdvance=num("adv",state.maxAdvance,15,180);
   state.repeat = p.get("rep")!=="0";
+  if(p.get("x")){ const x=decEcc(p.get("x")); if(Object.keys(x).length) state.ecc=Object.assign({}, state.ecc||{}, x); }
   if(p.get("pp")){ state.pPattern=seq(p.get("pp"));
     state.pAnchor=okDate(p.get("pa"))?p.get("pa"):state.anchor;
     if(p.get("ps")){ const psh=decShifts(p.get("ps")); if(psh) state.pShifts=psh; }
@@ -3698,6 +3741,7 @@ function render(){
   renderShareNudge();
   renderIcsNudge();
   renderIcsExpireNudge();
+  renderStatsNudge();
   renderClubBanner();
   renderDonateNudge();
   renderFormaGiorno(P);                // si azzera da solo in dettaglio
@@ -3754,6 +3798,10 @@ function diaryReminder(P, CARDS){
   // descrizione del turno): durante un turno di notte ancora in corso,
   // "domani" per il calendario può essere ancora "oggi" per l'app.
   if(dnum(f) > dnum(giornoVero())) return "";
+  // Il primo giorno d'uso no: quel sonno non l'aveva pianificato l'app, e a
+  // chi ha appena scelto il suo turno un modulo con orari inventati da
+  // "confermare" dice solo che qualcosa non torna.
+  if(state.firstSeenAt && dnum(f) <= dnum(new Date(state.firstSeenAt+"T12:00:00"))) return "";
   const cd=CARDS.find(c=>c.k==="d");
   if(!cd || !cd.wakeAsk) return "";
   const key0=iso(f), val=diary[key0];
@@ -4136,250 +4184,165 @@ if($("#benvenutoLink")) $("#benvenutoLink").addEventListener("click", e=>{
 // primaVolta risulti falso al prossimo avvio (store.get("state") non è
 // più null), la stessa logica di benvenutoLinkChiuso qui sotto vale solo
 // per la sessione corrente.
+// Primo avvio: UNA domanda, una risposta = un piano vero. Prima qui c'erano
+// nove scelte insieme (4 turni, 3 schemi, 2 link) sopra un piano di prova
+// per un giorno di riposo con un diario da compilare — troppo per chi non
+// sa ancora cosa fa l'app. Ora:
+//   • "Che turno fai oggi?" → un tocco → il piano di oggi. Solo oggi: gli
+//     altri giorni restano "non impostati", mai inventati da un ciclo di
+//     esempio che non è il suo.
+//   • chi ha un ciclo fisso lo sceglie da "I miei turni si ripetono" (o dal
+//     banner subito dopo il primo piano), poi un tocco su "oggi sei qui" per
+//     agganciare il ciclo al giorno giusto: due tocchi, ciclo corretto.
+//   • finché non c'è risposta, sotto non si vede altro (body.primo-avvio).
+let firstPlanBannerChiuso = !!store.get("firstPlanBannerChiuso", false);
 let demoEsempioChiuso = false;
 let demoEsempioTracciato = false;
 let demoEsempioSubflow = "home";
-let firstPlanBannerChiuso = !!store.get("firstPlanBannerChiuso", false);
+let sceltaSchemaAperta = false;   // riaperta dal banner del primo piano
+let schemaInScelta = null;        // preset di rotazione in attesa di "oggi sei qui"
 
+const SCHEMI_ROT = {
+  sanita: { nome:"In quinta (sanità)", pattern:"MPNSR",
+    shifts:{M:{n:"Mattino",s:420,e:840},P:{n:"Pomeriggio",s:840,e:1260},N:{n:"Notte",s:1260,e:1860},S:{rest:true,n:"Smonto"},R:{rest:true,n:"Riposo"}} },
+  "222": { nome:"2 mattine · 2 pomeriggi · 2 notti · 2 riposi", pattern:"MMPPNNRR",
+    shifts:{M:{n:"Mattino",s:360,e:840},P:{n:"Pomeriggio",s:840,e:1320},N:{n:"Notte",s:1320,e:1800},R:{rest:true,n:"Riposo"}} },
+  "12h": { nome:"Dodici ore: giorno · notte · 2 riposi", pattern:"DNRR",
+    shifts:{D:{n:"Giorno 12h",s:420,e:1140},N:{n:"Notte 12h",s:1140,e:1860},R:{rest:true,n:"Riposo"}} }
+};
+const SCHEMI_FISSI = {
+  N:{ nome:"Sempre di notte", pattern:"NNNNNRR", turno:{n:"Notte", s:1320, e:1800} },
+  M:{ nome:"Sempre di mattina", pattern:"MMMMMRR", turno:{n:"Mattino", s:360, e:840} },
+  P:{ nome:"Sempre di pomeriggio", pattern:"PPPPPRR", turno:{n:"Pomeriggio", s:840, e:1320} }
+};
+
+function demoEsempioVisibile(){
+  if(document.body && (document.body.classList.contains("wiz-open") || document.body.classList.contains("intro"))) return false;
+  return sceltaSchemaAperta || !(state.turniConfigurati || demoEsempioChiuso);
+}
 function renderDemoEsempio(){
   const el=$("#demoEsempio"); if(!el) return;
-  if(document.body && (document.body.classList.contains("wiz-open") || document.body.classList.contains("intro"))){ el.hidden=true; return; }
-  if(state.turniConfigurati || demoEsempioChiuso){ el.hidden=true; return; }
+  const vis = demoEsempioVisibile();
+  // Al primo avvio la domanda è tutta la schermata: niente piano di prova sotto.
+  document.body.classList.toggle("primo-avvio", vis);
+  if(!vis){ el.hidden=true; return; }
   el.hidden=false;
   if(!demoEsempioTracciato){ demoEsempioTracciato=true; track("example_started"); }
   el.className = "card qh-card";
+  const tile=(k,ic,nome,ore)=>'<button type="button" class="qh-btn" data-set-var="'+k+'"><span class="qh-ic">'+ic+'</span><b>'+nome+'</b><small>'+ore+'</small></button>';
+  const opt=(attr,ic,nome,sotto)=>'<button type="button" class="qh-opt-btn" '+attr+'><span class="qh-opt-ic">'+ic+'</span><div class="qh-opt-tx"><b>'+nome+'</b>'+(sotto?'<small>'+sotto+'</small>':'')+'</div><span class="qh-opt-arrow">→</span></button>';
+  const indietro=(dest,txt)=>'<button type="button" class="lnk" data-subflow="'+dest+'" style="margin-bottom:10px;font-size:13px">← '+txt+'</button>';
 
-  if(demoEsempioSubflow === "home"){
+  if(demoEsempioSubflow === "home" && !sceltaSchemaAperta){
     el.innerHTML =
-      '<div class="qh-title">DAL TURNO AL PIANO</div>'+
-      '<h2 class="qh-h">Che turni fai?</h2>'+
-      '<p class="qh-sub">Dicci quando lavori. Notturnisti organizza sonno, pause, caffeina e recupero intorno ai tuoi orari.</p>'+
-      '<div style="font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin:12px 0 8px">Pianifica subito per oggi:</div>'+
-      '<div class="qh-grid">'+
-        '<button type="button" class="qh-btn" data-quick-pick="N"><span class="qh-ic">' + ICON.moon + '</span><b>Notte</b><small>21:00 → 07:00</small></button>'+
-        '<button type="button" class="qh-btn" data-quick-pick="M"><span class="qh-ic">' + ICON.sun + '</span><b>Mattino</b><small>07:00 → 14:00</small></button>'+
-        '<button type="button" class="qh-btn" data-quick-pick="P"><span class="qh-ic">' + ICON.dim + '</span><b>Pomeriggio</b><small>14:00 → 21:00</small></button>'+
-        '<button type="button" class="qh-btn" data-quick-pick="R"><span class="qh-ic">' + ICON.sparkles + '</span><b>Riposo</b><small>Giorno libero</small></button>'+
-      '</div>'+
-      '<div style="font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin:14px 0 8px">Oppure scegli il tuo schema:</div>'+
-      '<div class="qh-flow-options">'+
-        '<button type="button" class="qh-opt-btn" data-subflow="rotazione">'+
-          '<span class="qh-opt-ic">' + ICON.cycle + '</span>'+
-          '<div class="qh-opt-tx">'+
-            '<b>Ciclo a rotazione regolare</b>'+
-            '<small>I turni si ripetono in sequenza (es. M-P-N-S-R, 2M-2P-2N-2R, 12h)</small>'+
-          '</div>'+
-          '<span class="qh-opt-arrow">→</span>'+
-        '</button>'+
-        '<button type="button" class="qh-opt-btn" data-subflow="variabile">'+
-          '<span class="qh-opt-ic">' + ICON.calendar + '</span>'+
-          '<div class="qh-opt-tx">'+
-            '<b>Turni variabili ogni mese</b>'+
-            '<small>Senza ciclo fisso: orari stabiliti da calendario mensile o a chiamata</small>'+
-          '</div>'+
-          '<span class="qh-opt-arrow">→</span>'+
-        '</button>'+
-        '<button type="button" class="qh-opt-btn" data-subflow="fisso">'+
-          '<span class="qh-opt-ic">' + ICON.moon + '</span>'+
-          '<div class="qh-opt-tx">'+
-            '<b>Turno fisso</b>'+
-            '<small>Lavori sempre nello stesso orario (es. sempre notte o sempre mattina)</small>'+
-          '</div>'+
-          '<span class="qh-opt-arrow">→</span>'+
-        '</button>'+
-      '</div>'+
-      '<div class="qh-foot" style="margin-top:14px">'+
-        '<button type="button" class="lnk" id="doConfiguraEsempio" style="font-size:13px">Configurazione guidata completa →</button>'+
-        '<button type="button" id="chiudiDemoEsempio" class="lnk" style="color:var(--faint);font-size:12px;padding:6px">Nascondi per ora</button>'+
-      '</div>';
-  } else if(demoEsempioSubflow === "rotazione"){
-    el.innerHTML =
-      '<button type="button" class="lnk" data-subflow="home" style="margin-bottom:10px;display:inline-flex;align-items:center;gap:6px;font-size:13px">← Torna alla scelta turni</button>'+
-      '<div class="qh-title">ROTAZIONE REGOLARE</div>'+
-      '<h2 class="qh-h">Qual è il tuo schema?</h2>'+
-      '<p class="qh-sub">Scegli la tua sequenza abituale, o componi un ciclo con lettere personalizzate:</p>'+
-      '<div class="qh-flow-options">'+
-        '<button type="button" class="qh-opt-btn" data-set-rot="sanita">'+
-          '<span class="qh-opt-ic">' + ICON.cycle + '</span>'+
-          '<div class="qh-opt-tx">'+
-            '<b>Sanità: In quinta (5 giorni)</b>'+
-            '<small>Mattina · Pomeriggio · Notte · Smonto · Riposo</small>'+
-          '</div>'+
-          '<span class="qh-opt-arrow">Scegli</span>'+
-        '</button>'+
-        '<button type="button" class="qh-opt-btn" data-set-rot="222">'+
-          '<span class="qh-opt-ic">' + ICON.cycle + '</span>'+
-          '<div class="qh-opt-tx">'+
-            '<b>Industria: 2M - 2P - 2N - 2R (8 giorni)</b>'+
-            '<small>2 Mattine · 2 Pomeriggi · 2 Notti · 2 Riposi</small>'+
-          '</div>'+
-          '<span class="qh-opt-arrow">Scegli</span>'+
-        '</button>'+
-        '<button type="button" class="qh-opt-btn" data-set-rot="12h">'+
-          '<span class="qh-opt-ic">' + ICON.cycle + '</span>'+
-          '<div class="qh-opt-tx">'+
-            '<b>Dodici ore (D · N · R · R)</b>'+
-            '<small>Giorno 07:00→19:00 · Notte 19:00→07:00 · Due riposi</small>'+
-          '</div>'+
-          '<span class="qh-opt-arrow">Scegli</span>'+
-        '</button>'+
-      '</div>'+
-      '<div style="margin-top:12px">'+
-        '<button type="button" class="btn g" id="doCustomRot" style="width:100%;font-size:13.5px">Componi un altro ciclo (lettere personalizzate) →</button>'+
-      '</div>';
-  } else if(demoEsempioSubflow === "variabile"){
-    el.innerHTML =
-      '<button type="button" class="lnk" data-subflow="home" style="margin-bottom:10px;display:inline-flex;align-items:center;gap:6px;font-size:13px">← Torna alla scelta turni</button>'+
-      '<div class="qh-title">TURNI VARIABILI</div>'+
       '<h2 class="qh-h">Che turno fai oggi?</h2>'+
-      '<p class="qh-sub">Non hai una rotazione fissa. Iniziamo dal turno di oggi, poi potrai segnare i prossimi giorni dal calendario quando ricevi il tabellone.</p>'+
+      '<p class="qh-sub">Un tocco e hai il piano: quando dormire, l\'ultimo caffè, la luce.</p>'+
       '<div class="qh-grid">'+
-        '<button type="button" class="qh-btn" data-set-var="N"><span class="qh-ic">' + ICON.moon + '</span><b>Notte</b><small>21:00 → 07:00</small></button>'+
-        '<button type="button" class="qh-btn" data-set-var="M"><span class="qh-ic">' + ICON.sun + '</span><b>Mattino</b><small>07:00 → 14:00</small></button>'+
-        '<button type="button" class="qh-btn" data-set-var="P"><span class="qh-ic">' + ICON.dim + '</span><b>Pomeriggio</b><small>14:00 → 21:00</small></button>'+
-        '<button type="button" class="qh-btn" data-set-var="R"><span class="qh-ic">' + ICON.sparkles + '</span><b>Riposo</b><small>Giorno libero</small></button>'+
-      '</div>';
-  } else if(demoEsempioSubflow === "fisso"){
+        tile("N",ICON.moon,"Notte","21:00 → 07:00")+
+        tile("M",ICON.sun,"Mattino","07:00 → 14:00")+
+        tile("P",ICON.dim,"Pomeriggio","14:00 → 21:00")+
+        tile("R",ICON.sparkles,"Riposo","Giorno libero")+
+      '</div>'+
+      '<p class="hint" style="margin:-4px 0 12px;text-align:center;font-size:12px">Orari diversi? Li cambi dopo, in un tocco.</p>'+
+      '<button type="button" class="lnk" data-subflow="schema" style="display:block;width:100%;text-align:center;font-size:13.5px;padding:6px 0">I miei turni si ripetono sempre uguali →</button>';
+  } else if(demoEsempioSubflow === "posizione" && schemaInScelta){
+    // "Oggi sei qui": aggancia il ciclo al giorno vero. Con 2 mattine di
+    // fila la sola lettera non basta, serve la posizione.
+    const S=SCHEMI_ROT[schemaInScelta], seq=S.pattern.split("");
+    const conta={};
     el.innerHTML =
-      '<button type="button" class="lnk" data-subflow="home" style="margin-bottom:10px;display:inline-flex;align-items:center;gap:6px;font-size:13px">← Torna alla scelta turni</button>'+
-      '<div class="qh-title">TURNO FISSO</div>'+
-      '<h2 class="qh-h">Qual è il tuo orario abituale?</h2>'+
-      '<p class="qh-sub">Lavori sempre nella stessa fascia oraria (5 giorni a settimana e 2 riposi). Scegli il tuo turno:</p>'+
+      indietro("schema","Cambia schema")+
+      '<h2 class="qh-h">Oggi dove sei nel ciclo?</h2>'+
+      '<p class="qh-sub">'+esc(S.nome)+'. Tocca il giorno di oggi: da qui calcoliamo tutti gli altri.</p>'+
+      '<div class="qh-pos">'+seq.map((c,i)=>{
+        conta[c]=(conta[c]||0)+1;
+        const tot=seq.filter(x=>x===c).length;
+        const nome=(S.shifts[c]&&S.shifts[c].n)||c;
+        return '<button type="button" class="qh-pos-btn" data-pos="'+i+'"><b>'+esc(nome)+'</b>'+(tot>1?'<small>'+conta[c]+'° giorno</small>':'')+'</button>';
+      }).join("")+'</div>';
+  } else {
+    el.innerHTML =
+      (sceltaSchemaAperta && state.turniConfigurati ? '<button type="button" class="lnk" data-chiudi-schema style="margin-bottom:10px;font-size:13px">← Annulla</button>' : indietro("home","Solo oggi"))+
+      '<h2 class="qh-h">Qual è il tuo schema?</h2>'+
+      '<p class="hint" style="margin:10px 0 6px;font-weight:700;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase">A rotazione</p>'+
       '<div class="qh-flow-options">'+
-        '<button type="button" class="qh-opt-btn" data-set-fisso="N">'+
-          '<span class="qh-opt-ic">' + ICON.moon + '</span>'+
-          '<div class="qh-opt-tx">'+
-            '<b>Notte fissa (es. 22:00 → 06:00)</b>'+
-            '<small>5 notti a settimana · Protezione sonno diurno e ancoraggio nei riposi</small>'+
-          '</div>'+
-          '<span class="qh-opt-arrow">Scegli</span>'+
-        '</button>'+
-        '<button type="button" class="qh-opt-btn" data-set-fisso="M">'+
-          '<span class="qh-opt-ic">' + ICON.sun + '</span>'+
-          '<div class="qh-opt-tx">'+
-            '<b>Mattino fisso (es. 06:00 → 14:00)</b>'+
-            '<small>5 mattine a settimana · Sveglia presto e orari sonno regolari</small>'+
-          '</div>'+
-          '<span class="qh-opt-arrow">Scegli</span>'+
-        '</button>'+
-        '<button type="button" class="qh-opt-btn" data-set-fisso="P">'+
-          '<span class="qh-opt-ic">' + ICON.dim + '</span>'+
-          '<div class="qh-opt-tx">'+
-            '<b>Pomeriggio fisso (es. 14:00 → 22:00)</b>'+
-            '<small>5 pomeriggi a settimana · Ritmo serale stabile</small>'+
-          '</div>'+
-          '<span class="qh-opt-arrow">Scegli</span>'+
-        '</button>'+
-      '</div>';
+        opt('data-set-rot="sanita"',ICON.cycle,"In quinta (5 giorni)","Mattino · Pomeriggio · Notte · Smonto · Riposo")+
+        opt('data-set-rot="222"',ICON.cycle,"2 · 2 · 2 · 2 (8 giorni)","2 Mattine · 2 Pomeriggi · 2 Notti · 2 Riposi")+
+        opt('data-set-rot="12h"',ICON.cycle,"Dodici ore (4 giorni)","Giorno · Notte · 2 Riposi")+
+      '</div>'+
+      '<p class="hint" style="margin:14px 0 6px;font-weight:700;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase">Sempre lo stesso turno</p>'+
+      '<div class="qh-flow-options">'+
+        opt('data-set-fisso="N"',ICON.moon,"Sempre di notte","5 notti e 2 riposi a settimana")+
+        opt('data-set-fisso="M"',ICON.sun,"Sempre di mattina","5 mattine e 2 riposi a settimana")+
+        opt('data-set-fisso="P"',ICON.dim,"Sempre di pomeriggio","5 pomeriggi e 2 riposi a settimana")+
+      '</div>'+
+      '<button type="button" class="lnk" id="doCustomRot" style="display:block;width:100%;text-align:center;margin-top:12px;font-size:13px">Il mio schema non c\'è: componilo →</button>';
   }
+}
+
+// Dopo ogni scelta: stesso epilogo, un solo posto.
+function primoPianoPronto(tipo, msg){
+  state.turniConfigurati = true;
+  store.set("turniConfigurati", true);
+  demoEsempioChiuso = true;
+  demoEsempioSubflow = "home";
+  sceltaSchemaAperta = false; schemaInScelta = null;
+  primaVolta = false;
+  renderShifts();
+  salva();
+  haptic(15);
+  track("plan_generated", {pattern_type: tipo});
+  toast(msg);
+  render();
+  try{ window.scrollTo({top:0, behavior:"smooth"}); }catch(e){ window.scrollTo(0,0); }
 }
 
 if($("#demoEsempio")) $("#demoEsempio").addEventListener("click", e=>{
   const subBtn = e.target.closest("[data-subflow]");
-  if(subBtn){
-    demoEsempioSubflow = subBtn.dataset.subflow;
-    renderDemoEsempio();
-    return;
-  }
-  const qp = e.target.closest("[data-quick-pick]");
-  if(qp){
-    const k = qp.dataset.quickPick;
+  if(subBtn){ demoEsempioSubflow = subBtn.dataset.subflow; renderDemoEsempio(); return; }
+  if(e.target.closest("[data-chiudi-schema]")){ sceltaSchemaAperta=false; demoEsempioSubflow="home"; render(); return; }
+
+  // Un turno solo per oggi: niente ciclo inventato per gli altri giorni.
+  const varBtn = e.target.closest("[data-set-var]");
+  if(varBtn){
+    // Ciclo di un solo giorno (oggi), che non si ripete: tutti gli altri
+    // giorni restano "non impostati". Con il ciclo di esempio ancora lì,
+    // i 4 giorni dopo oggi venivano presi da M-P-N-S-R.
+    const k = varBtn.dataset.setVar;
+    state.repeat = false;
+    state.pattern = k;
+    state.anchor = iso(new Date());
     state.ecc[iso(new Date())] = k;
-    state.turniConfigurati = true;
-    store.set("turniConfigurati", true);
-    demoEsempioChiuso = true;
-    primaVolta = false;
-    salva();
-    haptic(15);
-    try{ if(window.NTAnalytics) window.NTAnalytics.track("plan_generated", {pattern_type: k}); }catch(err){}
-    toast("Ecco il tuo piano operativo per oggi");
-    render();
+    primoPianoPronto("oggi", "Ecco il tuo piano di oggi");
     return;
   }
   const rotBtn = e.target.closest("[data-set-rot]");
-  if(rotBtn){
-    const tipo = rotBtn.dataset.setRot;
-    if(tipo === "sanita"){
-      state.pattern = "MPNSR";
-      state.shifts = {M:{n:"Mattino",s:420,e:840},P:{n:"Pomeriggio",s:840,e:1260},N:{n:"Notte",s:1260,e:1860},S:{rest:true,n:"Smonto"},R:{rest:true,n:"Riposo"}};
-    } else if(tipo === "222"){
-      state.pattern = "MMPPNNRR";
-      state.shifts = {M:{n:"Mattino",s:360,e:840},P:{n:"Pomeriggio",s:840,e:1320},N:{n:"Notte",s:1320,e:1800},R:{rest:true,n:"Riposo"}};
-    } else if(tipo === "12h"){
-      state.pattern = "DDNNRRRR";
-      state.shifts = {D:{n:"Giorno 12h",s:420,e:1140},N:{n:"Notte 12h",s:1140,e:1860},R:{rest:true,n:"Riposo"}};
-    }
+  if(rotBtn){ schemaInScelta = rotBtn.dataset.setRot; demoEsempioSubflow = "posizione"; renderDemoEsempio(); return; }
+  const posBtn = e.target.closest("[data-pos]");
+  if(posBtn && schemaInScelta){
+    const S = SCHEMI_ROT[schemaInScelta], i = +posBtn.dataset.pos;
+    state.pattern = S.pattern;
+    state.shifts = JSON.parse(JSON.stringify(S.shifts));
     state.repeat = true;
-    const d = new Date(); d.setDate(d.getDate() - ((d.getDay()+6)%7)); state.anchor = iso(d);
-    state.turniConfigurati = true;
-    store.set("turniConfigurati", true);
-    demoEsempioChiuso = true;
-    primaVolta = false;
-    renderShifts();
-    salva();
-    haptic(15);
-    try{ if(window.NTAnalytics) window.NTAnalytics.track("plan_generated", {pattern_type: state.pattern}); }catch(err){}
-    toast("Ciclo impostato! Ecco il tuo piano");
-    render();
-    return;
-  }
-  const varBtn = e.target.closest("[data-set-var]");
-  if(varBtn){
-    const k = varBtn.dataset.setVar;
-    state.repeat = false;
-    state.ecc[iso(new Date())] = k;
-    state.turniConfigurati = true;
-    store.set("turniConfigurati", true);
-    demoEsempioChiuso = true;
-    primaVolta = false;
-    salva();
-    haptic(15);
-    try{ if(window.NTAnalytics) window.NTAnalytics.track("plan_generated", {pattern_type: "variabile"}); }catch(err){}
-    toast("Turno impostato! Ecco il tuo piano");
-    render();
+    const d = new Date(); d.setDate(d.getDate() - i); state.anchor = iso(d);
+    delete state.ecc[iso(new Date())];   // il ciclo ora sa già cos'è oggi
+    primoPianoPronto("ciclo", "Ciclo impostato: ecco il tuo piano");
     return;
   }
   const fisBtn = e.target.closest("[data-set-fisso]");
   if(fisBtn){
-    const k = fisBtn.dataset.setFisso;
-    if(k === "N"){
-      state.pattern = "NNNNNRR";
-      state.shifts.N = state.shifts.N || {n:"Notte", s:1320, e:1800};
-    } else if(k === "M"){
-      state.pattern = "MMMMMRR";
-      state.shifts.M = state.shifts.M || {n:"Mattino", s:360, e:840};
-    } else if(k === "P"){
-      state.pattern = "PPPPPRR";
-      state.shifts.P = state.shifts.P || {n:"Pomeriggio", s:840, e:1320};
-    }
+    const k = fisBtn.dataset.setFisso, F = SCHEMI_FISSI[k];
+    state.pattern = F.pattern;
+    state.shifts[k] = state.shifts[k] || F.turno;
     state.repeat = true;
+    // Settimana lavorativa lunedì–venerdì: il ciclo parte dal lunedì.
     const d = new Date(); d.setDate(d.getDate() - ((d.getDay()+6)%7)); state.anchor = iso(d);
-    state.turniConfigurati = true;
-    store.set("turniConfigurati", true);
-    demoEsempioChiuso = true;
-    primaVolta = false;
-    renderShifts();
-    salva();
-    haptic(15);
-    try{ if(window.NTAnalytics) window.NTAnalytics.track("plan_generated", {pattern_type: "fisso_"+k}); }catch(err){}
-    toast("Turno fisso impostato! Ecco il tuo piano");
-    render();
+    delete state.ecc[iso(new Date())];
+    primoPianoPronto("fisso_"+k, "Turno fisso impostato: ecco il tuo piano");
     return;
   }
   if(e.target.closest("#doCustomRot")){
-    demoEsempioChiuso = true;
-    render();
-    apriIntro(true);
-    wizShow(1);
-    return;
-  }
-  if(e.target.closest("#chiudiDemoEsempio")){
-    demoEsempioChiuso = true;
-    render();
-    return;
-  }
-  if(e.target.closest("#doConfiguraEsempio")){
-    demoEsempioChiuso = true;
+    demoEsempioChiuso = true; sceltaSchemaAperta = false;
     track("example_completed");
     render();
     apriIntro(true);
@@ -4391,25 +4354,34 @@ if($("#demoEsempio")) $("#demoEsempio").addEventListener("click", e=>{
 function firstPlanBannerVisibile(){
   if(document.body && (document.body.classList.contains("wiz-open") || document.body.classList.contains("intro"))) return false;
   const mostraBenvenuto = primaVoltaDaLink && !benvenutoLinkChiuso;
-  return !!(state.turniConfigurati && !firstPlanBannerChiuso && !mostraBenvenuto);
+  return !!(state.turniConfigurati && !firstPlanBannerChiuso && !mostraBenvenuto && !sceltaSchemaAperta);
 }
+// Subito dopo il primo piano, il passo che vale di più: chi ha scelto solo
+// "oggi" scopre che può impostare il ciclo una volta per tutte (altrimenti
+// domani si ritrova "turno non impostato"); chi ha già un ciclo, che gli
+// orari standard si adattano ai suoi.
 function renderFirstPlanBanner(){
   const el=$("#firstPlanBanner"); if(!el) return;
   if(!firstPlanBannerVisibile()){ el.hidden=true; return; }
   el.hidden=false;
   el.className = "card";
   el.style.cssText = "background:var(--blue-soft);border:1px solid var(--blue-lt);border-radius:18px;padding:16px;margin:12px 0 16px;box-shadow:0 4px 18px rgba(45,90,140,0.12)";
+  const soloOggi = state.repeat === false;
   el.innerHTML =
     '<div style="display:flex;align-items:flex-start;gap:12px">'+
       '<span class="ora-ic" style="flex:none;margin-top:2px;background:var(--blue);color:var(--su-blu);width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center">' + ICON.check + '</span>'+
       '<div style="flex:1;min-width:0">'+
-        '<b style="display:block;font-size:15px;color:var(--ink)">Il tuo primo piano è pronto.</b>'+
+        '<b style="display:block;font-size:15px;color:var(--ink)">'+(soloOggi?'Il piano di oggi è pronto.':'Il tuo piano è pronto.')+'</b>'+
         '<p style="margin:4px 0 12px;font-size:13px;color:var(--dim);line-height:1.4">'+
-          'Calcolato con orari standard per il tuo turno. Vuoi renderlo su misura indicando tempi di viaggio e abitudini di sonno?'+
+          (soloOggi
+            ? 'I tuoi turni si ripetono? Imposta il ciclo una volta e il piano di ogni giorno è già pronto.'
+            : 'Calcolato su orari standard: se i tuoi turni o il tuo sonno sono diversi, adattali.')+
         '</p>'+
         '<div style="display:flex;gap:8px;flex-wrap:wrap">'+
-          '<button type="button" class="btn" id="doPersonalizzaPrimoPiano" style="min-height:36px;font-size:13px;padding:6px 14px">Personalizza il mio piano →</button>'+
-          '<button type="button" class="btn g" id="doChiudiPrimoPiano" style="min-height:36px;font-size:13px;padding:6px 14px">Va bene così</button>'+
+          (soloOggi
+            ? '<button type="button" class="btn" id="doCicloPrimoPiano" style="min-height:36px;font-size:13px;padding:6px 14px">Imposta il ciclo →</button>'
+            : '<button type="button" class="btn" id="doPersonalizzaPrimoPiano" style="min-height:36px;font-size:13px;padding:6px 14px">Adatta gli orari →</button>')+
+          '<button type="button" class="btn g" id="doChiudiPrimoPiano" style="min-height:36px;font-size:13px;padding:6px 14px">'+(soloOggi?'Cambiano ogni volta':'Va bene così')+'</button>'+
         '</div>'+
       '</div>'+
     '</div>';
@@ -4419,6 +4391,13 @@ if($("#firstPlanBanner")) $("#firstPlanBanner").addEventListener("click", e=>{
     firstPlanBannerChiuso = true;
     store.set("firstPlanBannerChiuso", true);
     render();
+    return;
+  }
+  if(e.target.closest("#doCicloPrimoPiano")){
+    sceltaSchemaAperta = true;
+    demoEsempioSubflow = "schema";
+    render();
+    try{ window.scrollTo({top:0, behavior:"smooth"}); }catch(err){}
     return;
   }
   if(e.target.closest("#doPersonalizzaPrimoPiano")){
@@ -4478,7 +4457,7 @@ function renderBackupNudge(){
   el.innerHTML =
     '<button type="button" id="chiudiBackupNudge" aria-label="Chiudi">×</button>'+
     '<b>Non hai ancora salvato i tuoi turni</b>'+
-    '<p class="hint" style="margin-top:6px">Stanno solo su questo telefono, in questo browser. Se li perdi (nuovo telefono, dati cancellati), li riscrivi da capo — salva il link ora, richiede un tocco.</p>'+
+    '<p class="hint" style="margin-top:6px">Stanno solo su questo telefono'+(window.NT_APP.nativo?'':', in questo browser')+'. Se li perdi (nuovo telefono, dati cancellati), li riscrivi da capo — salva il link ora, richiede un tocco.</p>'+
     '<button class="btn g" type="button" id="doSalvaOraNudge">Salva la configurazione →</button>';
 }
 if($("#backupNudge")) $("#backupNudge").addEventListener("click", e=>{
@@ -4504,6 +4483,7 @@ function isIOSPerInstall(){
   }catch(e){ return false; }
 }
 function giaInstallata(){
+  if(window.NT_APP && window.NT_APP.nativo) return true;
   try{ return window.matchMedia("(display-mode: standalone)").matches || navigator.standalone===true; }
   catch(e){ return false; }
 }
@@ -4520,7 +4500,7 @@ function renderInstallBanner(){
   const el=$("#installBanner"); if(!el) return;
   if(!installBannerVisibile()){ el.hidden=true; return; }
   const ios = isIOSPerInstall();
-  if(!installBannerTracciato){ installBannerTracciato=true; track("pwa_prompt_shown"); }
+  if(!installBannerTracciato){ installBannerTracciato=true; track("install_prompt_shown"); }
   el.hidden=false;
   el.innerHTML =
     '<button type="button" id="chiudiInstall" aria-label="Chiudi">×</button>'+
@@ -4538,7 +4518,7 @@ if($("#installBanner")) $("#installBanner").addEventListener("click", e=>{
     installPromptEvento.prompt();
     installPromptEvento.userChoice.then(r=>{
       if(r.outcome==="accepted"){ track("pwa_installed"); state.installBannerOff=true; salva(); }
-      installPromptEvento=null; renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderIcsExpireNudge(); renderClubBanner(); renderDonateNudge();
+      installPromptEvento=null; renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderIcsExpireNudge(); renderStatsNudge(); renderClubBanner(); renderDonateNudge();
     });
   }
 });
@@ -4581,6 +4561,7 @@ if($("#shareNudge")) $("#shareNudge").addEventListener("click", e=>{
 // installazione, condivisione) — dalla seconda in poi, quando l'utente è
 // chiaramente tornato, è il momento più naturale per "lo sapevi?".
 function icsNudgeVisibile(){
+  if(window.NT_APP.nativo) return false;   // nell'app: niente file da scaricare (vedi #doIcs)
   const mostraBenvenuto = primaVoltaDaLink && !benvenutoLinkChiuso;
   const pronto = !!(state.pattern && Object.keys(state.shifts||{}).length);
   const secondaSessione = state.firstSeenAt && state.firstSeenAt!==iso(new Date());
@@ -4609,6 +4590,7 @@ if($("#icsNudge")) $("#icsNudge").addEventListener("click", e=>{
 // icsExportedAt) e si riarma da sé al prossimo — a differenza di icsNudge
 // (che introduce la funzione una volta sola), questo deve tornare ogni ciclo.
 function icsExpireNudgeVisibile(){
+  if(window.NT_APP.nativo) return false;
   if(!state.icsExportedAt || state.icsExpireNudgeSeenAt===state.icsExportedAt) return false;
   const giorni=(new Date()-new Date(state.icsExportedAt+"T00:00:00"))/86400000;
   if(giorni<24) return false;
@@ -4629,7 +4611,7 @@ function renderIcsExpireNudge(){
     '<button type="button" id="chiudiIcsExpireNudge" aria-label="Chiudi">×</button>'+
     '<b>Il calendario esportato sta per scadere</b>'+
     '<p class="hint" style="margin-top:6px">I 28 giorni dell\'ultimo export finiscono presto: se non lo rifai, il telefono continua a mostrare turni vecchi.'+
-    (gia?'':' O smetti di doverci pensare: con il calendario automatico (gratis) si aggiorna da solo, per sempre.')+'</p>'+
+    (gia?'':' O smetti di doverci pensare: il calendario automatico (gratis) si aggiorna da solo.')+'</p>'+
     '<button class="btn g" type="button" id="doIcsExpireNudge">Esporta di nuovo →</button>'+
     (gia?'':'<button class="lnk" type="button" id="doIcsExpireNudgePay" style="margin-left:10px">O aggiornalo da solo →</button>');
 }
@@ -4637,6 +4619,36 @@ if($("#icsExpireNudge")) $("#icsExpireNudge").addEventListener("click", e=>{
   if(e.target.closest("#chiudiIcsExpireNudge")){ state.icsExpireNudgeSeenAt=state.icsExportedAt; salva(); renderIcsExpireNudge(); return; }
   if(e.target.closest("#doIcsExpireNudge")){ state.icsExpireNudgeSeenAt=state.icsExportedAt; salva(); apriCalendarioDaWizard(); return; }
   if(e.target.closest("#doIcsExpireNudgePay")){ if(window.NTPaid) window.NTPaid.open(); }
+});
+
+// Consenso alle statistiche d'uso (opt-in): la domanda si fa una volta sola,
+// dalla seconda sessione in poi, quando l'app ha già dimostrato qualcosa e
+// dopo gli inviti più urgenti. Due bottoni dello stesso peso, niente "×":
+// sì e no sono entrambe risposte, e restano modificabili in Opzioni.
+// Finché non c'è risposta, analytics.js non manda e non salva niente.
+function statsNudgeVisibile(){
+  if(!window.NTAnalytics || window.NTAnalytics.answered()) return false;
+  const mostraBenvenuto = primaVoltaDaLink && !benvenutoLinkChiuso;
+  const secondaSessione = state.firstSeenAt && state.firstSeenAt!==iso(new Date());
+  return !!(state.turniConfigurati && secondaSessione && !mostraBenvenuto && !firstPlanBannerVisibile() && !backupNudgeVisibile() && !installBannerVisibile() && !shareNudgeVisibile() && !icsNudgeVisibile() && !icsExpireNudgeVisibile());
+}
+function renderStatsNudge(){
+  const el=$("#statsNudge"); if(!el) return;
+  if(!statsNudgeVisibile()){ el.hidden=true; return; }
+  el.hidden=false;
+  el.innerHTML =
+    '<b>Ci aiuti a capire cosa migliorare?</b>'+
+    '<p class="hint" style="margin-top:6px">Solo conteggi anonimi del tipo "un piano è stato generato" o "le notifiche sono state attivate": nessun identificativo, nessun orario, nessun dato dei turni o del sonno. Puoi cambiare idea quando vuoi in Opzioni.</p>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">'+
+      '<button class="btn g" type="button" id="doStatsSi">Sì, va bene</button>'+
+      '<button class="btn g" type="button" id="doStatsNo">No, grazie</button>'+
+    '</div>';
+}
+if($("#statsNudge")) $("#statsNudge").addEventListener("click", e=>{
+  const si=e.target.closest("#doStatsSi"), no=e.target.closest("#doStatsNo");
+  if(!si && !no) return;
+  try{ window.NTAnalytics && window.NTAnalytics.setEnabled(!!si); }catch(err){}
+  render();
 });
 
 // Invito a notturnisti.club — prima l'unico collegamento per l'utente
@@ -4652,7 +4664,7 @@ function clubBannerVisibile(){
   const mostraBenvenuto = primaVoltaDaLink && !benvenutoLinkChiuso;
   const pronto = !!(state.pattern && Object.keys(state.shifts||{}).length);
   const heroAttivo = (!state.turniConfigurati && !demoEsempioChiuso);
-  return !(state.clubBannerOff || firstPlanBannerVisibile() || mostraBenvenuto || backupNudgeVisibile() || installBannerVisibile() || shareNudgeVisibile() || icsNudgeVisibile() || icsExpireNudgeVisibile() || !pronto || heroAttivo);
+  return !(state.clubBannerOff || firstPlanBannerVisibile() || mostraBenvenuto || backupNudgeVisibile() || installBannerVisibile() || shareNudgeVisibile() || icsNudgeVisibile() || icsExpireNudgeVisibile() || statsNudgeVisibile() || !pronto || heroAttivo);
 }
 function renderClubBanner(){
   const el=$("#clubBanner"); if(!el) return;
@@ -5839,7 +5851,7 @@ function calSyncHtml(feedUrl, copyBtnId, isCouple){
     return '<div style="margin:8px 0">' +
       '<a href="'+https+'" download="'+icsName+'" class="dbtn pri" style="text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center;padding:12px 14px;border-radius:var(--r);font-size:14px;font-weight:600">' +
         '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;flex:none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' +
-        'Importa in Google Calendar (.ics) →' +
+        'Importa una copia in Google Calendar →' +
       '</a>' +
       '<div style="display:flex;justify-content:center;align-items:center;gap:14px;margin-top:8px;font-size:12.5px;flex-wrap:wrap">' +
         '<a href="'+feedUrl+'" style="color:var(--blue);text-decoration:none;font-weight:600;padding:4px 0">Samsung Calendar (1 tocco)</a>' +
@@ -5847,8 +5859,8 @@ function calSyncHtml(feedUrl, copyBtnId, isCouple){
         '<button type="button" id="'+copyBtnId+'" style="background:none;border:none;color:var(--dim);font-size:12.5px;cursor:pointer;padding:4px 0">Copia link per PC</button>' +
       '</div>' +
       '<div style="font-size:11.5px;color:var(--faint);text-align:center;margin-top:5px;line-height:1.4">' +
-        'Tocca <b>Scarica</b> e poi <b>Apri</b>: Google Calendar si aprirà con i turni pronti da salvare.<br>' +
-        'Per la sincronizzazione continua da link, incolla il feed da computer in Google Calendar.' +
+        'La copia contiene i prossimi 42 giorni e <b>non si aggiorna</b> se cambi i turni.<br>' +
+        'Per l\'aggiornamento automatico: Samsung Calendar (1 tocco) oppure incolla il link in Google Calendar da computer.' +
       '</div>' +
     '</div>';
   }
@@ -6931,7 +6943,7 @@ $("#icsVai").onclick=()=>{
   }
 };
 $("#doFeed").onclick=()=>{
-  const url=location.origin+location.pathname+"#"+toHash();
+  const url=window.NT_APP.base+"#"+toHash();
   const body=["Non cancellare la riga qui sotto: mi serve per vedere esattamente il tuo ciclo.",
     url,"",
     "1. Che cosa ha sbagliato?","","",
@@ -6947,7 +6959,7 @@ $("#doFeed").onclick=()=>{
 // confuso con "Condividi il tuo ciclo" (condividiCiclo() sotto), che è per
 // un collega e non deve MAI portarsi dietro i dati di una terza persona.
 async function salvaConfigurazione(){
-  const url=location.origin+location.pathname+"#"+toHash();
+  const url=window.NT_APP.base+"#"+toHash();
   // Prima il foglio di condivisione nativo del telefono — un tocco, scegli
   // WhatsApp o SMS dalla lista che il telefono stesso propone, invece di
   // copiare e dover cambiare app a mano.
@@ -6978,7 +6990,7 @@ $("#doLink").onclick=salvaConfigurazione;
 // suoi orari di sonno insieme al proprio ciclo. Non segna backupDone: non è
 // un backup completo, è la condivisione di una sola parte.
 async function condividiCiclo(){
-  const url=location.origin+location.pathname+"#"+toHashCiclo();
+  const url=window.NT_APP.base+"#"+toHashCiclo();
   const testo="Il mio ciclo turni su Notturnisti — incollalo nell'app per confrontare i turni con i tuoi.";
   track("share_started");
   // share_created solo su una consegna vera del link (non se l'utente
@@ -7054,7 +7066,7 @@ function condividiCicloWhatsApp(){
     testo += emoji + " *" + dataLabel + "*: " + nome + orario + badge + "\n";
   }
 
-  const link = location.origin + location.pathname + "#" + toCompactHash();
+  const link = window.NT_APP.base + "#" + toCompactHash();
   testo += "\n🔗 Confronta i tuoi turni con i miei:\n" + link;
   track("share_whatsapp");
   const url = "https://wa.me/?text=" + encodeURIComponent(testo);
@@ -7069,7 +7081,7 @@ if($("#doCycShare")) $("#doCycShare").onclick=condividiCiclo;
 // riconosce il link e lo apre da sola — non serve costruire anche quella metà.
 function renderQR(holderSel){
   const holder=$(holderSel||"#qrHolder"); if(!holder || typeof window.qrcodegen==="undefined") return;
-  const url=location.origin+location.pathname+"#"+toCompactHash();
+  const url=window.NT_APP.base+"#"+toCompactHash();
   let qr; try{ qr=window.qrcodegen.QrCode.encodeText(url, window.qrcodegen.QrCode.Ecc.MEDIUM); }catch(e){ holder.textContent="Configurazione troppo estesa per un QR — usa il link."; return; }
   const n=qr.size, border=2, dim=n+border*2;
   let path="";
@@ -7093,6 +7105,28 @@ if($("#doShare")) $("#doShare").onclick=async()=>{
 // perché il feed live deve poterlo rileggere da solo. Un tocco in più di
 // verità, non nascosto dietro il fatto che riguarda una minoranza di utenti.
 if(store.get("sub") && $("#privacyNotaAbbonato")) $("#privacyNotaAbbonato").hidden=false;
+// App nativa: il file .ics (download di un blob) non si può salvare dal
+// WebView, e i promemoria li programma il sistema — testo diverso, onesto.
+if(window.NT_APP.nativo){
+  if($("#doIcs")) $("#doIcs").hidden=true;
+  if($("#notifHint")) $("#notifHint").textContent="Li programma il telefono: arrivano anche ad app chiusa e dopo un riavvio. Se non arrivano, controlla che il risparmio batteria non limiti Notturnisti. Restano promemoria, non sostituiscono la sveglia.";
+  // Android 12+: senza "Sveglie e promemoria" la sveglia può arrivare con
+  // qualche minuto di ritardo. Si propone solo a chi ha già le notifiche.
+  const riga=document.createElement("p"); riga.className="hint"; riga.hidden=true; riga.style.margin="-4px 0 var(--gap-sezione)";
+  riga.innerHTML='La sveglia può arrivare con qualche minuto di ritardo. <button class="lnk" type="button" style="display:inline">Rendila puntuale →</button>';
+  if($("#notifHint")) $("#notifHint").after(riga);
+  const aggiornaEsatta=()=>Promise.all([platform.notify.permission(),platform.notify.exactStatus()])
+    .then(([p,x])=>{ riga.hidden=!(p==="granted" && x!=="granted"); }).catch(()=>{});
+  riga.querySelector("button").onclick=()=>platform.notify.requestExact().then(()=>{ aggiornaEsatta(); ntNotifiche(); });
+  aggiornaEsatta(); platform.onResume(aggiornaEsatta);
+}
+// Interruttore statistiche (opt-in: spento finché non lo accendi tu).
+// analytics.js è caricato con defer, quindi qui può non esserci ancora — si
+// legge dopo il load e a ogni cambio di consenso (anche dalla card in Oggi).
+{ const cb=$("#optStats");
+  const sync=()=>{ try{ if(cb && window.NTAnalytics) cb.checked=window.NTAnalytics.isEnabled(); }catch(e){} };
+  if(cb){ cb.onchange=()=>{ try{ window.NTAnalytics && window.NTAnalytics.setEnabled(cb.checked); }catch(e){} sync(); render(); };
+    sync(); addEventListener("load", ()=>{ sync(); render(); }); addEventListener("nt:analytics-consent", sync); } }
 // Punto permanente e silenzioso per chi vuole sostenere il progetto senza
 // aspettare il nudge periodico (donateNudge) o essere passato da Andamenti/
 // dal calendario attivo: sempre lì, mai un obbligo.
@@ -7808,71 +7842,67 @@ addEventListener("nt:config-changed", ()=>{
   ntNotifiche(); // ricarica il piano notifiche quando la config cambia
 });
 
-/* ─── Notifiche locali: bridge app → SW ─────────────────────────────────────
-   Usa buildSchedule() da notifications.js (già caricato come module).
-   L'obiettivo: sveglia, pisolini, ultimo caffè e rientro arrivano sul telefono
-   anche quando l'app non è aperta. Zero backend, zero costi.
+/* ─── Notifiche locali ──────────────────────────────────────────────────────
+   Il piano arriva da buildSchedule() (notifications.js); DOVE viene armato lo
+   decide platform.js: service worker sul web, sistema operativo nell'app
+   nativa. Zero backend in entrambi i casi.
    ─────────────────────────────────────────────────────────────────────────── */
+// Permesso notifiche in cache: sul nativo si legge solo in modo asincrono,
+// mentre renderNotifRiga() è sincrona. var + funzione (entrambe "hoisted"),
+// non let: render() gira già più in alto in questo modulo, prima che questa
+// riga venga eseguita, e con let lì si romperebbe tutto (TDZ).
+var _notifPerm;
+function notifPerm(){
+  if(_notifPerm===undefined) _notifPerm = ("Notification" in window) ? Notification.permission : "unsupported";
+  return _notifPerm;
+}
+function aggiornaPermNotif(){
+  platform.notify.permission().then(p=>{ if(p!==notifPerm()){ _notifPerm=p; renderNotifRiga(); } }).catch(()=>{});
+}
 function ntNotifiche(){
   try{
-    if(!("serviceWorker" in navigator) || !("Notification" in window)) return;
-    if(Notification.permission !== "granted") return;
-    const sw = navigator.serviceWorker.controller;
-    if(!sw) return;
-    // Costruisce il piano con buildSchedule (da notifications.js, caricato come module)
     if(!window.NTNotif || !window.NTNotif.buildSchedule) return;
-    const items = window.NTNotif.buildSchedule(state, { days:7 });
-    sw.postMessage({ type:"NT_SCHEDULE", items });
-    ntPeriodicSync();
-  }catch(e){}
-}
-// Periodic Background Sync: dove il browser la concede (oggi solo
-// Chrome/Android, e solo in base a quanto l'utente usa l'app — Chrome non
-// lo dice mai con un prompt visibile, o c'è già o non c'è), risveglia il SW
-// da solo per riarmare i promemoria anche se l'app resta chiusa per giorni.
-// Nessun server coinvolto: il SW rilegge solo l'ultimo piano che ntNotifiche()
-// gli aveva già mandato (vedi sw.js). Su tutti gli altri browser questa
-// funzione non fa nulla, in silenzio — non è mai la strada principale,
-// solo un miglioramento quando capita di esserci.
-async function ntPeriodicSync(){
-  try{
-    if(!("serviceWorker" in navigator) || !("permissions" in navigator)) return;
-    const reg = await navigator.serviceWorker.ready;
-    if(!("periodicSync" in reg)) return;
-    const stato = await navigator.permissions.query({name:"periodic-background-sync"});
-    if(stato.state !== "granted") return;
-    await reg.periodicSync.register("nt-notif-refresh", {minInterval: 12*3600e3});
+    const items = window.NTNotif.buildSchedule(state, { days:platform.notify.days });
+    platform.notify.schedule(items).catch(()=>{});
   }catch(e){}
 }
 // Ricarica il piano al ritorno in foreground (SW potrebbe aver perso i timer)
 document.addEventListener("visibilitychange", ()=>{
-  if(document.visibilityState === "visible") ntNotifiche();
+  if(document.visibilityState === "visible"){ ntNotifiche(); aggiornaPermNotif(); }
+});
+// App nativa: ritorno in primo piano (riarma) e tocco su una notifica (tab giusto).
+platform.onResume(()=>{ ntNotifiche(); aggiornaPermNotif(); });
+platform.onNotificationTap(tab=>{
+  try{ const t=String(tab||"oggi").replace(/\?.*/,""); setTab({oggi:"oggi",diario:"oggi",turni:"turni"}[t]||"oggi"); render(); }catch(e){}
 });
 // Prima attivazione dopo il load (se il permesso è già stato concesso)
-addEventListener("load", ()=>{ setTimeout(ntNotifiche, 1500); });
+addEventListener("load", ()=>{ setTimeout(ntNotifiche, 1500); aggiornaPermNotif(); });
 
 // Richiesta permesso notifiche: non immediata, non aggressiva.
 // Si mostra come bottone in Opzioni ("Promemoria"), mai come prompt automatico.
 function ntChiediPermesso(){
-  if(!("Notification" in window)) return;
-  if(Notification.permission === "granted"){ ntNotifiche(); return; }
-  if(Notification.permission === "denied") return;
+  const perm=notifPerm();
+  if(perm === "unsupported") return;
+  if(perm === "granted"){ ntNotifiche(); return; }
+  if(perm === "denied") return;
   track("notification_prompt_shown");
-  Notification.requestPermission().then(p=>{
+  platform.notify.request().then(p=>{
+    _notifPerm = p;
     if(p === "granted"){ ntNotifiche(); track("notifications_enabled"); }
     render(); // aggiorna UI (nasconde il banner se concesso)
-  });
+  }).catch(()=>{});
 }
 window.ntChiediPermesso = ntChiediPermesso;
 if($("#doNotifiche")) $("#doNotifiche").onclick=ntChiediPermesso;
 if($("#doNotificheWiz")) $("#doNotificheWiz").onclick=ntChiediPermesso;
-// Stato del bottone "Promemoria" in Opzioni: solo lettura di
-// Notification.permission, costa nulla, ma non serve calcolarlo se Opzioni
+// Stato del bottone "Promemoria" in Opzioni: solo lettura del permesso in
+// cache (_notifPerm), costa nulla, ma non serve calcolarlo se Opzioni
 // non è nemmeno aperta — stessa idea di renderOpzSummaries().
 function renderNotifRiga(){
   const btn=$("#doNotifiche"); if(!btn) return;
-  if(!("Notification" in window)){ btn.hidden=true; return; }
-  const t=$("#notifTesto"), v=$("#notifVal"), perm=Notification.permission;
+  const perm=notifPerm();
+  if(perm==="unsupported"){ btn.hidden=true; return; }
+  const t=$("#notifTesto"), v=$("#notifVal");
   if(perm==="granted"){
     if(t) t.textContent="Promemoria attivi"; if(v) v.textContent="Attivi"; btn.disabled=true;
   } else if(perm==="denied"){
@@ -7970,7 +8000,18 @@ window.NT = {
     salva(); render(); },
   setPartner(seq, anchorISO){ state.pPattern=String(seq||"").toUpperCase().replace(/[^A-Z]/g,"").slice(0,400);
     state.pAnchor=anchorISO||state.anchor; salva(); render(); },
-  insights(){ let c=null,w=null; try{c=cycleSummary();}catch(e){} try{w=wakeSummary();}catch(e){} return {cycle:c, wake:w}; }
+  insights(){ let c=null,w=null; try{c=cycleSummary();}catch(e){} try{w=wakeSummary();}catch(e){} return {cycle:c, wake:w}; },
+  // Ripristino del calendario su un dispositivo nuovo: riporta anche i turni
+  // salvati sul server, ma SOLO se qui non ce ne sono ancora — altrimenti il
+  // primo tocco della persona avrebbe sovrascritto il server con un'app vuota.
+  // Solo i campi che parseConfig() del server produce, già validati lì.
+  applyConfig(cfg){
+    if(!cfg || !cfg.pattern || state.turniConfigurati) return false;
+    for(const k of ["pattern","anchor","shifts","repeat","ecc","freeWake","freeBed","caffSens","cTo","cFrom","prep","maxAdvance","pPattern","pAnchor","pShifts","pWake","pBed"])
+      if(cfg[k]!==undefined) state[k]=JSON.parse(JSON.stringify(cfg[k]));
+    state.turniConfigurati=true; store.set("turniConfigurati", true);
+    NT.normalizza(); salva(); render(); return true;
+  }
 };
 addEventListener("nt:refresh", ()=>{ try{ render(); }catch(e){} });
 
@@ -7987,7 +8028,7 @@ addEventListener("nt:refresh", ()=>{ try{ render(); }catch(e){} });
    alla schermata Home si fa da Condividi → Aggiungi a Home; lì non c'è prompt. */
 (function(){
   "use strict";
-  if("serviceWorker" in navigator){
+  if("serviceWorker" in navigator && !window.NT_APP.nativo){
     addEventListener("load", function(){
       navigator.serviceWorker.register("./sw.js").then(function(reg){
         // Ricezione messaggi dal SW (es. NT_NAV per cambio tab da notifica)
@@ -8007,18 +8048,18 @@ addEventListener("nt:refresh", ()=>{ try{ render(); }catch(e){} });
   var deferred=null;
   addEventListener("beforeinstallprompt", function(e){
     e.preventDefault(); deferred=e;
-    try{ installPromptEvento=e; renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderIcsExpireNudge(); renderClubBanner(); renderDonateNudge(); }catch(err){}
+    try{ installPromptEvento=e; renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderIcsExpireNudge(); renderStatsNudge(); renderClubBanner(); renderDonateNudge(); }catch(err){}
     var tools=document.querySelector(".tools"); if(!tools || document.getElementById("doInstall")) return;
     var b=document.createElement("button");
     b.className="lnk"; b.id="doInstall"; b.textContent="Installa l'app";
     b.onclick=function(){ if(!deferred) return; deferred.prompt();
       deferred.userChoice.finally(function(){ deferred=null; b.remove();
-        try{ installPromptEvento=null; renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderIcsExpireNudge(); renderClubBanner(); renderDonateNudge(); }catch(err){} }); };
+        try{ installPromptEvento=null; renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderIcsExpireNudge(); renderStatsNudge(); renderClubBanner(); renderDonateNudge(); }catch(err){} }); };
     tools.appendChild(b);
   });
   addEventListener("appinstalled", function(){ var b=document.getElementById("doInstall"); if(b) b.remove();
     track("pwa_installed");
-    try{ installPromptEvento=null; renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderIcsExpireNudge(); renderClubBanner(); renderDonateNudge(); }catch(err){} });
+    try{ installPromptEvento=null; renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderIcsExpireNudge(); renderStatsNudge(); renderClubBanner(); renderDonateNudge(); }catch(err){} });
   // iOS non manda mai beforeinstallprompt: qui non c'è un pulsante da
   // aggiungere, solo l'istruzione — sempre raggiungibile in Più, non solo
   // nel banner che si può chiudere.
@@ -8042,8 +8083,21 @@ addEventListener("nt:refresh", ()=>{ try{ render(); }catch(e){} });
 // Il link a Ko-fi per chi vuole sostenere il progetto — mai un obbligo, mai
 // una condizione per usare l'app. Deve stare PRIMA di paid.js e del resto del
 // modulo core: entrambi lo leggono una sola volta, al caricamento.
-window.NT_DONATE = { url: "https://ko-fi.com/notturnisti" };
+//
+// Nell'app nativa (Capacitor) la pagina gira su https://localhost: i link
+// condivisi, il feed e le API devono puntare comunque al sito vero. Il ponte
+// Capacitor è già iniettato prima di qualunque script della pagina.
+// Nell'app niente link di donazione: Google Play e App Store vietano i
+// pagamenti esterni per il contenuto digitale (docs/app-nativa.md §5).
+(function(){
+  var nativo = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+  var origin = nativo ? "https://app.notturnisti.club" : location.origin;
+  window.NT_APP = { nativo: nativo, origin: origin, base: nativo ? origin + "/" : location.origin + location.pathname };
+  window.NT_CAL = { api: nativo ? origin : "", origin: origin };
+  if(!nativo) window.NT_DONATE = { url: "https://ko-fi.com/notturnisti" };
+})();
 </script>
 <script src="./paid.js" defer></script>
+<script src="./migrate.js" defer></script>
 </body>
 </html>

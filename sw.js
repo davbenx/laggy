@@ -13,6 +13,8 @@ const CORE = [
   "./history.js",
   "./paid.js",
   "./notifications.js",
+  "./platform.js",
+  "./migrate.js",
   "./analytics.js"
 ];
 
