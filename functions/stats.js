@@ -89,7 +89,7 @@ details summary{cursor:pointer;font-weight:600}
 
   <section id="login" class="card login" hidden>
     <h2>Accesso</h2>
-    <p class="sub">Incolla il valore di <code>STATS_TOKEN</code> impostato sul Worker.</p>
+    <p class="sub">Incolla il codice delle statistiche.</p>
     <form id="loginForm">
       <input id="tok" type="password" autocomplete="current-password" placeholder="Token" required>
       <button class="btn" type="submit">Apri le statistiche</button>

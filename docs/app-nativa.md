@@ -210,9 +210,13 @@ raccomandazione) e dove si perdono le persone nell'onboarding.
   La pagina mostra gli indicatori principali, i dispositivi attivi al giorno,
   il percorso principale, gli abbandoni nell'onboarding, le piattaforme, i
   ritorni e i calendari vivi, più la tabella completa.
-- **Attivazione** (una volta sola, istruzioni anche in `wrangler.jsonc`):
-  `npx wrangler d1 create notturnisti-stats`, incollare l'id in
-  `wrangler.jsonc`, poi `npx wrangler secret put STATS_TOKEN`.
+- **Attivazione** (fatta il 2026-10-15): il database D1 `notturnisti-stats`
+  lo crea Wrangler al deploy (provisioning automatico, nessun ID nel repo).
+  La pagina è protetta da un codice di cui il repo conosce solo l'impronta
+  SHA-256 (`STATS_TOKEN_SHA256` in `wrangler.jsonc`). Per cambiarlo: nuova
+  stringa casuale, `sha256sum`, sostituire l'impronta.
+- Le anteprime dei branch usano lo stesso database: i loro eventi (pochi,
+  solo di chi le prova) finiscono nei totali.
 - **Limiti**: sono conteggi di eventi, non di persone (non ci sono id per
   deduplicare). "Dispositivi attivi" è l'unico numero che approssima le
   persone: un dispositivo conta al massimo una volta al giorno. `/collect` è
