@@ -374,6 +374,21 @@
       }, 2000);
     });
   } catch (e) {}
+  // Riallineamento una tantum: i feed creati prima che le eccezioni (cambi
+  // turno, turni variabili) viaggiassero col calendario hanno sul server una
+  // configurazione senza. Un PUT alla prima apertura dopo l'aggiornamento li
+  // corregge senza aspettare il prossimo cambio turno.
+  var SYNC_V = "2";
+  try {
+    if (paid() && localStorage.getItem("nt:subSyncV") !== SYNC_V) {
+      setTimeout(function () {
+        var s = getSub(); if (!s) return;
+        api("PUT", "/config/" + s.id, { cfg: paramsObj() }, s.writeKey).then(function (r) {
+          if (r.ok) try { localStorage.setItem("nt:subSyncV", SYNC_V); } catch (e) {}
+        }, function () {});
+      }, 3000);
+    }
+  } catch (e) {}
   if (document.readyState === "loading") addEventListener("DOMContentLoaded", launcher);
   else launcher();
   window.NTPaid = { open: open, paid: paid, getSub: getSub, attiva: attiva };   // per test/uso esterno
