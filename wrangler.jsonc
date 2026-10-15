@@ -39,22 +39,23 @@
     { "binding": "SUBS", "id": "9d54b9285f17404da83f470695d2a001" }
   ],
   // Statistiche d'uso aggregate (functions/_analytics.js, pagina /stats).
-  // Finché questo blocco resta commentato, /collect accetta e scarta tutto e
-  // /stats dice "database non collegato": niente si rompe. Per attivarlo:
-  //   1. npx wrangler d1 create notturnisti-stats   → copia il database_id
-  //   2. togli il commento qui sotto e incolla l'id
-  //   3. npx wrangler secret put STATS_TOKEN        → una stringa lunga a caso
-  //   4. apri https://app.notturnisti.club/stats#t=<quel token>
-  // Le tabelle si creano da sole alla prima richiesta.
-  // "d1_databases": [
-  //   { "binding": "DB", "database_name": "notturnisti-stats", "database_id": "INCOLLA-QUI" }
-  // ],
+  // Database D1 creato da Wrangler al primo deploy ("automatic resource
+  // provisioning", wrangler >= 4.45): niente database_id da copiare a mano,
+  // i deploy successivi lo ritrovano per nome. Le tabelle le crea il codice
+  // alla prima richiesta, quindi non servono migrazioni né "wrangler d1".
+  "d1_databases": [
+    { "binding": "DB", "database_name": "notturnisti-stats" }
+  ],
   // Solo i valori NON sensibili: store/variante/prezzo/valuta sono già
   // pubblici di fatto (paid.js li espone al browser via window.NT_PAY).
   // LEMONSQUEEZY_WEBHOOK_SECRET va impostato a parte come secret vero
   // (wrangler secret put, o dalla dashboard) — mai qui, finirebbe in chiaro
   // nel repo.
   "vars": {
+    // Impronta SHA-256 del codice che apre /stats (non il codice): pubblicarla
+    // non permette di risalirci. Per cambiare codice: nuova stringa casuale,
+    // sha256sum, sostituisci qui (e nelle anteprime sotto).
+    "STATS_TOKEN_SHA256": "9a48b0457a4982fd68999bc0d1dd6ad8f0e669b0c1f3a6c6d40aceda5510a5ba",
     "CURRENCY": "EUR",
     "LEMONSQUEEZY_STORE_ID": "notturnisti",
     "LEMONSQUEEZY_VARIANT_ID": "457255",
@@ -69,6 +70,7 @@
   // webhook reali.
   "previews": {
     "vars": {
+      "STATS_TOKEN_SHA256": "9a48b0457a4982fd68999bc0d1dd6ad8f0e669b0c1f3a6c6d40aceda5510a5ba",
       "CURRENCY": "EUR",
       "LEMONSQUEEZY_STORE_ID": "notturnisti",
       "LEMONSQUEEZY_VARIANT_ID": "457255",
