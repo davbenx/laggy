@@ -4,4 +4,6 @@
     <string name="title_activity_main">Notturnisti</string>
     <string name="package_name">club.notturnisti.twa</string>
     <string name="custom_url_scheme">club.notturnisti.twa</string>
+    <string name="widget_etichetta">Notturnisti · adesso</string>
+    <string name="widget_descrizione">Cosa fare adesso e le prossime due cose del tuo piano</string>
 </resources>

@@ -15,7 +15,8 @@ const FILES = [
   "engine.js", "alertness.js", "history.js", "notifications.js",
   "platform.js", "analytics.js", "paid.js", "migrate.js",
   "manifest.webmanifest",
-  "icon-180.png", "icon-192.png", "icon-512.png", "icon-maskable-512.png", "owl-mark.png"
+  "icon-180.png", "icon-192.png", "icon-512.png", "icon-maskable-512.png", "owl-mark.png",
+  "fonts/inter-latin.woff2", "fonts/noto-serif-latin.woff2"
 ];
 
 rmSync(out, { recursive: true, force: true });
@@ -23,6 +24,7 @@ mkdirSync(out, { recursive: true });
 for (const f of FILES) {
   const src = join(root, f);
   if (!existsSync(src)) throw new Error("manca " + f);
+  mkdirSync(dirname(join(out, f)), { recursive: true });
   cpSync(src, join(out, f));
 }
 console.log("www/: " + FILES.length + " file copiati da " + root);

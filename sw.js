@@ -15,7 +15,9 @@ const CORE = [
   "./notifications.js",
   "./platform.js",
   "./migrate.js",
-  "./analytics.js"
+  "./analytics.js",
+  "./fonts/inter-latin.woff2",
+  "./fonts/noto-serif-latin.woff2"
 ];
 
 // Il nome della cache è l'hash del contenuto dei file CORE, non una versione
@@ -88,13 +90,13 @@ self.addEventListener("fetch", e => {
     return;
   }
 
-  // Font di Google e altri statici: cache-first (nella cache corrente),
+  // Statici della stessa origine (font compresi, ora locali): cache-first (nella cache corrente),
   // aggiorna in background.
   e.respondWith(
     cacheName().then(name => caches.open(name)).then(cache =>
       cache.match(req).then(cached => {
         const net = fetch(req).then(res => {
-          if (res && res.status === 200 && (url.origin === location.origin || url.host.includes("gstatic") || url.host.includes("googleapis"))) {
+          if (res && res.status === 200 && url.origin === location.origin) {
             cache.put(req, res.clone());
           }
           return res;

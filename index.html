@@ -56,12 +56,18 @@ try{
 <meta name="apple-mobile-web-app-title" content="Notturnisti">
 <link rel="apple-touch-icon" href="./icon-180.png">
 <link rel="icon" href="./icon-192.png" type="image/png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" media="print" onload="this.media='all';this.onload=null"
- href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Serif:wght@600;700&display=swap">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Serif:wght@600;700&display=swap"></noscript>
+<link rel="preload" href="./fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
 <style>
+/* Font serviti da qui, non da Google Fonts: nessuna richiesta a terzi (né
+   l'IP né il referer a Google) e lo stesso aspetto offline e nell'app
+   nativa. Solo il sottoinsieme latino (copre l'italiano), file variabili:
+   uno per famiglia copre tutti i pesi. Licenza SIL OFL in fonts/. */
+@font-face{font-family:"Inter";font-style:normal;font-weight:100 900;font-display:swap;
+  src:url(./fonts/inter-latin.woff2) format("woff2");
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Noto Serif";font-style:normal;font-weight:100 900;font-display:swap;
+  src:url(./fonts/noto-serif-latin.woff2) format("woff2");
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 /* Palette Notturnisti — blu #2D5A8C, arancio #FF6B35.
    Chiaro come il sito. Scuro automatico per chi ha il telefono in modalità notte:
    sono turnisti, ce l'hanno quasi tutti. */
@@ -76,6 +82,11 @@ try{
    (vedi @media prefers-color-scheme:light qui sotto) — non è un dark
    forzato su tutti senza eccezioni, solo il default per chi non ha
    deciso nulla. */
+/* Margini delle barre di sistema. env() da solo non basta nell'app Android:
+   con Android 15 l'app va a tutto schermo e Capacitor comunica l'ingombro di
+   barra di stato e barra dei gesti come --safe-area-inset-* (le WebView
+   meno recenti danno 0 a env()). Si prende il più grande dei due. */
+:root{--sat:max(env(safe-area-inset-top,0px),var(--safe-area-inset-top,0px));--sab:max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px))}
 :root{
   --bg:#14161A; --s1:#1C1F25; --s2:#23272E; --line:#333941;
   --ink:#E6E8EB; --dim:#A8B0B8; --faint:#98A0A8;
@@ -147,7 +158,7 @@ header{border:none;padding:0;margin:0}
    rimesso qui sopra così il contenuto (logo, titolo) resta allineato
    col resto della pagina. */
 .appbar{display:flex;align-items:center;gap:11px;background:var(--bg-blur);
-padding:calc(env(safe-area-inset-top,0px) + 12px) 20px 12px;margin:0 -20px;position:sticky;top:0;z-index:20}
+padding:calc(var(--sat) + 12px) 20px 12px;margin:0 -20px;position:sticky;top:0;z-index:20}
 @supports (backdrop-filter:blur(1px)){.appbar{backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}}
 .applogo{width:36px;height:36px;flex:none;border-radius:9px}
 .apptitle{flex:1;min-width:0}
@@ -220,7 +231,7 @@ z-index:999;display:flex;align-items:flex-end;justify-content:center;animation:q
 .qs-backdrop[hidden]{display:none !important}
 @media(min-width:600px){.qs-backdrop{align-items:center}}
 .qs-sheet{background:var(--s1);border:1px solid var(--line);border-radius:18px;width:calc(100% - 24px);max-width:440px;
-margin:0 12px calc(72px + env(safe-area-inset-bottom, 0px));padding:18px 20px 20px;box-shadow:0 8px 32px rgba(0,0,0,0.4);
+margin:0 12px calc(72px + var(--sab));padding:18px 20px 20px;box-shadow:0 8px 32px rgba(0,0,0,0.4);
 animation:qsSlideUp .2s ease;display:flex;flex-direction:column;gap:13px;position:relative;z-index:1000}
 @media(min-width:600px){.qs-sheet{margin:0;border-radius:var(--r);box-shadow:var(--shadow-card)}}
 @keyframes qsFadeIn{from{opacity:0}to{opacity:1}}
@@ -565,7 +576,7 @@ body.wiz-open #clubBanner, body.intro #clubBanner,
 body.wiz-open #statsNudge, body.intro #statsNudge,
 body.wiz-open #donateNudge, body.intro #donateNudge{display:none!important}
 body.wiz-open .wsteps{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:8px}
-body.wiz-open .wiznav{position:sticky;bottom:0;background:var(--bg-blur);padding:10px 0 env(safe-area-inset-bottom,0)}
+body.wiz-open .wiznav{position:sticky;bottom:0;background:var(--bg-blur);padding:10px 0 var(--sab)}
 @supports (backdrop-filter:blur(1px)){body.wiz-open .wiznav{backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}}
 .tools{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 22px}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);
@@ -692,11 +703,11 @@ body.intro #vista,body.intro #formaGiorno,body.intro #essenziale{display:none}
 /* ── navigazione a tab: destinazioni separate + barra in basso (feel da app) ── */
 #vista{display:none}                     /* i tab sostituiscono il vecchio interruttore */
 body.tabs .setbar{display:none}          /* "Cambia" duplicava il tab Turni: unica sede */
-body.tabs{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))}
+body.tabs{padding-bottom:calc(72px + var(--sab))}
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;
 background:var(--bg);border-top:1px solid var(--line)}
 @supports (backdrop-filter:blur(1px)){.tabbar{background:var(--bg-blur);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}}
-.tabbar{padding-bottom:env(safe-area-inset-bottom,0px)}
+.tabbar{padding-bottom:var(--sab)}
 .tabbtn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
 background:none;border:none;color:var(--faint);font:inherit;font-size:11px;font-weight:600;
 letter-spacing:.01em;padding:9px 0 8px;min-height:56px;cursor:pointer;position:relative}
@@ -2702,11 +2713,16 @@ const store = {
     btn.setAttribute("aria-pressed", light?"true":"false");
     btn.setAttribute("aria-label", light?"Torna al tema scuro":"Passa alla modalità chiara");
   };
-  applica(store.get("theme","auto")==="light");
+  // Tema effettivo (forzato chiaro, oppure quello del telefono) anche per le
+  // barre di sistema dell'app nativa.
+  const mq=window.matchMedia ? window.matchMedia("(prefers-color-scheme: light)") : null;
+  const barre=()=>platform.setSystemBars(document.documentElement.dataset.theme==="light" || !!(mq && mq.matches));
+  applica(store.get("theme","auto")==="light"); barre();
+  if(mq && mq.addEventListener) mq.addEventListener("change", barre);
   btn.addEventListener("click", ()=>{
     const light = document.documentElement.dataset.theme!=="light";
     store.set("theme", light?"light":"auto");
-    applica(light);
+    applica(light); barre();
   });
 })();
 let diary = store.get("diary",{});
@@ -5903,6 +5919,7 @@ function renderPiuCal(){
   const hasPartner = !!(persona || (typeof state!=="undefined" && state.pPattern));
 
   const coupleUrl = (sub && sub.feedUrl ? sub.feedUrl : "").replace("/feed/", "/couple/");
+  if(platform.calendar.available){ renderCoppiaNativa(el, hasPartner, pName); return; }
 
   let detailsHtml = "";
   if(!hasPartner){
@@ -5981,11 +5998,109 @@ function renderPiuCal(){
   wireCalCopy("coupleCalCopyBtn", coupleUrl);
 }
 
+/* ── Calendario nativo (app Android/iOS) ────────────────────────────────
+   Nell'app il calendario non passa dal server: platform.calendar scrive un
+   calendario "Notturnisti" direttamente sul telefono (solo lì, account
+   locale) e lo riscrive a ogni cambio di turni. Stessi eventi del feed ICS
+   (NT.buildEvents), stessi 42 giorni; la coppia, 60 giorni come il feed. */
+function eventiCalendario(){
+  const f=state.focus; state.focus=new Date();
+  let ev=[], cp=[];
+  try{
+    NT.setIcs({turni:true,sonno:true,pisolini:true,caffe:true,luce:true,rientro:true,pasti:false,avviso:0});
+    ev=NT.buildEvents(42);
+    if(state.pPattern) cp=NT.buildCoupleEvents(60);
+  }catch(e){}
+  state.focus=f;
+  return {ev, cp};
+}
+let _calT=null;
+function ntCalendarioNativo(subito){
+  if(!platform.calendar.available || !platform.calendar.attivo()) return;
+  clearTimeout(_calT);
+  _calT=setTimeout(()=>{
+    const {ev, cp}=eventiCalendario();
+    platform.calendar.sync(ev, cp).then(()=>{
+      if(document.body.classList.contains("tab-turni")){ renderCycCalSync(); renderPiuCal(); }
+      try{ ntWidget(); }catch(e){}
+    }).catch(()=>{});
+  }, subito?0:2000);
+}
+const _hhmmDa = t => { const d=new Date(t); return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"); };
+function renderCalNativo(toggle, details){
+  const on=platform.calendar.attivo(), at=platform.calendar.ultimoSync();
+  toggle.checked=on;
+  details.innerHTML = on
+    ? '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px">'+
+        '<span style="color:#2ecc71;font-weight:600;display:flex;align-items:center;gap:6px"><span style="width:7px;height:7px;border-radius:50%;background:#2ecc71;display:inline-block"></span>Nel calendario del telefono</span>'+
+        '<button type="button" id="calNatApri" style="color:var(--blue);font-size:13px;font-weight:600;padding:0;background:none;border:none;cursor:pointer">Apri →</button>'+
+      '</div>'+
+      '<span>Calendario «Notturnisti», solo su questo telefono. Si aggiorna da solo quando cambi i turni'+(at?' · ultimo aggiornamento '+_hhmmDa(at):'')+'.</span>'
+    : '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">'+
+        '<span>Turni, sonno e ultimo caffè nell\'app Calendario del telefono. Restano solo sul telefono, nessun server.</span>'+
+        '<button type="button" class="btn b" id="calNatAttiva" style="padding:7px 12px;font-size:13px;white-space:nowrap">Attiva</button>'+
+      '</div>';
+  const attiva=async()=>{
+    const r=await platform.calendar.attiva();
+    if(r!=="ok"){ toggle.checked=false; toast("Serve il permesso al calendario: Impostazioni › App › Notturnisti › Autorizzazioni"); renderCycCalSync(); return; }
+    toast("Aggiungo il calendario al telefono…"); ntCalendarioNativo(true); renderCycCalSync();
+  };
+  toggle.onchange=async()=>{
+    if(toggle.checked) await attiva();
+    else { await platform.calendar.disattiva(); toast("Calendario rimosso dal telefono"); renderCycCalSync(); renderPiuCal(); }
+  };
+  const a=$("#calNatAttiva"); if(a) a.onclick=()=>{ toggle.checked=true; attiva(); };
+  const o=$("#calNatApri"); if(o) o.onclick=()=>platform.calendar.apri();
+}
+function renderCoppiaNativa(el, hasPartner, pName){
+  const on = platform.calendar.attivo() && platform.calendar.coppiaAttiva();
+  el.innerHTML =
+    '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px">'+
+      '<div style="min-width:0"><b style="display:block;font-size:15px;color:var(--ink);line-height:1.25">Calendario di coppia</b>'+
+      '<span style="display:block;font-size:12.5px;color:var(--dim);margin-top:2px">'+(hasPartner
+        ? (on ? 'I riposi in comune con <b>'+esc(pName)+'</b> sono nel calendario «Notturnisti · insieme».' : 'I riposi in comune con <b>'+esc(pName)+'</b> nel calendario del telefono.')
+        : 'Aggiungi prima una persona qui sopra.')+'</span></div>'+
+      '<label class="switch" title="Calendario di coppia"><input type="checkbox" id="coupleCalToggle"'+(on?' checked':'')+'><span class="slider"></span></label>'+
+    '</div>';
+  const t=$("#coupleCalToggle");
+  t.onchange=async()=>{
+    if(!hasPartner){ t.checked=false; apriPartner(); return; }
+    if(t.checked){
+      const r = platform.calendar.attivo() ? (await platform.calendar.impostaCoppia(true), "ok") : await platform.calendar.attiva({coppia:true});
+      if(r!=="ok"){ t.checked=false; toast("Serve il permesso al calendario"); return; }
+    } else await platform.calendar.impostaCoppia(false);
+    ntCalendarioNativo(true); renderPiuCal(); renderCycCalSync();
+  };
+}
+// Widget Android: le prossime 48 ore del piano, già calcolate. Si aggiorna a
+// ogni cambio, a ogni apertura e a ogni ritorno nell'app; da lì il widget
+// si ridisegna da solo al prossimo cambio di attività.
+function ntWidget(){
+  if(!platform.widget.available) return;
+  if(!state.turniConfigurati){ platform.widget.publish([]); return; }   // niente piano di esempio sul widget
+  const {ev}=eventiCalendario(), ora=Date.now();
+  const voci=ev.filter(e=>+e.end>ora && +e.start<ora+48*3600e3)
+    .map(e=>({s:+e.start, e:+e.end, t:e.title}))
+    .sort((a,b)=>a.s-b.s);
+  platform.widget.publish(voci);
+}
+if(platform.widget.available){
+  addEventListener("nt:config-changed", ()=>setTimeout(ntWidget, 500));
+  addEventListener("load", ()=>setTimeout(ntWidget, 1500));
+  platform.onResume(ntWidget);
+}
+if(platform.calendar.available){
+  addEventListener("nt:config-changed", ()=>ntCalendarioNativo());
+  addEventListener("load", ()=>setTimeout(()=>ntCalendarioNativo(true), 2500));
+  platform.onResume(()=>ntCalendarioNativo(true));   // a ogni ritorno: la finestra di 42 giorni avanza
+}
+
 // Tab Turni: Sincronizzazione del calendario normale con toggle diretto e copy Opzione A.
 function renderCycCalSync(){
   const toggle = $("#cycCalToggle");
   const details = $("#cycCalDetails");
   if(!toggle || !details) return;
+  if(platform.calendar.available){ renderCalNativo(toggle, details); return; }
 
   const isPaid = !!(window.NTPaid && window.NTPaid.paid());
   const sub = isPaid ? window.NTPaid.getSub() : null;
@@ -6126,7 +6241,8 @@ function apriFinestraSonno(){
 // nascosta.
 function apriCalendarioDaWizard(){
   if(document.body.classList.contains("wiz-open")) chiudiIntro(false);
-  if(window.NTPaid && window.NTPaid.open){
+  // Nell'app: niente feed, si va dritti all'interruttore del calendario del telefono.
+  if(!platform.calendar.available && window.NTPaid && window.NTPaid.open){
     window.NTPaid.open(window.NTPaid.paid() ? "account" : "attiva");
     return;
   }
@@ -6966,8 +7082,8 @@ async function salvaConfigurazione(){
   const testo="La mia configurazione Notturnisti — salvala per non perderla, o passarla a un altro dispositivo.";
   const isFirstSave = !state.backupDone;
   try{
-    if(navigator.share){
-      await navigator.share({title:"Notturnisti",text:testo,url});
+    if(platform.canShare()){
+      await platform.share({title:"Notturnisti",text:testo,url});
       state.backupDone=true; store.set("backupDone",true); render();
       if(isFirstSave && window.NTPaid && !window.NTPaid.paid()){
         setTimeout(()=>{ if(window.NTPaid && !window.NTPaid.paid()) window.NTPaid.open("attiva"); }, 600);
@@ -6997,7 +7113,7 @@ async function condividiCiclo(){
   // annulla il foglio di condivisione nativo: lì il link non è arrivato
   // da nessuna parte).
   try{
-    if(navigator.share){ await navigator.share({title:"Notturnisti",text:testo,url}); track("share_created"); return; }
+    if(platform.canShare()){ await platform.share({title:"Notturnisti",text:testo,url}); track("share_created"); return; }
   }catch(e){ if(e && e.name==="AbortError") return; }
   try{ await navigator.clipboard.writeText(url); toast("Link copiato"); track("share_created"); }
   catch(e){ prompt("Copia questo link:",url); track("share_created"); }
@@ -7094,7 +7210,7 @@ if($("#doShare")) $("#doShare").onclick=async()=>{
   const url="https://notturnisti.club/planner";
   const testo="Se fai i turni, questo pianifica sonno, caffè e luce da solo. L'ho trovato utile.";
   try{
-    if(navigator.share){ await navigator.share({title:"Notturnisti",text:testo,url}); return; }
+    if(platform.canShare()){ await platform.share({title:"Notturnisti",text:testo,url}); return; }
   }catch(e){ if(e && e.name==="AbortError") return; }
   try{ await navigator.clipboard.writeText(testo+" "+url); toast("Link copiato, pronto da incollare"); }
   catch(e){ prompt("Copia questo messaggio:",testo+" "+url); }
@@ -7872,6 +7988,26 @@ document.addEventListener("visibilitychange", ()=>{
 });
 // App nativa: ritorno in primo piano (riarma) e tocco su una notifica (tab giusto).
 platform.onResume(()=>{ ntNotifiche(); aggiornaPermNotif(); });
+// Tasto "indietro" (Android): prima chiude ciò che è aperto sopra, poi torna
+// a Oggi; da Oggi l'app va in secondo piano. Prima chiudeva subito l'app,
+// perché le schede non sono pagine distinte nella cronologia.
+platform.onBackButton(()=>{
+  const dlg=[...document.querySelectorAll("body > [role=dialog]")].pop();   // dialoghi di migrate.js
+  if(dlg){ dlg.remove(); return true; }
+  if($("#pf-modal")){ $("#pf-modal").remove(); return true; }
+  const qs=$("#quickShiftModal"); if(qs && !qs.hidden){ chiudiQuickShift(); return true; }
+  if(document.body.classList.contains("wiz-open") || document.body.classList.contains("intro")){
+    if(WIZ.step>1) wizShow(WIZ.step-1); else { chiudiIntro(false); render(); }
+    return true;
+  }
+  if(document.body.classList.contains("andamenti-aperta")){ chiudiAndamenti(); return true; }
+  if(document.body.classList.contains("vederci-aperta")){ chiudiVederci(); return true; }
+  if(sceltaSchemaAperta){ sceltaSchemaAperta=false; demoEsempioSubflow="home"; render(); return true; }
+  if(demoEsempioVisibile() && demoEsempioSubflow!=="home"){ demoEsempioSubflow = demoEsempioSubflow==="posizione" ? "schema" : "home"; renderDemoEsempio(); return true; }
+  if(document.body.classList.contains("tab-opzioni")){ chiudiOpzioniPagina(); return true; }
+  if(document.body.classList.contains("tab-turni")){ setTab("oggi"); render(); return true; }
+  return false;
+});
 platform.onNotificationTap(tab=>{
   try{ const t=String(tab||"oggi").replace(/\?.*/,""); setTab({oggi:"oggi",diario:"oggi",turni:"turni"}[t]||"oggi"); render(); }catch(e){}
 });
