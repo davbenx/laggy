@@ -13,6 +13,7 @@ public class MainActivity extends BridgeActivity {
         // di super.onCreate, che avvia il ponte con la pagina web.
         registerPlugin(WidgetPlugin.class);
         registerPlugin(PrintPlugin.class);
+        registerPlugin(ReviewPlugin.class);
         super.onCreate(savedInstanceState);
         // Se Android chiude il motore della pagina (memoria scarsa, crash del
         // WebView), di default l'intera app si chiude di colpo. Qui invece si

@@ -56,6 +56,7 @@ export const ALLOWED = {
   notif_aperta: ["tipo"],           // tocco su una notifica: quale tipo è utile
   adatta: ["esito"],                // proposta di adattare il piano: liberi_applicato, anticipo_rifiutato…
   migrazione: ["fase"],             // dalla vecchia app: export_web | import_app
+  recensione_chiesta: [],          // aperto il riquadro stelle di Play (non dice se è comparso)
   errore: ["dove"]                  // errore JavaScript: solo il file (index, engine…), mai il messaggio
 };
 

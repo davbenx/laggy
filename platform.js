@@ -361,6 +361,15 @@ export async function print(title) {
   return true;
 }
 
+/* ── Recensione su Google Play ──────────────────────────────────────────── */
+// Il riquadro delle stelle di Play dentro l'app (plugin locale NTReview).
+// Google decide se mostrarlo e non dice mai l'esito: niente da aspettarsi.
+export const review = {
+  available: isNative && name === "android" && !!plugin("NTReview"),
+  request() { const R = plugin("NTReview"); return R ? R.request().catch(() => {}) : Promise.resolve(); },
+  url: "https://play.google.com/store/apps/details?id=club.notturnisti.app"
+};
+
 /* ── Barre di sistema ──────────────────────────────────────────────────── */
 // Icone della barra di stato e della barra dei gesti leggibili sul tema
 // dell'app: chiare su fondo scuro, scure su fondo chiaro. Senza, seguivano
@@ -383,6 +392,6 @@ export function onBackButton(cb) {
   });
 }
 
-const NTPlatform = { isNative, name, notify, calendar, widget, onResume, onApriGiorno, onNotificationTap, onBackButton, canShare, share, print, setSystemBars };
+const NTPlatform = { isNative, name, notify, calendar, widget, onResume, onApriGiorno, onNotificationTap, onBackButton, canShare, share, print, review, setSystemBars };
 try { if (typeof window !== "undefined") window.NTPlatform = NTPlatform; } catch (e) {}
 export default NTPlatform;
