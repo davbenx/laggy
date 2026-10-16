@@ -9,6 +9,7 @@ public class MainActivity extends BridgeActivity {
         // Plugin locali dell'app (non pacchetti npm): vanno registrati prima
         // di super.onCreate, che avvia il ponte con la pagina web.
         registerPlugin(WidgetPlugin.class);
+        registerPlugin(PrintPlugin.class);
         super.onCreate(savedInstanceState);
     }
 }

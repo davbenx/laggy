@@ -132,6 +132,11 @@ details summary{cursor:pointer;font-weight:600}
         <div class="rows" id="steps"></div>
       </section>
       <section class="card">
+        <h2>Condivisioni per formato</h2>
+        <p class="sub">Quale modo di condividere si usa davvero (se il PDF resta a zero, si può togliere).</p>
+        <div class="rows" id="share"></div>
+      </section>
+      <section class="card">
         <h2>Funzioni attivate</h2>
         <p class="sub">Tocchi sulla lista "Rendi automatico il tuo piano".</p>
         <div class="rows" id="setup"></div>
@@ -320,6 +325,8 @@ function render(){
   var VOCI={turni:"Turni dei prossimi giorni",notifiche:"Promemoria",calendario:"Calendario del telefono",widget:"Widget"};
   $("#setup").innerHTML=rowsHtml(byProp(rows,"setup_item").map(function(x){ return {k:VOCI[x.k]||x.k, n:x.n}; }));
 
+  var FORMATI={turni_msg:"Messaggio con i turni",liberi_msg:"Messaggio con gli orari liberi",link:"Link al ciclo",qr:"QR del ciclo",pdf_ciclo:"Stampa/PDF del ciclo",pdf_liberi:"Stampa/PDF orari liberi"};
+  $("#share").innerHTML=rowsHtml(byProp(rows,"share_created").map(function(x){ return {k:FORMATI[x.k]||x.k, n:x.n}; }));
   $("#platforms").innerHTML=rowsHtml(byProp(rows,"active_day").map(function(x){ return {k:PLAT[x.k]||x.k, n:x.n}; }));
   $("#patterns").innerHTML=rowsHtml(byProp(rows,"plan_generated"));
   $("#returns").innerHTML=rowsHtml([["return_d1","Dopo 1 giorno"],["return_d7","Dopo 7 giorni"],["return_d30","Dopo 30 giorni"]].map(function(e){ return {k:e[1], n:total(rows,e[0])}; }));
