@@ -2811,6 +2811,16 @@ const store = {
     applica(scelta);
   });
 })();
+// Errori JavaScript, con le statistiche accese: solo DOVE (file), mai il
+// messaggio (potrebbe contenere dati). Una volta al giorno per file.
+(function(){
+  const dove=f=>{ const m=/([a-z]+)\.(?:js|html)/i.exec(String(f||"")); const n=m?m[1].toLowerCase():"inline";
+    return ["index","engine","platform","paid","notifications","migrate","analytics","history","alertness","inline"].includes(n)?n:"altro"; };
+  const segna=d=>{ try{ const k="errVisti", v=store.get(k,{}), oggi=new Date().toISOString().slice(0,10);
+    if(v[d]===oggi) return; v[d]=oggi; store.set(k,v); track("errore",{dove:d}); }catch(e){} };
+  addEventListener("error", e=>segna(dove(e && e.filename)));
+  addEventListener("unhandledrejection", ()=>segna("promessa"));
+})();
 let diary = store.get("diary",{});
 // Quando è stato inserito ogni voto — non il voto stesso, solo il momento.
 // Serve per una cosa sola: sapere se un voto basso è abbastanza recente da
@@ -4968,12 +4978,13 @@ function adattaVisibile(){
   if(document.body && (document.body.classList.contains("wiz-open") || document.body.classList.contains("intro"))) return false;
   return !!suggerimentoAdatta();
 }
+const tipoAdatta=f=> f==="maxAdvance" ? "anticipo" : "liberi";
 function applicaAdatta(f, v, daCard){
+  track("adatta", {esito: tipoAdatta(f)+"_applicato"});
   const prima={freeBed:state.freeBed, freeWake:state.freeWake, maxAdvance:state.maxAdvance};
   if(f==="finestraLibera"){ const [bd,wk]=String(v).split("-"); if(bd) state.freeBed=bd; if(wk) state.freeWake=wk; NT.sincronizzaNeed(); }
   else if(f==="freeWake"){ state.freeWake=v; NT.sincronizzaNeed(); }
   else if(f==="maxAdvance"){ const n=+v; if(isFinite(n)) state.maxAdvance=n; }
-  track("setup_item", {item: f==="maxAdvance" ? "adatta_anticipo" : "adatta_liberi"});
   _adattaFatto={prima, f, v};
   salva(); sincronizzaCampiPiano(); render();
   if(!daCard) toast("Aggiornato: il piano ora parte da qui");
@@ -4981,6 +4992,7 @@ function applicaAdatta(f, v, daCard){
 function annullaAdatta(){
   if(!_adattaFatto) return;
   const {prima, f, v}=_adattaFatto;
+  track("adatta", {esito: tipoAdatta(f)+"_annullato"});
   Object.assign(state, prima); NT.sincronizzaNeed();
   const no=store.get("adattaNo", []); no.push(f+"="+v); store.set("adattaNo", no.slice(-20));
   _adattaFatto=null; salva(); sincronizzaCampiPiano(); render(); toast("Annullato");
@@ -5005,6 +5017,8 @@ function renderAdatta(){
   }
   if(!adattaVisibile() || attivazioneVisibile()){ el.hidden=true; return; }
   el.hidden=false;
+  { const k=chiaveAdatta(sg), visti=store.get("adattaVisti", []);
+    if(!visti.includes(k)){ visti.push(k); store.set("adattaVisti", visti.slice(-20)); track("adatta", {esito: tipoAdatta(sg.action.field)+"_proposto"}); } }
   el.innerHTML='<span class="eyebrow" style="color:var(--ok)">Il piano si adatta a te</span>'+
     '<p style="margin:4px 0 0;font-size:14.5px;line-height:1.45">'+esc(sg.breve)+'</p>'+
     '<p class="hint" style="margin:4px 0 0">Lo dicono le notti che hai annotato. Puoi sempre cambiarlo in Impostazioni.</p>'+
@@ -5013,7 +5027,7 @@ function renderAdatta(){
 }
 document.addEventListener("click", e=>{
   const si=e.target.closest("#adattaSi"); if(si){ haptic(10); applicaAdatta(si.dataset.f, si.dataset.v, true); return; }
-  if(e.target.closest("#adattaNo")){ const sg=suggerimentoAdatta(); if(sg){ const no=store.get("adattaNo", []); no.push(chiaveAdatta(sg)); store.set("adattaNo", no.slice(-20)); } render(); return; }
+  if(e.target.closest("#adattaNo")){ const sg=suggerimentoAdatta(); if(sg){ track("adatta", {esito: tipoAdatta(sg.action.field)+"_rifiutato"}); const no=store.get("adattaNo", []); no.push(chiaveAdatta(sg)); store.set("adattaNo", no.slice(-20)); } render(); return; }
   if(e.target.closest("#adattaAnnulla")){ annullaAdatta(); return; }
   if(e.target.closest("#adattaOk")){ _adattaFatto=null; render(); }
 });
@@ -8794,14 +8808,27 @@ platform.onBackButton(()=>{
   if(document.body.classList.contains("tab-turni")){ setTab("oggi"); render(); return true; }
   return false;
 });
-platform.onNotificationTap(tab=>{
+platform.onNotificationTap((tab, kind)=>{
+  if(kind) track("notif_aperta", {tipo:String(kind)});
   try{ const t=String(tab||"oggi").replace(/\?.*/,"");
     if(t==="domani"){ setTab("oggi"); render(); setTimeout(()=>apriQuickShift(day(giornoVero(),1)), 300); return; }
     setTab({oggi:"oggi",diario:"oggi",turni:"turni"}[t]||"oggi"); render(); }catch(e){}
 });
 platform.onResume(leggiCanaliSpenti);
 // Prima attivazione dopo il load (se il permesso è già stato concesso)
-addEventListener("load", ()=>{ setTimeout(ntNotifiche, 1500); aggiornaPermNotif(); setTimeout(leggiCanaliSpenti, 2500); });
+addEventListener("load", ()=>{ setTimeout(ntNotifiche, 1500); aggiornaPermNotif(); setTimeout(leggiCanaliSpenti, 2500); setTimeout(contaFunzioniAttive, 5000); });
+// Una volta al giorno, con le statistiche accese: quali funzioni sono accese
+// davvero (non solo toccate). "a_n1c0w1": piattaforma, promemoria, calendario,
+// widget. Solo booleani, nessun dato dei turni.
+function contaFunzioniAttive(){
+  try{
+    if(!state.turniConfigurati || store.get("funzioniContate","")===isoOggi()) return;
+    store.set("funzioniContate", isoOggi());
+    const pl = platform.isNative ? (platform.name==="ios"?"i":"a") : (window.matchMedia("(display-mode: standalone)").matches?"p":"w");
+    const cal = platform.calendar.available ? platform.calendar.attivo() : !!(window.NTPaid && window.NTPaid.paid());
+    track("funzioni_attive", {mix: pl+"_n"+(promemoriaAttivi()?1:0)+"c"+(cal?1:0)+"w"+(platform.widget.presenti()>0?1:0)});
+  }catch(e){}
+}
 
 // Richiesta permesso notifiche: non immediata, non aggressiva.
 // Si mostra come bottone in Opzioni ("Promemoria"), mai come prompt automatico.

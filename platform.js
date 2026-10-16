@@ -328,7 +328,8 @@ export function onResume(cb) {
 export function onNotificationTap(cb) {
   const LN = plugin("LocalNotifications");
   if (LN) LN.addListener("localNotificationActionPerformed", ev => {
-    try { cb((ev && ev.notification && ev.notification.extra && ev.notification.extra.tab) || "oggi"); } catch (e) {}
+    const x = (ev && ev.notification && ev.notification.extra) || {};
+    try { cb(x.tab || "oggi", x.kind || ""); } catch (e) {}
   });
 }
 

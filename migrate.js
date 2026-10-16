@@ -93,6 +93,7 @@
       v.querySelector("[data-x]").onclick = function () { v.remove(); };
       return;
     }
+    try { window.NTAnalytics && window.NTAnalytics.track("migrazione", { fase: "export_web" }); } catch (e) {}
     encode(dati).then(function (payload) {
       var d = dialog('<b style="font-size:17px">Porta i tuoi dati nell\'app</b>' +
         '<p style="margin:8px 0 0;opacity:.8">Turni, diario e impostazioni di questo browser (' + n + ' voci) passano all\'app Notturnisti direttamente sul telefono, senza server.</p>' +
@@ -117,6 +118,7 @@
         var sub = {};
         chiavi.forEach(function (k) { sub[k] = dati[k]; });
         sub[DISMISS] = "true";
+        try { window.NTAnalytics && window.NTAnalytics.track("migrazione", { fase: "import_app" }); } catch (e) {}
         try { sessionStorage.setItem("nt-import", JSON.stringify(sub)); }
         catch (e) { alert("Spazio insufficiente: dati non importati."); return; }
         location.reload();

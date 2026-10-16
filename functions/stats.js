@@ -132,6 +132,27 @@ details summary{cursor:pointer;font-weight:600}
         <div class="rows" id="steps"></div>
       </section>
       <section class="card">
+        <h2>Funzioni accese davvero</h2>
+        <p class="sub">Una volta al giorno per dispositivo attivo: quota di chi ha promemoria, calendario e widget accesi (non solo toccati).</p>
+        <div class="rows" id="funzioni"></div>
+      </section>
+      <section class="card">
+        <h2>Notifiche aperte</h2>
+        <p class="sub">Tocchi sulle notifiche per tipo: le più aperte sono quelle utili.</p>
+        <div class="rows" id="notifAperte"></div>
+      </section>
+      <section class="card">
+        <h2>Il piano si adatta</h2>
+        <p class="sub">Proposte di adattare orari dei giorni liberi e anticipo della sveglia: quante accettate, annullate, rifiutate.</p>
+        <div class="rows" id="adatta"></div>
+      </section>
+      <section class="card">
+        <h2>Dalla vecchia app e stabilità</h2>
+        <p class="sub">Passaggio dei dati dalla vecchia app (sito → app) ed errori JavaScript per file (una volta al giorno per dispositivo).</p>
+        <div class="rows" id="migrazione"></div>
+        <div class="rows" id="errori" style="margin-top:10px"></div>
+      </section>
+      <section class="card">
         <h2>Promemoria</h2>
         <p class="sub">Che scelta fanno all'accensione, e quali tipi spengono dalle impostazioni del telefono (canali). Se un tipo viene spento spesso, è da rivedere.</p>
         <div class="rows" id="notifPreset"></div>
@@ -333,6 +354,20 @@ function render(){
 
   var FORMATI={turni_msg:"Messaggio con i turni",liberi_msg:"Messaggio con gli orari liberi",link:"Link al ciclo",qr:"QR del ciclo",pdf_ciclo:"Stampa/PDF del ciclo",pdf_liberi:"Stampa/PDF orari liberi"};
   $("#share").innerHTML=rowsHtml(byProp(rows,"share_created").map(function(x){ return {k:FORMATI[x.k]||x.k, n:x.n}; }));
+  // funzioni_attive: "a_n1c0w1" → quote per funzione, per piattaforma
+  var PIATT={a:"Android",w:"Web",p:"PWA",i:"iOS"}, f={};
+  rows.forEach(function(r){ if(r.event!=="funzioni_attive"||!r.prop) return; var m=/=(\w)_n(\d)c(\d)w(\d)$/.exec(r.prop); if(!m) return;
+    var k=m[1]; f[k]=f[k]||{tot:0,n:0,c:0,w:0}; f[k].tot+=r.n; if(m[2]==="1") f[k].n+=r.n; if(m[3]==="1") f[k].c+=r.n; if(m[4]==="1") f[k].w+=r.n; });
+  var fi=[]; Object.keys(f).forEach(function(k){ var x=f[k], pc=function(v){ return x.tot? Math.round(100*v/x.tot)+"%" : "—"; };
+    fi.push({k:(PIATT[k]||k)+": promemoria "+pc(x.n)+" · calendario "+pc(x.c)+(k==="a"?" · widget "+pc(x.w):""), n:x.tot}); });
+  $("#funzioni").innerHTML=rowsHtml(fi);
+  var TIPON={bedtime:"Preparati a dormire",wake:"Ora di alzarti",nap:"Pisolino",coffee:"Ultimo caffè",ret:"Rientro",prep:"Preparati per il turno",cambio:"Cambio turno",domani:"Che turno fai domani?",luce:"Luce",settimana:"La tua settimana",tip:"Il piano si adatta"};
+  $("#notifAperte").innerHTML=rowsHtml(byProp(rows,"notif_aperta").map(function(x){ return {k:TIPON[x.k]||x.k, n:x.n}; }));
+  var ESI={liberi_proposto:"Giorni liberi: proposte",liberi_applicato:"Giorni liberi: applicate",liberi_annullato:"Giorni liberi: annullate",liberi_rifiutato:"Giorni liberi: «lascia così»",
+    anticipo_proposto:"Anticipo: proposte",anticipo_applicato:"Anticipo: applicate",anticipo_annullato:"Anticipo: annullate",anticipo_rifiutato:"Anticipo: «lascia così»"};
+  $("#adatta").innerHTML=rowsHtml(byProp(rows,"adatta").map(function(x){ return {k:ESI[x.k]||x.k, n:x.n}; }));
+  $("#migrazione").innerHTML=rowsHtml(byProp(rows,"migrazione").map(function(x){ return {k:x.k==="export_web"?"Avviate dal sito":x.k==="import_app"?"Arrivate nell'app":x.k, n:x.n}; }));
+  $("#errori").innerHTML=rowsHtml(byProp(rows,"errore").map(function(x){ return {k:"Errore in "+x.k, n:x.n}; }));
   var PRESET={essenziali:"Scelta: essenziali",tutte:"Scelta: tutti",mie:"Scelta: personalizzata"};
   $("#notifPreset").innerHTML=rowsHtml(byProp(rows,"notif_tipi").map(function(x){ return {k:PRESET[x.k]||x.k, n:x.n}; }));
   var CAN={turni:"Spento: cambi di turno",sicurezza:"Spento: rientro dopo la notte",sonno:"Spento: sonno",caffe:"Spento: ultimo caffè",pisolini:"Spento: pisolini",luce:"Spento: luce",sveglie:"Spento: ora di alzarti",suggerimenti:"Spento: suggerimenti"};
