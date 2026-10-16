@@ -54,4 +54,127 @@
         android:ellipsize="end"
         android:textColor="#8CA4C0"
         android:textSize="13sp" />
+    <!-- Settimana: compare solo se il widget è alto almeno 3 righe
+         (NotturnistiWidget.mostraSettimana). Un tocco su un giorno apre
+         l'app su quel giorno. -->
+    <LinearLayout
+        android:id="@+id/w_settimana"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal"
+        android:visibility="gone">
+        <LinearLayout
+            android:id="@+id/w_g0"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+            <TextView android:id="@+id/w_g0_d" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textColor="#A8B0B8" android:textSize="10sp" android:maxLines="1" />
+            <TextView android:id="@+id/w_g0_c" android:layout_width="match_parent" android:layout_height="26dp"
+                android:layout_marginTop="2dp" android:gravity="center" android:textColor="#E6E8EB" android:textSize="13sp"
+                android:textStyle="bold" android:maxLines="1" android:background="@drawable/widget_cella_riposo" />
+            <TextView android:id="@+id/w_g0_s" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="2dp" android:textColor="#8CA4C0" android:textSize="10sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/w_g1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+            <TextView android:id="@+id/w_g1_d" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textColor="#A8B0B8" android:textSize="10sp" android:maxLines="1" />
+            <TextView android:id="@+id/w_g1_c" android:layout_width="match_parent" android:layout_height="26dp"
+                android:layout_marginTop="2dp" android:gravity="center" android:textColor="#E6E8EB" android:textSize="13sp"
+                android:textStyle="bold" android:maxLines="1" android:background="@drawable/widget_cella_riposo" />
+            <TextView android:id="@+id/w_g1_s" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="2dp" android:textColor="#8CA4C0" android:textSize="10sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/w_g2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+            <TextView android:id="@+id/w_g2_d" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textColor="#A8B0B8" android:textSize="10sp" android:maxLines="1" />
+            <TextView android:id="@+id/w_g2_c" android:layout_width="match_parent" android:layout_height="26dp"
+                android:layout_marginTop="2dp" android:gravity="center" android:textColor="#E6E8EB" android:textSize="13sp"
+                android:textStyle="bold" android:maxLines="1" android:background="@drawable/widget_cella_riposo" />
+            <TextView android:id="@+id/w_g2_s" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="2dp" android:textColor="#8CA4C0" android:textSize="10sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/w_g3"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+            <TextView android:id="@+id/w_g3_d" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textColor="#A8B0B8" android:textSize="10sp" android:maxLines="1" />
+            <TextView android:id="@+id/w_g3_c" android:layout_width="match_parent" android:layout_height="26dp"
+                android:layout_marginTop="2dp" android:gravity="center" android:textColor="#E6E8EB" android:textSize="13sp"
+                android:textStyle="bold" android:maxLines="1" android:background="@drawable/widget_cella_riposo" />
+            <TextView android:id="@+id/w_g3_s" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="2dp" android:textColor="#8CA4C0" android:textSize="10sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/w_g4"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+            <TextView android:id="@+id/w_g4_d" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textColor="#A8B0B8" android:textSize="10sp" android:maxLines="1" />
+            <TextView android:id="@+id/w_g4_c" android:layout_width="match_parent" android:layout_height="26dp"
+                android:layout_marginTop="2dp" android:gravity="center" android:textColor="#E6E8EB" android:textSize="13sp"
+                android:textStyle="bold" android:maxLines="1" android:background="@drawable/widget_cella_riposo" />
+            <TextView android:id="@+id/w_g4_s" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="2dp" android:textColor="#8CA4C0" android:textSize="10sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/w_g5"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+            <TextView android:id="@+id/w_g5_d" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textColor="#A8B0B8" android:textSize="10sp" android:maxLines="1" />
+            <TextView android:id="@+id/w_g5_c" android:layout_width="match_parent" android:layout_height="26dp"
+                android:layout_marginTop="2dp" android:gravity="center" android:textColor="#E6E8EB" android:textSize="13sp"
+                android:textStyle="bold" android:maxLines="1" android:background="@drawable/widget_cella_riposo" />
+            <TextView android:id="@+id/w_g5_s" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="2dp" android:textColor="#8CA4C0" android:textSize="10sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/w_g6"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="0dp"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+            <TextView android:id="@+id/w_g6_d" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textColor="#A8B0B8" android:textSize="10sp" android:maxLines="1" />
+            <TextView android:id="@+id/w_g6_c" android:layout_width="match_parent" android:layout_height="26dp"
+                android:layout_marginTop="2dp" android:gravity="center" android:textColor="#E6E8EB" android:textSize="13sp"
+                android:textStyle="bold" android:maxLines="1" android:background="@drawable/widget_cella_riposo" />
+            <TextView android:id="@+id/w_g6_s" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="2dp" android:textColor="#8CA4C0" android:textSize="10sp" android:maxLines="1" />
+        </LinearLayout>
+    </LinearLayout>
 </LinearLayout>

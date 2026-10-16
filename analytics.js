@@ -70,7 +70,9 @@
     active_day: ["platform"],
 
     // Lista di attivazione: quale voce si tocca (turni, notifiche, calendario, widget).
-    setup_item: ["item"]
+    setup_item: ["item"],
+    notif_tipi: ["preset"],
+    notif_canale_off: ["canale"]
   };
 
   var LS_CONSENT = "nt:analytics-consent";          // true | false | assente = mai chiesto

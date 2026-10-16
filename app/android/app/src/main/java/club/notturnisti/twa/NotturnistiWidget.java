@@ -7,6 +7,9 @@ import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
+import android.view.View;
 import android.widget.RemoteViews;
 import java.util.Calendar;
 import java.util.Locale;
@@ -30,6 +33,25 @@ public class NotturnistiWidget extends AppWidgetProvider {
     public void onUpdate(Context ctx, AppWidgetManager mgr, int[] ids) {
         disegna(ctx, mgr, ids);
     }
+
+    // Ridimensionato dall'utente: la settimana compare o sparisce.
+    @Override
+    public void onAppWidgetOptionsChanged(Context ctx, AppWidgetManager mgr, int id, Bundle opzioni) {
+        disegna(ctx, mgr, new int[]{ id });
+    }
+
+    // La settimana serve spazio: almeno 3 righe (circa 160 dp di altezza).
+    static boolean mostraSettimana(AppWidgetManager mgr, int id) {
+        Bundle o = mgr.getAppWidgetOptions(id);
+        int h = o == null ? 0 : Math.max(o.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT), o.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT));
+        return h >= 160;
+    }
+
+    static final int[][] CELLE = {
+        { R.id.w_g0, R.id.w_g0_d, R.id.w_g0_c, R.id.w_g0_s }, { R.id.w_g1, R.id.w_g1_d, R.id.w_g1_c, R.id.w_g1_s },
+        { R.id.w_g2, R.id.w_g2_d, R.id.w_g2_c, R.id.w_g2_s }, { R.id.w_g3, R.id.w_g3_d, R.id.w_g3_c, R.id.w_g3_s },
+        { R.id.w_g4, R.id.w_g4_d, R.id.w_g4_c, R.id.w_g4_s }, { R.id.w_g5, R.id.w_g5_d, R.id.w_g5_c, R.id.w_g5_s },
+        { R.id.w_g6, R.id.w_g6_d, R.id.w_g6_c, R.id.w_g6_s } };
 
     @Override
     public void onReceive(Context ctx, Intent intent) {
@@ -61,10 +83,13 @@ public class NotturnistiWidget extends AppWidgetProvider {
         String sotto = "per vedere il tuo piano qui";
         String p1 = "", p2 = "";
         long prossimoCambio = Long.MAX_VALUE;
+        JSONArray giorni = null;
         try {
             String json = ctx.getSharedPreferences(WidgetPlugin.PREFS, Context.MODE_PRIVATE).getString(WidgetPlugin.KEY, null);
             if (json != null) {
-                JSONArray v = new JSONObject(json).getJSONArray("voci");
+                JSONObject radice = new JSONObject(json);
+                giorni = radice.optJSONArray("giorni");
+                JSONArray v = radice.getJSONArray("voci");
                 JSONObject corrente = null;
                 int prossimi = 0;
                 for (int i = 0; i < v.length(); i++) {
@@ -103,6 +128,25 @@ public class NotturnistiWidget extends AppWidgetProvider {
             rv.setTextViewText(R.id.w_p1, p1);
             rv.setTextViewText(R.id.w_p2, p2);
             rv.setOnClickPendingIntent(R.id.w_root, pi);
+            boolean sett = giorni != null && giorni.length() > 0 && mostraSettimana(mgr, id);
+            rv.setViewVisibility(R.id.w_settimana, sett ? View.VISIBLE : View.GONE);
+            if (sett) {
+                for (int i = 0; i < CELLE.length; i++) {
+                    JSONObject g = giorni.optJSONObject(i);
+                    if (g == null) { rv.setViewVisibility(CELLE[i][0], View.INVISIBLE); continue; }
+                    rv.setViewVisibility(CELLE[i][0], View.VISIBLE);
+                    rv.setTextViewText(CELLE[i][1], g.optString("g"));
+                    rv.setTextViewText(CELLE[i][2], g.optString("c"));
+                    rv.setTextViewText(CELLE[i][3], g.optString("s"));
+                    String tipo = g.optString("t");
+                    rv.setInt(CELLE[i][2], "setBackgroundResource", "notte".equals(tipo) ? R.drawable.widget_cella_notte
+                        : "lavoro".equals(tipo) ? R.drawable.widget_cella_lavoro : R.drawable.widget_cella_riposo);
+                    // Un tocco sul giorno apre l'app su quel giorno (notturnisti://giorno/AAAA-MM-GG).
+                    Intent gi = new Intent(Intent.ACTION_VIEW, Uri.parse("notturnisti://giorno/" + g.optString("d")), ctx, MainActivity.class);
+                    gi.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    rv.setOnClickPendingIntent(CELLE[i][0], PendingIntent.getActivity(ctx, 100 + i, gi, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT));
+                }
+            }
             mgr.updateAppWidget(id, rv);
         }
 

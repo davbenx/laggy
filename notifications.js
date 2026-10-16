@@ -13,52 +13,95 @@ const localMidnight = d => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 const at = (mid, mins) => new Date(mid.getTime() + mins * MIN);
 const hhmm = d => String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
 
+// Catalogo dei tipi di notifica: unica fonte per il motore (qui), per gli
+// interruttori in Impostazioni e per i canali Android (platform.js). Ogni tipo
+// ha un suo canale, così si può spegnere anche dalle impostazioni del telefono.
+// "essenziale" = acceso nella scelta "Essenziali" (2–3 al giorno).
+export const TIPI = [
+  { k: "cambio",   nome: "Domani cambi turno",       desc: "Il giorno prima di un cambio: a che ora andare a letto e come prepararti", essenziale: true,  canale: "turni" },
+  { k: "ret",      nome: "Rientro dopo la notte",    desc: "Alla fine delle notti: l'ora più rischiosa per guidare",                essenziale: true,  canale: "sicurezza" },
+  { k: "bedtime",  nome: "Preparati a dormire",      desc: "Mezz'ora prima del sonno pianificato",                                   essenziale: true,  canale: "sonno" },
+  { k: "domani",   nome: "Che turno fai domani?",    desc: "Solo se domani non è segnato: senza turno il piano non c'è",             essenziale: true,  canale: "turni" },
+  { k: "coffee",   nome: "Ultimo caffè",             desc: "L'ora oltre la quale il caffè ti disturba il sonno",                     essenziale: false, canale: "caffe" },
+  { k: "nap",      nome: "Pisolino",                 desc: "Solo nei giorni in cui il piano lo prevede",                             essenziale: false, canale: "pisolini" },
+  { k: "prep",     nome: "Preparati per il turno",   desc: "Un'ora prima dell'inizio del turno",                                     essenziale: false, canale: "turni" },
+  { k: "luce",     nome: "Luce del mattino",         desc: "Quando prendere luce per restare in fase",                               essenziale: false, canale: "luce" },
+  { k: "wake",     nome: "Ora di alzarti",           desc: "Fine del sonno pianificato. Non è una sveglia: per quella usa la sveglia del telefono", essenziale: false, canale: "sveglie" },
+  { k: "settimana",nome: "La tua settimana",         desc: "La domenica sera, i turni dei prossimi 7 giorni",                        essenziale: false, canale: "suggerimenti" }
+];
+export const TIPI_ESSENZIALI = TIPI.filter(t => t.essenziale).map(t => t.k);
+export const TIPI_TUTTI = TIPI.map(t => t.k);
+
 // tipi -> codice id. id = giorno*100 + tipo*10 + progressivo: stabile per
 // giorno e tipo, e unico anche con più pisolini nello stesso giorno (prima
 // giorno*10+tipo: due pisolini avevano lo stesso id, e su Android il secondo
 // cancellava il primo).
-const KIND = { bedtime: 1, wake: 2, nap: 3, coffee: 4, ret: 5, prep: 6 };
+const KIND = { bedtime: 1, wake: 2, nap: 3, coffee: 4, ret: 5, prep: 6, cambio: 7, domani: 8, luce: 9, settimana: 0 };
+// Priorità quando un giorno ne avrebbe troppe (si tengono le prime).
+const PRIO = ["cambio", "ret", "bedtime", "domani", "nap", "coffee", "prep", "luce", "wake", "settimana"];
+const MAX_AL_GIORNO = 4, UNISCI_ENTRO = 20 * MIN;
+const GIORNI = ["dom", "lun", "mar", "mer", "gio", "ven", "sab"];
+const durTxt = m => { m = Math.round(Math.abs(m)); const h = Math.floor(m / 60), r = m % 60; return h ? h + (r ? "h" + String(r).padStart(2, "0") : " or" + (h === 1 ? "a" : "e")) : r + " min"; };
 
 export function buildSchedule(config, opts = {}) {
   const {
     days = 14,                 // iOS tiene max 64 notifiche in coda: finestra corta e si ri-arma
     bedtimeLead = 30,          // minuti di preavviso "preparati a dormire"
-    prepLead = 0,              // minuti prima del turno (0 = niente promemoria pre-turno)
-    types = ["bedtime", "wake", "nap", "coffee", "ret"]
+    prepLead = 60,             // minuti prima del turno (solo se il tipo "prep" è acceso)
+    types = TIPI_ESSENZIALI
   } = opts;
 
   const e = createEngine(config);
   const f0 = e.state.focus;
   const now = Date.now();
   const out = [];
+  const sonni = [];             // intervalli di sonno pianificato: lì non si disturba
   const want = k => types.includes(k);
   const seq = {};
-  const push = (base, mins, kind, title, body) => {
+  const push = (base, mins, kind, title, body, extra) => {
     const when = at(localMidnight(base), mins);
     const dayIdx = Math.round((localMidnight(base) - localMidnight(f0)) / (1440 * MIN));
     const k = dayIdx + ":" + kind, n = seq[k] = (seq[k] || 0) + 1;   // contato anche se nel passato: id stabili
     if (when.getTime() <= now) return;            // solo futuro
-    out.push({ id: dayIdx * 100 + KIND[kind] * 10 + (n - 1), kind, title, body, at: when });
+    out.push({ id: dayIdx * 100 + KIND[kind] * 10 + (n - 1), kind, title, body, at: when, extra });
   };
+  const fb = /^(\d\d):(\d\d)$/.exec(String(e.state.freeBed || "23:30"));
+  let lettoSolito = fb ? (+fb[1]) * 60 + (+fb[2]) : 1410; if (lettoSolito < 720) lettoSolito += 1440;
+  let domaniContati = 0;
+  // Sonno della sera prima (stessa scala: minuti dalla mezzanotte del suo
+  // giorno), per riconoscere un CAMBIO e non ripetere l'avviso ogni sera di
+  // una settimana di mattine.
+  let onsetIeri = null;
+  { const ieri = new Date(f0); ieri.setDate(ieri.getDate() - 1); e.state.focus = ieri;
+    if (e.codeAt(0) !== "?") { try { onsetIeri = e.plan().s.onset; } catch (_) {} } e.state.focus = f0; }
 
   for (let o = 0; o < days; o++) {
     const base = new Date(f0); base.setDate(base.getDate() + o);
     e.state.focus = base;
-    if (e.codeAt(0) === "?") continue;
-    let P; try { P = e.plan(); } catch (_) { continue; }
+    const codice = e.codeAt(0), codiceDomani = e.codeAt(1);
+    // Turni variabili: l'ultimo giorno segnato, la sera, chiede il successivo.
+    if (want("domani") && codice !== "?" && codiceDomani === "?" && domaniContati < 1) {
+      domaniContati++;
+      push(base, 19 * 60, "domani", "Che turno fai domani?", "Tocca per segnarlo: il piano di domani dipende da questo.", { tab: "domani" });
+    }
+    if (codice === "?") { onsetIeri = null; continue; }
+    let P; try { P = e.plan(); } catch (_) { onsetIeri = null; continue; }
+    const prevOnset = onsetIeri; onsetIeri = P.s.onset;
+    const mid = localMidnight(base);
+    sonni.push([at(mid, P.s.onset).getTime(), at(mid, P.s.onset + P.s.dur).getTime()]);
 
     if (want("bedtime"))
       push(base, P.s.onset - bedtimeLead, "bedtime", "Preparati a dormire",
-        "Sonno pianificato alle " + hhmm(at(localMidnight(base), P.s.onset)) + ".");
+        "Sonno pianificato alle " + hhmm(at(mid, P.s.onset)) + ".");
 
     if (want("wake"))
-      push(base, P.s.onset + P.s.dur, "wake", "Sveglia",
+      push(base, P.s.onset + P.s.dur, "wake", "Ora di alzarti",
         "Fine del sonno pianificato. In piedi per restare in fase.");
 
     if (want("nap") && P.naps)
       P.naps.forEach((n, i) => push(base, n.a, "nap",
         (n.rec || n.debito) ? "Pisolino di recupero" : "Pisolino",
-        "Fino alle " + hhmm(at(localMidnight(base), n.b)) + "."));
+        "Fino alle " + hhmm(at(mid, n.b)) + "."));
 
     if (want("coffee"))
       push(base, P.cut, "coffee", "Ultimo caffè",
@@ -70,11 +113,67 @@ export function buildSchedule(config, opts = {}) {
 
     if (want("prep") && prepLead > 0 && !P.b.rest)
       push(base, P.b.start - prepLead, "prep", "Preparati per il turno",
-        "Inizio alle " + hhmm(at(localMidnight(base), P.b.start)) + ".");
+        "Inizio alle " + hhmm(at(mid, P.b.start)) + ".");
+
+    if (want("luce") && !P.night)
+      push(base, P.wake + 15, "luce", "Luce del mattino",
+        "Esci o apri le tende entro un'ora: aiuta il corpo a restare in fase.");
+
+    // Domani cambi turno: il giorno prima di un cambio che chiede di
+    // spostare il sonno (a letto presto) o di prepararsi a una notte.
+    if (want("cambio")) {
+      let Pn = null; const dom = new Date(base); dom.setDate(dom.getDate() + 1);
+      if (codiceDomani !== "?") { e.state.focus = dom; try { Pn = e.plan(); } catch (_) {} e.state.focus = base; }
+      // a letto almeno 90 minuti prima di ieri sera (o del solito, se ieri non si sa)
+      const scarto = P.s.onset - (prevOnset != null ? prevOnset : lettoSolito);
+      if (Pn && !Pn.b.rest && Pn.night && !P.night) {
+        const pis = (Pn.naps || [])[0];
+        push(base, Math.max(12 * 60, P.s.onset - 240), "cambio", "Domani fai la notte",
+          (Pn.b.name || "Notte") + " dalle " + hhmm(at(localMidnight(dom), Pn.b.start)) + ". Stanotte dormi pure fino a tardi" +
+          (pis ? ", domani pisolino alle " + hhmm(at(localMidnight(dom), pis.a)) : "") + ".");
+      } else if (Pn && !Pn.b.rest && scarto <= -90 && !P.night) {
+        push(base, Math.max(12 * 60, P.s.onset - 240), "cambio", "Stasera a letto presto",
+          "Alle " + hhmm(at(mid, P.s.onset)) + ", " + durTxt(scarto) + " prima di ieri sera: domani " +
+          (Pn.b.name || "turno") + " alle " + hhmm(at(localMidnight(dom), Pn.b.start)) + ".");
+      }
+    }
+
+    // La domenica sera, la settimana che arriva.
+    if (want("settimana") && base.getDay() === 0) {
+      const righe = [];
+      for (let k = 1; k <= 7; k++) {
+        const d = new Date(base); d.setDate(d.getDate() + k); e.state.focus = d;
+        const c = e.codeAt(0); const sh = e.state.shifts && e.state.shifts[c];
+        righe.push(GIORNI[d.getDay()] + " " + (c === "?" ? "?" : sh ? sh.n : "riposo"));
+      }
+      e.state.focus = base;
+      push(base, 19 * 60, "settimana", "La tua settimana", righe.join(" · "));
+    }
   }
   e.state.focus = f0;
-  out.sort((a, b) => a.at - b.at);
-  return out;
+
+  // Regole contro il fastidio: niente durante il sonno pianificato (tranne
+  // "ora di alzarti"); due avvisi entro 20 minuti diventano uno; al massimo
+  // 4 al giorno, tenendo i più importanti.
+  let lista = out.filter(n => n.kind === "wake" || !sonni.some(([a, z]) => n.at.getTime() > a + MIN && n.at.getTime() < z - MIN));
+  lista.sort((a, b) => a.at - b.at);
+  const unite = [];
+  for (const n of lista) {
+    const prec = unite[unite.length - 1];
+    if (prec && n.at - prec.at <= UNISCI_ENTRO && n.kind !== "wake" && prec.kind !== "wake") {
+      const [prima, dopo] = PRIO.indexOf(n.kind) < PRIO.indexOf(prec.kind) ? [n, prec] : [prec, n];
+      unite[unite.length - 1] = { ...prima, at: prec.at, body: prima.body + " · " + dopo.title + ": " + dopo.body };
+    } else unite.push(n);
+  }
+  const perGiorno = {};
+  unite.forEach(n => { const k = localMidnight(n.at).getTime(); (perGiorno[k] = perGiorno[k] || []).push(n); });
+  const finali = [];
+  Object.values(perGiorno).forEach(g => {
+    g.sort((a, b) => PRIO.indexOf(a.kind) - PRIO.indexOf(b.kind));
+    finali.push(...g.slice(0, MAX_AL_GIORNO));
+  });
+  finali.sort((a, b) => a.at - b.at);
+  return finali;
 }
 
 /* ─── Ponte browser senza import incrociati ─────────────────────────────────
@@ -82,7 +181,7 @@ export function buildSchedule(config, opts = {}) {
    import dinamico (stesso pattern di NTAlert e NTHistory).                   */
 try {
   if (typeof window !== "undefined") {
-    window.NTNotif = { buildSchedule };
+    window.NTNotif = { buildSchedule, TIPI, TIPI_ESSENZIALI, TIPI_TUTTI };
     // Segnala al core che il modulo è pronto (potrebbe essere arrivato dopo render)
     var _kn = function () { try { window.dispatchEvent(new Event("nt:refresh")); } catch (e) {} };
     if (document.readyState === "loading") window.addEventListener("DOMContentLoaded", _kn);

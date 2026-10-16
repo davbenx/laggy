@@ -60,6 +60,7 @@ const webNotify = {
     return true;
   }
 };
+webNotify.canaliSpenti = async () => [];
 const PROVA = "Le notifiche funzionano: così arriveranno i promemoria del piano.";
 
 // Periodic Background Sync: dove il browser la concede (oggi solo
@@ -119,8 +120,8 @@ const nativeNotify = {
       id: n.id, title: n.title, body: n.body,
       schedule: { at: new Date(n.at), allowWhileIdle: true },
       isExactNotification: n.kind === "wake" && exactOk,
-      channelId: n.kind === "wake" ? "sveglie" : "promemoria",
-      extra: { kind: n.kind, tab: n.kind === "wake" ? "diario" : "oggi" }
+      channelId: CANALE_DI[n.kind] || "promemoria",
+      extra: { kind: n.kind, tab: (n.extra && n.extra.tab) || (n.kind === "wake" ? "diario" : "oggi") }
     }));
     if (name === "ios" && list.length) {
       list = list.slice(0, IOS_MAX);
@@ -133,6 +134,12 @@ const nativeNotify = {
     if (list.length) await LN.schedule({ notifications: list });
     return true;
   },
+  // Canali che l'utente ha spento dalle impostazioni del telefono.
+  async canaliSpenti() {
+    const LN = plugin("LocalNotifications"); if (!LN || name !== "android") return [];
+    try { const r = await LN.listChannels(); return (r.channels || []).filter(c => c.importance === 0).map(c => c.id); }
+    catch (e) { return []; }
+  },
   async prova() {
     const LN = plugin("LocalNotifications"); if (!LN) return false;
     if ((await this.permission()) !== "granted") return false;
@@ -143,13 +150,26 @@ const nativeNotify = {
   }
 };
 
+// Un canale per tipo: ognuno si spegne anche dalle impostazioni del telefono
+// (Impostazioni › App › Notturnisti › Notifiche), senza toccare gli altri.
+// Stessa tabella dei tipi di notifications.js (campo "canale").
+const CANALI = [
+  { id: "turni",        name: "Cambi di turno",            importance: 4 },
+  { id: "sicurezza",    name: "Rientro dopo la notte",     importance: 4 },
+  { id: "sonno",        name: "Sonno",                     importance: 3 },
+  { id: "caffe",        name: "Ultimo caffè",              importance: 3 },
+  { id: "pisolini",     name: "Pisolini",                  importance: 3 },
+  { id: "luce",         name: "Luce",                      importance: 2 },
+  { id: "sveglie",      name: "Ora di alzarti",            importance: 4 },
+  { id: "suggerimenti", name: "Suggerimenti e riepiloghi", importance: 2 },
+  { id: "promemoria",   name: "Prova e altri avvisi",      importance: 3 }
+];
+const CANALE_DI = { cambio: "turni", domani: "turni", prep: "turni", ret: "sicurezza", bedtime: "sonno", coffee: "caffe",
+  nap: "pisolini", luce: "luce", wake: "sveglie", settimana: "suggerimenti", tip: "suggerimenti" };
 let _channels = false;
 async function ensureChannels(LN) {
   if (_channels || name !== "android") return;
-  // Due canali: l'utente regola suono/priorità dalle impostazioni di sistema,
-  // senza una schermata nostra da mantenere.
-  await LN.createChannel({ id: "sveglie", name: "Sveglia", importance: 5, visibility: 1, vibration: true });
-  await LN.createChannel({ id: "promemoria", name: "Promemoria del piano", importance: 3, visibility: 1 });
+  for (const c of CANALI) await LN.createChannel({ ...c, visibility: 1, vibration: c.importance >= 4 });
   _channels = true;
 }
 
@@ -277,9 +297,9 @@ export const calendar = {
 // widget sceglie solo cosa vale adesso. Web: nessun widget possibile, no-op.
 export const widget = {
   available: isNative && !!plugin("NTWidget"),
-  async publish(voci) {
+  async publish(voci, giorni) {
     const W = plugin("NTWidget"); if (!W) return false;
-    try { const r = await W.publish({ json: JSON.stringify({ v: 1, at: Date.now(), voci }) }); widgetSalvaConteggio(r); return true; }
+    try { const r = await W.publish({ json: JSON.stringify({ v: 2, at: Date.now(), voci, giorni: giorni || [] }) }); widgetSalvaConteggio(r); return true; }
     catch (e) { return false; }
   },
   // Quanti widget ci sono (l'ultimo valore noto è anche in localStorage,
@@ -293,6 +313,14 @@ function widgetSalvaConteggio(r) { try { if (r && r.widgets != null) localStorag
 
 /* ── Eventi dell'app nativa ────────────────────────────────────────────── */
 // Sul web non scattano mai: lì bastano visibilitychange e i messaggi del SW.
+// Link interni dell'app (notturnisti://giorno/AAAA-MM-GG dal widget): cb(data).
+// A freddo il link arriva da getLaunchUrl, ad app aperta dall'evento.
+export function onApriGiorno(cb) {
+  const App = plugin("App"); if (!App) return;
+  const gestisci = u => { const m = /^notturnisti:\/\/giorno\/(\d{4}-\d{2}-\d{2})/.exec(String(u || "")); if (m) { try { cb(m[1]); } catch (e) {} } };
+  App.addListener("appUrlOpen", ev => gestisci(ev && ev.url));
+  App.getLaunchUrl().then(r => gestisci(r && r.url)).catch(() => {});
+}
 export function onResume(cb) {
   const App = plugin("App");
   if (App) App.addListener("resume", () => { try { cb(); } catch (e) {} });
@@ -354,6 +382,6 @@ export function onBackButton(cb) {
   });
 }
 
-const NTPlatform = { isNative, name, notify, calendar, widget, onResume, onNotificationTap, onBackButton, canShare, share, print, setSystemBars };
+const NTPlatform = { isNative, name, notify, calendar, widget, onResume, onApriGiorno, onNotificationTap, onBackButton, canShare, share, print, setSystemBars };
 try { if (typeof window !== "undefined") window.NTPlatform = NTPlatform; } catch (e) {}
 export default NTPlatform;

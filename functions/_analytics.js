@@ -50,7 +50,9 @@ export const ALLOWED = {
 
   active_day: ["platform"],
 
-  setup_item: ["item"]
+  setup_item: ["item"],
+  notif_tipi: ["preset"],
+  notif_canale_off: ["canale"]
 };
 
 // Valori ammessi per le proprietà: brevi e a bassa cardinalità. Qualunque altra
