@@ -247,10 +247,17 @@ export const widget = {
   available: isNative && !!plugin("NTWidget"),
   async publish(voci) {
     const W = plugin("NTWidget"); if (!W) return false;
-    try { await W.publish({ json: JSON.stringify({ v: 1, at: Date.now(), voci }) }); return true; }
+    try { const r = await W.publish({ json: JSON.stringify({ v: 1, at: Date.now(), voci }) }); widgetSalvaConteggio(r); return true; }
     catch (e) { return false; }
-  }
+  },
+  // Quanti widget ci sono (l'ultimo valore noto è anche in localStorage,
+  // così la lista di attivazione lo sa subito, senza attendere il nativo).
+  presenti() { try { return +(localStorage.getItem("nt:widgetN") || 0); } catch (e) { return 0; } },
+  async aggiorna() { const W = plugin("NTWidget"); if (!W) return 0; try { widgetSalvaConteggio(await W.count()); } catch (e) {} return this.presenti(); },
+  // Un tocco: finestra di sistema "Aggiungi alla schermata Home" (Android 8+).
+  async aggiungi() { const W = plugin("NTWidget"); if (!W) return false; try { return !!(await W.pin()).supported; } catch (e) { return false; } }
 };
+function widgetSalvaConteggio(r) { try { if (r && r.widgets != null) localStorage.setItem("nt:widgetN", String(r.widgets)); } catch (e) {} }
 
 /* ── Eventi dell'app nativa ────────────────────────────────────────────── */
 // Sul web non scattano mai: lì bastano visibilitychange e i messaggi del SW.

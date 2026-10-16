@@ -128,8 +128,13 @@ details summary{cursor:pointer;font-weight:600}
       </section>
       <section class="card">
         <h2>Onboarding: dove si fermano</h2>
-        <p class="sub">Passi completati e abbandoni ("Salta"), per passo.</p>
+        <p class="sub">Quante volte è stato fatto ogni passo, nell'ordine del flusso.</p>
         <div class="rows" id="steps"></div>
+      </section>
+      <section class="card">
+        <h2>Funzioni attivate</h2>
+        <p class="sub">Tocchi sulla lista "Rendi automatico il tuo piano".</p>
+        <div class="rows" id="setup"></div>
       </section>
       <section class="card">
         <h2>Da dove usano l'app</h2>
@@ -291,7 +296,7 @@ function render(){
 
   columns($("#chActive"), act, "Dispositivi attivi al giorno");
 
-  var funnelEv=[["onboarding_started","Onboarding iniziato"],["plan_generated","Piano generato"],["notification_prompt_shown","Proposta notifiche vista"],["notifications_enabled","Notifiche attivate"],["share_created","Condivisione creata"]];
+  var funnelEv=[["example_started","Prima schermata vista"],["plan_generated","Piano generato"],["onboarding_completed","Onboarding completato"],["notifications_enabled","Notifiche attivate"],["share_created","Condivisione creata"]];
   var fItems=funnelEv.map(function(e){ return {k:e[1], n:total(rows,e[0])}; });
   $("#funnel").innerHTML=rowsHtml(fItems, fItems[0].n||0);
 
@@ -302,12 +307,18 @@ function render(){
     steps[k]=steps[k]||{done:0,skip:0};
     if(r.event==="onboarding_step_completed") steps[k].done+=r.n; else steps[k].skip+=r.n;
   });
-  var sItems=[];
-  Object.keys(steps).sort(function(a,b){return (+a)-(+b);}).forEach(function(k){
-    sItems.push({k:"Passo "+k+" completato", n:steps[k].done});
-    if(steps[k].skip) sItems.push({k:"Passo "+k+" saltato", n:steps[k].skip});
+  var NOMI_PASSI=[["turno_oggi","Turno di oggi scelto"],["orario_ok","Orario confermato così"],["orario_cambiato","Orario corretto"],
+    ["schema_subito","Schema dalla prima schermata"],["scelta_ciclo","Prossimi giorni: a ciclo"],["scelta_fisso","Prossimi giorni: turno fisso"],
+    ["scelta_variabili","Prossimi giorni: variabili"],["schema_catalogo","Schema dal catalogo"],["schema_composto","Ciclo composto"],
+    ["posizione","Posizione nel ciclo"],["orari","Orari dei turni confermati"],["riposi","Giorni di riposo scelti"],["segna","Giorni segnati"]];
+  var sItems=NOMI_PASSI.filter(function(x){ return steps[x[0]]; }).map(function(x){ return {k:x[1], n:steps[x[0]].done}; });
+  Object.keys(steps).filter(function(k){ return /^\d+$/.test(k); }).sort(function(a,b){return (+a)-(+b);}).forEach(function(k){
+    sItems.push({k:"Configurazione completa, passo "+k, n:steps[k].done});
+    if(steps[k].skip) sItems.push({k:"Configurazione completa, saltato al passo "+k, n:steps[k].skip});
   });
   $("#steps").innerHTML=rowsHtml(sItems);
+  var VOCI={turni:"Turni dei prossimi giorni",notifiche:"Promemoria",calendario:"Calendario del telefono",widget:"Widget"};
+  $("#setup").innerHTML=rowsHtml(byProp(rows,"setup_item").map(function(x){ return {k:VOCI[x.k]||x.k, n:x.n}; }));
 
   $("#platforms").innerHTML=rowsHtml(byProp(rows,"active_day").map(function(x){ return {k:PLAT[x.k]||x.k, n:x.n}; }));
   $("#patterns").innerHTML=rowsHtml(byProp(rows,"plan_generated"));
