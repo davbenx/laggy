@@ -6759,7 +6759,7 @@ function ntWidget(){
   if(!state.turniConfigurati){ platform.widget.publish([]); return; }   // niente piano di esempio sul widget
   const {ev}=eventiCalendario(), ora=Date.now();
   const voci=ev.filter(e=>+e.end>ora && +e.start<ora+48*3600e3)
-    .map(e=>({s:+e.start, e:+e.end, t:e.title}))
+    .map(e=>({s:+e.start, e:+e.end, t:e.title, k:e.tipo}))
     .sort((a,b)=>a.s-b.s);
   // La settimana per il widget allargato: sigla del turno, colore per tipo
   // (lavoro di giorno, notte, riposo) e ora in cui andare a letto.
