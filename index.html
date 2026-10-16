@@ -302,6 +302,23 @@ padding:16px 18px;margin:2px 0 var(--gap-sezione);box-shadow:0 4px 20px rgba(45,
 .qh-opt-tx small{display:block;font-size:12px;color:var(--dim);margin-top:2px;line-height:1.3}
 .qh-opt-arrow{color:var(--faint);font-size:16px;font-weight:600}
 .qh-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.qh-ore{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.qh-ore label{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--dim);font-weight:600}
+.qh-ore input,.qh-ore-riga input{font:inherit;font-size:20px;font-weight:700;padding:10px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);text-align:center;min-height:52px}
+.qh-ore-riga{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;align-items:center;margin-top:10px}
+.qh-ore-riga input{font-size:16px;min-height:44px;padding:6px;max-width:110px}
+.qh-ore-riga span{color:var(--dim)}
+.qh-sett{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.qh-gg{font:inherit;font-size:13px;font-weight:700;padding:12px 0;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.qh-gg.on{background:var(--blue-soft);border-color:var(--blue);color:var(--blue-lt)}
+.qh-calgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:6px}
+.qh-cal{font:inherit;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;border-radius:12px;border:1px solid var(--blue);background:var(--bg);color:var(--ink);cursor:pointer;min-height:56px}
+.qh-cal small{color:var(--dim);font-size:11px}
+.qh-cal b{font-size:13px}
+.qh-cal.riposo{border-color:var(--line)}
+.qh-cal.vuoto{border-style:dashed;border-color:var(--line);color:var(--faint)}
+.qh-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.qh-chips .btn{min-height:38px;font-size:13px;padding:6px 14px}
 .qh-pos{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px}
 .qh-pos-btn{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;min-height:58px;justify-content:center;font:inherit;color:var(--ink)}
 .qh-pos-btn small{color:var(--dim);font-size:11.5px}
@@ -4212,91 +4229,165 @@ if($("#benvenutoLink")) $("#benvenutoLink").addEventListener("click", e=>{
 //     agganciare il ciclo al giorno giusto: due tocchi, ciclo corretto.
 //   • finché non c'è risposta, sotto non si vede altro (body.primo-avvio).
 let firstPlanBannerChiuso = !!store.get("firstPlanBannerChiuso", false);
+// ── Primo avvio ─────────────────────────────────────────────────────────────
+// Una domanda alla volta, e ogni risposta dà subito un piano vero:
+//   1. "Che turno fai oggi?" → un tocco sul turno → "a che ora?" (orari già
+//      compilati: se sono giusti è un tocco, se no si correggono lì, non
+//      "dopo" in qualche menu) → piano di oggi.
+//   2. Banner: "E nei prossimi giorni?" con le tre situazioni reali:
+//      • a ciclo      → schema (catalogo unico PRESETS) → "oggi dove sei" →
+//                       orari di tutti i turni dello schema
+//      • sempre questo turno → quali giorni riposi (non per forza sab/dom)
+//      • cambiano ogni volta → griglia dei prossimi 14 giorni da toccare
+//   3. Nessun turno inventato: chi sceglie solo "oggi" ha gli altri giorni
+//      "da impostare", e ogni giorno mancante si imposta con un tocco da Oggi.
 let demoEsempioChiuso = false;
 let demoEsempioTracciato = false;
-let demoEsempioSubflow = "home";
-let sceltaSchemaAperta = false;   // riaperta dal banner del primo piano
-let schemaInScelta = null;        // preset di rotazione in attesa di "oggi sei qui"
+let demoEsempioSubflow = "home";  // home | orario | prossimi | schema | posizione | orari | riposi | segna
+let sceltaSchemaAperta = false;   // flusso riaperto dal banner dopo il primo piano
+let schemaInScelta = null;        // indice in PRESETS in attesa di "oggi dove sei"
+let turnoInScelta = null;         // codice del turno toccato in "Che turno fai oggi?"
+let giorniSegna = 14;             // quanti giorni mostra la griglia "li segno io"
 
-const SCHEMI_ROT = {
-  sanita: { nome:"In quinta (sanità)", pattern:"MPNSR",
-    shifts:{M:{n:"Mattino",s:420,e:840},P:{n:"Pomeriggio",s:840,e:1260},N:{n:"Notte",s:1260,e:1860},S:{rest:true,n:"Smonto"},R:{rest:true,n:"Riposo"}} },
-  "222": { nome:"2 mattine · 2 pomeriggi · 2 notti · 2 riposi", pattern:"MMPPNNRR",
-    shifts:{M:{n:"Mattino",s:360,e:840},P:{n:"Pomeriggio",s:840,e:1320},N:{n:"Notte",s:1320,e:1800},R:{rest:true,n:"Riposo"}} },
-  "12h": { nome:"Dodici ore: giorno · notte · 2 riposi", pattern:"DNRR",
-    shifts:{D:{n:"Giorno 12h",s:420,e:1140},N:{n:"Notte 12h",s:1140,e:1860},R:{rest:true,n:"Riposo"}} }
-};
-const SCHEMI_FISSI = {
-  N:{ nome:"Sempre di notte", pattern:"NNNNNRR", turno:{n:"Notte", s:1320, e:1800} },
-  M:{ nome:"Sempre di mattina", pattern:"MMMMMRR", turno:{n:"Mattino", s:360, e:840} },
-  P:{ nome:"Sempre di pomeriggio", pattern:"PPPPPRR", turno:{n:"Pomeriggio", s:840, e:1320} }
-};
+const ORARI_BASE = { N:{n:"Notte",s:1260,e:1860}, M:{n:"Mattino",s:420,e:840}, P:{n:"Pomeriggio",s:840,e:1260} };
+const GIORNI_SETT = ["Lun","Mar","Mer","Gio","Ven","Sab","Dom"];
+const isoOggi = () => iso(new Date());
+const lunediDi = d => { const x=new Date(d); x.setDate(x.getDate()-((x.getDay()+6)%7)); return x; };
 
 function demoEsempioVisibile(){
   if(document.body && (document.body.classList.contains("wiz-open") || document.body.classList.contains("intro"))) return false;
   return sceltaSchemaAperta || !(state.turniConfigurati || demoEsempioChiuso);
 }
+// Minuti "dalle/alle" → turno. Fine prima dell'inizio = finisce il giorno
+// dopo. Una notte che comincia dopo mezzanotte (es. 00:00–08:00) appartiene
+// alla notte di stasera, come vuole il motore (inizio >= 1440).
+function turnoDaOrari(k, nome, da, a){
+  let s=t(da), e=t(a);
+  if(k==="N" && s<12*60){ s+=1440; e+=1440; }
+  if(e<=s) e+=1440;
+  return {n:nome, s, e};
+}
+const orarioTesto = sh => sh ? hhmm(sh.s)+" → "+hhmm(sh.e) : "";
+
 function renderDemoEsempio(){
   const el=$("#demoEsempio"); if(!el) return;
   const vis = demoEsempioVisibile();
-  // Al primo avvio la domanda è tutta la schermata: niente piano di prova sotto.
+  // Finché si sceglie, si vede solo la scelta: niente piano di prova sotto.
   document.body.classList.toggle("primo-avvio", vis);
   if(!vis){ el.hidden=true; return; }
   el.hidden=false;
   if(!demoEsempioTracciato){ demoEsempioTracciato=true; track("example_started"); }
   el.className = "card qh-card";
-  const tile=(k,ic,nome,ore)=>'<button type="button" class="qh-btn" data-set-var="'+k+'"><span class="qh-ic">'+ic+'</span><b>'+nome+'</b><small>'+ore+'</small></button>';
-  const opt=(attr,ic,nome,sotto)=>'<button type="button" class="qh-opt-btn" '+attr+'><span class="qh-opt-ic">'+ic+'</span><div class="qh-opt-tx"><b>'+nome+'</b>'+(sotto?'<small>'+sotto+'</small>':'')+'</div><span class="qh-opt-arrow">→</span></button>';
+  const sh = state.shifts||{};
+  const tile=(k,ic,nome,ore)=>'<button type="button" class="qh-btn" data-pick="'+k+'"><span class="qh-ic">'+ic+'</span><b>'+nome+'</b><small>'+ore+'</small></button>';
+  const opt=(attr,ic,nome,sotto)=>'<button type="button" class="qh-opt-btn" '+attr+'><span class="qh-opt-ic">'+ic+'</span><div class="qh-opt-tx"><b>'+esc(nome)+'</b>'+(sotto?'<small>'+esc(sotto)+'</small>':'')+'</div><span class="qh-opt-arrow">→</span></button>';
   const indietro=(dest,txt)=>'<button type="button" class="lnk" data-subflow="'+dest+'" style="margin-bottom:10px;font-size:13px">← '+txt+'</button>';
+  const chiudi = (sceltaSchemaAperta && state.turniConfigurati) ? '<button type="button" class="lnk" data-chiudi-schema style="margin-bottom:10px;font-size:13px">← Annulla</button>' : "";
+  const ic = k => k==="N"?ICON.moon : k==="M"?ICON.sun : k==="R"?ICON.sparkles : ICON.dim;
+  const f = demoEsempioSubflow;
 
-  if(demoEsempioSubflow === "home" && !sceltaSchemaAperta){
+  if(f === "home" && !sceltaSchemaAperta){
     el.innerHTML =
       '<h2 class="qh-h">Che turno fai oggi?</h2>'+
       '<p class="qh-sub">Un tocco e hai il piano: quando dormire, l\'ultimo caffè, la luce.</p>'+
       '<div class="qh-grid">'+
-        tile("N",ICON.moon,"Notte","21:00 → 07:00")+
-        tile("M",ICON.sun,"Mattino","07:00 → 14:00")+
-        tile("P",ICON.dim,"Pomeriggio","14:00 → 21:00")+
+        tile("N",ICON.moon,"Notte","di solito "+orarioTesto(sh.N||ORARI_BASE.N))+
+        tile("M",ICON.sun,"Mattino","di solito "+orarioTesto(sh.M||ORARI_BASE.M))+
+        tile("P",ICON.dim,"Pomeriggio","di solito "+orarioTesto(sh.P||ORARI_BASE.P))+
         tile("R",ICON.sparkles,"Riposo","Giorno libero")+
       '</div>'+
-      '<p class="hint" style="margin:-4px 0 12px;text-align:center;font-size:12px">Orari diversi? Li cambi dopo, in un tocco.</p>'+
-      '<button type="button" class="lnk" data-subflow="schema" style="display:block;width:100%;text-align:center;font-size:13.5px;padding:6px 0">I miei turni si ripetono sempre uguali →</button>';
-  } else if(demoEsempioSubflow === "posizione" && schemaInScelta){
-    // "Oggi sei qui": aggancia il ciclo al giorno vero. Con 2 mattine di
-    // fila la sola lettera non basta, serve la posizione.
-    const S=SCHEMI_ROT[schemaInScelta], seq=S.pattern.split("");
-    const conta={};
+      '<p class="hint" style="margin:-4px 0 10px;text-align:center;font-size:12px">L\'orario preciso lo scegli al passo dopo.</p>'+
+      '<button type="button" class="lnk" data-subflow="schema" style="display:block;width:100%;text-align:center;font-size:13.5px;padding:6px 0">Conosco già il mio schema di turni →</button>';
+  } else if(f === "orario" && turnoInScelta){
+    const k=turnoInScelta, cur=sh[k]||ORARI_BASE[k];
+    el.innerHTML =
+      indietro("home","Cambia turno")+
+      '<h2 class="qh-h">'+esc(cur.n)+': a che ora?</h2>'+
+      '<p class="qh-sub">Il piano di sonno dipende da qui: metti l\'orario vero, anche se è diverso dal solito.</p>'+
+      '<div class="qh-ore">'+
+        '<label>Inizio<input type="time" id="qhDa" value="'+hhmm(cur.s)+'"></label>'+
+        '<label>Fine<input type="time" id="qhA" value="'+hhmm(cur.e)+'"></label>'+
+      '</div>'+
+      '<button type="button" class="btn pri" id="qhConfermaOrario" style="width:100%;margin-top:14px;min-height:46px;font-weight:700">Vedi il piano di oggi →</button>';
+  } else if(f === "prossimi"){
+    el.innerHTML =
+      chiudi+
+      '<h2 class="qh-h">E nei prossimi giorni?</h2>'+
+      '<p class="qh-sub">Scegli quello che ti somiglia di più: cambi idea quando vuoi.</p>'+
+      '<div class="qh-flow-options">'+
+        opt('data-subflow="schema"',ICON.cycle,"Si ripetono a ciclo","Es. in quinta, 2·2·2·2, ciclo continuo, 12 ore")+
+        opt('data-subflow="riposi"',ICON.calendar,"Faccio sempre lo stesso turno","Scegli tu in quali giorni riposi")+
+        opt('data-subflow="segna"',ICON.calendar,"Cambiano ogni volta","Me li danno a settimana o a mese: li segno io")+
+      '</div>';
+  } else if(f === "posizione" && schemaInScelta!=null){
+    // "Oggi dove sei": con due mattine di fila la sola lettera non basta.
+    const S=PRESETS[schemaInScelta], seq=S.p.split(""), conta={};
+    const nomeDi=c=>(S.s[c]&&S.s[c].n)||(c==="S"?"Smonto":"Riposo");
     el.innerHTML =
       indietro("schema","Cambia schema")+
       '<h2 class="qh-h">Oggi dove sei nel ciclo?</h2>'+
-      '<p class="qh-sub">'+esc(S.nome)+'. Tocca il giorno di oggi: da qui calcoliamo tutti gli altri.</p>'+
+      '<p class="qh-sub">'+esc(nomePreset(S))+'. Tocca il giorno di oggi: da qui calcoliamo tutti gli altri.</p>'+
       '<div class="qh-pos">'+seq.map((c,i)=>{
-        conta[c]=(conta[c]||0)+1;
-        const tot=seq.filter(x=>x===c).length;
-        const nome=(S.shifts[c]&&S.shifts[c].n)||c;
-        return '<button type="button" class="qh-pos-btn" data-pos="'+i+'"><b>'+esc(nome)+'</b>'+(tot>1?'<small>'+conta[c]+'° giorno</small>':'')+'</button>';
+        conta[c]=(conta[c]||0)+1; const tot=seq.filter(x=>x===c).length;
+        return '<button type="button" class="qh-pos-btn" data-pos="'+i+'"><b>'+esc(nomeDi(c))+'</b>'+(tot>1?'<small>'+conta[c]+'° giorno</small>':'')+'</button>';
       }).join("")+'</div>';
-  } else {
+  } else if(f === "orari"){
+    // Orari di tutti i turni dello schema, già compilati: si conferma con un
+    // tocco o si correggono qui (prima restavano quelli del preset, in silenzio).
+    const keys=Object.keys(sh).filter(k=>sh[k] && !sh[k].rest);
     el.innerHTML =
-      (sceltaSchemaAperta && state.turniConfigurati ? '<button type="button" class="lnk" data-chiudi-schema style="margin-bottom:10px;font-size:13px">← Annulla</button>' : indietro("home","Solo oggi"))+
+      '<h2 class="qh-h">Gli orari dei tuoi turni</h2>'+
+      '<p class="qh-sub">Sono quelli più comuni: correggi quelli che da te sono diversi.</p>'+
+      keys.map(k=>'<div class="qh-ore-riga"><b>'+esc(sh[k].n)+'</b>'+
+        '<input type="time" data-ora-da="'+k+'" value="'+hhmm(sh[k].s)+'" aria-label="Inizio '+esc(sh[k].n)+'">'+
+        '<span>→</span><input type="time" data-ora-a="'+k+'" value="'+hhmm(sh[k].e)+'" aria-label="Fine '+esc(sh[k].n)+'"></div>').join("")+
+      '<button type="button" class="btn pri" id="qhConfermaOrari" style="width:100%;margin-top:14px;min-height:46px;font-weight:700">Fatto, vedi il piano →</button>';
+  } else if(f === "riposi"){
+    // Il turno "fisso" è quello indicato per oggi (anche se l'app è stata
+    // riaperta nel frattempo), altrimenti il primo turno di lavoro definito.
+    const oggiK = state.ecc[isoOggi()];
+    const lav = (turnoInScelta && turnoInScelta!=="R") ? turnoInScelta : (oggiK && oggiK!=="R" && sh[oggiK]) ? oggiK : (Object.keys(sh).find(k=>!sh[k].rest) || "M");
+    el.innerHTML =
+      indietro("prossimi","Indietro")+
+      '<h2 class="qh-h">In quali giorni riposi?</h2>'+
+      '<p class="qh-sub">Gli altri giorni: '+esc((sh[lav]||ORARI_BASE[lav]||{n:lav}).n)+' '+esc(orarioTesto(sh[lav]||ORARI_BASE[lav]))+'.</p>'+
+      '<div class="qh-sett" data-lav="'+esc(lav)+'">'+GIORNI_SETT.map((g,i)=>'<button type="button" class="qh-gg'+(i>=5?' on':'')+'" data-gg="'+i+'" aria-pressed="'+(i>=5)+'">'+g+'</button>').join("")+'</div>'+
+      '<button type="button" class="btn pri" id="qhConfermaRiposi" style="width:100%;margin-top:14px;min-height:46px;font-weight:700">Fatto, vedi il piano →</button>';
+  } else if(f === "segna"){
+    // Turni che cambiano: i prossimi giorni in una griglia, un tocco per
+    // giorno passa da un turno al successivo (… → Riposo → da decidere).
+    const codici=Object.keys(sh).filter(k=>sh[k] && !sh[k].rest).concat(["R","?"]);
+    const base=new Date(); base.setHours(12,0,0,0);
+    let celle="";
+    for(let o=0;o<giorniSegna;o++){
+      const d=day(base,o), k=state.ecc[iso(d)]||"?";
+      const nome = k==="?" ? "—" : k==="R" ? "Riposo" : ((sh[k]&&sh[k].n)||k);
+      celle+='<button type="button" class="qh-cal'+(k==="?"?" vuoto":k==="R"?" riposo":"")+'" data-segna="'+iso(d)+'">'+
+        '<small>'+(o===0?"oggi":d.toLocaleDateString("it-IT",{weekday:"short",day:"numeric"}))+'</small><b>'+esc(nome)+'</b></button>';
+    }
+    el.innerHTML =
+      indietro("prossimi","Indietro")+
+      '<h2 class="qh-h">Segna i prossimi giorni</h2>'+
+      '<p class="qh-sub">Tocca un giorno per cambiare turno ('+codici.filter(c=>c!=="?").map(c=>c==="R"?"Riposo":esc(sh[c].n)).join(" · ")+'). Quelli che non sai ancora lasciali vuoti.</p>'+
+      '<div class="qh-calgrid" data-codici="'+esc(codici.join(""))+'">'+celle+'</div>'+
+      '<div style="display:flex;gap:10px;justify-content:space-between;margin-top:10px;flex-wrap:wrap">'+
+        (giorniSegna<42?'<button type="button" class="lnk" id="qhAltriGiorni" style="font-size:13px">+ altri 14 giorni</button>':'<span></span>')+
+        '<button type="button" class="lnk" id="qhOrariVariabili" style="font-size:13px">Orari dei turni</button>'+
+      '</div>'+
+      '<button type="button" class="btn pri" id="qhConfermaSegna" style="width:100%;margin-top:14px;min-height:46px;font-weight:700">Fatto →</button>';
+  } else {
+    // Catalogo unico: gli stessi schemi della configurazione completa.
+    const gruppi={}; PRESETS.forEach((p,i)=>{ const g=p.sector||"Altri schemi"; (gruppi[g]=gruppi[g]||[]).push(i); });
+    el.innerHTML =
+      (chiudi || indietro(state.turniConfigurati?"prossimi":"home","Indietro"))+
       '<h2 class="qh-h">Qual è il tuo schema?</h2>'+
-      '<p class="hint" style="margin:10px 0 6px;font-weight:700;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase">A rotazione</p>'+
-      '<div class="qh-flow-options">'+
-        opt('data-set-rot="sanita"',ICON.cycle,"In quinta (5 giorni)","Mattino · Pomeriggio · Notte · Smonto · Riposo")+
-        opt('data-set-rot="222"',ICON.cycle,"2 · 2 · 2 · 2 (8 giorni)","2 Mattine · 2 Pomeriggi · 2 Notti · 2 Riposi")+
-        opt('data-set-rot="12h"',ICON.cycle,"Dodici ore (4 giorni)","Giorno · Notte · 2 Riposi")+
-      '</div>'+
-      '<p class="hint" style="margin:14px 0 6px;font-weight:700;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase">Sempre lo stesso turno</p>'+
-      '<div class="qh-flow-options">'+
-        opt('data-set-fisso="N"',ICON.moon,"Sempre di notte","5 notti e 2 riposi a settimana")+
-        opt('data-set-fisso="M"',ICON.sun,"Sempre di mattina","5 mattine e 2 riposi a settimana")+
-        opt('data-set-fisso="P"',ICON.dim,"Sempre di pomeriggio","5 pomeriggi e 2 riposi a settimana")+
-      '</div>'+
-      '<button type="button" class="lnk" id="doCustomRot" style="display:block;width:100%;text-align:center;margin-top:12px;font-size:13px">Il mio schema non c\'è: componilo →</button>';
+      Object.keys(gruppi).map(g=>'<p class="hint" style="margin:12px 0 6px;font-weight:700;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase">'+esc(g)+'</p>'+
+        '<div class="qh-flow-options">'+gruppi[g].map(i=>opt('data-preset-ob="'+i+'"',ICON.cycle,PRESETS[i].title,PRESETS[i].sub)).join("")+'</div>').join("")+
+      '<button type="button" class="lnk" id="doCustomRot" style="display:block;width:100%;text-align:center;margin-top:14px;font-size:13px">Il mio schema non c\'è: componilo →</button>';
   }
 }
 
-// Dopo ogni scelta: stesso epilogo, un solo posto.
+// Epilogo comune a ogni scelta.
 function primoPianoPronto(tipo, msg){
   state.turniConfigurati = true;
   store.set("turniConfigurati", true);
@@ -4312,51 +4403,100 @@ function primoPianoPronto(tipo, msg){
   render();
   try{ window.scrollTo({top:0, behavior:"smooth"}); }catch(e){ window.scrollTo(0,0); }
 }
+function apriFlussoProssimi(sub){
+  sceltaSchemaAperta = true; demoEsempioSubflow = sub || "prossimi";
+  render(); try{ window.scrollTo({top:0, behavior:"smooth"}); }catch(e){}
+}
 
 if($("#demoEsempio")) $("#demoEsempio").addEventListener("click", e=>{
   const subBtn = e.target.closest("[data-subflow]");
   if(subBtn){ demoEsempioSubflow = subBtn.dataset.subflow; renderDemoEsempio(); return; }
   if(e.target.closest("[data-chiudi-schema]")){ sceltaSchemaAperta=false; demoEsempioSubflow="home"; render(); return; }
 
-  // Un turno solo per oggi: niente ciclo inventato per gli altri giorni.
-  const varBtn = e.target.closest("[data-set-var]");
-  if(varBtn){
-    // Ciclo di un solo giorno (oggi), che non si ripete: tutti gli altri
-    // giorni restano "non impostati". Con il ciclo di esempio ancora lì,
-    // i 4 giorni dopo oggi venivano presi da M-P-N-S-R.
-    const k = varBtn.dataset.setVar;
-    state.repeat = false;
-    state.pattern = k;
-    state.anchor = iso(new Date());
-    state.ecc[iso(new Date())] = k;
+  // 1. turno di oggi → orario (riposo: subito il piano)
+  const pick = e.target.closest("[data-pick]");
+  if(pick){
+    const k = pick.dataset.pick;
+    turnoInScelta = k;
+    if(k==="R"){
+      state.repeat=false; state.pattern="R"; state.anchor=isoOggi(); state.ecc[isoOggi()]="R";
+      primoPianoPronto("oggi", "Ecco il tuo piano per la giornata libera");
+    } else { demoEsempioSubflow="orario"; renderDemoEsempio(); }
+    return;
+  }
+  if(e.target.closest("#qhConfermaOrario")){
+    const k=turnoInScelta, base=state.shifts[k]||ORARI_BASE[k];
+    state.shifts[k]=turnoDaOrari(k, base.n, $("#qhDa").value||hhmm(base.s), $("#qhA").value||hhmm(base.e));
+    // Solo oggi: un ciclo di un giorno che non si ripete. Gli altri giorni
+    // restano "da impostare", mai presi da un ciclo di esempio.
+    state.repeat=false; state.pattern=k; state.anchor=isoOggi(); state.ecc[isoOggi()]=k;
     primoPianoPronto("oggi", "Ecco il tuo piano di oggi");
     return;
   }
-  const rotBtn = e.target.closest("[data-set-rot]");
-  if(rotBtn){ schemaInScelta = rotBtn.dataset.setRot; demoEsempioSubflow = "posizione"; renderDemoEsempio(); return; }
-  const posBtn = e.target.closest("[data-pos]");
-  if(posBtn && schemaInScelta){
-    const S = SCHEMI_ROT[schemaInScelta], i = +posBtn.dataset.pos;
-    state.pattern = S.pattern;
-    state.shifts = JSON.parse(JSON.stringify(S.shifts));
-    state.repeat = true;
-    const d = new Date(); d.setDate(d.getDate() - i); state.anchor = iso(d);
-    delete state.ecc[iso(new Date())];   // il ciclo ora sa già cos'è oggi
-    primoPianoPronto("ciclo", "Ciclo impostato: ecco il tuo piano");
+
+  // 2a. schema a ciclo → oggi dove sei → orari
+  const pr = e.target.closest("[data-preset-ob]");
+  if(pr){ schemaInScelta=+pr.dataset.presetOb; demoEsempioSubflow="posizione"; renderDemoEsempio(); return; }
+  const pos = e.target.closest("[data-pos]");
+  if(pos && schemaInScelta!=null){
+    const S=PRESETS[schemaInScelta], i=+pos.dataset.pos;
+    const prima=JSON.parse(JSON.stringify(state.shifts||{}));
+    state.pattern=S.p;
+    state.shifts=JSON.parse(JSON.stringify(S.s));
+    // L'orario appena confermato per oggi vale più di quello del preset.
+    if(turnoInScelta && prima[turnoInScelta] && state.shifts[turnoInScelta] && state.ecc[isoOggi()]===turnoInScelta)
+      state.shifts[turnoInScelta]=Object.assign({}, state.shifts[turnoInScelta], {s:prima[turnoInScelta].s, e:prima[turnoInScelta].e});
+    state.repeat=true;
+    const d=new Date(); d.setDate(d.getDate()-i); state.anchor=iso(d);
+    delete state.ecc[isoOggi()];   // il ciclo ora sa già cos'è oggi
+    demoEsempioSubflow="orari"; renderDemoEsempio();
     return;
   }
-  const fisBtn = e.target.closest("[data-set-fisso]");
-  if(fisBtn){
-    const k = fisBtn.dataset.setFisso, F = SCHEMI_FISSI[k];
-    state.pattern = F.pattern;
-    state.shifts[k] = state.shifts[k] || F.turno;
-    state.repeat = true;
-    // Settimana lavorativa lunedì–venerdì: il ciclo parte dal lunedì.
-    const d = new Date(); d.setDate(d.getDate() - ((d.getDay()+6)%7)); state.anchor = iso(d);
-    delete state.ecc[iso(new Date())];
-    primoPianoPronto("fisso_"+k, "Turno fisso impostato: ecco il tuo piano");
+  if(e.target.closest("#qhConfermaOrari")){
+    document.querySelectorAll("[data-ora-da]").forEach(inp=>{
+      const k=inp.dataset.oraDa, a=document.querySelector('[data-ora-a="'+k+'"]');
+      if(state.shifts[k] && inp.value && a && a.value) state.shifts[k]=turnoDaOrari(k, state.shifts[k].n, inp.value, a.value);
+    });
+    if(state.repeat) primoPianoPronto("ciclo", "Ciclo impostato: ecco il tuo piano");
+    else { demoEsempioSubflow="segna"; renderDemoEsempio(); }
     return;
   }
+
+  // 2b. sempre lo stesso turno → giorni di riposo
+  const gg = e.target.closest("[data-gg]");
+  if(gg){ gg.classList.toggle("on"); gg.setAttribute("aria-pressed", gg.classList.contains("on")); return; }
+  if(e.target.closest("#qhConfermaRiposi")){
+    const box=document.querySelector(".qh-sett"), lav=box.dataset.lav;
+    const riposi=[...box.querySelectorAll(".qh-gg.on")].map(b=>+b.dataset.gg);
+    if(riposi.length===7){ toast("Lascia almeno un giorno di lavoro"); return; }
+    if(!state.shifts[lav]) state.shifts[lav]=JSON.parse(JSON.stringify(ORARI_BASE[lav]||ORARI_BASE.M));
+    state.pattern=GIORNI_SETT.map((_,i)=>riposi.includes(i)?"R":lav).join("");
+    state.repeat=true; state.anchor=iso(lunediDi(new Date()));
+    if(NT.codeAt(Math.round((dnum(new Date())-dnum(state.focus))/86400000))===state.ecc[isoOggi()]) delete state.ecc[isoOggi()];
+    primoPianoPronto("fisso_"+lav, "Turno fisso impostato: ecco il tuo piano");
+    return;
+  }
+
+  // 2c. turni che cambiano → griglia dei prossimi giorni
+  const cel = e.target.closest("[data-segna]");
+  if(cel){
+    const codici=(cel.closest(".qh-calgrid").dataset.codici||"R?").split("");
+    const d=cel.dataset.segna, cur=state.ecc[d]||"?";
+    const nk=codici[(codici.indexOf(cur)+1)%codici.length];
+    if(nk==="?") delete state.ecc[d]; else state.ecc[d]=nk;
+    renderDemoEsempio();
+    return;
+  }
+  if(e.target.closest("#qhAltriGiorni")){ giorniSegna=Math.min(42, giorniSegna+14); renderDemoEsempio(); return; }
+  if(e.target.closest("#qhOrariVariabili")){ state.repeat=false; demoEsempioSubflow="orari"; renderDemoEsempio(); return; }
+  if(e.target.closest("#qhConfermaSegna")){
+    state.repeat=false;
+    // Il "ciclo" di chi ha turni variabili è vuoto: contano solo i giorni segnati.
+    state.pattern="R"; state.anchor="2000-01-01";
+    primoPianoPronto("variabile", "Turni segnati: ecco il tuo piano");
+    return;
+  }
+
   if(e.target.closest("#doCustomRot")){
     demoEsempioChiuso = true; sceltaSchemaAperta = false;
     track("example_completed");
@@ -4372,56 +4512,43 @@ function firstPlanBannerVisibile(){
   const mostraBenvenuto = primaVoltaDaLink && !benvenutoLinkChiuso;
   return !!(state.turniConfigurati && !firstPlanBannerChiuso && !mostraBenvenuto && !sceltaSchemaAperta);
 }
-// Subito dopo il primo piano, il passo che vale di più: chi ha scelto solo
-// "oggi" scopre che può impostare il ciclo una volta per tutte (altrimenti
-// domani si ritrova "turno non impostato"); chi ha già un ciclo, che gli
-// orari standard si adattano ai suoi.
+// Subito dopo il primo piano, il passo che vale di più: chi ha indicato solo
+// oggi dice com'è il resto (ciclo, fisso, variabili); chi ha già un ciclo
+// può adattare sonno e viaggio.
 function renderFirstPlanBanner(){
   const el=$("#firstPlanBanner"); if(!el) return;
   if(!firstPlanBannerVisibile()){ el.hidden=true; return; }
   el.hidden=false;
   el.className = "card";
   el.style.cssText = "background:var(--blue-soft);border:1px solid var(--blue-lt);border-radius:18px;padding:16px;margin:12px 0 16px;box-shadow:0 4px 18px rgba(45,90,140,0.12)";
-  const soloOggi = state.repeat === false;
+  const soloOggi = state.repeat === false && !Object.keys(state.ecc||{}).some(k=>k>isoOggi());
+  const btn=(id,txt,g)=>'<button type="button" class="btn'+(g?' g':'')+'" id="'+id+'" style="min-height:38px;font-size:13px;padding:6px 14px">'+txt+'</button>';
   el.innerHTML =
     '<div style="display:flex;align-items:flex-start;gap:12px">'+
       '<span class="ora-ic" style="flex:none;margin-top:2px;background:var(--blue);color:var(--su-blu);width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center">' + ICON.check + '</span>'+
       '<div style="flex:1;min-width:0">'+
-        '<b style="display:block;font-size:15px;color:var(--ink)">'+(soloOggi?'Il piano di oggi è pronto.':'Il tuo piano è pronto.')+'</b>'+
+        '<b style="display:block;font-size:15px;color:var(--ink)">'+(soloOggi?'Il piano di oggi è pronto. E nei prossimi giorni?':'Il tuo piano è pronto.')+'</b>'+
         '<p style="margin:4px 0 12px;font-size:13px;color:var(--dim);line-height:1.4">'+
-          (soloOggi
-            ? 'I tuoi turni si ripetono? Imposta il ciclo una volta e il piano di ogni giorno è già pronto.'
-            : 'Calcolato su orari standard: se i tuoi turni o il tuo sonno sono diversi, adattali.')+
+          (soloOggi ? 'Dimmelo una volta e il piano di ogni giorno è già pronto.' : 'Puoi renderlo più tuo: tempi di viaggio, come dormi nei giorni liberi.')+
         '</p>'+
         '<div style="display:flex;gap:8px;flex-wrap:wrap">'+
           (soloOggi
-            ? '<button type="button" class="btn" id="doCicloPrimoPiano" style="min-height:36px;font-size:13px;padding:6px 14px">Imposta il ciclo →</button>'
-            : '<button type="button" class="btn" id="doPersonalizzaPrimoPiano" style="min-height:36px;font-size:13px;padding:6px 14px">Adatta gli orari →</button>')+
-          '<button type="button" class="btn g" id="doChiudiPrimoPiano" style="min-height:36px;font-size:13px;padding:6px 14px">'+(soloOggi?'Cambiano ogni volta':'Va bene così')+'</button>'+
+            ? btn("doProssimiCiclo","A ciclo")+btn("doProssimiFisso","Sempre questo turno")+btn("doProssimiSegna","Cambiano: li segno")+
+              '<button type="button" class="lnk" id="doChiudiPrimoPiano" style="font-size:12.5px;padding:6px 4px">Dopo</button>'
+            : btn("doPersonalizzaPrimoPiano","Adatta sonno e viaggio →")+btn("doChiudiPrimoPiano","Va bene così",true))+
         '</div>'+
       '</div>'+
     '</div>';
 }
 if($("#firstPlanBanner")) $("#firstPlanBanner").addEventListener("click", e=>{
   if(e.target.closest("#doChiudiPrimoPiano")){
-    firstPlanBannerChiuso = true;
-    store.set("firstPlanBannerChiuso", true);
-    render();
-    return;
+    firstPlanBannerChiuso = true; store.set("firstPlanBannerChiuso", true); render(); return;
   }
-  if(e.target.closest("#doCicloPrimoPiano")){
-    sceltaSchemaAperta = true;
-    demoEsempioSubflow = "schema";
-    render();
-    try{ window.scrollTo({top:0, behavior:"smooth"}); }catch(err){}
-    return;
-  }
+  if(e.target.closest("#doProssimiCiclo")){ apriFlussoProssimi("schema"); return; }
+  if(e.target.closest("#doProssimiFisso")){ apriFlussoProssimi("riposi"); return; }
+  if(e.target.closest("#doProssimiSegna")){ apriFlussoProssimi("segna"); return; }
   if(e.target.closest("#doPersonalizzaPrimoPiano")){
-    firstPlanBannerChiuso = true;
-    store.set("firstPlanBannerChiuso", true);
-    render();
-    apriOpzioni();
-    return;
+    firstPlanBannerChiuso = true; store.set("firstPlanBannerChiuso", true); render(); apriOpzioni(); return;
   }
 });
 
@@ -4551,6 +4678,7 @@ function shareNudgeVisibile(){
   if(document.body && (document.body.classList.contains("wiz-open") || document.body.classList.contains("intro"))) return false;
   const ob=$("#onboard"); if(ob && !ob.hidden) return false;
   if(!state.turniConfigurati) return false;
+  if(state.repeat===false) return false;   // turni variabili: non c'è un ciclo da condividere
   if(firstPlanBannerVisibile()) return false;
   const mostraBenvenuto = primaVoltaDaLink && !benvenutoLinkChiuso;
   const pronto = !!(state.pattern && Object.keys(state.shifts||{}).length);
@@ -5136,8 +5264,13 @@ function renderHeader(P, f){
   const cn=$("#ciclNome"); if(cn) cn.textContent=" — "+nomeCiclo;
   let [cls,msg]=statusLine(P);
   if(c==="?") {
+    // Giorno senza turno (chi ha turni variabili): si imposta da qui con un
+    // tocco, senza aprire altro. Prima diceva "oggi" anche guardando domani.
     cls="warn";
-    msg='Non so che turno hai oggi: il turno che hai inserito copre altri giorni. <button class="lnk" data-act="apri-ecc-oggi">Inserisci il turno di oggi →</button>';
+    const g = dnum(state.focus)===dnum(giornoVero()) ? "oggi" : dnum(state.focus)===dnum(day(giornoVero(),1)) ? "domani" : state.focus.toLocaleDateString("it-IT",{weekday:"long",day:"numeric"});
+    msg='<b>Che turno fai '+esc(g)+'?</b><span class="qh-chips">'+
+      Object.keys(state.shifts||{}).filter(k=>state.shifts[k] && !state.shifts[k].rest).map(k=>'<button class="btn g" type="button" data-turno-giorno="'+esc(k)+'">'+esc(state.shifts[k].n)+'</button>').join("")+
+      '<button class="btn g" type="button" data-turno-giorno="R">Riposo</button></span>';
   }
   else if(!NT.freeWakeOk()){ cls="warn";
     msg="La risposta sul risveglio in ferie ("+esc(state.freeWake)+") non è plausibile: "+
@@ -6281,7 +6414,10 @@ let eccAppena=false;   // un tocco lungo non deve anche far saltare al giorno
 function jump(e){ const el=e.target.closest(".crow"); if(!el) return;
   if(e.type==="keydown"&&e.key!=="Enter"&&e.key!==" ") return;
   if(eccAppena){ eccAppena=false; e.preventDefault(); return; }
-  e.preventDefault(); state.focus=day(state.focus,+el.dataset.off); cicloOff=0; render(); }
+  e.preventDefault();
+  const off=+el.dataset.off;
+  if(NT.codeAt(off)==="?"){ apriQuickShift(day(state.focus,off)); return; }   // giorno da impostare: subito la scelta del turno
+  state.focus=day(state.focus,off); cicloOff=0; render(); }
 $("#cyc").addEventListener("click",jump);
 $("#cyc").addEventListener("keydown",jump);
 
@@ -7354,11 +7490,14 @@ const PRESETS=[
  {sector:"Sanità", title:"In quinta", sub:"Mattina, pomeriggio, notte, smonto, riposo — 5 giorni", p:"MPNSR", s:SAN},
  {sector:"Sanità", title:"In sesta", sub:"Come in quinta, con un riposo in più dopo lo smonto — 6 giorni", p:"MPNSRR", s:SAN},
  {sector:"Industria", title:"Ciclo continuo", sub:"4 squadre, 16 giorni: 4 mattine, 4 pomeriggi, 4 notti, 4 riposi", p:"MMMMPPPPNNNNRRRR", s:T3},
+ {sector:"Industria", title:"2 · 2 · 2 · 2", sub:"2 mattine, 2 pomeriggi, 2 notti, 2 riposi — 8 giorni", p:"MMPPNNRR", s:T3},
  {sector:"Industria", title:"4x2", sub:"Quattro giorni di lavoro, due di riposo, per ogni turno", p:"MMMMRRPPPPRRNNNNRR", s:T3},
  {sector:"Industria", title:"Turni settimanali", sub:"Una settimana per turno: 5 giorni, poi due liberi", p:"MMMMMRRPPPPPRRNNNNNRR", s:T3},
  {sector:null, title:"Due turni", sub:"Mattina e pomeriggio, mai di notte — 5 giorni, poi due liberi", p:"MMMMMRRPPPPPRR",
   s:{M:{n:"Mattino",s:360,e:840},P:{n:"Pomeriggio",s:840,e:1320}}},
- {sector:null, title:"Dodici ore", sub:"Sanità, vigilanza, RSA, guardia — giorno e notte da 12 ore", p:"DDNNRRRR",
+ {sector:"Dodici ore", title:"Dodici ore · 2-2-4", sub:"2 giorni, 2 notti, 4 riposi — sanità, vigilanza, RSA", p:"DDNNRRRR",
+  s:{D:{n:"Giorno 12h",s:420,e:1140},N:{n:"Notte 12h",s:1140,e:1860}}},
+ {sector:"Dodici ore", title:"Dodici ore · 1-1-2", sub:"Giorno, notte, 2 riposi — 4 giorni", p:"DNRR",
   s:{D:{n:"Giorno 12h",s:420,e:1140},N:{n:"Notte 12h",s:1140,e:1860}}},
  {sector:null, title:"Spezzato", sub:"Trasporti, ristorazione — pausa lunga a metà giornata", p:"SSSSSRR",
   s:{S:{n:"Spezzato",s:660,e:1380}}},
@@ -8003,7 +8142,11 @@ platform.onBackButton(()=>{
   if(document.body.classList.contains("andamenti-aperta")){ chiudiAndamenti(); return true; }
   if(document.body.classList.contains("vederci-aperta")){ chiudiVederci(); return true; }
   if(sceltaSchemaAperta){ sceltaSchemaAperta=false; demoEsempioSubflow="home"; render(); return true; }
-  if(demoEsempioVisibile() && demoEsempioSubflow!=="home"){ demoEsempioSubflow = demoEsempioSubflow==="posizione" ? "schema" : "home"; renderDemoEsempio(); return true; }
+  if(demoEsempioVisibile() && demoEsempioSubflow!=="home"){
+    const su={orario:"home", posizione:"schema", orari:(state.repeat?"schema":"segna")}[demoEsempioSubflow] || (state.turniConfigurati?"prossimi":"home");
+    if(sceltaSchemaAperta && demoEsempioSubflow==="prossimi"){ sceltaSchemaAperta=false; demoEsempioSubflow="home"; render(); return true; }
+    demoEsempioSubflow=su; renderDemoEsempio(); return true;
+  }
   if(document.body.classList.contains("tab-opzioni")){ chiudiOpzioniPagina(); return true; }
   if(document.body.classList.contains("tab-turni")){ setTab("oggi"); render(); return true; }
   return false;
@@ -8097,6 +8240,8 @@ if($("#partner")) $("#partner").addEventListener("click", e=>{
 if($("#status")) $("#status").addEventListener("click", e=>{
   if(e.target.closest('[data-goto="sonno"]')) apriFinestraSonno();
   if(e.target.closest('[data-act="apri-ecc-oggi"]')) { haptic(10); apriEcc(state.focus); }
+  { const tg=e.target.closest("[data-turno-giorno]");
+    if(tg){ haptic(10); state.ecc[iso(state.focus)]=tg.dataset.turnoGiorno; salva(); render(); toast("Turno segnato"); } }
 });
 if($("#andamenti")) $("#andamenti").addEventListener("click", e=>{
   const ap=e.target.closest("[data-apply-field]");
