@@ -288,21 +288,8 @@ padding:16px 18px;margin:2px 0 var(--gap-sezione);box-shadow:0 4px 20px rgba(45,
 .ora-card.risk{background:var(--risk-soft);border-color:var(--risk-line);box-shadow:0 4px 20px rgba(220,80,50,0.14),var(--shadow-card)}
 .ora-card.risk .eyebrow{color:var(--risk)}
 .ora-card.risk b{color:var(--risk)}
-.ora-prossimo{background:var(--bg);border:1px solid var(--blue-lt);border-radius:14px;padding:10px 13px;margin:10px 0 12px}
-.ora-card.risk .ora-prossimo{border-color:var(--risk-line)}
-.ora-tag{display:inline-block;font-size:9.5px;font-weight:800;letter-spacing:.08em;color:var(--blue);text-transform:uppercase;margin-bottom:2px}
-.ora-card.risk .ora-tag{color:var(--risk)}
-.ora-timeline{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--dim);margin:8px 0 10px;padding-left:8px;border-left:2px solid var(--blue-lt)}
-.ora-card.risk .ora-timeline{border-left-color:var(--risk-line)}
-.ora-timeline-row{display:flex;align-items:center;gap:8px}
-.ora-timeline-time{font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;min-width:44px}
-.tl-ic{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;color:var(--blue);flex:none}
-.tl-ic svg{width:16px;height:16px}
-.ora-card.risk .tl-ic{color:var(--risk)}
-.ora-dis{font-size:11px;color:var(--faint);margin-top:10px;line-height:1.35}
 
 .qh-card{background:var(--s1);border:1px solid var(--blue-lt);border-radius:20px;padding:18px;margin:12px 0 16px;box-shadow:0 4px 24px rgba(45,90,140,0.14),var(--shadow-card)}
-.qh-title{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:4px}
 .qh-h{font-size:20px;font-weight:800;color:var(--ink);margin:0 0 4px;line-height:1.25}
 .qh-sub{font-size:13px;color:var(--dim);margin:0 0 14px;line-height:1.4}
 .qh-flow-options{display:flex;flex-direction:column;gap:8px;margin-top:12px}
@@ -318,8 +305,11 @@ padding:16px 18px;margin:2px 0 var(--gap-sezione);box-shadow:0 4px 20px rgba(45,
 .qh-ore{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .qh-ore label{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--dim);font-weight:600}
 .qh-ore input,.qh-ore-riga input{font:inherit;font-size:20px;font-weight:700;padding:10px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);text-align:center;min-height:52px}
-.qh-ore-riga{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;align-items:center;margin-top:10px}
-.qh-ore-riga input{font-size:16px;min-height:44px;padding:6px;max-width:110px}
+/* Nome del turno sopra, inizio → fine sotto: in riga unica, con caratteri
+   grandi o schermo stretto, l'ora di fine usciva dallo schermo. */
+.qh-ore-riga{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:6px 8px;align-items:center;margin-top:12px}
+.qh-ore-riga>:first-child{grid-column:1/-1;font-weight:700}
+.qh-ore-riga input{font-size:16px;min-height:44px;padding:6px;width:100%;min-width:0}
 .qh-ore-riga span{color:var(--dim)}
 .qh-sett{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
 .qh-gg{font:inherit;font-size:13px;font-weight:700;padding:12px 0;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
@@ -387,7 +377,6 @@ body.primo-avvio #clubBanner,body.primo-avvio #donateNudge{display:none!importan
 .qh-btn .qh-ic svg{width:22px;height:22px}
 .qh-btn b{font-size:14px;color:var(--ink);font-weight:700}
 .qh-btn small{font-size:11.5px;color:var(--dim);font-weight:500}
-.qh-foot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding-top:10px}
 .crow:hover .crail{background:var(--s2)}
 /* pillola, come nel mockup: bordo pieno invece di uno shadow interno, e
    un filo più alta (10px contro 8px) — lo stesso trattamento che lì
@@ -504,7 +493,7 @@ justify-content:center;overflow:hidden}
 #icsNudge{border-left-color:var(--blue)}
 #clubBanner{border-left-color:var(--orange)}
 #statsNudge{border-left-color:var(--blue)}
-#chiudiBenvenuto,#chiudiDemoEsempio,#chiudiBackupNudge,#chiudiInstall,#chiudiShareNudge,#chiudiIcsNudge,#chiudiIcsExpireNudge,#chiudiClub{float:right;background:none;border:none;color:var(--faint);
+#chiudiBenvenuto,#chiudiBackupNudge,#chiudiInstall,#chiudiShareNudge,#chiudiIcsNudge,#chiudiIcsExpireNudge,#chiudiClub{float:right;background:none;border:none;color:var(--faint);
 font-size:22px;line-height:1;cursor:pointer;padding:0 0 4px 10px;min-height:0}
 .card.s,.card.p{border-left-color:var(--blue)}
 .card.c,.card.l,.card.t{border-left-color:var(--orange-fill)}
@@ -726,9 +715,11 @@ color:var(--blue);display:flex;align-items:center;justify-content:center}
 .essrow.t-orange .eic{background:var(--orange-soft);color:var(--orange)}
 .essrow.warn .eic{background:var(--bg);color:var(--risk)}
 .essrow .el{display:block;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);line-height:1.3}
-.essrow .ev{flex:1;min-width:0}
+.essrow{flex-wrap:wrap}
+.essrow .ev{flex:1 1 7.5em;min-width:0}
+/* l'orario va a capo (a destra) se non c'è spazio, invece di schiacciare il titolo */
 .essrow .en{font-size:14px;font-weight:600;line-height:1.3;font-variant-numeric:tabular-nums;
-flex:none;color:var(--ink)}
+flex:0 1 auto;margin-left:auto;text-align:right;color:var(--ink)}
 .essrow .en b{font-weight:700}
 /* riga espandibile: unica affordance in Oggi (chevron a destra, riga toccabile) */
 .erow{margin-bottom:8px}
@@ -851,10 +842,7 @@ line-height:1.2;min-height:2.4em}
 /* il grafico è la mappa della giornata: parte dell'intestazione, sempre visibile */
 #band{margin:2px 0 var(--gap-sezione)}
 .ora-kss .hint{width:100%;margin:0 0 2px}
-.ora-dis{font-size:11px;color:var(--faint);line-height:1.45;margin-top:10px}
 /* non più in uso (era il collegamento verso l'upsell a pagamento) */
-.ladder{font-size:12.5px;color:var(--faint);line-height:1.55;margin:11px 2px 4px}
-.ladder b{color:var(--dim)}
 /* griglia turni variabili (gratis) */
 .grid21{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin:10px 0}
 .gcell{aspect-ratio:1;border:1px solid var(--line);border-radius:9px;background:var(--s1);color:var(--ink);font:inherit;font-weight:700;font-size:16px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-height:42px}
@@ -890,7 +878,7 @@ body.tab-oggi .cap.ciclo,body.tab-oggi #cyc,body.tab-oggi #cycShareBox,
 body.tab-oggi #doPartner,body.tab-oggi .cycbar,body.tab-oggi #cycRange,body.tab-oggi #doAndamenti,
 body.tab-oggi #icsBox,body.tab-oggi #andamentiPagina,
 body.tab-oggi #vederciPagina,body.tab-oggi #partner,body.tab-oggi .piu-cal,
-body.tab-oggi .tools,body.tab-oggi .piu-h,body.tab-oggi .piu-info,body.tab-oggi footer{display:none}
+body.tab-oggi .tools,body.tab-oggi .piu-info,body.tab-oggi footer{display:none}
 /* OGGI: la datebar (navigatore giorni) resta sempre; solo il DETTAGLIO è a scomparsa */
 body.tab-oggi .cap.giornata,body.tab-oggi #cards{display:none}
 /* La giornata aperta: batte la vecchia regola body.essenziale (che nasconde le schede) */
@@ -910,7 +898,7 @@ body.tab-oggi.essenziale #band{display:none}
 /* TURNI: ciclo, giorni liberi, partner, modifica */
 body.tab-turni #status,body.tab-turni #ora,body.tab-turni #benvenutoLink,body.tab-turni #demoEsempio,body.tab-turni #backupNudge,body.tab-turni #installBanner,body.tab-turni #shareNudge,body.tab-turni #icsNudge,body.tab-turni #icsExpireNudge,body.tab-turni #clubBanner,body.tab-turni #formaGiorno,body.tab-turni #essenziale,
 body.tab-turni .datebar,body.tab-turni .daynav,body.tab-turni .cap.giornata,body.tab-turni #band,body.tab-turni #cards,body.tab-turni #luciditaGiornoWrap,
-body.tab-turni #icsBox,body.tab-turni .piu-h,body.tab-turni .piu-info,
+body.tab-turni #icsBox,body.tab-turni .piu-info,
 body.tab-turni footer{display:none}
 /* Pagine Andamenti e "Quando possiamo vederci" (dentro la tab Turni,
    non tab a sé): quando una è aperta, nasconde il contenuto normale di
@@ -1000,11 +988,6 @@ text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:600;color:v
    vere (es. "senza i tuoi dati" sul foglio orari liberi), non solo tolto
    decorazione. Classe a parte, non sul .tools/.tool di base: quella
    resta invariata per l'unico bottone QR già riusato in Turni. */
-.tools-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.tools-grid .tool{flex-direction:column;align-items:flex-start;gap:8px;padding:14px 13px}
-.tools-grid .tool-tx b{font-size:14px}
-.tools-grid .tool-tx span{font-size:11.5px;line-height:1.4}
-.tools-grid .ecc{grid-column:1/-1}
 .presetTiles{display:flex;flex-direction:column;gap:8px}
 .piu-info{border:1px solid var(--line);border-radius:var(--r);margin:18px 0 8px;background:var(--s1)}
 .piu-info>summary{padding:12px 15px;cursor:pointer;font-size:14px;font-weight:600;color:var(--dim);
@@ -1030,7 +1013,7 @@ body.tab-opzioni .datebar,body.tab-opzioni .daynav,body.tab-opzioni #band,body.t
 body.tab-opzioni #cycShareBox,
 body.tab-opzioni .cycbar,body.tab-opzioni #cycRange,body.tab-opzioni #doAndamenti,body.tab-opzioni #doScambioTurno,body.tab-opzioni #scambioBox,
 body.tab-opzioni #andamentiPagina,body.tab-opzioni #vederciPagina,body.tab-opzioni #doPartner,
-body.tab-opzioni #partner,body.tab-opzioni #cards,body.tab-opzioni #luciditaGiornoWrap,body.tab-opzioni .piu-cal,body.tab-opzioni .piu-h,
+body.tab-opzioni #partner,body.tab-opzioni #cards,body.tab-opzioni #luciditaGiornoWrap,body.tab-opzioni .piu-cal,
 /* la sezione Opzioni vive solo nella sua destinazione */
 body:not(.tab-opzioni) #opzioni{display:none}
 #opzioni .tool{margin-bottom:10px}
@@ -1040,7 +1023,6 @@ body:not(.tab-opzioni) #opzioni{display:none}
    loro sezione a parte. Vedi il commento sul markup di #wizSaveArea. */
 #opzBox4 #wizSaveArea{display:none}
 .opz-info a{color:var(--blue);text-decoration:none;border-bottom:1px solid var(--blue-lt)}
-.piu-h{margin:2px 0 9px}
 /* Andamenti, come nel mockup: sezioni separate (ognuna la propria card),
    non più tutto scaricato dentro un'unica card grande — prima #andamenti
    era la card, ora è solo una colonna che le distanzia. */
@@ -1375,7 +1357,7 @@ header b{font-size:23px}
   <h1 id="dateLabel" tabindex="0" role="button" aria-label="Vai a una data">—</h1>
   <span class="shiftpill" id="shiftPill">—</span>
 </div>
-<input type="date" id="jumpDate" aria-hidden="true">
+<input type="date" id="jumpDate" aria-hidden="true" tabindex="-1">
 <!-- Frecce e "torna a oggi" sotto, sulla propria riga: come la barra di
      navigazione del ciclo in Turni (.cycbar, stesso stile ma classe
      diversa — .daynav, per poterle nascondere separatamente per tab).
@@ -3057,8 +3039,6 @@ function toastUndo(msg, azione){
 const esc = x => String(x==null?"":x).replace(/[&<>"']/g,
   c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const COL={R:"var(--faint)"};
-const colorOf=c=>{ const k=Object.keys(state.shifts); const i=k.indexOf(c);
-  return i<0?COL.R:["var(--orange-fill)","var(--blue)","var(--blue-lt)","var(--orange)","#7A6BB5","#3F8F7F"][i%6]; };
 const nameOf=c=>c==="?"?"Da inserire":(state.shifts[c]?state.shifts[c].n:"Riposo");
 // un codice turno è "notturno" se attraversa o parte nel cuore della notte
 function isNightCode(c){ const sh=state.shifts&&state.shifts[c]; if(!sh) return false;
@@ -3512,7 +3492,6 @@ const DLAB=["a pezzi","stanco","così così","sveglio","in forma"];
 // della bocca dei volti, ridotta all'essenziale geometrico. Il voto esatto
 // (1-5) resta nel title e nella card del giorno — qui serve un colpo
 // d'occhio, non la precisione.
-function tendenzaDi(mark){ return mark<=2 ? "giu" : mark===3 ? "piatto" : "su"; }
 const ICON_TEND = {
   giu:   '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>',
   piatto:'<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 12h12"/></svg>',
@@ -4415,7 +4394,11 @@ function renderDemoEsempio(){
         tile("R",ICON.sparkles,"Riposo","Giorno libero")+
       '</div>'+
       '<p class="hint" style="margin:-4px 0 10px;text-align:center;font-size:12px">L\'orario preciso lo scegli al passo dopo.</p>'+
-      '<button type="button" class="lnk" data-subflow="schema" style="display:block;width:100%;text-align:center;font-size:13.5px;padding:6px 0">Conosco già il mio schema di turni →</button>';
+      '<button type="button" class="lnk" data-subflow="schema" style="display:block;width:100%;text-align:center;font-size:13.5px;padding:6px 0">Conosco già il mio schema di turni →</button>'+
+      // Chi arriva dalla vecchia app (TWA): un link, non più un dialogo a tutto
+      // schermo davanti a ogni nuovo utente (migrate.js decide se proporlo).
+      (window.NTMigrate && window.NTMigrate.proponibile && window.NTMigrate.proponibile()
+        ? '<button type="button" class="lnk" id="doRecuperaDati" style="display:block;width:100%;text-align:center;font-size:12.5px;padding:10px 0 2px;color:var(--dim)">Usavi già Notturnisti? Recupera i tuoi turni →</button>' : '');
   } else if(f === "orario" && turnoInScelta){
     const k=turnoInScelta, cur=sh[k]||ORARI_BASE[k];
     el.innerHTML =
@@ -4949,6 +4932,7 @@ async function eseguiAttivazione(id){
     return;
   }
 }
+document.addEventListener("click", e=>{ if(e.target.closest("#doRecuperaDati") && window.NTMigrate) window.NTMigrate.recupera(); });
 document.addEventListener("click", e=>{
   const b=e.target.closest("[data-attiva]"); if(b){ eseguiAttivazione(b.dataset.attiva); return; }
   const g=e.target.closest("[data-gestisci]"); if(g){ gestisciFunzione(g.dataset.gestisci); return; }
@@ -6197,7 +6181,7 @@ function esempioAndamentoHtml(){
   return '<div class="andamento-insight">'+
       '<span class="aic">'+ICON.sun+'</span>'+
       '<div>'+ESB+'Quando il piano ti chiede di alzarti prima, in media ti alzi 25 minuti dopo. Il valore che hai messo (60 min) è più di quanto reggi.'+
-      '<div style="margin-top:8px"><span class="lnk" style="cursor:default;opacity:.7">Prova 40 min →</span></div></div></div>'+
+      '<div style="margin-top:8px"><span class="lnk" style="cursor:default">Prova 40 min →</span></div></div></div>'+
     '<div class="andamento-hero" style="margin-top:10px">'+ESB+
       '<div class="andamento-num" style="color:var(--orange)">-1h 20m</div>'+
       '<span class="hint" style="display:block">Dormi in media 6h40 contro 8h00 pianificate</span>'+
@@ -6745,7 +6729,6 @@ function renderCalNativo(toggle, details){
     if(toggle.checked) await attiva();
     else { await platform.calendar.disattiva(); toast("Calendario rimosso dal telefono"); renderCycCalSync(); renderPiuCal(); }
   };
-  const a=$("#calNatAttiva"); if(a) a.onclick=()=>{ toggle.checked=true; attiva(); };
   const o=$("#calNatApri"); if(o) o.onclick=()=>platform.calendar.apri();
 }
 function renderCoppiaNativa(el, hasPartner, pName){
@@ -6840,11 +6823,6 @@ function renderCycCalSync(){
       if(window.NTPaid && window.NTPaid.open) window.NTPaid.open("account");
     }
   };
-  const actBtn = $("#cycCalActivateBtn");
-  if(actBtn) actBtn.onclick = ()=>{
-    if(window.NTPaid && window.NTPaid.attiva) window.NTPaid.attiva();
-    else if(window.NTPaid && window.NTPaid.open) window.NTPaid.open("attiva");
-  };
   const mgBtn = $("#cycCalManageBtn");
   if(mgBtn) mgBtn.onclick = ()=>{
     if(window.NTPaid && window.NTPaid.open) window.NTPaid.open("account");
@@ -6873,7 +6851,6 @@ function renderOpzSummaries(){
   if(l){
     l.textContent = (state.evento && state.evento.d && state.evento.h) ? state.evento.d.slice(5) + " " + state.evento.h : "";
   }
-  renderNotifRiga();
 }
 // La griglia del wizard, passo 1: sostituisce lo scrivere la sequenza a
 // lettere. Sola visualizzazione — legge state.pattern per mostrare i tocchi
@@ -8767,7 +8744,7 @@ addEventListener("nt:config-changed", ()=>{
    nativa. Zero backend in entrambi i casi.
    ─────────────────────────────────────────────────────────────────────────── */
 // Permesso notifiche in cache: sul nativo si legge solo in modo asincrono,
-// mentre renderNotifRiga() è sincrona. var + funzione (entrambe "hoisted"),
+// mentre il rendering è sincrono. var + funzione (entrambe "hoisted"),
 // non let: render() gira già più in alto in questo modulo, prima che questa
 // riga venga eseguita, e con let lì si romperebbe tutto (TDZ).
 var _notifPerm;
@@ -8776,7 +8753,7 @@ function notifPerm(){
   return _notifPerm;
 }
 function aggiornaPermNotif(){
-  platform.notify.permission().then(p=>{ if(p!==notifPerm()){ _notifPerm=p; renderNotifRiga(); renderAttivazione(); } }).catch(()=>{});
+  platform.notify.permission().then(p=>{ if(p!==notifPerm()){ _notifPerm=p; renderAttivazione(); } }).catch(()=>{});
 }
 function ntNotifiche(){
   try{
@@ -8842,25 +8819,7 @@ function ntChiediPermesso(){
   }).catch(()=>{});
 }
 window.ntChiediPermesso = ntChiediPermesso;
-if($("#doNotifiche")) $("#doNotifiche").onclick=()=>gestisciFunzione("notifiche");
 if($("#doNotificheWiz")) $("#doNotificheWiz").onclick=ntChiediPermesso;
-// Stato del bottone "Promemoria" in Opzioni: solo lettura del permesso in
-// cache (_notifPerm), costa nulla, ma non serve calcolarlo se Opzioni
-// non è nemmeno aperta — stessa idea di renderOpzSummaries().
-function renderNotifRiga(){
-  const btn=$("#doNotifiche"); if(!btn) return;
-  const perm=notifPerm();
-  if(perm==="unsupported"){ btn.hidden=true; return; }
-  const t=$("#notifTesto"), v=$("#notifVal");
-  btn.disabled=false; btn.setAttribute("role","switch");
-  btn.setAttribute("aria-checked", promemoriaAttivi()?"true":"false");
-  if(perm==="denied"){
-    if(t) t.textContent="Promemoria bloccati dal telefono"; if(v) v.textContent="Come riattivarli";
-  } else {
-    if(t) t.textContent="Promemoria sul telefono";
-    if(v) v.innerHTML='<span class="sw" aria-hidden="true"></span>';
-  }
-}
 
 
 // ── navigazione a tab (feel da app): Oggi · Turni · Più ──

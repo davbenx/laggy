@@ -1,0 +1,10 @@
+import pw from "./_pw.mjs";
+const b=await pw.chromium.launch(); const p=await (await b.newContext({locale:"it-IT"})).newPage(); const errs=[]; p.on("pageerror",e=>errs.push(e.message));
+await p.goto("http://localhost:8765/index.html"); await p.waitForTimeout(700);
+await p.click("[data-pick=M]"); await p.click("#qhConfermaOrario"); await p.waitForTimeout(400);
+await p.click("#doOpzioni"); await p.click('[data-opz="1"]'); await p.waitForTimeout(300);
+const t=await p.evaluate(()=>document.querySelector("#demoEsempio .qh-h").textContent+" | "+[...document.body.classList].join(" "));
+console.log((/prossimi giorni/.test(t)&&!/tab-opzioni/.test(t)?"✔":"✘")+" Opzioni → Turni e ciclo apre il flusso lineare: "+t);
+await p.click("#qhAvanzate"); await p.waitForTimeout(300);
+console.log((await p.evaluate(()=>document.body.classList.contains("tab-opzioni"))?"✔":"✘")+" 'Impostazioni avanzate' porta ancora alla tabella completa");
+console.log("errori", errs); await b.close();

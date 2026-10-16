@@ -56,10 +56,6 @@
     // non permette di risalirci. Per cambiare codice: nuova stringa casuale,
     // sha256sum, sostituisci qui (e nelle anteprime sotto).
     "STATS_TOKEN_SHA256": "9a48b0457a4982fd68999bc0d1dd6ad8f0e669b0c1f3a6c6d40aceda5510a5ba",
-    "CURRENCY": "EUR",
-    "LEMONSQUEEZY_STORE_ID": "notturnisti",
-    "LEMONSQUEEZY_VARIANT_ID": "457255",
-    "PRICE": "36.99",
     "SITE_ORIGIN": "https://app.notturnisti.club"
   },
   // Deploy di anteprima (una per PR, via Workers Builds "wrangler preview"):
@@ -71,10 +67,6 @@
   "previews": {
     "vars": {
       "STATS_TOKEN_SHA256": "9a48b0457a4982fd68999bc0d1dd6ad8f0e669b0c1f3a6c6d40aceda5510a5ba",
-      "CURRENCY": "EUR",
-      "LEMONSQUEEZY_STORE_ID": "notturnisti",
-      "LEMONSQUEEZY_VARIANT_ID": "457255",
-      "PRICE": "36.99",
       "SITE_ORIGIN": "https://app.notturnisti.club"
     },
     "kv_namespaces": [
