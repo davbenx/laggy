@@ -110,12 +110,12 @@ Source-available, all rights reserved — see [LICENSE](./LICENSE). Not
 OSI-approved open source: you can read and study the code, but reuse,
 redistribution or competing use requires permission.
 
-## Test
+## Tests
 
-- `node --test tests/*.test.js` — motore, notifiche, statistiche, fuzz (senza browser).
-- `tests/ui/run.sh` — interfaccia nel browser con Playwright: flussi utente,
-  onboarding, inviti, notifiche, adattamento del piano, condivisione, app
-  nativa simulata, accessibilità (axe-core, WCAG 2.1 AA), testo al 130% e
-  tempi di avvio con CPU rallentata. `tests/ui/run.sh comp nudge` ne lancia solo alcune.
-- `app/scripts/test-android.sh` — prova end-to-end su un emulatore Android vero
-  (vedi docs/app-nativa.md).
+- `node --test tests/*.test.js` — engine, notifications, analytics, fuzzing (no browser).
+- `tests/ui/run.sh` — UI in the browser with Playwright: user flows, onboarding,
+  nudges, notifications, plan adaptation, sharing, simulated native app,
+  accessibility (axe-core, WCAG 2.1 AA), 130% text size and start-up time on a
+  throttled CPU. `tests/ui/run.sh comp nudge` runs only some suites.
+- `app/scripts/test-android.sh` — end-to-end run on a real Android emulator
+  (see docs/app-nativa.md).
