@@ -4512,6 +4512,11 @@ function renderDemoEsempio(){
         '<button type="button" class="btn g" data-aggiungi="R">+ Riposo</button>'+
         (nuovoTurnoAperto?'':'<button type="button" class="lnk" id="qhNuovoTurno" style="font-size:13px;padding:6px 4px">+ altro turno (es. 12 ore)</button>')+
       '</div>'+
+      // Lo smonto non è un turno da lavorare: è il giorno in cui torni dalla
+      // notte. Per il piano vale come un giorno libero (stesso calcolo del
+      // riposo), ma nei fogli turni della sanità ha una lettera sua: averla
+      // permette di ricopiare il proprio foglio così com'è.
+      (!sh.S?'<p class="hint" style="margin:6px 0 0;font-size:12px"><b>Smonto</b> = il giorno in cui torni a casa dalla notte. Non ha orari di lavoro: per il piano conta come un giorno libero. Mettilo solo se nel tuo foglio turni c\'è.</p>':'')+
       (nuovoTurnoAperto
         ? '<div class="qh-nuovo"><input type="text" id="qhNtNome" maxlength="20" placeholder="Nome (es. Giorno 12h)" aria-label="Nome del turno">'+
             '<div class="qh-ore"><label>Inizio<input type="time" id="qhNtDa" value="07:00"></label><label>Fine<input type="time" id="qhNtA" value="19:00"></label></div>'+
