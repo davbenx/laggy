@@ -165,7 +165,8 @@ const CANALI = [
   { id: "promemoria",   name: "Prova e altri avvisi",      importance: 3 }
 ];
 const CANALE_DI = { cambio: "turni", domani: "turni", prep: "turni", ret: "sicurezza", bedtime: "sonno", coffee: "caffe",
-  nap: "pisolini", luce: "luce", wake: "sveglie", settimana: "suggerimenti", tip: "suggerimenti" };
+  nap: "pisolini", luce: "luce", wake: "sveglie", settimana: "suggerimenti", tip: "suggerimenti",
+  diario: "suggerimenti", consigli: "suggerimenti" };
 let _channels = false;
 async function ensureChannels(LN) {
   if (_channels || name !== "android") return;

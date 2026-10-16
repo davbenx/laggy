@@ -27,7 +27,11 @@ export const TIPI = [
   { k: "prep",     nome: "Preparati per il turno",   desc: "Un'ora prima dell'inizio del turno",                                     essenziale: false, canale: "turni" },
   { k: "luce",     nome: "Luce del mattino",         desc: "Quando prendere luce per restare in fase",                               essenziale: false, canale: "luce" },
   { k: "wake",     nome: "Ora di alzarti",           desc: "Fine del sonno pianificato. Non è una sveglia: per quella usa la sveglia del telefono", essenziale: false, canale: "sveglie" },
-  { k: "settimana",nome: "La tua settimana",         desc: "La domenica sera, i turni dei prossimi 7 giorni",                        essenziale: false, canale: "suggerimenti" }
+  { k: "settimana",nome: "La tua settimana",         desc: "La domenica sera, i turni dei prossimi 7 giorni",                        essenziale: false, canale: "suggerimenti" },
+  // Questi due li prepara index.html (servono il diario e le impostazioni),
+  // non buildSchedule: sono silenziosi e si diradano da soli.
+  { k: "diario",   nome: "Come hai dormito?",        desc: "Poco dopo il risveglio, senza suono: annoti la notte in un tocco e il piano si adatta. Se non rispondi, si dirada da solo", essenziale: true, canale: "suggerimenti" },
+  { k: "consigli", nome: "Consigli per il tuo piano", desc: "Al massimo uno a settimana, in un giorno libero: cosa manca perché il piano sia davvero tuo", essenziale: true, canale: "suggerimenti" }
 ];
 export const TIPI_ESSENZIALI = TIPI.filter(t => t.essenziale).map(t => t.k);
 export const TIPI_TUTTI = TIPI.map(t => t.k);
