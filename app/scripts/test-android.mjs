@@ -10,7 +10,7 @@ const OUT=process.env.OUT||"/tmp";
 const APK=process.env.APK||"app/android/app/build/outputs/apk/debug/app-debug.apk";
 const ok=(c,m)=>console.log((c?"✔ ":"✘ ")+m);
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
-const PKG="club.notturnisti.twa";
+const PKG="club.notturnisti.app";
 if(!process.argv.includes("--no-install")){
   console.log(sh("uninstall "+PKG).trim());
   console.log(sh("install -r -g "+APK).trim().split("\n").pop());

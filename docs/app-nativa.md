@@ -280,3 +280,11 @@ eventi (42 giorni), 210 allarmi delle notifiche programmati, notifica di prova
 mostrata sul canale "Promemoria del piano". Trovato e corretto: se il motore
 del WebView si chiude, l'app ora si ricarica invece di chiudersi
 (`onRenderProcessGone` in MainActivity).
+
+## Nota (16/10/2026): niente TWA sul Play Store
+
+La TWA non è mai stata pubblicata: c'era solo la PWA. L'app nativa esce come
+app nuova, `club.notturnisti.app`, senza scheda o chiave da riprendere. Le
+parti di questo documento sull'"aggiornamento in place" della TWA non valgono
+più; il recupero dati resta, ma dalla PWA (dati nel browser) all'app.
+`/.well-known/assetlinks.json`, che serviva solo alla TWA, è stato tolto.

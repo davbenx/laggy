@@ -58,9 +58,9 @@ alertness.js       drowsiness/alertness model
 history.js         sleep diary storage
 notifications.js   local notifications (what to notify, when)
 platform.js        web vs native app (Capacitor): notifications, calendar, widget
-analytics.js       anonymous aggregate usage counters (opt-out in Options)
-paid.js            account, checkout, restore-link flow
-migrate.js         one-time data move from the old TWA to the native app
+analytics.js       anonymous aggregate usage counters (opt-in, off by default)
+paid.js            auto-updating calendar feed (free account) and restore link
+migrate.js         one-time move of the data saved in the browser (PWA) into the Android app
 sw.js              service worker (offline, caching)
 manifest.webmanifest  PWA manifest
 functions/         Cloudflare Pages Functions (API):
@@ -68,14 +68,12 @@ functions/         Cloudflare Pages Functions (API):
   couple/[id].js     shared/partner view
   feed/[id].js       ICS calendar feed
   collect.js         anonymous usage counters (D1, per-day aggregates only)
+  account.js         free account for the calendar feed
   stats.js           private usage dashboard (/stats, token-gated)
-  claim/[token].js   one-time license claim after checkout
-  webhook-ls.js      Lemon Squeezy payment webhook (HMAC-verified)
-  pending.js         pending-checkout bookkeeping
 ```
 
-Deployed on Cloudflare Pages. The Android app (`club.notturnisti.twa`) is
-moving from a Trusted Web Activity to a Capacitor shell in `app/`, which
+Deployed on Cloudflare (Workers + static assets). The Android app
+(`club.notturnisti.app`, not yet on the Play Store) is a Capacitor shell in `app/`, which
 bundles these same files unchanged and adds OS-level notifications — see
 `app/README.md` and `docs/app-nativa.md`.
 

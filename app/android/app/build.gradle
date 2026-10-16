@@ -4,14 +4,13 @@ android {
     namespace = "club.notturnisti.twa"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "club.notturnisti.twa"
+        applicationId "club.notturnisti.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        // Deve essere MAGGIORE del versionCode dell'ultima TWA pubblicata sul
-        // Play Store (stesso applicationId), altrimenti l'upload viene
-        // rifiutato. Si passa da riga di comando: ./gradlew bundleRelease -PntVersionCode=NN
+        // Cresce a ogni upload sul Play Store (il primo è 1). Si passa da riga
+        // di comando: ./gradlew bundleRelease -PntVersionCode=NN -PntVersionName=X.Y.Z
         versionCode((project.findProperty("ntVersionCode") ?: "1") as Integer)
-        versionName((project.findProperty("ntVersionName") ?: "2.0.0") as String)
+        versionName((project.findProperty("ntVersionName") ?: "1.0.0") as String)
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.

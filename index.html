@@ -4408,7 +4408,7 @@ function renderDemoEsempio(){
       // Chi arriva dalla vecchia app (TWA): un link, non più un dialogo a tutto
       // schermo davanti a ogni nuovo utente (migrate.js decide se proporlo).
       (window.NTMigrate && window.NTMigrate.proponibile && window.NTMigrate.proponibile()
-        ? '<button type="button" class="lnk" id="doRecuperaDati" style="display:block;width:100%;text-align:center;font-size:12.5px;padding:10px 0 2px;color:var(--dim)">Usavi già Notturnisti? Recupera i tuoi turni →</button>' : '');
+        ? '<button type="button" class="lnk" id="doRecuperaDati" style="display:block;width:100%;text-align:center;font-size:12.5px;padding:10px 0 2px;color:var(--dim)">Usavi Notturnisti dal browser? Porta qui i tuoi turni →</button>' : '');
   } else if(f === "orario" && turnoInScelta){
     const k=turnoInScelta, cur=sh[k]||ORARI_BASE[k];
     el.innerHTML =
