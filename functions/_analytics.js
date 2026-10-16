@@ -48,7 +48,9 @@ export const ALLOWED = {
 
   share_whatsapp: [],
 
-  active_day: ["platform"]
+  active_day: ["platform"],
+
+  setup_item: ["item"]
 };
 
 // Valori ammessi per le proprietà: brevi e a bassa cardinalità. Qualunque altra

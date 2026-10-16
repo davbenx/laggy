@@ -67,7 +67,10 @@
 
     // Una volta al giorno per dispositivo, senza id: "quanti dispositivi hanno
     // aperto l'app oggi". platform ∈ web | pwa | android | ios.
-    active_day: ["platform"]
+    active_day: ["platform"],
+
+    // Lista di attivazione: quale voce si tocca (turni, notifiche, calendario, widget).
+    setup_item: ["item"]
   };
 
   var LS_CONSENT = "nt:analytics-consent";          // true | false | assente = mai chiesto
