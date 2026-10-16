@@ -290,6 +290,16 @@ export async function share({ title, text, url }) {
   return true;
 }
 
+/* ── Stampa ────────────────────────────────────────────────────────────── */
+// Nel WebView window.print() non fa nulla: nell'app si passa dal servizio di
+// stampa di Android (plugin locale NTPrint, anche "Salva come PDF").
+export async function print(title) {
+  const P = plugin("NTPrint");
+  if (P) { await P.print({ title: title || "Notturnisti" }); return true; }
+  window.print();
+  return true;
+}
+
 /* ── Barre di sistema ──────────────────────────────────────────────────── */
 // Icone della barra di stato e della barra dei gesti leggibili sul tema
 // dell'app: chiare su fondo scuro, scure su fondo chiaro. Senza, seguivano
@@ -312,6 +322,6 @@ export function onBackButton(cb) {
   });
 }
 
-const NTPlatform = { isNative, name, notify, calendar, widget, onResume, onNotificationTap, onBackButton, canShare, share, setSystemBars };
+const NTPlatform = { isNative, name, notify, calendar, widget, onResume, onNotificationTap, onBackButton, canShare, share, print, setSystemBars };
 try { if (typeof window !== "undefined") window.NTPlatform = NTPlatform; } catch (e) {}
 export default NTPlatform;

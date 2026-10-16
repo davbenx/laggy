@@ -44,13 +44,14 @@ try{
     history.replaceState(null,"",location.pathname+location.search);
   }
 }catch(e){}
-// Applicato prima di qualunque CSS: se l'utente ha forzato il chiaro con
+// Applicato prima di qualunque CSS: se l'utente ha scelto chiaro o scuro con
 // l'interruttore in alto (vedi più sotto), va impostato subito, non dopo
 // il primo render — altrimenti si vedrebbe un lampo nel tema sbagliato.
 try{
   const t=localStorage.getItem("nt:theme");
-  if(t==="\"light\"") { document.documentElement.dataset.theme="light";
-    document.querySelector('meta[name="theme-color"]').content="#FFFFFF"; }
+  if(t==="\"light\"" || t==="\"dark\"") { const l=t==="\"light\"";
+    document.documentElement.dataset.theme=l?"light":"dark";
+    document.querySelector('meta[name="theme-color"]').content=l?"#FFFFFF":"#14161A"; }
 }catch(e){}
 </script>
 <link rel="manifest" href="./manifest.webmanifest">
@@ -123,17 +124,26 @@ try{
     --shadow-btn:0 8px 18px -6px rgba(45,90,140,.3);
   }
 }
+/* Controlli nativi (tendine, selettori d'ora, barre di scorrimento) nello
+   stesso tema della pagina, anche quando è scelto a mano. */
+:root{color-scheme:dark}
+@media (prefers-color-scheme:light){ :root{color-scheme:light} }
+:root[data-theme="dark"]{color-scheme:dark}
+:root[data-theme="light"]{color-scheme:light}
 :root[data-theme="dark"]{
-  --bg:#14161A; --s1:#1C1F24; --s2:#252930; --line:#2E343D;
-  --ink:#F0F3F6; --dim:#8A94A0; --faint:#555E68;
-  --blue:#5B87B5; --blue-fill:#2D5A8C; --blue-soft:#1A2736; --blue-lt:#4A75A0; --su-blu:#F0F3F6;
-  --orange:#FF6B35; --orange-fill:#FF6B35; --orange-bar:#E8551B; --orange-soft:#2E1A12;
-  --risk:#E57368; --risk-soft:#2A1412; --risk-line:#5C2420;
-  --sleep-fill:#2D5A8C; --ok:#4E9F6E; --on-warm:#F0F3F6;
-  --bg-blur:rgba(20,22,26,.82);
-  --warm-tint:#201812; --cool-tint:#141F2C;
-  --shadow-card:0 2px 8px -2px rgba(0,0,0,.45);
-  --shadow-btn:0 8px 18px -6px rgba(0,0,0,.5);
+  /* Stessi valori del tema scuro predefinito (:root qui sopra): scelto a mano
+     deve apparire identico a quello che arriva dal telefono. */
+  --bg:#14161A; --s1:#1C1F25; --s2:#23272E; --line:#333941;
+  --ink:#E6E8EB; --dim:#A8B0B8; --faint:#98A0A8;
+  --blue:#8CA4C0; --blue-fill:#2D5A8C; --blue-soft:#22303F; --blue-lt:#A9BED6; --su-blu:#14161A;
+  --orange-bar:#FF6B35;
+  --orange:#FF9068; --orange-fill:#FF6B35; --orange-soft:#3A2119;
+  --risk:#FF6B5C; --risk-soft:#3A1C18; --risk-line:#7A342C;
+  --sleep-fill:#2D5A8C; --ok:#5FBF85; --on-warm:#15171A;
+  --bg-blur:rgba(20,22,26,0.85);
+  --warm-tint:#241C15; --cool-tint:#182029;
+  --shadow-card:0 2px 10px -3px rgba(0,0,0,.4);
+  --shadow-btn:0 8px 20px -6px rgba(45,90,140,.35);
 }
 :root[data-theme="light"]{
   --bg:#FFFFFF; --s1:#F7F9FB; --s2:#EDF1F5; --line:#DDE3EA;
@@ -334,6 +344,11 @@ padding:16px 18px;margin:2px 0 var(--gap-sezione);box-shadow:0 4px 20px rgba(45,
 .attiva-voce .tx span{display:block;font-size:12.5px;color:var(--dim);margin-top:1px}
 .attiva-voce .go{flex:none;color:var(--blue);font-weight:700;font-size:13px}
 .attiva-voce.ok{cursor:default}
+.attiva-voce.gest{cursor:pointer}
+.sw{flex:none;position:relative;width:44px;height:26px;border-radius:999px;background:var(--s2);border:1.5px solid var(--line);transition:background .2s}
+.sw::before{content:"";position:absolute;top:2px;left:2px;width:19px;height:19px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3);transition:transform .2s}
+[aria-checked="true"] .sw{background:var(--blue-fill);border-color:var(--blue-fill)}
+[aria-checked="true"] .sw::before{transform:translateX(18px)}
 .attiva-voce.ok .tx b{color:var(--dim)}
 .qh-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .qh-chips .btn{min-height:38px;font-size:13px;padding:6px 14px}
@@ -569,6 +584,9 @@ border-radius:var(--r);padding:11px 13px;margin-bottom:18px}
 overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .q{margin-bottom:16px}
 .inline{display:flex;align-items:center;gap:9px}
+.ore-libere{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ore-libere label{display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--dim);font-weight:600;min-width:0}
+.ore-libere select{font-size:18px;font-weight:700;min-height:50px;padding:8px 10px;text-align:center;min-width:0}
 .inline input{max-width:110px}
 .inline span{font-size:14px;color:var(--dim)}
 .q>label{display:block;font-size:16px;font-weight:600;margin-bottom:7px;line-height:1.4}
@@ -1172,11 +1190,14 @@ header b{font-size:23px}
     <h2 class="wq">Nei giorni liberi, come dormi?</h2>
     <p class="wsub">Senza sveglia, quando dormi di solito? Da qui discendono quanto sonno ti serve e com'è fatto il tuo orologio. È la cosa che rende il piano davvero tuo — ma puoi anche saltare e vederlo subito.</p>
     <div class="q">
-      <div class="inline">
-        <span>dalle</span><select id="oBed"></select>
-        <span>alle</span><select id="oWake"></select>
-        <b id="oDur" style="margin-left:4px;white-space:nowrap">—</b>
+      <!-- Due colonne con l'etichetta sopra: in riga ("dalle [..] alle [..]
+           8 ore") su schermi stretti o con caratteri grandi le tendine si
+           restringevano fino a tagliare l'ora ("23:3"). -->
+      <div class="ore-libere">
+        <label>A letto<select id="oBed"></select></label>
+        <label>Sveglia<select id="oWake"></select></label>
       </div>
+      <b id="oDur" style="display:block;margin:8px 0 2px;font-size:14px">—</b>
       <span class="hint">Metti gli orari veri, quelli dopo qualche giorno di ferie senza sveglia.</span>
       <span class="hint" id="oWakeWarn" style="color:var(--orange);font-weight:600"></span>
     </div>
@@ -2744,32 +2765,34 @@ const store = {
   get(k,d){ try{ const v=localStorage.getItem("nt:"+k); return v?JSON.parse(v):d; }catch(e){ return d; } },
   set(k,v){ try{ localStorage.setItem("nt:"+k,JSON.stringify(v)); return true; }catch(e){ return false; } }
 };
-// Interruttore luce/buio in alto: forza il chiaro a prescindere dal tema di
-// sistema (vedi :root[data-theme="light"] in CSS). Lo script in testa alla
-// pagina applica già la scelta salvata prima del primo paint (niente lampo
-// nel tema sbagliato); qui si gestisce solo il tocco.
+// Interruttore luce/buio in alto: passa sempre al tema opposto a quello che
+// si vede, e lo ricorda ("light" | "dark"; "auto" = segue il telefono, finché
+// non si tocca). Prima poteva solo forzare il chiaro: con il telefono in
+// modalità chiara lo scuro non era raggiungibile. Lo script in testa alla
+// pagina applica già la scelta salvata prima del primo paint.
 (function(){
   // document.querySelector diretto, non $(): questo blocco gira prima
   // che $ venga definito più sotto nello script.
   const btn=document.querySelector("#themeToggle"); if(!btn) return;
   const meta=document.querySelector('meta[name="theme-color"]');
-  const applica=light=>{
-    if(light) document.documentElement.dataset.theme="light";
-    else delete document.documentElement.dataset.theme;
-    if(meta) meta.content = light ? "#FFFFFF" : "#14161A";
-    btn.setAttribute("aria-pressed", light?"true":"false");
-    btn.setAttribute("aria-label", light?"Torna al tema scuro":"Passa alla modalità chiara");
-  };
-  // Tema effettivo (forzato chiaro, oppure quello del telefono) anche per le
-  // barre di sistema dell'app nativa.
   const mq=window.matchMedia ? window.matchMedia("(prefers-color-scheme: light)") : null;
-  const barre=()=>platform.setSystemBars(document.documentElement.dataset.theme==="light" || !!(mq && mq.matches));
-  applica(store.get("theme","auto")==="light"); barre();
-  if(mq && mq.addEventListener) mq.addEventListener("change", barre);
+  // Tema effettivo: la scelta salvata, altrimenti quello del telefono.
+  const chiaro=()=>{ const t=document.documentElement.dataset.theme; return t ? t==="light" : !!(mq && mq.matches); };
+  const applica=scelta=>{
+    if(scelta==="light"||scelta==="dark") document.documentElement.dataset.theme=scelta;
+    else delete document.documentElement.dataset.theme;
+    const l=chiaro();
+    if(meta) meta.content = l ? "#FFFFFF" : "#14161A";
+    btn.setAttribute("aria-pressed", l?"true":"false");
+    btn.setAttribute("aria-label", l?"Passa al tema scuro":"Passa alla modalità chiara");
+    platform.setSystemBars(l);   // barre di sistema dell'app nativa
+  };
+  applica(store.get("theme","auto"));
+  if(mq && mq.addEventListener) mq.addEventListener("change", ()=>applica(store.get("theme","auto")));
   btn.addEventListener("click", ()=>{
-    const light = document.documentElement.dataset.theme!=="light";
-    store.set("theme", light?"light":"auto");
-    applica(light); barre();
+    const scelta = chiaro() ? "dark" : "light";
+    store.set("theme", scelta);
+    applica(scelta);
   });
 })();
 let diary = store.get("diary",{});
@@ -4673,12 +4696,22 @@ if($("#firstPlanBanner")) $("#firstPlanBanner").addEventListener("click", e=>{
    dopo il primo piano (il momento di massima motivazione), sparisce quando
    è tutto fatto o se la si nasconde; la stessa lista resta in Opzioni come
    "Cosa fa Notturnisti". Mentre è visibile, gli altri inviti tacciono. */
+// Spenti dall'utente nell'app (il permesso di sistema resta): si cancellano
+// quelli in coda e non se ne armano altri finché non li riaccende.
+function promemoriaSpenti(){ return !!store.get("promemoriaOff", false); }
+function promemoriaAttivi(){ return notifPerm()==="granted" && !promemoriaSpenti(); }
+function impostaPromemoria(on){
+  store.set("promemoriaOff", !on);
+  if(on){ track("notifications_enabled"); ntNotifiche(); toast("Promemoria attivi"); }
+  else { platform.notify.schedule([]).catch(()=>{}); toast("Promemoria spenti: puoi riattivarli da qui quando vuoi"); }
+  render();
+}
 function vociAttivazione(){
   const futuri = Object.keys(state.ecc||{}).filter(k=>k>isoOggi()).length;
   const perm = notifPerm();
   const v = [
     {id:"turni", t:"I turni dei prossimi giorni", d:"Così il piano è pronto ogni giorno, senza inserirlo", ok: state.repeat!==false || futuri>=7},
-    {id:"notifiche", t:"Promemoria sul telefono", d: platform.isNative ? "Ora di andare a letto, sveglia, ultimo caffè: anche ad app chiusa" : "Ora di andare a letto, sveglia, ultimo caffè", ok: perm==="granted", skip: perm==="unsupported"},
+    {id:"notifiche", t:"Promemoria sul telefono", d: platform.isNative ? "Ora di andare a letto, sveglia, ultimo caffè: anche ad app chiusa" : "Ora di andare a letto, sveglia, ultimo caffè", ok: promemoriaAttivi(), skip: perm==="unsupported"},
     {id:"calendario", t:"Nel calendario del telefono", d: platform.calendar.available ? "Turni e sonno nell'app Calendario, aggiornati da soli" : "Turni e sonno nel calendario che usi già", ok: platform.calendar.available ? platform.calendar.attivo() : !!(window.NTPaid && window.NTPaid.paid())}
   ];
   if(platform.widget.available) v.push({id:"widget", t:"Widget sulla schermata Home", d:"Cosa fare adesso, senza aprire l'app", ok: platform.widget.presenti()>0});
@@ -4695,6 +4728,42 @@ function htmlVociAttivazione(voci){
     '<span class="ck" aria-hidden="true">'+(x.ok?ICON.check:'')+'</span>'+
     '<span class="tx"><b>'+esc(x.t)+'</b><span>'+esc(x.d)+'</span></span>'+
     (x.ok?'<span class="go" style="color:var(--dim);font-weight:500">Attivo</span>':'<span class="go">Attiva →</span>')+'</button>').join("");
+}
+// In Opzioni ogni funzione si accende E si spegne: prima, una volta attiva,
+// la riga diceva "Attivo" e non faceva più nulla.
+function htmlVociGestione(voci){
+  return voci.map(x=>{
+    let destra, attr;
+    if(x.id==="turni"){ destra='<span class="go">Modifica ›</span>'; attr='data-gestisci="turni"'; }
+    else if(x.id==="widget"){ destra='<span class="go">'+(x.ok?'Come toglierlo':'Aggiungi →')+'</span>'; attr='data-gestisci="widget"'; }
+    else { destra='<span class="sw" aria-hidden="true"></span>'; attr='data-gestisci="'+x.id+'" role="switch" aria-checked="'+(x.ok?'true':'false')+'"'; }
+    return '<button type="button" class="attiva-voce gest'+(x.ok?' ok':'')+'" '+attr+'>'+
+      '<span class="ck" aria-hidden="true">'+(x.ok?ICON.check:'')+'</span>'+
+      '<span class="tx"><b>'+esc(x.t)+'</b><span>'+esc(x.d)+'</span></span>'+destra+'</button>';
+  }).join("");
+}
+async function gestisciFunzione(id){
+  const v=vociAttivazione().find(x=>x.id===id); if(!v) return;
+  haptic(10);
+  if(id==="turni"){ setTab("oggi"); apriFlussoProssimi("prossimi"); return; }
+  if(id==="notifiche"){
+    if(notifPerm()==="denied"){ toast("Le notifiche sono bloccate dal telefono: riattivale dalle impostazioni, alla voce Notturnisti"); return; }
+    if(notifPerm()!=="granted"){ store.set("promemoriaOff", false); ntChiediPermesso(); return; }
+    impostaPromemoria(promemoriaSpenti()); return;
+  }
+  if(id==="calendario"){
+    if(!v.ok){ eseguiAttivazione("calendario"); return; }
+    if(platform.calendar.available){
+      if(!confirm("Togliere il calendario «Notturnisti» dal telefono? Gli eventi creati dall'app verranno cancellati; i tuoi turni restano nell'app.")) return;
+      await platform.calendar.disattiva(); toast("Calendario tolto dal telefono"); render(); return;
+    }
+    if(window.NTPaid && window.NTPaid.open) window.NTPaid.open("account");
+    return;
+  }
+  if(id==="widget"){
+    if(!v.ok){ eseguiAttivazione("widget"); return; }
+    toast("Per toglierlo: tieni premuto il widget sulla schermata Home e trascinalo su «Rimuovi»");
+  }
 }
 function renderAttivazione(){
   const voci=vociAttivazione(), fatte=voci.filter(x=>x.ok).length;
@@ -4713,8 +4782,8 @@ function renderAttivazione(){
   if(op){
     op.className="card attiva-card";
     op.innerHTML='<div class="attiva-head"><b style="font-size:14.5px">Il tuo piano, automatico</b><span class="attiva-prog">'+fatte+' di '+voci.length+' attive</span></div>'+
-      '<p class="hint" style="margin:4px 0 4px">Il piano di sonno, luce e caffè si calcola sul telefono dai tuoi turni. Queste funzioni lo portano dove ti serve, senza aprire l\'app.</p>'+
-      htmlVociAttivazione(voci);
+      '<p class="hint" style="margin:4px 0 4px">Il piano di sonno, luce e caffè si calcola sul telefono dai tuoi turni. Queste funzioni lo portano dove ti serve, senza aprire l\'app. Accendile e spegnile da qui.</p>'+
+      htmlVociGestione(voci);
   }
 }
 async function eseguiAttivazione(id){
@@ -4722,7 +4791,8 @@ async function eseguiAttivazione(id){
   if(id==="turni"){ setTab("oggi"); apriFlussoProssimi("prossimi"); return; }
   if(id==="notifiche"){
     if(notifPerm()==="denied"){ toast("Le notifiche sono bloccate: riattivale dalle impostazioni del telefono, alla voce Notturnisti"); return; }
-    ntChiediPermesso(); return;
+    if(notifPerm()==="granted"){ impostaPromemoria(true); return; }
+    store.set("promemoriaOff", false); ntChiediPermesso(); return;
   }
   if(id==="calendario"){
     if(platform.calendar.available){
@@ -4741,6 +4811,7 @@ async function eseguiAttivazione(id){
 }
 document.addEventListener("click", e=>{
   const b=e.target.closest("[data-attiva]"); if(b){ eseguiAttivazione(b.dataset.attiva); return; }
+  const g=e.target.closest("[data-gestisci]"); if(g){ gestisciFunzione(g.dataset.gestisci); return; }
   if(e.target.closest("#nascondiAttivazione")){ store.set("attivazioneNascosta", true); render(); }
 });
 // Lo stato di notifiche e widget cambia fuori dall'app (permesso di sistema,
@@ -6920,11 +6991,17 @@ function buildShareSheet(){
     '<p class="ps-foot">Solo i giorni e le ore libere: nessun altro dato. notturnisti.club</p>';
   return w.length;
 }
+// In stampa si vede solo ciò che sta direttamente sotto <body> (body>* nascosti
+// tranne #printSheet): il foglio va tenuto lì, qualunque cosa lo racchiuda nel
+// markup. Prima finiva dentro .wrap e la pagina stampata usciva bianca.
+function stampaFoglio(titolo){
+  const el=$("#printSheet");
+  if(el && el.parentElement!==document.body) document.body.appendChild(el);
+  platform.print(titolo).catch(()=>toast("La stampa non è disponibile qui"));
+}
 if($("#doPrint")) $("#doPrint").onclick=()=>{
-  try{
-    if(!buildPrintSheet()){ toast("Imposta prima i turni"); return; }
-    window.print();
-  }catch(e){ toast("La stampa non è disponibile qui"); }
+  if(!buildPrintSheet()){ toast("Imposta prima i turni"); return; }
+  stampaFoglio("Notturnisti - il tuo ciclo");
 };
 // Pagine Andamenti e "Quando possiamo vederci": una alla volta dentro
 // Turni, non un accordion che si accumula sotto le altre sezioni —
@@ -6997,13 +7074,25 @@ const cycGo=n=>{
 // mostrava 19:00). Richiamata da entrambi i punti da cui questi campi
 // diventano visibili: nessuno dei due deve ricordarsi a mano quali campi
 // popolare, un solo posto che lo sa davvero.
+// Un orario salvato fuori dalla griglia delle tendine (non a quarti d'ora, o
+// fuori intervallo: arriva così da un link o da versioni precedenti) prima
+// faceva ricadere la tendina su 23:30/07:30, cioè mostrava un orario diverso
+// da quello usato dal piano. Ora l'opzione si aggiunge al suo posto.
+function selImposta(sel, val, dopoMezzanotte){
+  if(!sel || !/^([01]\d|2[0-3]):[0-5]\d$/.test(String(val))) return false;
+  const ord=v=>{ const m=t(v); return dopoMezzanotte && m<720 ? m+1440 : m; };
+  if(![...sel.options].some(o=>o.value===val)){
+    const dopo=[...sel.options].find(o=>ord(o.value)>ord(val));
+    sel.add(new Option(val,val), dopo||null);
+  }
+  sel.value=val; return true;
+}
 function sincronizzaCampiPiano(){
   if(selWake){
     const val=NT.freeWakeOk()? state.freeWake : hhmm(Math.round(NT.freeWakeUsata()/15)*15);
-    selWake.value = val;
-    if(selWake.value!==val) selWake.value="07:30";
+    if(!selImposta(selWake, val, false)) selWake.value="07:30";
   }
-  if(selBed){ selBed.value=state.freeBed; if(!selBed.value) selBed.value="23:30"; }
+  if(selBed && !selImposta(selBed, state.freeBed, true)) selBed.value="23:30";
   mostraDurata();
   if(oSel){
     const pi=presetIndex();
@@ -7685,7 +7774,7 @@ if(selBed){
 function mostraDurata(){
   const el=$("#oDur"); if(!el) return;
   const m=NT.durataLibera(), h=Math.floor(m/60), q=m%60;
-  el.textContent = h+(q===0?" ore":q===30?" ore e mezza":" ore e "+q);
+  el.textContent = h+(q===0?" ore":q===30?" ore e mezza":" ore e "+q)+" di sonno";
 }
 function leggiFinestra(){
   if(selBed  && /^([01]\d|2[0-3]):[0-5]\d$/.test(selBed.value))  state.freeBed=selBed.value;
@@ -8359,6 +8448,7 @@ function aggiornaPermNotif(){
 }
 function ntNotifiche(){
   try{
+    if(promemoriaSpenti()){ platform.notify.schedule([]).catch(()=>{}); return; }
     if(!window.NTNotif || !window.NTNotif.buildSchedule) return;
     const items = window.NTNotif.buildSchedule(state, { days:platform.notify.days });
     platform.notify.schedule(items).catch(()=>{});
@@ -8405,7 +8495,8 @@ addEventListener("load", ()=>{ setTimeout(ntNotifiche, 1500); aggiornaPermNotif(
 function ntChiediPermesso(){
   const perm=notifPerm();
   if(perm === "unsupported") return;
-  if(perm === "granted"){ ntNotifiche(); return; }
+  store.set("promemoriaOff", false);   // chiederli è riaccenderli
+  if(perm === "granted"){ ntNotifiche(); render(); return; }
   if(perm === "denied") return;
   track("notification_prompt_shown");
   platform.notify.request().then(p=>{
@@ -8415,7 +8506,7 @@ function ntChiediPermesso(){
   }).catch(()=>{});
 }
 window.ntChiediPermesso = ntChiediPermesso;
-if($("#doNotifiche")) $("#doNotifiche").onclick=ntChiediPermesso;
+if($("#doNotifiche")) $("#doNotifiche").onclick=()=>gestisciFunzione("notifiche");
 if($("#doNotificheWiz")) $("#doNotificheWiz").onclick=ntChiediPermesso;
 // Stato del bottone "Promemoria" in Opzioni: solo lettura del permesso in
 // cache (_notifPerm), costa nulla, ma non serve calcolarlo se Opzioni
@@ -8425,12 +8516,13 @@ function renderNotifRiga(){
   const perm=notifPerm();
   if(perm==="unsupported"){ btn.hidden=true; return; }
   const t=$("#notifTesto"), v=$("#notifVal");
-  if(perm==="granted"){
-    if(t) t.textContent="Promemoria attivi"; if(v) v.textContent="Attivi"; btn.disabled=true;
-  } else if(perm==="denied"){
-    if(t) t.textContent="Promemoria bloccati"; if(v) v.textContent="Riattivali dal telefono"; btn.disabled=true;
+  btn.disabled=false; btn.setAttribute("role","switch");
+  btn.setAttribute("aria-checked", promemoriaAttivi()?"true":"false");
+  if(perm==="denied"){
+    if(t) t.textContent="Promemoria bloccati dal telefono"; if(v) v.textContent="Come riattivarli";
   } else {
-    if(t) t.textContent="Attiva i promemoria sul telefono"; if(v) v.textContent=""; btn.disabled=false;
+    if(t) t.textContent="Promemoria sul telefono";
+    if(v) v.innerHTML='<span class="sw" aria-hidden="true"></span>';
   }
 }
 
@@ -8478,8 +8570,9 @@ if($("#tEdit")) $("#tEdit").onclick=()=>{ setTab("oggi"); apriFlussoProssimi("pr
 if($("#partner")) $("#partner").addEventListener("click", e=>{
   if(e.target.closest("[data-partner-edit]")) apriPartner();
   else if(e.target.closest("[data-partner-sheet]")){
-    if(!buildShareSheet()){ toast("Imposta prima i turni"); return; }
-    try{ window.print(); }catch(err){ toast("La stampa non è disponibile qui"); }
+    if(!state.turniConfigurati){ toast("Imposta prima i turni"); return; }
+    buildShareSheet();
+    stampaFoglio("Notturnisti - quando sono libero");
   }
 });
 if($("#status")) $("#status").addEventListener("click", e=>{
