@@ -93,6 +93,7 @@
       v.querySelector("[data-x]").onclick = function () { v.remove(); };
       return;
     }
+    try { window.NTAnalytics && window.NTAnalytics.track("migrazione", { fase: "export_web" }); } catch (e) {}
     encode(dati).then(function (payload) {
       var d = dialog('<b style="font-size:17px">Porta i tuoi dati nell\'app</b>' +
         '<p style="margin:8px 0 0;opacity:.8">Turni, diario e impostazioni di questo browser (' + n + ' voci) passano all\'app Notturnisti direttamente sul telefono, senza server.</p>' +
@@ -117,6 +118,7 @@
         var sub = {};
         chiavi.forEach(function (k) { sub[k] = dati[k]; });
         sub[DISMISS] = "true";
+        try { window.NTAnalytics && window.NTAnalytics.track("migrazione", { fase: "import_app" }); } catch (e) {}
         try { sessionStorage.setItem("nt-import", JSON.stringify(sub)); }
         catch (e) { alert("Spazio insufficiente: dati non importati."); return; }
         location.reload();
@@ -131,31 +133,25 @@
     }).catch(function () { alert("Link di importazione non valido o incompleto."); });
   }
 
-  function proponi() {
-    try { if (haDati() || localStorage.getItem(DISMISS)) return; } catch (e) { return; }
-    var d = dialog('<b style="font-size:17px">Usavi già Notturnisti?</b>' +
-      '<p style="margin:8px 0 0;opacity:.8">Se avevi l\'app installata dal browser o dal Play Store, i tuoi turni sono rimasti lì. Li recuperiamo con due tocchi, senza passare da nessun server.</p>' +
-      '<button type="button" style="' + PRI + '" data-ok>Recupera i miei dati</button>' +
-      '<button type="button" style="' + SEC + '" data-x>Inizio da capo</button>');
-    d.querySelector("[data-ok]").onclick = function () {
-      d.remove();
-      // Fuori dal dominio dell'app: Capacitor lo apre nel browser di sistema.
-      location.href = SITE;
-    };
-    d.querySelector("[data-x]").onclick = function () {
-      try { localStorage.setItem(DISMISS, "true"); } catch (e) {}
-      d.remove();
-    };
+  // Prima era un dialogo a tutto schermo al primo avvio, per chiunque: per
+  // i nuovi utenti (la maggioranza) una domanda in più prima di cominciare.
+  // Ora è un link nella prima schermata (index.html, #doRecuperaDati).
+  function proponibile() {
+    if (!nativo) return false;
+    try { return !haDati() && !localStorage.getItem(DISMISS); } catch (e) { return false; }
   }
-
+  function recupera() {
+    try { localStorage.setItem(DISMISS, "true"); } catch (e) {}
+    location.href = SITE;   // fuori dal dominio dell'app: Capacitor lo apre nel browser di sistema
+  }
   function avvia() {
     if (nativo) {
       var App = Cap.Plugins && Cap.Plugins.App;
       if (App) {
         App.addListener("appUrlOpen", function (ev) { if (ev && ev.url) importa(ev.url); });
         // Avvio a freddo dal link: l'URL arriva da getLaunchUrl, non dall'evento.
-        App.getLaunchUrl().then(function (r) { if (r && r.url) importa(r.url); else proponi(); }).catch(proponi);
-      } else proponi();
+        App.getLaunchUrl().then(function (r) { if (r && r.url) importa(r.url); }).catch(function () {});
+      }
     } else if (/[?&]export=app\b/.test(location.search)) {
       try { history.replaceState(null, "", location.pathname + location.hash); } catch (e) {}
       esporta();
@@ -164,5 +160,5 @@
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", avvia);
   else avvia();
 
-  window.NTMigrate = { encode: encode, decode: decode };
+  window.NTMigrate = { encode: encode, decode: decode, proponibile: proponibile, recupera: recupera };
 })();

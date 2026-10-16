@@ -35,9 +35,7 @@
   // nessuna proprietà. Nessun evento qui sotto può MAI portare identificatori,
   // orari di turno reali, dati di sonno, nome, email o posizione.
   var ALLOWED = {
-    landing_view: [],
     example_started: [],
-    example_completed: [],
 
     onboarding_started: [],
     onboarding_step_completed: ["step"],   // nome/indice dello step, non i valori inseriti
@@ -63,14 +61,22 @@
     return_d7: [],
     return_d30: [],
 
-    share_whatsapp: [],
 
     // Una volta al giorno per dispositivo, senza id: "quanti dispositivi hanno
     // aperto l'app oggi". platform ∈ web | pwa | android | ios.
     active_day: ["platform"],
 
     // Lista di attivazione: quale voce si tocca (turni, notifiche, calendario, widget).
-    setup_item: ["item"]
+    setup_item: ["item"],
+    notif_tipi: ["preset"],
+    notif_canale_off: ["canale"],
+    // Funzioni accese davvero, una volta al giorno: "a_n1c0w1" = piattaforma
+    // (a/w/p/i), promemoria, calendario, widget. Solo booleani.
+    funzioni_attive: ["mix"],
+    notif_aperta: ["tipo"],           // tocco su una notifica: quale tipo è utile
+    adatta: ["esito"],                // proposta di adattare il piano: liberi_applicato, anticipo_rifiutato…
+    migrazione: ["fase"],             // dalla vecchia app: export_web | import_app
+    errore: ["dove"]                  // errore JavaScript: solo il file (index, engine…), mai il messaggio
   };
 
   var LS_CONSENT = "nt:analytics-consent";          // true | false | assente = mai chiesto
@@ -183,7 +189,15 @@
     try {
       var first = readJSON(LS_FIRSTSEEN, null);
       var today = new Date().toISOString().slice(0, 10);
-      if (!first) { writeJSON(LS_FIRSTSEEN, today); return; }
+      if (!first) {
+        // Il giorno 0 è il primo uso dell'app (nt:state.firstSeenAt), non il
+        // giorno in cui si accendono le statistiche: altrimenti chi le accende
+        // dopo una settimana risulterebbe "nuovo".
+        var st = readJSON("nt:state", {});
+        first = /^\d{4}-\d{2}-\d{2}$/.test(st && st.firstSeenAt || "") ? st.firstSeenAt : today;
+        writeJSON(LS_FIRSTSEEN, first);
+        if (first === today) return;
+      }
       var days = Math.round((new Date(today) - new Date(first)) / 86400000);
       var fired = readJSON(LS_RETURNFIRED, {});
       [[1, "return_d1"], [7, "return_d7"], [30, "return_d30"]].forEach(function (pair) {

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Colori del widget, tema chiaro (values-night/ per il tema scuro): il
+     widget segue il tema del telefono, come le app di sistema. -->
+<resources>
+    <color name="w_sfondo">#FFFFFF</color>
+    <color name="w_chip">#EDF1F5</color>
+    <color name="w_ink">#15171A</color>
+    <color name="w_dim">#5C6670</color>
+    <color name="w_accento">#2D5A8C</color>
+    <color name="w_t_sonno">#2D5A8C</color>
+    <color name="w_t_turno">#D9541F</color>
+    <color name="w_t_caffe">#8A5A2B</color>
+    <color name="w_t_luce">#B57F00</color>
+    <color name="w_t_pisolino">#5B87B5</color>
+    <color name="w_t_rientro">#C0392B</color>
+    <color name="w_cella_lavoro">#FCE9E1</color>
+    <color name="w_cella_notte">#DCE6F1</color>
+    <color name="w_cella_riposo">#EDF1F5</color>
+</resources>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="w_sfondo">#1C1F25</color>
+    <color name="w_chip">#2A2F37</color>
+    <color name="w_ink">#E6E8EB</color>
+    <color name="w_dim">#A8B0B8</color>
+    <color name="w_accento">#8CA4C0</color>
+    <color name="w_t_sonno">#8CA4C0</color>
+    <color name="w_t_turno">#FF9068</color>
+    <color name="w_t_caffe">#D9A06B</color>
+    <color name="w_t_luce">#F2C14E</color>
+    <color name="w_t_pisolino">#A9BED6</color>
+    <color name="w_t_rientro">#FF6B5C</color>
+    <color name="w_cella_lavoro">#4A2A1C</color>
+    <color name="w_cella_notte">#22344A</color>
+    <color name="w_cella_riposo">#2A2F37</color>
+</resources>

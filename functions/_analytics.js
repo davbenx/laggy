@@ -18,9 +18,7 @@
 // Stesso elenco di analytics.js (lato browser): tests/analytics.test.js verifica
 // che coincidano, così aggiungere un evento solo da una parte fa fallire i test.
 export const ALLOWED = {
-  landing_view: [],
   example_started: [],
-  example_completed: [],
 
   onboarding_started: [],
   onboarding_step_completed: ["step"],
@@ -46,11 +44,19 @@ export const ALLOWED = {
   return_d7: [],
   return_d30: [],
 
-  share_whatsapp: [],
 
   active_day: ["platform"],
 
-  setup_item: ["item"]
+  setup_item: ["item"],
+  notif_tipi: ["preset"],
+  notif_canale_off: ["canale"],
+  // Funzioni accese davvero, una volta al giorno: "a_n1c0w1" = piattaforma
+  // (a/w/p/i), promemoria, calendario, widget. Solo booleani.
+  funzioni_attive: ["mix"],
+  notif_aperta: ["tipo"],           // tocco su una notifica: quale tipo è utile
+  adatta: ["esito"],                // proposta di adattare il piano: liberi_applicato, anticipo_rifiutato…
+  migrazione: ["fase"],             // dalla vecchia app: export_web | import_app
+  errore: ["dove"]                  // errore JavaScript: solo il file (index, engine…), mai il messaggio
 };
 
 // Valori ammessi per le proprietà: brevi e a bassa cardinalità. Qualunque altra

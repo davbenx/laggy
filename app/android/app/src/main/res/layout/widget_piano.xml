@@ -1,57 +1,206 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Widget "Il tuo piano". I testi qui sono anche l'anteprima nel selettore
+     dei widget; quelli veri li mette NotturnistiWidget. Colori in
+     values/widget_colori.xml e values-night/ (segue il tema del telefono). -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/w_root"
+    android:id="@android:id/background"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="14dp"
+    android:padding="16dp"
     android:background="@drawable/widget_sfondo">
 
     <TextView
+        android:id="@+id/w_etichetta"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/widget_etichetta"
-        android:textColor="#A8B0B8"
-        android:textSize="11sp"
+        android:text="Adesso"
         android:textAllCaps="true"
-        android:letterSpacing="0.08" />
-
-    <TextView
-        android:id="@+id/w_adesso"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:maxLines="1"
-        android:ellipsize="end"
-        android:textColor="#E6E8EB"
-        android:textSize="17sp"
+        android:letterSpacing="0.08"
+        android:textColor="@color/w_dim"
+        android:textSize="11sp"
         android:textStyle="bold" />
 
-    <TextView
-        android:id="@+id/w_sotto"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:maxLines="1"
-        android:ellipsize="end"
-        android:textColor="#A8B0B8"
-        android:textSize="13sp" />
-
-    <TextView
-        android:id="@+id/w_p1"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:maxLines="1"
-        android:ellipsize="end"
-        android:textColor="#8CA4C0"
-        android:textSize="13sp" />
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
-    <TextView
-        android:id="@+id/w_p2"
+        <FrameLayout
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/widget_icona_sfondo">
+            <ImageView
+                android:id="@+id/w_icona"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_w_sonno"
+                android:importantForAccessibility="no" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="12dp"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/w_adesso"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Sonno"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="@color/w_ink"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/w_sotto"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="fino alle 07:20 · ancora 2 h 10"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="@color/w_dim"
+                android:textSize="13sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/w_progresso"
+        style="@android:style/Widget.ProgressBar.Horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:layout_marginTop="10dp"
+        android:max="1000"
+        android:progress="600"
+        android:progressTint="@color/w_accento"
+        android:progressBackgroundTint="@color/w_chip" />
+
+    <LinearLayout
+        android:id="@+id/w_prossimi"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:maxLines="1"
-        android:ellipsize="end"
-        android:textColor="#8CA4C0"
-        android:textSize="13sp" />
+        android:orientation="vertical">
+        <LinearLayout android:id="@+id/w_p1" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="8dp" android:gravity="center_vertical" android:orientation="horizontal">
+            <ImageView android:id="@+id/w_p1_ic" android:layout_width="16dp" android:layout_height="16dp"
+                android:src="@drawable/ic_w_luce" android:importantForAccessibility="no" />
+            <TextView android:id="@+id/w_p1_ora" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginStart="8dp" android:text="07:35" android:textColor="@color/w_ink" android:textSize="13sp"
+                android:textStyle="bold" android:maxLines="1" />
+            <TextView android:id="@+id/w_p1_t" android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:layout_marginStart="8dp" android:text="Luce" android:textColor="@color/w_dim"
+                android:textSize="13sp" android:maxLines="1" android:ellipsize="end" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/w_p2" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="6dp" android:gravity="center_vertical" android:orientation="horizontal">
+            <ImageView android:id="@+id/w_p2_ic" android:layout_width="16dp" android:layout_height="16dp"
+                android:src="@drawable/ic_w_turno" android:importantForAccessibility="no" />
+            <TextView android:id="@+id/w_p2_ora" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginStart="8dp" android:text="14:00" android:textColor="@color/w_ink" android:textSize="13sp"
+                android:textStyle="bold" android:maxLines="1" />
+            <TextView android:id="@+id/w_p2_t" android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:layout_marginStart="8dp" android:text="Turno Pomeriggio" android:textColor="@color/w_dim"
+                android:textSize="13sp" android:maxLines="1" android:ellipsize="end" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Settimana: solo se il widget è alto almeno 3 righe. Un tocco su un
+         giorno apre l'app su quel giorno. -->
+    <LinearLayout
+        android:id="@+id/w_settimana"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:orientation="horizontal"
+        android:visibility="gone">
+        <LinearLayout android:id="@+id/w_g0" android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1" android:layout_marginEnd="3dp" android:paddingTop="3dp" android:paddingBottom="3dp"
+            android:gravity="center_horizontal" android:orientation="vertical">
+            <TextView android:id="@+id/w_g0_d" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textColor="@color/w_dim" android:textSize="10sp" android:maxLines="1" />
+            <TextView android:id="@+id/w_g0_c" android:layout_width="match_parent" android:layout_height="26dp"
+                android:layout_marginStart="2dp" android:layout_marginEnd="2dp" android:layout_marginTop="2dp"
+                android:gravity="center" android:textColor="@color/w_ink" android:textSize="13sp" android:textStyle="bold"
+                android:maxLines="1" android:background="@drawable/widget_cella_riposo" />
+            <TextView android:id="@+id/w_g0_s" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="2dp" android:textColor="@color/w_dim" android:textSize="10sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/w_g1" android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1" android:layout_marginEnd="3dp" android:paddingTop="3dp" android:paddingBottom="3dp"
+            android:gravity="center_horizontal" android:orientation="vertical">
+            <TextView android:id="@+id/w_g1_d" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textColor="@color/w_dim" android:textSize="10sp" android:maxLines="1" />
+            <TextView android:id="@+id/w_g1_c" android:layout_width="match_parent" android:layout_height="26dp"
+                android:layout_marginStart="2dp" android:layout_marginEnd="2dp" android:layout_marginTop="2dp"
+                android:gravity="center" android:textColor="@color/w_ink" android:textSize="13sp" android:textStyle="bold"
+                android:maxLines="1" android:background="@drawable/widget_cella_riposo" />
+            <TextView android:id="@+id/w_g1_s" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="2dp" android:textColor="@color/w_dim" android:textSize="10sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/w_g2" android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1" android:layout_marginEnd="3dp" android:paddingTop="3dp" android:paddingBottom="3dp"
+            android:gravity="center_horizontal" android:orientation="vertical">
+            <TextView android:id="@+id/w_g2_d" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textColor="@color/w_dim" android:textSize="10sp" android:maxLines="1" />
+            <TextView android:id="@+id/w_g2_c" android:layout_width="match_parent" android:layout_height="26dp"
+                android:layout_marginStart="2dp" android:layout_marginEnd="2dp" android:layout_marginTop="2dp"
+                android:gravity="center" android:textColor="@color/w_ink" android:textSize="13sp" android:textStyle="bold"
+                android:maxLines="1" android:background="@drawable/widget_cella_riposo" />
+            <TextView android:id="@+id/w_g2_s" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="2dp" android:textColor="@color/w_dim" android:textSize="10sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/w_g3" android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1" android:layout_marginEnd="3dp" android:paddingTop="3dp" android:paddingBottom="3dp"
+            android:gravity="center_horizontal" android:orientation="vertical">
+            <TextView android:id="@+id/w_g3_d" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textColor="@color/w_dim" android:textSize="10sp" android:maxLines="1" />
+            <TextView android:id="@+id/w_g3_c" android:layout_width="match_parent" android:layout_height="26dp"
+                android:layout_marginStart="2dp" android:layout_marginEnd="2dp" android:layout_marginTop="2dp"
+                android:gravity="center" android:textColor="@color/w_ink" android:textSize="13sp" android:textStyle="bold"
+                android:maxLines="1" android:background="@drawable/widget_cella_riposo" />
+            <TextView android:id="@+id/w_g3_s" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="2dp" android:textColor="@color/w_dim" android:textSize="10sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/w_g4" android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1" android:layout_marginEnd="3dp" android:paddingTop="3dp" android:paddingBottom="3dp"
+            android:gravity="center_horizontal" android:orientation="vertical">
+            <TextView android:id="@+id/w_g4_d" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textColor="@color/w_dim" android:textSize="10sp" android:maxLines="1" />
+            <TextView android:id="@+id/w_g4_c" android:layout_width="match_parent" android:layout_height="26dp"
+                android:layout_marginStart="2dp" android:layout_marginEnd="2dp" android:layout_marginTop="2dp"
+                android:gravity="center" android:textColor="@color/w_ink" android:textSize="13sp" android:textStyle="bold"
+                android:maxLines="1" android:background="@drawable/widget_cella_riposo" />
+            <TextView android:id="@+id/w_g4_s" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="2dp" android:textColor="@color/w_dim" android:textSize="10sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/w_g5" android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1" android:layout_marginEnd="3dp" android:paddingTop="3dp" android:paddingBottom="3dp"
+            android:gravity="center_horizontal" android:orientation="vertical">
+            <TextView android:id="@+id/w_g5_d" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textColor="@color/w_dim" android:textSize="10sp" android:maxLines="1" />
+            <TextView android:id="@+id/w_g5_c" android:layout_width="match_parent" android:layout_height="26dp"
+                android:layout_marginStart="2dp" android:layout_marginEnd="2dp" android:layout_marginTop="2dp"
+                android:gravity="center" android:textColor="@color/w_ink" android:textSize="13sp" android:textStyle="bold"
+                android:maxLines="1" android:background="@drawable/widget_cella_riposo" />
+            <TextView android:id="@+id/w_g5_s" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="2dp" android:textColor="@color/w_dim" android:textSize="10sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/w_g6" android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1" android:layout_marginEnd="0dp" android:paddingTop="3dp" android:paddingBottom="3dp"
+            android:gravity="center_horizontal" android:orientation="vertical">
+            <TextView android:id="@+id/w_g6_d" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textColor="@color/w_dim" android:textSize="10sp" android:maxLines="1" />
+            <TextView android:id="@+id/w_g6_c" android:layout_width="match_parent" android:layout_height="26dp"
+                android:layout_marginStart="2dp" android:layout_marginEnd="2dp" android:layout_marginTop="2dp"
+                android:gravity="center" android:textColor="@color/w_ink" android:textSize="13sp" android:textStyle="bold"
+                android:maxLines="1" android:background="@drawable/widget_cella_riposo" />
+            <TextView android:id="@+id/w_g6_s" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="2dp" android:textColor="@color/w_dim" android:textSize="10sp" android:maxLines="1" />
+        </LinearLayout>
+    </LinearLayout>
 </LinearLayout>
