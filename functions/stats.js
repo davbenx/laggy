@@ -324,6 +324,7 @@ function render(){
     kpi(fmt(Math.round(actTot/D.days)), "Dispositivi attivi, media al giorno", "oggi: "+fmt((act.find(function(p){return p.day===today;})||{n:0}).n))+
     kpi(fmt(total(rows,"plan_generated")), "Piani generati", "nel periodo")+
     kpi(fmt(total(rows,"notifications_enabled")), "Notifiche attivate", "nel periodo")+
+    kpi(fmt(total(rows,"recensione_chiesta")), "Richieste di recensione", "riquadro Play aperto (Google decide se mostrarlo)")+
     kpi(fmt(feedDistinct), "Calendari ICS vivi", coupleDistinct? ("più "+fmt(coupleDistinct)+" di coppia") : "feed distinti letti nel periodo");
 
   columns($("#chActive"), act, "Dispositivi attivi al giorno");
