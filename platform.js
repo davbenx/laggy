@@ -51,8 +51,16 @@ const webNotify = {
     sw.postMessage({ type: "NT_SCHEDULE", items });
     periodicSync();
     return true;
+  },
+  // Una notifica subito, per vedere che arrivano (non tocca la coda del piano).
+  async prova() {
+    if (!("Notification" in window) || Notification.permission !== "granted" || !("serviceWorker" in navigator)) return false;
+    const reg = await navigator.serviceWorker.ready;
+    setTimeout(() => reg.showNotification("Notturnisti", { body: PROVA, tag: "nt-prova", icon: "./icon-192.png" }), 3000);
+    return true;
   }
 };
+const PROVA = "Le notifiche funzionano: così arriveranno i promemoria del piano.";
 
 // Periodic Background Sync: dove il browser la concede (oggi solo
 // Chrome/Android, e solo in base a quanto l'utente usa l'app), risveglia il SW
@@ -123,6 +131,14 @@ const nativeNotify = {
         schedule: { at: new Date(last.getTime() + 60 * 60e3) }, isExactNotification: false, extra: { tab: "oggi" } });
     }
     if (list.length) await LN.schedule({ notifications: list });
+    return true;
+  },
+  async prova() {
+    const LN = plugin("LocalNotifications"); if (!LN) return false;
+    if ((await this.permission()) !== "granted") return false;
+    await ensureChannels(LN);
+    await LN.schedule({ notifications: [{ id: 999990, title: "Notturnisti", body: PROVA,
+      schedule: { at: new Date(Date.now() + 5000), allowWhileIdle: true }, channelId: "promemoria", extra: { tab: "oggi" } }] });
     return true;
   }
 };
@@ -236,7 +252,23 @@ export const calendar = {
     })();
     return _calBusy;
   },
-  async apri() { try { await plugin("CapacitorCalendar").openCalendar({ date: Date.now() }); } catch (e) {} }
+  async apri() { try { await plugin("CapacitorCalendar").openCalendar({ date: Date.now() }); } catch (e) {} },
+  // Quanti eventi dell'app ci sono davvero nel calendario del telefono nei
+  // prossimi 7 giorni: lo legge dal telefono, non dalla memoria dell'app.
+  async verifica() {
+    if (!this.available || !this.attivo()) return { on: false, n: 0 };
+    try {
+      if (!(await calPermesso(false))) return { on: true, permesso: false, n: 0 };
+      const st = calState();
+      if (!(await calEsiste(st.id))) return { on: true, permesso: true, esiste: false, n: 0 };
+      const from = Date.now(), to = from + 7 * 864e5;
+      const r = await plugin("CapacitorCalendar").listEventsInRange({ from, to });
+      const n = (r.result || []).filter(e => String(e.calendarId) === String(st.id)).length;
+      return { on: true, permesso: true, esiste: true, n };
+    } catch (e) { return { on: true, errore: String(e && e.message || e), n: 0 }; }
+  },
+  // Riscrive tutto alla prossima sincronizzazione (dimentica la firma).
+  riscrivi() { const st = calState(); st.sig = null; calSave(st); }
 };
 
 /* ── Widget ────────────────────────────────────────────────────────────── */
