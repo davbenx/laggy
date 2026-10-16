@@ -968,6 +968,12 @@ text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:600;color:v
 .opz-gruppo>.tool:not([hidden])~.tool,.opz-gruppo>.ecc{border-top:1px solid var(--line)}
 .opz-gruppo>.ecc{margin:0;border-left:0;border-right:0;border-bottom:0;border-radius:0}
 @media (hover:hover){ .opz-gruppo>.tool:hover{background:var(--s2)} }
+/* Opzioni: il valore attuale sta sotto la descrizione (a destra stringeva
+   il testo su quattro righe), la freccia dice che la riga si apre. */
+.opz-gruppo>.tool{align-items:center}
+.opz-gruppo>.tool::after{content:"›";flex:none;color:var(--faint);font-size:20px;line-height:1;margin-left:4px}
+.opz-gruppo .tool-tx .tool-val{display:block;max-width:none;padding:0;margin-top:3px;font-size:13px;font-weight:700;color:var(--blue);white-space:normal}
+.opz-gruppo .tool-tx .tool-val::after{content:none}
 /* Dentro Opzioni i passi del wizard perdono titolo e introduzione (sono
    già il nome della riga) e l'invito ai promemoria (sta in cima). */
 .ecc .wstep>.wq,.ecc .wstep>.wsub,.ecc .solo-wizard{display:none}
@@ -1413,7 +1419,7 @@ header b{font-size:23px}
 <!-- Simulatore Scambio Turno: strumento autonomo dentro la scheda Turni -->
 <button type="button" class="tsec" id="doScambioTurno">
   <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:var(--blue);background:var(--blue-soft)"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
-  <span class="tsec-tx"><span class="eyebrow" style="display:block">Simulatore</span><b style="font-family:var(--serif)">Valuta uno scambio turno</b><span style="font-size:12.5px;color:var(--dim);display:block;margin-top:2px">Controlla se lo scambio ti costa in sonno o crea ritorni rapidi (&lt;11h)</span></span>
+  <span class="tsec-tx"><span class="eyebrow" style="display:block">Cambio turno</span><b style="font-family:var(--serif)">Mi conviene lo scambio?</b><span style="font-size:12.5px;color:var(--dim);display:block;margin-top:2px">Prima di accettare: quanto sonno ti costa e se ti restano almeno 11 ore di riposo tra due turni.</span></span>
   <span class="tchev" id="scambioChev">›</span>
 </button>
 
@@ -1448,7 +1454,7 @@ header b{font-size:23px}
      persone): sono la stessa domanda, con o senza qualcun altro. -->
 <button type="button" class="tsec" id="doPartner">
   <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:var(--blue);background:var(--blue-soft)"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
-  <span class="tsec-tx"><span class="eyebrow" style="display:block">Quando sono disponibile</span><b id="doPartnerSub" style="font-family:var(--serif)">—</b></span>
+  <span class="tsec-tx"><span class="eyebrow" style="display:block">Quando sono libero</span><b id="doPartnerSub" style="font-family:var(--serif)">—</b></span>
   <span class="tchev">›</span>
 </button>
 
@@ -1457,7 +1463,7 @@ header b{font-size:23px}
     <button type="button" class="themebtn" id="chiudiVederci" aria-label="Torna a Turni">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
     </button>
-    <h1 class="tab-title" style="margin:0">Quando sono disponibile</h1>
+    <h1 class="tab-title" style="margin:0">Quando sono libero</h1>
   </div>
   <div id="partner"></div>
   <!-- Gestione delle persone tracciate: viveva in Opzioni ("Persone"),
@@ -1535,7 +1541,7 @@ header b{font-size:23px}
 
 <button type="button" class="tsec" id="doAndamenti">
   <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:var(--orange);background:var(--orange-soft)"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 6h6v6"/></svg>
-  <span class="tsec-tx"><span class="eyebrow" style="display:block">Andamenti</span><b id="andamentiAnteprima" style="font-family:var(--serif)">—</b></span>
+  <span class="tsec-tx"><span class="eyebrow" style="display:block">Come stai dormendo</span><b id="andamentiAnteprima" style="font-family:var(--serif)">—</b></span>
   <span class="tchev">›</span>
 </button>
 
@@ -1544,7 +1550,7 @@ header b{font-size:23px}
     <button type="button" class="themebtn" id="chiudiAndamenti" aria-label="Torna a Turni">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
     </button>
-    <h1 class="tab-title" style="margin:0">Andamenti</h1>
+    <h1 class="tab-title" style="margin:0">Come stai dormendo</h1>
   </div>
   <div id="andamenti"></div>
 </div>
@@ -1562,7 +1568,7 @@ header b{font-size:23px}
      Turni, qualunque sia la loro specificità (stesso bug di
      specificità già trovato e corretto altrove in questo file). -->
 <div id="cycShareBox" class="cycshare-btn" style="flex-direction:column;gap:8px;margin-top:var(--gap-sezione)">
-  <span class="eyebrow">Sincronizzazione & Condivisione</span>
+  <span class="eyebrow">Calendario e condivisione</span>
   <div class="cal-sync-card" id="turniCalSyncCard" style="background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;box-shadow:var(--shadow-card);margin-bottom:4px">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
       <div style="display:flex;align-items:center;gap:12px;min-width:0">
@@ -1572,12 +1578,12 @@ header b{font-size:23px}
           </svg>
         </span>
         <div style="min-width:0">
-          <b style="display:block;font-size:15px;color:var(--ink);line-height:1.25">Sincronizza col calendario</b>
-          <span style="display:block;font-size:12.5px;color:var(--dim);margin-top:2px">I tuoi orari sempre sul telefono, senza aprire l'app</span>
+          <b style="display:block;font-size:15px;color:var(--ink);line-height:1.25">Nel calendario del telefono</b>
+          <span style="display:block;font-size:12.5px;color:var(--dim);margin-top:2px" id="cycCalSub">Turni e ore di sonno nel calendario che usi già, aggiornati da soli.</span>
         </div>
       </div>
-      <label class="switch" title="Attiva o disattiva sincronizzazione">
-        <input type="checkbox" id="cycCalToggle">
+      <label class="switch" title="Calendario del telefono">
+        <input type="checkbox" id="cycCalToggle" aria-label="Turni e sonno nel calendario del telefono">
         <span class="slider"></span>
       </label>
     </div>
@@ -1587,22 +1593,22 @@ header b{font-size:23px}
   <div class="tools" style="margin:0">
     <button type="button" id="doShareWhatsApp" class="tool">
       <span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.41a8.204 8.204 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.19 8.19 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24m4.52 11.66c-.19.53-1.06 1.04-1.47 1.08-.38.04-.88.06-2.84-.73-2.34-.95-3.84-3.34-3.96-3.49-.11-.16-.96-1.27-.96-2.42 0-1.15.6-1.72.82-1.95.21-.23.46-.29.62-.29.15 0 .31 0 .44.01.14.01.33-.05.51.39.19.46.66 1.6.72 1.72.06.12.1.26.02.42-.08.16-.12.26-.24.4-.12.14-.26.31-.37.42-.12.12-.24.25-.1.5.14.24.62 1.03 1.34 1.67.92.82 1.7 1.08 1.94 1.2.24.12.39.1.53-.06.15-.17.62-.72.79-.97.16-.25.33-.21.55-.13.22.08 1.41.67 1.65.79.24.12.4.18.46.28.06.11.06.63-.13 1.16"/></svg></span>
-      <span class="tool-tx"><b>Invia i miei turni su WhatsApp</b><span>Formatta il ciclo da oggi per colleghi o partner</span></span>
+      <span class="tool-tx"><b>Manda i miei turni su WhatsApp</b><span>Un messaggio con i turni dei prossimi giorni, uno per riga: per colleghi o famiglia.</span></span>
     </button>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
       <button type="button" id="doCycShare" class="tool" style="margin:0;padding:12px;flex-direction:column;align-items:flex-start;gap:6px">
         <span class="tool-ic" style="margin:0"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg></span>
-        <span class="tool-tx"><b>Condividi il ciclo</b><span style="font-size:12px">Link per confrontare i turni</span></span>
+        <span class="tool-tx"><b>Link al mio ciclo</b><span style="font-size:12px">Chi lo apre vede i tuoi turni accanto ai suoi</span></span>
       </button>
       <button type="button" id="doCycQR" class="tool" style="margin:0;padding:12px;flex-direction:column;align-items:flex-start;gap:6px">
         <span class="tool-ic" style="margin:0"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM19 14h2v2h-2zM14 19h2v2h-2zM19 19h2v2h-2z"/></svg></span>
-        <span class="tool-tx"><b>Mostra codice QR</b><span style="font-size:12px">Per chi ti sta davanti</span></span>
+        <span class="tool-tx"><b>QR del ciclo</b><span style="font-size:12px">Lo stesso link, da inquadrare di persona</span></span>
       </button>
     </div>
     <div class="ecc" id="qrBoxCyc" hidden><div id="qrHolderCyc" style="display:flex;justify-content:center;margin:14px 0"></div></div>
     <button type="button" id="doPrint" class="tool">
       <span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8V3h12v5"/><rect x="4" y="8" width="16" height="8" rx="1.5"/><path d="M8 13h8v7H8z"/></svg></span>
-      <span class="tool-tx"><b>Stampa il foglio del ciclo</b><span>Un giro completo, da attaccare al frigo</span></span>
+      <span class="tool-tx"><b>Stampa o salva in PDF</b><span>28 giorni con turni, sonno e ultimo caffè: da appendere al frigo.</span></span>
     </button>
   </div>
 </div>
@@ -1627,19 +1633,16 @@ header b{font-size:23px}
   <span class="eyebrow opz-eb">Il tuo piano</span>
   <div class="opz-gruppo">
   <button class="tool tool-1line" data-opz="1"><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg></span>
-    <span class="tool-tx"><b>Turni e ciclo</b></span>
-    <span class="tool-val" id="opzValTurni"></span></button>
+    <span class="tool-tx"><b>Turni e ciclo</b><span>Cambia lo schema o gli orari dei turni</span><span class="tool-val" id="opzValTurni"></span></span></button>
   <div class="ecc" id="opzBox1" hidden></div>
   <button class="tool tool-1line" data-opz="3"><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg></span>
-    <span class="tool-tx"><b>Sonno nei giorni liberi</b></span>
-    <span class="tool-val" id="opzValSonno"></span></button>
+    <span class="tool-tx"><b>Sonno nei giorni liberi</b><span>Quando dormi senza sveglia: il piano parte da qui</span><span class="tool-val" id="opzValSonno"></span></span></button>
   <div class="ecc" id="opzBox3" hidden></div>
   <button class="tool tool-1line" data-opz="4"><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h1.5a2.5 2.5 0 0 1 0 5H17"/><path d="M4 8h13v5a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V8z"/><path d="M8 2v3M12 2v3"/></svg></span>
-    <span class="tool-tx"><b>Tragitto, caffè e pisolini</b></span></button>
+    <span class="tool-tx"><b>Tragitto, caffè e pisolini</b><span>Tempi di viaggio, effetto del caffè, se puoi dormire al lavoro</span></span></button>
   <div class="ecc" id="opzBox4" hidden></div>
   <button class="tool tool-1line" id="doOpzLucidita"><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>
-    <span class="tool-tx"><b>Un giorno importante</b></span>
-    <span class="tool-val" id="opzValLucidita"></span></button>
+    <span class="tool-tx"><b>Un giorno importante</b><span>Esame, visita, matrimonio: arrivi lucido all'ora giusta</span><span class="tool-val" id="opzValLucidita"></span></span></button>
   <div class="ecc" id="opzBoxLucidita" hidden>
     <p class="hint" style="margin-top:0">Esame, visita, matrimonio: scegli giorno e ora, e il sonno dei giorni prima si adatta perché tu arrivi lucido.</p>
     <div id="opzLuciditaContent" style="margin-top:10px"></div>
@@ -1649,13 +1652,13 @@ header b{font-size:23px}
   <div class="opz-gruppo">
     <button class="tool" id="doLink">
       <span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg></span>
-      <span class="tool-tx"><b>Salva la configurazione</b>
-      <span>In un link: per non perderla o passarla a un altro telefono.</span></span>
+      <span class="tool-tx"><b>Copia di sicurezza</b>
+      <span>Un link con tutte le tue impostazioni: ti serve se cambi telefono o reinstalli l'app.</span></span>
     </button>
     <button class="tool" id="doIcs">
       <span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M8 11l4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></span>
-      <span class="tool-tx"><b>Scarica i turni per il calendario</b>
-      <span>File con 28 giorni, da importare a mano. Non si aggiorna da solo.</span></span>
+      <span class="tool-tx"><b>File per il calendario</b>
+      <span>Solo se non vuoi quello automatico qui sopra: 28 giorni da importare a mano, non si aggiorna.</span></span>
     </button>
     <div class="ecc" id="icsBox" hidden>
       <b>Cosa mettere nel calendario</b>
@@ -1695,7 +1698,7 @@ header b{font-size:23px}
       <span>Statistiche d'uso anonime</span>
       <span class="switch"><input type="checkbox" id="optStats" aria-label="Statistiche d'uso anonime" aria-describedby="optStatsHint"><span class="slider"></span></span>
     </label>
-    <p class="hint" id="optStatsHint" style="margin:2px 0 0">Spente finché non le accendi. Solo contatori come «un piano è stato generato»: nessun identificativo, nessun dato dei turni.</p>
+    <p class="hint" id="optStatsHint" style="margin:2px 0 0">Ci aiutano a capire cosa migliorare. Solo contatori come «un piano è stato creato»: nessun identificativo, nessun dato dei turni. Spente finché non le accendi.</p>
     <p style="margin:10px 0 0"><button class="lnk" id="doFeed" style="padding:8px 0">Segnala cosa non torna</button> · <button class="lnk" id="doShare" style="padding:8px 0">Consiglialo a un collega</button></p>
     <p class="hint" style="margin:10px 0 0"><a href="https://notturnisti.club/planner" target="_blank" rel="noopener">Come si usa</a> · <a href="https://notturnisti.club/chi-siamo/" target="_blank" rel="noopener">Chi siamo</a> · <a href="https://notturnisti.club" target="_blank" rel="noopener">notturnisti.club</a><span id="doDonateLnkWrap" hidden> · <a id="doDonateLnk" href="#" target="_blank" rel="noopener">Sostieni il progetto</a></span></p>
   </div>
@@ -4723,11 +4726,11 @@ function vociAttivazione(){
   const futuri = Object.keys(state.ecc||{}).filter(k=>k>isoOggi()).length;
   const perm = notifPerm();
   const v = [
-    {id:"turni", t:"I turni dei prossimi giorni", d:"Così il piano è pronto ogni giorno, senza inserirlo", ok: state.repeat!==false || futuri>=7},
-    {id:"notifiche", t:"Promemoria sul telefono", d: perm==="denied" ? "Bloccati dal telefono: tocca per sapere come riattivarli" : "Ora di andare a letto, sveglia, ultimo caffè", ok: promemoriaAttivi(), skip: perm==="unsupported"},
-    {id:"calendario", t:"Nel calendario del telefono", d: platform.calendar.available ? "Turni e sonno nell'app Calendario, aggiornati da soli" : "Turni e sonno nel calendario che usi già", ok: platform.calendar.available ? platform.calendar.attivo() : !!(window.NTPaid && window.NTPaid.paid())}
+    {id:"turni", t:"I turni dei prossimi giorni", d:"Così ogni giorno il piano è pronto, senza dirgli che turno fai", ok: state.repeat!==false || futuri>=7},
+    {id:"notifiche", t:"Promemoria sul telefono", d: perm==="denied" ? "Bloccati dal telefono: tocca per sapere come riattivarli" : "Ti avvisa quando andare a letto, svegliarti e smettere col caffè", ok: promemoriaAttivi(), skip: perm==="unsupported"},
+    {id:"calendario", t:"Nel calendario del telefono", d: platform.calendar.available ? "Turni e ore di sonno nell'app Calendario, aggiornati da soli" : "Turni e ore di sonno nel calendario che usi già (Google, Apple…), aggiornati da soli", ok: platform.calendar.available ? platform.calendar.attivo() : !!(window.NTPaid && window.NTPaid.paid())}
   ];
-  if(platform.widget.available) v.push({id:"widget", t:"Widget sulla schermata Home", d:"Cosa fare adesso, senza aprire l'app", ok: platform.widget.presenti()>0});
+  if(platform.widget.available) v.push({id:"widget", t:"Widget sulla schermata Home", d:"Cosa fare adesso (dormire, caffè, luce) senza aprire l'app", ok: platform.widget.presenti()>0});
   return v.filter(x=>!x.skip);
 }
 function attivazioneVisibile(){
@@ -6026,7 +6029,7 @@ function renderAndamenti(){
         const lx=xAt(vals.length-1).toFixed(1), ly=yAt(vals[vals.length-1]).toFixed(1);
         const numColor = d>0 ? "var(--orange)" : "var(--ok)";
         heroHtml='<div class="andamento-hero">'+
-          '<span class="hint" style="display:block">Debito di sonno · ultime '+trend.series.length+' notti</span>'+
+          '<span class="hint" style="display:block">'+(d>0?"Sonno che ti manca":"Sonno in più del necessario")+' · ultime '+trend.series.length+' notti</span>'+
           '<div class="andamento-num" style="color:'+numColor+'">'+(d>0?"-":"+")+hm(Math.abs(d))+'</div>'+
           '<span class="hint" style="display:block">Dormi in media '+hm(trend.avgActual)+
             (trend.avgPlanned?' contro '+hm(trend.avgPlanned)+' pianificate':'')+'</span>'+
@@ -6113,7 +6116,12 @@ function renderAndamenti(){
 function renderAndamentiPreview(){
   const el=$("#andamentiAnteprima"); if(!el) return;
   const num=$("#andamenti .andamento-num");
-  el.textContent = num ? "Debito di sonno: "+num.textContent : "Ancora pochi dati";
+  // "-1h 20m" non diceva se è sonno che manca o che avanza: a parole.
+  const v = num ? num.textContent.trim() : "";
+  el.textContent = !num ? "Ancora pochi dati"
+    : /^[-−]/.test(v) ? "Ti mancano "+v.replace(/^[-−]\s*/,"")+" di sonno"
+    : /^\+/.test(v) ? "Sonno in pari, anzi "+v+" in più"
+    : (/^0/.test(v) ? "Sonno in pari" : "Ti mancano "+v+" di sonno");
 }
 
 // Turni: la card partner (gestione nel wizard, risultato qui)
@@ -6370,21 +6378,21 @@ function renderPiuCal(){
   if(!hasPartner){
     detailsHtml =
       '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">' +
-        '<span>Aggiungi prima una persona qui sopra per sincronizzare i riposi in comune.</span>' +
+        '<span>Aggiungi prima una persona qui sopra: poi i riposi che avete in comune finiscono nel calendario.</span>' +
         '<button type="button" class="btn b" id="coupleAddPartnerBtn" style="padding:7px 12px;font-size:13px;white-space:nowrap">Aggiungi persona</button>' +
       '</div>';
   } else if(!isPaid){
     detailsHtml =
       '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">' +
         '<span>I riposi in comune con <b>'+esc(pName)+'</b> sempre in agenda sul telefono di entrambi, aggiornati da soli.</span>' +
-        '<button type="button" class="btn b" id="coupleCalActivateBtn" style="padding:7px 12px;font-size:13px;white-space:nowrap">Attiva sincronizzazione</button>' +
+        '<button type="button" class="btn b" id="coupleCalActivateBtn" style="padding:7px 12px;font-size:13px;white-space:nowrap">Mettili in calendario</button>' +
       '</div>';
   } else {
     detailsHtml =
       '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px">' +
         '<span style="color:#2ecc71;font-weight:600;display:flex;align-items:center;gap:6px">' +
           '<span style="width:7px;height:7px;border-radius:50%;background:#2ecc71;display:inline-block"></span>' +
-          'Sincronizzazione attiva con '+esc(pName) +
+          'Riposi in comune con '+esc(pName)+' in calendario' +
         '</span>' +
         '<button type="button" id="coupleCalManageBtn" style="color:var(--blue);font-size:13px;font-weight:600;padding:0;background:none;border:none;cursor:pointer">Gestisci →</button>' +
       '</div>' +
@@ -6475,16 +6483,15 @@ const _hhmmDa = t => { const d=new Date(t); return String(d.getHours()).padStart
 function renderCalNativo(toggle, details){
   const on=platform.calendar.attivo(), at=platform.calendar.ultimoSync();
   toggle.checked=on;
+  // Spento: basta l'interruttore (prima c'erano anche un secondo testo e un
+  // bottone "Attiva" che facevano la stessa cosa). Acceso: dove trovarlo.
+  details.hidden=!on;
   details.innerHTML = on
-    ? '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px">'+
-        '<span style="color:#2ecc71;font-weight:600;display:flex;align-items:center;gap:6px"><span style="width:7px;height:7px;border-radius:50%;background:#2ecc71;display:inline-block"></span>Nel calendario del telefono</span>'+
-        '<button type="button" id="calNatApri" style="color:var(--blue);font-size:13px;font-weight:600;padding:0;background:none;border:none;cursor:pointer">Apri →</button>'+
-      '</div>'+
-      '<span>Calendario «Notturnisti», solo su questo telefono. Si aggiorna da solo quando cambi i turni'+(at?' · ultimo aggiornamento '+_hhmmDa(at):'')+'.</span>'
-    : '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">'+
-        '<span>Turni, sonno e ultimo caffè nell\'app Calendario del telefono. Restano solo sul telefono, nessun server.</span>'+
-        '<button type="button" class="btn b" id="calNatAttiva" style="padding:7px 12px;font-size:13px;white-space:nowrap">Attiva</button>'+
-      '</div>';
+    ? '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">'+
+        '<span>Calendario «Notturnisti», solo su questo telefono'+(at?' · aggiornato alle '+_hhmmDa(at):'')+'</span>'+
+        '<button type="button" id="calNatApri" style="color:var(--blue);font-size:13px;font-weight:600;padding:8px 0;background:none;border:none;cursor:pointer;white-space:nowrap">Apri →</button>'+
+      '</div>'
+    : '';
   const attiva=async()=>{
     const r=await platform.calendar.attiva();
     if(r!=="ok"){ toggle.checked=false; toast("Serve il permesso al calendario: Impostazioni › App › Notturnisti › Autorizzazioni"); renderCycCalSync(); return; }
@@ -6552,18 +6559,15 @@ function renderCycCalSync(){
   const feed = (sub && sub.feedUrl) || "";
   toggle.checked = isPaid;
 
+  details.hidden=!isPaid;
   if(!isPaid){
-    details.innerHTML =
-      '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">' +
-        '<span>Turni, sonno e ultimo caffè sempre pronti in agenda, senza aprire l\'app.</span>' +
-        '<button type="button" class="btn b" id="cycCalActivateBtn" style="padding:7px 12px;font-size:13px;white-space:nowrap">Attiva sincronizzazione</button>' +
-      '</div>';
+    details.innerHTML = '';
   } else {
     details.innerHTML =
       '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px">' +
         '<span style="color:#2ecc71;font-weight:600;display:flex;align-items:center;gap:6px">' +
           '<span style="width:7px;height:7px;border-radius:50%;background:#2ecc71;display:inline-block"></span>' +
-          'Sincronizzazione attiva' +
+          'Attivo: si aggiorna da solo' +
         '</span>' +
         '<button type="button" id="cycCalManageBtn" style="color:var(--blue);font-size:13px;font-weight:600;padding:0;background:none;border:none;cursor:pointer">Gestisci →</button>' +
       '</div>' +
