@@ -5336,6 +5336,7 @@ function clubBannerVisibile(){
   const mostraBenvenuto = primaVoltaDaLink && !benvenutoLinkChiuso;
   const pronto = !!(state.pattern && Object.keys(state.shifts||{}).length);
   const heroAttivo = (!state.turniConfigurati && !demoEsempioChiuso);
+  if(donateMomento()) return false;   // il momento del grazie ha la precedenza
   return !(state.clubBannerOff || firstPlanBannerVisibile() || mostraBenvenuto || backupNudgeVisibile() || installBannerVisibile() || shareNudgeVisibile() || icsNudgeVisibile() || icsExpireNudgeVisibile() || statsNudgeVisibile() || !pronto || heroAttivo);
 }
 function renderClubBanner(){
@@ -5350,22 +5351,44 @@ function renderClubBanner(){
 }
 if($("#clubBanner")) $("#clubBanner").addEventListener("click", e=>{
   if(e.target.closest("#chiudiClub")){ state.clubBannerOff=true; salva(); renderClubBanner(); return; }
+  // Aperto il link, l'invito ha fatto il suo lavoro: prima tornava ogni
+  // giorno finché non si toccava la ×.
+  if(e.target.closest("#clubBanner a")){ state.clubBannerOff=true; salva(); setTimeout(renderClubBanner, 0); }
 });
 
-// Invito a sostenere il progetto — l'ultimo della fila, il più silenzioso di
-// tutti: non prima che l'app abbia dato valore per un po' (tre settimane
-// d'uso reale, non al primo avvio), sparisce per sempre al primo tocco
-// (chiusura o click), come club/share/install. Notturnisti è gratis e lo
-// resta comunque — questo non è mai una condizione, solo un modo per chi
-// vuole ricambiare a scoprire come farlo.
-function donateNudgeVisibile(){
-  if(invitiInPausa(true)) return false;
+// Le ultime notti annotate vanno bene: almeno cinque in tutto, delle ultime
+// tre almeno due buone (Sveglio, Al meglio) e nessuna pessima. È il momento
+// in cui l'app ha appena dimostrato di servire: lo usano sia la recensione
+// (app) sia l'invito a sostenere (web).
+function serieBuona(){
+  const k=Object.keys(diary); if(k.length<5) return false;
+  const ultime=k.sort().slice(-3).map(x=>+diary[x]);
+  return ultime.filter(x=>x>=4).length>=2 && !ultime.some(x=>x<=2);
+}
+function giorniDalPrimoUso(){ return state.firstSeenAt ? (new Date()-new Date(state.firstSeenAt+"T00:00:00"))/86400000 : 0; }
+
+// Invito a sostenere il progetto (solo web: nell'app le regole di Play non
+// lo permettono). Due momenti, una volta sola in tutto, sparisce al primo
+// tocco (chiusura o click):
+// - subito dopo una serie di notti buone annotate, da 14 giorni d'uso: la
+//   gratitudine è più alta quando il risultato si vede, e ha la precedenza
+//   sull'invito al Club;
+// - per chi non annota, dopo 30 giorni d'uso, in coda al Club.
+// Mai dopo notti pessime. Notturnisti è gratis e lo resta comunque: non è
+// mai una condizione, solo un modo per chi vuole ricambiare di farlo.
+function donateBase(){
   const pronto = !!(state.pattern && Object.keys(state.shifts||{}).length);
-  const giorniUso = state.firstSeenAt ? (new Date()-new Date(state.firstSeenAt+"T00:00:00"))/86400000 : 0;
-  // Come per la recensione: non subito dopo notti pessime annotate.
+  if(state.donateNudgeOff || !donateUrl() || !pronto) return false;
   const ultime = Object.keys(diary).sort().slice(-3).map(k=>+diary[k]);
-  if(ultime.some(x=>x<=2)) return false;
-  return !(state.donateNudgeOff || !donateUrl() || clubBannerVisibile() || !pronto || giorniUso<21);
+  return !ultime.some(x=>x<=2);
+}
+function donateMomento(){ return donateBase() && giorniDalPrimoUso()>=14 && serieBuona(); }
+function donateNudgeVisibile(){
+  if(invitiInPausa(true) || !donateBase()) return false;
+  // Un invito alla volta: prima quelli già in fila (backup, installazione,
+  // condivisione, calendario, statistiche).
+  if(firstPlanBannerVisibile() || backupNudgeVisibile() || installBannerVisibile() || shareNudgeVisibile() || icsNudgeVisibile() || icsExpireNudgeVisibile() || statsNudgeVisibile()) return false;
+  return donateMomento() || (giorniDalPrimoUso()>=30 && !clubBannerVisibile());
 }
 function renderDonateNudge(){
   const el=$("#donateNudge"); if(!el) return;
@@ -5373,8 +5396,11 @@ function renderDonateNudge(){
   el.hidden=false;
   el.innerHTML =
     '<button type="button" id="chiudiDonateNudge" aria-label="Chiudi">×</button>'+
-    '<b>Notturnisti resta gratis per tutti</b>'+
-    '<p class="hint" style="margin-top:6px">Nessuna funzione a pagamento, nessun account obbligatorio: lo sviluppo lo copro io. Se in queste settimane ti è stato utile, un contributo libero — anche piccolo — aiuta a tenerlo in piedi.</p>'+
+    (donateMomento()
+      ? '<b>Le ultime notti che hai annotato sono andate bene</b>'+
+        '<p class="hint" style="margin-top:6px">Notturnisti resta gratis per tutti: niente funzioni a pagamento, niente account. Lo sviluppo lo copro io. Se ti sta aiutando, un caffè — anche piccolo — lo tiene in piedi.</p>'
+      : '<b>Notturnisti resta gratis per tutti</b>'+
+        '<p class="hint" style="margin-top:6px">Nessuna funzione a pagamento, nessun account obbligatorio: lo sviluppo lo copro io. Se in queste settimane ti è stato utile, un contributo libero — anche piccolo — aiuta a tenerlo in piedi.</p>')+
     '<a class="btn g" href="'+esc(donateUrl())+'" target="_blank" rel="noopener" id="doDonateNudge" style="display:inline-block;text-decoration:none;text-align:center">Offrimi un caffè →</a>';
 }
 if($("#donateNudge")) $("#donateNudge").addEventListener("click", e=>{
@@ -5394,13 +5420,10 @@ if($("#donateNudge")) $("#donateNudge").addEventListener("click", e=>{
 function proponiRecensione(){
   try{
     if(!platform.review.available) return;
-    if(!state.firstSeenAt || (new Date()-new Date(state.firstSeenAt+"T00:00:00"))/86400000 < 14) return;
-    if(Object.keys(diary).length < 5) return;
-    // Non una notte buona isolata: le ultime tre annotate devono essere
-    // almeno due su tre buone e nessuna pessima. E niente segnali di
-    // frustrazione: un errore oggi, notifiche negate dal telefono.
-    const ultime = Object.keys(diary).sort().slice(-3).map(k=>+diary[k]);
-    if(ultime.filter(x=>x>=4).length < 2 || ultime.some(x=>x<=2)) return;
+    if(giorniDalPrimoUso() < 14) return;
+    // Non una notte buona isolata ma una serie (serieBuona), e niente segnali
+    // di frustrazione: un errore oggi, notifiche negate dal telefono.
+    if(!serieBuona()) return;
     if(Object.values(store.get("errVisti",{})).includes(new Date().toISOString().slice(0,10))) return;
     if(notifPerm()==="denied") return;
     if(attivazioneVisibile() || adattaVisibile()) return;
