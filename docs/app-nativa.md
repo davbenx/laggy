@@ -256,3 +256,27 @@ Da decidere quando l'app sarà sullo store: su Android web il banner
 | Font | Inter e Noto Serif serviti dal sito e inclusi nell'app (woff2 latini, licenza OFL in `fonts/`). Niente più richieste a Google Fonts, anche sul web |
 | Calendario nativo | `@ebarooni/capacitor-calendar`: calendario locale "Notturnisti" (account LOCAL, non va su Google), più "Notturnisti · insieme" per la coppia. Viene riscritto a ogni cambio, a ogni apertura e a ogni ritorno nell'app (la finestra di 42 giorni avanza), solo se gli eventi sono cambiati. Nessun promemoria sugli eventi: le notifiche dell'app bastano. Spegnendolo, i calendari vengono cancellati |
 | Widget | `NotturnistiWidget.java` (RemoteViews, 4×2 ridimensionabile): mostra cosa vale adesso e le prossime due cose. La timeline delle 48 ore arriva già calcolata dalla pagina (`WidgetPlugin`, `platform.widget.publish`); il widget si ridisegna da solo al prossimo cambio con un allarme inesatto, senza permessi speciali |
+
+## Test su Android (emulatore)
+
+`app/scripts/test-android.sh` prepara un emulatore Android 11 (la prima volta
+scarica emulatore e immagine), compila un APK di test con il debug del WebView
+acceso e lancia `app/scripts/test-android.mjs`, che usa l'app come un utente e
+legge i risultati da Android stesso:
+
+- calendario «Notturnisti» nel database Calendario (account locale, visibile)
+  e numero di eventi;
+- allarmi programmati per le notifiche del piano (`dumpsys alarm`);
+- la notifica di prova davvero mostrata (`dumpsys notification`);
+- quello che l'app dice in Turni ("Nel telefono: N eventi…").
+
+Senza KVM l'emulatore gira senza accelerazione: avvio 7–20 minuti e WebView
+lento, ma è un Android vero. Android 14 su queste macchine è risultato
+instabile (crash del WebView, riavvii del sistema); Android 11 regge.
+L'APK di test non va distribuito.
+
+Prima prova (16/10/2026, Android 11): calendario creato e visibile con 168
+eventi (42 giorni), 210 allarmi delle notifiche programmati, notifica di prova
+mostrata sul canale "Promemoria del piano". Trovato e corretto: se il motore
+del WebView si chiude, l'app ora si ricarica invece di chiudersi
+(`onRenderProcessGone` in MainActivity).
