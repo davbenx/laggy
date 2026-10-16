@@ -514,6 +514,7 @@ font-size:22px;line-height:1;cursor:pointer;padding:0 0 4px 10px;min-height:0}
 .row{display:flex;gap:12px;font-size:14px;padding:3px 0;line-height:1.5}
 .row b{color:var(--blue);font-weight:600;flex:none;min-width:100px}
 .row span{color:var(--dim)}
+@media (max-width:480px){ .row{flex-direction:column;gap:0;padding:5px 0} .row b{min-width:0} }
 .flag{margin-top:10px;padding:9px 12px;background:var(--orange-soft);border-radius:var(--r);
 font-size:14px;color:var(--orange);line-height:1.5}
 .opts{margin-top:12px;display:grid;gap:8px}
@@ -527,7 +528,7 @@ details{margin-top:10px}
 summary{cursor:pointer;font-size:11px;letter-spacing:.07em;color:var(--faint);
 font-weight:600;list-style:none;display:inline-flex;gap:6px;align-items:center;padding:4px 0}
 summary::-webkit-details-marker{display:none}
-summary::after{content:"↓";font-size:11px}details[open] summary::after{content:"↑"}
+summary::after{content:"›";display:inline-block;margin-left:6px;transform:rotate(90deg);transition:transform .15s}details[open]>summary::after{transform:rotate(-90deg)}
 .erow>summary{text-transform:none}
 .erow>summary::after{content:none!important}
 summary:hover{color:var(--blue)}
@@ -730,7 +731,8 @@ flex:none;color:var(--ink)}
 .erow>summary .essrow{margin-bottom:0}
 .echev{flex:none;align-self:center;color:var(--faint);font-size:19px;line-height:1;
 transition:transform .15s ease;padding-left:2px}
-.erow[open]>summary .echev{transform:rotate(90deg)}
+.erow>summary .echev{transform:rotate(90deg)}
+.erow[open]>summary .echev{transform:rotate(-90deg)}
 .erow[open]>summary .essrow{border-color:var(--blue-lt)}
 .erow[open]>summary .el{color:var(--blue)}
 .ed{padding:10px 0 16px 50px}
@@ -799,6 +801,9 @@ background:var(--s2);box-sizing:content-box}
 .tsec-tx span{display:block;font-size:12.5px;color:var(--dim);margin-top:2px;font-weight:400}
 .tchev{color:var(--faint);font-size:19px;line-height:1;transition:transform .15s ease}
 .tsec.open .tchev{transform:rotate(90deg)}
+/* Il cambio turno si apre qui sotto (gli altri riquadri aprono una pagina). */
+#scambioChev{transform:rotate(90deg)}
+#doScambioTurno[aria-expanded="true"] #scambioChev{transform:rotate(-90deg)}
 .tsec.open{border-color:var(--blue-lt)}
 .tsec.open>svg{color:var(--blue)}
 /* Blocco unico "Ora": l'unico contenitore enfatizzato in cima. Tinta blu
@@ -971,7 +976,10 @@ text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:600;color:v
 /* Opzioni: il valore attuale sta sotto la descrizione (a destra stringeva
    il testo su quattro righe), la freccia dice che la riga si apre. */
 .opz-gruppo>.tool{align-items:center}
-.opz-gruppo>.tool::after{content:"›";flex:none;color:var(--faint);font-size:20px;line-height:1;margin-left:4px}
+.opz-gruppo>.tool::after{content:"›";flex:none;color:var(--faint);font-size:20px;line-height:1;margin-left:4px;transform:rotate(90deg);transition:transform .15s}
+.opz-gruppo>.tool[aria-expanded="true"]::after{transform:rotate(-90deg)}
+.opz-gruppo>.tool.va::after{transform:none}
+.opz-gruppo>.tool.azione::after{content:none}
 .opz-gruppo .tool-tx .tool-val{display:block;max-width:none;padding:0;margin-top:3px;font-size:13px;font-weight:700;color:var(--blue);white-space:normal}
 .opz-gruppo .tool-tx .tool-val::after{content:none}
 /* Dentro Opzioni i passi del wizard perdono titolo e introduzione (sono
@@ -1109,7 +1117,7 @@ header b{font-size:23px}
   <!-- Opzioni non è più una tab (si apre/tocca una volta e basta, non è
        un posto in cui si torna ogni giorno come Oggi/Turni) — un'icona
        sempre raggiungibile qui, non uno slot su 4 nella barra in basso. -->
-  <button class="themebtn" id="doOpzioni" type="button" aria-label="Opzioni">
+  <button class="themebtn" id="doOpzioni" type="button" aria-label="Impostazioni">
     <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
   </button>
   <button class="themebtn" id="themeToggle" type="button" aria-label="Passa alla modalità chiara" aria-pressed="false">
@@ -1364,7 +1372,7 @@ header b{font-size:23px}
      mezzo alle frecce. -->
 <div class="daynav" style="margin:10px 0 var(--gap-sezione)">
   <button class="nav" id="prev" aria-label="Giorno precedente"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
-  <button class="today" id="goToday">Naviga</button>
+  <button class="today" id="goToday">Scegli giorno</button>
   <button class="nav" id="next" aria-label="Giorno successivo"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
 </div>
 <div id="ora" class="ora"></div>
@@ -1392,7 +1400,7 @@ header b{font-size:23px}
 <h1 class="cycrange" id="cycRange" style="cursor:default">Turni</h1>
 <div class="cycbar" style="margin:10px 0 14px">
   <button class="nav" id="cycPrev" aria-label="Giorni precedenti"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
-  <button class="today" id="cycToday">Naviga</button>
+  <button class="today" id="cycToday">Scegli giorno</button>
   <button class="nav" id="cycNext" aria-label="Giorni successivi"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
 </div>
 <!-- "Il tuo ciclo" subito sopra la striscia, sotto la navigazione: è
@@ -1425,7 +1433,7 @@ header b{font-size:23px}
 
 <div class="ecc" id="scambioBox" hidden style="margin-top:10px">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-    <b style="font-size:16px">⇄ Valuta uno scambio turno</b>
+    <b style="font-size:16px">⇄ Mi conviene lo scambio?</b>
     <button type="button" class="btn g" id="chiudiScambioBtn" style="padding:2px 8px;font-size:12px;min-height:28px">Chiudi</button>
   </div>
 
@@ -1480,7 +1488,7 @@ header b{font-size:23px}
     <div id="wizPeopleList"></div>
     <div class="q">
       <label for="personaLink">Il suo link</label>
-      <textarea id="personaLink" rows="2" placeholder="Fatti mandare il suo link (Opzioni → Salva la configurazione) e incollalo qui"></textarea>
+      <textarea id="personaLink" rows="2" placeholder="Fatti mandare il suo link (Impostazioni → Copia di sicurezza) e incollalo qui"></textarea>
       <span class="hint" id="personaLinkErr"></span>
     </div>
     <div class="q">
@@ -1619,7 +1627,7 @@ header b{font-size:23px}
     <button type="button" class="themebtn" id="chiudiOpzioni" aria-label="Torna indietro">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
     </button>
-    <h1 class="tab-title" style="margin:0">Opzioni</h1>
+    <h1 class="tab-title" style="margin:0">Impostazioni</h1>
   </div>
   <!-- Opzioni in tre blocchi (prima erano cinque, con promemoria e
        calendario ripetuti in due posti e "Turni" in due righe che aprivano
@@ -1630,7 +1638,7 @@ header b{font-size:23px}
   <p class="hint" id="notifHint" style="margin:8px 2px 0">I promemoria arrivano finché il browser li tiene attivi: riapri l'app ogni giorno o due. Non sostituiscono la sveglia.</p>
   <span class="eyebrow opz-eb">Il tuo piano</span>
   <div class="opz-gruppo">
-  <button class="tool tool-1line" data-opz="1"><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg></span>
+  <button class="tool tool-1line va" data-opz="1"><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg></span>
     <span class="tool-tx"><b>Turni e ciclo</b><span>Cambia lo schema o gli orari dei turni</span><span class="tool-val" id="opzValTurni"></span></span></button>
   <div class="ecc" id="opzBox1" hidden></div>
   <button class="tool tool-1line" data-opz="3"><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg></span>
@@ -1648,7 +1656,7 @@ header b{font-size:23px}
   </div>
   <span class="eyebrow opz-eb">Salva</span>
   <div class="opz-gruppo">
-    <button class="tool" id="doLink">
+    <button class="tool azione" id="doLink">
       <span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg></span>
       <span class="tool-tx"><b>Copia di sicurezza</b>
       <span>Un link con tutte le tue impostazioni: ti serve se cambi telefono o reinstalli l'app.</span></span>
@@ -1713,7 +1721,8 @@ header b{font-size:23px}
     </div>
     <div class="qs-grid" id="qsGrid"></div>
     <button type="button" class="qs-reset" id="qsReset" hidden>✕ Torna alla sequenza standard</button>
-    <button type="button" class="lnk" id="qsVaiScambio" style="font-size:12.5px;text-align:center;width:100%;margin-top:2px;padding:4px 0">⇄ Valuta uno scambio turno con un collega →</button>
+    <button type="button" class="btn g" id="qsVaiPiano" style="width:100%;min-height:44px;margin-top:6px" hidden>Vedi il piano di questo giorno</button>
+    <button type="button" class="lnk" id="qsVaiScambio" style="font-size:12.5px;text-align:center;width:100%;margin-top:2px;padding:10px 0">⇄ Mi conviene uno scambio con un collega? →</button>
   </div>
 </div>
 
@@ -4789,7 +4798,7 @@ function renderAttivazione(){
       el.innerHTML='<div class="attiva-head"><b style="font-size:15px">Rendi automatico il tuo piano</b><span class="attiva-prog">'+fatte+' di '+voci.length+'</span></div>'+
         '<div class="attiva-bar"><i style="width:'+Math.round(100*fatte/voci.length)+'%"></i></div>'+
         htmlVociAttivazione(voci)+
-        '<button type="button" class="lnk" id="nascondiAttivazione" style="font-size:12px;color:var(--faint);padding:6px 0 0">Nascondi (resta in Opzioni)</button>';
+        '<button type="button" class="lnk" id="nascondiAttivazione" style="font-size:12px;color:var(--faint);padding:6px 0 0">Nascondi (resta in Impostazioni)</button>';
     }
   }
   const op=$("#opzFunzioni");
@@ -5084,7 +5093,7 @@ function renderStatsNudge(){
   el.hidden=false;
   el.innerHTML =
     '<b>Ci aiuti a capire cosa migliorare?</b>'+
-    '<p class="hint" style="margin-top:6px">Solo conteggi anonimi del tipo "un piano è stato generato" o "le notifiche sono state attivate": nessun identificativo, nessun orario, nessun dato dei turni o del sonno. Puoi cambiare idea quando vuoi in Opzioni.</p>'+
+    '<p class="hint" style="margin-top:6px">Solo conteggi anonimi del tipo "un piano è stato generato" o "le notifiche sono state attivate": nessun identificativo, nessun orario, nessun dato dei turni o del sonno. Puoi cambiare idea quando vuoi in Impostazioni.</p>'+
     '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">'+
       '<button class="btn g" type="button" id="doStatsSi">Sì, va bene</button>'+
       '<button class="btn g" type="button" id="doStatsNo">No, grazie</button>'+
@@ -5521,7 +5530,7 @@ function renderHeader(P, f){
   // allontanati — mai nascosto, altrimenti la riga di navigazione
   // "saltava" di dimensione a seconda del giorno mostrato.
   const bt=$("#goToday");
-  if(bt){ bt.textContent = scarto===0 ? "Naviga" : "Torna a oggi"; bt.classList.toggle("full", scarto!==0); }
+  if(bt){ bt.textContent = scarto===0 ? "Scegli giorno" : "Torna a oggi"; bt.classList.toggle("full", scarto!==0); }
   const stessoMese = f.getMonth() === giornoVero().getMonth() && f.getFullYear() === giornoVero().getFullYear();
   const stessoAnno = f.getFullYear() === giornoVero().getFullYear();
   const giornoTxt = f.toLocaleDateString("it-IT", {
@@ -6113,7 +6122,11 @@ function renderAndamenti(){
 // ricalcolarlo — un solo posto che sa cos'è "il debito di sonno".
 function renderAndamentiPreview(){
   const el=$("#andamentiAnteprima"); if(!el) return;
-  const num=$("#andamenti .andamento-num");
+  // Le card di esempio (finché non ci sono notti annotate) hanno numeri
+  // finti: in anteprima non vanno mostrati come se fossero tuoi.
+  const esempio=!!$("#andamenti .andamento-insight-eyebrow") && /esempio/i.test($("#andamenti").innerText.slice(0,200));
+  const num=esempio ? null : $("#andamenti .andamento-num");
+  if(esempio){ el.textContent="Annota qualche notte per vederlo"; return; }
   // "-1h 20m" non diceva se è sonno che manca o che avanza: a parole.
   const v = num ? num.textContent.trim() : "";
   el.textContent = !num ? "Ancora pochi dati"
@@ -6188,7 +6201,10 @@ function finestraMigliore(off, per){
 // fine di un turno e il sonno è molto più corto. Non c'è un modo diretto per
 // chiedere "è un giorno di riposo pieno?" qui (richiederebbe un plan()
 // completo in più per ogni giorno) — la durata è già un'ottima approssimazione.
-const finestraTuttoIlGiorno=w=>(w.b-w.a)>=600;
+// "Tutto il giorno" solo se lo è davvero: da mattina e per almeno 12 ore.
+// Prima bastavano 10 ore, e un "12:25–23:30" dopo una notte diventava
+// "tutto il giorno".
+const finestraTuttoIlGiorno=w=>w.a<=600 && (w.b-w.a)>=720;
 // Anteprima sotto "Quando sono disponibile", come nel mockup approvato —
 // prima il bottone diceva solo il nome della sezione, senza dare un motivo
 // per aprirla. La tua prossima finestra libera, non quella con qualcuno:
@@ -6370,6 +6386,8 @@ function renderPiuCal(){
   const hasPartner = !!(persona || (typeof state!=="undefined" && state.pPattern));
 
   const coupleUrl = (sub && sub.feedUrl ? sub.feedUrl : "").replace("/feed/", "/couple/");
+  if($("#piuCal")) $("#piuCal").hidden=!hasPartner;
+  if(!hasPartner){ el.innerHTML=""; return; }
   if(platform.calendar.available){ renderCoppiaNativa(el, hasPartner, pName); return; }
 
   let detailsHtml = "";
@@ -6703,12 +6721,16 @@ function apriBifasico(){
   apriSezioneInline(4);
   const q=$("#mattinoBif"); if(q && q.scrollIntoView) setTimeout(()=>q.scrollIntoView({behavior:"smooth",block:"center"}),80);
 }
-$("#goToday").onclick=()=>{ state.focus=giornoVero(); cicloOff=0; render(); };
+// Su oggi il bottone centrale diceva "Naviga" e non faceva nulla: ora apre
+// il calendario del telefono per saltare a un giorno; altrove torna a oggi.
+function suOggi(){ return dnum(state.focus)===dnum(giornoVero()) && !cicloOff; }
+$("#goToday").onclick=()=>{ if(suOggi()){ apriSelettoreData(); return; } state.focus=giornoVero(); cicloOff=0; render(); };
 $("#prev").onclick=()=>{state.focus=day(state.focus,-1);render()};
 $("#next").onclick=()=>{state.focus=day(state.focus,1);render()};
 // Il selettore nativo del telefono, non un calendario costruito da zero:
 // il campo data resta nascosto e fa solo da motore, l'etichetta visibile
 // è quella che si tocca davvero.
+function apriSelettoreData(){ const j=$("#jumpDate"); if(!j) return; j.value=iso(state.focus); try{ if(j.showPicker) j.showPicker(); else j.click(); }catch(e){ j.click(); } }
 if($("#jumpDate")){
   const apriSelettore=()=>{
     $("#jumpDate").value=iso(state.focus);
@@ -6730,8 +6752,7 @@ function jump(e){ const el=e.target.closest(".crow"); if(!el) return;
   if(eccAppena){ eccAppena=false; e.preventDefault(); return; }
   e.preventDefault();
   const off=+el.dataset.off;
-  if(NT.codeAt(off)==="?"){ apriQuickShift(day(state.focus,off)); return; }   // giorno da impostare: subito la scelta del turno
-  state.focus=day(state.focus,off); cicloOff=0; render(); }
+  haptic(8); apriQuickShift(day(state.focus,off)); }
 $("#cyc").addEventListener("click",jump);
 $("#cyc").addEventListener("keydown",jump);
 
@@ -6751,6 +6772,8 @@ function apriQuickShift(d){
   const dateStr=isOggi?"oggi":isDomani?"domani":isIeri?"ieri":quickShiftTarget.toLocaleDateString("it-IT",{weekday:"short",day:"numeric",month:"short"});
 
   $("#qsDateTitle").textContent=dateStr.charAt(0).toUpperCase()+dateStr.slice(1);
+  // Da Turni il giorno toccato si apre qui: si cambia il turno o si va al suo piano.
+  if($("#qsVaiPiano")) $("#qsVaiPiano").hidden=!document.body.classList.contains("tab-turni");
   $("#qsDateSub").textContent=isOggi?"Cosa fai davvero":"Turno per";
 
   const targetIso=iso(quickShiftTarget);
@@ -6828,6 +6851,12 @@ document.addEventListener("keydown",e=>{
   if(e.key==="Escape"&&$("#quickShiftModal")&&!$("#quickShiftModal").hidden){
     chiudiQuickShift();
   }
+});
+if($("#qsVaiPiano")) $("#qsVaiPiano").addEventListener("click",()=>{
+  const d=quickShiftTarget||state.focus;
+  chiudiQuickShift();
+  state.focus=new Date(d); cicloOff=0; setTab("oggi"); render();
+  try{ window.scrollTo(0,0); }catch(e){}
 });
 if($("#qsVaiScambio")) $("#qsVaiScambio").addEventListener("click",()=>{
   const d=quickShiftTarget||state.focus;
@@ -7086,7 +7115,7 @@ const cycGo=n=>{
   const b=$("#cycToday");
   if(b){
     const diverso = cicloOff!==0 || dnum(state.focus)!==dnum(giornoVero());
-    b.textContent = diverso ? "Torna a oggi" : "Naviga";
+    b.textContent = diverso ? "Torna a oggi" : "Scegli giorno";
     b.classList.toggle("full", diverso);
   }
   const p=$("#cycPrev"), nx=$("#cycNext");
@@ -7149,11 +7178,20 @@ function sincronizzaCampiPiano(){
     if(wc){ wc.checked = tuttePersone().length>0; if(cb) cb.hidden=!wc.checked; } }
 }
 const OPZ_PASSI = {1:[1,2], 3:[3], 4:[4]};
+// aria-expanded su ogni riga che apre un pannello qui sotto: la freccia gira
+// e i lettori di schermo dicono "espanso/compresso".
+function segnaEspansi(){
+  [["[data-opz=\"3\"]","#opzBox3"],["[data-opz=\"4\"]","#opzBox4"],["#doOpzLucidita","#opzBoxLucidita"],["#doIcs","#icsBox"]].forEach(([b,x])=>{
+    const bt=document.querySelector(b), bx=$(x); if(bt && bx) bt.setAttribute("aria-expanded", bx.hidden?"false":"true");
+  });
+}
+if($("#opzioni")) $("#opzioni").addEventListener("click", ()=>setTimeout(segnaEspansi,0));
 function apriSezioneInline(n){
   const box=$("#opzBox"+n); if(!box) return;
   const apri=box.hidden;
   soloUno(apri?"#opzBox"+n:null);
   box.hidden=!apri;
+  segnaEspansi();
   if(!apri) return;
   const passi=OPZ_PASSI[n]||[n];
   passi.forEach(p=>{
@@ -7203,7 +7241,7 @@ function finestraCiclo(){
 }
 if($("#cycPrev"))  $("#cycPrev").onclick =()=>cycGo(cicloOff-passoCiclo());
 if($("#cycNext"))  $("#cycNext").onclick =()=>cycGo(cicloOff+passoCiclo());
-if($("#cycToday")) $("#cycToday").onclick=()=>{ state.focus=giornoVero(); cycGo(0); };
+if($("#cycToday")) $("#cycToday").onclick=()=>{ if(suOggi()){ apriSelettoreData(); return; } state.focus=giornoVero(); cycGo(0); };
 
 if($("#doCycQR")) $("#doCycQR").onclick=()=>{
   const b=$("#qrBoxCyc"); if(!b) return;
@@ -7316,14 +7354,14 @@ function aggiornaScambio(){
     pillHtml='<span class="traffic-pill green">🟢 Favorevole</span>';
     verdictDesc=dS>=30
       ? "Ottimo scambio: guadagni +"+dur(dS)+" di sonno rispetto al piano attuale!"
-      : "Differenza di sonno minima e nessun rientro rapido. Puoi procedere serenamente.";
+      : "Il sonno cambia poco e tra un turno e l'altro restano sempre almeno 11 ore: puoi accettare tranquillo.";
   }
 
   if(vOut){
     vOut.innerHTML=
       '<div style="background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px">'+
         '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px">'+
-          '<b style="font-size:14px;color:var(--ink)">Valutazione biologica</b>'+
+          '<b style="font-size:14px;color:var(--ink)">Per il tuo sonno</b>'+
           pillHtml+
         '</div>'+
         '<p style="font-size:13px;color:var(--dim);margin:0;line-height:1.45">'+verdictDesc+'</p>'+
@@ -7341,10 +7379,10 @@ function aggiornaScambio(){
 
   if(dOut){
     dOut.innerHTML='<div class="rows">'+
-      riga("Sonno (2 sett.)", dur(r.prima.sonno), dur(r.dopo.sonno), deltaSonnoTxt)+
-      riga("Veglia più lunga", dur(r.prima.vegliaMax), dur(r.dopo.vegliaMax), deltaVegliaTxt)+
-      riga("Pisolini necessari", r.prima.pisolini, r.dopo.pisolini, dP>0?'<span style="color:#f59e0b">+'+dP+'</span>':'')+
-      riga("Rientri rapidi (&lt;11h)", ritorniPrima, ritorniDopo, ritorniTxt)+
+      riga("Sonno in 2 settimane", dur(r.prima.sonno), dur(r.dopo.sonno), deltaSonnoTxt)+
+      riga("Ore di fila da sveglio (max)", dur(r.prima.vegliaMax), dur(r.dopo.vegliaMax), deltaVegliaTxt)+
+      riga("Pisolini che servono", r.prima.pisolini, r.dopo.pisolini, dP>0?'<span style="color:#f59e0b">+'+dP+'</span>':'')+
+      riga("Riposi sotto le 11 ore", ritorniPrima, ritorniDopo, ritorniTxt)+
       '</div>';
   }
 }
@@ -7355,7 +7393,7 @@ function apriScambioTurno(giornoA){
   const apri=box.hidden;
   soloUno(apri?"#scambioBox":null);
   box.hidden=!apri;
-  if($("#scambioChev")) $("#scambioChev").textContent=apri?"‹":"›";
+  if($("#doScambioTurno")) $("#doScambioTurno").setAttribute("aria-expanded", apri?"true":"false");
   if(!apri) return;
 
   const targetA=giornoA || state.focus || giornoVero();
@@ -7368,7 +7406,7 @@ function apriScambioTurno(giornoA){
 if($("#doScambioTurno")) $("#doScambioTurno").onclick=()=>apriScambioTurno();
 if($("#chiudiScambioBtn")) $("#chiudiScambioBtn").onclick=()=>{
   $("#scambioBox").hidden=true;
-  if($("#scambioChev")) $("#scambioChev").textContent="›";
+  if($("#doScambioTurno")) $("#doScambioTurno").setAttribute("aria-expanded","false");
 };
 if($("#swapA")) $("#swapA").addEventListener("change",aggiornaScambio);
 if($("#swapB")) $("#swapB").addEventListener("change",aggiornaScambio);
@@ -8453,7 +8491,7 @@ function salva(){
     napTurno:state.napTurno,sonnoDiurno:state.sonnoDiurno,mattinoBifasico:state.mattinoBifasico,avvisoBifasicoOff:state.avvisoBifasicoOff,installBannerOff:state.installBannerOff,shareNudgeOff:state.shareNudgeOff,icsNudgeOff:state.icsNudgeOff,icsExportedAt:state.icsExportedAt,icsExpireNudgeSeenAt:state.icsExpireNudgeSeenAt,firstSeenAt:state.firstSeenAt,clubBannerOff:state.clubBannerOff,donateNudgeOff:state.donateNudgeOff,pausa:state.pausa,caffSens:state.caffSens,vista:state.vista});
   if(!salvato && state.turniConfigurati && !_avvisoSalvataggio){
     _avvisoSalvataggio=true;
-    setTimeout(()=>toast("Questo browser non permette di salvare: i turni restano solo finché l'app è aperta. Salva la configurazione come link (Opzioni)."), 600);
+    setTimeout(()=>toast("Questo browser non permette di salvare: i turni restano solo finché l'app è aperta. Fai una copia di sicurezza (Impostazioni)."), 600);
   }
   // segnala i cambi di configurazione (non di vista) così il modulo del
   // calendario automatico può tenere allineato il feed. Il primo salva non conta.
