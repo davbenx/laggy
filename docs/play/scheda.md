@@ -39,9 +39,10 @@ Notturnisti dà indicazioni generali di benessere e organizzazione basate sulla 
 ## Categoria e contatti
 - Categoria: Salute e fitness
 - Tag: Sonno, Calendario, Pianificazione
+- Nome sviluppatore: Glaukoros
 - Email: notturnisti.club+pianificatore@gmail.com
 - Sito web: https://notturnisti.club
-- Privacy policy: https://app.notturnisti.club/privacy/ (compilare prima il nome del titolare nel file privacy/index.html)
+- Privacy policy: https://app.notturnisti.club/privacy/
 
 ## Grafica (in docs/play/img/)
 - Icona 512×512: icon-512.png (nella radice del repository)
