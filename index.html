@@ -1699,7 +1699,7 @@ header b{font-size:23px}
     </label>
     <p class="hint" id="optStatsHint" style="margin:2px 0 0">Ci aiutano a capire cosa migliorare. Solo contatori come «un piano è stato creato»: nessun identificativo, nessun dato dei turni. Spente finché non le accendi.</p>
     <p style="margin:10px 0 0"><button class="lnk" id="doFeed" style="padding:8px 0">Segnala cosa non torna</button> · <button class="lnk" id="doShare" style="padding:8px 0">Consiglialo a un collega</button></p>
-    <p class="hint" style="margin:10px 0 0"><a href="https://notturnisti.club/planner" target="_blank" rel="noopener">Come si usa</a> · <a href="https://notturnisti.club/chi-siamo/" target="_blank" rel="noopener">Chi siamo</a> · <a href="https://notturnisti.club" target="_blank" rel="noopener">notturnisti.club</a><span id="doDonateLnkWrap" hidden> · <a id="doDonateLnk" href="#" target="_blank" rel="noopener">Sostieni il progetto</a></span></p>
+    <p class="hint" style="margin:10px 0 0"><a href="https://notturnisti.club/planner" target="_blank" rel="noopener">Come si usa</a> · <a href="https://notturnisti.club/chi-siamo/" target="_blank" rel="noopener">Chi siamo</a> · <a href="https://notturnisti.club" target="_blank" rel="noopener">notturnisti.club</a> · <a href="https://app.notturnisti.club/privacy/" target="_blank" rel="noopener">Privacy</a><span id="doDonateLnkWrap" hidden> · <a id="doDonateLnk" href="#" target="_blank" rel="noopener">Sostieni il progetto</a></span></p>
   </div>
 </div>
 <!-- Quick Shift Switcher modal / sheet a 1 tocco -->
@@ -7863,7 +7863,7 @@ async function salvaConfigurazione(){
     if(platform.canShare()){
       await platform.share({title:"Notturnisti",text:testo,url});
       state.backupDone=true; store.set("backupDone",true); render();
-      if(isFirstSave && window.NTPaid && !window.NTPaid.paid()){
+      if(isFirstSave && !window.NT_APP.nativo && window.NTPaid && !window.NTPaid.paid()){
         setTimeout(()=>{ if(window.NTPaid && !window.NTPaid.paid()) window.NTPaid.open("attiva"); }, 600);
       }
       return;
@@ -7872,7 +7872,9 @@ async function salvaConfigurazione(){
   try{ await navigator.clipboard.writeText(url); toast("Link copiato"); }
   catch(e){ prompt("Copia questo link:",url); }
   state.backupDone=true; store.set("backupDone",true); render();
-  if(isFirstSave && window.NTPaid && !window.NTPaid.paid()){
+  // Solo sul web: nell'app il calendario è quello del telefono, e il feed
+  // web terrebbe i turni anche sul server.
+  if(isFirstSave && !window.NT_APP.nativo && window.NTPaid && !window.NTPaid.paid()){
     setTimeout(()=>{ if(window.NTPaid && !window.NTPaid.paid()) window.NTPaid.open("attiva"); }, 600);
   }
 }
