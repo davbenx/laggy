@@ -22,6 +22,9 @@
 <meta name="description" content="Dai tuoi turni: quando dormire, l'ultimo caffè, la luce, i pasti. Turni personalizzabili, giorni liberi in comune con chi vuoi, export calendario.">
 <meta name="theme-color" content="#14161A">
 <script>
+// Rete di sicurezza: se tra 6 secondi l'app non ha finito di avviarsi
+// (l'ultima riga dello script toglie #jsoff), mostra l'avviso.
+setTimeout(function(){ if(document.getElementById("jsoff")) document.documentElement.classList.add("js-lento"); }, 6000);
 // Dati importati dalla vecchia app (migrate.js): applicati QUI, prima che
 // qualunque altro script legga o salvi lo stato — altrimenti il salvataggio
 // automatico della pagina precedente potrebbe riscriverci sopra i dati vecchi.
@@ -319,6 +322,14 @@ padding:16px 18px;margin:2px 0 var(--gap-sezione);box-shadow:0 4px 20px rgba(45,
 .qh-cal.vuoto{border-style:dashed;border-color:var(--line);color:var(--faint)}
 .qh-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .qh-chips .btn{min-height:38px;font-size:13px;padding:6px 14px}
+.qh-seq{display:flex;flex-wrap:wrap;gap:6px;min-height:52px;padding:8px;border:1px dashed var(--line);border-radius:14px;margin-bottom:10px}
+.qh-seq-chip{font:inherit;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:62px;padding:6px 8px;border-radius:10px;border:1px solid var(--blue);background:var(--bg);color:var(--ink);font-size:12.5px;font-weight:600;cursor:pointer}
+.qh-seq-chip small{color:var(--dim);font-size:10.5px;font-weight:500}
+.qh-seq-chip.riposo{border-color:var(--line);color:var(--dim)}
+.qh-add{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.qh-nuovo{margin-top:10px;padding:12px;border:1px solid var(--line);border-radius:14px;display:grid;gap:8px}
+.qh-nuovo input[type=text]{font:inherit;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.qh-add .btn{min-height:40px;font-size:13px;padding:6px 12px}
 .qh-pos{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px}
 .qh-pos-btn{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;min-height:58px;justify-content:center;font:inherit;color:var(--ink)}
 .qh-pos-btn small{color:var(--dim);font-size:11.5px}
@@ -392,7 +403,12 @@ font-size:14px;cursor:pointer;text-decoration:underline;text-underline-offset:3p
 .conto li{margin-bottom:7px}
 .conto li:last-child{margin-bottom:0}
 .jsoff{background:var(--orange-soft);border:1px solid var(--orange-fill);border-radius:var(--r);
-padding:15px 16px;margin:14px 0}
+padding:15px 16px;margin:14px 0;display:none}
+/* L'avviso "la pagina non si è avviata" esisteva sempre e lo script lo
+   toglieva solo alla fine: a ogni apertura lampeggiava per un attimo. Ora è
+   nascosto e compare solo se dopo 6 secondi lo script non ha finito (o
+   subito, se JavaScript è spento: vedi <noscript>). */
+html.js-lento .jsoff{display:block}
 .jsoff>b{display:block;font-size:16px;margin-bottom:7px;color:var(--orange)}
 .jsoff p{font-size:14px;line-height:1.55;margin-bottom:8px}
 .jsoff p:last-child{margin-bottom:0}
@@ -1057,7 +1073,7 @@ header b{font-size:23px}
   <p>Quasi sempre è l'hosting che lo riscrive o lo blocca. Su Cloudflare, in <b>Speed → Optimization</b>, devono essere spenti <b>Rocket Loader</b> e la minificazione automatica del JavaScript. Se hai impostato una <b>Content-Security-Policy</b>, deve consentire gli script inline.</p>
   <p>Se invece hai disattivato JavaScript nel browser, questo strumento non può funzionare: fa tutti i calcoli sul tuo dispositivo, senza mandare niente a un server.</p>
 </div>
-<noscript><style>#jsoff p:nth-of-type(1),#jsoff p:nth-of-type(2){display:none}</style></noscript>
+<noscript><style>#jsoff{display:block}#jsoff p:nth-of-type(1),#jsoff p:nth-of-type(2){display:none}</style></noscript>
 <div class="onboard" id="linkChoice" hidden style="z-index:60">
   <h2 class="wq">Hai aperto un link con turni diversi dai tuoi</h2>
   <p class="wsub" id="linkChoiceWho">Non coincide con la configurazione che hai già su questo telefono.</p>
@@ -4202,7 +4218,7 @@ function renderBenvenutoLink(){
 }
 if($("#benvenutoLink")) $("#benvenutoLink").addEventListener("click", e=>{
   if(e.target.closest("#chiudiBenvenuto")){ benvenutoLinkChiuso=true; renderBenvenutoLink(); return; }
-  if(e.target.closest("#doConfiguraLaTua")){ benvenutoLinkChiuso=true; renderBenvenutoLink(); apriIntro(true); wizShow(1); }
+  if(e.target.closest("#doConfiguraLaTua")){ benvenutoLinkChiuso=true; state.turniConfigurati=false; store.set("turniConfigurati", false); demoEsempioChiuso=false; demoEsempioSubflow="home"; render(); }
 });
 
 // Prima chi apriva l'app per la prima volta (senza arrivare da un link)
@@ -4245,9 +4261,11 @@ let demoEsempioChiuso = false;
 let demoEsempioTracciato = false;
 let demoEsempioSubflow = "home";  // home | orario | prossimi | schema | posizione | orari | riposi | segna
 let sceltaSchemaAperta = false;   // flusso riaperto dal banner dopo il primo piano
-let schemaInScelta = null;        // indice in PRESETS in attesa di "oggi dove sei"
+let schemaInScelta = null;        // {nome, p, s}: schema (preset o composto) in attesa di "oggi dove sei"
 let turnoInScelta = null;         // codice del turno toccato in "Che turno fai oggi?"
 let giorniSegna = 14;             // quanti giorni mostra la griglia "li segno io"
+let composizione = [];            // il ciclo che si sta componendo, una lettera per giorno
+let nuovoTurnoAperto = false;     // modulo "+ altro turno" nel compositore
 
 const ORARI_BASE = { N:{n:"Notte",s:1260,e:1860}, M:{n:"Mattino",s:420,e:840}, P:{n:"Pomeriggio",s:840,e:1260} };
 const GIORNI_SETT = ["Lun","Mar","Mer","Gio","Ven","Sab","Dom"];
@@ -4293,6 +4311,7 @@ function renderDemoEsempio(){
   const chiudi = (sceltaSchemaAperta && state.turniConfigurati) ? '<button type="button" class="lnk" data-chiudi-schema style="margin-bottom:10px;font-size:13px">← Annulla</button>' : "";
   const ic = k => k==="N"?ICON.moon : k==="M"?ICON.sun : k==="R"?ICON.sparkles : ICON.dim;
   const f = demoEsempioSubflow;
+  const avanzate = '<button type="button" class="lnk" id="qhAvanzate" style="display:block;width:100%;text-align:center;margin-top:12px;font-size:12.5px;color:var(--dim)">Impostazioni avanzate</button>';
 
   if(f === "home" && !sceltaSchemaAperta){
     el.innerHTML =
@@ -4326,15 +4345,15 @@ function renderDemoEsempio(){
         opt('data-subflow="schema"',ICON.cycle,"Si ripetono a ciclo","Es. in quinta, 2·2·2·2, ciclo continuo, 12 ore")+
         opt('data-subflow="riposi"',ICON.calendar,"Faccio sempre lo stesso turno","Scegli tu in quali giorni riposi")+
         opt('data-subflow="segna"',ICON.calendar,"Cambiano ogni volta","Me li danno a settimana o a mese: li segno io")+
-      '</div>';
-  } else if(f === "posizione" && schemaInScelta!=null){
+      '</div>'+(state.turniConfigurati?avanzate:"");
+  } else if(f === "posizione" && schemaInScelta){
     // "Oggi dove sei": con due mattine di fila la sola lettera non basta.
-    const S=PRESETS[schemaInScelta], seq=S.p.split(""), conta={};
+    const S=schemaInScelta, seq=S.p.split(""), conta={};
     const nomeDi=c=>(S.s[c]&&S.s[c].n)||(c==="S"?"Smonto":"Riposo");
     el.innerHTML =
-      indietro("schema","Cambia schema")+
+      indietro(S.composto?"componi":"schema", S.composto?"Modifica il ciclo":"Cambia schema")+
       '<h2 class="qh-h">Oggi dove sei nel ciclo?</h2>'+
-      '<p class="qh-sub">'+esc(nomePreset(S))+'. Tocca il giorno di oggi: da qui calcoliamo tutti gli altri.</p>'+
+      '<p class="qh-sub">'+esc(S.nome)+'. Tocca il giorno di oggi: da qui calcoliamo tutti gli altri.</p>'+
       '<div class="qh-pos">'+seq.map((c,i)=>{
         conta[c]=(conta[c]||0)+1; const tot=seq.filter(x=>x===c).length;
         return '<button type="button" class="qh-pos-btn" data-pos="'+i+'"><b>'+esc(nomeDi(c))+'</b>'+(tot>1?'<small>'+conta[c]+'° giorno</small>':'')+'</button>';
@@ -4342,14 +4361,16 @@ function renderDemoEsempio(){
   } else if(f === "orari"){
     // Orari di tutti i turni dello schema, già compilati: si conferma con un
     // tocco o si correggono qui (prima restavano quelli del preset, in silenzio).
-    const keys=Object.keys(sh).filter(k=>sh[k] && !sh[k].rest);
+    const usati = state.repeat ? new Set(String(state.pattern||"").split("")) : null;
+    const keys=Object.keys(sh).filter(k=>sh[k] && !sh[k].rest && (!usati || usati.has(k)));
     el.innerHTML =
       '<h2 class="qh-h">Gli orari dei tuoi turni</h2>'+
       '<p class="qh-sub">Sono quelli più comuni: correggi quelli che da te sono diversi.</p>'+
       keys.map(k=>'<div class="qh-ore-riga"><b>'+esc(sh[k].n)+'</b>'+
         '<input type="time" data-ora-da="'+k+'" value="'+hhmm(sh[k].s)+'" aria-label="Inizio '+esc(sh[k].n)+'">'+
         '<span>→</span><input type="time" data-ora-a="'+k+'" value="'+hhmm(sh[k].e)+'" aria-label="Fine '+esc(sh[k].n)+'"></div>').join("")+
-      '<button type="button" class="btn pri" id="qhConfermaOrari" style="width:100%;margin-top:14px;min-height:46px;font-weight:700">Fatto, vedi il piano →</button>';
+      '<button type="button" class="btn pri" id="qhConfermaOrari" style="width:100%;margin-top:14px;min-height:46px;font-weight:700">Fatto, vedi il piano →</button>'+
+      (state.turniConfigurati?avanzate:"");
   } else if(f === "riposi"){
     // Il turno "fisso" è quello indicato per oggi (anche se l'app è stata
     // riaperta nel frattempo), altrimenti il primo turno di lavoro definito.
@@ -4383,6 +4404,30 @@ function renderDemoEsempio(){
         '<button type="button" class="lnk" id="qhOrariVariabili" style="font-size:13px">Orari dei turni</button>'+
       '</div>'+
       '<button type="button" class="btn pri" id="qhConfermaSegna" style="width:100%;margin-top:14px;min-height:46px;font-weight:700">Fatto →</button>';
+  } else if(f === "componi"){
+    // Il ciclo si compone qui, toccando i turni nell'ordine in cui li fai:
+    // niente tabella di lettere nelle Opzioni.
+    const tipi=Object.keys(sh).filter(k=>sh[k] && !sh[k].rest);
+    const nomeDi=c=> c==="R"?"Riposo" : c==="S"&&!sh.S?"Smonto" : ((sh[c]&&sh[c].n)||c);
+    const chip=(c,i)=>'<button type="button" class="qh-seq-chip'+(c==="R"||(c==="S"&&!sh.S)?" riposo":"")+'" data-togli="'+i+'" aria-label="Togli '+esc(nomeDi(c))+', giorno '+(i+1)+'"><small>'+(i+1)+'</small>'+esc(nomeDi(c))+'</button>';
+    el.innerHTML =
+      indietro("schema","Indietro")+
+      '<h2 class="qh-h">Componi il tuo ciclo</h2>'+
+      '<p class="qh-sub">Tocca i turni nell\'ordine in cui li fai, fino a quando il ciclo ricomincia uguale. Tocca un giorno qui sotto per toglierlo.</p>'+
+      '<div class="qh-seq" aria-live="polite">'+(composizione.length ? composizione.map(chip).join("") : '<span class="hint" style="padding:10px 2px">Il tuo ciclo comparirà qui.</span>')+'</div>'+
+      '<div class="qh-add">'+
+        tipi.map(k=>'<button type="button" class="btn g" data-aggiungi="'+esc(k)+'">+ '+esc(sh[k].n)+'</button>').join("")+
+        (!sh.S?'<button type="button" class="btn g" data-aggiungi="S">+ Smonto</button>':'')+
+        '<button type="button" class="btn g" data-aggiungi="R">+ Riposo</button>'+
+        (nuovoTurnoAperto?'':'<button type="button" class="lnk" id="qhNuovoTurno" style="font-size:13px;padding:6px 4px">+ altro turno (es. 12 ore)</button>')+
+      '</div>'+
+      (nuovoTurnoAperto
+        ? '<div class="qh-nuovo"><input type="text" id="qhNtNome" maxlength="20" placeholder="Nome (es. Giorno 12h)" aria-label="Nome del turno">'+
+            '<div class="qh-ore"><label>Inizio<input type="time" id="qhNtDa" value="07:00"></label><label>Fine<input type="time" id="qhNtA" value="19:00"></label></div>'+
+            '<button type="button" class="btn" id="qhNtSalva" style="width:100%;margin-top:8px">Aggiungi il turno</button></div>'
+        : '')+
+      '<p class="hint" style="margin:8px 0 0;font-size:12px">'+composizione.length+' giorni'+(composizione.length?' · poi ricomincia dal giorno 1':'')+'.</p>'+
+      '<button type="button" class="btn pri" id="qhComponiAvanti" style="width:100%;margin-top:14px;min-height:46px;font-weight:700"'+(composizione.some(c=>c!=="R"&&c!=="S")?'':' disabled')+'>Avanti →</button>';
   } else {
     // Catalogo unico: gli stessi schemi della configurazione completa.
     const gruppi={}; PRESETS.forEach((p,i)=>{ const g=p.sector||"Altri schemi"; (gruppi[g]=gruppi[g]||[]).push(i); });
@@ -4391,7 +4436,7 @@ function renderDemoEsempio(){
       '<h2 class="qh-h">Qual è il tuo schema?</h2>'+
       Object.keys(gruppi).map(g=>'<p class="hint" style="margin:12px 0 6px;font-weight:700;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase">'+esc(g)+'</p>'+
         '<div class="qh-flow-options">'+gruppi[g].map(i=>opt('data-preset-ob="'+i+'"',ICON.cycle,PRESETS[i].title,PRESETS[i].sub)).join("")+'</div>').join("")+
-      '<button type="button" class="lnk" id="doCustomRot" style="display:block;width:100%;text-align:center;margin-top:14px;font-size:13px">Il mio schema non c\'è: componilo →</button>';
+      '<button type="button" class="btn g" id="doCustomRot" style="display:block;width:100%;margin-top:14px;min-height:44px">Il mio schema non c\'è: lo compongo io →</button>';
   }
 }
 
@@ -4446,10 +4491,10 @@ if($("#demoEsempio")) $("#demoEsempio").addEventListener("click", e=>{
 
   // 2a. schema a ciclo → oggi dove sei → orari
   const pr = e.target.closest("[data-preset-ob]");
-  if(pr){ schemaInScelta=+pr.dataset.presetOb; demoEsempioSubflow="posizione"; renderDemoEsempio(); return; }
+  if(pr){ const P0=PRESETS[+pr.dataset.presetOb]; schemaInScelta={nome:nomePreset(P0), p:P0.p, s:P0.s}; demoEsempioSubflow="posizione"; renderDemoEsempio(); return; }
   const pos = e.target.closest("[data-pos]");
-  if(pos && schemaInScelta!=null){
-    const S=PRESETS[schemaInScelta], i=+pos.dataset.pos;
+  if(pos && schemaInScelta){
+    const S=schemaInScelta, i=+pos.dataset.pos;
     const prima=JSON.parse(JSON.stringify(state.shifts||{}));
     state.pattern=S.p;
     state.shifts=JSON.parse(JSON.stringify(S.s));
@@ -4513,12 +4558,34 @@ if($("#demoEsempio")) $("#demoEsempio").addEventListener("click", e=>{
   }
 
   if(e.target.closest("#doCustomRot")){
-    demoEsempioChiuso = true; sceltaSchemaAperta = false;
-    track("example_completed");
-    render();
-    apriIntro(true);
-    wizShow(1);
-    return;
+    // Si parte dal ciclo attuale, se c'è; altrimenti vuoto.
+    composizione = (state.repeat && state.turniConfigurati && state.pattern) ? state.pattern.split("").slice(0,42) : [];
+    demoEsempioSubflow="componi"; renderDemoEsempio(); return;
+  }
+  const ag=e.target.closest("[data-aggiungi]");
+  if(ag){ if(composizione.length>=42){ toast("Massimo 42 giorni"); return; } composizione.push(ag.dataset.aggiungi); haptic(8); renderDemoEsempio(); return; }
+  if(e.target.closest("#qhNuovoTurno")){ nuovoTurnoAperto=true; renderDemoEsempio(); const n=$("#qhNtNome"); if(n) n.focus(); return; }
+  if(e.target.closest("#qhNtSalva")){
+    const nome=safeName($("#qhNtNome").value)||"Turno";
+    const lettera="ABCDEFGHIJKLOQTUVWXYZ".split("").find(c=>!state.shifts[c]);
+    if(!lettera){ toast("Troppi tipi di turno"); return; }
+    const t1=turnoDaOrari(lettera, nome, $("#qhNtDa").value||"07:00", $("#qhNtA").value||"19:00");
+    if(!orarioPlausibile(t1)) return;
+    state.shifts[lettera]=t1; nuovoTurnoAperto=false;
+    if(composizione.length<42) composizione.push(lettera);
+    renderDemoEsempio(); return;
+  }
+  const tg=e.target.closest("[data-togli]");
+  if(tg){ composizione.splice(+tg.dataset.togli,1); renderDemoEsempio(); return; }
+  if(e.target.closest("#qhComponiAvanti")){
+    const usati=[...new Set(composizione)].filter(c=>c!=="R");
+    const sh={};
+    for(const c of usati){ if(c==="S" && !state.shifts.S) continue; sh[c]=JSON.parse(JSON.stringify(state.shifts[c]||ORARI_BASE[c]||{n:c,s:420,e:840})); }
+    schemaInScelta={nome:"Il tuo ciclo di "+composizione.length+" giorni", p:composizione.join(""), s:sh, composto:true};
+    demoEsempioSubflow="posizione"; renderDemoEsempio(); return;
+  }
+  if(e.target.closest("#qhAvanzate")){
+    sceltaSchemaAperta=false; demoEsempioSubflow="home"; render(); apriOpzioni(); apriSezioneInline(1); return;
   }
 });
 
@@ -6867,6 +6934,9 @@ function apriSezionePersone(){
 }
 if($("#opzioni")) $("#opzioni").addEventListener("click", e=>{
   const b=e.target.closest("[data-opz]"); if(!b) return;
+  // "Turni e ciclo": un solo modo di cambiare il ciclo, il flusso lineare
+  // (la tabella completa resta in "Impostazioni avanzate", in fondo al flusso).
+  if(+b.dataset.opz===1){ setTab("oggi"); apriFlussoProssimi("prossimi"); return; }
   apriSezioneInline(+b.dataset.opz);
 });
 function passoCiclo(){
@@ -7079,6 +7149,12 @@ if($("#swapApplica")) $("#swapApplica").onclick=()=>{
 function renderLuciditaCard(){
   const wrap=$("#luciditaGiornoWrap");
   if(!wrap) return;
+  // Solo dove ha senso: oggi o un giorno futuro, con un turno noto, a
+  // configurazione fatta. Prima compariva anche sui giorni passati (lucido
+  // ieri?), su quelli senza turno e durante la scelta dei turni.
+  if(!state.turniConfigurati || dnum(state.focus) < dnum(giornoVero()) || NT.codeAt(0)==="?" || document.body.classList.contains("primo-avvio")){
+    wrap.innerHTML=""; return;
+  }
 
   const focusIso=iso(state.focus);
   const ev=state.evento;
@@ -8196,7 +8272,7 @@ platform.onBackButton(()=>{
   if(document.body.classList.contains("vederci-aperta")){ chiudiVederci(); return true; }
   if(sceltaSchemaAperta){ sceltaSchemaAperta=false; demoEsempioSubflow="home"; render(); return true; }
   if(demoEsempioVisibile() && demoEsempioSubflow!=="home"){
-    const su={orario:"home", posizione:"schema", orari:(state.repeat?"schema":"segna")}[demoEsempioSubflow] || (state.turniConfigurati?"prossimi":"home");
+    const su={orario:"home", posizione:(schemaInScelta&&schemaInScelta.composto?"componi":"schema"), componi:"schema", orari:(state.repeat?"schema":"segna")}[demoEsempioSubflow] || (state.turniConfigurati?"prossimi":"home");
     if(sceltaSchemaAperta && demoEsempioSubflow==="prossimi"){ sceltaSchemaAperta=false; demoEsempioSubflow="home"; render(); return true; }
     demoEsempioSubflow=su; renderDemoEsempio(); return true;
   }
@@ -8282,7 +8358,9 @@ function apriOpzioni(){
 function chiudiOpzioniPagina(){ setTab(tabPrimaDiOpzioni); }
 if($("#doOpzioni")) $("#doOpzioni").onclick=apriOpzioni;
 if($("#chiudiOpzioni")) $("#chiudiOpzioni").onclick=chiudiOpzioniPagina;
-if($("#tEdit")) $("#tEdit").onclick=()=>{ apriOpzioni(); apriSezioneInline(1); };
+// "Modifica" del ciclo: lo stesso flusso lineare dell'inizio (com'è il ciclo
+// → schema o composizione → oggi dove sei → orari), non le Opzioni.
+if($("#tEdit")) $("#tEdit").onclick=()=>{ setTab("oggi"); apriFlussoProssimi("prossimi"); };
 if($("#partner")) $("#partner").addEventListener("click", e=>{
   if(e.target.closest("[data-partner-edit]")) apriPartner();
   else if(e.target.closest("[data-partner-sheet]")){
