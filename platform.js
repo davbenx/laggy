@@ -170,10 +170,14 @@ async function calEsiste(id) {
   try { const r = await plugin("CapacitorCalendar").listCalendars(); return (r.result || []).some(c => String(c.id) === String(id)); }
   catch (e) { return false; }
 }
-async function calScrivi(id, vecchi, eventi) {
+// salva(ids) dopo ogni evento creato: se la scrittura si interrompe a metà
+// (permesso revocato, app chiusa), gli eventi già creati restano registrati
+// e la volta dopo vengono cancellati, invece di restare duplicati per sempre.
+async function calScrivi(id, vecchi, eventi, salva) {
   const C = plugin("CapacitorCalendar");
   if (vecchi && vecchi.length) { try { await C.deleteEventsById({ ids: vecchi }); } catch (e) {} }
   const nuovi = [];
+  salva(nuovi);
   for (const e of eventi) {
     // Occupato solo il turno; sonno, caffè, luce e riposi in comune non
     // devono far risultare "impegnato" a chi guarda la tua disponibilità.
@@ -181,7 +185,7 @@ async function calScrivi(id, vecchi, eventi) {
       isAllDay: !!e.allDay, availability: e.tipo === "turno" ? 0 : 1 };
     if (e.desc) opt.description = e.desc;
     const r = await C.createEvent(opt);
-    if (r && r.id) nuovi.push(String(r.id));
+    if (r && r.id) { nuovi.push(String(r.id)); salva(nuovi); }
   }
   return nuovi;
 }
@@ -218,10 +222,10 @@ export const calendar = {
         const sig = JSON.stringify([events.map(e => [e.uid, +e.start, +e.end, e.title]), coppia.map(e => [e.uid, e.desc])]);
         if (sig === st.sig && await calEsiste(st.id)) return true;
         if (!(await calEsiste(st.id))) { st.id = await calCrea("Notturnisti", "#3D7BE0"); st.ids = []; }
-        st.ids = await calScrivi(st.id, st.ids, events);
+        st.ids = await calScrivi(st.id, st.ids, events, ids => { st.ids = ids.slice(); st.sig = null; calSave(st); });
         if (st.coppia) {
           if (!(await calEsiste(st.idCoppia))) { st.idCoppia = await calCrea("Notturnisti · insieme", "#E0913D"); st.idsCoppia = []; }
-          st.idsCoppia = await calScrivi(st.idCoppia, st.idsCoppia, coppia);
+          st.idsCoppia = await calScrivi(st.idCoppia, st.idsCoppia, coppia, ids => { st.idsCoppia = ids.slice(); st.sig = null; calSave(st); });
         } else if (st.idCoppia) {
           try { await plugin("CapacitorCalendar").deleteCalendar({ id: String(st.idCoppia) }); } catch (e) {}
           st.idCoppia = null; st.idsCoppia = [];

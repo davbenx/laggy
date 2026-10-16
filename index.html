@@ -4268,6 +4268,14 @@ function turnoDaOrari(k, nome, da, a){
   return {n:nome, s, e};
 }
 const orarioTesto = sh => sh ? hhmm(sh.s)+" → "+hhmm(sh.e) : "";
+// Un turno tra 1 e 16 ore. Inizio uguale alla fine diventava un turno di 24
+// ore, e il piano del sonno di conseguenza.
+function orarioPlausibile(sh){
+  const d=sh.e-sh.s;
+  if(!Number.isFinite(d) || d<60){ toast("Controlla gli orari: il turno dura meno di un'ora"); return false; }
+  if(d>16*60){ toast("Controlla gli orari: "+esc(sh.n)+" durerebbe "+Math.round(d/60)+" ore"); return false; }
+  return true;
+}
 
 function renderDemoEsempio(){
   const el=$("#demoEsempio"); if(!el) return;
@@ -4426,7 +4434,9 @@ if($("#demoEsempio")) $("#demoEsempio").addEventListener("click", e=>{
   }
   if(e.target.closest("#qhConfermaOrario")){
     const k=turnoInScelta, base=state.shifts[k]||ORARI_BASE[k];
-    state.shifts[k]=turnoDaOrari(k, base.n, $("#qhDa").value||hhmm(base.s), $("#qhA").value||hhmm(base.e));
+    const nuovo=turnoDaOrari(k, base.n, $("#qhDa").value||hhmm(base.s), $("#qhA").value||hhmm(base.e));
+    if(!orarioPlausibile(nuovo)) return;
+    state.shifts[k]=nuovo;
     // Solo oggi: un ciclo di un giorno che non si ripete. Gli altri giorni
     // restano "da impostare", mai presi da un ciclo di esempio.
     state.repeat=false; state.pattern=k; state.anchor=isoOggi(); state.ecc[isoOggi()]=k;
@@ -4453,10 +4463,15 @@ if($("#demoEsempio")) $("#demoEsempio").addEventListener("click", e=>{
     return;
   }
   if(e.target.closest("#qhConfermaOrari")){
-    document.querySelectorAll("[data-ora-da]").forEach(inp=>{
+    const nuovi={};
+    for(const inp of document.querySelectorAll("[data-ora-da]")){
       const k=inp.dataset.oraDa, a=document.querySelector('[data-ora-a="'+k+'"]');
-      if(state.shifts[k] && inp.value && a && a.value) state.shifts[k]=turnoDaOrari(k, state.shifts[k].n, inp.value, a.value);
-    });
+      if(!(state.shifts[k] && inp.value && a && a.value)) continue;
+      const t1=turnoDaOrari(k, state.shifts[k].n, inp.value, a.value);
+      if(!orarioPlausibile(t1)) return;
+      nuovi[k]=t1;
+    }
+    Object.assign(state.shifts, nuovi);
     if(state.repeat) primoPianoPronto("ciclo", "Ciclo impostato: ecco il tuo piano");
     else { demoEsempioSubflow="segna"; renderDemoEsempio(); }
     return;
@@ -4631,7 +4646,26 @@ function giaInstallata(){
   catch(e){ return false; }
 }
 let installPromptEvento = null;
+// Un invito al giorno, al massimo. Erano sette (installa, condividi,
+// calendario, scadenza calendario, statistiche, Club, sostieni) e ognuno
+// cedeva il passo al precedente: chiuso uno, compariva subito il successivo,
+// una catena di interruzioni proprio nei primi giorni. Ora, dopo che se ne è
+// chiuso o usato uno, gli altri aspettano domani; e il primo giorno d'uso
+// compaiono solo quelli che servono subito (installazione, backup).
+var _invitoOggi = store.get("invitoVisto", "");   // var: letta da render(), mai in TDZ
+function invitiInPausa(nonIlPrimoGiorno){
+  const oggi = iso(new Date());
+  if(_invitoOggi === oggi) return true;
+  if(nonIlPrimoGiorno && (!state.firstSeenAt || state.firstSeenAt === oggi)) return true;
+  return false;
+}
+document.addEventListener("click", e=>{
+  if(e.target.closest("#installBanner button, #installBanner a, #shareNudge button, #icsNudge button, #icsExpireNudge button, #statsNudge button, #clubBanner button, #clubBanner a, #donateNudge button, #donateNudge a")){
+    _invitoOggi = iso(new Date()); store.set("invitoVisto", _invitoOggi);
+  }
+}, true);
 function installBannerVisibile(){
+  if(invitiInPausa(false)) return false;
   const mostraBenvenuto = primaVoltaDaLink && !benvenutoLinkChiuso;
   const pronto = !!(state.pattern && Object.keys(state.shifts||{}).length);
   const ios = isIOSPerInstall();
@@ -4675,6 +4709,7 @@ if($("#installBanner")) $("#installBanner").addEventListener("click", e=>{
 // non se l'utente ha già almeno una persona in elenco — a quel punto lo
 // sta già facendo.
 function shareNudgeVisibile(){
+  if(invitiInPausa(true)) return false;
   if(document.body && (document.body.classList.contains("wiz-open") || document.body.classList.contains("intro"))) return false;
   const ob=$("#onboard"); if(ob && !ob.hidden) return false;
   if(!state.turniConfigurati) return false;
@@ -4705,6 +4740,7 @@ if($("#shareNudge")) $("#shareNudge").addEventListener("click", e=>{
 // installazione, condivisione) — dalla seconda in poi, quando l'utente è
 // chiaramente tornato, è il momento più naturale per "lo sapevi?".
 function icsNudgeVisibile(){
+  if(invitiInPausa(true)) return false;
   if(window.NT_APP.nativo) return false;   // nell'app: niente file da scaricare (vedi #doIcs)
   const mostraBenvenuto = primaVoltaDaLink && !benvenutoLinkChiuso;
   const pronto = !!(state.pattern && Object.keys(state.shifts||{}).length);
@@ -4734,6 +4770,7 @@ if($("#icsNudge")) $("#icsNudge").addEventListener("click", e=>{
 // icsExportedAt) e si riarma da sé al prossimo — a differenza di icsNudge
 // (che introduce la funzione una volta sola), questo deve tornare ogni ciclo.
 function icsExpireNudgeVisibile(){
+  if(invitiInPausa(false)) return false;
   if(window.NT_APP.nativo) return false;
   if(!state.icsExportedAt || state.icsExpireNudgeSeenAt===state.icsExportedAt) return false;
   const giorni=(new Date()-new Date(state.icsExportedAt+"T00:00:00"))/86400000;
@@ -4771,6 +4808,7 @@ if($("#icsExpireNudge")) $("#icsExpireNudge").addEventListener("click", e=>{
 // sì e no sono entrambe risposte, e restano modificabili in Opzioni.
 // Finché non c'è risposta, analytics.js non manda e non salva niente.
 function statsNudgeVisibile(){
+  if(invitiInPausa(true)) return false;
   if(!window.NTAnalytics || window.NTAnalytics.answered()) return false;
   const mostraBenvenuto = primaVoltaDaLink && !benvenutoLinkChiuso;
   const secondaSessione = state.firstSeenAt && state.firstSeenAt!==iso(new Date());
@@ -4805,6 +4843,7 @@ if($("#statsNudge")) $("#statsNudge").addEventListener("click", e=>{
 // cede il passo a tutti i banner sopra, non si accumulano richieste sullo
 // stesso schermo.
 function clubBannerVisibile(){
+  if(invitiInPausa(true)) return false;
   const mostraBenvenuto = primaVoltaDaLink && !benvenutoLinkChiuso;
   const pronto = !!(state.pattern && Object.keys(state.shifts||{}).length);
   const heroAttivo = (!state.turniConfigurati && !demoEsempioChiuso);
@@ -4831,6 +4870,7 @@ if($("#clubBanner")) $("#clubBanner").addEventListener("click", e=>{
 // resta comunque — questo non è mai una condizione, solo un modo per chi
 // vuole ricambiare a scoprire come farlo.
 function donateNudgeVisibile(){
+  if(invitiInPausa(true)) return false;
   const pronto = !!(state.pattern && Object.keys(state.shifts||{}).length);
   const giorniUso = state.firstSeenAt ? (new Date()-new Date(state.firstSeenAt+"T00:00:00"))/86400000 : 0;
   return !(state.donateNudgeOff || !donateUrl() || clubBannerVisibile() || !pronto || giorniUso<21);
@@ -5192,8 +5232,13 @@ function renderEssenziale(P, CARDS){
 function serieTurnoCorrente(){
   const oggi=NT.block(0);
   if(oggi.rest) return null;
-  let inizio=0; while(!NT.block(inizio-1).rest && NT.block(inizio-1).c===oggi.c) inizio--;
-  let fine=0; while(!NT.block(fine+1).rest && NT.block(fine+1).c===oggi.c) fine++;
+  // Limite ai due cicli: con uno schema senza giorni di riposo (es. "sempre
+  // pomeriggio", o un turno fisso senza riposi) la serie non finiva mai e
+  // l'app si bloccava all'apertura. Oltre ~4 mesi la pillola non dice niente.
+  const MAX=120;
+  let inizio=0; while(inizio>-MAX && !NT.block(inizio-1).rest && NT.block(inizio-1).c===oggi.c) inizio--;
+  let fine=0; while(fine<MAX && !NT.block(fine+1).rest && NT.block(fine+1).c===oggi.c) fine++;
+  if(fine-inizio+1 > 60) return null;   // nessun riposo in vista: "Pomeriggio 37/240" non aiuta
   const totale=fine-inizio+1;
   if(totale<2) return null;
   return {posizione:-inizio+1, totale};
@@ -8067,14 +8112,22 @@ if($("#doOpen")) $("#doOpen").onclick=()=>{
   // nuova impostazione: portare direttamente dove si modifica davvero.
   apriOpzioni();
 };
+// Se il telefono non lascia salvare (navigazione privata, memoria piena,
+// dati del sito bloccati) l'app funziona lo stesso, ma i turni spariscono
+// alla chiusura: va detto una volta, non scoperto il giorno dopo.
+let _avvisoSalvataggio=false;
 function salva(){
   store.set("turniConfigurati", !!state.turniConfigurati);
-  store.set("state",{turniConfigurati:state.turniConfigurati,pattern:state.pattern,anchor:state.anchor,shifts:state.shifts,
+  const salvato = store.set("state",{turniConfigurati:state.turniConfigurati,pattern:state.pattern,anchor:state.anchor,shifts:state.shifts,
     cTo:state.cTo,cFrom:state.cFrom,need:state.need,prep:state.prep,freeWake:state.freeWake,freeBed:state.freeBed,
     maxAdvance:state.maxAdvance,pPattern:state.pPattern,pAnchor:state.pAnchor,
     pShifts:state.pShifts,pWake:state.pWake,pBed:state.pBed,pName:state.pName,people:state.people,personaGlance:state.personaGlance,
     repeat:state.repeat,ecc:state.ecc,evento:state.evento,
     napTurno:state.napTurno,sonnoDiurno:state.sonnoDiurno,mattinoBifasico:state.mattinoBifasico,avvisoBifasicoOff:state.avvisoBifasicoOff,installBannerOff:state.installBannerOff,shareNudgeOff:state.shareNudgeOff,icsNudgeOff:state.icsNudgeOff,icsExportedAt:state.icsExportedAt,icsExpireNudgeSeenAt:state.icsExpireNudgeSeenAt,firstSeenAt:state.firstSeenAt,clubBannerOff:state.clubBannerOff,donateNudgeOff:state.donateNudgeOff,pausa:state.pausa,caffSens:state.caffSens,vista:state.vista});
+  if(!salvato && state.turniConfigurati && !_avvisoSalvataggio){
+    _avvisoSalvataggio=true;
+    setTimeout(()=>toast("Questo browser non permette di salvare: i turni restano solo finché l'app è aperta. Salva la configurazione come link (Opzioni)."), 600);
+  }
   // segnala i cambi di configurazione (non di vista) così il modulo del
   // calendario automatico può tenere allineato il feed. Il primo salva non conta.
   try{
