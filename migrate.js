@@ -1,12 +1,12 @@
-/* migrate.js — trasloco dei dati dalla vecchia app (TWA/PWA, dati nel browser)
+/* migrate.js — trasloco dei dati dalla PWA (dati nel browser)
    alla nuova app nativa (Capacitor, dati nel suo WebView). Sono due storage
-   separati anche sullo stesso telefono: senza questo, chi aggiorna l'app dal
-   Play Store ripartirebbe con turni e diario vuoti.
+   separati anche sullo stesso telefono: senza questo, chi passa dalla PWA
+   all'app ripartirebbe con turni e diario vuoti.
 
    Nessun server: i dati passano dentro il link stesso, nel frammento (#…).
      1. App nativa, primo avvio a vuoto → "Recupera i miei dati" apre
         https://app.notturnisti.club/?export=app nel browser del telefono, cioè
-        lo stesso in cui girava la vecchia app e in cui stanno i dati.
+        lo stesso in cui girava la PWA e in cui stanno i dati.
      2. Il sito, con ?export=app, legge le chiavi "nt:" dal suo localStorage,
         le comprime e al tocco su "Apri nell'app" naviga a
         notturnisti://import#v1.<dati>  (serve un tocco: i browser bloccano

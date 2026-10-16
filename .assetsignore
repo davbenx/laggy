@@ -6,6 +6,7 @@ tests/
 dist/
 .wrangler/
 .git/
+.github/
 .gitignore
 wrangler.jsonc
 .assetsignore
