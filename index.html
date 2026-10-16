@@ -1591,24 +1591,22 @@ header b{font-size:23px}
   </div>
 
   <div class="tools" style="margin:0">
+    <!-- Un formato per situazione, in ordine d'uso: messaggio (chiunque, in
+         chat), link o QR (chi ha l'app e vuole confrontare), carta/PDF (frigo,
+         bacheca). -->
     <button type="button" id="doShareWhatsApp" class="tool">
       <span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.41a8.204 8.204 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.19 8.19 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24m4.52 11.66c-.19.53-1.06 1.04-1.47 1.08-.38.04-.88.06-2.84-.73-2.34-.95-3.84-3.34-3.96-3.49-.11-.16-.96-1.27-.96-2.42 0-1.15.6-1.72.82-1.95.21-.23.46-.29.62-.29.15 0 .31 0 .44.01.14.01.33-.05.51.39.19.46.66 1.6.72 1.72.06.12.1.26.02.42-.08.16-.12.26-.24.4-.12.14-.26.31-.37.42-.12.12-.24.25-.1.5.14.24.62 1.03 1.34 1.67.92.82 1.7 1.08 1.94 1.2.24.12.39.1.53-.06.15-.17.62-.72.79-.97.16-.25.33-.21.55-.13.22.08 1.41.67 1.65.79.24.12.4.18.46.28.06.11.06.63-.13 1.16"/></svg></span>
-      <span class="tool-tx"><b>Manda i miei turni su WhatsApp</b><span>Un messaggio con i turni dei prossimi giorni, uno per riga: per colleghi o famiglia.</span></span>
+      <span class="tool-tx"><b>Manda i miei turni</b><span>Un messaggio con i turni dei prossimi giorni, per WhatsApp o dove vuoi: per colleghi o famiglia.</span></span>
     </button>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-      <button type="button" id="doCycShare" class="tool" style="margin:0;padding:12px;flex-direction:column;align-items:flex-start;gap:6px">
-        <span class="tool-ic" style="margin:0"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg></span>
-        <span class="tool-tx"><b>Link al mio ciclo</b><span style="font-size:12px">Chi lo apre vede i tuoi turni accanto ai suoi</span></span>
-      </button>
-      <button type="button" id="doCycQR" class="tool" style="margin:0;padding:12px;flex-direction:column;align-items:flex-start;gap:6px">
-        <span class="tool-ic" style="margin:0"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM19 14h2v2h-2zM14 19h2v2h-2zM19 19h2v2h-2z"/></svg></span>
-        <span class="tool-tx"><b>QR del ciclo</b><span style="font-size:12px">Lo stesso link, da inquadrare di persona</span></span>
-      </button>
-    </div>
+    <button type="button" id="doCycShare" class="tool">
+      <span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg></span>
+      <span class="tool-tx"><b>Link per chi ha l'app</b><span>Chi lo apre vede i tuoi turni accanto ai suoi.</span></span>
+    </button>
+    <button type="button" class="lnk" id="doCycQR" style="align-self:flex-start;font-size:13px;padding:6px 2px;margin-top:-2px">Oppure mostralo come QR, da inquadrare di persona</button>
     <div class="ecc" id="qrBoxCyc" hidden><div id="qrHolderCyc" style="display:flex;justify-content:center;margin:14px 0"></div></div>
-    <button type="button" id="doPrint" class="tool">
+    <button type="button" id="doPrint" class="tool tool-1line">
       <span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8V3h12v5"/><rect x="4" y="8" width="16" height="8" rx="1.5"/><path d="M8 13h8v7H8z"/></svg></span>
-      <span class="tool-tx"><b>Stampa o salva in PDF</b><span>28 giorni con turni, sonno e ultimo caffè: da appendere al frigo.</span></span>
+      <span class="tool-tx"><b>Stampa o salva in PDF</b><span>28 giorni con turni, sonno e ultimo caffè, da appendere</span></span>
     </button>
   </div>
 </div>
@@ -7036,7 +7034,7 @@ async function mandaOrariLiberi(){
   if(!state.turniConfigurati){ toast("Imposta prima i turni"); return; }
   const testo=testoOrariLiberi();
   if(!testo){ toast("Nessuna finestra libera nelle prossime due settimane"); return; }
-  track("share_created");
+  track("share_created", {tipo:"liberi_msg"});
   try{
     if(platform.canShare()){ await platform.share({title:"Quando sono libero", text:testo}); return; }
   }catch(e){ if(e && e.name==="AbortError") return; }
@@ -7045,6 +7043,7 @@ async function mandaOrariLiberi(){
 }
 if($("#doPrint")) $("#doPrint").onclick=()=>{
   if(!buildPrintSheet()){ toast("Imposta prima i turni"); return; }
+  track("share_created", {tipo:"pdf_ciclo"});
   stampaFoglio("Notturnisti - il tuo ciclo");
 };
 // Pagine Andamenti e "Quando possiamo vederci": una alla volta dentro
@@ -7209,7 +7208,7 @@ if($("#cycToday")) $("#cycToday").onclick=()=>{ state.focus=giornoVero(); cycGo(
 if($("#doCycQR")) $("#doCycQR").onclick=()=>{
   const b=$("#qrBoxCyc"); if(!b) return;
   b.hidden=!b.hidden;
-  if(!b.hidden) renderQR("#qrHolderCyc");
+  if(!b.hidden){ renderQR("#qrHolderCyc"); track("share_created", {tipo:"qr"}); }
 };
 
 // La griglia del wizard scrive subito, come ogni altro campo del passo (il
@@ -7617,12 +7616,12 @@ async function condividiCiclo(){
   // annulla il foglio di condivisione nativo: lì il link non è arrivato
   // da nessuna parte).
   try{
-    if(platform.canShare()){ await platform.share({title:"Notturnisti",text:testo,url}); track("share_created"); return; }
+    if(platform.canShare()){ await platform.share({title:"Notturnisti",text:testo,url}); track("share_created", {tipo:"link"}); return; }
   }catch(e){ if(e && e.name==="AbortError") return; }
-  try{ await navigator.clipboard.writeText(url); toast("Link copiato"); track("share_created"); }
-  catch(e){ prompt("Copia questo link:",url); track("share_created"); }
+  try{ await navigator.clipboard.writeText(url); toast("Link copiato"); track("share_created", {tipo:"link"}); }
+  catch(e){ prompt("Copia questo link:",url); track("share_created", {tipo:"link"}); }
 }
-function condividiCicloWhatsApp(){
+async function condividiCicloWhatsApp(){
   const p = (state.pattern || "").toUpperCase().replace(/[^A-Z]/g, "");
   const L = p.length || 7;
   let start = giornoVero();
@@ -7688,9 +7687,14 @@ function condividiCicloWhatsApp(){
 
   const link = window.NT_APP.base + "#" + toCompactHash();
   testo += "\n🔗 Confronta i tuoi turni con i miei:\n" + link;
-  track("share_whatsapp");
-  const url = "https://wa.me/?text=" + encodeURIComponent(testo);
-  window.open(url, "_blank");
+  // Pannello di condivisione del telefono: WhatsApp, Telegram, SMS… (prima
+  // solo wa.me, che escludeva le altre app e nell'app Android passava dal
+  // browser). wa.me resta il ripiego dove il pannello non c'è (computer).
+  track("share_created", {tipo:"turni_msg"});
+  try{
+    if(platform.canShare()){ await platform.share({title:"I miei turni", text:testo}); return; }
+  }catch(e){ if(e && e.name==="AbortError") return; }
+  window.open("https://wa.me/?text=" + encodeURIComponent(testo), "_blank");
 }
 const condividiSettimanaWhatsApp = condividiCicloWhatsApp;
 if($("#doShareWhatsApp")) $("#doShareWhatsApp").onclick=()=>{ haptic(10); condividiSettimanaWhatsApp(); };
@@ -8617,6 +8621,7 @@ if($("#partner")) $("#partner").addEventListener("click", e=>{
   else if(e.target.closest("[data-partner-sheet]")){
     if(!state.turniConfigurati){ toast("Imposta prima i turni"); return; }
     buildShareSheet();
+    track("share_created", {tipo:"pdf_liberi"});
     stampaFoglio("Notturnisti - quando sono libero");
   }
 });

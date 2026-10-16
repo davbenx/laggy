@@ -49,7 +49,7 @@
     calendar_viewed: [],
 
     share_started: [],
-    share_created: [],
+    share_created: ["tipo"],
     share_opened: [],
     share_accepted: [],
 
