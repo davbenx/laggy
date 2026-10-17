@@ -146,8 +146,11 @@ const nativeNotify = {
     await ensureChannels(LN);
     // Subito, senza "schedule": un allarme non esatto a 5 secondi, da
     // Android 14, il sistema può rinviarlo di minuti (visto su Android 15).
+    // isExactNotification:false perché il plugin, se manca il permesso delle
+    // sveglie esatte (Android 12+), aprirebbe la schermata di sistema
+    // "Sveglie e promemoria" anche per una notifica immediata.
     await LN.schedule({ notifications: [{ id: 999990, title: "Notturnisti", body: PROVA,
-      channelId: "promemoria", extra: { tab: "oggi" } }] });
+      channelId: "promemoria", isExactNotification: false, extra: { tab: "oggi" } }] });
     return true;
   }
 };
