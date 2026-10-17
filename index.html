@@ -5287,8 +5287,20 @@ document.addEventListener("click", e=>{
     _invitoOggi = iso(new Date()); store.set("invitoVisto", _invitoOggi);
   }
 }, true);
+// Android dal browser, con l'app già su Play: l'invito porta lì (notifiche
+// affidabili, widget, calendario), anche a chi usa già la versione web
+// installata. Il link porta con sé la provenienza, così Play Console dice
+// quante installazioni arrivano da qui.
+function playDaWeb(){
+  try{ return !window.NT_APP.nativo && !!window.NT_APP.play && /Android/i.test(navigator.userAgent||""); }catch(e){ return false; }
+}
+function playLink(){ return window.NT_APP.play+(window.NT_APP.play.includes("?")?"&":"?")+"referrer="+encodeURIComponent("utm_source=webapp&utm_medium=banner"); }
 function installBannerVisibile(){
   if(invitiInPausa(false)) return false;
+  if(playDaWeb()){
+    const pronto = !!(state.pattern && Object.keys(state.shifts||{}).length);
+    return !(state.installBannerOff || (primaVoltaDaLink && !benvenutoLinkChiuso) || firstPlanBannerVisibile() || backupNudgeVisibile() || !pronto);
+  }
   const mostraBenvenuto = primaVoltaDaLink && !benvenutoLinkChiuso;
   const pronto = !!(state.pattern && Object.keys(state.shifts||{}).length);
   const ios = isIOSPerInstall();
@@ -5302,6 +5314,14 @@ function renderInstallBanner(){
   const ios = isIOSPerInstall();
   if(!installBannerTracciato){ installBannerTracciato=true; track("install_prompt_shown"); }
   el.hidden=false;
+  if(playDaWeb()){
+    el.innerHTML =
+      '<button type="button" id="chiudiInstall" aria-label="Chiudi">×</button>'+
+      '<b>Notturnisti è su Google Play</b>'+
+      '<p class="hint" style="margin-top:6px">L\'app Android fa tutto quello che fa questa pagina, in più: promemoria che arrivano anche ad app chiusa, i turni nel calendario del telefono, il widget sulla schermata Home. Gratis come qui. I tuoi turni li porti con un tocco: all\'apertura scegli «Usavi Notturnisti dal browser?».</p>'+
+      '<a class="btn g" id="doPlayApp" href="'+esc(playLink())+'" target="_blank" rel="noopener" style="display:inline-block;text-decoration:none;text-align:center">Apri Google Play →</a>';
+    return;
+  }
   el.innerHTML =
     '<button type="button" id="chiudiInstall" aria-label="Chiudi">×</button>'+
     '<b>Usa Notturnisti come app</b>'+
@@ -5314,6 +5334,7 @@ function renderInstallBanner(){
 }
 if($("#installBanner")) $("#installBanner").addEventListener("click", e=>{
   if(e.target.closest("#chiudiInstall")){ state.installBannerOff=true; salva(); renderInstallBanner(); return; }
+  if(e.target.closest("#doPlayApp")){ track("setup_item", {item:"play"}); state.installBannerOff=true; salva(); return; }
   if(e.target.closest("#doInstallApp") && installPromptEvento){
     installPromptEvento.prompt();
     installPromptEvento.userChoice.then(r=>{
@@ -9268,7 +9289,11 @@ addEventListener("nt:refresh", ()=>{ try{ render(); }catch(e){} });
 (function(){
   var nativo = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
   var origin = nativo ? "https://app.notturnisti.club" : location.origin;
-  window.NT_APP = { nativo: nativo, origin: origin, base: nativo ? origin + "/" : location.origin + location.pathname };
+  window.NT_APP = { nativo: nativo, origin: origin, base: nativo ? origin + "/" : location.origin + location.pathname,
+    // Scheda Google Play: da compilare il giorno in cui l'app è pubblica in
+    // produzione. Finché è vuota, sul web Android resta l'invito a installare
+    // la versione web; con il link, l'invito porta a Play (vedi installBanner).
+    play: "" };
   window.NT_CAL = { api: nativo ? origin : "", origin: origin };
   if(!nativo) window.NT_DONATE = { url: "https://ko-fi.com/notturnisti" };
 })();
