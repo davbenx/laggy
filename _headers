@@ -4,8 +4,6 @@
   Permissions-Policy: geolocation=(), camera=(), microphone=(), interest-cohort=()
   X-Robots-Tag: all
   X-Frame-Options: SAMEORIGIN
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://assets.lemonsqueezy.com; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self' https://api.lemonsqueezy.com https://*.pages.dev; img-src 'self' blob: data:; frame-src https://*.lemonsqueezy.com; frame-ancestors 'self' https://notturnisti.club https://www.notturnisti.club; object-src 'none'; base-uri 'self'
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self'; img-src 'self' blob: data:; frame-src 'none'; frame-ancestors 'self' https://notturnisti.club https://www.notturnisti.club; object-src 'none'; base-uri 'self'; form-action 'self'
+  Strict-Transport-Security: max-age=31536000
 
-/.well-known/assetlinks.json
-  Content-Type: application/json
-  Access-Control-Allow-Origin: *
