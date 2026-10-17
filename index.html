@@ -1115,6 +1115,27 @@ header b{font-size:23px}
   #printSheet thead{display:table-header-group}
   #printSheet tr{break-inside:avoid;page-break-inside:avoid}
   .ps-foot{margin-top:3mm;font-size:7.5pt;color:#444}
+  /* Pagina 1: calendario da muro. In bianco e nero si distingue lo stesso:
+     notte grigio scuro, lavoro grigio chiaro, riposo bianco. */
+  #printSheet .pc{break-after:page;page-break-after:always}
+  #printSheet .pc h1{font-size:20pt}
+  .pc-griglia{width:calc(100% - 1pt);display:grid;grid-template-columns:repeat(7,1fr);border-top:.6pt solid #000;border-left:.6pt solid #000}
+  .pc-griglia>div{box-sizing:border-box;min-width:0}
+  .pc-h{font-size:8pt;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:1.2mm 1.5mm;border-right:.6pt solid #000;border-bottom:.6pt solid #000;background:#000;color:#fff!important;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .pc-g{height:40mm;padding:1.5mm;border-right:.6pt solid #000;border-bottom:.6pt solid #000;display:flex;flex-direction:column;gap:.6mm;overflow:hidden;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .pc-g b{font-size:10.5pt;line-height:1.1;margin-top:1mm}
+  .pc-g span{font-size:8pt;color:#222}
+  .pc-n{font-size:9pt!important;font-weight:700;color:#000!important}
+  .pc-s{margin-top:auto}
+  .pc-notte{background:#d4d4d4}
+  .pc-lavoro{background:#f0f0f0}
+  .pc-pass{opacity:.35}
+  .pc-oggi{outline:1.6pt solid #000;outline-offset:-1.6pt}
+  .pc-piede{display:flex;align-items:center;gap:4mm;margin-top:4mm}
+  .pc-piede p{font-size:8pt;color:#333;margin:0;line-height:1.35}
+  .pc-qr svg{width:26mm;height:26mm;display:block}
 }
 </style>
 </head>
@@ -1623,7 +1644,7 @@ header b{font-size:23px}
     <div class="ecc" id="qrBoxCyc" hidden><div id="qrHolderCyc" style="display:flex;justify-content:center;margin:14px 0"></div></div>
     <button type="button" id="doPrint" class="tool tool-1line">
       <span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8V3h12v5"/><rect x="4" y="8" width="16" height="8" rx="1.5"/><path d="M8 13h8v7H8z"/></svg></span>
-      <span class="tool-tx"><b>Stampa o salva in PDF</b><span>4 settimane da oggi con turni, sonno e ultimo caffè, da appendere</span></span>
+      <span class="tool-tx"><b>Stampa o salva in PDF</b><span>Un calendario da appendere (5 settimane) e il dettaglio giorno per giorno: sonno, pisolini, caffè, luce</span></span>
     </button>
   </div>
 </div>
@@ -7354,14 +7375,48 @@ function buildPrintSheet(){
       '<td>'+hhmm(P.wake+15)+'</td></tr>');
   }
   state.focus=fPrima;
-  el.innerHTML =
-    '<h1>Notturnisti — il tuo ciclo</h1>'+
+  el.innerHTML = paginaCalendario(f0) +
+    '<h1 class="ps-p2">Notturnisti — il tuo ciclo, giorno per giorno</h1>'+
     '<p class="ps-sub">'+esc(righe.length+" giorni dal "+f0.toLocaleDateString("it-IT",{day:"numeric",month:"long",year:"numeric"}))+
     ' · sequenza <b>'+esc(state.pattern||"—")+'</b>'+(state.repeat===false?" (non si ripete)":"")+'</p>'+
     '<table><thead><tr><th>Giorno</th><th>Turno</th><th>Dormi</th><th>Pisolini</th><th>Ultimo caffè</th><th>Luce</th></tr></thead>'+
     '<tbody>'+righe.join("")+'</tbody></table>'+
     '<p class="ps-foot">Piano indicativo di pianificazione, non un dispositivo medico. notturnisti.club</p>';
   return righe.length;
+}
+// Pagina 1 del foglio: un calendario da appendere. Cinque settimane intere
+// da lunedì, a partire dalla settimana di oggi (i giorni già passati sono
+// sbiaditi): sempre da oggi, ma con la forma di un calendario da muro.
+// In ogni casella turno, orario e quando dormire. In fondo il QR del ciclo:
+// chi lo inquadra ha la versione che si aggiorna da sola.
+function paginaCalendario(oggi){
+  const GG=["Lun","Mar","Mer","Gio","Ven","Sab","Dom"];
+  const lun=lunediDi(oggi), fPrima=state.focus, celle=[];
+  for(let i=0;i<35;i++){
+    const d=day(lun,i), passato=dnum(d)<dnum(oggi);
+    state.focus=d;
+    let c="?"; try{ c=NT.codeAt(0); }catch(e){}
+    let P=null; if(c!=="?"){ try{ P=NT.plan(); }catch(e){} }
+    const tipo = !P ? "vuoto" : P.b.rest ? "riposo" : P.night ? "notte" : "lavoro";
+    const num = d.getDate()+(d.getDate()===1||i===0 ? " "+d.toLocaleDateString("it-IT",{month:"short"}) : "");
+    celle.push('<div class="pc-g pc-'+tipo+(passato?' pc-pass':'')+(dnum(d)===dnum(oggi)?' pc-oggi':'')+'">'+
+      '<span class="pc-n">'+esc(num)+'</span>'+
+      (P ? '<b>'+esc(P.b.rest?"Riposo":(P.b.name||P.b.c))+'</b>'+
+        (P.b.rest?'':'<span>'+hhmm(P.b.start)+'–'+hhmm(P.b.end)+'</span>')+
+        '<span class="pc-s">dormi '+hhmm(P.s.onset)+'</span>' : '')+
+      '</div>');
+  }
+  state.focus=fPrima;
+  const fine=day(lun,34), qr=qrSvg(96);
+  return '<section class="pc">'+
+    '<h1>I miei turni</h1>'+
+    '<p class="ps-sub">Dal '+esc(lun.toLocaleDateString("it-IT",{day:"numeric",month:"long"}))+' al '+esc(fine.toLocaleDateString("it-IT",{day:"numeric",month:"long",year:"numeric"}))+
+      ' · stampato il '+esc(oggi.toLocaleDateString("it-IT",{day:"numeric",month:"long"}))+'</p>'+
+    '<div class="pc-griglia">'+GG.map(g=>'<div class="pc-h">'+g+'</div>').join("")+celle.join("")+'</div>'+
+    '<div class="pc-piede">'+(qr?'<div class="pc-qr">'+qr+'</div>':'')+
+      '<p>'+(qr?'<b>Inquadra il codice</b> con la fotocamera: si aprono i miei turni sempre aggiornati e, se usi Notturnisti, li vedi accanto ai tuoi.<br>':'')+
+      'Turno, orario e ora in cui vado a dormire. Piano indicativo, non un dispositivo medico · notturnisti.club</p></div>'+
+    '</section>';
 }
 // Il foglio da dare a chi aspetta: solo i giorni e le ore libere, niente
 // sonno/turni/caffè. Riusa finestreLibere() — la stessa vista di "Quando sono
@@ -8099,6 +8154,15 @@ if($("#doCycShare")) $("#doCycShare").onclick=condividiCiclo;
 // i tuoi dati (toCompactHash()), mai quelli di una persona che segui. Solo
 // generazione: la lettura la fa già la fotocamera nativa del telefono, che
 // riconosce il link e lo apre da sola — non serve costruire anche quella metà.
+// Il QR del proprio ciclo come SVG (anche per il foglio stampato); "" se il
+// link è troppo lungo per un QR.
+function qrSvg(px){
+  if(typeof window.qrcodegen==="undefined") return "";
+  let qr; try{ qr=window.qrcodegen.QrCode.encodeText(window.NT_APP.base+"#"+toCompactHash(), window.qrcodegen.QrCode.Ecc.MEDIUM); }catch(e){ return ""; }
+  const n=qr.size, border=2, dim=n+border*2; let path="";
+  for(let y=0;y<n;y++) for(let x=0;x<n;x++) if(qr.getModule(x,y)) path+="M"+(x+border)+","+(y+border)+"h1v1h-1z";
+  return '<svg viewBox="0 0 '+dim+' '+dim+'" width="'+px+'" height="'+px+'" role="img" aria-label="Codice QR del ciclo"><rect width="'+dim+'" height="'+dim+'" fill="#fff"/><path d="'+path+'" fill="#000"/></svg>';
+}
 function renderQR(holderSel){
   const holder=$(holderSel||"#qrHolder"); if(!holder || typeof window.qrcodegen==="undefined") return;
   const url=window.NT_APP.base+"#"+toCompactHash();
