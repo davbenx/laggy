@@ -1118,6 +1118,7 @@ header b{font-size:23px}
   /* Pagina 1: calendario da muro. In bianco e nero si distingue lo stesso:
      notte grigio scuro, lavoro grigio chiaro, riposo bianco. */
   #printSheet .pc{break-after:page;page-break-after:always}
+  #printSheet .pc.pc-sola{break-after:auto;page-break-after:auto}
   #printSheet .pc h1{font-size:20pt}
   .pc-griglia{width:calc(100% - 1pt);display:grid;grid-template-columns:repeat(7,1fr);border-top:.6pt solid #000;border-left:.6pt solid #000}
   .pc-griglia>div{box-sizing:border-box;min-width:0}
@@ -3024,8 +3025,10 @@ function scambio(offA, offB, giorni){
 
 // Il rovescio del piano: non quando dormi, ma quando sei disponibile. Serve per
 // prendere un appuntamento o vedere qualcuno senza doverlo dedurre da solo.
+// Da oggi (non dal giorno che si sta guardando): è "quando sono libero" da
+// adesso in avanti, per la pagina, il messaggio e il foglio.
 function finestreLibere(giorni){
-  const f0=state.focus, out=[];
+  const fPrima=state.focus, f0=giornoVero(), out=[];
   for(let o=0;o<giorni;o++){
     state.focus=day(f0,o);
     if(NT.codeAt(0)==="?") continue;
@@ -3042,7 +3045,7 @@ function finestreLibere(giorni){
     }
     if(fine-t>=90) out.push({d:day(f0,o), a:t, b:fine});
   }
-  state.focus=f0;
+  state.focus=fPrima;
   return out;
 }
 function download(name, text, mime){
@@ -7423,19 +7426,41 @@ function paginaCalendario(oggi){
 // disponibile" — e lo stesso foglio di stampa, con un contenuto diverso.
 function buildShareSheet(){
   const el=$("#printSheet"); if(!el) return 0;
-  // 28 giorni come il foglio del ciclo e l'export ICS — se la sequenza non
-  // si ripete e finisce prima, i giorni oltre restano "?" e vengono già
-  // saltati da finestreLibere(), quindi chiedere 28 non fa mai danno.
-  const w=finestreLibere(28);
-  const righe=w.map(x=>'<tr><td>'+esc(x.d.toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"}))+
-    '</td><td><b>'+hhmm(x.a)+" – "+hhmm(x.b)+'</b><br><span>'+dur(x.b-x.a)+'</span></td></tr>').join("");
-  el.innerHTML =
+  // Calendario come il foglio dei turni (cinque settimane da lunedì, dalla
+  // settimana di oggi), ma con solo le ore libere: niente turni, sonno o
+  // QR (il QR aprirebbe il ciclo intero, che qui si promette di non dare).
+  // Più tempo libero = casella più chiara, si legge anche in bianco e nero.
+  const GG=["Lun","Mar","Mer","Gio","Ven","Sab","Dom"];
+  const oggi=giornoVero(), lun=lunediDi(oggi), fPrima=state.focus;
+  const restanti=35-Math.round((dnum(oggi)-dnum(lun))/86400000);
+  const perGiorno={}; let tot=0;
+  finestreLibere(restanti).forEach(x=>{ (perGiorno[iso(x.d)]=perGiorno[iso(x.d)]||[]).push(x); tot++; });
+  const celle=[];
+  for(let i=0;i<35;i++){
+    const d=day(lun,i), k=iso(d), passato=dnum(d)<dnum(oggi);
+    state.focus=d; let c="?"; try{ c=NT.codeAt(0); }catch(e){}
+    const w=perGiorno[k]||[];
+    const tutto=w.length===1 && finestraTuttoIlGiorno(w[0]);
+    const tipo = passato||c==="?" ? "vuoto" : tutto ? "riposo" : w.length ? "lavoro" : "notte";
+    const num=d.getDate()+(d.getDate()===1||i===0 ? " "+d.toLocaleDateString("it-IT",{month:"short"}) : "");
+    let dentro="";
+    if(!passato && c!=="?"){
+      if(tutto) dentro='<b>Libero</b><span>tutto il giorno</span>';
+      else if(w.length) dentro=w.slice(0,2).map(x=>'<b>'+hhmm(x.a)+'–'+hhmm(x.b)+'</b>').join("")+(w.length>2?'<span>e altre</span>':'');
+      else dentro='<span>non libero</span>';
+    }
+    celle.push('<div class="pc-g pc-'+tipo+(passato?' pc-pass':'')+(dnum(d)===dnum(oggi)?' pc-oggi':'')+'"><span class="pc-n">'+esc(num)+'</span>'+dentro+'</div>');
+  }
+  state.focus=fPrima;
+  const fine=day(lun,34);
+  el.innerHTML='<section class="pc pc-sola">'+
     '<h1>Quando sono libero</h1>'+
-    '<p class="ps-sub">Prossime quattro settimane, dal '+esc(new Date().toLocaleDateString("it-IT",{day:"numeric",month:"long",year:"numeric"}))+'</p>'+
-    '<table><thead><tr><th>Giorno</th><th>Sono libero</th></tr></thead>'+
-    '<tbody>'+(righe||'<tr><td colspan="2">Nessuna finestra libera nelle prossime quattro settimane.</td></tr>')+'</tbody></table>'+
-    '<p class="ps-foot">Solo i giorni e le ore libere: nessun altro dato. notturnisti.club</p>';
-  return w.length;
+    '<p class="ps-sub">Dal '+esc(lun.toLocaleDateString("it-IT",{day:"numeric",month:"long"}))+' al '+esc(fine.toLocaleDateString("it-IT",{day:"numeric",month:"long",year:"numeric"}))+
+      ' · stampato il '+esc(oggi.toLocaleDateString("it-IT",{day:"numeric",month:"long"}))+'</p>'+
+    '<div class="pc-griglia">'+GG.map(g=>'<div class="pc-h">'+g+'</div>').join("")+celle.join("")+'</div>'+
+    '<div class="pc-piede"><p>Le ore in cui sono sveglio e non al lavoro (contando anche il viaggio). Solo i giorni e le ore libere: nessun altro dato · notturnisti.club</p></div>'+
+    '</section>';
+  return tot || 1;
 }
 // In stampa si vede solo ciò che sta direttamente sotto <body> (body>* nascosti
 // tranne #printSheet): il foglio va tenuto lì, qualunque cosa lo racchiuda nel
