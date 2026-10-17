@@ -350,7 +350,7 @@ function render(){
     if(steps[k].skip) sItems.push({k:"Configurazione completa, saltato al passo "+k, n:steps[k].skip});
   });
   $("#steps").innerHTML=rowsHtml(sItems);
-  var VOCI={turni:"Turni dei prossimi giorni",notifiche:"Promemoria",calendario:"Calendario del telefono",widget:"Widget"};
+  var VOCI={turni:"Turni dei prossimi giorni",notifiche:"Promemoria",calendario:"Calendario del telefono",widget:"Widget",file_ics:"File .ics scaricato",play:"Dal web a Google Play"};
   $("#setup").innerHTML=rowsHtml(byProp(rows,"setup_item").map(function(x){ return {k:VOCI[x.k]||x.k, n:x.n}; }));
 
   var FORMATI={turni_msg:"Messaggio con i turni",liberi_msg:"Messaggio con gli orari liberi",link:"Link al ciclo",qr:"QR del ciclo",pdf_ciclo:"Stampa/PDF del ciclo",pdf_liberi:"Stampa/PDF orari liberi",chiedi_link:"Richiesta del link a una persona"};

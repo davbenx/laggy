@@ -90,6 +90,9 @@
       '<p class="pf-p">Gratis, per chiunque. Turni, sonno, ultimo caffè — anche quello di coppia — scritti da soli nel calendario del telefono, aggiornati ogni volta che cambi qualcosa qui. I tuoi orari sempre pronti in agenda, senza aprire l\'app.</p>' +
       '<button class="pf-btn" id="pf-activate" type="button">Attiva il calendario →</button>' +
       '<p class="pf-note" id="pf-activate-status" style="display:none"></p>' +
+      // L'alternativa per chi non vuole i turni su un server: qui, dove si
+      // sceglie, non come voce a sé in Impostazioni accanto all'automatico.
+      (window.NTApriFileCalendario ? '<p class="pf-note">Preferisci non tenere i turni su un server? <button class="pf-danger" id="pf-file" style="color:var(--blue)">Scarica un file con 4 settimane</button> da aprire con il calendario: non si aggiorna da solo.</p>' : '') +
       (url ? '<p class="pf-note">L\'app è gratis e lo resta. Se vuoi <a href="' + url + '" target="_blank" rel="noopener" style="color:var(--blue)">offrire un caffè</a>, è benvenuto ma mai necessario.</p>' : '') +
       '<p class="pf-note">Hai già attivato il calendario su un altro dispositivo? <button class="pf-danger" id="pf-restore" style="color:var(--blue)">Ripristina</button></p>' +
       '<div id="pf-restore-box" hidden><input class="pf-in" id="pf-rid" placeholder="id"><input class="pf-in" id="pf-rkey" placeholder="chiave di scrittura">' +
@@ -186,6 +189,7 @@
     var b = $("#pf-body"); if (!b) return;
     // attivazione + restore
     if ($("#pf-activate")) $("#pf-activate").onclick = attiva;
+    var pff = $("#pf-file"); if (pff) pff.onclick = function () { close(); window.NTApriFileCalendario(); };
     var rb = $("#pf-restore"); if (rb) rb.onclick = function () { var x = $("#pf-restore-box"); x.hidden = !x.hidden; };
     var rgo = $("#pf-rgo"); if (rgo) rgo.onclick = function () {
       var id = ($("#pf-rid").value || "").trim(), key = ($("#pf-rkey").value || "").trim();

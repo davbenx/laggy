@@ -1698,7 +1698,7 @@ header b{font-size:23px}
       <span>Per chi non vuole il calendario automatico (che tiene i turni su un server): 4 settimane da oggi in un file da aprire con il calendario. Non si aggiorna da solo: quando cambia qualcosa, va rifatto.</span></span>
     </button>
     <div class="ecc" id="icsBox" hidden>
-      <b>Cosa mettere nel calendario</b>
+      <b>File per il calendario: cosa metterci</b>
       <p class="hint">Il turno non ha promemoria (lo sai già); gli altri solo dove l'orario conta.</p>
       <label class="p1"><input type="checkbox" id="icsT" checked> Turni</label>
       <label class="p1"><input type="checkbox" id="icsS" checked> Sonno</label>
@@ -5443,7 +5443,7 @@ function renderIcsExpireNudge(){
 }
 if($("#icsExpireNudge")) $("#icsExpireNudge").addEventListener("click", e=>{
   if(e.target.closest("#chiudiIcsExpireNudge")){ state.icsExpireNudgeSeenAt=state.icsExportedAt; salva(); renderIcsExpireNudge(); return; }
-  if(e.target.closest("#doIcsExpireNudge")){ state.icsExpireNudgeSeenAt=state.icsExportedAt; salva(); apriCalendarioDaWizard(); return; }
+  if(e.target.closest("#doIcsExpireNudge")){ state.icsExpireNudgeSeenAt=state.icsExportedAt; salva(); window.NTApriFileCalendario(); return; }
   if(e.target.closest("#doIcsExpireNudgePay")){ if(window.NTPaid) window.NTPaid.open(); }
 });
 
@@ -8026,6 +8026,16 @@ if($("#doOpzLucidita")) $("#doOpzLucidita").onclick=()=>{
 };
 
 if($("#icsAndroid")) $("#icsAndroid").hidden=!/Android/i.test(navigator.userAgent||"");
+// Il file .ics non ha più una riga sua in Impostazioni (sembrava un secondo
+// calendario da scegliere accanto a quello automatico): si apre dalla
+// finestra del calendario automatico, come alternativa senza server.
+if($("#doIcs")) $("#doIcs").hidden=true;
+window.NTApriFileCalendario=()=>{
+  apriOpzioni();
+  const b=$("#icsBox"); if(!b) return;
+  soloUno("#icsBox"); b.hidden=false;
+  setTimeout(()=>{ if(b.scrollIntoView) b.scrollIntoView({behavior:"smooth",block:"center"}); }, 80);
+};
 $("#doIcs").onclick=()=>{ const b=$("#icsBox"); const apri=b.hidden;
   soloUno(apri?"#icsBox":null); b.hidden=!apri;
   if(apri && b.scrollIntoView) b.scrollIntoView({behavior:"smooth",block:"nearest"}); };
@@ -8046,6 +8056,7 @@ $("#icsVai").onclick=()=>{
     let testoIcs; try{ testoIcs=NT.buildIcs(28); } finally { state.focus=fPrima; }
     download("notturnisti-"+iso(giornoVero())+".ics",testoIcs,"text/calendar");
     $("#icsBox").hidden=true; toast("File scaricato: aprilo con il calendario");
+    track("setup_item", {item:"file_ics"});
     // Segna quando: il file è statico e scade dopo 28 giorni, senza questo
     // l'app non ha modo di sapere se il calendario del telefono è ancora
     // allineato al piano vero — vedi renderIcsExpireNudge().
