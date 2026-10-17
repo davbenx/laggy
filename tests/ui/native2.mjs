@@ -67,7 +67,7 @@ ok((await lg()).includes("App.minimizeApp"), "indietro da Oggi manda l'app in se
 // condivisione
 const shareBtn = await p.evaluate(()=>!!document.querySelector("#doShare"));
 await p.evaluate(()=>document.querySelector("#doShare") && document.querySelector("#doShare").click()); await p.waitForTimeout(500);
-ok((await lg()).some(x=>x.startsWith("Share.share https://notturnisti.club/planner")), "«Consiglialo a un collega» apre il pannello nativo con il link al sito pubblico: "+(await lg()).filter(x=>x.startsWith("Share")).pop());
+ok((await lg()).some(x=>x.startsWith("Share.share https://notturnisti.club/planner")), "«Consiglialo a chi lavora con te» apre il pannello nativo con il link al sito pubblico: "+(await lg()).filter(x=>x.startsWith("Share")).pop());
 // disattiva calendario
 await p.evaluate(()=>document.querySelector("#doOpzioni").click()); await p.waitForTimeout(300);
 p.once("dialog", d=>d.accept());

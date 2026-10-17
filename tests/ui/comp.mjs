@@ -42,7 +42,7 @@ await p.click("[data-chiudi-schema]").catch(async()=>{ await p.evaluate(()=>{ sc
 // 4. lucidità: niente sui giorni passati e su quelli senza turno
 p=await nuovo(); await p.goto("http://localhost:8765/index.html"); await p.waitForTimeout(700);
 await p.click("[data-pick=N]"); await p.click("#qhConfermaOrario"); await p.waitForTimeout(400); await p.click("#doChiudiPrimoPiano");
-const luc=()=>p.evaluate(()=>/lucido/.test(document.querySelector("#luciditaGiornoWrap").innerText));
+const luc=()=>p.evaluate(()=>/lucid|in forma/i.test(document.querySelector("#luciditaGiornoWrap").innerText));
 ok(!(await luc()), "lucidità: non c'è oggi (la notte prima è già passata)");
 await p.click("#prev"); await p.waitForTimeout(200); ok(!(await luc()), "lucidità: non c'è ieri");
 await p.click("#next"); await p.click("#next"); await p.waitForTimeout(200); ok(!(await luc()), "lucidità: non c'è su un giorno senza turno");
