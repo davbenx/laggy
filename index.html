@@ -177,9 +177,13 @@ padding:calc(var(--sat) + 12px) 20px 12px;margin:0 -20px;position:sticky;top:0;z
 .apptitle{flex:1;min-width:0}
 .apptitle b{display:block;font-family:var(--serif);font-size:19px;font-weight:700;letter-spacing:-.01em;line-height:1.1}
 .apptitle span{display:block;font-size:12.5px;color:var(--faint);margin-top:1px}
-.themebtn{flex:none;background:none;border:none;padding:9px;margin:-9px;color:var(--dim);
+.themebtn{flex:none;background:none;border:none;padding:12px;margin:-12px;color:var(--dim);
 cursor:pointer;display:flex;border-radius:999px}
 .themebtn:hover{color:var(--ink);background:var(--s1)}
+/* Bersagli di tocco da almeno 44px anche per i link dentro il testo: il
+   padding verticale di un elemento in riga allarga l'area toccabile senza
+   spostare le righe. */
+.foot-links a{padding:12px 2px;margin:-12px -2px}
 .themebtn[aria-pressed="true"]{color:var(--blue)}
 /* .datebar: solo data+pillola ora (le frecce e "torna a oggi" sono sotto,
    sulla loro riga, come .cycbar in Turni) — baseline, non center: la
@@ -761,7 +765,7 @@ justify-content:center;flex:none;width:44px;height:44px;border-radius:999px}
 .wizowl{display:block;margin:0 auto 12px;border-radius:9px}
 .essnudge{font-size:12.5px;color:var(--faint);margin-top:14px;line-height:1.55}
 .essnudge button{background:none;border:none;color:var(--blue);font:inherit;cursor:pointer;
-text-decoration:underline;text-underline-offset:2px;padding:0}
+text-decoration:underline;text-underline-offset:2px;padding:12px 2px;margin:-12px -2px}
 body.essenziale:not(.tabs) .cap,body.essenziale:not(.tabs) #cyc,
 body.essenziale:not(.tabs) #icsBox,body.essenziale:not(.tabs) #scambioBox,body.essenziale:not(.tabs) #band,body.essenziale:not(.tabs) #cards,
 body.essenziale:not(.tabs) .tools{display:none}
@@ -972,6 +976,8 @@ text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:600;color:v
 .opz-gruppo>.tool{align-items:center}
 .opz-gruppo>.tool::after{content:"›";flex:none;color:var(--faint);font-size:20px;line-height:1;margin-left:4px;transform:rotate(90deg);transition:transform .15s}
 .opz-gruppo>.tool[aria-expanded="true"]::after{transform:rotate(-90deg)}
+/* Aperte da una notifica: non finire sotto la barra in alto. */
+.opz-gruppo>.tool{scroll-margin-top:76px}
 .opz-gruppo>.tool.va::after{transform:none}
 .opz-gruppo>.tool.azione::after{content:none}
 .opz-gruppo .tool-tx .tool-val{display:block;max-width:none;padding:0;margin-top:3px;font-size:13px;font-weight:700;color:var(--blue);white-space:normal}
@@ -1699,7 +1705,7 @@ header b{font-size:23px}
     </label>
     <p class="hint" id="optStatsHint" style="margin:2px 0 0">Ci aiutano a capire cosa migliorare. Solo contatori come «un piano è stato creato»: nessun identificativo, nessun dato dei turni. Spente finché non le accendi.</p>
     <p style="margin:10px 0 0"><button class="lnk" id="doFeed" style="padding:8px 0">Segnala cosa non torna</button> · <button class="lnk" id="doShare" style="padding:8px 0">Consiglialo a un collega</button></p>
-    <p class="hint" style="margin:10px 0 0"><a href="https://notturnisti.club/planner" target="_blank" rel="noopener">Come si usa</a> · <a href="https://notturnisti.club/chi-siamo/" target="_blank" rel="noopener">Chi siamo</a> · <a href="https://notturnisti.club" target="_blank" rel="noopener">notturnisti.club</a> · <a href="https://app.notturnisti.club/privacy/" target="_blank" rel="noopener">Privacy</a><span id="doDonateLnkWrap" hidden> · <a id="doDonateLnk" href="#" target="_blank" rel="noopener">Sostieni il progetto</a></span><span id="doReviewLnkWrap" hidden> · <a id="doReviewLnk" href="#" target="_blank" rel="noopener">Valuta su Google Play</a></span></p>
+    <p class="hint foot-links" style="margin:10px 0 0"><a href="https://notturnisti.club/planner" target="_blank" rel="noopener">Come si usa</a> · <a href="https://notturnisti.club/chi-siamo/" target="_blank" rel="noopener">Chi siamo</a> · <a href="https://notturnisti.club" target="_blank" rel="noopener">notturnisti.club</a> · <a href="https://app.notturnisti.club/privacy/" target="_blank" rel="noopener">Privacy</a><span id="doDonateLnkWrap" hidden> · <a id="doDonateLnk" href="#" target="_blank" rel="noopener">Sostieni il progetto</a></span><span id="doReviewLnkWrap" hidden> · <a id="doReviewLnk" href="#" target="_blank" rel="noopener">Valuta su Google Play</a></span></p>
   </div>
 </div>
 <!-- Quick Shift Switcher modal / sheet a 1 tocco -->
@@ -4709,7 +4715,7 @@ function renderFirstPlanBanner(){
   el.className = "card";
   el.style.cssText = "background:var(--blue-soft);border:1px solid var(--blue-lt);border-radius:18px;padding:16px;margin:12px 0 16px;box-shadow:0 4px 18px rgba(45,90,140,0.12)";
   const soloOggi = state.repeat === false && !Object.keys(state.ecc||{}).some(k=>k>isoOggi());
-  const btn=(id,txt,g)=>'<button type="button" class="btn'+(g?' g':'')+'" id="'+id+'" style="min-height:38px;font-size:13px;padding:6px 14px">'+txt+'</button>';
+  const btn=(id,txt,g)=>'<button type="button" class="btn'+(g?' g':'')+'" id="'+id+'" style="min-height:44px;font-size:13px;padding:6px 14px">'+txt+'</button>';
   el.innerHTML =
     '<div style="display:flex;align-items:flex-start;gap:12px">'+
       '<span class="ora-ic" style="flex:none;margin-top:2px;background:var(--blue);color:var(--su-blu);width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center">' + ICON.check + '</span>'+
@@ -4755,6 +4761,10 @@ function promemoriaSpenti(){ return !!store.get("promemoriaOff", false); }
 function catalogoNotifiche(){ return (window.NTNotif && window.NTNotif.TIPI) || []; }
 function tipiNotifiche(){
   const scelti=store.get("notifTipi", null);
+  // Chi aveva scelto "Essenziali" prima che ci fossero diario e consigli
+  // li riceve anche lui: la scelta era "le essenziali", non quelle quattro.
+  if(Array.isArray(scelti) && scelti.slice().sort().join(",")==="bedtime,cambio,domani,ret"){
+    const n=scelti.concat(["diario","consigli"]); store.set("notifTipi", n); return n; }
   if(Array.isArray(scelti)) return scelti;
   return (window.NTNotif && window.NTNotif.TIPI_ESSENZIALI) || ["cambio","ret","bedtime","domani"];
 }
@@ -5052,6 +5062,85 @@ function notificaAdatta(){
   }
   if(n.at<=now) return null;
   return {id:990001, kind:"tip", title:"Il piano si può adattare a te", body:sg.breve+" Tocca per aggiornarlo.", at:new Date(n.at)};
+}
+
+/* ── Notifiche che invitano: "Come hai dormito?" e un consiglio ─────────────
+   Le altre notifiche dicono cosa fare adesso; queste chiedono qualcosa
+   all'utente, quindi devono guadagnarsi il posto:
+   - silenziose (canale "suggerimenti", senza suono), una per tipo al giorno,
+     mai oltre le 4 al giorno in tutto, mai a meno di un'ora da un'altra;
+   - "Come hai dormito?": 45 minuti dopo la fine del sonno pianificato (si è
+     svegli ma la notte è ancora fresca), non il primo giorno, non se è già
+     annotata. Se ne restano senza risposta 3 di fila passa a una ogni 3
+     giorni; dopo 6 si ferma finché l'utente non annota da solo;
+   - un consiglio alla volta, solo per cose rimaste ai valori di partenza o
+     funzioni mai accese (viaggio, sonno nei liberi, calendario, widget):
+     dal quarto giorno, al massimo uno a settimana, in un giorno libero a
+     metà mattina, e ciascuno una volta sola nella vita dell'app. */
+function notificheInvito(items){
+  const tipi=tipiNotifiche(), out=[];
+  if(!state.turniConfigurati || !window.NTNotif) return out;
+  const oggi=isoOggi(), now=Date.now(), H=3600e3;
+  const perGiorno=d=>items.concat(out).filter(n=>iso(new Date(n.at))===d).length;
+  const libero=at=>!items.concat(out).some(n=>Math.abs(new Date(n.at)-at)<H);
+  const annotata=d=>diary[d]!=null || !!wakes[d] || !!((state.beds||{})[d]);
+  // diario
+  if(tipi.includes("diario")){
+    const st=store.get("diarioNotif", {prog:[], ignorate:0, ferma:0});
+    // le date passate dicono com'è andata
+    st.prog=(st.prog||[]).filter(d=>{ if(d>=oggi) return true; if(annotata(d)) st.ignorate=0; else st.ignorate=(st.ignorate||0)+1; return false; });
+    if(st.ignorate>=6 && !st.ferma) st.ferma=now;
+    const ultimaAnnotata=Math.max(0, ...Object.values(diaryAt||{}).map(Number).filter(isFinite));
+    if(st.ferma && ultimaAnnotata>st.ferma){ st.ferma=0; st.ignorate=0; }
+    if(!st.ferma){
+      const ogni = st.ignorate>=3 ? 3 : 1;
+      const sveglie=window.NTNotif.buildSchedule(state, {days:4, types:["wake"]});
+      let ultima=st.ultima||"";
+      for(const w of sveglie){
+        const at=new Date(new Date(w.at).getTime()+45*60e3), d=iso(new Date(w.at));
+        if(state.firstSeenAt && d<=state.firstSeenAt) continue;
+        if(annotata(d) || out.some(n=>n.kind==="diario" && iso(new Date(n.at))===d)) continue;
+        if(ultima && (new Date(d)-new Date(ultima))/864e5 < ogni && !st.prog.includes(d)) continue;
+        if(perGiorno(iso(at))>=4 || !libero(at)) continue;
+        out.push({id:970000+Math.round((new Date(d)-new Date(oggi))/864e5), kind:"diario", title:"Come hai dormito?",
+          body:"Un tocco per annotarlo: con qualche notte segnata il piano si adatta a te.", at, extra:{tab:"diario"}});
+        if(!st.prog.includes(d)) st.prog.push(d);
+        ultima=d;
+        if(out.filter(n=>n.kind==="diario").length>=2) break;
+      }
+      st.ultima=ultima;
+    }
+    store.set("diarioNotif", st);
+  }
+  // un consiglio
+  if(tipi.includes("consigli") && state.firstSeenAt && (now-new Date(state.firstSeenAt+"T00:00:00"))/864e5>=3){
+    const fatti=store.get("consigliFatti", []);
+    const cand=[
+      {k:"viaggio", ok:!(state.cTo===25 && state.cFrom===25), t:"Quanto ci metti ad arrivare al lavoro?", b:"Per ora conto 25 minuti. Con il tuo tempo vero, sveglia e rientro diventano precisi."},
+      {k:"liberi", ok:!(state.freeBed==="23:30" && state.freeWake==="07:30") || !!suggerimentoAdatta(), t:"Come dormi nei giorni liberi?", b:"È il punto da cui parte tutto il piano: dimmelo una volta e diventa davvero tuo."},
+      {k:"calendario", ok:!platform.calendar.available || platform.calendar.attivo(), t:"I turni nel calendario del telefono", b:"Turni e ore di sonno nell'app Calendario, aggiornati da soli. Un tocco per attivarlo."},
+      {k:"widget", ok:!platform.widget.available || platform.widget.presenti()>0, t:"Il piano sulla schermata Home", b:"Con il widget vedi cosa fare adesso (dormire, caffè, luce) senza aprire l'app."}
+    ].filter(c=>!c.ok && !fatti.includes(c.k));
+    let pen=store.get("consiglioNotif", null);
+    if(pen && pen.at<=now){ fatti.push(pen.k); store.set("consigliFatti", fatti); store.set("consiglioUltimo", pen.at); pen=null; store.set("consiglioNotif", null); }
+    if(pen && !cand.some(c=>c.k===pen.k)){ pen=null; store.set("consiglioNotif", null); }   // sistemato nel frattempo
+    const ultimo=store.get("consiglioUltimo", 0);
+    if(!pen && cand.length){
+      // primo giorno libero, almeno 7 giorni dopo l'ultimo consiglio, alle 10:30
+      const base=Math.round((new Date(oggi+"T12:00:00")-new Date(iso(state.focus)+"T12:00:00"))/864e5);
+      for(let o=1;o<=7;o++){
+        const c=NT.codeAt(base+o); if(c==="?" || (state.shifts||{})[c]) continue;
+        const at=new Date(); at.setDate(at.getDate()+o); at.setHours(10,30,0,0);
+        if(ultimo && at.getTime()-ultimo<7*864e5) continue;
+        pen={k:cand[0].k, at:at.getTime()}; store.set("consiglioNotif", pen); break;
+      }
+    }
+    if(pen && pen.at>now){
+      const c=cand.find(x=>x.k===pen.k), at=new Date(pen.at);
+      if(c && perGiorno(iso(at))<4) out.push({id:990002, kind:"consigli", title:c.t, body:c.b, at:libero(at)?at:new Date(pen.at+H), extra:{tab:"consiglio:"+c.k}});
+    }
+  }
+  return out;
 }
 
 function renderSetupNudge(){
@@ -6795,7 +6884,7 @@ function renderCalNativo(toggle, details){
   details.innerHTML = on
     ? '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">'+
         '<span>Calendario «Notturnisti», solo su questo telefono'+(at?' · aggiornato alle '+_hhmmDa(at):'')+'</span>'+
-        '<button type="button" id="calNatApri" style="color:var(--blue);font-size:13px;font-weight:600;padding:8px 0;background:none;border:none;cursor:pointer;white-space:nowrap">Apri →</button>'+
+        '<button type="button" id="calNatApri" style="color:var(--blue);font-size:13px;font-weight:600;min-height:44px;padding:8px 0;background:none;border:none;cursor:pointer;white-space:nowrap">Apri →</button>'+
       '</div>'+
       '<span id="calNatStato" style="display:block;margin-top:4px">Controllo il calendario del telefono…</span>'
     : '';
@@ -8848,6 +8937,7 @@ function ntNotifiche(){
     if(!window.NTNotif || !window.NTNotif.buildSchedule) return;
     const items = window.NTNotif.buildSchedule(state, { days:platform.notify.days, types:tipiNotifiche() });
     try{ const na=notificaAdatta(); if(na) items.push(na); }catch(e){}
+    try{ items.push(...notificheInvito(items)); }catch(e){}
     platform.notify.schedule(items).catch(()=>{});
   }catch(e){}
 }
@@ -8885,6 +8975,9 @@ platform.onNotificationTap((tab, kind)=>{
   if(kind) track("notif_aperta", {tipo:String(kind)});
   try{ const t=String(tab||"oggi").replace(/\?.*/,"");
     if(t==="domani"){ setTab("oggi"); render(); setTimeout(()=>apriQuickShift(day(giornoVero(),1)), 300); return; }
+    if(t.startsWith("consiglio:")){ const k=t.slice(10);
+      if(k==="calendario" || k==="widget"){ setTab("oggi"); render(); setTimeout(()=>eseguiAttivazione(k), 300); return; }
+      apriOpzioni(); setTimeout(()=>{ const b=$('[data-opz="'+(k==="viaggio"?4:3)+'"]'); if(b){ if(b.getAttribute("aria-expanded")!=="true") b.click(); b.scrollIntoView({block:"start",behavior:"smooth"}); } }, 300); return; }
     setTab({oggi:"oggi",diario:"oggi",turni:"turni"}[t]||"oggi"); render(); }catch(e){}
 });
 platform.onResume(leggiCanaliSpenti);
