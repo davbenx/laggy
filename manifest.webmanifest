@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "Notturnisti · Pianificatore turni",
+  "name": "Notturnisti: turni e sonno",
   "short_name": "Notturnisti",
-  "description": "Dai tuoi turni: quando dormire, l'ultimo caffè, la luce, i pasti. Il tuo piano viene calcolato sul dispositivo nel rispetto della tua privacy.",
+  "description": "Il calendario dei turni che ti dice quando dormire, il caffè e la luce. Gratis, senza account: i tuoi dati restano sul telefono.",
   "start_url": "/?standalone=true",
   "scope": "/",
   "display": "standalone",
@@ -40,7 +40,7 @@
     {
       "name": "Oggi",
       "short_name": "Oggi",
-      "description": "Il piano di oggi e il rischio fatica",
+      "description": "Il piano di oggi",
       "url": "./?t=oggi",
       "icons": [
         {
@@ -64,7 +64,7 @@
     {
       "name": "I miei turni",
       "short_name": "Turni",
-      "description": "Ciclo, giorni liberi e partner",
+      "description": "Ciclo, tempo libero e persone",
       "url": "./?t=turni",
       "icons": [
         {

@@ -17,7 +17,9 @@ if(!process.argv.includes("--no-install")){
 }
 sh("shell pm grant "+PKG+" android.permission.POST_NOTIFICATIONS");
 sh("shell appops set "+PKG+" SCHEDULE_EXACT_ALARM allow");
-sh("shell am start -n "+PKG+"/.MainActivity");
+// L'applicationId è club.notturnisti.app, ma le classi Java restano nel
+// pacchetto club.notturnisti.twa: il nome della schermata va scritto intero.
+sh("shell am start -n "+PKG+"/club.notturnisti.twa.MainActivity");
 let pid=""; for(let i=0;i<60 && !pid;i++){ await wait(3000); pid=sh("shell pidof "+PKG).trim(); }
 console.log("pid", pid);
 let sock=""; for(let i=0;i<60 && !sock;i++){ await wait(3000); const u=sh("shell cat /proc/net/unix"); const m=u.match(/webview_devtools_remote_\d+/); if(m) sock=m[0]; }
@@ -56,9 +58,11 @@ await tocca("#qhConfermaOrari");
 await wait(3000);
 await tocca("#doChiudiPrimoPiano",null,30000);
 log("onboarding fatto");
-ok(await p.evaluate(()=>!!document.querySelector('[data-attiva="notifiche"]')), "lista 'Rendi automatico il tuo piano' presente");
-// notifiche
-await tocca('[data-attiva="notifiche"]'); await wait(15000);
+ok(await p.evaluate(()=>!document.querySelector("#setupChecklist").hidden), "lista 'Rendi automatico il tuo piano' presente");
+// notifiche: fino ad Android 12 il permesso c'è già di default e la voce
+// risulta già attiva (niente da toccare); da Android 13 va chiesto.
+if(await p.evaluate(()=>!!document.querySelector('[data-attiva="notifiche"]'))){ await tocca('[data-attiva="notifiche"]'); }
+await wait(15000);
 const alarms=sh("shell dumpsys alarm").split("\n").filter(l=>l.includes(PKG)).length;
 ok(alarms>0, "notifiche: allarmi programmati nel sistema per l'app = "+alarms);
 log("notifiche verificate");

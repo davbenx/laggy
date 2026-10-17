@@ -20,9 +20,10 @@ echo "Attendo l'avvio di Android…"
 until [ "$("$ADB" -s emulator-5554 shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; do sleep 10; done
 until "$ADB" -s emulator-5554 shell service check package 2>/dev/null | grep -q found; do sleep 10; done
 # APK di test (debug del WebView acceso), poi config ripristinata
-cp capacitor.config.json /tmp/cap.config.bak
-sed -i 's/"webContentsDebuggingEnabled": false/"webContentsDebuggingEnabled": true/' capacitor.config.json
-trap 'cp /tmp/cap.config.bak capacitor.config.json' EXIT
+CFG="$PWD/capacitor.config.json"   # percorso assoluto: lo script poi fa "cd .."
+cp "$CFG" /tmp/cap.config.bak
+sed -i 's/"webContentsDebuggingEnabled": false/"webContentsDebuggingEnabled": true/' "$CFG"
+trap 'cp /tmp/cap.config.bak "$CFG"' EXIT INT TERM
 npm run -s build:web && npx cap sync android >/dev/null && (cd android && ./gradlew assembleDebug --no-daemon -q)
 "$ADB" -s emulator-5554 install -r -g android/app/build/outputs/apk/debug/app-debug.apk
 cd .. && ADB="$ADB" APK=app/android/app/build/outputs/apk/debug/app-debug.apk node app/scripts/test-android.mjs --no-install
