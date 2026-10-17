@@ -95,7 +95,10 @@ if(!/id=999990/.test(notif)){
   // diagnosi: cosa dice Android della notifica e dei canali dell'app
   console.log("--- dumpsys (righe dell'app)\n"+sh("shell dumpsys notification --noredact").split("\n").filter(l=>/notturnisti/i.test(l)).slice(0,25).join("\n"));
   console.log("--- permesso\n"+sh("shell dumpsys package "+PKG).split("\n").filter(l=>/POST_NOTIFICATIONS|SCHEDULE_EXACT/.test(l)).join("\n"));
-  console.log("--- logcat\n"+sh("shell logcat -d -t 400").split("\n").filter(l=>/NotificationService|notturnisti|Capacitor\/LocalNot|LocalNotification/i.test(l)).slice(-30).join("\n"));
+  const d=sh("shell dumpsys notification --noredact").split("\n"); const i=d.findIndex(l=>/AppSettings: club\.notturnisti/.test(l));
+  console.log("--- canali\n"+d.slice(i,i+14).join("\n"));
+  console.log("--- cmd notification list\n"+sh("shell cmd notification list").split("\n").filter(l=>/notturnisti/.test(l)).join("\n"));
+  console.log("--- logcat\n"+sh("shell logcat -d -t 5000").split("\n").filter(l=>/NotificationService|No Channel|999990|uppress|enqueueNotification|Capacitor|LocalNotif|chromium.*Console/i.test(l) && !/artd/.test(l)).slice(-40).join("\n"));
 }
 console.log(notif.slice(0,300));
 sh("shell screencap -p /sdcard/s.png"); execSync(A+" pull /sdcard/s.png "+OUT+"/android-shot.png");
