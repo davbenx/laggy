@@ -952,6 +952,7 @@ border:1px solid var(--blue-lt);border-radius:var(--r);color:var(--blue);font:in
 .switch input:checked + .slider::before{transform:translateX(18px)}
 #piuCal #pf-open{display:none}
 .tools{flex-direction:column;gap:10px}
+.tool[hidden]{display:none!important}
 .tool{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;background:var(--s1);border:1px solid var(--line);
 border-radius:var(--r);padding:13px 15px;font:inherit;cursor:pointer;color:inherit;min-height:44px;
 box-shadow:var(--shadow-card)}
@@ -1003,6 +1004,8 @@ text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:600;color:v
 .ecc .wstep>.wq,.ecc .wstep>.wsub,.ecc .solo-wizard{display:none}
 #chiudiOpzioni{padding:11px;margin:-11px}
 .opz-info .hint a{display:inline-block;padding:6px 0}
+.opz-info .foot-links{line-height:1.5}
+.opz-info .foot-links a{padding:10px 0;margin:0;border-bottom:0;text-decoration:underline;text-decoration-color:var(--blue-lt);text-underline-offset:3px}
 .riga-sw,.q>label.riga-sw{display:flex;margin-bottom:4px;align-items:center;gap:12px;justify-content:space-between;font-size:15px;font-weight:600;color:var(--ink);cursor:pointer;min-height:44px}
 /* Strumenti di Più: griglia a 2 colonne invece di righe impilate — meno
    scroll, ma il testo di ogni card resta per intero (solo più compatto):
@@ -1030,7 +1033,7 @@ list-style:none;min-height:44px;display:flex;align-items:center}
 .piu-info-in b{color:var(--ink)}
 /* OPZIONI: solo la configurazione */
 body.tab-oggi #doScambioTurno,body.tab-oggi #scambioBox,
-body.tab-opzioni #status,body.tab-opzioni #ora,body.tab-opzioni #benvenutoLink,body.tab-opzioni #demoEsempio,body.tab-opzioni #backupNudge,body.tab-opzioni #installBanner,body.tab-opzioni #shareNudge,body.tab-opzioni #icsNudge,body.tab-opzioni #icsExpireNudge,body.tab-opzioni #clubBanner,body.tab-opzioni #formaGiorno,body.tab-opzioni #essenziale,
+body.tab-opzioni #firstPlanBanner,body.tab-opzioni #setupChecklist,body.tab-opzioni #adattaCard,body.tab-opzioni #status,body.tab-opzioni #ora,body.tab-opzioni #benvenutoLink,body.tab-opzioni #demoEsempio,body.tab-opzioni #backupNudge,body.tab-opzioni #installBanner,body.tab-opzioni #shareNudge,body.tab-opzioni #icsNudge,body.tab-opzioni #icsExpireNudge,body.tab-opzioni #clubBanner,body.tab-opzioni #formaGiorno,body.tab-opzioni #essenziale,
 body.tab-opzioni .datebar,body.tab-opzioni .daynav,body.tab-opzioni #band,body.tab-opzioni .cap.ciclo,body.tab-opzioni #cyc,
 body.tab-opzioni #cycShareBox,
 body.tab-opzioni .cycbar,body.tab-opzioni #cycRange,body.tab-opzioni #doAndamenti,body.tab-opzioni #doScambioTurno,body.tab-opzioni #scambioBox,
@@ -1737,8 +1740,12 @@ header b{font-size:23px}
       <span class="switch"><input type="checkbox" id="optStats" aria-label="Statistiche d'uso anonime" aria-describedby="optStatsHint"><span class="slider"></span></span>
     </label>
     <p class="hint" id="optStatsHint" style="margin:2px 0 0">Ci aiutano a capire cosa migliorare. Solo contatori come «un piano è stato creato»: nessun identificativo, nessun dato dei turni. Spente finché non le accendi.</p>
-    <p style="margin:10px 0 0"><button class="lnk" id="doFeed" style="padding:8px 0">Segnala cosa non torna</button> · <button class="lnk" id="doShare" style="padding:8px 0">Consiglialo a chi lavora con te</button></p>
+    <p style="margin:10px 0 0;display:flex;flex-direction:column;align-items:flex-start"><button class="lnk" id="doFeed" style="padding:10px 0">Segnala cosa non torna</button><button class="lnk" id="doShare" style="padding:10px 0">Consiglialo a chi lavora con te</button></p>
     <p class="hint foot-links" style="margin:10px 0 0"><a href="https://notturnisti.club/planner" target="_blank" rel="noopener">Come si usa</a> · <a href="https://notturnisti.club/chi-siamo/" target="_blank" rel="noopener">Chi siamo</a> · <a href="https://notturnisti.club" target="_blank" rel="noopener">notturnisti.club</a> · <a href="https://app.notturnisti.club/privacy/" target="_blank" rel="noopener">Privacy</a> · <a href="https://app.notturnisti.club/termini/" target="_blank" rel="noopener">Termini d'uso</a> · <a href="https://app.notturnisti.club/licenze/" target="_blank" rel="noopener">Licenze</a><span id="doDonateLnkWrap" hidden> · <a id="doDonateLnk" href="#" target="_blank" rel="noopener">Sostieni il progetto</a></span><span id="doReviewLnkWrap" hidden> · <a id="doReviewLnk" href="#" target="_blank" rel="noopener">Valuta su Google Play</a></span></p>
+    <p class="hint" style="margin:14px 0 0;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center">
+      <span id="versioneApp">Versione web</span>
+      <button class="lnk" type="button" id="doCancellaTutto" style="color:var(--risk);padding:10px 0">Cancella tutti i dati</button>
+    </p>
   </div>
 </div>
 <!-- Quick Shift Switcher modal / sheet a 1 tocco -->
@@ -8030,6 +8037,26 @@ if($("#icsAndroid")) $("#icsAndroid").hidden=!/Android/i.test(navigator.userAgen
 // calendario da scegliere accanto a quello automatico): si apre dalla
 // finestra del calendario automatico, come alternativa senza server.
 if($("#doIcs")) $("#doIcs").hidden=true;
+// Versione, utile quando qualcuno scrive per un problema.
+platform.versione().then(v=>{ const el=$("#versioneApp"); if(el && v) el.textContent="Versione "+v; }).catch(()=>{});
+// Cancella tutto ciò che l'app ha salvato su questo dispositivo: turni,
+// diario, persone, impostazioni, consenso alle statistiche; toglie anche
+// promemoria, calendario «Notturnisti» e contenuto del widget. Due conferme
+// (sul web basta chiudere la scheda per perdere tutto per sbaglio: qui no).
+if($("#doCancellaTutto")) $("#doCancellaTutto").onclick=async()=>{
+  // Il calendario automatico (solo web) tiene i turni anche sul server:
+  // prima si cancella quello, dalla sua finestra, altrimenti resterebbe lì.
+  if(window.NTPaid && window.NTPaid.paid && window.NTPaid.paid()){
+    alert("Prima cancella il calendario automatico: tiene una copia dei turni sul server. Si apre la sua finestra, tocca «Cancella tutto», poi torna qui.");
+    window.NTPaid.open("account"); return; }
+  if(!confirm("Cancellare tutti i dati di Notturnisti da questo dispositivo? Turni, diario, persone e impostazioni spariscono e non si possono recuperare, a meno di avere una copia di sicurezza.")) return;
+  if(!confirm("Sicuro? È definitivo.")) return;
+  try{ await platform.notify.schedule([]); }catch(e){}
+  try{ if(platform.calendar.available && platform.calendar.attivo()) await platform.calendar.disattiva(); }catch(e){}
+  try{ if(platform.widget.available) await platform.widget.publish([]); }catch(e){}
+  try{ Object.keys(localStorage).filter(k=>k.startsWith("nt:")).forEach(k=>localStorage.removeItem(k)); }catch(e){}
+  location.replace(location.pathname);
+};
 window.NTApriFileCalendario=()=>{
   apriOpzioni();
   const b=$("#icsBox"); if(!b) return;

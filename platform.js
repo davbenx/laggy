@@ -362,6 +362,13 @@ export async function print(title) {
   return true;
 }
 
+// Versione dell'app ("1.0.0 (12)") nell'app nativa; sul web null.
+export async function versione() {
+  const App = plugin("App");
+  if (!App || !App.getInfo) return null;
+  try { const i = await App.getInfo(); return i.version + (i.build ? " (" + i.build + ")" : ""); } catch (e) { return null; }
+}
+
 /* ── Recensione su Google Play ──────────────────────────────────────────── */
 // Il riquadro delle stelle di Play dentro l'app (plugin locale NTReview).
 // Google decide se mostrarlo e non dice mai l'esito: niente da aspettarsi.
@@ -393,6 +400,6 @@ export function onBackButton(cb) {
   });
 }
 
-const NTPlatform = { isNative, name, notify, calendar, widget, onResume, onApriGiorno, onNotificationTap, onBackButton, canShare, share, print, review, setSystemBars };
+const NTPlatform = { isNative, name, notify, calendar, widget, onResume, onApriGiorno, onNotificationTap, onBackButton, canShare, share, print, review, versione, setSystemBars };
 try { if (typeof window !== "undefined") window.NTPlatform = NTPlatform; } catch (e) {}
 export default NTPlatform;
