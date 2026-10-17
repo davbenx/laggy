@@ -21,12 +21,22 @@ ripetute, pena il rifiuto della scheda.
    accesso all'app (tutto senza login), annunci (no), classificazione IARC, pubblico di
    destinazione (18+), sicurezza dei dati, app per la salute, app governative/finanziarie/notizie (no).
 3. Scheda dello Store (`scheda.md` + `img/`). Paesi: Italia, San Marino, Svizzera, Vaticano.
-4. Test → Test chiuso → crea un canale, carica l'AAB, aggiungi i tester (Gruppo Google, §2),
+4. Panoramica della pubblicazione → **Pubblicazione gestita: attiva**. Così nulla esce (né una
+   versione né una modifica alla scheda) finché non premi tu "Pubblica" dopo l'approvazione.
+5. Test → Test interno → carica l'AAB, aggiungi solo te stesso, installa da Play e prova le cose
+   che l'APK di prova non copre: firma di Play, aggiornamento sopra la versione precedente.
+6. Test → Test chiuso → crea un canale, carica l'AAB, aggiungi i tester (Gruppo Google, §2),
    note di versione, invia per la revisione.
-5. Dopo **14 giorni consecutivi con almeno 12 tester iscritti**: Panoramica della pubblicazione →
+7. Dopo **14 giorni consecutivi con almeno 12 tester iscritti**: Panoramica della pubblicazione →
    Richiedi l'accesso alla produzione (domande in §2.4).
-6. Produzione: stesso AAB (o uno nuovo con le correzioni dei test), lancio graduale al 20%, poi
+8. Produzione: stesso AAB (o uno nuovo con le correzioni dei test), lancio graduale al 20%, poi
    50%, poi 100% in una settimana se crash e ANR restano bassi (§5).
+
+**API Play Integrity: non serve (per ora).** Google la consiglia a tutti, ma protegge un server
+da app modificate o dispositivi falsi: acquisti, account, premi, classifiche. Notturnisti non ha
+login né acquisti e calcola tutto sul telefono, quindi non c'è nulla da proteggere così. Aggiungerla
+porterebbe una dipendenza da Google Play Services e un progetto Google Cloud, senza beneficio.
+Da rivalutare solo se un giorno il server del calendario automatico ricevesse abusi.
 
 **Il giorno dopo la pubblicazione**
 - Nel codice: in `index.html`, `window.NT_APP.play = "https://play.google.com/store/apps/details?id=club.notturnisti.app"`.
