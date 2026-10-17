@@ -1005,8 +1005,12 @@ text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:600;color:v
 .ecc .wstep>.wq,.ecc .wstep>.wsub,.ecc .solo-wizard{display:none}
 #chiudiOpzioni{padding:11px;margin:-11px}
 .opz-info .hint a{display:inline-block;padding:6px 0}
-.opz-info .foot-links{line-height:1.5}
-.opz-info .foot-links a{padding:10px 0;margin:0;border-bottom:0;text-decoration:underline;text-decoration-color:var(--blue-lt);text-underline-offset:3px}
+/* Link in fondo: griglia a 2 colonne, un link per cella alta 44px, senza
+   puntini né sottolineature che si accavallano quando vanno a capo. */
+.opz-info .foot-links{display:grid;grid-template-columns:1fr 1fr;column-gap:16px;margin:10px 0 0;font-size:14px}
+.opz-info .foot-links>span{display:contents}
+.opz-info .foot-links>span[hidden]{display:none}
+.opz-info .foot-links a{display:flex;align-items:center;min-height:44px;padding:0;margin:0;border-bottom:0;color:var(--blue);text-decoration:none;font-weight:600}
 .riga-sw,.q>label.riga-sw{display:flex;margin-bottom:4px;align-items:center;gap:12px;justify-content:space-between;font-size:15px;font-weight:600;color:var(--ink);cursor:pointer;min-height:44px}
 /* Strumenti di Più: griglia a 2 colonne invece di righe impilate — meno
    scroll, ma il testo di ogni card resta per intero (solo più compatto):
@@ -1742,7 +1746,16 @@ header b{font-size:23px}
     </label>
     <p class="hint" id="optStatsHint" style="margin:2px 0 0">Ci aiutano a capire cosa migliorare. Solo contatori come «un piano è stato creato»: nessun identificativo, nessun dato dei turni. Spente finché non le accendi.</p>
     <p style="margin:10px 0 0;display:flex;flex-direction:column;align-items:flex-start"><button class="lnk" id="doFeed" style="padding:10px 0">Segnala cosa non torna</button><button class="lnk" id="doShare" style="padding:10px 0">Consiglialo a chi lavora con te</button></p>
-    <p class="hint foot-links" style="margin:10px 0 0"><a href="https://notturnisti.club/planner" target="_blank" rel="noopener">Come si usa</a> · <a href="https://notturnisti.club/chi-siamo/" target="_blank" rel="noopener">Chi siamo</a> · <a href="https://notturnisti.club" target="_blank" rel="noopener">notturnisti.club</a> · <a href="https://app.notturnisti.club/privacy/" target="_blank" rel="noopener">Privacy</a> · <a href="https://app.notturnisti.club/termini/" target="_blank" rel="noopener">Termini d'uso</a> · <a href="https://app.notturnisti.club/licenze/" target="_blank" rel="noopener">Licenze</a><span id="doDonateLnkWrap" hidden> · <a id="doDonateLnk" href="#" target="_blank" rel="noopener">Sostieni il progetto</a></span><span id="doReviewLnkWrap" hidden> · <a id="doReviewLnk" href="#" target="_blank" rel="noopener">Valuta su Google Play</a></span></p>
+    <nav class="foot-links" aria-label="Informazioni">
+      <a href="https://notturnisti.club/planner" target="_blank" rel="noopener">Come si usa</a>
+      <a href="https://notturnisti.club/chi-siamo/" target="_blank" rel="noopener">Chi siamo</a>
+      <a href="https://app.notturnisti.club/privacy/" target="_blank" rel="noopener">Privacy</a>
+      <a href="https://app.notturnisti.club/termini/" target="_blank" rel="noopener">Termini d'uso</a>
+      <a href="https://app.notturnisti.club/licenze/" target="_blank" rel="noopener">Licenze</a>
+      <a href="https://notturnisti.club" target="_blank" rel="noopener">notturnisti.club</a>
+      <span id="doDonateLnkWrap" hidden><a id="doDonateLnk" href="#" target="_blank" rel="noopener">Sostieni il progetto</a></span>
+      <span id="doReviewLnkWrap" hidden><a id="doReviewLnk" href="#" target="_blank" rel="noopener">Valuta su Google Play</a></span>
+    </nav>
     <p class="hint" style="margin:14px 0 0;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center">
       <span id="versioneApp">Versione web</span>
       <button class="lnk" type="button" id="doCancellaTutto" style="color:var(--risk);padding:10px 0">Cancella tutti i dati</button>
