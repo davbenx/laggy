@@ -4449,7 +4449,10 @@ function renderDemoEsempio(){
     // tocco o si correggono qui (prima restavano quelli del preset, in silenzio).
     const usati = state.repeat ? new Set(String(state.pattern||"").split("")) : null;
     const keys=Object.keys(sh).filter(k=>sh[k] && !sh[k].rest && (!usati || usati.has(k)));
+    // Indietro: al passo da cui si è arrivati (dove sei nel ciclo, o la
+    // griglia dei giorni per chi ha turni variabili). Prima non c'era.
     el.innerHTML =
+      indietro(state.repeat!==false && schemaInScelta ? "posizione" : "segna", "Indietro")+
       '<h2 class="qh-h">Gli orari dei tuoi turni</h2>'+
       '<p class="qh-sub">Sono quelli più comuni: correggi quelli che da te sono diversi.</p>'+
       keys.map(k=>'<div class="qh-ore-riga"><b>'+esc(sh[k].n)+'</b>'+
@@ -7791,8 +7794,8 @@ function renderLuciditaCard(){
           '<b style="display:block;font-size:14px;margin-bottom:6px">🎯 Modifica orario di lucidità</b>'+
           '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'+
             '<input type="time" id="luciditaInputH" value="'+esc(ev.h)+'" style="max-width:110px;padding:6px 8px;border-radius:var(--r);border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:14px">'+
-            '<button type="button" class="btn pri" id="luciditaSaveBtn" style="padding:6px 14px;font-size:13px;min-height:34px">Salva</button>'+
-            '<button type="button" class="btn g" id="luciditaCancelBtn" style="padding:6px 10px;font-size:13px;min-height:34px">Annulla</button>'+
+            '<button type="button" class="btn pri" id="luciditaSaveBtn" style="padding:6px 14px;font-size:13px;min-height:44px">Salva</button>'+
+            '<button type="button" class="btn g" id="luciditaCancelBtn" style="padding:6px 10px;font-size:13px;min-height:44px">Annulla</button>'+
           '</div>'+
         '</div>';
       $("#luciditaSaveBtn").onclick=()=>{
@@ -7827,8 +7830,8 @@ function renderLuciditaCard(){
           '<span style="font-size:12px;color:var(--dim);display:block;margin-bottom:8px">Un matrimonio, un esame, una visita medica. Il sonno prima si adatterà.</span>'+
           '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'+
             '<input type="time" id="luciditaInputH" value="15:00" style="max-width:110px;padding:6px 8px;border-radius:var(--r);border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:14px">'+
-            '<button type="button" class="btn pri" id="luciditaSaveBtn" style="padding:6px 14px;font-size:13px;min-height:34px">Salva</button>'+
-            '<button type="button" class="btn g" id="luciditaCancelBtn" style="padding:6px 10px;font-size:13px;min-height:34px">Annulla</button>'+
+            '<button type="button" class="btn pri" id="luciditaSaveBtn" style="padding:6px 14px;font-size:13px;min-height:44px">Salva</button>'+
+            '<button type="button" class="btn g" id="luciditaCancelBtn" style="padding:6px 10px;font-size:13px;min-height:44px">Annulla</button>'+
           '</div>'+
         '</div>';
       $("#luciditaSaveBtn").onclick=()=>{
@@ -8908,7 +8911,7 @@ platform.onBackButton(()=>{
   if(document.body.classList.contains("scambio-aperta")){ chiudiScambio(); return true; }
   if(sceltaSchemaAperta){ sceltaSchemaAperta=false; demoEsempioSubflow="home"; render(); return true; }
   if(demoEsempioVisibile() && demoEsempioSubflow!=="home"){
-    const su={orario:"home", posizione:(schemaInScelta&&schemaInScelta.composto?"componi":"schema"), componi:"schema", orari:(state.repeat?"schema":"segna")}[demoEsempioSubflow] || (state.turniConfigurati?"prossimi":"home");
+    const su={orario:"home", posizione:(schemaInScelta&&schemaInScelta.composto?"componi":"schema"), componi:"schema", orari:(state.repeat!==false && schemaInScelta?"posizione":"segna")}[demoEsempioSubflow] || (state.turniConfigurati?"prossimi":"home");
     if(sceltaSchemaAperta && demoEsempioSubflow==="prossimi"){ sceltaSchemaAperta=false; demoEsempioSubflow="home"; render(); return true; }
     demoEsempioSubflow=su; renderDemoEsempio(); return true;
   }
