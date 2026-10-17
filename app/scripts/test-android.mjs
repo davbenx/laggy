@@ -91,6 +91,12 @@ await tocca("[data-prova-notifica]",null,60000);
 await wait(15000);
 let notif=""; for(let i=0;i<12 && !/id=999990/.test(notif);i++){ await wait(10000); notif=sh("shell dumpsys notification").split("\n").filter(l=>/NotificationRecord.*club\.notturnisti/.test(l)).join("\n"); }
 ok(/id=999990/.test(notif), "notifica di prova mostrata da Android");
+if(!/id=999990/.test(notif)){
+  // diagnosi: cosa dice Android della notifica e dei canali dell'app
+  console.log("--- dumpsys (righe dell'app)\n"+sh("shell dumpsys notification --noredact").split("\n").filter(l=>/notturnisti/i.test(l)).slice(0,25).join("\n"));
+  console.log("--- permesso\n"+sh("shell dumpsys package "+PKG).split("\n").filter(l=>/POST_NOTIFICATIONS|SCHEDULE_EXACT/.test(l)).join("\n"));
+  console.log("--- logcat\n"+sh("shell logcat -d -t 400").split("\n").filter(l=>/NotificationService|notturnisti|Capacitor\/LocalNot|LocalNotification/i.test(l)).slice(-30).join("\n"));
+}
 console.log(notif.slice(0,300));
 sh("shell screencap -p /sdcard/s.png"); execSync(A+" pull /sdcard/s.png "+OUT+"/android-shot.png");
 console.log("errori pagina:", errs);
