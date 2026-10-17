@@ -88,6 +88,9 @@ ok(/Nel telefono: \d+ eventi/.test(statoCal), "Impostazioni: stato del calendari
 // notifica di prova
 await tocca("#doOpzioni"); await wait(4000);
 await tocca("[data-prova-notifica]",null,60000);
+await wait(3000);
+console.log("toast dopo la prova:", await p.evaluate(()=>{ const t=document.querySelector("#toast"); return t ? t.className+" | "+t.innerText : "(nessuno)"; }));
+console.log("bottoni prova:", await p.evaluate(()=>document.querySelectorAll("[data-prova-notifica]").length));
 await wait(15000);
 let notif=""; for(let i=0;i<12 && !/id=999990/.test(notif);i++){ await wait(10000); notif=sh("shell dumpsys notification").split("\n").filter(l=>/NotificationRecord.*club\.notturnisti/.test(l)).join("\n"); }
 ok(/id=999990/.test(notif), "notifica di prova mostrata da Android");
