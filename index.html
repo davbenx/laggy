@@ -905,6 +905,7 @@ body.tab-oggi.essenziale #band{display:none}
 body.tab-turni #status,body.tab-turni #ora,body.tab-turni #benvenutoLink,body.tab-turni #demoEsempio,body.tab-turni #backupNudge,body.tab-turni #installBanner,body.tab-turni #shareNudge,body.tab-turni #icsNudge,body.tab-turni #icsExpireNudge,body.tab-turni #clubBanner,body.tab-turni #formaGiorno,body.tab-turni #essenziale,
 body.tab-turni .datebar,body.tab-turni .daynav,body.tab-turni .cap.giornata,body.tab-turni #band,body.tab-turni #cards,body.tab-turni #luciditaGiornoWrap,
 body.tab-turni #icsBox,body.tab-turni .piu-info,
+body.tab-turni #setupChecklist,body.tab-turni #adattaCard,body.tab-turni #statsNudge,body.tab-turni #donateNudge,body.tab-turni #firstPlanBanner,
 body.tab-turni footer{display:none}
 /* Pagine Andamenti e "Quando possiamo vederci" (dentro la tab Turni,
    non tab a sé): quando una è aperta, nasconde il contenuto normale di
@@ -936,6 +937,12 @@ body.tab-oggi #scambioPagina,body.tab-opzioni #scambioPagina{display:none}
    salvare/esportare → Opzioni, calendario di coppia → "Quando sono
    disponibile"). Barra a due tab (Oggi, Turni) + Opzioni dietro
    l'icona in header. */
+.persone-intro{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;margin-bottom:8px}
+.persone-intro b{display:block;font-size:15px;color:var(--ink)}
+.persone-intro span{display:block;font-size:13px;color:var(--dim);margin-top:4px;line-height:1.45}
+.persone-add{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:12px;background:var(--blue-soft);
+border:1px solid var(--blue-lt);border-radius:var(--r);color:var(--blue);font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.persone-modo{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin:14px 0 6px}
 .cal-sync-card, .piu-cal{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;box-shadow:var(--shadow-card)}
 .switch{position:relative;display:inline-block;width:46px;height:26px;flex:none}
 .switch input{opacity:0;width:0;height:0}
@@ -1495,13 +1502,19 @@ header b{font-size:23px}
        apre e chiude questo pannello — stessi id, stessa apriSezionePersone()
        di prima, solo diverso genitore nel DOM. -->
   <div class="ecc" id="opzBoxPersone" hidden>
-    <label class="p1" style="margin:0"><input type="checkbox" id="wantCross"> Segui un'altra persona</label>
-    <span class="hint">Trova i riposi che avete in comune nei prossimi tre mesi e le ore in cui siete svegli insieme.</span>
-    <div id="crossBox" hidden>
+    <!-- Due strade, dalla più facile: chi ha Notturnisti ti manda il suo
+         link (un tocco per chiederglielo), chi non ce l'ha si inserisce a
+         mano. L'interruttore "Segui un'altra persona" non serve più: aprire
+         questo pannello è già la scelta. -->
+    <input type="checkbox" id="wantCross" checked hidden>
+    <div id="crossBox">
     <div id="wizPeopleList"></div>
+    <p class="persone-modo">Usa Notturnisti</p>
+    <button type="button" class="btn g" id="doChiediLink" style="width:100%;min-height:44px">Chiedi il suo link →</button>
+    <span class="hint" style="display:block;margin:6px 0 4px">Le arriva il tuo link e cosa toccare per mandarti il suo. Quando te lo manda, incollalo qui sotto.</span>
     <div class="q">
       <label for="personaLink">Il suo link</label>
-      <textarea id="personaLink" rows="2" placeholder="Fatti mandare il suo link (Impostazioni → Copia di sicurezza) e incollalo qui"></textarea>
+      <textarea id="personaLink" rows="2" placeholder="Incolla qui il link che ti ha mandato"></textarea>
       <span class="hint" id="personaLinkErr"></span>
     </div>
     <div class="q">
@@ -1509,7 +1522,7 @@ header b{font-size:23px}
       <input id="personaName" placeholder="es. Marco">
     </div>
     <details class="wdet">
-      <summary>Non ha un link? Inseriscila a mano</summary>
+      <summary>Non usa Notturnisti? Inserisci tu i suoi turni</summary>
       <div class="q">
         <label for="personaMode">Che orari fa</label>
         <select id="personaMode">
@@ -1546,9 +1559,10 @@ header b{font-size:23px}
       </div>
 
     </details>
-    <button class="btn g" type="button" id="doConfirmPersona" style="margin-top:10px">Aggiungi alla lista</button>
+    <button class="btn pri" type="button" id="doConfirmPersona" style="margin-top:10px;width:100%;min-height:46px">Aggiungi</button>
     </div>
   </div>
+  <div id="partnerShare"></div>
   <!-- "Calendario di coppia" era in Più (sparita): è la naturale
        continuazione di QUESTA pagina, non di un cassetto a parte —
        gli stessi riposi in comune, ma nel calendario del telefono di
@@ -6539,20 +6553,20 @@ function raccogliPersonaShifts(){
 function renderWizPeopleList(){
   const el=$("#wizPeopleList"); if(!el) return;
   const persone=tuttePersone();
-  if(!persone.length){ el.innerHTML='<p class="hint" style="margin:0 0 10px">Nessuna, per ora.</p>'; return; }
+  if(!persone.length){ el.innerHTML=''; return; }
   // La stellina sceglie chi guarda la card compatta di Oggi — ha senso
   // solo con più di una persona: con una sola, è sempre e comunque lei.
   const multi = persone.length>1;
   if(multi && (!(state.personaGlance>=0) || state.personaGlance>=persone.length)) state.personaGlance=0;
   const star='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3.1-5.4 3.1 1.3-6-4.6-4.1 6.1-.6z"/></svg>';
-  el.innerHTML=persone.map((per,i)=>{
+  el.innerHTML='<p class="persone-modo" style="margin-top:4px">Le tue persone</p>'+persone.map((per,i)=>{
     const nome=per.name||"Persona "+(i+1);
     const attiva = state.personaGlance===i;
     return '<div class="diary" style="gap:8px;margin-bottom:6px">'+
       (multi?'<button class="lnk" data-glance-persona="'+i+'" aria-label="Mostrala nella card di Oggi" title="Mostrala nella card di Oggi" style="color:'+(attiva?"var(--orange)":"var(--faint)")+';padding:4px">'+star+'</button>':'')+
       '<span style="flex:1;font-weight:600">'+esc(nome)+'</span>'+
       '<button class="lnk" data-remove-persona="'+i+'" style="color:var(--faint)">Rimuovi</button></div>';
-  }).join("")+(multi?'<p class="hint" style="margin:2px 0 10px">La stellina sceglie chi vedi nella card "Turni condivisi" di Oggi — le altre restano comunque visibili in "Quando sono disponibile".</p>':'');
+  }).join("")+(multi?'<p class="hint" style="margin:2px 0 10px">La stellina sceglie chi vedi nella card "Turni condivisi" di Oggi — le altre restano comunque visibili qui sopra.</p>':'');
 }
 // La finestra libera più lunga (almeno tre ore vere) di un giorno in comune —
 // stessa soglia/ordinamento già usati per la card "p" in cards(), qui
@@ -6638,17 +6652,20 @@ function renderPartner(CARDS){
     }
   });
 
-  // ── Le tue persone: solo il bottone, non più un elenco nudo di nomi
-  // sopra di lui — ogni nome tracciato è già visibile qui sopra come
-  // intestazione "Con [nome]", e ricompare con le vere azioni (stellina,
-  // Rimuovi) nel pannello che questo bottone apre: un terzo elenco senza
-  // azioni, solo per guardarlo, non aggiungeva niente. ──
-  h+='<span class="eyebrow" style="display:block;margin:var(--gap-sezione) 0 8px">Le tue persone</span>';
-  h+='<button type="button" data-partner-edit style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;'+
-    'background:none;border:1.5px dashed var(--line);border-radius:var(--r);color:var(--dim);font-family:inherit;font-size:13.5px;font-weight:600;cursor:pointer;">'+
+  // ── Con chi vederti: da vuota la sezione dice cosa fa (prima c'era solo
+  // "+ Aggiungi una persona", senza dire a cosa serve); con qualcuno già
+  // in elenco basta il bottone, le persone sono visibili qui sopra. ──
+  h+='<span class="eyebrow" style="display:block;margin:var(--gap-sezione) 0 8px">Con chi vuoi vederti</span>';
+  if(!tuttePer.length) h+='<div class="persone-intro"><b>Trova i momenti liberi in comune</b>'+
+    '<span>Partner, amici, colleghi: aggiungili e vedi qui i giorni e le ore in cui siete liberi insieme. I loro turni restano solo su questo telefono.</span></div>';
+  h+='<button type="button" data-partner-edit class="persone-add">'+
     '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>'+
-    (tuttePer.length?"Aggiungi un'altra persona":"Aggiungi una persona")+'</button>';
+    (tuttePer.length?"Aggiungi un'altra persona o gestisci":"Aggiungi una persona")+'</button>';
 
+  el.innerHTML=h;
+  // Il pannello per aggiungere una persona sta fra il bottone qui sopra e
+  // la condivisione qui sotto: si apre dove si è toccato, non in fondo.
+  h='';
   // ── Esportare il foglio dei giorni liberi: senza i tuoi dati, per chi
   // vuole vederti senza avere l'app. "Condividi il tuo ciclo" (link/QR)
   // si è spostato subito sotto la striscia in Turni — è un'azione che
@@ -6665,7 +6682,7 @@ function renderPartner(CARDS){
       '<span class="tool-tx"><b>Stampa o salva in PDF</b></span>'+
     '</button>'+
     '</div>';
-  el.innerHTML=h;
+  const es=$("#partnerShare"); if(es) es.innerHTML=h;
 }
 
 // Rilevamento automatico del sistema operativo per sincronizzazione calendario lean
@@ -7502,8 +7519,7 @@ function sincronizzaCampiPiano(){
   if($("#napT")) $("#napT").value=state.napTurno||"no";
   if($("#sonnoD")) $("#sonnoD").value=state.sonnoDiurno||"diviso";
   if($("#mattinoBif")) $("#mattinoBif").checked=!!state.mattinoBifasico;
-  { const wc=$("#wantCross"), cb=$("#crossBox");
-    if(wc){ wc.checked = tuttePersone().length>0; if(cb) cb.hidden=!wc.checked; } }
+
 }
 const OPZ_PASSI = {1:[1,2], 3:[3], 4:[4]};
 // aria-expanded su ogni riga che apre un pannello qui sotto: la freccia gira
@@ -8410,6 +8426,18 @@ if($("#personaPattern")) $("#personaPattern").addEventListener("input", ()=>{
   const box=$("#personaShiftsBox"); if(box && !box.hidden) renderPersonaShifts();
 });
 if($("#doOpenCalendario")) $("#doOpenCalendario").onclick=()=>apriCalendarioDaWizard();
+// Un messaggio già scritto per chiederle i turni: cosa toccare per mandare
+// il suo link, e il nostro, così anche lei vede subito i giorni in comune.
+if($("#doChiediLink")) $("#doChiediLink").onclick=async()=>{
+  haptic(10);
+  const mio=window.NT_APP.base+"#"+toCompactHash();
+  const testo="Vediamo quando siamo liberi insieme? Con Notturnisti apri il mio link qui sotto e ti dice i giorni in comune.\n"+mio+
+    "\n\nSe vuoi mandarmi i tuoi turni: Notturnisti › Turni › Condividi i tuoi turni › Link per chi ha l'app.";
+  track("share_created", {tipo:"chiedi_link"});
+  try{ if(platform.canShare()){ await platform.share({title:"Quando siamo liberi insieme", text:testo}); return; } }
+  catch(e){ if(e && e.name==="AbortError") return; }
+  try{ await navigator.clipboard.writeText(testo); toast("Messaggio copiato: incollalo dove vuoi"); }catch(e){ window.open("https://wa.me/?text="+encodeURIComponent(testo),"_blank"); }
+};
 if($("#doConfirmPersona")) $("#doConfirmPersona").onclick=()=>{
   const btn=$("#doConfirmPersona"), err=$("#personaLinkErr");
   const link=$("#personaLink")?.value||"", name=$("#personaName")?.value.trim()||"";
@@ -9004,7 +9032,7 @@ if($("#chiudiOpzioni")) $("#chiudiOpzioni").onclick=chiudiOpzioniPagina;
 // "Modifica" del ciclo: lo stesso flusso lineare dell'inizio (com'è il ciclo
 // → schema o composizione → oggi dove sei → orari), non le Opzioni.
 if($("#tEdit")) $("#tEdit").onclick=()=>{ setTab("oggi"); apriFlussoProssimi("prossimi"); };
-if($("#partner")) $("#partner").addEventListener("click", e=>{
+["#partner","#partnerShare"].forEach(s=>{ const el=$(s); if(el) el.addEventListener("click", e=>{
   if(e.target.closest("[data-partner-edit]")) apriPartner();
   else if(e.target.closest("[data-partner-msg]")) mandaOrariLiberi();
   else if(e.target.closest("[data-partner-sheet]")){
@@ -9013,7 +9041,7 @@ if($("#partner")) $("#partner").addEventListener("click", e=>{
     track("share_created", {tipo:"pdf_liberi"});
     stampaFoglio("Notturnisti - quando sono libero");
   }
-});
+}); });
 if($("#status")) $("#status").addEventListener("click", e=>{
   if(e.target.closest('[data-goto="sonno"]')) apriFinestraSonno();
   if(e.target.closest('[data-act="apri-ecc-oggi"]')) { haptic(10); apriEcc(state.focus); }

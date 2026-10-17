@@ -24,17 +24,19 @@ ok(await p.evaluate(()=>/lucido/i.test(document.querySelector("#luciditaGiornoWr
 await p.click("#goToday");
 // attiva calendario e controlla stato reale
 await p.click('[data-attiva="calendario"]'); await p.waitForTimeout(3000);
-await p.click('[data-tab="turni"]'); await p.waitForTimeout(1200);
-const st=await p.evaluate(()=>document.querySelector("#calNatStato")&&document.querySelector("#calNatStato").innerText);
-ok(/Nel telefono: \d+ eventi/.test(st||""), "calendario: Turni dice quanti eventi ci sono davvero nel telefono → "+st);
+// lo stato del calendario ora vive solo in Impostazioni (tolto il doppione in Turni)
+await p.evaluate(()=>document.querySelector("#doOpzioni").click()); await p.waitForTimeout(300);
+await p.click("[data-cal-controlla]"); await p.waitForTimeout(1200);
+const st=await p.evaluate(()=>document.querySelector("#opzCalStato")&&document.querySelector("#opzCalStato").innerText);
+ok(/Nel telefono: \d+ eventi/.test(st||""), "calendario: Impostazioni dice quanti eventi ci sono davvero nel telefono → "+st);
 await p.evaluate(()=>{ window.__cal.ev={}; }); // l'utente/il sistema li cancella
-await p.evaluate(()=>{ document.querySelector('[data-tab="oggi"]').click(); document.querySelector('[data-tab="turni"]').click(); }); await p.waitForTimeout(800);
-const st2=await p.evaluate(()=>document.querySelector("#calNatStato").innerText);
+await p.click("[data-cal-controlla]"); await p.waitForTimeout(800);
+const st2=await p.evaluate(()=>document.querySelector("#opzCalStato").innerText);
 ok(/Non trovo gli eventi/.test(st2), "calendario: se mancano lo dice → "+st2);
 await p.click("[data-cal-riscrivi]"); await p.waitForTimeout(4500);
 ok(await p.evaluate(()=>Object.keys(window.__cal.ev).length)>0, "calendario: 'Riscrivili ora' li rimette");
 // notifica di prova
-await p.evaluate(()=>document.querySelector("#doOpzioni").click()); await p.waitForTimeout(300);
+if(!await p.evaluate(()=>document.body.classList.contains("tab-opzioni"))){ await p.evaluate(()=>document.querySelector("#doOpzioni").click()); await p.waitForTimeout(300); }
 await p.click("[data-prova-notifica]"); await p.waitForTimeout(300);
 ok(await p.evaluate(()=>window.__pend.some(n=>n.id===999990)), "Impostazioni: 'Prova una notifica' ne programma una tra 5 secondi");
 // diario: 30 notti a letto 00:30 sveglia 09:00
