@@ -1,4 +1,5 @@
 {
+  "id": "/",
   "name": "Notturnisti · Pianificatore turni",
   "short_name": "Notturnisti",
   "description": "Dai tuoi turni: quando dormire, l'ultimo caffè, la luce, i pasti. Il tuo piano viene calcolato sul dispositivo nel rispetto della tua privacy.",
@@ -76,17 +77,17 @@
   "screenshots": [
     {
       "src": "screenshot-oggi.jpg",
-      "sizes": "783x1696",
+      "sizes": "1080x1920",
       "type": "image/jpeg",
-      "platform": "narrow",
-      "label": "Schermata Oggi: sonno, pisolino, turno, ultimo caffè e rischio fatica"
+      "form_factor": "narrow",
+      "label": "Oggi: il piano del giorno sul tuo turno, con cosa fare adesso"
     },
     {
       "src": "screenshot-turni.jpg",
-      "sizes": "783x1696",
+      "sizes": "1080x1920",
       "type": "image/jpeg",
-      "platform": "narrow",
-      "label": "Schermata Turni: ciclo settimanale, prossimi turni e riposi con il partner"
+      "form_factor": "narrow",
+      "label": "Turni: la settimana a colpo d'occhio, con turni e sonno"
     }
   ]
 }
