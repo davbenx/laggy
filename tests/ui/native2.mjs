@@ -43,11 +43,11 @@ ok(parseFloat(padTop)>=44, "margine barra di stato applicato all'intestazione: "
 const fonts = await p.evaluate(async()=>{ await document.fonts.ready; return [...document.fonts].filter(f=>f.status==="loaded").map(f=>f.family).join(","); });
 ok(/Inter/.test(fonts), "font caricati in locale: "+fonts);
 // calendario nativo
-await p.evaluate(()=>{ [...document.querySelectorAll("#tabbar button")].find(b=>/Turni/.test(b.textContent)).click(); });
+await p.evaluate(()=>document.querySelector("#doOpzioni").click());
 await p.waitForTimeout(400);
-await p.evaluate(()=>{ const t=document.querySelector("#cycCalToggle"); t.checked=true; t.dispatchEvent(new Event("change")); });
+await p.evaluate(()=>document.querySelector('#opzFunzioni [data-gestisci="calendario"]').click());
 await p.waitForTimeout(2500);
-let cal = await p.evaluate(()=>({ cals:Object.values(window.__cal.cals), n:Object.keys(window.__cal.ev).length, ui:document.querySelector("#cycCalDetails").innerText.slice(0,80), turno:Object.values(window.__cal.ev).find(e=>/Turno/.test(e.title)) }));
+let cal = await p.evaluate(()=>({ cals:Object.values(window.__cal.cals), n:Object.keys(window.__cal.ev).length, ui:document.querySelector('#opzFunzioni [data-gestisci="calendario"]').innerText.slice(0,90), turno:Object.values(window.__cal.ev).find(e=>/Turno/.test(e.title)) }));
 ok(cal.cals.includes("Notturnisti") && cal.n>0 && /telefono/.test(cal.ui), "calendario creato sul telefono: "+JSON.stringify(cal.cals)+", "+cal.n+" eventi, UI "+JSON.stringify(cal.ui));
 ok(cal.turno && cal.turno.availability===0 && !cal.turno.alerts, "turno = occupato, nessun promemoria doppio");
 // cambio turno → riscrittura
@@ -69,8 +69,9 @@ const shareBtn = await p.evaluate(()=>!!document.querySelector("#doShare"));
 await p.evaluate(()=>document.querySelector("#doShare") && document.querySelector("#doShare").click()); await p.waitForTimeout(500);
 ok((await lg()).some(x=>x.startsWith("Share.share https://notturnisti.club/planner")), "«Consiglialo a un collega» apre il pannello nativo con il link al sito pubblico: "+(await lg()).filter(x=>x.startsWith("Share")).pop());
 // disattiva calendario
-await p.evaluate(()=>{ [...document.querySelectorAll("#tabbar button")].find(b=>/Turni/.test(b.textContent)).click(); });
-await p.evaluate(()=>{ const t=document.querySelector("#cycCalToggle"); t.checked=false; t.dispatchEvent(new Event("change")); }); await p.waitForTimeout(800);
+await p.evaluate(()=>document.querySelector("#doOpzioni").click()); await p.waitForTimeout(300);
+p.once("dialog", d=>d.accept());
+await p.evaluate(()=>document.querySelector('#opzFunzioni [data-gestisci="calendario"]').click()); await p.waitForTimeout(800);
 ok(await p.evaluate(()=>Object.keys(window.__cal.cals).length===0), "spegnendo, il calendario viene rimosso dal telefono");
 console.log("errori pagina:", errs);
 await b.close();

@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Widget "Il tuo piano". I testi qui sono anche l'anteprima nel selettore
+<!-- Widget "Il tuo piano". Contenuto centrato in verticale: lo spazio che
+     avanza (widget alto ma non abbastanza per la settimana) si divide sopra e
+     sotto invece di restare tutto in fondo. I testi qui sono anche l'anteprima nel selettore
      dei widget; quelli veri li mette NotturnistiWidget. Colori in
      values/widget_colori.xml e values-night/ (segue il tema del telefono). -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -7,6 +9,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:gravity="center_vertical"
     android:padding="16dp"
     android:background="@drawable/widget_sfondo">
 

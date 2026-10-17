@@ -353,7 +353,7 @@ function render(){
   var VOCI={turni:"Turni dei prossimi giorni",notifiche:"Promemoria",calendario:"Calendario del telefono",widget:"Widget"};
   $("#setup").innerHTML=rowsHtml(byProp(rows,"setup_item").map(function(x){ return {k:VOCI[x.k]||x.k, n:x.n}; }));
 
-  var FORMATI={turni_msg:"Messaggio con i turni",liberi_msg:"Messaggio con gli orari liberi",link:"Link al ciclo",qr:"QR del ciclo",pdf_ciclo:"Stampa/PDF del ciclo",pdf_liberi:"Stampa/PDF orari liberi"};
+  var FORMATI={turni_msg:"Messaggio con i turni",liberi_msg:"Messaggio con gli orari liberi",link:"Link al ciclo",qr:"QR del ciclo",pdf_ciclo:"Stampa/PDF del ciclo",pdf_liberi:"Stampa/PDF orari liberi",chiedi_link:"Richiesta del link a una persona"};
   $("#share").innerHTML=rowsHtml(byProp(rows,"share_created").map(function(x){ return {k:FORMATI[x.k]||x.k, n:x.n}; }));
   // funzioni_attive: "a_n1c0w1" → quote per funzione, per piattaforma
   var PIATT={a:"Android",w:"Web",p:"PWA",i:"iOS"}, f={};

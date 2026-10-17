@@ -12,7 +12,7 @@ for (const [nome,url,init] of [["web","http://localhost:8765/index.html",()=>{ w
   await p.click('[data-tab="turni"]'); await p.evaluate(()=>document.querySelector("#doPartner").click()); await p.waitForTimeout(300);
   await p.click("[data-partner-msg]"); await p.waitForTimeout(300);
   const sh=await p.evaluate(()=>window.__sh);
-  ok(sh.length===1 && /prossime due settimane/.test(sh[0].text) && !/Notte|Mattino|sonno/i.test(sh[0].text.split("\n").slice(1).join("")), nome+": 'Manda i miei orari liberi' apre la condivisione");
+  ok(sh.length===1 && /nei prossimi \d+ giorni/.test(sh[0].text) && !/Notte|Mattino|sonno/i.test(sh[0].text.split("\n").slice(1).join("")), nome+": 'Manda i miei orari liberi' apre la condivisione");
   if(nome==="web") console.log(sh[0].text);
   await p.locator("#partner").screenshot({path:"/tmp/m-"+nome+".png"});
   await ctx.close();
