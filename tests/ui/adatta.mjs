@@ -38,7 +38,7 @@ ok(await p.evaluate(()=>Object.keys(window.__cal.ev).length)>0, "calendario: 'Ri
 // notifica di prova
 if(!await p.evaluate(()=>document.body.classList.contains("tab-opzioni"))){ await p.evaluate(()=>document.querySelector("#doOpzioni").click()); await p.waitForTimeout(300); }
 await p.click("[data-prova-notifica]"); await p.waitForTimeout(300);
-ok(await p.evaluate(()=>window.__pend.some(n=>n.id===999990)), "Impostazioni: 'Prova una notifica' ne programma una tra 5 secondi");
+ok(await p.evaluate(()=>window.__pend.some(n=>n.id===999990)), "Impostazioni: 'Prova una notifica' la manda subito");
 // diario: 30 notti a letto 00:30 sveglia 09:00
 await p.evaluate(()=>{ const w={}, bd={}; for(let i=1;i<=30;i++){ const d=new Date(); d.setDate(d.getDate()-i); const k=d.toISOString().slice(0,10); w[k]="09:00"; bd[k]="00:30"; } localStorage.setItem("nt:wakes",JSON.stringify(w)); localStorage.setItem("nt:beds",JSON.stringify(bd)); localStorage.setItem("nt:invitoVisto","\"2000-01-01\""); });
 await p.reload(); await p.waitForTimeout(1500);

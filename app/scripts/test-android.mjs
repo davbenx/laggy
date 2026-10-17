@@ -80,7 +80,11 @@ const ev=sh("shell content query --uri content://com.android.calendar/events --p
 console.log(ev.map(l=>l.replace(/dtstart=(\d+)/,(m,x)=>"inizio="+new Date(+x).toLocaleString("it-IT",{timeZone:"Europe/Rome"})).replace(/dtend=(\d+)/,(m,x)=>"fine="+new Date(+x).toLocaleString("it-IT",{timeZone:"Europe/Rome"}))).join("\n"));
 // stato visto dall'app
 await tocca('[data-tab="turni"]'); await wait(15000);
-console.log("Turni dice:", await p.evaluate(()=>{ const e=document.querySelector("#calNatStato"); return e? e.innerText : "(niente)"; }));
+// lo stato del calendario ora è in Impostazioni (tolto il doppione in Turni)
+await p.evaluate(()=>document.querySelector("#doOpzioni").click()); await wait(1500);
+await p.evaluate(()=>document.querySelector("[data-cal-controlla]") && document.querySelector("[data-cal-controlla]").click()); await wait(6000);
+const statoCal=await p.evaluate(()=>{ const e=document.querySelector("#opzCalStato"); return e? e.innerText : "(niente)"; });
+ok(/Nel telefono: \d+ eventi/.test(statoCal), "Impostazioni: stato del calendario → "+statoCal);
 // notifica di prova
 await tocca("#doOpzioni"); await wait(4000);
 await tocca("[data-prova-notifica]",null,60000);

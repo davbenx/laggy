@@ -144,8 +144,10 @@ const nativeNotify = {
     const LN = plugin("LocalNotifications"); if (!LN) return false;
     if ((await this.permission()) !== "granted") return false;
     await ensureChannels(LN);
+    // Subito, senza "schedule": un allarme non esatto a 5 secondi, da
+    // Android 14, il sistema può rinviarlo di minuti (visto su Android 15).
     await LN.schedule({ notifications: [{ id: 999990, title: "Notturnisti", body: PROVA,
-      schedule: { at: new Date(Date.now() + 5000), allowWhileIdle: true }, channelId: "promemoria", extra: { tab: "oggi" } }] });
+      channelId: "promemoria", extra: { tab: "oggi" } }] });
     return true;
   }
 };

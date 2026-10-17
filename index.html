@@ -6962,7 +6962,7 @@ function statoCalendario(el){
 }
 document.addEventListener("click", e=>{
   if(e.target.closest("[data-cal-riscrivi]")){ platform.calendar.riscrivi(); toast("Riscrivo il calendario…"); ntCalendarioNativo(true); setTimeout(()=>{ renderAttivazione(); }, 4000); }
-  if(e.target.closest("[data-prova-notifica]")){ platform.notify.prova().then(ok=>toast(ok ? "Tra qualche secondo arriva una notifica di prova" : "Prima accendi i promemoria")).catch(()=>toast("Notifica di prova non riuscita")); }
+  if(e.target.closest("[data-prova-notifica]")){ platform.notify.prova().then(ok=>toast(ok ? (platform.isNative ? "Notifica di prova inviata: guarda in alto" : "Tra qualche secondo arriva una notifica di prova") : "Prima accendi i promemoria")).catch(()=>toast("Notifica di prova non riuscita")); }
   if(e.target.closest("[data-cal-apri]")){ platform.calendar.apri(); return; }
   if(e.target.closest("[data-cal-controlla]")){ const el=$("#opzCalStato"); if(el){ el.hidden=false; el.textContent="Controllo…"; statoCalendario(el); } }
 });
