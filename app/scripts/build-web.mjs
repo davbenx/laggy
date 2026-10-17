@@ -16,7 +16,10 @@ const FILES = [
   "platform.js", "analytics.js", "paid.js", "migrate.js",
   "manifest.webmanifest",
   "icon-180.png", "icon-192.png", "icon-512.png", "icon-maskable-512.png", "owl-mark.png",
-  "fonts/inter-latin.woff2", "fonts/noto-serif-latin.woff2"
+  "fonts/inter-latin.woff2", "fonts/noto-serif-latin.woff2",
+  // Avvisi delle licenze: MIT e OFL chiedono che accompagnino le copie
+  // distribuite, quindi stanno anche dentro l'app, non solo sul sito.
+  "licenze/index.html", "fonts/OFL-Inter.txt", "fonts/OFL-NotoSerif.txt"
 ];
 
 rmSync(out, { recursive: true, force: true });

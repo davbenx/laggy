@@ -43,6 +43,7 @@ Notturnisti dà indicazioni generali di benessere e organizzazione basate sulla 
 - Email: notturnisti.club+pianificatore@gmail.com
 - Sito web: https://notturnisti.club
 - Privacy policy: https://app.notturnisti.club/privacy/
+- Termini d'uso: https://app.notturnisti.club/termini/ (non c'è un campo in Play Console: il link è nell'app, al primo passo e in Impostazioni)
 
 ## Grafica (in docs/play/img/)
 - Icona 512×512: icon-512.png (nella radice del repository)
