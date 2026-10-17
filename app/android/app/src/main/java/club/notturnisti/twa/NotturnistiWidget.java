@@ -91,12 +91,12 @@ public class NotturnistiWidget extends AppWidgetProvider {
         return domani ? "domani " + h : h;
     }
 
-    // "2 h 10", "45 min", "1 h"
+    // "2 h 10 min", "45 min", "1 h"
     private static String durata(long ms) {
         long m = Math.max(1, Math.round(ms / 60000.0));
         if (m < 60) return m + " min";
         long h = m / 60, r = m % 60;
-        return r == 0 ? h + " h" : h + " h " + r;
+        return r == 0 ? h + " h" : h + " h " + r + " min";
     }
 
     static void disegna(Context ctx, AppWidgetManager mgr, int[] ids) {
@@ -142,9 +142,11 @@ public class NotturnistiWidget extends AppWidgetProvider {
                 } else if (primo != null) {
                     long s = primo.getLong("s");
                     // Mai "nessun impegno": la prossima cosa, con quanto manca.
-                    etichetta = "Tra " + durata(s - ora);
+                    // L'etichetta resta una parola (come "Adesso"): il conto
+                    // alla rovescia in maiuscolo ("TRA 5 H 19") si leggeva male.
+                    etichetta = "Prossimo";
                     adesso = primo.getString("t");
-                    sotto = "alle " + hhmm(s, ora);
+                    sotto = "alle " + hhmm(s, ora) + " · tra " + durata(s - ora);
                     icona = icona(primo.optString("k", null));
                     rinfresco = ora + (s - ora < 3_600_000 ? 60_000 : 5 * 60_000);
                 } else {
