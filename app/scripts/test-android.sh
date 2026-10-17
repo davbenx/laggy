@@ -25,5 +25,11 @@ cp "$CFG" /tmp/cap.config.bak
 sed -i 's/"webContentsDebuggingEnabled": false/"webContentsDebuggingEnabled": true/' "$CFG"
 trap 'cp /tmp/cap.config.bak "$CFG"' EXIT INT TERM
 npm run -s build:web && npx cap sync android >/dev/null && (cd android && ./gradlew assembleDebug --no-daemon -q)
-"$ADB" -s emulator-5554 install -r -g android/app/build/outputs/apk/debug/app-debug.apk
+# Senza KVM il sistema dell'emulatore a volte si riavvia appena acceso:
+# si riprova finché il gestore dei pacchetti risponde e l'installazione riesce.
+for t in 1 2 3 4 5 6; do
+  until "$ADB" -s emulator-5554 shell pm path android 2>/dev/null | grep -q package; do sleep 10; done
+  "$ADB" -s emulator-5554 install -r -g android/app/build/outputs/apk/debug/app-debug.apk 2>&1 | grep -q Success && break
+  echo "installazione non riuscita (tentativo $t), riprovo"; sleep 30
+done
 cd .. && ADB="$ADB" APK=app/android/app/build/outputs/apk/debug/app-debug.apk node app/scripts/test-android.mjs --no-install
