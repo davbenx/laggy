@@ -171,13 +171,13 @@
     var coupleUrl = (s.feedUrl || "").replace("/feed/", "/couple/");
     if (!r.pPattern)
       return '<h2 class="pf-h">Calendario di coppia</h2>' +
-        '<p class="pf-p">Il partner si imposta una volta sola, nella scheda <b>Quando sono disponibile → Aggiungi una persona</b>. ' +
+        '<p class="pf-p">La persona con cui vuoi il calendario di coppia si aggiunge una volta sola, in <b>Turni → Quando ho tempo libero → Aggiungi una persona</b>. ' +
         'Da lì i vostri riposi in comune arrivano anche qui, come calendario da iscrivere che si aggiorna da solo.</p>';
     return '<h2 class="pf-h">Calendario di coppia</h2>' +
       '<p class="pf-p">Partner impostato. Iscrivi questo calendario: mostra i <b>riposi in comune</b> nei prossimi 60 giorni e si aggiorna da solo.</p>' +
       scCalAction(coupleUrl, "pf-copy-couple", true) +
       '<p class="pf-note">Come sopra: l\'aggiornamento non è istantaneo, lo decide il calendario che usi, non c\'è modo di forzarlo da qui.</p>' +
-      '<button class="pf-btn" id="pf-couple-sync">Sincronizza il partner</button>' +
+      '<button class="pf-btn" id="pf-couple-sync">Sincronizza il calendario di coppia</button>' +
       '<p class="pf-note">Aggiorna il feed con la sequenza del partner impostata in Turni.</p>';
   }
 

@@ -20,7 +20,7 @@ t0=Date.now(); await p.reload({waitUntil:"load"}); await p.waitForSelector("#doO
 console.log("avvio con turni impostati (CPU 4x): pronta in", Date.now()-t0, "ms");
 await cdp.send("Emulation.setCPUThrottlingRate",{rate:1});
 // accessibilità su ogni schermata
-const schermate=[["Oggi",async()=>{}],["Turni",async()=>{ await p.click('[data-tab="turni"]'); }],["Quando sono libero",async()=>{ await p.evaluate(()=>document.querySelector("#doPartner").click()); }],["Come sto dormendo",async()=>{ await p.evaluate(()=>{ document.querySelector("#chiudiVederci").click(); document.querySelector("#doAndamenti").click(); }); }],["Impostazioni",async()=>{ await p.evaluate(()=>{ document.querySelector("#chiudiAndamenti").click(); document.querySelector("#doOpzioni").click(); }); }]];
+const schermate=[["Oggi",async()=>{}],["Turni",async()=>{ await p.click('[data-tab="turni"]'); }],["Quando ho tempo libero",async()=>{ await p.evaluate(()=>document.querySelector("#doPartner").click()); }],["Come sto dormendo",async()=>{ await p.evaluate(()=>{ document.querySelector("#chiudiVederci").click(); document.querySelector("#doAndamenti").click(); }); }],["Impostazioni",async()=>{ await p.evaluate(()=>{ document.querySelector("#chiudiAndamenti").click(); document.querySelector("#doOpzioni").click(); }); }]];
 for (const scheme of ["light","dark"]) {
   await p.emulateMedia({colorScheme:scheme});
   await p.evaluate(()=>{ localStorage.removeItem("nt:theme"); delete document.documentElement.dataset.theme; });

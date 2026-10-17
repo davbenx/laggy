@@ -13,7 +13,7 @@ await p.click("#goToday"); ok(await p.evaluate(()=>window.__picker)===1, "su ogg
 await p.click('[data-tab="turni"]'); await p.waitForTimeout(200);
 ok(await p.evaluate(()=>document.querySelector("#andamentiAnteprima").innerText)==="Annota qualche notte per vederlo", "Turni: 'Come sto dormendo' non mostra i numeri dell'esempio come tuoi");
 await p.evaluate(()=>document.querySelector("#doPartner").click()); await p.waitForTimeout(200);
-ok(await p.evaluate(()=>document.querySelector("#piuCal").hidden), "Quando sono libero: niente calendario di coppia senza una persona");
+ok(await p.evaluate(()=>document.querySelector("#piuCal").hidden), "Quando ho tempo libero: niente calendario di coppia senza una persona");
 await p.evaluate(()=>document.querySelector("#chiudiVederci").click());
 await p.click("#doScambioTurno"); await p.waitForTimeout(200);
 ok(await p.evaluate(()=>!document.querySelector("#scambioPagina").hidden && getComputedStyle(document.querySelector("#doPartner")).display==="none"), "scambio: si apre come pagina a sé, come le altre due");

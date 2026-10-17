@@ -20,7 +20,7 @@ await p.click("#doChiudiPrimoPiano").catch(()=>{});
 // lucidità: oggi no, domani sì
 ok(await p.evaluate(()=>document.querySelector("#luciditaGiornoWrap").innerText.trim()===""), "lucido: su oggi l'invito non c'è (la notte prima è già passata)");
 await p.click("#next"); await p.waitForTimeout(200);
-ok(await p.evaluate(()=>/lucido/i.test(document.querySelector("#luciditaGiornoWrap").innerText)), "lucido: su domani l'invito c'è");
+ok(await p.evaluate(()=>/lucid|in forma/i.test(document.querySelector("#luciditaGiornoWrap").innerText)), "lucido: su domani l'invito c'è");
 await p.click("#goToday");
 // attiva calendario e controlla stato reale
 await p.click('[data-attiva="calendario"]'); await p.waitForTimeout(3000);

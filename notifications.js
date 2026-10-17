@@ -113,7 +113,7 @@ export function buildSchedule(config, opts = {}) {
 
     if (want("ret") && (P.night || P.lateStart) && !P.b.rest)
       push(base, P.b.end, "ret", "Rientro dal turno",
-        "L'ora più rischiosa. Occhiali, e se sei stanco non guidare: 20 minuti fermo e un caffè.");
+        "L'ora più rischiosa. Occhiali, e se hai sonno non guidare: 20 minuti di sosta e un caffè.");
 
     if (want("prep") && prepLead > 0 && !P.b.rest)
       push(base, P.b.start - prepLead, "prep", "Preparati per il turno",
