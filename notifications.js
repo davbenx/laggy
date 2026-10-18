@@ -108,11 +108,13 @@ export function buildSchedule(config, opts = {}) {
     const mid = localMidnight(base);
     sonni.push([at(mid, P.s.onset).getTime(), at(mid, P.s.onset + P.s.dur).getTime()]);
 
-    if (want("bedtime"))
+    // Fra due turni attaccati può non esserci tempo per dormire: niente
+    // "preparati a dormire" o "ora di alzarti" per un sonno che non c'è.
+    if (want("bedtime") && P.s.dur > 0)
       push(base, P.s.onset - bedtimeLead, "bedtime", "Preparati a dormire",
         "Sonno pianificato alle " + hhmm(at(mid, P.s.onset)) + ".");
 
-    if (want("wake"))
+    if (want("wake") && P.s.dur > 0)
       push(base, P.s.onset + P.s.dur, "wake", "Ora di alzarti",
         "Fine del sonno pianificato. In piedi per restare in fase.");
 

@@ -376,3 +376,54 @@ test("eccezioni: andata e ritorno, e il feed le rispetta", () => {
   const turni = [...ics.matchAll(/SUMMARY:(Turno [^\r]*)/g)].map(m => m[1]);
   assert.deepEqual(turni, ["Turno Notte", "Turno Mattino"]);
 });
+
+test("mai a letto durante il turno: il sonno principale comincia dopo il rientro a casa", () => {
+  // Pomeriggio fino a sera seguito da mattino presto (il "rientro"): prima il
+  // sonno si contava a ritroso dalla sveglia e finiva in pieno turno.
+  const oggi = new Date(); oggi.setHours(12, 0, 0, 0);
+  const casi = [
+    [{ P: { n: "Pomeriggio", s: 840, e: 1260 }, Q: { n: "Presto", s: 360, e: 780 } }, "PQRRRRR"],
+    [{ P: { n: "Pomeriggio", s: 840, e: 1320 }, M: { n: "Mattino", s: 360, e: 840 } }, "PMRRRRR"],
+    [{ M: { n: "Mattino", s: 360, e: 840 }, P: { n: "Pomeriggio", s: 840, e: 1320 }, N: { n: "Notte", s: 1320, e: 1860 } }, "MPNSRPMMR"]
+  ];
+  for (const [shifts, pattern] of casi) for (const bif of [false, true]) {
+    const e = createEngine({ pattern, anchor: oggi.toISOString().slice(0, 10), shifts, repeat: true, mattinoBifasico: bif, cFrom: 25, focus: oggi });
+    for (let o = 0; o < pattern.length; o++) {
+      const d = new Date(oggi); d.setDate(d.getDate() + o); e.state.focus = d;
+      const P = e.plan();
+      if (P.b.rest || P.night || P.lateStart) continue;
+      assert.ok(P.s.onset >= P.b.end + 25, pattern + " giorno " + o + (bif ? " bifasico" : "") + ": a letto " + P.s.onset + " prima della fine turno " + P.b.end);
+    }
+  }
+});
+
+test("tutte le combinazioni di tre giorni: sonno e pisolini mai dentro un turno o il viaggio", () => {
+  // Dieci forme di turno (alba, mattino, mattino tardi, giorno 12h, pomeriggio,
+  // sera, sera tardi, notte, notte 12h, notte fonda da mezzanotte) più il riposo,
+  // in ogni sequenza di tre giorni possibile (escluse quelle con meno di 2 ore
+  // fra un turno e l'altro), con viaggi corti e lunghi e un cronotipo mattiniero.
+  // I pisolini in pausa al lavoro (x.turno) sono voluti e non contano.
+  const T = { A: { n: "Alba", s: 300, e: 780 }, M: { n: "Mattino", s: 360, e: 840 }, L: { n: "Mattino tardi", s: 480, e: 960 },
+    D: { n: "Giorno 12h", s: 420, e: 1140 }, P: { n: "Pomeriggio", s: 840, e: 1320 }, S: { n: "Sera", s: 1080, e: 1440 },
+    X: { n: "Sera tardi", s: 1140, e: 1500 }, N: { n: "Notte", s: 1320, e: 1860 }, K: { n: "Notte 12h", s: 1140, e: 1860 }, Z: { n: "Notte fonda", s: 0, e: 480 } };
+  const codes = Object.keys(T).concat(["R"]);
+  const oggi = new Date(); oggi.setHours(12, 0, 0, 0);
+  const problemi = [];
+  for (const V of [{ cTo: 25, cFrom: 25 }, { cTo: 60, cFrom: 60, freeBed: "22:00", freeWake: "04:00" }])
+  for (const a of codes) for (const b of codes) for (const c of codes) {
+    const seq = [a, b, c]; let ok = true;
+    for (let i = 0; i < 2; i++) { const x = T[seq[i]], y = T[seq[i + 1]]; if (x && y && 1440 + y.s - x.e < 120) ok = false; }
+    if (!ok) continue;
+    const pat = a + b + c + "RRRR";
+    const e = createEngine(Object.assign({ pattern: pat, anchor: oggi.toISOString().slice(0, 10), shifts: T, repeat: true, focus: oggi }, V));
+    const occ = []; for (let o = -1; o < 5; o++) { const w = e.block(o); if (!w.rest) occ.push([o * 1440 + w.start - V.cTo, o * 1440 + w.end + V.cFrom]); }
+    for (let o = 0; o < 3; o++) {
+      const d = new Date(oggi); d.setDate(d.getDate() + o); e.state.focus = d;
+      const P = e.plan();
+      const items = [[P.s.onset, P.s.onset + P.s.dur]].concat((P.naps || []).filter(x => !x.turno).map(x => [x.a, x.b]));
+      for (const [s0, z0] of items) { if (!(z0 > s0)) continue;
+        if (occ.some(([da, al]) => o * 1440 + s0 < al - 1 && o * 1440 + z0 > da + 1)) problemi.push(pat + " giorno " + o + " " + s0 + "-" + z0); }
+    }
+  }
+  assert.equal(problemi.length, 0, problemi.slice(0, 10).join(" | "));
+});
