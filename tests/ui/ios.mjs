@@ -31,6 +31,16 @@ const z=await p.evaluate(()=>({ta:getComputedStyle(document.documentElement).tou
   campi:[...document.querySelectorAll("input[type=time],input[type=text],input[type=number],select")].filter(e=>e.offsetParent).map(e=>getComputedStyle(e).fontSize).filter(f=>parseFloat(f)<16).length}));
 ok(z.ta==="manipulation", "niente zoom col doppio tocco (touch-action: manipulation)");
 ok(z.campi===0, "campi visibili a 16px o più: Safari non zooma entrando");
+// PDF: su iPhone niente window.print() (dall'app sulla Home non apre niente):
+// un file PDF vero nel pannello di condivisione
+await p.evaluate(()=>{ window.__files=[]; window.__printed=0; navigator.canShare=()=>true;
+  navigator.share=async(o)=>{ for(const f of o.files||[]){ const t=await f.text(); window.__files.push({name:f.name, type:f.type, head:t.slice(0,8), pagine:(t.match(/\/Type \/Page /g)||[]).length}); } };
+  window.print=()=>{ window.__printed++; }; });
+await p.click('[data-tab="turni"]'); await p.waitForTimeout(300);
+await p.evaluate(()=>document.querySelector("#doPrint").click()); await p.waitForTimeout(800);
+const pdf=await p.evaluate(()=>({f:window.__files, printed:window.__printed}));
+ok(pdf.printed===0 && pdf.f.length===1 && pdf.f[0].head.startsWith("%PDF-1.4") && pdf.f[0].type==="application/pdf" && pdf.f[0].pagine===2,
+  "iPhone: «Stampa o salva in PDF» condivide un PDF di 2 pagine (calendario + giorno per giorno) → "+JSON.stringify(pdf));
 // installazione: prima voce di "Rendi automatico il tuo piano"
 await p.click('[data-tab="oggi"]'); await p.waitForTimeout(400);
 const voce=await p.evaluate(()=>{ const v=document.querySelector("#setupChecklist:not([hidden]) .attiva-voce"); return v ? v.dataset.attiva+" | "+v.innerText.replace(/\n/g," ") : "(niente)"; });

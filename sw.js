@@ -14,6 +14,7 @@ const CORE = [
   "./paid.js",
   "./notifications.js",
   "./platform.js",
+  "./pdf.js",
   "./migrate.js",
   "./analytics.js",
   "./fonts/inter-latin.woff2",
