@@ -1797,7 +1797,7 @@ header b{font-size:23px}
       <span>Statistiche d'uso anonime</span>
       <span class="switch"><input type="checkbox" id="optStats" aria-label="Statistiche d'uso anonime" aria-describedby="optStatsHint"><span class="slider"></span></span>
     </label>
-    <p class="hint" id="optStatsHint" style="margin:2px 0 0">Ci aiutano a capire cosa migliorare. Solo contatori come «un piano è stato creato»: nessun identificativo, nessun dato dei turni. Spente finché non le accendi.</p>
+    <p class="hint" id="optStatsHint" style="margin:2px 0 0">Ci aiutano a migliorare l'app: contano in forma anonima cosa si usa, per esempio quanti accendono i promemoria o su che tipo di telefono. Niente turni, orari o diario, e niente che dica chi sei. Spente finché non le accendi.</p>
     <p style="margin:10px 0 0;display:flex;flex-direction:column;align-items:flex-start"><button class="lnk" id="doShare" style="padding:10px 0">Invita chi lavora con te</button><button class="lnk" id="doFeed" style="padding:10px 0">Segnala cosa non torna</button></p>
     <nav class="foot-links" aria-label="Informazioni">
       <a href="https://notturnisti.club/planner" target="_blank" rel="noopener">Come si usa</a>
@@ -5591,8 +5591,8 @@ function renderStatsNudge(){
   if(!statsNudgeVisibile()){ el.hidden=true; return; }
   el.hidden=false;
   el.innerHTML =
-    '<b>Ci aiuti a capire cosa migliorare?</b>'+
-    '<p class="hint" style="margin-top:6px">Solo conteggi anonimi del tipo "un piano è stato generato" o "le notifiche sono state attivate": nessun identificativo, nessun orario, nessun dato dei turni o del sonno. Puoi cambiare idea quando vuoi in Impostazioni.</p>'+
+    '<b>Ci aiuti a migliorare Notturnisti?</b>'+
+    '<p class="hint" style="margin-top:6px">Se accetti, l\'app conta in forma anonima cosa si usa e cosa no (per esempio quanti accendono i promemoria, o su che tipo di telefono si usa), così sappiamo dove lavorare. Niente turni, orari o diario, e niente che dica chi sei. Puoi cambiare idea quando vuoi in Impostazioni.</p>'+
     '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">'+
       '<button class="btn g" type="button" id="doStatsSi">Sì, va bene</button>'+
       '<button class="btn g" type="button" id="doStatsNo">No, grazie</button>'+
