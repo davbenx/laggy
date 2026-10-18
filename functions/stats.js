@@ -182,8 +182,18 @@ details summary{cursor:pointer;font-weight:600}
       </section>
       <section class="card">
         <h2>Da dove usano l'app</h2>
-        <p class="sub">Aperture giornaliere per piattaforma.</p>
-        <div class="rows" id="platforms"></div>
+        <p class="sub">Dispositivi attivi al giorno, sommati nel periodo (solo chi ha acceso le statistiche: contano le proporzioni).</p>
+        <h3 class="sub" style="margin-top:12px"><b>Sistema</b></h3>
+        <div class="rows" id="platOs"></div>
+        <h3 class="sub" style="margin-top:12px"><b>Come la usano</b></h3>
+        <div class="rows" id="platSup"></div>
+        <h3 class="sub" style="margin-top:12px"><b>Browser</b> (web e web app)</h3>
+        <div class="rows" id="platBr"></div>
+      </section>
+      <section class="card">
+        <h2>Conversioni</h2>
+        <p class="sub">Su quanti hanno visto la proposta, nel periodo.</p>
+        <div class="rows" id="conversioni"></div>
       </section>
       <section class="card">
         <h2>Tipo di turnazione</h2>
@@ -331,7 +341,21 @@ function roundTop(x,y,w,h,r){ // colonna ancorata alla base, angoli arrotondati 
 }
 function niceStep(max){ var raw=max/4, p=Math.pow(10,Math.floor(Math.log10(raw))); var f=raw/p; return (f<=1?1:f<=2?2:f<=5?5:10)*p; }
 
-var PLAT={web:"Browser",pwa:"PWA installata",android:"App Android",ios:"App iOS"};
+// active_day: app_android | app_ios | {web,pwa}_{ios,android,computer}_{browser}
+// (prima: web | pwa | android | ios, ancora in arrivo dalle copie vecchie).
+function piattaforma(v){
+  var vecchi={web:["web","?","?"],pwa:["pwa","?","?"],android:["app","android",""],ios:["app","ios",""]};
+  if(vecchi[v]) return vecchi[v];
+  var p=String(v).split("_");
+  return p[0]==="app" ? ["app",p[1]||"?",""] : [p[0],p[1]||"?",p[2]||"?"];
+}
+var NOME_OS={ios:"iPhone e iPad",android:"Android",computer:"Computer","?":"Non indicato (versione vecchia)"};
+var NOME_SUP={app:"App (Play / App Store)",pwa:"Web app sulla schermata Home",web:"Nel browser"};
+var NOME_BR={safari:"Safari",chrome:"Chrome",samsung:"Samsung Internet",firefox:"Firefox",altro:"Altro","?":"Non indicato (versione vecchia)"};
+function perParte(rows, i, nomi){
+  var o={}; byProp(rows,"active_day").forEach(function(x){ var k=piattaforma(x.k)[i]; if(k==="") return; o[k]=(o[k]||0)+x.n; });
+  return Object.keys(o).map(function(k){ return {k:nomi[k]||k, n:o[k]}; }).sort(function(a,b){ return b.n-a.n; });
+}
 
 function render(){
   var D=state.data, rows=D.counts, days=daysList(D.since, D.days);
@@ -379,14 +403,16 @@ function render(){
 
   var FORMATI={turni_msg:"Messaggio con i turni",liberi_msg:"Messaggio con gli orari liberi",link:"Invito con il ciclo",app:"Invito (solo l'app)",qr:"QR del ciclo",pdf_ciclo:"Stampa/PDF del ciclo",pdf_liberi:"Stampa/PDF orari liberi",chiedi_link:"Richiesta del link a una persona"};
   $("#share").innerHTML=rowsHtml(byProp(rows,"share_created").map(function(x){ return {k:FORMATI[x.k]||x.k, n:x.n}; }));
-  // funzioni_attive: "a_n1c0w1" → quote per funzione, per piattaforma
-  var PIATT={a:"Android",w:"Web",p:"PWA",i:"iOS"}, f={};
-  rows.forEach(function(r){ if(r.event!=="funzioni_attive"||!r.prop) return; var m=/=(\w)_n(\d)c(\d)w(\d)$/.exec(r.prop); if(!m) return;
-    var k=m[1]; f[k]=f[k]||{tot:0,n:0,c:0,w:0}; f[k].tot+=r.n; if(m[2]==="1") f[k].n+=r.n; if(m[3]==="1") f[k].c+=r.n; if(m[4]==="1") f[k].w+=r.n; });
-  var fi=[]; Object.keys(f).forEach(function(k){ var x=f[k], pc=function(v){ return x.tot? Math.round(100*v/x.tot)+"%" : "—"; };
-    fi.push({k:(PIATT[k]||k)+": promemoria "+pc(x.n)+" · calendario "+pc(x.c)+(k==="a"?" · widget "+pc(x.w):""), n:x.tot}); });
+  // funzioni_attive: "a_n1c0w1" (+ "p1" sul web: promemoria con le push, che
+  // arrivano anche ad app chiusa) → quote per funzione, per piattaforma
+  var PIATT={a:"App Android",w:"Browser",p:"Web app sulla Home",i:"App iOS"}, f={};
+  rows.forEach(function(r){ if(r.event!=="funzioni_attive"||!r.prop) return; var m=/=(\w)_n(\d)c(\d)w(\d)(?:p(\d))?$/.exec(r.prop); if(!m) return;
+    var k=m[1]; f[k]=f[k]||{tot:0,n:0,c:0,w:0,p:0,pn:0}; f[k].tot+=r.n; if(m[2]==="1") f[k].n+=r.n; if(m[3]==="1") f[k].c+=r.n; if(m[4]==="1") f[k].w+=r.n;
+    if(m[5]!=null){ f[k].pn+=r.n; if(m[5]==="1") f[k].p+=r.n; } });
+  var fi=[]; Object.keys(f).forEach(function(k){ var x=f[k], pc=function(v,t){ t=t==null?x.tot:t; return t? Math.round(100*v/t)+"%" : "—"; };
+    fi.push({k:(PIATT[k]||k)+": promemoria "+pc(x.n)+(x.pn?" (ad app chiusa "+pc(x.p,x.pn)+")":"")+" · calendario "+pc(x.c)+(k==="a"?" · widget "+pc(x.w):""), n:x.tot}); });
   $("#funzioni").innerHTML=rowsHtml(fi);
-  var TIPON={bedtime:"Preparati a dormire",wake:"Ora di alzarti",nap:"Pisolino",coffee:"Ultimo caffè",ret:"Rientro",prep:"Preparati per il turno",cambio:"Cambio turno",domani:"Che turno fai domani?",luce:"Luce",settimana:"La tua settimana",tip:"Il piano si adatta"};
+  var TIPON={diario:"Come hai dormito?",consigli:"Consigli",bedtime:"Preparati a dormire",wake:"Ora di alzarti",nap:"Pisolino",coffee:"Ultimo caffè",ret:"Rientro",prep:"Preparati per il turno",cambio:"Cambio turno",domani:"Che turno fai domani?",luce:"Luce",settimana:"La tua settimana",tip:"Il piano si adatta"};
   $("#notifAperte").innerHTML=rowsHtml(byProp(rows,"notif_aperta").map(function(x){ return {k:TIPON[x.k]||x.k, n:x.n}; }));
   var ESI={liberi_proposto:"Giorni liberi: proposte",liberi_applicato:"Giorni liberi: applicate",liberi_annullato:"Giorni liberi: annullate",liberi_rifiutato:"Giorni liberi: «lascia così»",
     anticipo_proposto:"Anticipo: proposte",anticipo_applicato:"Anticipo: applicate",anticipo_annullato:"Anticipo: annullate",anticipo_rifiutato:"Anticipo: «lascia così»"};
@@ -397,7 +423,15 @@ function render(){
   $("#notifPreset").innerHTML=rowsHtml(byProp(rows,"notif_tipi").map(function(x){ return {k:PRESET[x.k]||x.k, n:x.n}; }));
   var CAN={turni:"Spento: cambi di turno",sicurezza:"Spento: rientro dopo la notte",sonno:"Spento: sonno",caffe:"Spento: ultimo caffè",pisolini:"Spento: pisolini",luce:"Spento: luce",sveglie:"Spento: ora di alzarti",suggerimenti:"Spento: suggerimenti"};
   $("#notifOff").innerHTML=rowsHtml(byProp(rows,"notif_canale_off").map(function(x){ return {k:CAN[x.k]||x.k, n:x.n}; }));
-  $("#platforms").innerHTML=rowsHtml(byProp(rows,"active_day").map(function(x){ return {k:PLAT[x.k]||x.k, n:x.n}; }));
+  $("#platOs").innerHTML=rowsHtml(perParte(rows,1,NOME_OS));
+  $("#platSup").innerHTML=rowsHtml(perParte(rows,0,NOME_SUP));
+  $("#platBr").innerHTML=rowsHtml(perParte(rows,2,NOME_BR));
+  var conv=function(a,b,nome){ var x=total(rows,a), y=total(rows,b); return {k:nome+": "+fmt(y)+" su "+fmt(x)+(x?" ("+Math.round(100*y/x)+"%)":""), n:y}; };
+  $("#conversioni").innerHTML=rowsHtml([
+    conv("install_prompt_shown","pwa_installed","Installata dalla proposta"),
+    conv("notification_prompt_shown","notifications_enabled","Promemoria accesi"),
+    conv("share_opened","share_accepted","Link del ciclo aperti → usati")
+  ]);
   $("#patterns").innerHTML=rowsHtml(byProp(rows,"plan_generated"));
   $("#returns").innerHTML=rowsHtml([["return_d1","Dopo 1 giorno"],["return_d7","Dopo 7 giorni"],["return_d30","Dopo 30 giorni"]].map(function(e){ return {k:e[1], n:total(rows,e[0])}; }));
 

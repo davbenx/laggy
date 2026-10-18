@@ -36,17 +36,11 @@
   // orari di turno reali, dati di sonno, nome, email o posizione.
   var ALLOWED = {
     example_started: [],
-
-    onboarding_started: [],
     onboarding_step_completed: ["step"],   // nome/indice dello step, non i valori inseriti
     onboarding_abandoned: ["step"],
     onboarding_completed: [],
 
     plan_generated: ["pattern_type"],      // categoria del pattern (es. "notte","rotazione"), mai orari reali
-    today_viewed: [],
-    calendar_viewed: [],
-
-    share_started: [],
     share_created: ["tipo"],
     share_opened: [],
     share_accepted: [],
@@ -63,7 +57,7 @@
 
 
     // Una volta al giorno per dispositivo, senza id: "quanti dispositivi hanno
-    // aperto l'app oggi". platform ∈ web | pwa | android | ios.
+    // aperto l'app oggi". platform: vedi platform() qui sotto (es. pwa_ios_safari).
     active_day: ["platform"],
 
     // Lista di attivazione: quale voce si tocca (turni, notifiche, calendario, widget).
@@ -210,13 +204,27 @@
     } catch (e) {}
   }
 
+  // Dove gira l'app, in poche categorie larghe: superficie (app, web app sulla
+  // Home, browser), sistema (ios, android, computer) e, sul web, la famiglia
+  // del browser. Niente versioni né modelli: servono a decidere su cosa
+  // investire (un'app iOS? quanti potrebbero passare all'app Android?), non a
+  // riconoscere un telefono.
   function platform() {
     try {
       if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform())
-        return window.Capacitor.getPlatform() === "ios" ? "ios" : "android";
-      if (window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true) return "pwa";
+        return window.Capacitor.getPlatform() === "ios" ? "app_ios" : "app_android";
+      var ua = navigator.userAgent || "";
+      var os = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1) ? "ios"
+        : /Android/.test(ua) ? "android" : "computer";
+      var br = /SamsungBrowser/.test(ua) ? "samsung" : /Firefox|FxiOS/.test(ua) ? "firefox"
+        : /Edg|OPR|Opera|YaBrowser/.test(ua) ? "altro" : /Chrome|CriOS|Chromium/.test(ua) ? "chrome"
+        : /Safari/.test(ua) ? "safari" : "altro";
+      var home = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+      // Sulla Home di iPhone la web app è sempre Safari, anche se non lo dice.
+      if (home && os === "ios") br = "safari";
+      return (home ? "pwa_" : "web_") + os + "_" + br;
     } catch (e) {}
-    return "web";
+    return "web_computer_altro";
   }
   // Un booleano per giorno, come checkReturns: nessuna cronologia delle visite.
   function checkActiveDay() {
