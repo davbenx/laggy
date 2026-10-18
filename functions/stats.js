@@ -95,6 +95,18 @@ details summary{cursor:pointer;font-weight:600}
       <button class="btn" type="submit">Apri le statistiche</button>
     </form>
     <p id="loginErr" class="err" hidden></p>
+    <details style="margin-top:14px">
+      <summary>Codice perso? Creane uno nuovo</summary>
+      <p class="sub">Si crea qui, su questo dispositivo: non passa da nessun server. Il codice salvalo (nel gestore delle password); a chi gestisce il sito manda solo l'impronta, che non è segreta. Quando l'impronta viene cambiata, il codice vecchio smette di funzionare.</p>
+      <button class="btn" type="button" id="genTok">Crea un nuovo codice</button>
+      <div id="genOut" hidden>
+        <p class="sub" style="margin-top:12px"><b>Codice</b> (tienilo per te):</p>
+        <code id="genCode" style="word-break:break-all;user-select:all"></code>
+        <p class="sub" style="margin-top:12px"><b>Impronta</b> (da mandare):</p>
+        <code id="genHash" style="word-break:break-all;user-select:all"></code>
+        <p><button class="btn" type="button" id="genCopy">Copia l'impronta</button></p>
+      </div>
+    </details>
   </section>
 
   <div id="app" hidden>
@@ -222,6 +234,16 @@ function showLogin(msg){
 }
 $("#loginForm").addEventListener("submit",function(ev){ ev.preventDefault(); setTok($("#tok").value.trim()); load(); });
 $("#logout").addEventListener("click",function(){ setTok(""); showLogin(); });
+// Nuovo codice: casuale, generato nel browser; al server serve solo l'impronta.
+$("#genTok").addEventListener("click",function(){
+  var b=new Uint8Array(24); crypto.getRandomValues(b);
+  var code=btoa(String.fromCharCode.apply(null,b)).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+  crypto.subtle.digest("SHA-256", new TextEncoder().encode(code)).then(function(h){
+    var hex=Array.prototype.map.call(new Uint8Array(h),function(x){return ("0"+x.toString(16)).slice(-2);}).join("");
+    $("#genCode").textContent=code; $("#genHash").textContent=hex; $("#genOut").hidden=false; $("#tok").value=code;
+  });
+});
+$("#genCopy").addEventListener("click",function(){ var t=$("#genHash").textContent; if(navigator.clipboard) navigator.clipboard.writeText(t); this.textContent="Copiata"; });
 document.querySelectorAll("[data-days]").forEach(function(b){
   b.addEventListener("click",function(){ state.days=+b.dataset.days; try{localStorage.setItem("nt-stats-days",state.days);}catch(e){} load(); });
 });
@@ -325,6 +347,8 @@ function render(){
     kpi(fmt(total(rows,"plan_generated")), "Piani generati", "nel periodo")+
     kpi(fmt(total(rows,"notifications_enabled")), "Notifiche attivate", "nel periodo")+
     kpi(fmt(total(rows,"recensione_chiesta")), "Richieste di recensione", "riquadro Play aperto (Google decide se mostrarlo)")+
+    kpi(fmt(total(rows,"share_opened")), "Link aperti da chi li riceve", "su "+fmt(total(rows,"share_created"))+" mandati")+
+    kpi(fmt(total(rows,"diario_rapido")), "Notti registrate dalla notifica", "«Come previsto»")+
     kpi(fmt(feedDistinct), "Calendari ICS vivi", coupleDistinct? ("più "+fmt(coupleDistinct)+" di coppia") : "feed distinti letti nel periodo");
 
   columns($("#chActive"), act, "Dispositivi attivi al giorno");
@@ -353,7 +377,7 @@ function render(){
   var VOCI={turni:"Turni dei prossimi giorni",notifiche:"Promemoria",calendario:"Calendario del telefono",widget:"Widget",file_ics:"File .ics scaricato",play:"Dal web a Google Play"};
   $("#setup").innerHTML=rowsHtml(byProp(rows,"setup_item").map(function(x){ return {k:VOCI[x.k]||x.k, n:x.n}; }));
 
-  var FORMATI={turni_msg:"Messaggio con i turni",liberi_msg:"Messaggio con gli orari liberi",link:"Link al ciclo",qr:"QR del ciclo",pdf_ciclo:"Stampa/PDF del ciclo",pdf_liberi:"Stampa/PDF orari liberi",chiedi_link:"Richiesta del link a una persona"};
+  var FORMATI={turni_msg:"Messaggio con i turni",liberi_msg:"Messaggio con gli orari liberi",link:"Invito con il ciclo",app:"Invito (solo l'app)",qr:"QR del ciclo",pdf_ciclo:"Stampa/PDF del ciclo",pdf_liberi:"Stampa/PDF orari liberi",chiedi_link:"Richiesta del link a una persona"};
   $("#share").innerHTML=rowsHtml(byProp(rows,"share_created").map(function(x){ return {k:FORMATI[x.k]||x.k, n:x.n}; }));
   // funzioni_attive: "a_n1c0w1" → quote per funzione, per piattaforma
   var PIATT={a:"Android",w:"Web",p:"PWA",i:"iOS"}, f={};

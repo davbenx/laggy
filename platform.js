@@ -116,11 +116,13 @@ const nativeNotify = {
     // Solo la sveglia merita l'esattezza, e solo se il permesso c'è già;
     // tutto il resto va bene con qualche minuto di scarto (Doze).
     const exactOk = (await this.exactStatus()) === "granted";
+    await ensureAzioni(LN);
     let list = items.map(n => ({
       id: n.id, title: n.title, body: n.body,
       schedule: { at: new Date(n.at), allowWhileIdle: true },
       isExactNotification: n.kind === "wake" && exactOk,
       channelId: CANALE_DI[n.kind] || "promemoria",
+      ...(AZIONI_DI[n.kind] ? { actionTypeId: AZIONI_DI[n.kind] } : {}),
       extra: { kind: n.kind, tab: (n.extra && n.extra.tab) || (n.kind === "wake" ? "diario" : "oggi") }
     }));
     if (name === "ios" && list.length) {
@@ -173,6 +175,18 @@ const CANALE_DI = { cambio: "turni", domani: "turni", prep: "turni", ret: "sicur
   nap: "pisolini", luce: "luce", wake: "sveglie", settimana: "suggerimenti", tip: "suggerimenti",
   diario: "suggerimenti", consigli: "suggerimenti" };
 let _channels = false;
+// Pulsanti nella notifica: solo dove un tocco basta a fare la cosa.
+// «Come hai dormito?» → «Come previsto» registra gli orari del piano (con
+// Annulla subito dopo), «Altri orari» apre il modulo. Il tocco sulla
+// notifica fa come «Altri orari».
+const AZIONI_DI = { diario: "diario" };
+let _azioni = false;
+async function ensureAzioni(LN) {
+  if (_azioni) return;
+  try { await LN.registerActionTypes({ types: [{ id: "diario", actions: [
+    { id: "previsto", title: "Come previsto" }, { id: "altri", title: "Altri orari" } ] }] }); } catch (e) {}
+  _azioni = true;
+}
 async function ensureChannels(LN) {
   if (_channels || name !== "android") return;
   for (const c of CANALI) await LN.createChannel({ ...c, visibility: 1, vibration: c.importance >= 4 });
@@ -335,7 +349,7 @@ export function onNotificationTap(cb) {
   const LN = plugin("LocalNotifications");
   if (LN) LN.addListener("localNotificationActionPerformed", ev => {
     const x = (ev && ev.notification && ev.notification.extra) || {};
-    try { cb(x.tab || "oggi", x.kind || ""); } catch (e) {}
+    try { cb(x.tab || "oggi", x.kind || "", (ev && ev.actionId) || ""); } catch (e) {}
   });
 }
 
