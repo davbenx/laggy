@@ -20,11 +20,48 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Notturnisti: turni e sonno</title>
 <meta name="description" content="Il calendario dei turni che ti dice quando dormire, il caffè e la luce, sul tuo turno. Gratis, senza account: i tuoi dati restano sul telefono.">
+<!-- Anteprima nei messaggi (WhatsApp, Telegram…): l'invito a un collega è un
+     link a questa pagina, senza anteprima arrivava come indirizzo nudo. -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Notturnisti">
+<meta property="og:title" content="Notturnisti: turni e sonno">
+<meta property="og:description" content="Ti dice quando dormire, il caffè e la luce, sul tuo turno. Gratis, senza account.">
+<meta property="og:image" content="https://app.notturnisti.club/og-image.jpg">
+<meta property="og:image:width" content="1024">
+<meta property="og:image:height" content="500">
+<meta property="og:locale" content="it_IT">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#14161A">
 <script>
 // Rete di sicurezza: se tra 6 secondi l'app non ha finito di avviarsi
 // (l'ultima riga dello script toglie #jsoff), mostra l'avviso.
 setTimeout(function(){ if(document.getElementById("jsoff")) document.documentElement.classList.add("js-lento"); }, 6000);
+// iPhone/iPad: alcune cose vanno fatte diversamente (selettore della data,
+// zoom sui campi). Qui, prima del CSS che lo legge.
+try{ if(/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform==="MacIntel" && navigator.maxTouchPoints>1)) document.documentElement.classList.add("ios"); }catch(e){}
+// iPhone: l'app aggiunta alla schermata Home ha una memoria tutta sua, vuota,
+// separata da Safari. Se l'indirizzo salvato porta con sé la configurazione
+// (render() ce la scrive), i turni arrivano già da lì; in più Safari lascia
+// una copia completa (anche diario e impostazioni) nella cache, che risulta
+// condivisa tra Safari e app installata. Qui, al primo avvio dalla Home e
+// solo a memoria vuota, la si riprende e si ricarica una volta.
+try{
+  var standalone = window.navigator.standalone===true || matchMedia("(display-mode: standalone)").matches;
+  if(document.documentElement.classList.contains("ios") && standalone && !localStorage.getItem("nt:state")
+     && !sessionStorage.getItem("nt-passaggio") && window.caches){
+    sessionStorage.setItem("nt-passaggio","1");
+    caches.open("passaggio-ios").then(function(c){ return c.match("/__passaggio"); })
+      .then(function(r){ return r ? r.json() : null; })
+      .then(function(d){
+        // la memoria era vuota all'avvio: quello che c'è ora l'ha creato questo
+        // primo avvio (dal link nell'indirizzo), e la copia di Safari è più completa
+        if(!d || !d["nt:state"]) return;
+        Object.keys(d).forEach(function(k){ if(/^nt:/.test(k)) localStorage.setItem(k, d[k]); });
+        localStorage.setItem("nt:passaggioIOS", JSON.stringify(new Date().toISOString().slice(0,10)));
+        location.replace(location.pathname);
+      }).catch(function(){});
+  }
+}catch(e){}
 // Dati importati dalla vecchia app (migrate.js): applicati QUI, prima che
 // qualunque altro script legga o salvi lo stato — altrimenti il salvataggio
 // automatico della pagina precedente potrebbe riscriverci sopra i dati vecchi.
@@ -231,6 +268,19 @@ border-radius:var(--r);font-family:inherit;font-size:12.5px;font-weight:600;curs
 .today:hover{border-color:var(--blue);color:var(--blue)}
 .today.full{background:var(--blue);border:1px solid var(--blue);color:var(--su-blu)}
 .today.full:hover{background:var(--blue-fill)}
+/* iPhone: Safari non apre il selettore della data da codice (showPicker su
+   un campo nascosto non fa niente). Sopra il bottone c'è allora un campo
+   data vero e trasparente: il tocco arriva a lui e iOS apre il suo
+   selettore. Solo quando il bottone dice "Scegli giorno": con "Torna a
+   oggi" il tocco va al bottone. */
+.today-wrap{position:relative;display:inline-flex;flex:none}
+.today-pick{display:none}
+html.ios .today-pick{display:block;position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;border:0;opacity:0;font-size:16px;-webkit-appearance:none;appearance:none;cursor:pointer}
+html.ios .today-wrap:has(.today.full) .today-pick{display:none}
+/* iPhone: niente zoom col doppio tocco (resta lo zoom con due dita) e
+   niente zoom automatico entrando in un campo: Safari lo fa sotto i 16px. */
+html{touch-action:manipulation}
+html.ios input,html.ios select,html.ios textarea{font-size:max(16px,1em)}
 /* pillola del turno: affordance interattiva, hover, active, chevron rotante all'apertura */
 .shiftpill{display:inline-flex;align-items:center;gap:5px;background:var(--blue-soft);color:var(--blue);font-size:12px;
 font-weight:700;padding:5px 11px;border-radius:999px;white-space:nowrap;cursor:pointer;border:1px solid transparent;
@@ -618,6 +668,9 @@ background:none;border:none;width:100%;cursor:pointer;font-family:inherit;text-d
 .wizbar>i{display:block;height:100%;width:25%;background:var(--blue);border-radius:99px;transition:width .28s ease}
 .wizstep{font-size:12.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);font-weight:600;margin-top:9px}
 .wstep{animation:wfade .22s ease}
+@keyframes evidenzia{0%,40%{box-shadow:0 0 0 3px var(--blue)}100%{box-shadow:0 0 0 3px transparent}}
+.evidenzia{animation:evidenzia 1.6s ease-out;border-radius:12px}
+@media (prefers-reduced-motion:reduce){.evidenzia{animation:none}}
 @keyframes wfade{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:none}}
 .wq{font-family:var(--serif);font-size:23px;line-height:1.25;margin:0 0 6px}
 .wsub{font-size:14px;color:var(--dim);line-height:1.55;margin:0 0 18px}
@@ -1417,7 +1470,7 @@ header b{font-size:23px}
      mezzo alle frecce. -->
 <div class="daynav" style="margin:10px 0 var(--gap-sezione)">
   <button class="nav" id="prev" aria-label="Giorno precedente"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
-  <button class="today" id="goToday">Scegli giorno</button>
+  <span class="today-wrap"><button class="today" id="goToday">Scegli giorno</button><input type="date" class="today-pick" tabindex="-1" aria-hidden="true"></span>
   <button class="nav" id="next" aria-label="Giorno successivo"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
 </div>
 <div id="ora" class="ora"></div>
@@ -1445,7 +1498,7 @@ header b{font-size:23px}
 <h1 class="cycrange" id="cycRange" style="cursor:default">Turni</h1>
 <div class="cycbar" style="margin:10px 0 14px">
   <button class="nav" id="cycPrev" aria-label="Giorni precedenti"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
-  <button class="today" id="cycToday">Scegli giorno</button>
+  <span class="today-wrap"><button class="today" id="cycToday">Scegli giorno</button><input type="date" class="today-pick" tabindex="-1" aria-hidden="true"></span>
   <button class="nav" id="cycNext" aria-label="Giorni successivi"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
 </div>
 <!-- "Il tuo ciclo" subito sopra la striscia, sotto la navigazione: è
@@ -1641,16 +1694,16 @@ header b{font-size:23px}
     <!-- Un formato per situazione, in ordine d'uso: messaggio (chiunque, in
          chat), link o QR (chi ha l'app e vuole confrontare), carta/PDF (frigo,
          bacheca). -->
+    <button type="button" id="doCycShare" class="tool">
+      <span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg></span>
+      <span class="tool-tx"><b>Invita chi lavora con te</b><span>Un link con il tuo ciclo: chi non ha l'app la trova già pronta, chi ce l'ha vede i tuoi turni accanto ai suoi.</span></span>
+    </button>
+    <button type="button" class="lnk" id="doCycQR" style="align-self:flex-start;font-size:13px;padding:6px 2px;margin-top:-2px">Oppure mostralo come QR, da inquadrare di persona</button>
+    <div class="ecc" id="qrBoxCyc" hidden><div id="qrHolderCyc" style="display:flex;justify-content:center;margin:14px 0"></div></div>
     <button type="button" id="doShareWhatsApp" class="tool">
       <span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.41a8.204 8.204 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.19 8.19 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24m4.52 11.66c-.19.53-1.06 1.04-1.47 1.08-.38.04-.88.06-2.84-.73-2.34-.95-3.84-3.34-3.96-3.49-.11-.16-.96-1.27-.96-2.42 0-1.15.6-1.72.82-1.95.21-.23.46-.29.62-.29.15 0 .31 0 .44.01.14.01.33-.05.51.39.19.46.66 1.6.72 1.72.06.12.1.26.02.42-.08.16-.12.26-.24.4-.12.14-.26.31-.37.42-.12.12-.24.25-.1.5.14.24.62 1.03 1.34 1.67.92.82 1.7 1.08 1.94 1.2.24.12.39.1.53-.06.15-.17.62-.72.79-.97.16-.25.33-.21.55-.13.22.08 1.41.67 1.65.79.24.12.4.18.46.28.06.11.06.63-.13 1.16"/></svg></span>
       <span class="tool-tx"><b>Manda i miei turni</b><span>Un messaggio con i turni dei prossimi giorni, per WhatsApp o dove vuoi: per chi lavora con te o per la famiglia.</span></span>
     </button>
-    <button type="button" id="doCycShare" class="tool">
-      <span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg></span>
-      <span class="tool-tx"><b>Link per chi ha l'app</b><span>Chi lo apre vede i tuoi turni accanto ai suoi.</span></span>
-    </button>
-    <button type="button" class="lnk" id="doCycQR" style="align-self:flex-start;font-size:13px;padding:6px 2px;margin-top:-2px">Oppure mostralo come QR, da inquadrare di persona</button>
-    <div class="ecc" id="qrBoxCyc" hidden><div id="qrHolderCyc" style="display:flex;justify-content:center;margin:14px 0"></div></div>
     <button type="button" id="doPrint" class="tool tool-1line">
       <span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8V3h12v5"/><rect x="4" y="8" width="16" height="8" rx="1.5"/><path d="M8 13h8v7H8z"/></svg></span>
       <span class="tool-tx"><b>Stampa o salva in PDF</b><span>Un calendario da appendere (5 settimane) e il dettaglio giorno per giorno: sonno, pisolini, caffè, luce</span></span>
@@ -1745,7 +1798,7 @@ header b{font-size:23px}
       <span class="switch"><input type="checkbox" id="optStats" aria-label="Statistiche d'uso anonime" aria-describedby="optStatsHint"><span class="slider"></span></span>
     </label>
     <p class="hint" id="optStatsHint" style="margin:2px 0 0">Ci aiutano a capire cosa migliorare. Solo contatori come «un piano è stato creato»: nessun identificativo, nessun dato dei turni. Spente finché non le accendi.</p>
-    <p style="margin:10px 0 0;display:flex;flex-direction:column;align-items:flex-start"><button class="lnk" id="doFeed" style="padding:10px 0">Segnala cosa non torna</button><button class="lnk" id="doShare" style="padding:10px 0">Consiglialo a chi lavora con te</button></p>
+    <p style="margin:10px 0 0;display:flex;flex-direction:column;align-items:flex-start"><button class="lnk" id="doShare" style="padding:10px 0">Invita chi lavora con te</button><button class="lnk" id="doFeed" style="padding:10px 0">Segnala cosa non torna</button></p>
     <nav class="foot-links" aria-label="Informazioni">
       <a href="https://notturnisti.club/planner" target="_blank" rel="noopener">Come si usa</a>
       <a href="https://notturnisti.club/chi-siamo/" target="_blank" rel="noopener">Chi siamo</a>
@@ -4366,12 +4419,15 @@ function renderBenvenutoLink(){
   el.hidden=false;
   el.innerHTML =
     '<button type="button" id="chiudiBenvenuto" aria-label="Chiudi">×</button>'+
-    '<b>Notturnisti</b>'+
-    '<p class="hint" style="margin-top:6px">Uno strumento per chi lavora a turni: orari di sonno, pisolini e riposi calcolati sul tuo ciclo, non generici. Questa configurazione ti è stata condivisa — puoi usarla così com\'è, o partire da qui per farla tua.</p>'+
-    '<button class="btn g" type="button" id="doConfiguraLaTua">Configura la tua →</button>';
+    '<b>Ti hanno mandato i loro turni</b>'+
+    '<p class="hint" style="margin-top:6px">Notturnisti calcola sul tuo ciclo quando dormire, il caffè, la luce e i pisolini. Il piano qui sotto è già fatto su questi turni.</p>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">'+
+    '<button class="btn g" type="button" id="doSonoIMiei">Faccio gli stessi turni</button>'+
+    '<button class="btn" type="button" id="doConfiguraLaTua">I miei sono diversi →</button></div>';
 }
 if($("#benvenutoLink")) $("#benvenutoLink").addEventListener("click", e=>{
   if(e.target.closest("#chiudiBenvenuto")){ benvenutoLinkChiuso=true; renderBenvenutoLink(); return; }
+  if(e.target.closest("#doSonoIMiei")){ benvenutoLinkChiuso=true; state.turniConfigurati=true; salva(); track("setup_item", {item:"ciclo_da_link"}); render(); toast("Fatto: questo è il tuo piano"); return; }
   if(e.target.closest("#doConfiguraLaTua")){ benvenutoLinkChiuso=true; state.turniConfigurati=false; store.set("turniConfigurati", false); demoEsempioChiuso=false; demoEsempioSubflow="home"; render(); }
 });
 
@@ -4925,13 +4981,25 @@ function impostaPromemoria(on){
 function vociAttivazione(){
   const futuri = Object.keys(state.ecc||{}).filter(k=>k>isoOggi()).length;
   const perm = notifPerm();
-  const v = [
+  const v = [];
+  // Web: installarla viene prima di tutto. Su iPhone i promemoria arrivano
+  // solo all'app aggiunta alla Home; su Android si apre senza browser e
+  // non perde i dati quando il browser fa pulizia. Era solo un invito a
+  // parte, che questa lista teneva in pausa per due settimane: in pratica
+  // non lo vedeva quasi nessuno.
+  if(!giaInstallata()){
+    if(playDaWeb()) v.push({id:"installa", t:"L'app su Google Play", d:"Promemoria anche ad app chiusa, calendario del telefono, widget. Gratis come qui", ok:false});
+    else if(isIOSPerInstall()) v.push({id:"installa", t:"Aggiungila alla schermata Home", d:"Si apre a tutto schermo con un tocco, come un'app", ok:false});
+    else if(installPromptEvento) v.push({id:"installa", t:"Installala sul telefono", d:"Si apre con un tocco, funziona anche offline e i turni restano al sicuro", ok:false});
+  }
+  v.push(
     {id:"turni", t:"I turni dei prossimi giorni", d:"Così ogni giorno il piano è pronto, senza dirgli che turno fai", ok: state.repeat!==false || futuri>=7},
-    {id:"notifiche", t:"Promemoria sul telefono", d: perm==="denied" ? "Bloccati dal telefono: tocca per sapere come riattivarli" : "Cambi di turno, quando dormire, rientro dopo la notte: scegli tu quali", ok: promemoriaAttivi(), skip: perm==="unsupported"},
+    {id:"notifiche", t:"Promemoria sul telefono", d: perm==="denied" ? "Bloccati dal telefono: tocca per sapere come riattivarli" : (window.NT_APP.nativo ? "Cambi di turno, quando dormire, rientro dopo la notte: scegli tu quali" : "Cambi di turno, quando dormire, rientro: arrivano finché il browser tiene attiva l'app, riaprila ogni giorno o due"), ok: promemoriaAttivi(), skip: perm==="unsupported"},
     {id:"calendario", t:"Nel calendario del telefono", d: platform.calendar.available ? (platform.calendar.attivo()
         ? "Calendario «Notturnisti», solo su questo telefono"+(platform.calendar.ultimoSync()?" · aggiornato alle "+_hhmmDa(platform.calendar.ultimoSync()):"")
         : "Turni e ore di sonno nell'app Calendario, aggiornati da soli") : "Turni e ore di sonno nel calendario che usi già (Google, Apple…), aggiornati da soli", ok: platform.calendar.available ? platform.calendar.attivo() : !!(window.NTPaid && window.NTPaid.paid())}
-  ];
+
+  );
   if(platform.widget.available) v.push({id:"widget", t:"Widget sulla schermata Home", d:"Cosa fare adesso (dormire, caffè, luce) senza aprire l'app", ok: platform.widget.presenti()>0});
   return v.filter(x=>!x.skip);
 }
@@ -4940,6 +5008,10 @@ function vociAttivazione(){
 // altri inviti, e chi non vuole il widget non deve vederla per sempre.
 // Contati da quando compare, non dal primo uso: chi arriva dalla vecchia app
 // web la vede comunque, con le voci dell'app.
+function giorniDaAttivazione(){
+  const dal = store.get("attivazioneDal", "");
+  return dal ? (new Date()-new Date(dal+"T00:00:00"))/86400000 : 0;
+}
 function attivazioneVisibile(){
   if(!state.turniConfigurati || sceltaSchemaAperta || store.get("attivazioneNascosta", false)) return false;
   if(firstPlanBannerVisibile()) return false;
@@ -4971,6 +5043,7 @@ function htmlVociGestione(voci){
 async function gestisciFunzione(id){
   const v=vociAttivazione().find(x=>x.id===id); if(!v) return;
   haptic(10);
+  if(id==="installa"){ eseguiAttivazione(id); return; }
   if(id==="turni"){ setTab("oggi"); apriFlussoProssimi("prossimi"); return; }
   if(id==="notifiche"){
     if(notifPerm()==="denied"){ toast("Le notifiche sono bloccate dal telefono: riattivale dalle impostazioni, alla voce Notturnisti"); return; }
@@ -5019,6 +5092,16 @@ function renderAttivazione(){
 async function eseguiAttivazione(id){
   track("setup_item", {item:id}); haptic(10);
   if(id==="turni"){ setTab("oggi"); apriFlussoProssimi("prossimi"); return; }
+  if(id==="installa"){
+    if(playDaWeb()){ window.open(playLink(), "_blank", "noopener"); return; }
+    if(installPromptEvento){
+      const ev=installPromptEvento; ev.prompt();
+      ev.userChoice.then(r=>{ if(r.outcome==="accepted") track("pwa_installed"); installPromptEvento=null; renderAttivazione(); render(); }).catch(()=>{});
+      return;
+    }
+    if(isIOSPerInstall()){ passaggioIOS(); toast("In Safari tocca Condividi (il quadrato con la freccia in su), poi «Aggiungi alla schermata Home»"); }
+    return;
+  }
   if(id==="notifiche"){
     if(notifPerm()==="denied"){ toast("Le notifiche sono bloccate: riattivale dalle impostazioni del telefono, alla voce Notturnisti"); return; }
     if(notifPerm()==="granted"){ impostaPromemoria(true); return; }
@@ -5309,7 +5392,13 @@ let installPromptEvento = null;
 // compaiono solo quelli che servono subito (installazione, backup).
 var _invitoOggi = store.get("invitoVisto", "");   // var: letta da render(), mai in TDZ
 function invitiInPausa(nonIlPrimoGiorno){
-  if(attivazioneVisibile()) return true;   // prima la lista di attivazione, poi il resto
+  // La lista di attivazione tiene in pausa gli altri inviti solo nei primi
+  // 3 giorni: resta visibile fino a 14, ma sul web una voce (il calendario
+  // automatico) la fanno in pochi, e bloccare tutto per due settimane
+  // spostava l'invito a condividere e la domanda sulle statistiche a quando
+  // molti hanno già smesso di aprire l'app. Poi vale la regola di sempre:
+  // un invito al giorno.
+  if(attivazioneVisibile() && giorniDaAttivazione()<3) return true;
   if(adattaVisibile()) return true;        // poi la proposta di adattare il piano
   const oggi = iso(new Date());
   if(_invitoOggi === oggi) return true;
@@ -5329,8 +5418,10 @@ function playDaWeb(){
   try{ return !window.NT_APP.nativo && !!window.NT_APP.play && /Android/i.test(navigator.userAgent||""); }catch(e){ return false; }
 }
 function playLink(){ return window.NT_APP.play+(window.NT_APP.play.includes("?")?"&":"?")+"referrer="+encodeURIComponent("utm_source=webapp&utm_medium=banner"); }
+// Un invito non ripete una voce che la lista di attivazione mostra già.
+function inLista(id){ return attivazioneVisibile() && vociAttivazione().some(x=>x.id===id && !x.ok); }
 function installBannerVisibile(){
-  if(invitiInPausa(false)) return false;
+  if(invitiInPausa(false) || inLista("installa")) return false;
   if(playDaWeb()){
     const pronto = !!(state.pattern && Object.keys(state.shifts||{}).length);
     return !(state.installBannerOff || (primaVoltaDaLink && !benvenutoLinkChiuso) || firstPlanBannerVisibile() || backupNudgeVisibile() || !pronto);
@@ -5403,13 +5494,13 @@ function renderShareNudge(){
   el.hidden=false;
   el.innerHTML =
     '<button type="button" id="chiudiShareNudge" aria-label="Chiudi">×</button>'+
-    '<b>Condividi il tuo ciclo</b>'+
-    '<p class="hint" style="margin-top:6px">Manda il tuo ciclo a chi fa i tuoi stessi turni: lo importa in Notturnisti con un tocco.</p>'+
-    '<button class="btn g" type="button" id="doShareNudge">Condividi il mio ciclo →</button>';
+    '<b>Chi lavora con te fa i tuoi stessi turni?</b>'+
+    '<p class="hint" style="margin-top:6px">Mandagli il tuo ciclo: apre il link e trova l\'app già pronta, con il suo piano.</p>'+
+    '<button class="btn g" type="button" id="doShareNudge">Invita chi lavora con te →</button>';
 }
 if($("#shareNudge")) $("#shareNudge").addEventListener("click", e=>{
   if(e.target.closest("#chiudiShareNudge")){ state.shareNudgeOff=true; salva(); renderShareNudge(); return; }
-  if(e.target.closest("#doShareNudge")){ state.shareNudgeOff=true; salva(); renderShareNudge(); salvaConfigurazione(); }
+  if(e.target.closest("#doShareNudge")){ state.shareNudgeOff=true; salva(); renderShareNudge(); invitaChiLavoraConTe(); }
 });
 
 // Segnala l'export calendario — vive solo dentro Più, mai menzionato
@@ -5418,8 +5509,9 @@ if($("#shareNudge")) $("#shareNudge").addEventListener("click", e=>{
 // installazione, condivisione) — dalla seconda in poi, quando l'utente è
 // chiaramente tornato, è il momento più naturale per "lo sapevi?".
 function icsNudgeVisibile(){
-  if(invitiInPausa(true)) return false;
+  if(invitiInPausa(true) || inLista("calendario")) return false;
   if(window.NT_APP.nativo) return false;   // nell'app: niente file da scaricare (vedi #doIcs)
+  if(window.NTPaid && window.NTPaid.paid()) return false;   // il calendario automatico c'è già
   const mostraBenvenuto = primaVoltaDaLink && !benvenutoLinkChiuso;
   const pronto = !!(state.pattern && Object.keys(state.shifts||{}).length);
   const secondaSessione = state.firstSeenAt && state.firstSeenAt!==iso(new Date());
@@ -5432,8 +5524,8 @@ function renderIcsNudge(){
   el.innerHTML =
     '<button type="button" id="chiudiIcsNudge" aria-label="Chiudi">×</button>'+
     '<b>Lo sapevi? Puoi vedere i turni nel calendario del telefono</b>'+
-    '<p class="hint" style="margin-top:6px">Un file con i prossimi 28 giorni: niente di nuovo da controllare, li vedi dove guardi già i tuoi appuntamenti.</p>'+
-    '<button class="btn g" type="button" id="doIcsNudge">Esporta nel calendario →</button>';
+    '<p class="hint" style="margin-top:6px">Turni e ore di sonno nel calendario che usi già (Google, Apple…), aggiornati da soli: li vedi dove guardi già i tuoi appuntamenti.</p>'+
+    '<button class="btn g" type="button" id="doIcsNudge">Aggiungili al calendario →</button>';
 }
 if($("#icsNudge")) $("#icsNudge").addEventListener("click", e=>{
   if(e.target.closest("#chiudiIcsNudge")){ state.icsNudgeOff=true; salva(); renderIcsNudge(); return; }
@@ -7165,11 +7257,25 @@ if($("#jumpDate")){
   };
   $("#dateLabel").addEventListener("click", apriSelettore);
   $("#dateLabel").addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); apriSelettore(); } });
+  document.querySelectorAll(".today-pick").forEach(inp=>{
+    // il valore va messo prima che il selettore lo legga
+    const prepara=()=>{ inp.value=iso(state.focus); };
+    inp.addEventListener("pointerdown", prepara); inp.addEventListener("focus", prepara);
+    inp.addEventListener("change", e=>{
+      const v=e.target.value;
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(v||"")) return;
+      const d=new Date(v+"T12:00:00"); if(isNaN(+d)) return;
+      state.focus=d; cicloOff=0;
+      if(inp.closest(".cycbar")) cycGo(0); else render();
+    });
+  });
   $("#jumpDate").addEventListener("change", e=>{
     const v=e.target.value;
     if(!/^\d{4}-\d{2}-\d{2}$/.test(v||"")) return;
     const d=new Date(v+"T12:00:00"); if(isNaN(+d)) return;
-    state.focus=d; cicloOff=0; render();
+    state.focus=d; cicloOff=0;
+    // in Turni il bottone "Torna a oggi" si aggiorna solo passando da cycGo
+    if(document.body.classList.contains("tab-turni")) cycGo(0); else render();
   });
 }
 let eccAppena=false;   // un tocco lungo non deve anche far saltare al giorno
@@ -8169,7 +8275,10 @@ $("#doLink").onclick=salvaConfigurazione;
 // un backup completo, è la condivisione di una sola parte.
 async function condividiCiclo(){
   const url=window.NT_APP.base+"#"+toHashCiclo();
-  const testo="Il mio ciclo turni su Notturnisti — incollalo nell'app per confrontare i turni con i tuoi.";
+  // Un solo messaggio per tutti: a chi non ha l'app arriva già pronta con il
+  // ciclo (se fa gli stessi turni ha subito il piano), a chi ce l'ha propone
+  // di aggiungere questi turni alle sue persone.
+  const testo="Uso Notturnisti per i turni: mi dice quando dormire, il caffè e la luce, giorno per giorno. Gratis, senza account. Dal link si apre già con i miei turni: se fai gli stessi hai subito il tuo piano, se no li cambi in due tocchi.";
   track("share_started");
   // share_created solo su una consegna vera del link (non se l'utente
   // annulla il foglio di condivisione nativo: lì il link non è arrivato
@@ -8292,17 +8401,21 @@ function renderQR(holderSel){
   for(let y=0;y<n;y++) for(let x=0;x<n;x++) if(qr.getModule(x,y)) path+="M"+(x+border)+","+(y+border)+"h1v1h-1z";
   holder.innerHTML='<svg viewBox="0 0 '+dim+' '+dim+'" width="220" height="220" role="img" aria-label="Codice QR con la configurazione"><rect width="'+dim+'" height="'+dim+'" fill="#fff"/><path d="'+path+'" fill="#000"/></svg>';
 }
-if($("#doShare")) $("#doShare").onclick=async()=>{
-  // Il link dell'app, non la propria configurazione: qui si consiglia lo
-  // strumento, non si passa il proprio piano.
-  const url="https://notturnisti.club/planner";
-  const testo="Se fai i turni, questo pianifica sonno, caffè e luce da solo. L'ho trovato utile.";
+// Impostazioni: lo stesso invito di Turni (il link con il proprio ciclo:
+// chi lo riceve trova l'app già pronta). Senza un ciclo fisso, il link
+// dell'app e basta.
+if($("#doShare")) $("#doShare").onclick=invitaChiLavoraConTe;
+async function invitaChiLavoraConTe(){
+  if(state.turniConfigurati && state.pattern){ condividiCiclo(); return; }
+  const url=window.NT_APP.nativo ? "https://app.notturnisti.club/" : window.NT_APP.base;
+  const testo="Uso Notturnisti per i turni: mi dice quando dormire, il caffè e la luce, giorno per giorno. Gratis, senza account.";
+  track("share_started");
   try{
-    if(platform.canShare()){ await platform.share({title:"Notturnisti",text:testo,url}); return; }
+    if(platform.canShare()){ await platform.share({title:"Notturnisti",text:testo,url}); track("share_created", {tipo:"app"}); return; }
   }catch(e){ if(e && e.name==="AbortError") return; }
-  try{ await navigator.clipboard.writeText(testo+" "+url); toast("Link copiato, pronto da incollare"); }
+  try{ await navigator.clipboard.writeText(testo+" "+url); toast("Link copiato, pronto da incollare"); track("share_created", {tipo:"app"}); }
   catch(e){ prompt("Copia questo messaggio:",testo+" "+url); }
-};
+}
 // La nota privacy in Opzioni dice "restano nel link e nel tuo browser" — vero
 // per chi non paga, non del tutto per chi ha il calendario di coppia
 // (paid.js, chiave "nt:sub"): quel piano vive anche in un KV lato server,
@@ -9039,7 +9152,21 @@ if($("#doOpen")) $("#doOpen").onclick=()=>{
 // dati del sito bloccati) l'app funziona lo stesso, ma i turni spariscono
 // alla chiusura: va detto una volta, non scoperto il giorno dopo.
 let _avvisoSalvataggio=false;
+// iPhone, in Safari: copia completa per l'app che verrà aggiunta alla Home
+// (vedi in testa alla pagina). Solo su iPhone, solo finché non è installata.
+let _passaggioT=0;
+function passaggioIOS(){
+  try{
+    if(!document.documentElement.classList.contains("ios") || giaInstallata() || !window.caches) return;
+    clearTimeout(_passaggioT);
+    _passaggioT=setTimeout(()=>{
+      const d={}; for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(/^nt:/.test(k)) d[k]=localStorage.getItem(k); }
+      caches.open("passaggio-ios").then(c=>c.put("/__passaggio", new Response(JSON.stringify(d),{headers:{"content-type":"application/json"}}))).catch(()=>{});
+    }, 800);
+  }catch(e){}
+}
 function salva(){
+  passaggioIOS();
   store.set("turniConfigurati", !!state.turniConfigurati);
   const salvato = store.set("state",{turniConfigurati:state.turniConfigurati,pattern:state.pattern,anchor:state.anchor,shifts:state.shifts,
     cTo:state.cTo,cFrom:state.cFrom,need:state.need,prep:state.prep,freeWake:state.freeWake,freeBed:state.freeBed,
@@ -9131,18 +9258,66 @@ platform.onBackButton(()=>{
   if(document.body.classList.contains("tab-turni")){ setTab("oggi"); render(); return true; }
   return false;
 });
-platform.onNotificationTap((tab, kind)=>{
-  if(kind) track("notif_aperta", {tipo:String(kind)});
-  try{ const t=String(tab||"oggi").replace(/\?.*/,"");
-    if(t==="domani"){ setTab("oggi"); render(); setTimeout(()=>apriQuickShift(day(giornoVero(),1)), 300); return; }
+// Dove porta il tocco su una notifica (nativa o web) o su una scorciatoia
+// dell'icona: la sezione che serve per fare la cosa che la notifica chiede,
+// sempre sul giorno di adesso (la notifica parla di ora, non del giorno che
+// stavi guardando).
+//  · diario  → il modulo "Il tuo sonno" (orari e voto)
+//  · pisolino → il pisolino nella stessa scheda (Fatto / Saltato)
+//  · domani  → la scelta del turno di domani
+//  · turni   → il calendario dei turni
+//  · consiglio:<k> → l'impostazione o l'attivazione di cui parla
+function apriDestinazione(tab){
+  try{
+    if(/^diario\?previsto=1/.test(String(tab||""))){ registraComePrevisto(); return; }
+    const t=String(tab||"oggi").replace(/\?.*/,"");
+    chiudiQuickShift();
+    if(t==="turni"){ setTab("turni"); return; }
+    state.focus=giornoVero(); cicloOff=0;
+    if(t==="domani"){ setTab("oggi"); setTimeout(()=>apriQuickShift(day(giornoVero(),1)), 300); return; }
     if(t.startsWith("consiglio:")){ const k=t.slice(10);
-      if(k==="calendario" || k==="widget"){ setTab("oggi"); render(); setTimeout(()=>eseguiAttivazione(k), 300); return; }
+      if(k==="calendario" || k==="widget"){ setTab("oggi"); setTimeout(()=>eseguiAttivazione(k), 300); return; }
       apriOpzioni(); setTimeout(()=>{ const b=$('[data-opz="'+(k==="viaggio"?4:3)+'"]'); if(b){ if(b.getAttribute("aria-expanded")!=="true") b.click(); b.scrollIntoView({block:"start",behavior:"smooth"}); } }, 300); return; }
-    setTab({oggi:"oggi",diario:"oggi",turni:"turni"}[t]||"oggi"); render(); }catch(e){}
+    setTab("oggi");
+    if(t==="diario" || t==="pisolino") setTimeout(()=>{
+      const drem=$("#essenziale .drem"); if(!drem) return;
+      const nap=t==="pisolino" && drem.querySelector("[data-nap]");
+      const dove=nap ? nap.closest(".diary") : drem;
+      dove.scrollIntoView({behavior:"smooth",block:"center"});
+      dove.classList.remove("evidenzia"); void dove.offsetWidth; dove.classList.add("evidenzia");
+    }, 150);
+  }catch(e){}
+}
+// «Come previsto» dalla notifica «Come hai dormito?»: gli orari del piano
+// per la notte appena passata, su Oggi, con Annulla. Se era già annotata non
+// tocca niente e mostra il modulo.
+function registraComePrevisto(){
+  try{
+    chiudiQuickShift();
+    state.focus=giornoVero(); cicloOff=0; setTab("oggi");
+    const k=iso(state.focus), c=cards(NT.plan()).find(x=>x.k==="d");
+    if(!c || !c.wakeAsk || state.beds[k] || state.wakes[k]){ apriDestinazione("diario"); return; }
+    state.beds[k]=c.bedPiano; state.wakes[k]=c.wakePiano;
+    store.set("beds",state.beds); store.set("wakes",state.wakes);
+    track("diario_rapido");
+    render(); apriDestinazione("diario");
+    toastUndo("Registrato: "+c.bedPiano+" → "+c.wakePiano, ()=>{
+      delete state.beds[k]; delete state.wakes[k];
+      store.set("beds",state.beds); store.set("wakes",state.wakes); render();
+    });
+  }catch(e){}
+}
+platform.onNotificationTap((tab, kind, azione)=>{
+  if(kind) track("notif_aperta", {tipo:String(kind)});
+  if(azione==="previsto"){ registraComePrevisto(); return; }
+  apriDestinazione(tab);
 });
 platform.onResume(leggiCanaliSpenti);
 // Prima attivazione dopo il load (se il permesso è già stato concesso)
 addEventListener("load", ()=>{ setTimeout(ntNotifiche, 1500); aggiornaPermNotif(); setTimeout(leggiCanaliSpenti, 2500); setTimeout(contaFunzioniAttive, 5000); });
+// iPhone: copia per l'app sulla Home aggiornata anche col diario, non solo a ogni salva()
+addEventListener("load", ()=>setTimeout(passaggioIOS, 3000));
+document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState==="hidden") passaggioIOS(); });
 // Una volta al giorno, con le statistiche accese: quali funzioni sono accese
 // davvero (non solo toccate). "a_n1c0w1": piattaforma, promemoria, calendario,
 // widget. Solo booleani, nessun dato dei turni.
@@ -9241,12 +9416,9 @@ if($("#andamenti")) $("#andamenti").addEventListener("click", e=>{
 });
 document.body.classList.add("tabs");
 // scorciatoie dell'icona (manifest shortcuts): ?t=oggi|diario|turni
-{ let t="oggi", diario=false;
-  try{ const q=new URLSearchParams(location.search).get("t");
-    if(q==="turni") t="turni"; else if(q==="diario"){ t="oggi"; diario=true; } }catch(e){}
-  setTab(t);
-  if(diario){ const b=$('#essenziale [data-open], #essenziale [data-asplan]');
-    if(b && b.scrollIntoView) setTimeout(()=>b.scrollIntoView({behavior:"smooth",block:"center"}),120); } }
+{ let q=null; try{ q=new URLSearchParams(location.search).get("t"); }catch(e){}
+  setTab(q==="turni" ? "turni" : "oggi");
+  if(q && q!=="oggi") addEventListener("load", ()=>setTimeout(()=>apriDestinazione(q), 300)); }
 
 
 
@@ -9306,9 +9478,7 @@ addEventListener("nt:refresh", ()=>{ if(_refreshInAttesa) return; _refreshInAtte
           if(!e.data) return;
           if(e.data.type === "NT_NAV"){
             try{
-              var tab = String(e.data.tab||"oggi").replace(/\?.*/,"");
-              var tabn = {oggi:"oggi",diario:"oggi",turni:"turni"}[tab]||"oggi";
-              setTab(tabn); render();
+              apriDestinazione(e.data.tab);
             }catch(err){}
           }
         });
@@ -9318,7 +9488,7 @@ addEventListener("nt:refresh", ()=>{ if(_refreshInAttesa) return; _refreshInAtte
   var deferred=null;
   addEventListener("beforeinstallprompt", function(e){
     e.preventDefault(); deferred=e;
-    try{ installPromptEvento=e; renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderIcsExpireNudge(); renderStatsNudge(); renderClubBanner(); renderDonateNudge(); }catch(err){}
+    try{ installPromptEvento=e; renderAttivazione(); renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderIcsExpireNudge(); renderStatsNudge(); renderClubBanner(); renderDonateNudge(); }catch(err){}
     var tools=document.querySelector(".tools"); if(!tools || document.getElementById("doInstall")) return;
     var b=document.createElement("button");
     b.className="lnk"; b.id="doInstall"; b.textContent="Installa l'app";

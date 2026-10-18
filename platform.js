@@ -15,6 +15,8 @@
 // Capacitor su window.Capacitor.Plugins, quindi questo file resta servibile
 // così com'è, senza build step, sia dal sito sia dal bundle dell'app.
 
+import { pdfDaFoglio } from "./pdf.js";   // solo per il PDF su iPhone (print)
+
 const Cap = typeof window !== "undefined" ? window.Capacitor : undefined;
 
 export const isNative = !!(Cap && typeof Cap.isNativePlatform === "function" && Cap.isNativePlatform());
@@ -116,11 +118,13 @@ const nativeNotify = {
     // Solo la sveglia merita l'esattezza, e solo se il permesso c'è già;
     // tutto il resto va bene con qualche minuto di scarto (Doze).
     const exactOk = (await this.exactStatus()) === "granted";
+    await ensureAzioni(LN);
     let list = items.map(n => ({
       id: n.id, title: n.title, body: n.body,
       schedule: { at: new Date(n.at), allowWhileIdle: true },
       isExactNotification: n.kind === "wake" && exactOk,
       channelId: CANALE_DI[n.kind] || "promemoria",
+      ...(AZIONI_DI[n.kind] ? { actionTypeId: AZIONI_DI[n.kind] } : {}),
       extra: { kind: n.kind, tab: (n.extra && n.extra.tab) || (n.kind === "wake" ? "diario" : "oggi") }
     }));
     if (name === "ios" && list.length) {
@@ -173,6 +177,18 @@ const CANALE_DI = { cambio: "turni", domani: "turni", prep: "turni", ret: "sicur
   nap: "pisolini", luce: "luce", wake: "sveglie", settimana: "suggerimenti", tip: "suggerimenti",
   diario: "suggerimenti", consigli: "suggerimenti" };
 let _channels = false;
+// Pulsanti nella notifica: solo dove un tocco basta a fare la cosa.
+// «Come hai dormito?» → «Come previsto» registra gli orari del piano (con
+// Annulla subito dopo), «Altri orari» apre il modulo. Il tocco sulla
+// notifica fa come «Altri orari».
+const AZIONI_DI = { diario: "diario" };
+let _azioni = false;
+async function ensureAzioni(LN) {
+  if (_azioni) return;
+  try { await LN.registerActionTypes({ types: [{ id: "diario", actions: [
+    { id: "previsto", title: "Come previsto" }, { id: "altri", title: "Altri orari" } ] }] }); } catch (e) {}
+  _azioni = true;
+}
 async function ensureChannels(LN) {
   if (_channels || name !== "android") return;
   for (const c of CANALI) await LN.createChannel({ ...c, visibility: 1, vibration: c.importance >= 4 });
@@ -335,7 +351,7 @@ export function onNotificationTap(cb) {
   const LN = plugin("LocalNotifications");
   if (LN) LN.addListener("localNotificationActionPerformed", ev => {
     const x = (ev && ev.notification && ev.notification.extra) || {};
-    try { cb(x.tab || "oggi", x.kind || ""); } catch (e) {}
+    try { cb(x.tab || "oggi", x.kind || "", (ev && ev.actionId) || ""); } catch (e) {}
   });
 }
 
@@ -360,11 +376,38 @@ export async function share({ title, text, url }) {
 /* ── Stampa ────────────────────────────────────────────────────────────── */
 // Nel WebView window.print() non fa nulla: nell'app si passa dal servizio di
 // stampa di Android (plugin locale NTPrint, anche "Salva come PDF").
+// iPhone/iPad sul web: window.print() dall'app aggiunta alla schermata Home
+// non apre niente, e in Safari il PDF è nascosto nell'anteprima di stampa.
+// Lì si crea un PDF vero e si apre il pannello di condivisione (Salva su
+// File, WhatsApp, Stampa). Tutto sincrono fino a share(): il tocco
+// dell'utente deve valere ancora quando il pannello si apre.
+function iosWeb() {
+  try { return !isNative && (/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)); }
+  catch (e) { return false; }
+}
 export async function print(title) {
   const P = plugin("NTPrint");
   if (P) { await P.print({ title: title || "Notturnisti" }); return true; }
+  const foglio = document.getElementById("printSheet");
+  if (iosWeb() && foglio) {
+    const nome = (title || "Notturnisti").replace(/[^\w\- ]+/g, "").replace(/\s+/g, " ").trim() + ".pdf";
+    const file = new File([pdfDaFoglio(foglio)], nome, { type: "application/pdf" });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try { await navigator.share({ files: [file], title: title || "Notturnisti" }); }
+      catch (e) { if (!e || e.name !== "AbortError") scarica(file); }
+      return true;
+    }
+    scarica(file);
+    return true;
+  }
   window.print();
   return true;
+}
+function scarica(file) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(file); a.download = file.name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 60000);
 }
 
 // Versione dell'app ("1.0.0 (12)") nell'app nativa; sul web null.

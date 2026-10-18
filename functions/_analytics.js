@@ -57,6 +57,7 @@ export const ALLOWED = {
   adatta: ["esito"],                // proposta di adattare il piano: liberi_applicato, anticipo_rifiutato…
   migrazione: ["fase"],             // dalla vecchia app: export_web | import_app
   recensione_chiesta: [],          // aperto il riquadro stelle di Play (non dice se è comparso)
+  diario_rapido: [],               // sonno registrato con «Come previsto» dalla notifica
   errore: ["dove"]                  // errore JavaScript: solo il file (index, engine…), mai il messaggio
 };
 

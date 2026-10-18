@@ -13,7 +13,7 @@ const out = join(here, "..", "www");
 const FILES = [
   "index.html",
   "engine.js", "alertness.js", "history.js", "notifications.js",
-  "platform.js", "analytics.js", "paid.js", "migrate.js",
+  "platform.js", "pdf.js", "analytics.js", "paid.js", "migrate.js",
   "manifest.webmanifest",
   "icon-180.png", "icon-192.png", "icon-512.png", "icon-maskable-512.png", "owl-mark.png",
   "fonts/inter-latin.woff2", "fonts/noto-serif-latin.woff2",

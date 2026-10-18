@@ -17,7 +17,7 @@ for (const [nome,url,init] of [["web","http://localhost:8765/index.html",()=>{ w
   else ok(r.sh.length===1 && r.open.length===0, nome+": 'Manda i miei turni' usa il pannello del telefono "+JSON.stringify(r));
   if(nome!=="computer"){
     await p.click("#doCycQR"); await p.waitForTimeout(200);
-    ok(await p.evaluate(()=>!!document.querySelector("#qrHolderCyc svg")), nome+": QR dal link sotto 'Link per chi ha l'app'");
+    ok(await p.evaluate(()=>!!document.querySelector("#qrHolderCyc svg")), nome+": QR dal link sotto «Invita chi lavora con te»");
     await p.click("#doPrint"); await p.waitForTimeout(200);
     ok(await p.evaluate(()=>window.__pr===1), nome+": Stampa o salva in PDF");
     await p.evaluate(()=>{ const t=document.querySelector("#toast"); t&&t.remove(); });
