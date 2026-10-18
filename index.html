@@ -428,7 +428,7 @@ padding:16px 18px;margin:2px 0 var(--gap-sezione);box-shadow:0 4px 20px rgba(45,
 body.primo-avvio .datebar,body.primo-avvio .daynav,body.primo-avvio #ora,body.primo-avvio #band,
 body.primo-avvio #status,body.primo-avvio #vista,body.primo-avvio #formaGiorno,body.primo-avvio #essenziale,
 body.primo-avvio #luciditaGiornoWrap,body.primo-avvio #cards,body.primo-avvio #tabbar,
-body.primo-avvio #firstPlanBanner,body.primo-avvio #setupChecklist,body.primo-avvio #adattaCard,body.primo-avvio #setupNudge,body.primo-avvio #backupNudge,body.primo-avvio #installBanner,
+body.primo-avvio #firstPlanBanner,body.primo-avvio #setupChecklist,body.primo-avvio #adattaCard,body.primo-avvio #medicoCard,body.primo-avvio #setupNudge,body.primo-avvio #backupNudge,body.primo-avvio #installBanner,
 body.primo-avvio #shareNudge,body.primo-avvio #icsNudge,body.primo-avvio #icsExpireNudge,body.primo-avvio #statsNudge,
 body.primo-avvio #clubBanner,body.primo-avvio #donateNudge{display:none!important}
 .qh-btn{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:12px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;min-height:74px;transition:all .15s;font:inherit}
@@ -505,6 +505,16 @@ html.js-lento .jsoff{display:block}
 .crow.mod .ccode{text-decoration:underline;text-underline-offset:2px}
 .cbar.sh{background:var(--orange-fill)}
 .key{display:flex;gap:14px;margin-top:8px;font-size:12px;color:var(--faint);flex-wrap:wrap}
+.mese{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;margin-top:12px}
+.mese-testa{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.mese-testa b{font-size:15px;color:var(--ink)}
+.mese-testa button{background:none;border:0;color:var(--blue);font:inherit;font-size:20px;line-height:1;padding:8px 12px;margin:-8px -6px;cursor:pointer}
+.mese-testa button[disabled]{color:var(--faint);opacity:.4;cursor:default}
+.mese-num{display:grid;grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:8px;margin-top:10px}
+.mese-num div{background:var(--bg);border-radius:10px;padding:8px 10px}
+.mese-num b{display:block;font-size:20px;color:var(--ink);font-variant-numeric:tabular-nums}
+.mese-num span{font-size:12px;color:var(--dim)}
+.mese .hint{margin:8px 0 0}
 .key i{display:inline-block;width:10px;height:7px;border-radius:3px;margin-right:5px;vertical-align:1px}
 .band{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:13px 14px 6px;margin-bottom:24px;position:relative;overflow:hidden}
 /* Il grafico della giornata: rotaia SOTTILE come quella del ciclo (stesso
@@ -632,7 +642,7 @@ footer a{color:var(--blue);text-decoration:none;border-bottom:1px solid var(--bl
 .onboard{background:var(--s1);border:1px solid var(--line);border-top:3px solid var(--blue);
 border-radius:var(--r);padding:18px 18px 20px;margin-bottom:20px}
 body.intro .datebar,body.intro .daynav,body.intro #ora,body.intro #status,body.intro .cap,
-body.intro #cyc,body.intro #band,body.intro #cards,body.intro .tools,
+body.intro #cyc,body.intro #meseBox,body.intro #band,body.intro #cards,body.intro .tools,
 body.intro #cycShareBox,
 body.intro .setbar{display:none}
 .setbar{display:flex;align-items:center;gap:12px;background:var(--s1);border:1px solid var(--line);
@@ -827,7 +837,7 @@ justify-content:center;flex:none;width:44px;height:44px;border-radius:999px}
 .qh-fiducia{font-size:12.5px;color:var(--dim);margin:-8px 0 14px}
 .essnudge button{background:none;border:none;color:var(--blue);font:inherit;cursor:pointer;
 text-decoration:underline;text-underline-offset:2px;padding:12px 2px;margin:-12px -2px}
-body.essenziale:not(.tabs) .cap,body.essenziale:not(.tabs) #cyc,
+body.essenziale:not(.tabs) .cap,body.essenziale:not(.tabs) #cyc,body.essenziale:not(.tabs) #meseBox,
 body.essenziale:not(.tabs) #icsBox,body.essenziale:not(.tabs) #scambioBox,body.essenziale:not(.tabs) #band,body.essenziale:not(.tabs) #cards,
 body.essenziale:not(.tabs) .tools{display:none}
 body:not(.essenziale) #essenziale{display:none}
@@ -936,7 +946,7 @@ color:var(--blue);display:inline-flex;align-items:center;justify-content:center}
 /* in Oggi lo #status resta solo quando è un avviso o nota informativa; il resto lo dice il piano */
 body.tab-oggi #status:not(.warn):not(.info){display:none}
 /* OGGI: il giorno. "La giornata" (datebar + dettaglio + diario) è a scomparsa. */
-body.tab-oggi .cap.ciclo,body.tab-oggi #cyc,body.tab-oggi #cycShareBox,
+body.tab-oggi .cap.ciclo,body.tab-oggi #cyc,body.tab-oggi #meseBox,body.tab-oggi #cycShareBox,
 body.tab-oggi #doPartner,body.tab-oggi .cycbar,body.tab-oggi #cycRange,body.tab-oggi #doAndamenti,
 body.tab-oggi #icsBox,body.tab-oggi #andamentiPagina,
 body.tab-oggi #vederciPagina,body.tab-oggi #partner,body.tab-oggi .piu-cal,
@@ -961,7 +971,7 @@ body.tab-oggi.essenziale #band{display:none}
 body.tab-turni #status,body.tab-turni #ora,body.tab-turni #benvenutoLink,body.tab-turni #demoEsempio,body.tab-turni #backupNudge,body.tab-turni #installBanner,body.tab-turni #shareNudge,body.tab-turni #icsNudge,body.tab-turni #icsExpireNudge,body.tab-turni #clubBanner,body.tab-turni #formaGiorno,body.tab-turni #essenziale,
 body.tab-turni .datebar,body.tab-turni .daynav,body.tab-turni .cap.giornata,body.tab-turni #band,body.tab-turni #cards,body.tab-turni #luciditaGiornoWrap,
 body.tab-turni #icsBox,body.tab-turni .piu-info,
-body.tab-turni #setupChecklist,body.tab-turni #adattaCard,body.tab-turni #statsNudge,body.tab-turni #donateNudge,body.tab-turni #firstPlanBanner,
+body.tab-turni #setupChecklist,body.tab-turni #adattaCard,body.tab-turni #medicoCard,body.tab-turni #statsNudge,body.tab-turni #donateNudge,body.tab-turni #firstPlanBanner,
 body.tab-turni footer{display:none}
 /* Pagine Andamenti e "Quando possiamo vederci" (dentro la tab Turni,
    non tab a sé): quando una è aperta, nasconde il contenuto normale di
@@ -970,19 +980,19 @@ body.tab-turni footer{display:none}
    (attributo hidden), non da qui; il JS le tiene anche mutuamente
    esclusive. */
 body.tab-turni.andamenti-aperta .cap.ciclo,
-body.tab-turni.andamenti-aperta #cyc,body.tab-turni.andamenti-aperta #cycShareBox,
+body.tab-turni.andamenti-aperta #cyc,body.tab-turni.andamenti-aperta #meseBox,body.tab-turni.andamenti-aperta #cycShareBox,
 body.tab-turni.andamenti-aperta .cycbar,body.tab-turni.andamenti-aperta #cycRange,
 body.tab-turni.andamenti-aperta #doScambioTurno,body.tab-turni.andamenti-aperta #scambioBox,
 body.tab-turni.andamenti-aperta #doPartner,
 body.tab-turni.andamenti-aperta #doAndamenti,
 body.tab-turni.vederci-aperta .cap.ciclo,
-body.tab-turni.vederci-aperta #cyc,body.tab-turni.vederci-aperta #cycShareBox,
+body.tab-turni.vederci-aperta #cyc,body.tab-turni.vederci-aperta #meseBox,body.tab-turni.vederci-aperta #cycShareBox,
 body.tab-turni.vederci-aperta .cycbar,body.tab-turni.vederci-aperta #cycRange,
 body.tab-turni.vederci-aperta #doScambioTurno,body.tab-turni.vederci-aperta #scambioBox,
 body.tab-turni.vederci-aperta #doPartner,
 body.tab-turni.vederci-aperta #doAndamenti,
 body.tab-turni.scambio-aperta .cap.ciclo,
-body.tab-turni.scambio-aperta #cyc,body.tab-turni.scambio-aperta #cycShareBox,
+body.tab-turni.scambio-aperta #cyc,body.tab-turni.scambio-aperta #meseBox,body.tab-turni.scambio-aperta #cycShareBox,
 body.tab-turni.scambio-aperta .cycbar,body.tab-turni.scambio-aperta #cycRange,
 body.tab-turni.scambio-aperta #doScambioTurno,
 body.tab-turni.scambio-aperta #doPartner,
@@ -1093,8 +1103,8 @@ list-style:none;min-height:44px;display:flex;align-items:center}
 .piu-info-in b{color:var(--ink)}
 /* OPZIONI: solo la configurazione */
 body.tab-oggi #doScambioTurno,body.tab-oggi #scambioBox,
-body.tab-opzioni #firstPlanBanner,body.tab-opzioni #setupChecklist,body.tab-opzioni #adattaCard,body.tab-opzioni #status,body.tab-opzioni #ora,body.tab-opzioni #benvenutoLink,body.tab-opzioni #demoEsempio,body.tab-opzioni #backupNudge,body.tab-opzioni #installBanner,body.tab-opzioni #shareNudge,body.tab-opzioni #icsNudge,body.tab-opzioni #icsExpireNudge,body.tab-opzioni #clubBanner,body.tab-opzioni #formaGiorno,body.tab-opzioni #essenziale,
-body.tab-opzioni .datebar,body.tab-opzioni .daynav,body.tab-opzioni #band,body.tab-opzioni .cap.ciclo,body.tab-opzioni #cyc,
+body.tab-opzioni #firstPlanBanner,body.tab-opzioni #setupChecklist,body.tab-opzioni #adattaCard,body.tab-opzioni #medicoCard,body.tab-opzioni #status,body.tab-opzioni #ora,body.tab-opzioni #benvenutoLink,body.tab-opzioni #demoEsempio,body.tab-opzioni #backupNudge,body.tab-opzioni #installBanner,body.tab-opzioni #shareNudge,body.tab-opzioni #icsNudge,body.tab-opzioni #icsExpireNudge,body.tab-opzioni #clubBanner,body.tab-opzioni #formaGiorno,body.tab-opzioni #essenziale,
+body.tab-opzioni .datebar,body.tab-opzioni .daynav,body.tab-opzioni #band,body.tab-opzioni .cap.ciclo,body.tab-opzioni #cyc,body.tab-opzioni #meseBox,
 body.tab-opzioni #cycShareBox,
 body.tab-opzioni .cycbar,body.tab-opzioni #cycRange,body.tab-opzioni #doAndamenti,body.tab-opzioni #doScambioTurno,body.tab-opzioni #scambioBox,
 body.tab-opzioni #andamentiPagina,body.tab-opzioni #vederciPagina,body.tab-opzioni #doPartner,
@@ -1454,6 +1464,7 @@ header b{font-size:23px}
 <!-- Il piano si adatta: proposta con un tocco quando il diario mostra che le
      tue abitudini sono diverse da quelle impostate (vedi renderAdatta). -->
 <div id="adattaCard" class="card" hidden></div>
+<div id="medicoCard" class="card" hidden></div>
 <div id="setupNudge" class="card" hidden></div>
 <div id="backupNudge" class="card" hidden></div>
 <div id="installBanner" class="card" hidden></div>
@@ -1515,6 +1526,11 @@ header b{font-size:23px}
 <div class="cap ciclo"><span class="eyebrow">Il tuo ciclo<span id="ciclNome"></span></span>
   <button class="lnk" id="tEdit">Modifica →</button></div>
 <div class="cyc" id="cyc"></div>
+<!-- Il mese in numeri: ore, turni, notti, domeniche e festivi. È la cosa che
+     quasi ogni app di turni fa e che i turnisti chiedono (per controllare la
+     busta paga, le notti fatte, i festivi). Niente stima della paga: con le
+     regole dei contratti sarebbe facile sbagliare, e sui soldi un errore costa. -->
+<section class="mese" id="meseBox" aria-label="Il mese in numeri"></section>
 <!-- Il cluster "Condividi" (link/QR/stampa) si è spostato più in basso,
      dopo Quando sono disponibile e Andamenti: era la prima cosa vista
      sotto la striscia, davanti a due sezioni usate più spesso (la propria
@@ -4009,6 +4025,7 @@ function render(){
   renderSetupNudge();
   renderAttivazione();
   renderAdatta();
+  renderMedico();
   renderBackupNudge();
   renderInstallBanner();
   renderShareNudge();
@@ -4026,7 +4043,7 @@ function render(){
   // (verificato su ogni chiamata a setTab() e ogni data-tab nel markup).
   const showStrip = (tab==="turni") || (!ess && tab!=="oggi"); // ciclo/dettaglio legacy
   const showDay = (tab==="oggi" && giornata) || (!ess && tab!=="turni");
-  if(showStrip){ renderStrip(P, f, S); renderAndamenti(); renderAndamentiPreview(); renderPartner(CARDS); renderPartnerPreview(); renderPiuCal(); }
+  if(showStrip){ renderStrip(P, f, S); renderMese(); renderAndamenti(); renderAndamentiPreview(); renderPartner(CARDS); renderPartnerPreview(); renderPiuCal(); }
   if(tab==="oggi") renderBand(P, CARDS);
   if(showDay){ renderCards(P, f, CARDS); }
   renderOpzSummaries();
@@ -5171,6 +5188,29 @@ function suggerimentoAdatta(){
   const no=store.get("adattaNo", []);
   return suggerimentiAdatta().find(c=>!no.includes(chiaveAdatta(c))) || null;
 }
+// Un segnale, non una diagnosi. Più di un notturnista su quattro ha i sintomi
+// del disturbo del sonno da lavoro a turni, e in Italia chi lavora di notte
+// ha già una visita periodica con il medico competente: se il diario dice
+// per settimane "poca energia", lo si suggerisce una volta, con delicatezza.
+function medicoVisibile(){
+  if(!state.turniConfigurati || store.get("medicoVisto", false)) return false;
+  if(firstPlanBannerVisibile() || attivazioneVisibile() || adattaVisibile()) return false;
+  const da=iso(day(giornoVero(),-21));
+  const voti=Object.keys(diary).filter(k=>k>=da).map(k=>+diary[k]).filter(v=>v>=1 && v<=5);
+  const bassi=voti.filter(v=>v<=2).length;
+  return voti.length>=8 && bassi>=5 && bassi/voti.length>=0.6;
+}
+function renderMedico(){
+  const el=$("#medicoCard"); if(!el) return;
+  if(!medicoVisibile()){ el.hidden=true; return; }
+  el.hidden=false;
+  el.innerHTML='<b>Da qualche settimana segni spesso poca energia</b>'+
+    '<p class="hint" style="margin-top:6px">Succede a tanti che lavorano a turni, e non sempre basta organizzare meglio il sonno. Se dormi male o hai molto sonno durante il giorno con regolarità, parlane con il medico competente alla prossima visita periodica, o con il tuo medico: possono aiutarti più di un\'app. Non è una diagnosi, solo un segnale da non lasciar passare.</p>'+
+    '<button class="btn g" type="button" id="doMedicoOk">Ho capito</button>';
+}
+if($("#medicoCard")) $("#medicoCard").addEventListener("click", e=>{
+  if(e.target.closest("#doMedicoOk")){ store.set("medicoVisto", true); track("setup_item", {item:"medico_visto"}); renderMedico(); }
+});
 function adattaVisibile(){
   if(_adattaFatto) return true;
   if(!state.turniConfigurati || sceltaSchemaAperta || firstPlanBannerVisibile()) return false;
@@ -6248,6 +6288,58 @@ function rischiAvanti(P, n){
   }
   return flag;
 }
+// Festivi nazionali italiani (domeniche a parte): fissi più Pasquetta.
+function festivoIT(d){
+  const m=d.getMonth()+1, g=d.getDate();
+  if(["1-1","1-6","4-25","5-1","6-2","8-15","11-1","12-8","12-25","12-26"].includes(m+"-"+g)) return true;
+  const y=d.getFullYear(), a=y%19, b=Math.floor(y/100), c=y%100, dd=Math.floor(b/4), e=b%4, f=Math.floor((b+8)/25),
+    gg=Math.floor((b-f+1)/3), h=(19*a+b-dd-gg+15)%30, i=Math.floor(c/4), k=c%4, l=(32+2*e+2*i-h-k)%7, mm=Math.floor((a+11*h+22*l)/451),
+    mese=Math.floor((h+l-7*mm+114)/31), giorno=((h+l-7*mm+114)%31)+1;
+  const pasquetta=new Date(y, mese-1, giorno+1);
+  return m===pasquetta.getMonth()+1 && g===pasquetta.getDate();
+}
+let meseOff=0;
+function datiMese(off){
+  const oggi=giornoVero(), primo=new Date(oggi.getFullYear(), oggi.getMonth()+off, 1, 12), fPrima=state.focus;
+  const r={primo, ore:0, turni:0, notti:0, festivi:0, liberi:0, ignoti:0};
+  for(let d=new Date(primo); d.getMonth()===primo.getMonth(); d.setDate(d.getDate()+1)){
+    state.focus=new Date(d);
+    let c="?"; try{ c=NT.codeAt(0); }catch(e){}
+    if(c==="?"){ r.ignoti++; continue; }
+    const sh=state.shifts[c];
+    if(!sh){ r.liberi++; continue; }
+    r.turni++; r.ore+=Math.max(0, sh.e-sh.s)/60;
+    try{ const b=NT.block(0); if(NT.spansNight(b)||NT.startsInNight(b)) r.notti++; }catch(e){}
+    if(d.getDay()===0 || festivoIT(d)) r.festivi++;
+  }
+  state.focus=fPrima;
+  return r;
+}
+function renderMese(){
+  const el=$("#meseBox"); if(!el) return;
+  if(!state.turniConfigurati){ el.hidden=true; return; }
+  const r=datiMese(meseOff);
+  // con un ciclo che non si ripete, oltre la fine non c'è niente da contare
+  if(r.ignoti && !r.turni && !r.liberi){ if(meseOff!==0){ meseOff=0; return renderMese(); } el.hidden=true; return; }
+  el.hidden=false;
+  const nome=r.primo.toLocaleDateString(LINGUA,{month:"long",year:"numeric"});
+  const ore=Math.round(r.ore*10)/10;
+  el.innerHTML='<div class="mese-testa"><button type="button" data-mese="-1" aria-label="Mese precedente"'+(meseOff<=-12?' disabled':'')+'>‹</button>'+
+    '<b>'+esc(nome.charAt(0).toUpperCase()+nome.slice(1))+'</b>'+
+    '<button type="button" data-mese="1" aria-label="Mese successivo"'+(meseOff>=12?' disabled':'')+'>›</button></div>'+
+    '<div class="mese-num">'+
+      '<div><b>'+String(ore).replace(".",",")+'</b><span>ore di turno</span></div>'+
+      '<div><b>'+r.turni+'</b><span>turni</span></div>'+
+      '<div><b>'+r.notti+'</b><span>notti</span></div>'+
+      '<div><b>'+r.festivi+'</b><span>domeniche e festivi</span></div>'+
+      '<div><b>'+r.liberi+'</b><span>giorni senza turno</span></div>'+
+    '</div>'+
+    '<p class="hint">Dall\'inizio alla fine di ogni turno, pause comprese'+(r.ignoti?'; '+r.ignoti+(r.ignoti===1?' giorno ancora da segnare':' giorni ancora da segnare'):'')+'. Per controllare le ore, non è un conteggio ufficiale.</p>';
+}
+if($("#meseBox")) $("#meseBox").addEventListener("click", e=>{
+  const b=e.target.closest("[data-mese]"); if(!b || b.disabled) return;
+  meseOff=Math.max(-12, Math.min(12, meseOff + +b.dataset.mese)); renderMese();
+});
 function renderStrip(P, f, S){
   // Scala unica per tutte le righe, senza avvolgimenti: così ogni barra
   // resta sul giorno a cui appartiene e non se ne va a finire su quello dopo.
