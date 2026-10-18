@@ -31,4 +31,26 @@ const z=await p.evaluate(()=>({ta:getComputedStyle(document.documentElement).tou
   campi:[...document.querySelectorAll("input[type=time],input[type=text],input[type=number],select")].filter(e=>e.offsetParent).map(e=>getComputedStyle(e).fontSize).filter(f=>parseFloat(f)<16).length}));
 ok(z.ta==="manipulation", "niente zoom col doppio tocco (touch-action: manipulation)");
 ok(z.campi===0, "campi visibili a 16px o più: Safari non zooma entrando");
+// installazione: prima voce di "Rendi automatico il tuo piano"
+await p.click('[data-tab="oggi"]'); await p.waitForTimeout(400);
+const voce=await p.evaluate(()=>{ const v=document.querySelector("#setupChecklist:not([hidden]) .attiva-voce"); return v ? v.dataset.attiva+" | "+v.innerText.replace(/\n/g," ") : "(niente)"; });
+ok(/^installa .*schermata Home/.test(voce), "iPhone: la lista parte da «Aggiungila alla schermata Home» → "+voce);
+await p.click('#setupChecklist [data-attiva="installa"]'); await p.waitForTimeout(300);
+const t=await p.evaluate(()=>{ const e=document.querySelector("#toast"); return e?e.innerText:""; });
+ok(/Condividi.*Aggiungi alla schermata Home/.test(t), "iPhone: il tocco spiega come fare in Safari → "+t);
+// Android/Chrome: la voce compare quando Chrome dice che si può installare
+const ctx2=await b.newContext({locale:"it-IT",viewport:{width:390,height:844},hasTouch:true,isMobile:true,
+  userAgent:"Mozilla/5.0 (Linux; Android 15; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36"});
+const a=await ctx2.newPage(); a.on("pageerror",e=>errs.push(e.message));
+await a.goto("http://localhost:8765/index.html"); await a.waitForTimeout(700);
+await a.click("text=Conosco già il mio schema"); await a.click("[data-preset-ob='0']"); await a.click("[data-pos='0']"); await a.click("#qhConfermaOrari"); await a.waitForTimeout(500);
+await a.evaluate(()=>{const c=document.querySelector("#doChiudiPrimoPiano"); if(c) c.click();});
+const prima=await a.evaluate(()=>!!document.querySelector('#setupChecklist [data-attiva="installa"]'));
+await a.evaluate(()=>{ window.__prompt=0; const ev=new Event("beforeinstallprompt"); ev.prompt=()=>{ window.__prompt++; }; ev.userChoice=Promise.resolve({outcome:"accepted"}); window.dispatchEvent(ev); });
+await a.waitForTimeout(300);
+const dopo=await a.evaluate(()=>{ const v=document.querySelector("#setupChecklist .attiva-voce"); return v ? v.dataset.attiva : ""; });
+ok(!prima && dopo==="installa", "Android: «Installala sul telefono» compare in cima quando Chrome lo permette (prima: "+prima+", poi: "+dopo+")");
+await a.click('#setupChecklist [data-attiva="installa"]'); await a.waitForTimeout(400);
+const dopoInst=await a.evaluate(()=>({p:window.__prompt, voce:!!document.querySelector('#setupChecklist [data-attiva="installa"]')}));
+ok(dopoInst.p===1 && !dopoInst.voce, "Android: il tocco apre la richiesta di Chrome e, installata, la voce sparisce → "+JSON.stringify(dopoInst));
 console.log("errori", errs); await b.close();

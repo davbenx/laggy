@@ -4944,13 +4944,25 @@ function impostaPromemoria(on){
 function vociAttivazione(){
   const futuri = Object.keys(state.ecc||{}).filter(k=>k>isoOggi()).length;
   const perm = notifPerm();
-  const v = [
+  const v = [];
+  // Web: installarla viene prima di tutto. Su iPhone i promemoria arrivano
+  // solo all'app aggiunta alla Home; su Android si apre senza browser e
+  // non perde i dati quando il browser fa pulizia. Era solo un invito a
+  // parte, che questa lista teneva in pausa per due settimane: in pratica
+  // non lo vedeva quasi nessuno.
+  if(!giaInstallata()){
+    if(playDaWeb()) v.push({id:"installa", t:"L'app su Google Play", d:"Promemoria anche ad app chiusa, calendario del telefono, widget. Gratis come qui", ok:false});
+    else if(isIOSPerInstall()) v.push({id:"installa", t:"Aggiungila alla schermata Home", d:"Si apre a tutto schermo, e su iPhone è il solo modo per ricevere i promemoria", ok:false});
+    else if(installPromptEvento) v.push({id:"installa", t:"Installala sul telefono", d:"Si apre con un tocco, funziona anche offline e i turni restano al sicuro", ok:false});
+  }
+  v.push(
     {id:"turni", t:"I turni dei prossimi giorni", d:"Così ogni giorno il piano è pronto, senza dirgli che turno fai", ok: state.repeat!==false || futuri>=7},
     {id:"notifiche", t:"Promemoria sul telefono", d: perm==="denied" ? "Bloccati dal telefono: tocca per sapere come riattivarli" : "Cambi di turno, quando dormire, rientro dopo la notte: scegli tu quali", ok: promemoriaAttivi(), skip: perm==="unsupported"},
     {id:"calendario", t:"Nel calendario del telefono", d: platform.calendar.available ? (platform.calendar.attivo()
         ? "Calendario «Notturnisti», solo su questo telefono"+(platform.calendar.ultimoSync()?" · aggiornato alle "+_hhmmDa(platform.calendar.ultimoSync()):"")
         : "Turni e ore di sonno nell'app Calendario, aggiornati da soli") : "Turni e ore di sonno nel calendario che usi già (Google, Apple…), aggiornati da soli", ok: platform.calendar.available ? platform.calendar.attivo() : !!(window.NTPaid && window.NTPaid.paid())}
-  ];
+
+  );
   if(platform.widget.available) v.push({id:"widget", t:"Widget sulla schermata Home", d:"Cosa fare adesso (dormire, caffè, luce) senza aprire l'app", ok: platform.widget.presenti()>0});
   return v.filter(x=>!x.skip);
 }
@@ -4990,6 +5002,7 @@ function htmlVociGestione(voci){
 async function gestisciFunzione(id){
   const v=vociAttivazione().find(x=>x.id===id); if(!v) return;
   haptic(10);
+  if(id==="installa"){ eseguiAttivazione(id); return; }
   if(id==="turni"){ setTab("oggi"); apriFlussoProssimi("prossimi"); return; }
   if(id==="notifiche"){
     if(notifPerm()==="denied"){ toast("Le notifiche sono bloccate dal telefono: riattivale dalle impostazioni, alla voce Notturnisti"); return; }
@@ -5038,6 +5051,16 @@ function renderAttivazione(){
 async function eseguiAttivazione(id){
   track("setup_item", {item:id}); haptic(10);
   if(id==="turni"){ setTab("oggi"); apriFlussoProssimi("prossimi"); return; }
+  if(id==="installa"){
+    if(playDaWeb()){ window.open(playLink(), "_blank", "noopener"); return; }
+    if(installPromptEvento){
+      const ev=installPromptEvento; ev.prompt();
+      ev.userChoice.then(r=>{ if(r.outcome==="accepted") track("pwa_installed"); installPromptEvento=null; renderAttivazione(); render(); }).catch(()=>{});
+      return;
+    }
+    if(isIOSPerInstall()) toast("In Safari tocca Condividi (il quadrato con la freccia in su), poi «Aggiungi alla schermata Home»");
+    return;
+  }
   if(id==="notifiche"){
     if(notifPerm()==="denied"){ toast("Le notifiche sono bloccate: riattivale dalle impostazioni del telefono, alla voce Notturnisti"); return; }
     if(notifPerm()==="granted"){ impostaPromemoria(true); return; }
@@ -9370,7 +9393,7 @@ addEventListener("nt:refresh", ()=>{ if(_refreshInAttesa) return; _refreshInAtte
   var deferred=null;
   addEventListener("beforeinstallprompt", function(e){
     e.preventDefault(); deferred=e;
-    try{ installPromptEvento=e; renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderIcsExpireNudge(); renderStatsNudge(); renderClubBanner(); renderDonateNudge(); }catch(err){}
+    try{ installPromptEvento=e; renderAttivazione(); renderInstallBanner(); renderShareNudge(); renderIcsNudge(); renderIcsExpireNudge(); renderStatsNudge(); renderClubBanner(); renderDonateNudge(); }catch(err){}
     var tools=document.querySelector(".tools"); if(!tools || document.getElementById("doInstall")) return;
     var b=document.createElement("button");
     b.className="lnk"; b.id="doInstall"; b.textContent="Installa l'app";
