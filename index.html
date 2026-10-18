@@ -4952,7 +4952,7 @@ function vociAttivazione(){
   // non lo vedeva quasi nessuno.
   if(!giaInstallata()){
     if(playDaWeb()) v.push({id:"installa", t:"L'app su Google Play", d:"Promemoria anche ad app chiusa, calendario del telefono, widget. Gratis come qui", ok:false});
-    else if(isIOSPerInstall()) v.push({id:"installa", t:"Aggiungila alla schermata Home", d:"Si apre a tutto schermo, e su iPhone è il solo modo per ricevere i promemoria", ok:false});
+    else if(isIOSPerInstall()) v.push({id:"installa", t:"Aggiungila alla schermata Home", d:"Si apre a tutto schermo con un tocco, come un'app", ok:false});
     else if(installPromptEvento) v.push({id:"installa", t:"Installala sul telefono", d:"Si apre con un tocco, funziona anche offline e i turni restano al sicuro", ok:false});
   }
   v.push(
