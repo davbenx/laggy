@@ -71,6 +71,14 @@ attivo (scrivi lì solo se le regole del gruppo lo permettono). Recluta **15–2
 
 Niente regali o premi in cambio di recensioni: le regole di Play lo vietano.
 
+### 2.3b Tre domande ai tester (dopo una settimana)
+Brevi, in un messaggio o in un modulo; le risposte decidono cosa fare dopo il lancio.
+1. Cosa ti ha confuso o ti è sembrato sbagliato? (anche una cosa sola)
+2. Quali di queste useresti? Giorni speciali (ferie, malattia, reperibilità,
+   formazione) · sonno letto in automatico dall'orologio o dal telefono ·
+   stima della paga con notti e festivi · altro: ____
+3. Cosa ti manca per usarla ogni giorno?
+
 ### 2.4 Domande per l'accesso alla produzione (risposte da adattare con i dati veri)
 - *Come hai reclutato i tester?* Iscritti alla newsletter di notturnisti.club e lavoratori a turni
   della mia rete (sanità, industria), più alcuni conoscenti con Android.

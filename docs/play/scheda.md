@@ -19,7 +19,7 @@ Varianti per l'esperimento sulla scheda (Play Console → Esperimenti sulla sche
 ## Descrizione completa (max 4000)
 Lavori a turni? Notturnisti è il calendario dei turni che fa una cosa in più: ti dice, giorno per giorno, quando dormire, fino a che ora prendere il caffè, quando cercare la luce e quando fare un pisolino, calcolati sul tuo ciclo vero. Notti, mattine, pomeriggi, smonti e riposi.
 
-Gratis. Senza account. Senza pubblicità. I tuoi dati restano sul telefono.
+Gratis, senza abbonamenti. Senza account. Senza pubblicità. I tuoi turni restano sul tuo telefono: niente da perdere su un server.
 
 PERCHÉ NON UN SEMPLICE CALENDARIO TURNI
 Un calendario ti dice che domani fai la notte. Notturnisti ti dice anche cosa fare oggi per arrivarci in forma: a che ora andare a letto, quando fare il pisolino, quando smettere con il caffè, e come rientrare dopo l'ultima notte senza perdere due giorni.
@@ -31,18 +31,19 @@ COME FUNZIONA
 • Ogni consiglio ha il suo perché, spiegato in parole semplici.
 
 FUNZIONA DA SOLO
-• Promemoria: quando prepararti a dormire, l'ultimo caffè, il rientro dopo la notte (l'ora più a rischio per chi guida). Scegli tu quali: al massimo 4 al giorno, mai mentre dormi.
+• Promemoria: quando prepararti a dormire, l'ultimo caffè, il rientro dopo la notte (l'ora più a rischio per chi guida), e un consiglio in più nei giorni impegnativi, come la terza notte di fila. Scegli tu quali: al massimo 4 al giorno, mai mentre dormi.
 • Calendario del telefono: turni e sonno nell'app Calendario, aggiornati da soli.
 • Widget sulla schermata Home: cosa fare adesso, quanto manca alla prossima cosa e la tua settimana.
 
 SI ADATTA A TE
-Annota come hai dormito con un tocco. Se nei giorni liberi dormi in orari diversi da quelli impostati, o fai fatica ad anticipare la sveglia, l'app te lo propone e aggiorna il piano.
+Non ti impone orari fissi. Annota come hai dormito con un tocco, anche dalla notifica del mattino. Se nei giorni liberi dormi in orari diversi da quelli impostati, o fai fatica ad anticipare la sveglia, l'app te lo propone e aggiorna il piano. Turno cambiato all'ultimo momento? Lo cambi con un tocco e il piano si ricalcola.
 
 PER CHI TI ASPETTA
 • Manda i tuoi turni o il tuo tempo libero su WhatsApp, o dove vuoi.
 • Trova il tempo libero in comune con partner, famiglia o chi lavora con te.
 • Mi conviene lo scambio? Prima di accettare un cambio turno vedi quanto sonno ti costa e se ti restano almeno 11 ore di riposo.
 • Stampa o salva in PDF un calendario da appendere al frigo.
+• Il mese in numeri: ore di turno, notti, domeniche e festivi, per tenere il conto.
 
 PER CHI È
 Per chi lavora a turni e di notte: infermieri e OSS, medici, operai e turnisti dell'industria, forze dell'ordine, vigili del fuoco, autisti, guardie giurate, addetti alla logistica, all'assistenza e all'accoglienza.
