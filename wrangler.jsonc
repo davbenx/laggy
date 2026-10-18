@@ -58,7 +58,7 @@
     // Impronta SHA-256 del codice che apre /stats (non il codice): pubblicarla
     // non permette di risalirci. Per cambiare codice: nuova stringa casuale,
     // sha256sum, sostituisci qui (e nelle anteprime sotto).
-    "STATS_TOKEN_SHA256": "9a48b0457a4982fd68999bc0d1dd6ad8f0e669b0c1f3a6c6d40aceda5510a5ba",
+    "STATS_TOKEN_SHA256": "9a8cbeb84f8db05fa450ae7ded9ebc004af915aac34b437c0efc91e491240813",
     "SITE_ORIGIN": "https://app.notturnisti.club"
   },
   // Deploy di anteprima (una per PR, via Workers Builds "wrangler preview"):
@@ -69,7 +69,7 @@
   // webhook reali.
   "previews": {
     "vars": {
-      "STATS_TOKEN_SHA256": "9a48b0457a4982fd68999bc0d1dd6ad8f0e669b0c1f3a6c6d40aceda5510a5ba",
+      "STATS_TOKEN_SHA256": "9a8cbeb84f8db05fa450ae7ded9ebc004af915aac34b437c0efc91e491240813",
       "SITE_ORIGIN": "https://app.notturnisti.club"
     },
     "kv_namespaces": [
