@@ -262,12 +262,20 @@ function constraint(off){
       // davvero, e recupera il resto con un pisolino pomeridiano dopo il
       // turno (in block(), più sotto, lo stesso schema già usato per il
       // sonno corto dopo un turno cominciato nelle ore piccole).
+      // Mai a letto prima di essere a casa: se oggi si lavora fino a sera
+      // (pomeriggio → mattino presto, un "rientro"), il sonno comincia dopo
+      // la fine del turno, il viaggio e il tempo per staccare, e viene più
+      // corto. Prima lo si contava a ritroso dalla sveglia di domani e basta:
+      // con un pomeriggio fino alle 22 e un mattino alle 6 il piano diceva
+      // "a letto alle 20:50", in pieno turno.
+      const aCasa = b.rest ? -Infinity : b.end + state.cFrom + CFG.windDownEve;
       if(state.mattinoBifasico && onsetNaturale < CFG.bifasicoSoglia){
-        const dur = Math.min(state.need, CFG.bifasicoMainMax);
-        const onset = Math.max(wake-dur, CFG.bedtimeFloor);
+        const dur0 = Math.min(state.need, CFG.bifasicoMainMax);
+        const onset = Math.max(wake-dur0, CFG.bedtimeFloor, aCasa);
+        const dur = Math.max(Math.min(dur0, wake-onset), 0);
         return {pin:true, onset, dur, mid:Math.round(onset+dur/2), kind:"pre-turno-bifasico"};
       }
-      const onset = Math.max(onsetNaturale, CFG.bedtimeFloor);
+      const onset = Math.max(onsetNaturale, CFG.bedtimeFloor, aCasa);
       const dur = Math.max(wake-onset, 0);
       return {pin:true, onset, dur, mid:Math.round(onset+dur/2), kind:"pre-turno"};
     }
@@ -343,7 +351,11 @@ function simulate(){
 
   let prev = null;
   for(let i=0;i<N;i++){
-    const c = C[i]; let target, dr = +(c.pin ? c.dur : state.need) || 480;
+    // Uno zero vero (nessun tempo per dormire fra due turni) resta zero: prima
+    // "|| 480" lo scambiava per un valore mancante e ci metteva 8 ore di sonno
+    // in pieno turno.
+    const c = C[i], d0 = +(c.pin ? c.dur : state.need);
+    let target, dr = Number.isFinite(d0) ? d0 : 480;
     if(pin[i]){
       target = c.pin ? c.mid : pinMid(i);
       if(prev !== null){
@@ -379,6 +391,13 @@ function simulate(){
         meta[i].blocked = true;
       }
     } else if(isFinite(c.floor === undefined ? NaN : c.floor)){ /* i perni hanno già l'orario */ }
+    // Regola finale, uguale per ogni combinazione di turni: il sonno non
+    // comincia prima di essere a casa (fine turno + viaggio + tempo per
+    // staccare) e finisce in tempo per prepararsi e partire per il turno
+    // dopo. Le regole sopra coprono i casi tipici; questa chiude quelli che
+    // sfuggivano (sera tardi → mattino presto, cronotipi molto mattinieri,
+    // viaggi lunghi), dove il piano metteva il sonno dentro un turno.
+    [onset, dr] = dentroLeOre(i-H, onset, dr);
     onset = Math.round(onset/5)*5; dr = Math.round(dr/5)*5;
     mid[i] = Math.round(onset + dr/2);
     if(!c.pin && prev !== null && Math.abs(mid[i]-prev) > 15) meta[i].ramp = true;
@@ -399,6 +418,23 @@ function simulate(){
     nLen:nLen[i], nIdx:nIdx[i], syn:!!(meta[i].reset||meta[i].preNight),
     strategy: nLen[i] ? (nLen[i] >= CFG.adaptThreshold ? "compromesso" : "contieni") : null
   }));
+}
+
+// Turni di ieri, oggi e domani sulla scala di oggi: [da quando si esce, a quando si è a letto].
+function dentroLeOre(off, onset, dr){
+  const occupato = [];
+  for(const k of [-1,0,1]){
+    const w = block(off+k); if(w.rest) continue;
+    occupato.push([w.start + k*1440 - state.cTo - state.prep, w.end + k*1440 + state.cFrom + CFG.windDown]);
+  }
+  occupato.sort((x,y)=>x[0]-y[0]);
+  for(let giro=0; giro<2; giro++) for(const [da, a] of occupato){
+    const fine = onset + dr;
+    if(onset >= a || fine <= da) continue;           // nessuna sovrapposizione
+    if(onset < da){ dr = Math.max(0, da - onset); }  // il turno arriva dopo: ci si sveglia in tempo
+    else { onset = a; dr = Math.max(0, fine - a); }  // il turno c'era prima: si dorme dopo
+  }
+  return [onset, dr];
 }
 
 const at = (S,off) => S[off+CFG.H];
@@ -603,14 +639,28 @@ function plan(){
       let fine = s.onset - 300;
       if(!b.rest && b.start > wake + 150)
         fine = Math.min(fine, b.start - state.cTo - CFG.mealGap - CFG.napGap);
-      const inizio = Math.max(fine - len, wake + 180);
-      const scontro = !b.rest && inizio < b.end && fine > b.start;
+      let inizio = Math.max(fine - len, wake + 180);
+      // Il turno conta con il viaggio: un pisolino che parte appena finisce il
+      // turno (12 ore di giorno, poi la notte) cadeva sulla strada di casa.
+      // Se si sovrappone solo alla coda (rientro), parte appena a casa.
+      if(!b.rest && inizio < b.end + state.cFrom && fine > b.end && inizio >= b.start)
+        inizio = b.end + state.cFrom + 15;
+      const scontro = !b.rest && inizio < b.end + state.cFrom && fine > b.start - state.cTo;
       if(fine - inizio >= CFG.napMin && !scontro)
         { const p = dallaFine(fine, fine - inizio, Math.max(wake + 180, fine - 90), {lungo:true, ore:veglia});
           if(p) naps.push(p); }
     }
   }
 
+  // Stessa regola del sonno principale: niente pisolini mentre si è al lavoro
+  // o in viaggio (quelli in pausa al lavoro, x.turno, sono voluti). Se uno
+  // tocca il turno lo si accorcia; se non resta abbastanza, si toglie.
+  for(let k=naps.length-1; k>=0; k--){
+    const x = naps[k]; if(x.turno) continue;
+    const [a, d] = dentroLeOre(0, x.a, x.b - x.a);
+    if(d < CFG.napMin && d < (x.b - x.a)) naps.splice(k, 1);
+    else if(a !== x.a || d !== x.b - x.a){ x.a = Math.round(a/5)*5; x.b = Math.round((a+d)/5)*5; }
+  }
   const busy = sleeps.concat(naps), meals = [];
   if(spansNight(b) && !startsInNight(b)){
     meals.push({at:place(b.start - state.cTo - CFG.mealGap, busy), main:true});
@@ -796,7 +846,7 @@ function buildEvents(days){
     const base=day(f0,o);
     // il turno lo sai già: evento sì, sveglia no
     if(ICS.turni && !P.b.rest) ev(base,P.b.start,P.b.end,"turno","Turno "+(P.b.name||P.b.c),"",false);
-    if(ICS.sonno) ev(base,P.s.onset,P.s.onset+P.s.dur,"sonno","Sonno",
+    if(ICS.sonno && P.s.dur > 0) ev(base,P.s.onset,P.s.onset+P.s.dur,"sonno","Sonno",
       "Pianificato da notturnisti.club",true,true);
     if(ICS.pisolini) P.naps.forEach(n=>ev(base,n.a,n.b,"pisolino-"+tipoPisolino(n),
       (n.rec||n.debito)?"Pisolino di recupero":((n.b-n.a)<40?"Pisolino breve":"Pisolino"),"",true));

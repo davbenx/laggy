@@ -46,7 +46,8 @@ test("fuzz: 120 configurazioni casuali, nessuna eccezione e nessun orario imposs
       e.state.focus = new Date(Date.now() + o * 864e5);
       if (e.codeAt(0) === "?") continue;
       const P = e.plan();
-      assert.ok(Number.isFinite(P.s.onset) && P.s.dur > 0 && P.s.dur <= 16 * 60, "sonno impossibile: " + ctx);
+      // 0 è possibile e onesto: fra due turni attaccati non c'è tempo per dormire
+      assert.ok(Number.isFinite(P.s.onset) && P.s.dur >= 0 && P.s.dur <= 16 * 60, "sonno impossibile: " + ctx);
     }
     e.state.focus = new Date();
     for (const ev of e.buildEvents(42)) assert.ok(ev.end > ev.start, "evento invertito " + ev.uid + ": " + ctx);

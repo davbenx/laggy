@@ -3355,7 +3355,11 @@ function cards(P){
   const sc={k:"s",lab:"Quando dormire",val:hhmm(s.onset)+" → "+hhmm(end),
     small:"sveglia alle "+hhmm(end)+" · "+dur(s.dur),
     rows:[]};
-  if(s.kind==="diurno"){
+  if(!(s.dur > 0)){
+    sc.val="Nessun tempo per dormire"; sc.small="fra questo turno e il prossimo";
+    sc.sub="Fra la fine di questo turno e l'inizio del prossimo, con il viaggio, non resta tempo per un sonno vero. Riposa appena puoi, anche poco, e se possibile chiedi un cambio: due turni così vicini sono il caso più rischioso per guidare.";
+  }
+  else if(s.kind==="diurno"){
     sc.sub="A letto appena rientri, senza fermate. Di giorno si dorme meno, è normale: le ore che mancano le recuperi col pisolino del pomeriggio.";
     sc.rows.push(["Camera","buio totale, tappi, telefono in silenzioso"]);
     sc.why="Di giorno il corpo spinge verso la veglia proprio nelle ore in cui devi dormire, e allungare a forza il sonno del mattino funziona poco. Aggiungere un pisolino prima del turno rende molto di più.";
@@ -5821,6 +5825,8 @@ function adessoLine(P, riferimento){
 // "Oggi") e la sveglia in grassetto: l'utente legge QUANDO dorme senza calcolare
 // né dedurre dal fatto che il sonno scavalca la mezzanotte.
 function sonnoWin(P){
+  // fra due turni attaccati il piano non trova tempo per dormire: lo si dice
+  if(!(P.s.dur > 0)) return '<b>Nessun tempo per dormire</b>';
   const dOn=Math.floor(P.s.onset/1440), dEnd=Math.floor(P.end/1440);
   const ancora = dOn>=1 ? "Domani" : (dEnd>dOn ? "Stanotte" : "Oggi");
   return '<span class="dwhen">'+ancora+'</span>'+hhmm(P.s.onset)+' → <b>'+hhmm(P.end)+'</b>';
