@@ -25,6 +25,9 @@
 // Rete di sicurezza: se tra 6 secondi l'app non ha finito di avviarsi
 // (l'ultima riga dello script toglie #jsoff), mostra l'avviso.
 setTimeout(function(){ if(document.getElementById("jsoff")) document.documentElement.classList.add("js-lento"); }, 6000);
+// iPhone/iPad: alcune cose vanno fatte diversamente (selettore della data,
+// zoom sui campi). Qui, prima del CSS che lo legge.
+try{ if(/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform==="MacIntel" && navigator.maxTouchPoints>1)) document.documentElement.classList.add("ios"); }catch(e){}
 // Dati importati dalla vecchia app (migrate.js): applicati QUI, prima che
 // qualunque altro script legga o salvi lo stato — altrimenti il salvataggio
 // automatico della pagina precedente potrebbe riscriverci sopra i dati vecchi.
@@ -231,6 +234,19 @@ border-radius:var(--r);font-family:inherit;font-size:12.5px;font-weight:600;curs
 .today:hover{border-color:var(--blue);color:var(--blue)}
 .today.full{background:var(--blue);border:1px solid var(--blue);color:var(--su-blu)}
 .today.full:hover{background:var(--blue-fill)}
+/* iPhone: Safari non apre il selettore della data da codice (showPicker su
+   un campo nascosto non fa niente). Sopra il bottone c'è allora un campo
+   data vero e trasparente: il tocco arriva a lui e iOS apre il suo
+   selettore. Solo quando il bottone dice "Scegli giorno": con "Torna a
+   oggi" il tocco va al bottone. */
+.today-wrap{position:relative;display:inline-flex;flex:none}
+.today-pick{display:none}
+html.ios .today-pick{display:block;position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;border:0;opacity:0;font-size:16px;-webkit-appearance:none;appearance:none;cursor:pointer}
+html.ios .today-wrap:has(.today.full) .today-pick{display:none}
+/* iPhone: niente zoom col doppio tocco (resta lo zoom con due dita) e
+   niente zoom automatico entrando in un campo: Safari lo fa sotto i 16px. */
+html{touch-action:manipulation}
+html.ios input,html.ios select,html.ios textarea{font-size:max(16px,1em)}
 /* pillola del turno: affordance interattiva, hover, active, chevron rotante all'apertura */
 .shiftpill{display:inline-flex;align-items:center;gap:5px;background:var(--blue-soft);color:var(--blue);font-size:12px;
 font-weight:700;padding:5px 11px;border-radius:999px;white-space:nowrap;cursor:pointer;border:1px solid transparent;
@@ -1420,7 +1436,7 @@ header b{font-size:23px}
      mezzo alle frecce. -->
 <div class="daynav" style="margin:10px 0 var(--gap-sezione)">
   <button class="nav" id="prev" aria-label="Giorno precedente"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
-  <button class="today" id="goToday">Scegli giorno</button>
+  <span class="today-wrap"><button class="today" id="goToday">Scegli giorno</button><input type="date" class="today-pick" tabindex="-1" aria-hidden="true"></span>
   <button class="nav" id="next" aria-label="Giorno successivo"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
 </div>
 <div id="ora" class="ora"></div>
@@ -1448,7 +1464,7 @@ header b{font-size:23px}
 <h1 class="cycrange" id="cycRange" style="cursor:default">Turni</h1>
 <div class="cycbar" style="margin:10px 0 14px">
   <button class="nav" id="cycPrev" aria-label="Giorni precedenti"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
-  <button class="today" id="cycToday">Scegli giorno</button>
+  <span class="today-wrap"><button class="today" id="cycToday">Scegli giorno</button><input type="date" class="today-pick" tabindex="-1" aria-hidden="true"></span>
   <button class="nav" id="cycNext" aria-label="Giorni successivi"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
 </div>
 <!-- "Il tuo ciclo" subito sopra la striscia, sotto la navigazione: è
@@ -7168,11 +7184,25 @@ if($("#jumpDate")){
   };
   $("#dateLabel").addEventListener("click", apriSelettore);
   $("#dateLabel").addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); apriSelettore(); } });
+  document.querySelectorAll(".today-pick").forEach(inp=>{
+    // il valore va messo prima che il selettore lo legga
+    const prepara=()=>{ inp.value=iso(state.focus); };
+    inp.addEventListener("pointerdown", prepara); inp.addEventListener("focus", prepara);
+    inp.addEventListener("change", e=>{
+      const v=e.target.value;
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(v||"")) return;
+      const d=new Date(v+"T12:00:00"); if(isNaN(+d)) return;
+      state.focus=d; cicloOff=0;
+      if(inp.closest(".cycbar")) cycGo(0); else render();
+    });
+  });
   $("#jumpDate").addEventListener("change", e=>{
     const v=e.target.value;
     if(!/^\d{4}-\d{2}-\d{2}$/.test(v||"")) return;
     const d=new Date(v+"T12:00:00"); if(isNaN(+d)) return;
-    state.focus=d; cicloOff=0; render();
+    state.focus=d; cicloOff=0;
+    // in Turni il bottone "Torna a oggi" si aggiorna solo passando da cycGo
+    if(document.body.classList.contains("tab-turni")) cycGo(0); else render();
   });
 }
 let eccAppena=false;   // un tocco lungo non deve anche far saltare al giorno
