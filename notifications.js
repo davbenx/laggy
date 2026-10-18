@@ -7,6 +7,7 @@
 // non solo il promemoria PRIMA di andare a letto. È il pezzo che il calendario non fa bene.
 
 import { createEngine } from "./engine.js";
+import { giorniBrevi } from "./lingua.js";
 
 const MIN = 60000;
 const localMidnight = d => new Date(d.getFullYear(), d.getMonth(), d.getDate());
@@ -48,7 +49,7 @@ const KIND = { bedtime: 1, wake: 2, nap: 3, coffee: 4, ret: 5, prep: 6, cambio: 
 // Priorità quando un giorno ne avrebbe troppe (si tengono le prime).
 const PRIO = ["cambio", "ret", "rischio", "bedtime", "domani", "nap", "coffee", "prep", "luce", "wake", "settimana"];
 const MAX_AL_GIORNO = 4, UNISCI_ENTRO = 20 * MIN;
-const GIORNI = ["dom", "lun", "mar", "mer", "gio", "ven", "sab"];
+const GIORNI = giorniBrevi();   // dom … sab, come getDay()
 const durTxt = m => { m = Math.round(Math.abs(m)); const h = Math.floor(m / 60), r = m % 60; return h ? h + (r ? "h" + String(r).padStart(2, "0") : " or" + (h === 1 ? "a" : "e")) : r + " min"; };
 
 export function buildSchedule(config, opts = {}) {

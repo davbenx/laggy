@@ -2654,6 +2654,7 @@ var qrcodegen;
 // stessa garanzia di ordine che un normalizzatore await avrebbe dato, senza
 // bisogno di riscrivere tutto in async. I moduli sono già strict di default.
 import { createEngine, resolveNextAction, encEcc, decEcc } from "./engine.js";
+import { LINGUA, giorniBrevi, mesiBrevi } from "./lingua.js";   // formato di date e giorni: un solo punto
 import platform from "./platform.js";
 /* MOTORE NOTTURNISTI v4 — turni arbitrari.
    Nessuna regola guarda più la lettera del turno. Tutto si decide dalla
@@ -3203,7 +3204,7 @@ return h===1 ? "un'ora" : h+" ore"};
 
 function nextDuty(P){
   const d=guardaAvanti(P,21).find(x=>!x.rest);
-  return d ? {c:d.c, o:d.o, gg:day(state.focus,d.o).toLocaleDateString("it-IT",{weekday:"long"})} : null;
+  return d ? {c:d.c, o:d.o, gg:day(state.focus,d.o).toLocaleDateString(LINGUA,{weekday:"long"})} : null;
 }
 function statusLine(P){
   const s=P.s, nd=nextDuty(P);
@@ -3595,7 +3596,7 @@ function cards(P){
     const ov=freeOverlap(0, scelto);
     const nomeScelto = tuttePer.length>1 && scelto.name ? " — "+esc(scelto.name) : "";
     out.push({k:"p",lab:"Turni condivisi"+nomeScelto,
-      val:sh.length?"Prossimo giorno insieme: "+sh[0].d.toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"short"}):"Nessun riposo in comune nei prossimi tre mesi",
+      val:sh.length?"Prossimo giorno insieme: "+sh[0].d.toLocaleDateString(LINGUA,{weekday:"long",day:"numeric",month:"short"}):"Nessun riposo in comune nei prossimi tre mesi",
       small:ov!==null?"oggi ~"+hm(ov)+" svegli insieme":"",
       // Prima la lista diceva solo QUANDO ("fra 3 giorni"), non anche a che
       // ora — l'unico orario visibile era quello di oggi (small, sopra).
@@ -3605,7 +3606,7 @@ function cards(P){
       list:sh.map(x=>{
         const fin=finestreCondivise(x.off, scelto)||[];
         const vere=fin.filter(([a,z])=>z-a>=180).sort((p,q)=>(q[1]-q[0])-(p[1]-p[0]));
-        return {a:x.d.toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"short"}),
+        return {a:x.d.toLocaleDateString(LINGUA,{weekday:"long",day:"numeric",month:"short"}),
                 b:(x.off===0?"oggi":"fra "+x.off+" giorni")+
                   (vere.length?" · "+vere.map(([a,z])=>hhmm(mod1440(a))+"–"+hhmm(mod1440(z))).join(", "):"")};
       }),
@@ -3929,7 +3930,7 @@ function coverage(){
   const p=(state.pattern||"").toUpperCase().replace(/[^A-Z]/g,"");
   if(!p) return null;
   const a=new Date(state.anchor+"T12:00:00"), z=day(a,p.length-1);
-  const fmt=d=>d.toLocaleDateString("it-IT",{day:"numeric",month:"long"});
+  const fmt=d=>d.toLocaleDateString(LINGUA,{day:"numeric",month:"long"});
   const art=d=>[1,8,11].includes(d.getDate())?"all'":"al ";
   if(state.repeat!==false) return p.length+" giorni, poi ricomincia da capo.";
   const left=dnum(z)-dnum(new Date());
@@ -4493,7 +4494,7 @@ let composizione = [];            // il ciclo che si sta componendo, una lettera
 let nuovoTurnoAperto = false;     // modulo "+ altro turno" nel compositore
 
 const ORARI_BASE = { N:{n:"Notte",s:1260,e:1860}, M:{n:"Mattino",s:420,e:840}, P:{n:"Pomeriggio",s:840,e:1260} };
-const GIORNI_SETT = ["Lun","Mar","Mer","Gio","Ven","Sab","Dom"];
+const GIORNI_SETT = giorniBrevi({ daLunedi: true, maiuscola: true });   // Lun … Dom
 const isoOggi = () => iso(new Date());
 const lunediDi = d => { const x=new Date(d); x.setDate(x.getDate()-((x.getDay()+6)%7)); return x; };
 
@@ -4629,7 +4630,7 @@ function renderDemoEsempio(){
       const d=day(base,o), k=state.ecc[iso(d)]||"?";
       const nome = k==="?" ? "—" : k==="R" ? "Riposo" : ((sh[k]&&sh[k].n)||k);
       celle+='<button type="button" class="qh-cal'+(k==="?"?" vuoto":k==="R"?" riposo":"")+'" data-segna="'+iso(d)+'">'+
-        '<small>'+(o===0?"oggi":d.toLocaleDateString("it-IT",{weekday:"short",day:"numeric"}))+'</small><b>'+esc(nome)+'</b></button>';
+        '<small>'+(o===0?"oggi":d.toLocaleDateString(LINGUA,{weekday:"short",day:"numeric"}))+'</small><b>'+esc(nome)+'</b></button>';
     }
     el.innerHTML =
       indietro("prossimi","Indietro")+
@@ -6111,7 +6112,7 @@ function renderHeader(P, f){
   if(bt){ bt.textContent = scarto===0 ? "Scegli giorno" : "Torna a oggi"; bt.classList.toggle("full", scarto!==0); }
   const stessoMese = f.getMonth() === giornoVero().getMonth() && f.getFullYear() === giornoVero().getFullYear();
   const stessoAnno = f.getFullYear() === giornoVero().getFullYear();
-  const giornoTxt = f.toLocaleDateString("it-IT", {
+  const giornoTxt = f.toLocaleDateString(LINGUA, {
     weekday: "long",
     day: "numeric",
     ...(!stessoMese ? { month: "short" } : {}),
@@ -6163,7 +6164,7 @@ function renderHeader(P, f){
     // Giorno senza turno (chi ha turni variabili): si imposta da qui con un
     // tocco, senza aprire altro. Prima diceva "oggi" anche guardando domani.
     cls="warn";
-    const g = dnum(state.focus)===dnum(giornoVero()) ? "oggi" : dnum(state.focus)===dnum(day(giornoVero(),1)) ? "domani" : state.focus.toLocaleDateString("it-IT",{weekday:"long",day:"numeric"});
+    const g = dnum(state.focus)===dnum(giornoVero()) ? "oggi" : dnum(state.focus)===dnum(day(giornoVero(),1)) ? "domani" : state.focus.toLocaleDateString(LINGUA,{weekday:"long",day:"numeric"});
     msg='<b>Che turno fai '+esc(g)+'?</b><span class="qh-chips">'+
       Object.keys(state.shifts||{}).filter(k=>state.shifts[k] && !state.shifts[k].rest).map(k=>'<button class="btn g" type="button" data-turno-giorno="'+esc(k)+'">'+esc(state.shifts[k].n)+'</button>').join("")+
       '<button class="btn g" type="button" data-turno-giorno="R">Riposo</button></span>';
@@ -6180,7 +6181,7 @@ function renderHeader(P, f){
     const diffDays = Math.round((dnum(evD) - dnum(giornoVero())) / 86400000);
     if(diffDays >= 0 && diffDays <= 3 && dnum(state.focus) === dnum(giornoVero())){
       cls = (cls ? cls + " " : "") + "info";
-      const evGiornoTxt = diffDays === 0 ? "oggi" : diffDays === 1 ? "domani" : evD.toLocaleDateString("it-IT", { weekday: "long" });
+      const evGiornoTxt = diffDays === 0 ? "oggi" : diffDays === 1 ? "domani" : evD.toLocaleDateString(LINGUA, { weekday: "long" });
       msg += '<br><span class="lucidita-banner" style="display:inline-block;margin-top:6px;font-size:13px;color:var(--blue);font-weight:600">🎯 In vista dell\'evento di ' + esc(evGiornoTxt) + ' alle ore ' + esc(state.evento.h) + ', oggi il sonno è anticipato per farti arrivare al picco di lucidità.</span>';
     }
   }
@@ -6284,7 +6285,7 @@ function renderStrip(P, f, S){
     // solo plan() lo fa — chiamarlo per ogni giorno della striscia costerebbe
     // un plan() completo x13 a ogni render, non solo una lettura leggera)
     ch+='<div class="crow'+(o===0?" on":"")+(state.ecc[iso(d)]?" mod":"")+'" data-off="'+o+'" role="button" tabindex="0">'+
-      '<span class="clab">'+d.toLocaleDateString("it-IT",{weekday:"short"}).slice(0,3)+' '+d.getDate()+'</span>'+
+      '<span class="clab">'+d.toLocaleDateString(LINGUA,{weekday:"short"}).slice(0,3)+' '+d.getDate()+'</span>'+
       '<span class="ccode">'+k+'</span>'+
       '<span class="crail">'+
       seg.map(([x,w,cl])=>'<span class="cbar '+cl+'" style="left:'+x+'%;width:'+w+'%"></span>').join("")+
@@ -6313,8 +6314,8 @@ function renderStrip(P, f, S){
     const stessoMese = d1.getMonth()===d2.getMonth() && d1.getFullYear()===d2.getFullYear();
     const annoCorrente = new Date().getFullYear();
     rangeEl.textContent = "Turni "+(stessoMese
-      ? d1.getDate()+"–"+d2.toLocaleDateString("it-IT",{day:"numeric",month:"long", ...(d2.getFullYear() !== annoCorrente ? {year:"numeric"} : {})})
-      : d1.toLocaleDateString("it-IT",{day:"numeric",month:"short"})+" – "+d2.toLocaleDateString("it-IT",{day:"numeric",month:"long", ...(d2.getFullYear() !== annoCorrente ? {year:"numeric"} : {})}));
+      ? d1.getDate()+"–"+d2.toLocaleDateString(LINGUA,{day:"numeric",month:"long", ...(d2.getFullYear() !== annoCorrente ? {year:"numeric"} : {})})
+      : d1.toLocaleDateString(LINGUA,{day:"numeric",month:"short"})+" – "+d2.toLocaleDateString(LINGUA,{day:"numeric",month:"long", ...(d2.getFullYear() !== annoCorrente ? {year:"numeric"} : {})}));
   }
 }
 
@@ -6792,7 +6793,7 @@ function renderPartnerPreview(){
   const w=finestreLibere(7);
   if(!w.length){ el.textContent="Nessuna finestra libera nei prossimi sette giorni"; return; }
   const x=w[0], scarto=dnum(x.d)-dnum(giornoVero());
-  const quando = scarto===0 ? "oggi" : scarto===1 ? "domani" : x.d.toLocaleDateString("it-IT",{weekday:"long"});
+  const quando = scarto===0 ? "oggi" : scarto===1 ? "domani" : x.d.toLocaleDateString(LINGUA,{weekday:"long"});
   el.textContent = quando.charAt(0).toUpperCase()+quando.slice(1)+(finestraTuttoIlGiorno(x)?"":" "+hhmm(x.a)+"–"+hhmm(x.b));
 }
 function renderPartner(CARDS){
@@ -6806,14 +6807,14 @@ function renderPartner(CARDS){
   const libere=finestreLibere(7);
   if(libere.length){
     const x=libere[0], tutto=finestraTuttoIlGiorno(x);
-    const giorno=x.d.toLocaleDateString("it-IT",{weekday:"long"});
+    const giorno=x.d.toLocaleDateString(LINGUA,{weekday:"long"});
     const giornoCap=giorno.charAt(0).toUpperCase()+giorno.slice(1);
     h+='<div class="whero"><span class="eyebrow" style="color:var(--blue)">Prossima finestra libera</span>'+
       '<div class="whero-num">'+esc(giornoCap)+(tutto?"":" "+hhmm(x.a)+" → "+hhmm(x.b))+'</div>'+
       '<div class="whero-sub">'+(tutto?"Libero tutto il giorno":hm(x.b-x.a)+" libere")+'</div>'+
       '</div>';
     const altre=libere.slice(1,6).map(y=>{
-      const gy=y.d.toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"});
+      const gy=y.d.toLocaleDateString(LINGUA,{weekday:"long",day:"numeric",month:"long"});
       const gyCap=gy.charAt(0).toUpperCase()+gy.slice(1);
       return '<div class="row"><b>'+esc(gyCap)+'</b><span>'+(finestraTuttoIlGiorno(y)?"tutto il giorno":hhmm(y.a)+"–"+hhmm(y.b))+'</span></div>';
     }).join("");
@@ -6833,14 +6834,14 @@ function renderPartner(CARDS){
     h+='<span class="eyebrow" style="display:block;color:var(--blue);margin:var(--gap-sezione) 0 8px">Con '+esc(nome)+'</span>';
     if(sh && sh.length){
       const x=sh[0], w=finestraMigliore(x.off, per);
-      const giorno=x.d.toLocaleDateString("it-IT",{weekday:"long"});
+      const giorno=x.d.toLocaleDateString(LINGUA,{weekday:"long"});
       const giornoCap=giorno.charAt(0).toUpperCase()+giorno.slice(1);
       h+='<div class="whero"><div class="whero-num">'+esc(giornoCap)+(w?" "+hhmm(mod1440(w[0]))+" → "+hhmm(mod1440(w[1])):"")+'</div>'+
         (w?'<div class="whero-sub">'+hm(w[1]-w[0])+' libere insieme</div>':'<div class="whero-sub">Tutto il giorno</div>')+
         '</div>';
       const altre=sh.slice(1,5).map(y=>{
         const wy=finestraMigliore(y.off, per);
-        const gy=y.d.toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"});
+        const gy=y.d.toLocaleDateString(LINGUA,{weekday:"long",day:"numeric",month:"long"});
         const gyCap=gy.charAt(0).toUpperCase()+gy.slice(1);
         return '<div class="row"><b>'+esc(gyCap)+'</b><span>'+(wy?hhmm(mod1440(wy[0]))+"–"+hhmm(mod1440(wy[1])):"tutto il giorno")+'</span></div>';
       }).join("");
@@ -7324,7 +7325,7 @@ function apriQuickShift(d){
   const isOggi=iso(quickShiftTarget)===iso(giornoVero());
   const isDomani=iso(quickShiftTarget)===iso(day(giornoVero(),1));
   const isIeri=iso(quickShiftTarget)===iso(day(giornoVero(),-1));
-  const dateStr=isOggi?"oggi":isDomani?"domani":isIeri?"ieri":quickShiftTarget.toLocaleDateString("it-IT",{weekday:"short",day:"numeric",month:"short"});
+  const dateStr=isOggi?"oggi":isDomani?"domani":isIeri?"ieri":quickShiftTarget.toLocaleDateString(LINGUA,{weekday:"short",day:"numeric",month:"short"});
 
   $("#qsDateTitle").textContent=dateStr.charAt(0).toUpperCase()+dateStr.slice(1);
   // Da Turni il giorno toccato si apre qui: si cambia il turno o si va al suo piano.
@@ -7558,7 +7559,7 @@ function buildPrintSheet(){
     if(!P){ continue; }
     const b=P.b;
     righe.push('<tr'+(o===0?' class="oggi"':'')+'>'+
-      '<td>'+esc(d.toLocaleDateString("it-IT",{weekday:"short",day:"numeric",month:"short"}))+'</td>'+
+      '<td>'+esc(d.toLocaleDateString(LINGUA,{weekday:"short",day:"numeric",month:"short"}))+'</td>'+
       '<td><b>'+esc(b.rest?"Riposo":(b.name||b.c))+'</b>'+
         (b.rest?"":'<br><span>'+hhmm(b.start)+"–"+hhmm(b.end)+'</span>')+'</td>'+
       '<td><b>'+hhmm(P.s.onset)+" → "+hhmm(P.end)+'</b><br><span>'+dur(P.s.dur)+'</span></td>'+
@@ -7569,7 +7570,7 @@ function buildPrintSheet(){
   state.focus=fPrima;
   el.innerHTML = paginaCalendario(f0) +
     '<h1 class="ps-p2">Notturnisti — il tuo ciclo, giorno per giorno</h1>'+
-    '<p class="ps-sub">'+esc(righe.length+" giorni dal "+f0.toLocaleDateString("it-IT",{day:"numeric",month:"long",year:"numeric"}))+
+    '<p class="ps-sub">'+esc(righe.length+" giorni dal "+f0.toLocaleDateString(LINGUA,{day:"numeric",month:"long",year:"numeric"}))+
     ' · sequenza <b>'+esc(state.pattern||"—")+'</b>'+(state.repeat===false?" (non si ripete)":"")+'</p>'+
     '<table><thead><tr><th>Giorno</th><th>Turno</th><th>Dormi</th><th>Pisolini</th><th>Ultimo caffè</th><th>Luce</th></tr></thead>'+
     '<tbody>'+righe.join("")+'</tbody></table>'+
@@ -7582,7 +7583,7 @@ function buildPrintSheet(){
 // In ogni casella turno, orario e quando dormire. In fondo il QR del ciclo:
 // chi lo inquadra ha la versione che si aggiorna da sola.
 function paginaCalendario(oggi){
-  const GG=["Lun","Mar","Mer","Gio","Ven","Sab","Dom"];
+  const GG=GIORNI_SETT;
   const lun=lunediDi(oggi), fPrima=state.focus, celle=[];
   for(let i=0;i<35;i++){
     const d=day(lun,i), passato=dnum(d)<dnum(oggi);
@@ -7590,7 +7591,7 @@ function paginaCalendario(oggi){
     let c="?"; try{ c=NT.codeAt(0); }catch(e){}
     let P=null; if(c!=="?"){ try{ P=NT.plan(); }catch(e){} }
     const tipo = !P ? "vuoto" : P.b.rest ? "riposo" : P.night ? "notte" : "lavoro";
-    const num = d.getDate()+(d.getDate()===1||i===0 ? " "+d.toLocaleDateString("it-IT",{month:"short"}) : "");
+    const num = d.getDate()+(d.getDate()===1||i===0 ? " "+d.toLocaleDateString(LINGUA,{month:"short"}) : "");
     celle.push('<div class="pc-g pc-'+tipo+(passato?' pc-pass':'')+(dnum(d)===dnum(oggi)?' pc-oggi':'')+'">'+
       '<span class="pc-n">'+esc(num)+'</span>'+
       (P ? '<b>'+esc(P.b.rest?"Riposo":(P.b.name||P.b.c))+'</b>'+
@@ -7602,8 +7603,8 @@ function paginaCalendario(oggi){
   const fine=day(lun,34), qr=qrSvg(96);
   return '<section class="pc">'+
     '<h1>I miei turni</h1>'+
-    '<p class="ps-sub">Dal '+esc(lun.toLocaleDateString("it-IT",{day:"numeric",month:"long"}))+' al '+esc(fine.toLocaleDateString("it-IT",{day:"numeric",month:"long",year:"numeric"}))+
-      ' · stampato il '+esc(oggi.toLocaleDateString("it-IT",{day:"numeric",month:"long"}))+'</p>'+
+    '<p class="ps-sub">Dal '+esc(lun.toLocaleDateString(LINGUA,{day:"numeric",month:"long"}))+' al '+esc(fine.toLocaleDateString(LINGUA,{day:"numeric",month:"long",year:"numeric"}))+
+      ' · stampato il '+esc(oggi.toLocaleDateString(LINGUA,{day:"numeric",month:"long"}))+'</p>'+
     '<div class="pc-griglia">'+GG.map(g=>'<div class="pc-h">'+g+'</div>').join("")+celle.join("")+'</div>'+
     '<div class="pc-piede">'+(qr?'<div class="pc-qr">'+qr+'</div>':'')+
       '<p>'+(qr?'<b>Inquadra il codice</b> con la fotocamera: si aprono i miei turni sempre aggiornati e, se usi Notturnisti, li vedi accanto ai tuoi.<br>':'')+
@@ -7619,7 +7620,7 @@ function buildShareSheet(){
   // settimana di oggi), ma con solo le ore libere: niente turni, sonno o
   // QR (il QR aprirebbe il ciclo intero, che qui si promette di non dare).
   // Più tempo libero = casella più chiara, si legge anche in bianco e nero.
-  const GG=["Lun","Mar","Mer","Gio","Ven","Sab","Dom"];
+  const GG=GIORNI_SETT;
   const oggi=giornoVero(), lun=lunediDi(oggi), fPrima=state.focus;
   const restanti=35-Math.round((dnum(oggi)-dnum(lun))/86400000);
   const perGiorno={}; let tot=0;
@@ -7631,7 +7632,7 @@ function buildShareSheet(){
     const w=perGiorno[k]||[];
     const tutto=w.length===1 && finestraTuttoIlGiorno(w[0]);
     const tipo = passato||c==="?" ? "vuoto" : tutto ? "riposo" : w.length ? "lavoro" : "notte";
-    const num=d.getDate()+(d.getDate()===1||i===0 ? " "+d.toLocaleDateString("it-IT",{month:"short"}) : "");
+    const num=d.getDate()+(d.getDate()===1||i===0 ? " "+d.toLocaleDateString(LINGUA,{month:"short"}) : "");
     let dentro="";
     if(!passato && c!=="?"){
       if(tutto) dentro='<b>Giorno libero</b>';
@@ -7644,8 +7645,8 @@ function buildShareSheet(){
   const fine=day(lun,34);
   el.innerHTML='<section class="pc pc-sola">'+
     '<h1>Quando ho tempo libero</h1>'+
-    '<p class="ps-sub">Dal '+esc(lun.toLocaleDateString("it-IT",{day:"numeric",month:"long"}))+' al '+esc(fine.toLocaleDateString("it-IT",{day:"numeric",month:"long",year:"numeric"}))+
-      ' · stampato il '+esc(oggi.toLocaleDateString("it-IT",{day:"numeric",month:"long"}))+'</p>'+
+    '<p class="ps-sub">Dal '+esc(lun.toLocaleDateString(LINGUA,{day:"numeric",month:"long"}))+' al '+esc(fine.toLocaleDateString(LINGUA,{day:"numeric",month:"long",year:"numeric"}))+
+      ' · stampato il '+esc(oggi.toLocaleDateString(LINGUA,{day:"numeric",month:"long"}))+'</p>'+
     '<div class="pc-griglia">'+GG.map(g=>'<div class="pc-h">'+g+'</div>').join("")+celle.join("")+'</div>'+
     '<div class="pc-piede"><p>Le ore di veglia fuori dal lavoro (contando anche il viaggio). Solo i giorni e le ore libere: nessun altro dato · notturnisti.club</p></div>'+
     '</section>';
@@ -7667,7 +7668,7 @@ function testoOrariLiberi(){
   const w=finestreLibere(giorniDaCondividere()), perGiorno=new Map();
   w.forEach(x=>{ const k=iso(x.d); if(!perGiorno.has(k)) perGiorno.set(k,{d:x.d,f:[]}); perGiorno.get(k).f.push(x); });
   const righe=[...perGiorno.values()].map(g=>{
-    const nome=g.d.toLocaleDateString("it-IT",{weekday:"short",day:"numeric",month:"short"});
+    const nome=g.d.toLocaleDateString(LINGUA,{weekday:"short",day:"numeric",month:"short"});
     const ore=g.f.map(x=>hhmm(x.a)+"–"+hhmm(x.b)).join(", ");
     return "• "+nome.charAt(0).toUpperCase()+nome.slice(1)+": "+ore;
   });
@@ -7919,7 +7920,7 @@ function popolaSelettoriScambio(selA, selB){
   for(let i=-3;i<=14;i++){
     const d=day(state.focus,i);
     const isToday=iso(d)===iso(giornoVero());
-    const dayName=isToday?"Oggi":d.toLocaleDateString("it-IT",{weekday:"short",day:"numeric"});
+    const dayName=isToday?"Oggi":d.toLocaleDateString(LINGUA,{weekday:"short",day:"numeric"});
     const shiftCode=NT.codeAt(i);
     const shiftName=nameOf(shiftCode);
     const text=dayName+" ("+shiftName+")";
@@ -8136,7 +8137,7 @@ function renderOpzLucidita(){
   const ev=state.evento;
   if(ev && ev.d && ev.h){
     const d=parseIso(ev.d);
-    const dStr=d.toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+    const dStr=d.toLocaleDateString(LINGUA,{weekday:"long",day:"numeric",month:"long",year:"numeric"});
     cont.innerHTML=
       '<div style="background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;margin-bottom:10px">'+
         '<span style="font-size:12px;color:var(--dim);text-transform:uppercase;font-weight:600;display:block">Evento programmato</span>'+
@@ -8341,8 +8342,8 @@ async function condividiCicloWhatsApp(){
     }
   }
 
-  const giorni = ["Dom","Lun","Mar","Mer","Gio","Ven","Sab"];
-  const mesi = ["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"];
+  const giorni = giorniBrevi({ maiuscola: true });   // Dom … Sab, come getDay()
+  const mesi = mesiBrevi();
 
   const pi = typeof presetIndex === "function" ? presetIndex() : -1;
   const nomeCiclo = (pi >= 0 && typeof PRESETS !== "undefined" && PRESETS[pi])
