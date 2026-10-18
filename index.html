@@ -4994,7 +4994,7 @@ function vociAttivazione(){
   }
   v.push(
     {id:"turni", t:"I turni dei prossimi giorni", d:"Così ogni giorno il piano è pronto, senza dirgli che turno fai", ok: state.repeat!==false || futuri>=7},
-    {id:"notifiche", t:"Promemoria sul telefono", d: perm==="denied" ? "Bloccati dal telefono: tocca per sapere come riattivarli" : (window.NT_APP.nativo ? "Cambi di turno, quando dormire, rientro dopo la notte: scegli tu quali" : "Cambi di turno, quando dormire, rientro: arrivano finché il browser tiene attiva l'app, riaprila ogni giorno o due"), ok: promemoriaAttivi(), skip: perm==="unsupported"},
+    {id:"notifiche", t:"Promemoria sul telefono", d: perm==="denied" ? "Bloccati dal telefono: tocca per sapere come riattivarli" : (window.NT_APP.nativo || platform.notify.pushStato()!=="no" ? "Cambi di turno, quando dormire, rientro dopo la notte: scegli tu quali" : "Cambi di turno, quando dormire, rientro: arrivano finché il browser tiene attiva l'app, riaprila ogni giorno o due"), ok: promemoriaAttivi(), skip: perm==="unsupported"},
     {id:"calendario", t:"Nel calendario del telefono", d: platform.calendar.available ? (platform.calendar.attivo()
         ? "Calendario «Notturnisti», solo su questo telefono"+(platform.calendar.ultimoSync()?" · aggiornato alle "+_hhmmDa(platform.calendar.ultimoSync()):"")
         : "Turni e ore di sonno nell'app Calendario, aggiornati da soli") : "Turni e ore di sonno nel calendario che usi già (Google, Apple…), aggiornati da soli", ok: platform.calendar.available ? platform.calendar.attivo() : !!(window.NTPaid && window.NTPaid.paid())}
@@ -8424,6 +8424,11 @@ async function invitaChiLavoraConTe(){
 if(store.get("sub") && $("#privacyNotaAbbonato")) $("#privacyNotaAbbonato").hidden=false;
 // App nativa: il file .ics (download di un blob) non si può salvare dal
 // WebView, e i promemoria li programma il sistema — testo diverso, onesto.
+// Web con le push (Chrome, Safari sul computer, iPhone dall'app sulla Home):
+// i promemoria arrivano anche ad app chiusa. Detto insieme a cosa resta sul
+// server per farlo: solo gli orari, non cosa dicono.
+if(!window.NT_APP.nativo && platform.notify.pushStato && platform.notify.pushStato()!=="no" && $("#notifHint"))
+  $("#notifHint").textContent="Arrivano anche ad app chiusa: per svegliarla all'ora giusta il nostro server conserva solo gli orari dei promemoria (non cosa dicono), finché li tieni accesi. Non sostituiscono la sveglia.";
 if(window.NT_APP.nativo){
   if($("#doIcs")) $("#doIcs").hidden=true;
   if($("#notifHint")) $("#notifHint").textContent="I promemoria arrivano anche ad app chiusa. Se mancano, controlla che il risparmio batteria non limiti Notturnisti. Non sostituiscono la sveglia.";
