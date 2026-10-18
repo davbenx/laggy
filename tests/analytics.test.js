@@ -29,7 +29,7 @@ function clientAllowed() {
 
 test("opt-in: senza consenso non parte niente e non si scrive niente", () => {
   const { A, store, sent } = loadClient({ "nt:analytics-optout": "false", "nt:analytics-firstseen": '"2026-01-01"' });
-  A.track("today_viewed");
+  A.track("example_started");
   assert.equal(A.isEnabled(), false);
   assert.equal(A.answered(), false);
   assert.equal(sent.length, 0);
@@ -39,12 +39,12 @@ test("opt-in: senza consenso non parte niente e non si scrive niente", () => {
 test("opt-in: dopo il sì gli eventi partono, dopo il no si cancella tutto", () => {
   const { A, store, sent } = loadClient();
   A.setEnabled(true);
-  A.track("today_viewed");
-  assert.ok(sent.some(b => JSON.parse(b).event === "today_viewed"));
+  A.track("example_started");
+  assert.ok(sent.some(b => JSON.parse(b).event === "example_started"));
   assert.ok(sent.some(b => JSON.parse(b).event === "active_day"));
   A.setEnabled(false);
   const n = sent.length;
-  A.track("today_viewed");
+  A.track("example_started");
   assert.equal(sent.length, n);
   assert.deepEqual([...store.keys()], ["nt:analytics-consent"]);
   assert.equal(A.answered(), true);
@@ -61,11 +61,16 @@ test("sanitizeEvent: evento sconosciuto scartato", () => {
 });
 
 test("sanitizeEvent: proprietà non ammesse o valori liberi non passano", () => {
-  assert.deepEqual(sanitizeEvent({ event: "today_viewed", props: { email: "a@b.it" } }), { event: "today_viewed", prop: "" });
+  assert.deepEqual(sanitizeEvent({ event: "example_started", props: { email: "a@b.it" } }), { event: "example_started", prop: "" });
   assert.deepEqual(sanitizeEvent({ event: "plan_generated", props: { pattern_type: "Mario Rossi 21:00" } }), { event: "plan_generated", prop: "" });
   assert.deepEqual(sanitizeEvent({ event: "plan_generated", props: { pattern_type: "fisso_N" } }), { event: "plan_generated", prop: "pattern_type=fisso_n" });
   assert.deepEqual(sanitizeEvent({ event: "active_day", props: { platform: "windows" } }), { event: "active_day", prop: "" });
   assert.deepEqual(sanitizeEvent({ event: "active_day", props: { platform: "android" } }), { event: "active_day", prop: "platform=android" });
+  // piattaforme larghe e chiuse: superficie, sistema, famiglia del browser
+  assert.deepEqual(sanitizeEvent({ event: "active_day", props: { platform: "pwa_ios_safari" } }), { event: "active_day", prop: "platform=pwa_ios_safari" });
+  assert.deepEqual(sanitizeEvent({ event: "active_day", props: { platform: "app_android" } }), { event: "active_day", prop: "platform=app_android" });
+  assert.deepEqual(sanitizeEvent({ event: "active_day", props: { platform: "web_ios_safari_17_4" } }), { event: "active_day", prop: "" });
+  assert.deepEqual(sanitizeEvent({ event: "active_day", props: { platform: "web_android_pixel8" } }), { event: "active_day", prop: "" });
   assert.deepEqual(sanitizeEvent({ event: "onboarding_step_completed", props: { step: 3 } }), { event: "onboarding_step_completed", prop: "step=3" });
 });
 
@@ -108,7 +113,7 @@ test("POST /collect: incrementa il contatore giusto e risponde sempre 204", asyn
   assert.equal(r.status, 204);
   r = await onRequestPost({ env: { DB }, request: req(JSON.stringify({ event: "inventato" })) });
   assert.equal(r.status, 204);
-  r = await onRequestPost({ env: {}, request: req(JSON.stringify({ event: "today_viewed" })) }); // senza DB: no-op
+  r = await onRequestPost({ env: {}, request: req(JSON.stringify({ event: "example_started" })) }); // senza DB: no-op
   assert.equal(r.status, 204);
   const day = new Date(t).toISOString().slice(0, 10);
   assert.deepEqual([...DB.rows], [[day + "|plan_generated|pattern_type=notte", 2]]);

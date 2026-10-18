@@ -4427,7 +4427,7 @@ function renderBenvenutoLink(){
 }
 if($("#benvenutoLink")) $("#benvenutoLink").addEventListener("click", e=>{
   if(e.target.closest("#chiudiBenvenuto")){ benvenutoLinkChiuso=true; renderBenvenutoLink(); return; }
-  if(e.target.closest("#doSonoIMiei")){ benvenutoLinkChiuso=true; state.turniConfigurati=true; salva(); track("setup_item", {item:"ciclo_da_link"}); render(); toast("Fatto: questo è il tuo piano"); return; }
+  if(e.target.closest("#doSonoIMiei")){ benvenutoLinkChiuso=true; state.turniConfigurati=true; salva(); track("share_accepted"); render(); toast("Fatto: questo è il tuo piano"); return; }
   if(e.target.closest("#doConfiguraLaTua")){ benvenutoLinkChiuso=true; state.turniConfigurati=false; store.set("turniConfigurati", false); demoEsempioChiuso=false; demoEsempioSubflow="home"; render(); }
 });
 
@@ -5071,6 +5071,8 @@ function renderAttivazione(){
     if(!attivazioneVisibile()) el.hidden=true;
     else {
       el.hidden=false; el.className="card attiva-card";
+      // l'installazione proposta dalla lista conta come la proposta del banner
+      if(!installBannerTracciato && voci.some(x=>x.id==="installa" && !x.ok)){ installBannerTracciato=true; track("install_prompt_shown"); }
       el.innerHTML='<div class="attiva-head"><b style="font-size:15px">Rendi automatico il tuo piano</b><span class="attiva-prog">'+fatte+' di '+voci.length+'</span></div>'+
         '<div class="attiva-bar"><i style="width:'+Math.round(100*fatte/voci.length)+'%"></i></div>'+
         htmlVociAttivazione(voci)+
@@ -5432,7 +5434,7 @@ function installBannerVisibile(){
   const heroAttivo = (!state.turniConfigurati && !demoEsempioChiuso);
   return !(state.installBannerOff || giaInstallata() || mostraBenvenuto || firstPlanBannerVisibile() || backupNudgeVisibile() || !pronto || heroAttivo || !(installPromptEvento || ios));
 }
-let installBannerTracciato=false;
+var installBannerTracciato=false;   // var: letta anche da renderAttivazione(), mai in TDZ
 function renderInstallBanner(){
   const el=$("#installBanner"); if(!el) return;
   if(!installBannerVisibile()){ el.hidden=true; return; }
@@ -8279,7 +8281,6 @@ async function condividiCiclo(){
   // ciclo (se fa gli stessi turni ha subito il piano), a chi ce l'ha propone
   // di aggiungere questi turni alle sue persone.
   const testo="Uso Notturnisti per i turni: mi dice quando dormire, il caffè e la luce, giorno per giorno. Gratis, senza account. Dal link si apre già con i miei turni: se fai gli stessi hai subito il tuo piano, se no li cambi in due tocchi.";
-  track("share_started");
   // share_created solo su una consegna vera del link (non se l'utente
   // annulla il foglio di condivisione nativo: lì il link non è arrivato
   // da nessuna parte).
@@ -8409,7 +8410,6 @@ async function invitaChiLavoraConTe(){
   if(state.turniConfigurati && state.pattern){ condividiCiclo(); return; }
   const url=window.NT_APP.nativo ? "https://app.notturnisti.club/" : window.NT_APP.base;
   const testo="Uso Notturnisti per i turni: mi dice quando dormire, il caffè e la luce, giorno per giorno. Gratis, senza account.";
-  track("share_started");
   try{
     if(platform.canShare()){ await platform.share({title:"Notturnisti",text:testo,url}); track("share_created", {tipo:"app"}); return; }
   }catch(e){ if(e && e.name==="AbortError") return; }
@@ -9101,7 +9101,6 @@ function apriIntro(nascondiPiano){
   // ingresso al wizard a schermo pieno: doConfiguraEsempio/doConfiguraLaTua,
   // entrambi al primo avvio) — apriIntro() è sempre un vero inizio, non una
   // riapertura per modificare.
-  track("onboarding_started");
   WIZ.gotoOggi=true;   // di default "vedi il piano" porta a Oggi
   // "wiz-open" governa solo la disposizione (schermo pieno, navigazione
   // fissa in fondo) — sempre attiva quando il wizard è aperto, qualunque
@@ -9332,7 +9331,8 @@ function contaFunzioniAttive(){
     store.set("funzioniContate", isoOggi());
     const pl = platform.isNative ? (platform.name==="ios"?"i":"a") : (window.matchMedia("(display-mode: standalone)").matches?"p":"w");
     const cal = platform.calendar.available ? platform.calendar.attivo() : !!(window.NTPaid && window.NTPaid.paid());
-    track("funzioni_attive", {mix: pl+"_n"+(promemoriaAttivi()?1:0)+"c"+(cal?1:0)+"w"+(platform.widget.presenti()>0?1:0)});
+    track("funzioni_attive", {mix: pl+"_n"+(promemoriaAttivi()?1:0)+"c"+(cal?1:0)+"w"+(platform.widget.presenti()>0?1:0)+
+      (platform.isNative ? "" : "p"+(promemoriaAttivi() && platform.notify.pushStato && platform.notify.pushStato()==="attive" ? 1 : 0))});
   }catch(e){}
 }
 
@@ -9361,10 +9361,6 @@ if($("#doNotificheWiz")) $("#doNotificheWiz").onclick=ntChiediPermesso;
 // partner, modifica. Più = calendario automatico ed extra.
 function setTab(t){
   const tab = (t==="turni"||t==="opzioni") ? t : "oggi";
-  // Stile "pageview", non "una volta sola": ogni volta che si arriva
-  // davvero su Oggi/Turni, non solo la primissima. Opzioni non ha un
-  // evento suo nella tassonomia (non è una delle due tab vere).
-  if(tab==="oggi") track("today_viewed"); else if(tab==="turni") track("calendar_viewed");
   document.body.classList.remove("tab-oggi","tab-turni","tab-opzioni","giornata");
   chiudiAndamenti();
   chiudiVederci();

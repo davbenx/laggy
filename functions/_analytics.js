@@ -19,17 +19,11 @@
 // che coincidano, così aggiungere un evento solo da una parte fa fallire i test.
 export const ALLOWED = {
   example_started: [],
-
-  onboarding_started: [],
   onboarding_step_completed: ["step"],
   onboarding_abandoned: ["step"],
   onboarding_completed: [],
 
   plan_generated: ["pattern_type"],
-  today_viewed: [],
-  calendar_viewed: [],
-
-  share_started: [],
   share_created: ["tipo"],
   share_opened: [],
   share_accepted: [],
@@ -65,7 +59,13 @@ export const ALLOWED = {
 // cosa viene scartata — un campo libero è il modo in cui un dato personale
 // finisce per sbaglio in un database di "statistiche anonime".
 const VALUE_RE = /^[a-z0-9_]{1,24}$/;
-const PLATFORMS = new Set(["web", "pwa", "android", "ios"]);
+// Piattaforme: app_android | app_ios | {web,pwa}_{ios,android,computer}_{safari,
+// chrome,samsung,firefox,altro}. Un insieme chiuso: nient'altro entra.
+// I quattro valori di prima restano validi finché le copie vecchie dell'app
+// (in cache nei browser) non si aggiornano.
+const PLATFORMS = new Set(["app_android", "app_ios", "web", "pwa", "android", "ios"]);
+for (const s of ["web", "pwa"]) for (const o of ["ios", "android", "computer"])
+  for (const b of ["safari", "chrome", "samsung", "firefox", "altro"]) PLATFORMS.add(s + "_" + o + "_" + b);
 
 export const RETENTION_DAYS = 400;      // contatori aggregati
 export const FEED_RETENTION_DAYS = 90;  // hash dei feed: il minimo per vedere un trend
