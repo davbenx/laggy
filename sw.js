@@ -173,7 +173,7 @@ function _schedule(items) {
         renotify: true,
         silent: n.kind === "bedtime",  // la sveglia fa rumore, il promemoria no
         requireInteraction: n.kind === "wake",  // la sveglia resta finché non la tocchi
-        data: { kind: n.kind, tab: n.kind === "wake" ? "diario" : "oggi" }
+        data: { kind: n.kind, tab: (n.extra && n.extra.tab) || (n.kind === "wake" ? "diario" : "oggi") }
       };
       // Azioni rapide sul check-in sonno (solo sveglia)
       if (n.kind === "wake") {

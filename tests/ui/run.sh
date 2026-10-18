@@ -9,6 +9,13 @@
 set -uo pipefail
 cd "$(dirname "$0")/../.."
 OUT="${OUT:-$(mktemp -d)}"; export OUT
+# Ora locale verso mezzogiorno: tra mezzanotte e la sveglia l'app conta
+# ancora il giorno prima (voluto), e alcune suite che dicono "oggi"
+# fallivano solo se lanciate di notte. TZ=... dal chiamante vince.
+if [ -z "${TZ:-}" ]; then
+  n=$((12 - 10#$(date -u +%H)))
+  if [ $n -ge 0 ]; then export TZ="Etc/GMT-$n"; else export TZ="Etc/GMT+$((-n))"; fi
+fi
 (cd app && npm run -s build:web >/dev/null)
 python3 -m http.server 8765 --bind 127.0.0.1 >/dev/null 2>&1 & S1=$!
 (cd app/www && exec python3 -m http.server 8766 --bind 127.0.0.1 >/dev/null 2>&1) & S2=$!
@@ -18,7 +25,7 @@ if [ -z "${AXE_JS:-}" ]; then
   mkdir -p "$OUT/axe" && (cd "$OUT/axe" && npm i --silent --no-save axe-core@4.10.2 >/dev/null 2>&1)
   export AXE_JS="$OUT/axe/node_modules/axe-core/axe.min.js"
 fi
-SUITE=("$@"); [ ${#SUITE[@]} -eq 0 ] && SUITE=(personas comp nudge robust opz attiva fix5 msg share3 ux3 adatta notif3 native2 inviti indietro cancella footlinks overflow perf e2e)
+SUITE=("$@"); [ ${#SUITE[@]} -eq 0 ] && SUITE=(personas comp nudge robust opz attiva fix5 msg share3 ux3 adatta notif3 native2 inviti indietro cancella footlinks notiftap overflow perf e2e)
 fail=0
 for s in "${SUITE[@]}"; do
   f=tests/ui/$s.mjs; [ -f "$f" ] || f=tests/ui/$s.cjs

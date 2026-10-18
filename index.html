@@ -618,6 +618,9 @@ background:none;border:none;width:100%;cursor:pointer;font-family:inherit;text-d
 .wizbar>i{display:block;height:100%;width:25%;background:var(--blue);border-radius:99px;transition:width .28s ease}
 .wizstep{font-size:12.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);font-weight:600;margin-top:9px}
 .wstep{animation:wfade .22s ease}
+@keyframes evidenzia{0%,40%{box-shadow:0 0 0 3px var(--blue)}100%{box-shadow:0 0 0 3px transparent}}
+.evidenzia{animation:evidenzia 1.6s ease-out;border-radius:12px}
+@media (prefers-reduced-motion:reduce){.evidenzia{animation:none}}
 @keyframes wfade{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:none}}
 .wq{font-family:var(--serif);font-size:23px;line-height:1.25;margin:0 0 6px}
 .wsub{font-size:14px;color:var(--dim);line-height:1.55;margin:0 0 18px}
@@ -9131,14 +9134,38 @@ platform.onBackButton(()=>{
   if(document.body.classList.contains("tab-turni")){ setTab("oggi"); render(); return true; }
   return false;
 });
+// Dove porta il tocco su una notifica (nativa o web) o su una scorciatoia
+// dell'icona: la sezione che serve per fare la cosa che la notifica chiede,
+// sempre sul giorno di adesso (la notifica parla di ora, non del giorno che
+// stavi guardando).
+//  · diario  → il modulo "Il tuo sonno" (orari e voto)
+//  · pisolino → il pisolino nella stessa scheda (Fatto / Saltato)
+//  · domani  → la scelta del turno di domani
+//  · turni   → il calendario dei turni
+//  · consiglio:<k> → l'impostazione o l'attivazione di cui parla
+function apriDestinazione(tab){
+  try{
+    const t=String(tab||"oggi").replace(/\?.*/,"");
+    chiudiQuickShift();
+    if(t==="turni"){ setTab("turni"); return; }
+    state.focus=giornoVero(); cicloOff=0;
+    if(t==="domani"){ setTab("oggi"); setTimeout(()=>apriQuickShift(day(giornoVero(),1)), 300); return; }
+    if(t.startsWith("consiglio:")){ const k=t.slice(10);
+      if(k==="calendario" || k==="widget"){ setTab("oggi"); setTimeout(()=>eseguiAttivazione(k), 300); return; }
+      apriOpzioni(); setTimeout(()=>{ const b=$('[data-opz="'+(k==="viaggio"?4:3)+'"]'); if(b){ if(b.getAttribute("aria-expanded")!=="true") b.click(); b.scrollIntoView({block:"start",behavior:"smooth"}); } }, 300); return; }
+    setTab("oggi");
+    if(t==="diario" || t==="pisolino") setTimeout(()=>{
+      const drem=$("#essenziale .drem"); if(!drem) return;
+      const nap=t==="pisolino" && drem.querySelector("[data-nap]");
+      const dove=nap ? nap.closest(".diary") : drem;
+      dove.scrollIntoView({behavior:"smooth",block:"center"});
+      dove.classList.remove("evidenzia"); void dove.offsetWidth; dove.classList.add("evidenzia");
+    }, 150);
+  }catch(e){}
+}
 platform.onNotificationTap((tab, kind)=>{
   if(kind) track("notif_aperta", {tipo:String(kind)});
-  try{ const t=String(tab||"oggi").replace(/\?.*/,"");
-    if(t==="domani"){ setTab("oggi"); render(); setTimeout(()=>apriQuickShift(day(giornoVero(),1)), 300); return; }
-    if(t.startsWith("consiglio:")){ const k=t.slice(10);
-      if(k==="calendario" || k==="widget"){ setTab("oggi"); render(); setTimeout(()=>eseguiAttivazione(k), 300); return; }
-      apriOpzioni(); setTimeout(()=>{ const b=$('[data-opz="'+(k==="viaggio"?4:3)+'"]'); if(b){ if(b.getAttribute("aria-expanded")!=="true") b.click(); b.scrollIntoView({block:"start",behavior:"smooth"}); } }, 300); return; }
-    setTab({oggi:"oggi",diario:"oggi",turni:"turni"}[t]||"oggi"); render(); }catch(e){}
+  apriDestinazione(tab);
 });
 platform.onResume(leggiCanaliSpenti);
 // Prima attivazione dopo il load (se il permesso è già stato concesso)
@@ -9241,12 +9268,9 @@ if($("#andamenti")) $("#andamenti").addEventListener("click", e=>{
 });
 document.body.classList.add("tabs");
 // scorciatoie dell'icona (manifest shortcuts): ?t=oggi|diario|turni
-{ let t="oggi", diario=false;
-  try{ const q=new URLSearchParams(location.search).get("t");
-    if(q==="turni") t="turni"; else if(q==="diario"){ t="oggi"; diario=true; } }catch(e){}
-  setTab(t);
-  if(diario){ const b=$('#essenziale [data-open], #essenziale [data-asplan]');
-    if(b && b.scrollIntoView) setTimeout(()=>b.scrollIntoView({behavior:"smooth",block:"center"}),120); } }
+{ let q=null; try{ q=new URLSearchParams(location.search).get("t"); }catch(e){}
+  setTab(q==="turni" ? "turni" : "oggi");
+  if(q && q!=="oggi") addEventListener("load", ()=>setTimeout(()=>apriDestinazione(q), 300)); }
 
 
 
@@ -9306,9 +9330,7 @@ addEventListener("nt:refresh", ()=>{ if(_refreshInAttesa) return; _refreshInAtte
           if(!e.data) return;
           if(e.data.type === "NT_NAV"){
             try{
-              var tab = String(e.data.tab||"oggi").replace(/\?.*/,"");
-              var tabn = {oggi:"oggi",diario:"oggi",turni:"turni"}[tab]||"oggi";
-              setTab(tabn); render();
+              apriDestinazione(e.data.tab);
             }catch(err){}
           }
         });

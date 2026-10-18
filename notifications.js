@@ -105,7 +105,7 @@ export function buildSchedule(config, opts = {}) {
     if (want("nap") && P.naps)
       P.naps.forEach((n, i) => push(base, n.a, "nap",
         (n.rec || n.debito) ? "Pisolino di recupero" : "Pisolino",
-        "Fino alle " + hhmm(at(mid, n.b)) + "."));
+        "Fino alle " + hhmm(at(mid, n.b)) + ".", { tab: "pisolino" }));
 
     if (want("coffee"))
       push(base, P.cut, "coffee", "Ultimo caffè",
@@ -151,7 +151,7 @@ export function buildSchedule(config, opts = {}) {
         righe.push(GIORNI[d.getDay()] + " " + (c === "?" ? "?" : sh ? sh.n : "riposo"));
       }
       e.state.focus = base;
-      push(base, 19 * 60, "settimana", "La tua settimana", righe.join(" · "));
+      push(base, 19 * 60, "settimana", "La tua settimana", righe.join(" · "), { tab: "turni" });
     }
   }
   e.state.focus = f0;
