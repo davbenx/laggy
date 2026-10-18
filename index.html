@@ -823,6 +823,8 @@ justify-content:center;flex:none;width:44px;height:44px;border-radius:999px}
 .empty p{font-size:14px;color:var(--dim);line-height:1.55;max-width:36ch;margin:0 auto}
 .wizowl{display:block;margin:0 auto 12px;border-radius:9px}
 .essnudge{font-size:12.5px;color:var(--faint);margin-top:14px;line-height:1.55}
+.esshint{font-size:13px;color:var(--dim);margin:0 2px 10px}
+.qh-fiducia{font-size:12.5px;color:var(--dim);margin:-8px 0 14px}
 .essnudge button{background:none;border:none;color:var(--blue);font:inherit;cursor:pointer;
 text-decoration:underline;text-underline-offset:2px;padding:12px 2px;margin:-12px -2px}
 body.essenziale:not(.tabs) .cap,body.essenziale:not(.tabs) #cyc,
@@ -1100,6 +1102,11 @@ body.tab-opzioni #partner,body.tab-opzioni #cards,body.tab-opzioni #luciditaGior
 /* la sezione Opzioni vive solo nella sua destinazione */
 body:not(.tab-opzioni) #opzioni{display:none}
 #opzioni .tool{margin-bottom:10px}
+/* La freccia per uscire resta a portata di dito mentre si scorre: la pagina
+   è lunga, e sul web su iPhone non c'è un tasto indietro. Sotto la barra in
+   alto (anche lei fissa): --appbar-h la misura lo script. */
+#opzioni .opz-testa{position:sticky;top:var(--appbar-h,64px);z-index:19;background:var(--bg-blur);padding:6px 0;box-shadow:-20px 0 0 var(--bg-blur),20px 0 0 var(--bg-blur);clip-path:inset(0 -20px)}
+@supports (backdrop-filter:blur(1px)){#opzioni .opz-testa{backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}}
 .opz-info{margin-top:0}
 /* Il nodo "prima di chiudere, salva" appartiene alla fine del wizard — dentro
    Dettagli del piano (Opzioni) è fuori contesto, Salva/Esporta hanno già la
@@ -1715,7 +1722,7 @@ header b{font-size:23px}
 <div id="cards"></div>
 
 <div id="opzioni">
-  <div style="display:flex;align-items:center;gap:12px;margin:2px 0 var(--gap-sezione)">
+  <div class="opz-testa" style="display:flex;align-items:center;gap:12px;margin:2px 0 var(--gap-sezione)">
     <button type="button" class="themebtn" id="chiudiOpzioni" aria-label="Torna indietro">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
     </button>
@@ -4527,6 +4534,7 @@ function renderDemoEsempio(){
     el.innerHTML =
       '<h2 class="qh-h">Che turno fai oggi?</h2>'+
       '<p class="qh-sub">Un tocco e hai il piano: quando dormire, l\'ultimo caffè, la luce.</p>'+
+      '<p class="qh-fiducia">Gratis, senza account: turni e sonno restano sul tuo telefono.</p>'+
       '<div class="qh-grid">'+
         tile("N",ICON.moon,"Notte","di solito "+orarioTesto(sh.N||ORARI_BASE.N))+
         tile("M",ICON.sun,"Mattino","di solito "+orarioTesto(sh.M||ORARI_BASE.M))+
@@ -5872,7 +5880,7 @@ function renderFormaGiorno(P){
 
   const legenda=['<span class="fg-key"><i style="background:var(--blue)"></i>Sonno</span>'];
   if(!P.b.rest) legenda.push('<span class="fg-key"><i style="background:var(--orange-fill)"></i>Turno</span>');
-  if(cbtVisibile) legenda.push('<span class="fg-key"><i style="background:var(--risk)"></i>Sonnolenza</span>');
+  if(cbtVisibile) legenda.push('<span class="fg-key"><i style="background:var(--risk)"></i>Picco di sonnolenza</span>');
 
   el.innerHTML =
     '<svg viewBox="0 0 '+W+' 30" style="width:100%;height:30px;display:block" role="img" aria-label="Forma della giornata">'+
@@ -6042,6 +6050,10 @@ function renderEssenziale(P, CARDS){
   // "adesso" sullo stesso schermo, in competizione. Questa resta la
   // lista cronologica semplice, senza separatori.
   let h=voci.map(v=>v.html).join("");
+  // Ogni voce si apre e spiega il suo perché, ma l'unico indizio era la
+  // freccina: al primo piano lo si dice una volta, finché non se ne apre una.
+  if(state.turniConfigurati && !store.get("perchéVisto", false) && voci.some(v=>/class="erow"/.test(v.html)))
+    h='<p class="esshint">Tocca una voce per sapere perché.</p>'+h;
 
   // Affina la finestra di sonno: si chiede DOPO aver mostrato il piano
   if(state.freeBed==="23:30" && state.freeWake==="07:30")
@@ -7515,6 +7527,7 @@ function diaryClick(e){
 if($("#essenziale")) $("#essenziale").addEventListener("toggle", e=>{
   const r=e.target; if(!r.dataset || !r.dataset.row) return;
   if(r.open) essAperte.add(r.dataset.row); else essAperte.delete(r.dataset.row);
+  if(r.open && !store.get("perchéVisto", false)){ store.set("perchéVisto", true); const h=$("#essenziale .esshint"); if(h) h.remove(); }
 }, true);
 ["#cards","#essenziale","#andamenti"].forEach(s=>{ const el=$(s); if(el){ el.addEventListener("change",diaryChange); el.addEventListener("click",diaryClick); } });
 // Il foglio per il frigo: si costruisce apposta, non si spreme il DOM vivo.
@@ -9389,6 +9402,20 @@ function apriOpzioni(){
 function chiudiOpzioniPagina(){ setTab(tabPrimaDiOpzioni); }
 if($("#doOpzioni")) $("#doOpzioni").onclick=apriOpzioni;
 if($("#chiudiOpzioni")) $("#chiudiOpzioni").onclick=chiudiOpzioniPagina;
+{ const ab=document.querySelector(".appbar");
+  const misura=()=>{ if(ab) document.documentElement.style.setProperty("--appbar-h", ab.offsetHeight+"px"); };
+  misura(); if(ab && window.ResizeObserver) new ResizeObserver(misura).observe(ab); }
+// Impostazioni: ogni modifica si salva da sola. Un «Salvato» discreto quando
+// cambi un valore (orari, tempi, scelte), per togliere il dubbio senza un
+// pulsante «Salva» che farebbe credere il contrario. Gli interruttori hanno
+// già il loro messaggio.
+{ let t=0;
+  if($("#opzioni")) $("#opzioni").addEventListener("change", e=>{
+    const x=e.target; if(!x || !x.matches) return;
+    if(x.matches('input[type=checkbox],input[type=radio]') || x.closest(".opz-funz")) return;
+    // se la modifica ha già un suo messaggio (un avviso, un errore), resta quello
+    clearTimeout(t); t=setTimeout(()=>{ const el=$("#toast"); if(!el || !el.classList.contains("on")) toast("Salvato"); }, 350);
+  }); }
 // "Modifica" del ciclo: lo stesso flusso lineare dell'inizio (com'è il ciclo
 // → schema o composizione → oggi dove sei → orari), non le Opzioni.
 if($("#tEdit")) $("#tEdit").onclick=()=>{ setTab("oggi"); apriFlussoProssimi("prossimi"); };
