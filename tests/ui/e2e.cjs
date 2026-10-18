@@ -6,8 +6,13 @@ const { chromium } = require(require("child_process").execSync("npm root -g").to
   await ctx.addInitScript(() => { try { Object.defineProperty(Notification, "permission", { get: () => "granted" }); } catch (e) {} });
   const p = await ctx.newPage();
   const errs = [], posts = [];
-  p.on("console", m => { if (m.type() === "error") errs.push(m.text()); });
+  // Le finestre di prova sono "in incognito": lì Chrome rifiuta le push e lo
+  // scrive da sé in console (non si può rilevare prima). Non è un errore dell'app.
+  p.on("console", m => { if (m.type() === "error" && !/Push API in incognito/.test(m.text())) errs.push(m.text()); });
   p.on("pageerror", e => errs.push("PAGEERROR " + e.message));
+  // API delle push (server vero solo in produzione): qui una finta, il resto del flusso è vero.
+  await ctx.route("**/push/key", r => r.fulfill({ contentType: "application/json", body: JSON.stringify({ key: "BFbDN3WLhHfuy9WzTiEnlBomE0rIAr9URfx7Jow-g1u5gk_eRZ9rEWB2TEMsJWK6ZlkIqrg83WDoVWHj2xa4B6I" }) }));
+  await ctx.route("**/push/sync", r => r.fulfill({ contentType: "application/json", body: "{\"ok\":true}" }));
   await ctx.route("**/collect", async r => { const buf = r.request().postDataBuffer(); posts.push(buf ? buf.toString() : null); await r.fulfill({ status: 204 }); });
   await p.goto("http://localhost:8765/index.html");
   await p.waitForTimeout(2500);

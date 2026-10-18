@@ -52,7 +52,14 @@ const webNotify = {
     if (!sw) return false;
     sw.postMessage({ type: "NT_SCHEDULE", items });
     periodicSync();
+    syncPush(items);
     return true;
+  },
+  // "attive": il server sveglia l'app all'ora dei promemoria (arrivano anche
+  // ad app chiusa); "no": il browser non lo permette (iPhone fuori dalla Home).
+  pushStato() {
+    if (!pushPossibile()) return "no";
+    try { return localStorage.getItem("nt-push-ult") ? "attive" : "in-attesa"; } catch (e) { return "in-attesa"; }
   },
   // Una notifica subito, per vedere che arrivano (non tocca la coda del piano).
   async prova() {
@@ -63,6 +70,49 @@ const webNotify = {
   }
 };
 webNotify.canaliSpenti = async () => [];
+
+// Web Push (vedi functions/_push.js): al server vanno SOLO gli orari dei
+// promemoria, mai cosa dicono; all'ora giusta manda una push vuota e il
+// service worker mostra la notifica dal piano salvato sul telefono. Si
+// rimanda solo quando gli orari cambiano. Lista vuota (promemoria spenti):
+// iscrizione cancellata, sul server e nel browser.
+function pushPossibile() {
+  return typeof navigator !== "undefined" && "serviceWorker" in navigator && typeof window !== "undefined" && "PushManager" in window;
+}
+const u8 = s => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((s.length + 3) % 4)), c => c.charCodeAt(0));
+async function syncPush(items) {
+  try {
+    if (!pushPossibile()) return "no";
+    const reg = await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    const now = Date.now();
+    const orari = [...new Set((items || []).map(n => Math.floor(new Date(n.at).getTime() / 60e3) * 60e3))]
+      .filter(t => t > now).sort((a, b) => a - b).slice(0, 120);
+    if (!orari.length || Notification.permission !== "granted") {
+      if (sub) {
+        await fetch("/push/sync", { method: "POST", body: JSON.stringify({ endpoint: sub.endpoint, stop: true }) }).catch(() => {});
+        await sub.unsubscribe().catch(() => {});
+      }
+      localStorage.removeItem("nt-push-ult");
+      return "off";
+    }
+    if (!sub) {
+      // Iscrizione rifiutata (finestra in incognito, servizio push assente):
+      // non ci si riprova a ogni riprogrammazione, solo alla prossima apertura.
+      if (sessionStorage.getItem("nt-push-no")) return "no";
+      const rk = await fetch("/push/key");
+      if (!rk.ok) return "err";
+      const { key } = await rk.json();
+      try { sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: u8(key) }); }
+      catch (e) { sessionStorage.setItem("nt-push-no", "1"); return "no"; }
+    }
+    const firma = sub.endpoint + "|" + orari.join(",");
+    if (firma === localStorage.getItem("nt-push-ult")) return "ok";
+    const r = await fetch("/push/sync", { method: "POST", body: JSON.stringify({ endpoint: sub.endpoint, orari }) });
+    if (r.ok) localStorage.setItem("nt-push-ult", firma);
+    return r.ok ? "ok" : "err";
+  } catch (e) { return "err"; }
+}
 const PROVA = "Le notifiche funzionano: così arriveranno i promemoria del piano.";
 
 // Periodic Background Sync: dove il browser la concede (oggi solo

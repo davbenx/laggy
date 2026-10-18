@@ -18,8 +18,11 @@
   // routing dinamico [id].js) in un vero script Worker, con la stessa
   // logica di sempre, zero duplicazione da mantenere a mano. dist/ non è
   // versionato: si rigenera a ogni deploy da functions/, che resta l'unica
-  // fonte di verità.
-  "main": "./dist/worker/index.js",
+  // fonte di verità. worker.js lo avvolge e aggiunge solo il giro di ogni
+  // minuto delle push (le Pages Functions non hanno i cron).
+  "main": "./worker.js",
+  // Ogni minuto: le push dei promemoria della web app (worker.js, _push.js).
+  "triggers": { "crons": ["* * * * *"] },
   "assets": {
     // "." perché index.html, engine.js e gli altri script pubblici vivono
     // nella root del repo — .assetsignore sotto esclude tutto ciò che non

@@ -75,7 +75,7 @@ self.addEventListener("fetch", e => {
   if (req.method !== "GET") return;
   const url = new URL(req.url);
 
-  if (/^\/(feed|config|couple)(\/|$)/.test(url.pathname)) return;
+  if (/^\/(feed|config|couple|push|stats|collect)(\/|$)/.test(url.pathname)) return;   // API: sempre rete, mai cache
 
   // Navigazione: rete, poi cade sulla cache CORRENTE (mai caches.match()
   // senza nome: cerca fra tutte le cache rimaste, ordine non garantito —
@@ -156,6 +156,43 @@ function _cancelAll() {
   _timers.clear();
 }
 
+// Una notifica del piano. La mostrano due strade, il timer qui sotto (se il
+// service worker è ancora vivo) e la push dal server (vedi più giù): le già
+// mostrate si segnano in IndexedDB, così non arrivano due volte.
+function _opts(n) {
+  const opts = {
+    body: n.body,
+    icon: "./icon-192.png",
+    badge: "./owl-mark.png",
+    tag: "nt-" + n.kind,       // raggruppa per tipo (bedtime, wake, nap…)
+    renotify: true,
+    silent: n.kind === "bedtime",  // la sveglia fa rumore, il promemoria no
+    requireInteraction: n.kind === "wake",  // la sveglia resta finché non la tocchi
+    data: { kind: n.kind, tab: (n.extra && n.extra.tab) || (n.kind === "wake" ? "diario" : "oggi") }
+  };
+  // «Come hai dormito?»: «Come previsto» registra gli orari del piano
+  // (l'app mostra Annulla), «Altri orari» apre il modulo. Niente pulsanti
+  // sulla sveglia: lì è presto per dire com'è andata.
+  if (n.kind === "diario") {
+    opts.actions = [
+      { action: "previsto", title: "Come previsto" },
+      { action: "altri",    title: "Altri orari" }
+    ];
+  }
+  return opts;
+}
+async function _mostrate() { try { return (await _kvGet("mostrate")) || {}; } catch (e) { return {}; } }
+async function _mostra(n) {
+  const m = await _mostrate(), k = n.id + "@" + new Date(n.at).getTime();
+  if (m[k]) return false;
+  m[k] = Date.now();
+  const limite = Date.now() - 2 * 86400e3;
+  for (const x in m) if (m[x] < limite) delete m[x];
+  await _kvSet("mostrate", m).catch(() => {});
+  await self.registration.showNotification(n.title, _opts(n));
+  return true;
+}
+
 function _schedule(items) {
   _cancelAll();
   const now = Date.now();
@@ -163,34 +200,29 @@ function _schedule(items) {
     const when = new Date(n.at).getTime();
     const delay = when - now;
     if (delay < 0 || delay > 7 * 24 * 3600e3) continue;  // solo i prossimi 7 giorni
-
-    const tid = setTimeout(() => {
-      _timers.delete(n.id);
-      const opts = {
-        body: n.body,
-        icon: "./icon-192.png",
-        badge: "./owl-mark.png",
-        tag: "nt-" + n.kind,       // raggruppa per tipo (bedtime, wake, nap…)
-        renotify: true,
-        silent: n.kind === "bedtime",  // la sveglia fa rumore, il promemoria no
-        requireInteraction: n.kind === "wake",  // la sveglia resta finché non la tocchi
-        data: { kind: n.kind, tab: (n.extra && n.extra.tab) || (n.kind === "wake" ? "diario" : "oggi") }
-      };
-      // «Come hai dormito?»: «Come previsto» registra gli orari del piano
-      // (l'app mostra Annulla), «Altri orari» apre il modulo. Niente pulsanti
-      // sulla sveglia: lì è presto per dire com'è andata.
-      if (n.kind === "diario") {
-        opts.actions = [
-          { action: "previsto", title: "Come previsto" },
-          { action: "altri",    title: "Altri orari" }
-        ];
-      }
-      self.registration.showNotification(n.title, opts).catch(() => {});
-    }, Math.max(delay, 500));
-
+    const tid = setTimeout(() => { _timers.delete(n.id); _mostra(n).catch(() => {}); }, Math.max(delay, 500));
     _timers.set(n.id, tid);
   }
 }
+
+// Push dal server (promemoria ad app chiusa): arriva vuota, all'ora di uno
+// dei promemoria. Qui si guarda il piano salvato l'ultima volta che l'app era
+// aperta e si mostra quello dovuto. iOS e Chrome vogliono che ogni push mostri
+// una notifica: se il timer l'aveva già mostrata, la si ripresenta uguale e
+// in silenzio (stessa etichetta, nessun suono) invece di non mostrare niente.
+self.addEventListener("push", e => {
+  e.waitUntil((async () => {
+    const items = (await _kvGet("lastItems").catch(() => null)) || [];
+    const now = Date.now();
+    const dovute = items.filter(n => { const t = new Date(n.at).getTime(); return t <= now + 90e3 && t > now - 15 * 60e3; });
+    let nuove = 0;
+    for (const n of dovute) if (await _mostra(n).catch(() => false)) nuove++;
+    if (nuove) return;
+    const ultima = dovute[dovute.length - 1];
+    if (ultima) return self.registration.showNotification(ultima.title, { ..._opts(ultima), renotify: false, silent: true });
+    return self.registration.showNotification("Notturnisti", { body: "Il piano di oggi è aggiornato: aprilo per vederlo.", icon: "./icon-192.png", badge: "./owl-mark.png", tag: "nt-agg", silent: true, data: { tab: "oggi" } });
+  })());
+});
 
 // Messaggio dall'app: { type:"NT_SCHEDULE", items:[{id,kind,title,body,at}] }
 self.addEventListener("message", e => {

@@ -24,7 +24,7 @@ th{color:var(--dim);font-weight:600}
 <body>
 <main>
 <h1>Privacy</h1>
-<p class="sub">App e sito web Notturnisti · aggiornata il 16 ottobre 2026</p>
+<p class="sub">App e sito web Notturnisti · aggiornata il 18 ottobre 2026</p>
 
 <div class="box"><b>In breve.</b> I tuoi turni, gli orari, il diario del sonno e le impostazioni restano sul tuo telefono: l'app calcola il piano lì e non li manda a nessun server. Le statistiche d'uso anonime sono spente finché non le accendi tu. Niente pubblicità, niente profilazione, nessun dato venduto o ceduto.</div>
 
@@ -34,7 +34,7 @@ th{color:var(--dim);font-weight:600}
 <h2>Cosa resta sul telefono (e non arriva a noi)</h2>
 <ul>
 <li>Turni, ciclo, orari, persone che segui, diario del sonno e impostazioni: salvati nella memoria dell'app sul tuo telefono. Se disinstalli l'app vengono cancellati.</li>
-<li><b>Notifiche</b>: sono programmate dal telefono stesso, senza server.</li>
+<li><b>Notifiche</b>: nell'app Android sono programmate dal telefono stesso, senza server. Sul sito web, per farle arrivare anche ad app chiusa, serve un piccolo aiuto dal server (vedi sotto).</li>
 <li><b>Calendario del telefono</b> (solo se lo accendi): l'app crea sul telefono un calendario «Notturnisti», solo su questo dispositivo, e ci scrive turni e orari di sonno. Il permesso di lettura serve solo a ritrovare quel calendario e a controllare che i suoi eventi ci siano; gli altri tuoi calendari non vengono letti per nessun altro scopo e nulla lascia il telefono. Spegnendolo, il calendario «Notturnisti» viene cancellato.</li>
 <li><b>Widget</b>: mostra il piano usando i dati già sul telefono.</li>
 <li><b>Backup di Android</b>: se sul telefono è attivo il backup di Google, Android può copiare i dati dell'app nel tuo backup personale, così li ritrovi su un nuovo telefono. Lo gestisce Google per te, cifrato, sul tuo account: noi non vi abbiamo accesso. Puoi spegnerlo dalle impostazioni del telefono.</li>
@@ -46,11 +46,12 @@ th{color:var(--dim);font-weight:600}
 <tr><td><b>Statistiche d'uso anonime</b>: contatori come «un piano è stato creato», «promemoria accesi», «notifica aperta», il tipo di dispositivo (web, Android) ed errori dell'app indicati solo per file, mai il messaggio.</td><td>Solo se le accendi (Impostazioni → Statistiche d'uso anonime). Spente di default; puoi spegnerle quando vuoi.</td><td>Capire cosa migliorare. Si salvano solo totali per giorno, senza identificativi, senza indirizzo IP, senza orari né turni: da questi dati non si può risalire a te. Conservati al massimo 400 giorni. Base giuridica: il tuo consenso.</td></tr>
 <tr><td><b>Link e messaggi che condividi</b> (il tuo ciclo, gli orari liberi, la copia di sicurezza)</td><td>Solo quando li mandi tu, con l'app che scegli (WhatsApp, email…).</td><td>I dati stanno nel link stesso, dopo il simbolo «#», che i browser non inviano ai server: non passano da noi.</td></tr>
 <tr><td><b>Email di riscontro</b> («Segnala cosa non torna»)</td><td>Solo se scrivi tu.</td><td>Rispondere. L'email contiene il link al tuo ciclo, che puoi cancellare prima di inviarla.</td></tr>
+<tr><td><b>Solo sito web</b>: promemoria anche ad app chiusa</td><td>Solo se accendi i promemoria dal sito (non nell'app Android). Si spengono da Impostazioni → Promemoria.</td><td>Il browser non sa far suonare una notifica a un'ora precisa da solo: per questo salviamo su un server (Cloudflare) <b>solo gli orari</b> dei prossimi promemoria, al massimo 9 giorni avanti, e l'indirizzo anonimo per le notifiche che il tuo browser ci fornisce (non dice chi sei). Non salviamo cosa dicono le notifiche, né turni, né diario: all'ora giusta mandiamo un avviso vuoto e il testo lo mostra il telefono, dai dati che ha già. Gli orari passati si cancellano entro un minuto; tutto si cancella quando spegni i promemoria, quando il browser revoca l'iscrizione o dopo 30 giorni senza aggiornamenti. L'avviso passa dal servizio di notifiche del tuo browser (Google per Chrome, Apple per Safari, Mozilla per Firefox). Base giuridica: fornirti il servizio richiesto.</td></tr>
 <tr><td><b>Solo sito web</b>: calendario che si aggiorna da solo (feed per Google/Apple Calendar)</td><td>Solo se lo attivi dal sito; nell'app Android non esiste, si usa il calendario del telefono.</td><td>Per aggiornare il feed, i tuoi turni e orari sono salvati su un server (Cloudflare) legati a un codice casuale, senza email né nome. Li cancelli dalla schermata dell'account. Per proteggere il servizio da abusi, alla creazione dell'account l'indirizzo IP è tenuto al massimo 10 minuti e poi cancellato. Base giuridica: fornirti il servizio richiesto.</td></tr>
 </table>
 
 <h2>Fornitori</h2>
-<p>Il sito e le statistiche girano su Cloudflare (server nell'Unione Europea e altrove, con garanzie del Data Privacy Framework e clausole contrattuali standard). Cloudflare tratta i dati solo per fornire il servizio. L'app viene distribuita tramite Google Play, che ha una sua informativa.</p>
+<p>Il sito, le statistiche e i promemoria del sito girano su Cloudflare (server nell'Unione Europea e altrove, con garanzie del Data Privacy Framework e clausole contrattuali standard). Cloudflare tratta i dati solo per fornire il servizio. Gli avvisi dei promemoria del sito passano dal servizio di notifiche del browser (Google, Apple o Mozilla), senza contenuto. L'app viene distribuita tramite Google Play, che ha una sua informativa.</p>
 
 <h2>I tuoi diritti</h2>
 <p>Puoi chiedere accesso, rettifica, cancellazione, limitazione, portabilità e opporti al trattamento scrivendo al contatto qui sopra; per le statistiche anonime, non essendo collegate a te, non possiamo individuarle, ma puoi spegnerle in qualsiasi momento. Puoi anche presentare reclamo al Garante per la protezione dei dati personali (<a href="https://www.garanteprivacy.it">garanteprivacy.it</a>).</p>
