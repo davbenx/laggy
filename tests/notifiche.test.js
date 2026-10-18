@@ -48,3 +48,26 @@ test("turni variabili: l'ultimo giorno segnato chiede quello dopo, una volta", (
   assert.equal(giorno(L[0].at), iso(dom), "la sera di domani, che è l'ultimo giorno segnato");
   assert.equal(L[0].extra.tab, "domani");
 });
+
+test("giorni impegnativi: dalla terza notte di fila, e prima di un rientro con meno di 11 ore", () => {
+  const domani = new Date(); domani.setDate(domani.getDate() + 1);
+  const notti = buildSchedule({ pattern: "NNNNRRR", anchor: iso(domani), shifts: SH }, { days: 7, types: TIPI_ESSENZIALI });
+  const r = notti.filter(n => n.kind === "rischio");
+  assert.equal(r.length, 2, "terza e quarta notte: " + r.map(n => n.body).join(" | "));
+  assert.ok(/Terza notte di fila/.test(r[0].body) && /Quarta notte di fila/.test(r[1].body));
+  assert.ok(r.every(n => /Inizio alle 22:00/.test(n.body) && n.at.getHours() < 22), "prima del turno, mai durante");
+  const SH2 = { P: { n: "Pomeriggio", s: 840, e: 1260 }, Q: { n: "Presto", s: 360, e: 780 } };
+  const rr = buildSchedule({ pattern: "PQRRRRR", anchor: iso(domani), shifts: SH2 }, { days: 7, types: TIPI_ESSENZIALI }).filter(n => n.kind === "rischio");
+  assert.equal(rr.length, 1); const min = rr[0].at.getHours() * 60 + rr[0].at.getMinutes();
+  assert.ok(/9 ore dopo/.test(rr[0].body) && min >= 840 && min < 1260, "durante il turno di ieri, prima della fine: " + rr[0].body + " " + rr[0].at);
+  const normale = buildSchedule({ pattern: "MPNSR", anchor: iso(domani), shifts: SH }, { days: 10, types: TIPI_ESSENZIALI });
+  assert.equal(normale.filter(n => n.kind === "rischio").length, 0, "un ciclo normale non ha avvisi in più");
+  assert.ok(new Set(notti.map(n => n.id)).size === notti.length, "id unici");
+});
+
+test("rientro dopo la notte: 10 minuti prima della fine del turno", () => {
+  const domani = new Date(); domani.setDate(domani.getDate() + 1);
+  const L = buildSchedule({ pattern: "NRRRRRR", anchor: iso(domani), shifts: SH }, { days: 7, types: TIPI_ESSENZIALI });
+  const ret = L.find(n => n.kind === "ret");
+  assert.ok(ret && ret.at.getHours() === 6 && ret.at.getMinutes() === 50, String(ret && ret.at));
+});

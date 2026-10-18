@@ -20,6 +20,7 @@ const hhmm = d => String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinu
 export const TIPI = [
   { k: "cambio",   nome: "Domani cambi turno",       desc: "Il giorno prima di un cambio: a che ora andare a letto e come prepararti", essenziale: true,  canale: "turni" },
   { k: "ret",      nome: "Rientro dopo la notte",    desc: "Alla fine delle notti: l'ora più rischiosa per guidare",                essenziale: true,  canale: "sicurezza" },
+  { k: "rischio",  nome: "Giorni impegnativi",       desc: "Prima della terza notte di fila o di un rientro con meno di 11 ore di riposo: cosa fare per arrivarci meglio", essenziale: true, canale: "sicurezza" },
   { k: "bedtime",  nome: "Preparati a dormire",      desc: "Mezz'ora prima del sonno pianificato",                                   essenziale: true,  canale: "sonno" },
   { k: "domani",   nome: "Che turno fai domani?",    desc: "Solo se domani non è segnato: senza turno il piano non c'è",             essenziale: true,  canale: "turni" },
   { k: "coffee",   nome: "Ultimo caffè",             desc: "L'ora oltre la quale il caffè ti disturba il sonno",                     essenziale: false, canale: "caffe" },
@@ -42,7 +43,7 @@ export const TIPI_TUTTI = TIPI.map(t => t.k);
 // cancellava il primo).
 const KIND = { bedtime: 1, wake: 2, nap: 3, coffee: 4, ret: 5, prep: 6, cambio: 7, domani: 8, luce: 9, settimana: 0 };
 // Priorità quando un giorno ne avrebbe troppe (si tengono le prime).
-const PRIO = ["cambio", "ret", "bedtime", "domani", "nap", "coffee", "prep", "luce", "wake", "settimana"];
+const PRIO = ["cambio", "ret", "rischio", "bedtime", "domani", "nap", "coffee", "prep", "luce", "wake", "settimana"];
 const MAX_AL_GIORNO = 4, UNISCI_ENTRO = 20 * MIN;
 const GIORNI = ["dom", "lun", "mar", "mer", "gio", "ven", "sab"];
 const durTxt = m => { m = Math.round(Math.abs(m)); const h = Math.floor(m / 60), r = m % 60; return h ? h + (r ? "h" + String(r).padStart(2, "0") : " or" + (h === 1 ? "a" : "e")) : r + " min"; };
@@ -67,7 +68,9 @@ export function buildSchedule(config, opts = {}) {
     const dayIdx = Math.round((localMidnight(base) - localMidnight(f0)) / (1440 * MIN));
     const k = dayIdx + ":" + kind, n = seq[k] = (seq[k] || 0) + 1;   // contato anche se nel passato: id stabili
     if (when.getTime() <= now) return;            // solo futuro
-    out.push({ id: dayIdx * 100 + KIND[kind] * 10 + (n - 1), kind, title, body, at: when, extra });
+    // "rischio" non ha una cifra libera in KIND (0–9 usate): una sua fascia di id
+    const id = kind === "rischio" ? 980000 + (dayIdx + 1) * 10 + (n - 1) : dayIdx * 100 + KIND[kind] * 10 + (n - 1);
+    out.push({ id, kind, title, body, at: when, extra });
   };
   const fb = /^(\d\d):(\d\d)$/.exec(String(e.state.freeBed || "23:30"));
   let lettoSolito = fb ? (+fb[1]) * 60 + (+fb[2]) : 1410; if (lettoSolito < 720) lettoSolito += 1440;
@@ -79,6 +82,16 @@ export function buildSchedule(config, opts = {}) {
   { const ieri = new Date(f0); ieri.setDate(ieri.getDate() - 1); e.state.focus = ieri;
     if (e.codeAt(0) !== "?") { try { onsetIeri = e.plan().s.onset; } catch (_) {} } e.state.focus = f0; }
 
+  // Notti di fila fino a ieri (al massimo 6 indietro): poi si aggiorna giorno per giorno.
+  let nottiDiFila = 0;
+  for (let k = 1; k <= 6; k++) {
+    const d = new Date(f0); d.setDate(d.getDate() - k); e.state.focus = d;
+    let Pk = null; if (e.codeAt(0) !== "?") { try { Pk = e.plan(); } catch (_) {} }
+    if (Pk && Pk.night) nottiDiFila++; else break;
+  }
+  e.state.focus = f0;
+  const ORDINALE = ["", "", "seconda", "terza", "quarta", "quinta", "sesta", "settima"];
+
   for (let o = 0; o < days; o++) {
     const base = new Date(f0); base.setDate(base.getDate() + o);
     e.state.focus = base;
@@ -88,8 +101,9 @@ export function buildSchedule(config, opts = {}) {
       domaniContati++;
       push(base, 19 * 60, "domani", "Che turno fai domani?", "Tocca per segnarlo: il piano di domani dipende da questo.", { tab: "domani" });
     }
-    if (codice === "?") { onsetIeri = null; continue; }
-    let P; try { P = e.plan(); } catch (_) { onsetIeri = null; continue; }
+    if (codice === "?") { onsetIeri = null; nottiDiFila = 0; continue; }
+    let P; try { P = e.plan(); } catch (_) { onsetIeri = null; nottiDiFila = 0; continue; }
+    nottiDiFila = P.night ? nottiDiFila + 1 : 0;
     const prevOnset = onsetIeri; onsetIeri = P.s.onset;
     const mid = localMidnight(base);
     sonni.push([at(mid, P.s.onset).getTime(), at(mid, P.s.onset + P.s.dur).getTime()]);
@@ -111,9 +125,40 @@ export function buildSchedule(config, opts = {}) {
       push(base, P.cut, "coffee", "Ultimo caffè",
         "Dopo quest'ora la caffeina resta in circolo quando provi a dormire.");
 
+    // 10 minuti prima della fine: lo leggi prima di uscire, non già alla guida.
     if (want("ret") && (P.night || P.lateStart) && !P.b.rest)
-      push(base, P.b.end, "ret", "Rientro dal turno",
-        "L'ora più rischiosa. Occhiali, e se hai sonno non guidare: 20 minuti di sosta e un caffè.");
+      push(base, P.b.end - 10, "ret", "Rientro dal turno",
+        "Tra poco l'ora più rischiosa per guidare. Occhiali da sole, e se hai sonno non guidare: 20 minuti di sosta e un caffè.");
+
+    // Giorni impegnativi: non un allarme nel momento del calo (al lavoro, o
+    // alla guida, sarebbe solo una distrazione) ma un consiglio prima, quando
+    // si può ancora fare qualcosa. Solo dove il piano lo vede davvero.
+    if (want("rischio") && !P.b.rest) {
+      const pb = P.pb;
+      // Rientro ravvicinato: meno di 11 ore tra la fine di ieri e l'inizio di oggi.
+      // Si dice a fine turno di ieri, quando si decide come passare la sera.
+      if (pb && !pb.rest && isFinite(pb.end) && isFinite(P.b.start)) {
+        const riposo = 1440 + P.b.start - pb.end;
+        if (riposo > 0 && riposo < 660)
+          // mezz'ora prima della fine del turno di ieri: si è ancora al lavoro (svegli)
+          push(base, pb.end - 1440 - 30, "rischio", "Domani rientri presto",
+            "Inizi alle " + hhmm(at(mid, P.b.start)) + ", " + durTxt(riposo) + " dopo la fine di oggi: a letto appena arrivi a casa.", { tab: "oggi", alLavoro: true });
+      }
+      // Notte impegnativa: terza (o più) di fila, o il calo più forte dentro il
+      // turno con poco sonno prima.
+      if (P.night && nottiDiFila >= 3) {
+        // Dalla terza notte di fila il debito si accumula: il pisolino prima e
+        // una pausa nel momento del calo contano di più.
+        const parti = [(ORDINALE[nottiDiFila] ? ORDINALE[nottiDiFila][0].toUpperCase() + ORDINALE[nottiDiFila].slice(1) : nottiDiFila + "ª") + " notte di fila"];
+        const pis = (P.naps || []).find(n => n.b <= P.b.start);
+        if (pis) parti.push("Se puoi, pisolino alle " + hhmm(at(mid, pis.a)));
+        // il minimo corporeo resta ancorato al ritmo naturale (come in Oggi)
+        const minimo = e.naturalMid() + e.CFG.cbtOffset;
+        if (minimo >= P.b.start && minimo < P.b.end) parti.push("Il calo più forte cadrà verso le " + hhmm(at(mid, minimo)) + ": tieni lì una pausa, se puoi");
+        push(base, pis ? pis.a - 30 : P.b.start - 180, "rischio", "Notte impegnativa",
+          "Inizio alle " + hhmm(at(mid, P.b.start)) + ". " + parti.join(". ") + ".");
+      }
+    }
 
     if (want("prep") && prepLead > 0 && !P.b.rest)
       push(base, P.b.start - prepLead, "prep", "Preparati per il turno",
@@ -159,7 +204,7 @@ export function buildSchedule(config, opts = {}) {
   // Regole contro il fastidio: niente durante il sonno pianificato (tranne
   // "ora di alzarti"); due avvisi entro 20 minuti diventano uno; al massimo
   // 4 al giorno, tenendo i più importanti.
-  let lista = out.filter(n => n.kind === "wake" || !sonni.some(([a, z]) => n.at.getTime() > a + MIN && n.at.getTime() < z - MIN));
+  let lista = out.filter(n => n.kind === "wake" || (n.extra && n.extra.alLavoro) || !sonni.some(([a, z]) => n.at.getTime() > a + MIN && n.at.getTime() < z - MIN));
   lista.sort((a, b) => a.at - b.at);
   const unite = [];
   for (const n of lista) {

@@ -214,7 +214,7 @@ const nativeNotify = {
 // Stessa tabella dei tipi di notifications.js (campo "canale").
 const CANALI = [
   { id: "turni",        name: "Cambi di turno",            importance: 4 },
-  { id: "sicurezza",    name: "Rientro dopo la notte",     importance: 4 },
+  { id: "sicurezza",    name: "Rientro e giorni impegnativi", importance: 4 },
   { id: "sonno",        name: "Sonno",                     importance: 3 },
   { id: "caffe",        name: "Ultimo caffè",              importance: 3 },
   { id: "pisolini",     name: "Pisolini",                  importance: 3 },
@@ -223,7 +223,7 @@ const CANALI = [
   { id: "suggerimenti", name: "Suggerimenti e riepiloghi", importance: 2 },
   { id: "promemoria",   name: "Prova e altri avvisi",      importance: 3 }
 ];
-const CANALE_DI = { cambio: "turni", domani: "turni", prep: "turni", ret: "sicurezza", bedtime: "sonno", coffee: "caffe",
+const CANALE_DI = { cambio: "turni", domani: "turni", prep: "turni", ret: "sicurezza", rischio: "sicurezza", bedtime: "sonno", coffee: "caffe",
   nap: "pisolini", luce: "luce", wake: "sveglie", settimana: "suggerimenti", tip: "suggerimenti",
   diario: "suggerimenti", consigli: "suggerimenti" };
 let _channels = false;

@@ -412,7 +412,7 @@ function render(){
   var fi=[]; Object.keys(f).forEach(function(k){ var x=f[k], pc=function(v,t){ t=t==null?x.tot:t; return t? Math.round(100*v/t)+"%" : "—"; };
     fi.push({k:(PIATT[k]||k)+": promemoria "+pc(x.n)+(x.pn?" (ad app chiusa "+pc(x.p,x.pn)+")":"")+" · calendario "+pc(x.c)+(k==="a"?" · widget "+pc(x.w):""), n:x.tot}); });
   $("#funzioni").innerHTML=rowsHtml(fi);
-  var TIPON={diario:"Come hai dormito?",consigli:"Consigli",bedtime:"Preparati a dormire",wake:"Ora di alzarti",nap:"Pisolino",coffee:"Ultimo caffè",ret:"Rientro",prep:"Preparati per il turno",cambio:"Cambio turno",domani:"Che turno fai domani?",luce:"Luce",settimana:"La tua settimana",tip:"Il piano si adatta"};
+  var TIPON={diario:"Come hai dormito?",consigli:"Consigli",rischio:"Giorni impegnativi",bedtime:"Preparati a dormire",wake:"Ora di alzarti",nap:"Pisolino",coffee:"Ultimo caffè",ret:"Rientro",prep:"Preparati per il turno",cambio:"Cambio turno",domani:"Che turno fai domani?",luce:"Luce",settimana:"La tua settimana",tip:"Il piano si adatta"};
   $("#notifAperte").innerHTML=rowsHtml(byProp(rows,"notif_aperta").map(function(x){ return {k:TIPON[x.k]||x.k, n:x.n}; }));
   var ESI={liberi_proposto:"Giorni liberi: proposte",liberi_applicato:"Giorni liberi: applicate",liberi_annullato:"Giorni liberi: annullate",liberi_rifiutato:"Giorni liberi: «lascia così»",
     anticipo_proposto:"Anticipo: proposte",anticipo_applicato:"Anticipo: applicate",anticipo_annullato:"Anticipo: annullate",anticipo_rifiutato:"Anticipo: «lascia così»"};
