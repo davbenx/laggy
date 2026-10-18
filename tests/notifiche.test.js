@@ -71,3 +71,20 @@ test("rientro dopo la notte: 10 minuti prima della fine del turno", () => {
   const ret = L.find(n => n.kind === "ret");
   assert.ok(ret && ret.at.getHours() === 6 && ret.at.getMinutes() === 50, String(ret && ret.at));
 });
+
+test("cambio dell'ora: notifiche e testi all'ora giusta anche nei giorni di 23 e 25 ore", () => {
+  const tzPrima = process.env.TZ; process.env.TZ = "Europe/Rome";
+  try {
+    // Il prossimo cambio d'ora (ultima domenica di marzo o di ottobre) almeno fra due giorni.
+    const ultimaDomenica = (y, m) => { const d = new Date(y, m + 1, 0, 12); d.setDate(d.getDate() - d.getDay()); return d; };
+    const limite = Date.now() + 2 * 864e5;
+    let cambio = null;
+    for (let y = new Date().getFullYear(); !cambio; y++) for (const m of [2, 9]) { const d = ultimaDomenica(y, m); if (!cambio && d.getTime() > limite) cambio = d; }
+    const vigilia = new Date(cambio); vigilia.setDate(vigilia.getDate() - 1);
+    const L = buildSchedule({ pattern: "NNNNNNN", anchor: iso(vigilia), shifts: SH, focus: vigilia }, { days: 3, types: TIPI_ESSENZIALI });
+    // Notte 22:00 → 07:00: il rientro alle 06:50 ogni mattina, anche quella del cambio
+    const ret = L.filter(n => n.kind === "ret");
+    assert.ok(ret.length >= 2 && ret.every(n => n.at.getHours() === 6 && n.at.getMinutes() === 50), ret.map(n => n.at.toString()).join(" | "));
+    assert.ok(L.filter(n => /Inizio alle/.test(n.body)).every(n => /Inizio alle 22:00/.test(n.body)), "i testi dicono l'ora vera del turno");
+  } finally { if (tzPrima === undefined) delete process.env.TZ; else process.env.TZ = tzPrima; }
+});

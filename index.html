@@ -2707,10 +2707,15 @@ const day = (d,n) => { const x=new Date(d); x.setDate(x.getDate()+n); return x; 
 // sono ancora in corso), va oltre i 1440 minuti, nella stessa linea del
 // tempo assoluta già usata per gli orari di inizio/fine di turni e sonni:
 // "adesso" e i confini di un evento devono restare confrontabili.
-function minutiDaFocus(){
-  const focusMid = new Date(state.focus.getFullYear(), state.focus.getMonth(), state.focus.getDate());
-  return Math.round((new Date() - focusMid) / 60000);
+// Minuti di adesso dalla mezzanotte del giorno "rif", come li conta il piano:
+// giorni di calendario × 1440 + l'ora sull'orologio. Sottrarre i millisecondi
+// dava un'ora di errore nei giorni del cambio d'ora (23 o 25 ore).
+function minutiDa(rif, ora){
+  const n = ora || new Date();
+  const g = Math.round((new Date(n.getFullYear(), n.getMonth(), n.getDate()) - new Date(rif.getFullYear(), rif.getMonth(), rif.getDate())) / 864e5);
+  return g*1440 + n.getHours()*60 + n.getMinutes();
 }
+function minutiDaFocus(){ return minutiDa(state.focus); }
 // Il "giorno vero" che si sta vivendo — di solito la data del calendario,
 // ma non finché un turno o un sonno cominciati ieri sera sono ancora in
 // corso: aprire l'app alle 01:30 nel mezzo di un turno di notte e vedersi
@@ -4285,8 +4290,7 @@ function renderOra(Pfocus){
   const isToday = true;
   let r=null;
   const now = new Date();
-  const rifMid = new Date(vero.getFullYear(), vero.getMonth(), vero.getDate());
-  const m = Math.round((now - rifMid) / 60000);
+  const m = minutiDa(vero, now);
   const b = P.b;
 
   let lastEnd = null;
@@ -4322,7 +4326,7 @@ function renderOra(Pfocus){
       }
     }
     const midnight=new Date(vero.getFullYear(),vero.getMonth(),vero.getDate());
-    const nextSleep=(P.s&&typeof P.s.onset==="number")?new Date(midnight.getTime()+P.s.onset*60000):null;
+    const nextSleep=(P.s&&typeof P.s.onset==="number")?new Date(midnight.getFullYear(),midnight.getMonth(),midnight.getDate(),0,P.s.onset):null;   // con il calendario: giusto anche nei giorni del cambio d'ora
     r=window.NTAlert.alertness({now, freeWake:state.freeWake, freeBed:state.freeBed, lastSleepEnd:lastEnd, nextSleepStart:nextSleep});
   } }catch(e){}
 
@@ -5745,8 +5749,7 @@ function proponiRecensione(){
 // dopo. Il confronto diretto, senza toccare a/b, non ha questo problema.
 function inWin(m,a,b){ return m>=a && m<b; }
 function adessoLine(P, riferimento){
-  const rifMid = new Date(riferimento.getFullYear(), riferimento.getMonth(), riferimento.getDate());
-  const m = Math.round((new Date() - rifMid) / 60000), b=P.b;
+  const m = minutiDa(riferimento), b=P.b;
   if(b.c === "?"){
     return {
       t: "Turno non impostato per oggi",

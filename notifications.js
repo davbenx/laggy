@@ -10,7 +10,10 @@ import { createEngine } from "./engine.js";
 
 const MIN = 60000;
 const localMidnight = d => new Date(d.getFullYear(), d.getMonth(), d.getDate());
-const at = (mid, mins) => new Date(mid.getTime() + mins * MIN);
+// Minuti dalla mezzanotte → ora locale vera. Con il calendario, non sommando
+// millisecondi: nei giorni del cambio d'ora (23 o 25 ore) la somma spostava di
+// un'ora tutto quello che cadeva dopo le 3 (promemoria e testi «Inizio alle…»).
+const at = (mid, mins) => new Date(mid.getFullYear(), mid.getMonth(), mid.getDate(), 0, mins);
 const hhmm = d => String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
 
 // Catalogo dei tipi di notifica: unica fonte per il motore (qui), per gli
