@@ -9359,7 +9359,7 @@ function ntNotifiche(){
     try{ const na=notificaAdatta(); if(na) items.push(na); }catch(e){}
     // Diagnostica minima (letta dal test sul telefono): quante ne aggiunge
     // l'invito al diario e l'eventuale errore, che qui si inghiotte.
-    const diag=window.NTDiagNotifiche={invito:0, err:""};
+    const diag=window.NTDiagNotifiche={invito:0, err:"", tc:!!state.turniConfigurati, tipi:tipiNotifiche().join(","), n:items.length};
     try{ const inv=notificheInvito(items); diag.invito=inv.length; items.push(...inv); }catch(e){ diag.err=String(e&&e.message||e); }
     platform.notify.schedule(items).then(r=>{ diag.ok=r; }).catch(e=>{ diag.errSchedule=String(e&&e.message||e); });
   }catch(e){}
