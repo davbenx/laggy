@@ -25,7 +25,7 @@ const giorno=t=>new Date(t).toDateString();
 let r=await apri(10);
 const dia=r.sched.filter(n=>n.k==="diario"), con=r.sched.filter(n=>n.k==="consigli");
 ok(dia.length>=1 && dia.length<=2, "diario: una o due nei prossimi giorni → "+dia.length);
-ok(dia.every(n=>n.ch==="suggerimenti"), "diario: canale silenzioso");
+ok(dia.every(n=>n.ch==="diario"), "diario: canale suo, che si vede (non fra le silenziose)");
 ok(new Set(dia.map(n=>giorno(n.at))).size===dia.length, "diario: mai due nello stesso giorno");
 ok(con.length===1 && con[0].tab==="consiglio:viaggio", "consiglio: uno solo, il primo che manca (viaggio) → "+JSON.stringify(con.map(n=>n.tab)));
 const perG={}; r.sched.forEach(n=>{ const g=giorno(n.at); perG[g]=(perG[g]||0)+1; });

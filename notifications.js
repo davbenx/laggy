@@ -35,7 +35,7 @@ export const TIPI = [
   { k: "settimana",nome: "La tua settimana",         desc: "La domenica sera, i turni dei prossimi 7 giorni",                        essenziale: false, canale: "suggerimenti" },
   // Questi due li prepara index.html (servono il diario e le impostazioni),
   // non buildSchedule: sono silenziosi e si diradano da soli.
-  { k: "diario",   nome: "Come hai dormito?",        desc: "Poco dopo il risveglio, senza suono: annoti la notte in un tocco e il piano si adatta. Se non rispondi, si dirada da solo", essenziale: true, canale: "suggerimenti" },
+  { k: "diario",   nome: "Come hai dormito?",        desc: "Poco dopo il risveglio: annoti la notte in un tocco e il piano si adatta. Se non rispondi, si dirada da solo", essenziale: true, canale: "diario" },
   { k: "consigli", nome: "Consigli per il tuo piano", desc: "Al massimo uno a settimana, in un giorno libero: cosa manca perché il piano sia davvero tuo", essenziale: true, canale: "suggerimenti" }
 ];
 export const TIPI_ESSENZIALI = TIPI.filter(t => t.essenziale).map(t => t.k);
