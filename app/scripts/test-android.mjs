@@ -65,6 +65,16 @@ if(await p.evaluate(()=>!!document.querySelector('[data-attiva="notifiche"]'))){
 await wait(15000);
 const alarms=sh("shell dumpsys alarm").split("\n").filter(l=>l.includes(PKG)).length;
 ok(alarms>0, "notifiche: allarmi programmati nel sistema per l'app = "+alarms);
+// in coda nel sistema, per tipo: «Come hai dormito?» (diario) compresa
+const coda=await p.evaluate(async()=>{ const r=await window.Capacitor.Plugins.LocalNotifications.getPending();
+  const t={}; (r.notifications||[]).forEach(n=>{ const k=(n.extra&&n.extra.kind)||"?"; t[k]=(t[k]||0)+1; }); return t; });
+console.log("in coda per tipo:", JSON.stringify(coda));
+if(!coda.diario) console.log("diagnosi diario:", JSON.stringify(await p.evaluate(()=>{ const st=JSON.parse(localStorage.getItem("nt:state")||"{}");
+  return { diag:window.NTDiagNotifiche, tipi:localStorage.getItem("nt:notifTipi"), dn:localStorage.getItem("nt:diarioNotif"), firstSeenAt:st.firstSeenAt, ora:new Date().toString(),
+    sveglie:window.NTNotif ? window.NTNotif.buildSchedule(st,{days:4,types:["wake"]}).map(n=>new Date(n.at).toString().slice(0,21)) : "no NTNotif" }; })));
+ok(coda.diario>0, "«Come hai dormito?» in coda nel sistema ("+(coda.diario||0)+")");
+const can=sh("shell dumpsys notification --noredact").split("\n").filter(l=>/mId='(suggerimenti|diario)'/.test(l)).map(l=>(l.match(/mId='(\w+)'/)||[])[1]+" importanza "+(l.match(/mImportance=(\d)/)||[])[1]);
+console.log("canale del diario:", can.join(" · "));
 log("notifiche verificate");
 // calendario
 await tocca('[data-attiva="calendario"]');

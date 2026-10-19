@@ -221,11 +221,15 @@ const CANALI = [
   { id: "luce",         name: "Luce",                      importance: 2 },
   { id: "sveglie",      name: "Ora di alzarti",            importance: 4 },
   { id: "suggerimenti", name: "Suggerimenti e riepiloghi", importance: 2 },
+  // «Come hai dormito?» ha un canale suo, a importanza normale: su quello
+  // silenzioso dei suggerimenti molti telefoni la mettevano fra le
+  // "Silenziose", senza banner, e passava inosservata (sul web invece arriva).
+  { id: "diario",       name: "Come hai dormito?",         importance: 3 },
   { id: "promemoria",   name: "Prova e altri avvisi",      importance: 3 }
 ];
 const CANALE_DI = { cambio: "turni", domani: "turni", prep: "turni", ret: "sicurezza", rischio: "sicurezza", bedtime: "sonno", coffee: "caffe",
   nap: "pisolini", luce: "luce", wake: "sveglie", settimana: "suggerimenti", tip: "suggerimenti",
-  diario: "suggerimenti", consigli: "suggerimenti" };
+  diario: "diario", consigli: "suggerimenti" };
 let _channels = false;
 // Pulsanti nella notifica: solo dove un tocco basta a fare la cosa.
 // «Come hai dormito?» → «Come previsto» registra gli orari del piano (con

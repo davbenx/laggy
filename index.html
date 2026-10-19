@@ -5119,10 +5119,11 @@ function renderAttivazione(){
     const v2=voci.filter(x=>x.id!=="turni");
     const prove=[];
     if(promemoriaAttivi()) prove.push('<button type="button" class="lnk" data-prova-notifica style="padding:8px 0">Prova una notifica</button>');
+    if(promemoriaAttivi()) prove.push('<button type="button" class="lnk" data-prossimi-promemoria style="padding:8px 0">Vedi i prossimi promemoria</button>');
     if(platform.calendar.available && platform.calendar.attivo()){
       prove.push('<button type="button" class="lnk" data-cal-apri style="padding:8px 0">Apri il calendario</button>');
       prove.push('<button type="button" class="lnk" data-cal-controlla style="padding:8px 0">Controlla</button>'); }
-    op.innerHTML=htmlVociGestione(v2)+(promemoriaAttivi()?htmlTipiNotifiche():'')+(prove.length?'<div style="display:flex;gap:16px;flex-wrap:wrap;padding:2px 15px 8px;border-top:1px solid var(--line)">'+prove.join("")+'</div><p class="hint" id="opzCalStato" hidden style="margin:0;padding:0 15px 10px"></p>':'');
+    op.innerHTML=htmlVociGestione(v2)+(promemoriaAttivi()?htmlTipiNotifiche():'')+(prove.length?'<div style="display:flex;gap:16px;flex-wrap:wrap;padding:2px 15px 8px;border-top:1px solid var(--line)">'+prove.join("")+'</div><p class="hint" id="opzCalStato" hidden style="margin:0;padding:0 15px 10px"></p><div class="hint" id="opzProssimi" hidden style="margin:0;padding:0 15px 10px"></div>':'');
   }
 }
 async function eseguiAttivazione(id){
@@ -7183,6 +7184,18 @@ function statoCalendario(el){
 }
 document.addEventListener("click", e=>{
   if(e.target.closest("[data-cal-riscrivi]")){ platform.calendar.riscrivi(); toast("Riscrivo il calendario…"); ntCalendarioNativo(true); setTimeout(()=>{ renderAttivazione(); }, 4000); }
+  if(e.target.closest("[data-prossimi-promemoria]")){
+    const box=$("#opzProssimi"); if(!box) return;
+    if(!box.hidden){ box.hidden=true; return; }
+    const ora=Date.now();
+    const L=(_ultimiPromemoria||[]).filter(n=>new Date(n.at).getTime()>ora).sort((a,b)=>new Date(a.at)-new Date(b.at)).slice(0,8);
+    box.innerHTML = L.length
+      ? '<p style="margin:0 0 4px"><b>I prossimi, in programma sul telefono:</b></p>'+L.map(n=>{ const d=new Date(n.at);
+          return '<div>'+esc(d.toLocaleDateString(LINGUA,{weekday:"short",day:"numeric"}))+', '+hhmm(d.getHours()*60+d.getMinutes())+' · '+esc(n.title)+'</div>'; }).join("")+
+        '<p style="margin:6px 0 0">Se uno non arriva: controlla che il risparmio energetico non limiti Notturnisti e che la notifica non sia fra le «Silenziose».</p>'
+      : 'Nessun promemoria in programma nei prossimi giorni.';
+    box.hidden=false; return;
+  }
   if(e.target.closest("[data-prova-notifica]")){ platform.notify.prova().then(ok=>toast(ok ? (platform.isNative ? "Notifica di prova inviata: guarda in alto" : "Tra qualche secondo arriva una notifica di prova") : "Prima accendi i promemoria")).catch(()=>toast("Notifica di prova non riuscita")); }
   if(e.target.closest("[data-cal-apri]")){ platform.calendar.apri(); return; }
   if(e.target.closest("[data-cal-controlla]")){ const el=$("#opzCalStato"); if(el){ el.hidden=false; el.textContent="Controllo…"; statoCalendario(el); } }
@@ -9300,7 +9313,10 @@ function salva(){
   // segnala i cambi di configurazione (non di vista) così il modulo del
   // calendario automatico può tenere allineato il feed. Il primo salva non conta.
   try{
-    const sig=JSON.stringify([state.pattern,state.shifts,state.anchor,state.repeat,
+    // turniConfigurati compreso: chi sceglie proprio lo schema dell'esempio
+    // non cambia nient'altro, e senza questo notifiche, widget e calendario
+    // restavano quelli dell'avvio ("non configurato": niente diario, widget vuoto).
+    const sig=JSON.stringify([!!state.turniConfigurati,state.pattern,state.shifts,state.anchor,state.repeat,
       state.freeWake,state.freeBed,state.cTo,state.cFrom,state.need,state.prep,state.maxAdvance,
       state.pPattern,state.pAnchor,state.pShifts,state.pWake,state.pBed,state.pName,state.people,
       state.ecc,state.evento,state.napTurno,state.pausa,state.caffSens]);
@@ -9336,14 +9352,22 @@ function notifPerm(){
 function aggiornaPermNotif(){
   platform.notify.permission().then(p=>{ if(p!==notifPerm()){ _notifPerm=p; renderAttivazione(); } }).catch(()=>{});
 }
+var _ultimiPromemoria = [];   // l'ultima coda mandata al telefono, per «Vedi i prossimi promemoria»
 function ntNotifiche(){
   try{
-    if(promemoriaSpenti()){ platform.notify.schedule([]).catch(()=>{}); return; }
+    // Niente promemoria per il piano d'esempio: fino ad Android 12 il permesso
+    // c'è già all'installazione, e chi non ha ancora messo i suoi turni
+    // riceveva cambi turno e "vai a dormire" di turni non suoi.
+    if(promemoriaSpenti() || !state.turniConfigurati){ platform.notify.schedule([]).catch(()=>{}); return; }
     if(!window.NTNotif || !window.NTNotif.buildSchedule) return;
     const items = window.NTNotif.buildSchedule(state, { days:platform.notify.days, types:tipiNotifiche() });
+    _ultimiPromemoria = items;
     try{ const na=notificaAdatta(); if(na) items.push(na); }catch(e){}
-    try{ items.push(...notificheInvito(items)); }catch(e){}
-    platform.notify.schedule(items).catch(()=>{});
+    // Diagnostica minima (letta dal test sul telefono): quante ne aggiunge
+    // l'invito al diario e l'eventuale errore, che qui si inghiotte.
+    const diag=window.NTDiagNotifiche={invito:0, err:""};
+    try{ const inv=notificheInvito(items); diag.invito=inv.length; items.push(...inv); }catch(e){ diag.err=String(e&&e.message||e); }
+    platform.notify.schedule(items).then(r=>{ diag.ok=r; }).catch(e=>{ diag.errSchedule=String(e&&e.message||e); });
   }catch(e){}
 }
 // Ricarica il piano al ritorno in foreground (SW potrebbe aver perso i timer)
