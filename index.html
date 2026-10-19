@@ -9313,7 +9313,10 @@ function salva(){
   // segnala i cambi di configurazione (non di vista) così il modulo del
   // calendario automatico può tenere allineato il feed. Il primo salva non conta.
   try{
-    const sig=JSON.stringify([state.pattern,state.shifts,state.anchor,state.repeat,
+    // turniConfigurati compreso: chi sceglie proprio lo schema dell'esempio
+    // non cambia nient'altro, e senza questo notifiche, widget e calendario
+    // restavano quelli dell'avvio ("non configurato": niente diario, widget vuoto).
+    const sig=JSON.stringify([!!state.turniConfigurati,state.pattern,state.shifts,state.anchor,state.repeat,
       state.freeWake,state.freeBed,state.cTo,state.cFrom,state.need,state.prep,state.maxAdvance,
       state.pPattern,state.pAnchor,state.pShifts,state.pWake,state.pBed,state.pName,state.people,
       state.ecc,state.evento,state.napTurno,state.pausa,state.caffSens]);
@@ -9352,14 +9355,17 @@ function aggiornaPermNotif(){
 var _ultimiPromemoria = [];   // l'ultima coda mandata al telefono, per «Vedi i prossimi promemoria»
 function ntNotifiche(){
   try{
-    if(promemoriaSpenti()){ platform.notify.schedule([]).catch(()=>{}); return; }
+    // Niente promemoria per il piano d'esempio: fino ad Android 12 il permesso
+    // c'è già all'installazione, e chi non ha ancora messo i suoi turni
+    // riceveva cambi turno e "vai a dormire" di turni non suoi.
+    if(promemoriaSpenti() || !state.turniConfigurati){ platform.notify.schedule([]).catch(()=>{}); return; }
     if(!window.NTNotif || !window.NTNotif.buildSchedule) return;
     const items = window.NTNotif.buildSchedule(state, { days:platform.notify.days, types:tipiNotifiche() });
     _ultimiPromemoria = items;
     try{ const na=notificaAdatta(); if(na) items.push(na); }catch(e){}
     // Diagnostica minima (letta dal test sul telefono): quante ne aggiunge
     // l'invito al diario e l'eventuale errore, che qui si inghiotte.
-    const diag=window.NTDiagNotifiche={invito:0, err:"", tc:!!state.turniConfigurati, tipi:tipiNotifiche().join(","), n:items.length};
+    const diag=window.NTDiagNotifiche={invito:0, err:""};
     try{ const inv=notificheInvito(items); diag.invito=inv.length; items.push(...inv); }catch(e){ diag.err=String(e&&e.message||e); }
     platform.notify.schedule(items).then(r=>{ diag.ok=r; }).catch(e=>{ diag.errSchedule=String(e&&e.message||e); });
   }catch(e){}

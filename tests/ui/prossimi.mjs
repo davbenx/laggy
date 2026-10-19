@@ -24,4 +24,17 @@ await p.click("#doOpzioni"); await p.waitForTimeout(400);
 await p.click("[data-prossimi-promemoria]"); await p.waitForTimeout(300);
 const t=await p.evaluate(()=>{ const e=document.querySelector("#opzProssimi"); return e && !e.hidden ? e.innerText : ""; });
 ok(/I prossimi/.test(t) && t.split("\n").filter(l=>/·/.test(l)).length>=3 && !/NaN|undefined/.test(t), "«Vedi i prossimi promemoria»: elenco con giorno, ora e titolo → "+t.split("\n").slice(1,4).join(" | "));
+// Installazione nuova, schema uguale a quello d'esempio: prima mancava il
+// riarmo dopo l'onboarding (la configurazione "non cambiava"), e restava la
+// coda dell'avvio, senza diario. E prima dei turni: nessun promemoria.
+{ const c2=await b.newContext({locale:"it-IT",viewport:{width:390,height:844}}); await c2.addInitScript(nativo);
+  const q=await c2.newPage(); q.on("pageerror",e=>errs.push(e.message));
+  await q.goto("http://localhost:8766/index.html"); await q.waitForTimeout(1500);
+  const prima=await q.evaluate(()=>window.__sched.length);
+  ok(prima===0, "prima di mettere i turni nessun promemoria del piano d'esempio ("+prima+")");
+  await q.click("text=Conosco già il mio schema"); await q.click("[data-preset-ob='0']"); await q.click("[data-pos='0']"); await q.click("#qhConfermaOrari");
+  await q.waitForTimeout(6000);
+  const k=await q.evaluate(()=>window.__sched.filter(n=>n.extra&&n.extra.kind==="diario").length);
+  ok(k>0, "subito dopo l'onboarding, senza riaprire l'app: «Come hai dormito?» in coda ("+k+")");
+  await c2.close(); }
 console.log("errori", errs); await b.close();

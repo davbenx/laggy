@@ -16,6 +16,8 @@ const { chromium } = require(require("child_process").execSync("npm root -g").to
   await ctx.route("**/collect", async r => { const buf = r.request().postDataBuffer(); posts.push(buf ? buf.toString() : null); await r.fulfill({ status: 204 }); });
   await p.goto("http://localhost:8765/index.html");
   await p.waitForTimeout(2500);
+  // turni "miei": il piano d'esempio non arma promemoria
+  await p.evaluate(() => { localStorage.setItem("nt:turniConfigurati", "true"); const st = JSON.parse(localStorage.getItem("nt:state") || "{}"); st.turniConfigurati = true; localStorage.setItem("nt:state", JSON.stringify(st)); });
   await p.reload(); await p.waitForTimeout(3000); // ora il SW controlla la pagina
   const info = await p.evaluate(async () => ({
     platform: window.NTPlatform && window.NTPlatform.name,
