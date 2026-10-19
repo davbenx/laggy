@@ -9357,8 +9357,11 @@ function ntNotifiche(){
     const items = window.NTNotif.buildSchedule(state, { days:platform.notify.days, types:tipiNotifiche() });
     _ultimiPromemoria = items;
     try{ const na=notificaAdatta(); if(na) items.push(na); }catch(e){}
-    try{ items.push(...notificheInvito(items)); }catch(e){}
-    platform.notify.schedule(items).catch(()=>{});
+    // Diagnostica minima (letta dal test sul telefono): quante ne aggiunge
+    // l'invito al diario e l'eventuale errore, che qui si inghiotte.
+    const diag=window.NTDiagNotifiche={invito:0, err:""};
+    try{ const inv=notificheInvito(items); diag.invito=inv.length; items.push(...inv); }catch(e){ diag.err=String(e&&e.message||e); }
+    platform.notify.schedule(items).then(r=>{ diag.ok=r; }).catch(e=>{ diag.errSchedule=String(e&&e.message||e); });
   }catch(e){}
 }
 // Ricarica il piano al ritorno in foreground (SW potrebbe aver perso i timer)
