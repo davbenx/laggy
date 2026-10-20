@@ -7611,7 +7611,7 @@ function ntWidget(){
     const P=c==="?"?null:NT_planSafe(d);
     const tipo = !P || P.b.rest ? "riposo" : P.night ? "notte" : "lavoro";
     const sigla=(SIGLA_SPECIALE[g.t]||(c==="?"?"?":c))+(g.t==="reperibile"?"•":g.t==="extra"?"+":"");
-    giorni.push({d:iso(d), g:o===0?"oggi":GG[d.getDay()]+" "+d.getDate(), c:sigla, t:tipo, s:P?hhmm(P.s.onset):""});
+    giorni.push({d:iso(d), g:o===0?"oggi":GG[d.getDay()]+"\u00a0"+d.getDate(), c:sigla, t:tipo, s:P?hhmm(P.s.onset):""});
   }
   platform.widget.publish(voci, giorni, {turno, diario:diarioWidget()});
 }
