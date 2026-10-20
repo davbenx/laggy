@@ -571,7 +571,18 @@ justify-content:center;overflow:hidden}
 #icsNudge{border-left-color:var(--blue)}
 #clubBanner{border-left-color:var(--orange)}
 #statsNudge{border-left-color:var(--blue)}
-#chiudiBenvenuto,#chiudiBackupNudge,#chiudiInstall,#chiudiShareNudge,#chiudiIcsNudge,#chiudiIcsExpireNudge,#chiudiClub{float:right;background:none;border:none;color:var(--faint);
+/* Inviti in alto (una card alla volta): stesso modello per tutti. Titolo,
+   una riga, un'azione piena; chiusura sempre con la × in alto a destra. */
+.invito{position:relative;border-left-color:var(--blue)}
+.invito>b,.invito .attiva-head{display:block;font-size:15px;font-weight:600;line-height:1.35;color:var(--ink);padding-right:36px}
+.invito .attiva-head{display:flex}
+.invito>p.hint{font-size:13.5px;line-height:1.5;margin:5px 0 12px!important}
+.invito .x{position:absolute;top:2px;right:2px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:none;border:0;color:var(--faint);font-size:22px;line-height:1;cursor:pointer;padding:0;float:none;min-height:0}
+.invito .x:hover{color:var(--ink)}
+.btn.azione{display:inline-flex;align-items:center;justify-content:center;background:var(--blue-fill);border:1px solid var(--blue-fill);color:#fff;font-weight:600;font-size:14px;min-height:42px;padding:8px 16px;text-decoration:none;text-align:center}
+.btn.azione:hover{background:var(--blue-fill);color:#fff;filter:brightness(1.1)}
+.adatta-azioni .lnk{min-height:44px;padding:0 6px}
+#chiudiBenvenuto{float:right;background:none;border:none;color:var(--faint);
 font-size:22px;line-height:1;cursor:pointer;padding:0 0 4px 10px;min-height:0}
 .card.s,.card.p{border-left-color:var(--blue)}
 .card.c,.card.l,.card.t{border-left-color:var(--orange-fill)}
@@ -840,6 +851,22 @@ justify-content:center;flex:none;width:44px;height:44px;border-radius:999px}
 .empty img{opacity:.9;margin-bottom:9px;border-radius:9px}
 .empty p{font-size:14px;color:var(--dim);line-height:1.55;max-width:36ch;margin:0 auto}
 .wizowl{display:block;margin:0 auto 12px;border-radius:9px}
+.dq{font-size:15px;color:var(--ink);line-height:1.4;margin:2px 0 10px}
+.dq-az{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.dq-az .dbtn{flex:1 1 auto;min-height:44px}
+.dq-az .dbtn.pri{flex:1.4 1 auto}
+.dq-az .lnk{min-height:44px;padding:0 8px}
+.dq-campi{display:flex;flex-wrap:wrap;gap:10px 14px;margin:2px 0 12px}
+.dq-campi label{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;color:var(--ink)}
+.ora-in{width:auto;min-width:7.2em}
+.dq-sez{border-top:1px solid var(--line);margin:14px 0 8px;padding-top:12px;font-size:12.5px;font-weight:600;color:var(--faint);text-transform:none}
+.dq-sez span{font-weight:400}
+.dq-riga{border-top:1px solid var(--line);margin-top:14px;padding-top:10px;font-size:14px;color:var(--dim);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.dq-riga b{color:var(--ink)}
+.dq-riga .kic{display:inline-flex;width:20px;height:20px}
+.drem-cmp{color:var(--dim);font-size:13px;font-weight:500}
+.drem-done,.dq-riga{line-height:1.5}
+.drem-done .lnk,.dq-riga .lnk{min-height:0;padding:10px 6px;margin:-10px 0;vertical-align:baseline}
 .dopo-notte{margin:-2px 0 10px;padding:0 2px}
 .dn-lab{display:block;font-size:12px;color:var(--dim);margin:0 0 6px}
 .dn-scelta{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--s2);border:1px solid var(--line);border-radius:var(--r);padding:2px}
@@ -1506,17 +1533,17 @@ header b{font-size:23px}
 <div id="setupChecklist" class="card" hidden></div>
 <!-- Il piano si adatta: proposta con un tocco quando il diario mostra che le
      tue abitudini sono diverse da quelle impostate (vedi renderAdatta). -->
-<div id="adattaCard" class="card" hidden></div>
-<div id="medicoCard" class="card" hidden></div>
+<div id="adattaCard" class="card invito" hidden></div>
+<div id="medicoCard" class="card invito" hidden></div>
 <div id="setupNudge" class="card" hidden></div>
-<div id="backupNudge" class="card" hidden></div>
-<div id="installBanner" class="card" hidden></div>
-<div id="shareNudge" class="card" hidden></div>
-<div id="icsNudge" class="card" hidden></div>
-<div id="icsExpireNudge" class="card" hidden></div>
-<div id="statsNudge" class="card" hidden></div>
-<div id="clubBanner" class="card" hidden></div>
-<div id="donateNudge" class="card" hidden></div>
+<div id="backupNudge" class="card invito" hidden></div>
+<div id="installBanner" class="card invito" hidden></div>
+<div id="shareNudge" class="card invito" hidden></div>
+<div id="icsNudge" class="card invito" hidden></div>
+<div id="icsExpireNudge" class="card invito" hidden></div>
+<div id="statsNudge" class="card invito" hidden></div>
+<div id="clubBanner" class="card invito" hidden></div>
+<div id="donateNudge" class="card invito" hidden></div>
 <!-- Data sopra Adesso, non sotto: prima di sapere "cosa fare adesso" serve
      sapere di quale giorno si sta parlando (specie sfogliando avanti). -->
 <div class="datebar">
@@ -3010,9 +3037,17 @@ function fromHash(hashStr){
   }
   return true;
 }
+// Quello che si annota nel diario cambia le notifiche: «Come hai dormito?» non
+// va più chiesto, un pisolino di recupero va aggiunto. Prima si ricalcolavano
+// solo alla riapertura dell'app, e la domanda arrivava anche dopo aver risposto.
+const DIARIO_CHIAVI = new Set(["wakes","beds","pisolini","diary"]);
+let _dopoDiarioT = null;
+function dopoDiario(){ clearTimeout(_dopoDiarioT); _dopoDiarioT = setTimeout(()=>{ try{ ntNotifiche(); }catch(e){} }, 300); }
 const store = {
   get(k,d){ try{ const v=localStorage.getItem("nt:"+k); return v?JSON.parse(v):d; }catch(e){ return d; } },
-  set(k,v){ try{ localStorage.setItem("nt:"+k,JSON.stringify(v)); return true; }catch(e){ return false; } },
+  set(k,v){ let ok=true; try{ localStorage.setItem("nt:"+k,JSON.stringify(v)); }catch(e){ ok=false; }
+    if(DIARIO_CHIAVI.has(k)) dopoDiario();
+    return ok; },
   // un oggetto giorno → valore (diario, sveglie…): qualunque altra cosa salvata lì è un dato rotto
   mappa(k){ const v=this.get(k,null); return (v && typeof v==="object" && !Array.isArray(v)) ? v : {}; },
   lista(k){ const v=this.get(k,null); return Array.isArray(v) ? v : []; }
@@ -3503,6 +3538,7 @@ function cards(P){
   }else if(b.rest){
     sc.sub=s.meta.reset?"Stasera a letto presto anche senza sonno: ci penserà la stanchezza ad addormentarti."
       :s.meta.ramp?"Non è un riposo qualunque: da come dormi stanotte dipende quanto ti peseranno le prossime notti."
+      :(!P.nb.rest && /^pre-turno/.test(s.kind)) ? "Domani attacchi alle "+hhmm(P.nb.start)+": stanotte la sveglia è alle "+hhmm(s.onset+s.dur)+"."
       :"Riposo pieno. Non c'è niente da preparare: dormi senza guardare l'orologio.";
     const o=restOptions(P); if(o) sc.opts=o;
     sc.why="Nei riposi il sonno è l'unica leva che hai in mano. Alzarsi un'ora prima è fattibile; tre ore prima no, semplicemente non ti addormenti. Per questo l'orario consigliato cambia da un riposo all'altro, anche se la giornata è libera uguale.";
@@ -4209,141 +4245,101 @@ function diaryReminder(P, CARDS){
   const logged = comePiano || diverso;
 
   let durTxt="", cmp="", debt=false;
+  // Il confronto è con il sonno pianificato per QUELLA notte (gli orari della
+  // domanda), non con P.s, che è il sonno di stanotte: in un giorno di notte
+  // il «rispetto al piano» usciva con ore di differenza inventate.
+  let pianoDur=t(cd.wakePiano)-t(cd.bedPiano); if(pianoDur<=0) pianoDur+=1440;
   if(bd && wk){ let mins=t(wk)-t(bd); if(mins<=0) mins+=1440; durTxt=dur(mins);
-    if(P && P.s && isFinite(P.s.dur)){
-      debt = mins < P.s.dur - 20;
+    if(isFinite(pianoDur)){
+      debt = mins < pianoDur - 20;
       // Prima confrontava solo l'ora del risveglio col piano — così chi
       // andava a letto più tardi ma si svegliava all'ora giusta si sentiva
       // dire "in orario col piano" anche con un sonno chiaramente più
       // corto, mentre l'app aggiungeva comunque un pisolino di recupero.
       // Ora confronta la durata vera, la stessa cosa che decide "debt" qui
       // sopra: il testo e il comportamento non si contraddicono più.
-      const dd = mins - P.s.dur;
-      cmp = Math.abs(dd)<=10 ? "(in linea col piano)" : (dd>0 ? "(+" + hm(dd) + " rispetto al piano)" : "(–" + hm(dd) + " rispetto al piano)");
+      const dd = mins - pianoDur;
+      cmp = Math.abs(dd)<=10 ? "" : (dd>0 ? "(+" + hm(dd) + " sul piano)" : "(–" + hm(dd) + " sul piano)");   // in linea: niente da dire
     } }
   // Il cerchio si chiude a schermo: se hai annotato meno sonno e oggi il piano
   // prescrive un recupero, dillo — così vedi che il TUO dato ha cambiato il piano.
   const recupero = logged && debt && P && (P.naps||[]).some(n=>n.rec||n.debito);
   if(dnum(f)===dnum(giornoVero())) setBadge(logged?0:1);
 
+  // Un solo modo per tutto il diario, quello delle app di tutti i giorni:
+  // una domanda con gli orari del piano → «Sì, così» (un tocco) oppure «Altri
+  // orari» (due campi e Salva) → resta una riga sola con «Modifica». Le scelte
+  // (energia, pisolino saltato) si salvano al tocco. Prima ogni parte aveva un
+  // meccanismo suo: orari e Registra, voto senza conferma, Fatto/Saltato
+  // sempre visibili con Conferma sotto.
+  const campiOra=(attr, a, b, salva, annulla)=>
+    '<div class="dq-campi"><label>A letto<input type="time" class="ora-in" '+attr[0]+' value="'+esc(a)+'"></label>'+
+    '<label>Sveglia<input type="time" class="ora-in" '+attr[1]+' value="'+esc(b)+'"></label></div>'+
+    '<div class="dq-az">'+salva+(annulla||"")+'</div>';
   const sleepEditing = state.diaryEditing.has("sleep:"+key0);
-  let x='<div class="drem'+(logged?" done":"")+'">';
+  let x='<div class="drem'+(logged && !sleepEditing?" done":"")+'">';
   x+='<div class="drem-q"><span class="dic">'+ICON.moon+'</span>Il tuo sonno</div>';
-  if(!logged){
-    const nowD = new Date();
-    const nowMin = nowD.getHours()*60 + nowD.getMinutes();
-    const isToday = dnum(f) === dnum(nowD);
-    const defBed = bd || cd.bedPiano || (P && P.sp ? hhmm(P.sp.onset) : "23:00");
-    const defWake = wk || (isToday && nowMin < t(cd.wakePiano) ? hhmm(nowMin) : cd.wakePiano) || (P && P.sp ? hhmm(P.sp.onset + P.sp.dur) : "07:00");
-    x+='<div style="font-size:15.5px;font-weight:600;color:var(--ink);line-height:1.3;margin-bottom:6px">'+
-       'Registra il tuo sonno</div>'+
-       '<div style="font-size:13px;color:var(--dim);margin-bottom:12px">'+
-       'Conferma o modifica gli orari reali:</div>'+
-       '<div class="diary" style="gap:12px;margin-bottom:12px;align-items:center;flex-wrap:wrap">'+
-       '<label style="display:flex;align-items:center;gap:6px;font-size:13.5px;color:var(--ink);font-weight:600">'+
-       'A letto <input type="time" data-sleep-bed="1" value="'+esc(defBed)+'" style="max-width:115px;flex:none"></label>'+
-       '<label style="display:flex;align-items:center;gap:6px;font-size:13.5px;color:var(--ink);font-weight:600">'+
-       'Sveglia <input type="time" data-sleep-wake="1" value="'+esc(defWake)+'" style="max-width:115px;flex:none"></label></div>'+
-       '<div class="diary" style="gap:8px">'+
-       '<button class="dbtn wide pri" data-confirm-sleep="1" aria-label="Registra il tuo sonno">Registra il tuo sonno</button></div>';
+  const nowD = new Date(), nowMin = nowD.getHours()*60 + nowD.getMinutes();
+  const isToday = dnum(f) === dnum(nowD);
+  const defBed = bd || cd.bedPiano || (P && P.sp ? hhmm(P.sp.onset) : "23:00");
+  const defWake = wk || (isToday && nowMin < t(cd.wakePiano) ? hhmm(nowMin) : cd.wakePiano) || (P && P.sp ? hhmm(P.sp.onset + P.sp.dur) : "07:00");
+  if(sleepEditing){
+    x+=campiOra(['data-sleep-bed="1" aria-label="A letto"','data-sleep-wake="1" aria-label="Sveglia"'], defBed, defWake,
+      '<button class="dbtn pri" data-confirm-sleep="1">Salva</button>',
+      '<button class="lnk" data-annulla-sleep="1">Annulla</button>');
+  } else if(!logged){
+    x+='<p class="dq">Hai dormito <b>'+esc(defBed)+' → '+esc(defWake)+'</b>?</p>'+
+      '<div class="dq-az"><button class="dbtn pri" data-confirm-sleep="1" data-def-bed="'+esc(defBed)+'" data-def-wake="'+esc(defWake)+'">Sì, così</button>'+
+      '<button class="dbtn" data-open="1">Altri orari</button></div>';
   } else {
-    // Prima, con orari diversi dal piano, questa riga mostrava la
-    // differenza ("+15 minuti sul piano") E una riga a parte con gli
-    // orari assoluti ("Orari corretti: 23:40 → 09:10") — la stessa
-    // deviazione detta due volte, in due unità diverse. Il bottone
-    // "Modifica" ora è sempre qui: gli orari esatti si vedono aprendo il
-    // modulo di modifica (che li precompila già), non anche prima di aprirlo.
-    x+='<div class="drem-done"><span class="drem-ok">✓</span> Hai dormito <b>'+durTxt+'</b> '+
-       (cmp?'<span class="drem-cmp" style="color:var(--dim);font-size:13px;font-weight:500">'+cmp+'</span> ':'')+
-       '<button class="lnk drem-edit" data-open="1" aria-label="Modifica gli orari del sonno">Modifica</button></div>'+
+    x+='<div class="drem-done"><span class="drem-ok">✓</span> Sonno <b>'+esc(bd)+'–'+esc(wk)+'</b> · '+durTxt+
+       (cmp?' <span class="drem-cmp">'+cmp+'</span>':'')+
+       ' <button class="lnk drem-edit" data-open="1" aria-label="Modifica gli orari del sonno">Modifica</button></div>'+
        (recupero?'<div class="drem-rec">Hai dormito meno del previsto: il piano ha aggiunto un pisolino di recupero qui sotto.</div>':'');
-    if(sleepEditing)
-      x+='<div class="diary" style="gap:10px;margin-top:8px;align-items:center;flex-wrap:wrap">'+
-         '<span class="hint" style="width:100%">Modifica orari effettivi</span>'+
-         '<label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink);font-weight:600">'+
-         'A letto <input type="time" data-sleep-bed="1" value="'+esc(bd||cd.bedPiano)+'" style="max-width:115px;flex:none"></label>'+
-         '<label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink);font-weight:600">'+
-         'Sveglia <input type="time" data-sleep-wake="1" value="'+esc(wk||cd.wakePiano)+'" style="max-width:115px;flex:none"></label></div>'+
-         '<button class="btn g" data-confirm-sleep="1" style="display:block;width:100%;box-sizing:border-box;margin-top:8px;white-space:normal;overflow-wrap:break-word;text-align:center" aria-label="Conferma gli orari del sonno">Conferma orari</button>';
-    // Il voto da 1 a 5 alimenta "Il tuo andamento" (il ciclo giorno per
-    // giorno, la correlazione col debito) — ma non c'era nessun modo di
-    // inserirlo: il gestore del clic esisteva già, scritto e funzionante,
-    // senza che nessun bottone lo generasse mai. Le etichette non chiedono
-    // un umore generico ma quanto sei sveglio, riprendendo lo stesso
-    // vocabolario già usato nel check-in di vigilanza qui sopra (Sveglio,
-    // Così così) — stessa scala di pensiero, non due lessici diversi nella
-    // stessa app. 1=peggio, 5=meglio: la direzione che tutto il resto del
-    // codice (grafici, soglie) già assume.
-    // Stesso formato icona+testo del check-in rapido qui sopra: due domande
-    // che sembrano dire la stessa cosa restano più facili da distinguere se
-    // almeno non sembrano anche due stili diversi — restano comunque due
-    // dati diversi (questo è permanente, legato a questa notte; l'altro
-    // scade in due ore e parla di adesso), solo vestiti allo stesso modo.
-    x+='<div style="border-top:1px solid var(--line);margin:14px 0 8px;padding-top:12px;'+
-       'font-size:12.5px;font-weight:600;color:var(--faint)">Com\'è andata oggi? '+
-       '<span style="font-weight:400">(facoltativo)</span></div>'+
-       '<div class="ora-kss" style="margin-top:0">'+
-       // Un colore per punto della scala (rosso→verde, lo stesso vocabolario
-       // di rischio/ok già usato altrove in app) invece di un'icona sempre
-       // neutra: si legge la tendenza a colpo d'occhio, non solo leggendo
-       // ogni etichetta una per una.
-       [[1,"Senza energie",ICON.faceTerrible,"var(--risk)"],[2,"Poca energia",ICON.faceLow,"var(--orange)"],
-        [3,"Così così",ICON.faceMid,"var(--faint)"],[4,"Bene",ICON.faceOk,"var(--blue)"],
-        [5,"Al meglio",ICON.faceGreat,"var(--ok)"]].map(o=>
-         '<button class="dbtn kface'+(+diary[key0]===o[0]?" on":"")+'" data-diary="'+o[0]+'" aria-label="'+o[1]+'" style="--tone:'+o[3]+'">'+
-         '<i class="kic" style="color:'+o[3]+'">'+o[2]+'</i><span>'+o[1]+'</span></button>').join("")+
-       '</div>';
   }
-  const napCards=CARDS.filter(c=>c.nap);
-  if(napCards.length) x+='<div class="drem-q" style="border-top:1px solid var(--line);margin:14px 0 8px;padding-top:12px">Il tuo pisolino</div>';
-  napCards.forEach(c=>{
+  // Come ti senti: una scelta, si salva al tocco. Solo dopo il sonno, e poi
+  // resta la riga con la scelta fatta (i grafici di «Come sto dormendo» la usano).
+  const VOTI=[[1,"Senza energie",ICON.faceTerrible,"var(--risk)"],[2,"Poca energia",ICON.faceLow,"var(--orange)"],
+    [3,"Così così",ICON.faceMid,"var(--faint)"],[4,"Bene",ICON.faceOk,"var(--blue)"],[5,"Al meglio",ICON.faceGreat,"var(--ok)"]];
+  if(logged && !sleepEditing){
+    const v=VOTI.find(o=>o[0]===+val), votoEditing=state.diaryEditing.has("voto:"+key0);
+    if(v && !votoEditing)
+      x+='<div class="dq-riga"><i class="kic" style="color:'+v[3]+'">'+v[2]+'</i> Energia: <b>'+v[1]+'</b> <button class="lnk drem-edit" data-voto-edit="1">Cambia</button></div>';
+    else
+      x+='<div class="dq-sez">Come ti senti? <span>(facoltativo)</span></div><div class="ora-kss" style="margin-top:0">'+
+        VOTI.map(o=>'<button class="dbtn kface'+(+val===o[0]?" on":"")+'" data-diary="'+o[0]+'" aria-label="'+o[1]+'" aria-pressed="'+(+val===o[0])+'" style="--tone:'+o[3]+'">'+
+          '<i class="kic" style="color:'+o[3]+'">'+o[2]+'</i><span>'+o[1]+'</span></button>').join("")+'</div>';
+  }
+  // Il pisolino: la domanda solo quando è cominciato (prima non c'è niente da
+  // dire: «Fatto?» per un pisolino delle 17 alle 9 del mattino non ha senso).
+  const ora = dnum(f) < dnum(giornoVero()) ? Infinity : minutiDaFocus();
+  CARDS.filter(c=>c.nap && isFinite(c.at) && ora>=c.at).forEach(c=>{
     const seg=((state.pisolini||{})[key0]||{})[c.nap.k]||{};
-    const livello=c.nap.livello;
-    const skippabile = isFinite(livello) && livello<2;   // c'è un livello dopo a cui scendere
-    x+='<div class="diary" style="gap:8px;margin-top:8px"><span class="hint" style="width:100%">Pisolino previsto</span>'+
-      '<button class="dbtn'+(seg.si?" on":"")+'" data-nap="si" data-k="'+esc(c.nap.k)+'" data-min="'+c.nap.min+'">Fatto</button>'+
-      '<button class="dbtn'+(seg.no?" on":"")+'" data-nap="no" data-k="'+esc(c.nap.k)+'" data-min="'+c.nap.min+'">Saltato</button>'+
-      (skippabile?'<button class="dbtn" data-skip-recupero="'+(livello+1)+'">Altra opzione</button>':'')+
-      '</div>';
-    if(seg.si){
-      const napEditing = state.diaryEditing.has("nap:"+key0+":"+c.nap.k);
-      if(napEditing){
-        x+='<div class="diary" style="gap:10px;margin-top:6px"><span class="hint" style="width:100%">A che ora, davvero?</span>'+
-          '<input type="time" data-napa="'+esc(c.nap.k)+'" data-min="'+c.nap.min+'" value="'+esc(seg.a||c.nap.k)+'" style="max-width:118px;flex:none">'+
-          '<input type="time" data-napb="'+esc(c.nap.k)+'" data-min="'+c.nap.min+'" value="'+esc(seg.b||c.nap.fine)+'" style="max-width:118px;flex:none"></div>'+
-          '<button class="btn g" data-confirm-nap="'+esc(c.nap.k)+'" style="display:block;width:100%;box-sizing:border-box;margin-top:8px;white-space:normal;overflow-wrap:break-word;text-align:center" aria-label="Conferma gli orari del pisolino">Conferma</button>';
-      } else {
-        x+='<div class="diary" style="gap:8px;margin-top:6px;align-items:center">'+
-          '<span class="hint" style="width:100%">Fatto: '+esc(seg.a||c.nap.k)+' → '+esc(seg.b||c.nap.fine)+'</span>'+
-          '<button class="lnk drem-edit" data-edit-nap="'+esc(c.nap.k)+'" aria-label="Modifica gli orari del pisolino">Modifica</button></div>';
-      }
+    const fine=c.nap.fine, napEditing=state.diaryEditing.has("nap:"+key0+":"+c.nap.k);
+    if(napEditing || !(seg.si || seg.no)) x+='<div class="dq-sez" data-nap-q="'+esc(c.nap.k)+'">Pisolino</div>';
+    else x+='<div class="dq-sez" data-nap-q="'+esc(c.nap.k)+'" style="padding-top:0;border-top:0;margin:0"></div>';
+    if(napEditing){
+      x+='<div class="dq-campi"><label>Inizio<input type="time" class="ora-in" data-nap-in-a="1" aria-label="Inizio del pisolino" value="'+esc(seg.a||c.nap.k)+'"></label>'+
+        '<label>Fine<input type="time" class="ora-in" data-nap-in-b="1" aria-label="Fine del pisolino" value="'+esc(seg.b||fine)+'"></label></div>'+
+        '<div class="dq-az"><button class="dbtn pri" data-nap-salva="'+esc(c.nap.k)+'" data-min="'+c.nap.min+'">Salva</button><button class="lnk" data-nap-annulla="'+esc(c.nap.k)+'">Annulla</button></div>';
+    } else if(seg.si){
+      x+='<div class="drem-done"><span class="drem-ok">✓</span> Pisolino <b>'+esc(seg.a||c.nap.k)+'–'+esc(seg.b||fine)+'</b> '+
+        '<button class="lnk drem-edit" data-edit-nap="'+esc(c.nap.k)+'" aria-label="Modifica gli orari del pisolino">Modifica</button></div>';
       // Se il pisolino registrato è durato molto più del previsto, un avviso
       // subito — non solo un conto che si aggiusta domani in silenzio.
-      const aReale=NT.oraDi(seg.a||c.nap.k), bReale=NT.oraDi(seg.b||c.nap.fine);
+      const aReale=NT.oraDi(seg.a||c.nap.k), bReale=NT.oraDi(seg.b||fine);
       if(aReale!==null && bReale!==null){
         let dReale=bReale-aReale; while(dReale<=0) dReale+=1440;
         if(dReale-c.nap.min>=20 && dReale<300)
           x+='<div class="drem-rec">Più lungo del previsto ('+dur(dReale)+'): oltre una certa durata un pisolino rischia di scivolare in sonno profondo, con più intontimento al risveglio invece di meno.</div>';
       }
-      // Il nappuccino (caffè appena prima di un pisolino breve) ha senso solo
-      // per i pisolini corti — è la stessa tecnica, non una diversa: qui si
-      // limita a verificare che non cada oltre il taglio caffeina già
-      // calcolato altrove, non un secondo calcolo scollegato dal primo.
-      if(c.nap.min<=30){
-        const napp=!!seg.napp;
-        x+='<label class="p1" style="margin-top:8px"><input type="checkbox" data-napp="'+esc(c.nap.k)+'"'+(napp?' checked':'')+'> Un caffè appena prima (nappuccino)</label>';
-        if(napp){
-          // Confronto sempre relativo al risveglio (mai orari grezzi a
-          // scale diverse fra loro): stesso principio già usato altrove in
-          // questo file, dopo un paio di bug nati proprio da questo.
-          const dFromWake = tt => { let d=tt-P.wake; while(d<0) d+=1440; return d; };
-          const oltreIlTaglio = aReale!==null && isFinite(P.cut) && dFromWake(aReale) >= dFromWake(P.cut);
-          if(oltreIlTaglio)
-            x+='<div class="drem-rec" style="color:var(--risk);border-left-color:var(--risk)">Cade dopo il tuo taglio caffeina delle '+hhmm(P.cut)+': rischia di disturbare il sonno principale che segue.</div>';
-          else
-            x+='<div class="drem-rec">Bere il caffè subito prima di un pisolino breve dà più lucidità di entrambi presi da soli — l\'effetto arriva mentre dormi, non prima.</div>';
-        }
-      }
+    } else if(seg.no){
+      x+='<div class="drem-done">Pisolino saltato <button class="lnk drem-edit" data-nap-riapri="'+esc(c.nap.k)+'">Modifica</button></div>';
+    } else {
+      x+='<p class="dq">Hai fatto il pisolino <b>'+esc(c.nap.k)+' → '+esc(fine)+'</b>?</p>'+
+        '<div class="dq-az"><button class="dbtn pri" data-nap="si" data-k="'+esc(c.nap.k)+'" data-fine="'+esc(fine)+'" data-min="'+c.nap.min+'">Sì, così</button>'+
+        '<button class="dbtn" data-nap-altri="'+esc(c.nap.k)+'">Altri orari</button>'+
+        '<button class="dbtn" data-nap="no" data-k="'+esc(c.nap.k)+'" data-min="'+c.nap.min+'">Saltato</button></div>';
     }
   });
   // Livello 3: nessuna finestra ha retto, ma il debito non sparisce in
@@ -5213,7 +5209,7 @@ function renderAttivazione(){
   if(el){
     if(!attivazioneVisibile()) el.hidden=true;
     else {
-      el.hidden=false; el.className="card attiva-card";
+      el.hidden=false; el.className="card attiva-card invito";
       // l'installazione proposta dalla lista conta come la proposta del banner
       if(!installBannerTracciato && voci.some(x=>x.id==="installa" && !x.ok)){ installBannerTracciato=true; track("install_prompt_shown"); }
       // Intera solo il primo giorno (quando si imposta tutto); dopo, una riga
@@ -5231,10 +5227,10 @@ function renderAttivazione(){
           '<span class="attiva-prog">'+fatte+' di '+voci.length+'</span><span class="tchev" aria-hidden="true">›</span></button>';
         return renderOpzFunzioni(voci);
       }
-      el.innerHTML='<div class="attiva-head"><b style="font-size:15px">Rendi automatico il tuo piano</b><span class="attiva-prog">'+fatte+' di '+voci.length+'</span></div>'+
+      el.innerHTML='<button type="button" class="x" id="nascondiAttivazione" aria-label="Nascondi: resta in Impostazioni" title="Nascondi (resta in Impostazioni)">×</button>'+
+        '<div class="attiva-head"><b style="font-size:15px">Rendi automatico il tuo piano</b><span class="attiva-prog">'+fatte+' di '+voci.length+'</span></div>'+
         '<div class="attiva-bar"><i style="width:'+Math.round(100*fatte/voci.length)+'%"></i></div>'+
-        htmlVociAttivazione(voci)+
-        '<button type="button" class="lnk" id="nascondiAttivazione" style="font-size:12px;color:var(--faint);padding:6px 0 0">Nascondi (resta in Impostazioni)</button>';
+        htmlVociAttivazione(voci);
     }
   }
   renderOpzFunzioni(voci);
@@ -5333,10 +5329,9 @@ function renderMedico(){
   const el=$("#medicoCard"); if(!el) return;
   if(!medicoVisibile()){ el.hidden=true; return; }
   el.hidden=false;
-  el.innerHTML='<b>Da qualche settimana segni spesso poca energia</b>'+
-    '<p class="hint" style="margin-top:6px">Succede a tanti che lavorano a turni, e non sempre basta organizzare meglio il sonno. Se dormi male o hai molto sonno durante il giorno con regolarità, parlane con il medico competente alla prossima visita periodica, o con il tuo medico: possono aiutarti più di un\'app. Non è una diagnosi, solo un segnale da non lasciar passare.</p>'+
-    '<div style="display:flex;flex-wrap:wrap;gap:8px"><button class="btn" type="button" data-riepilogo-medico>Prepara il riepilogo per la visita</button>'+
-    '<button class="btn g" type="button" id="doMedicoOk">Ho capito</button></div>';
+  el.innerHTML='<button type="button" class="x" id="doMedicoOk" aria-label="Chiudi">×</button><b>Da qualche settimana segni spesso poca energia</b>'+
+    '<p class="hint">Succede a tanti turnisti, e non sempre basta organizzare il sonno. Parlane con il medico competente alla prossima visita: non è una diagnosi, è un segnale da non lasciar passare.</p>'+
+    '<button class="btn azione" type="button" data-riepilogo-medico>Prepara il riepilogo per la visita</button>';
 }
 if($("#medicoCard")) $("#medicoCard").addEventListener("click", e=>{
   if(e.target.closest("[data-riepilogo-medico]")){ stampaRiepilogoMedico(); return; }
@@ -5392,8 +5387,8 @@ function renderAdatta(){
   el.innerHTML='<span class="eyebrow" style="color:var(--ok)">Il piano si adatta a te</span>'+
     '<p style="margin:4px 0 0;font-size:14.5px;line-height:1.45">'+esc(sg.breve)+'</p>'+
     '<p class="hint" style="margin:4px 0 0">Lo dicono le notti che hai annotato. Puoi sempre cambiarlo in Impostazioni.</p>'+
-    '<div class="adatta-azioni"><button type="button" class="btn" id="adattaSi" data-f="'+esc(sg.action.field)+'" data-v="'+esc(String(sg.action.value))+'">'+esc(testoAzione(sg))+'</button>'+
-    '<button type="button" class="btn g" id="adattaNo">Lascia così</button></div>';
+    '<div class="adatta-azioni"><button type="button" class="btn azione" id="adattaSi" data-f="'+esc(sg.action.field)+'" data-v="'+esc(String(sg.action.value))+'">'+esc(testoAzione(sg))+'</button>'+
+    '<button type="button" class="lnk" id="adattaNo">Lascia così</button></div>';
 }
 document.addEventListener("click", e=>{
   const si=e.target.closest("#adattaSi"); if(si){ haptic(10); applicaAdatta(si.dataset.f, si.dataset.v, true); return; }
@@ -5446,7 +5441,7 @@ function notificheInvito(items){
     if(st.ferma && ultimaAnnotata>st.ferma){ st.ferma=0; st.ignorate=0; }
     if(!st.ferma){
       const ogni = st.ignorate>=3 ? 3 : 1;
-      const sveglie=window.NTNotif.buildSchedule(state, {days:4, types:["wake"]});
+      const sveglie=window.NTNotif.buildSchedule(statoPerNotifiche(), {days:5, types:["wake"]});
       let ultima=st.ultima||"";
       for(const w of sveglie){
         const at=new Date(new Date(w.at).getTime()+45*60e3), d=iso(new Date(w.at));
@@ -5541,10 +5536,10 @@ function renderBackupNudge(){
   if(!backupNudgeVisibile()){ el.hidden=true; return; }
   el.hidden=false;
   el.innerHTML =
-    '<button type="button" id="chiudiBackupNudge" aria-label="Chiudi">×</button>'+
+    '<button type="button" class="x" id="chiudiBackupNudge" aria-label="Chiudi">×</button>'+
     '<b>Non hai ancora salvato i tuoi turni</b>'+
     '<p class="hint" style="margin-top:6px">Stanno solo su questo telefono'+(window.NT_APP.nativo?'':', in questo browser')+'. Se li perdi (nuovo telefono, dati cancellati), li riscrivi da capo — salva il link ora, richiede un tocco.</p>'+
-    '<button class="btn g" type="button" id="doSalvaOraNudge">Salva la configurazione →</button>';
+    '<button class="btn azione" type="button" id="doSalvaOraNudge">Salva la configurazione</button>';
 }
 if($("#backupNudge")) $("#backupNudge").addEventListener("click", e=>{
   if(e.target.closest("#chiudiBackupNudge")){ backupNudgeChiuso=true; renderBackupNudge(); return; }
@@ -5590,6 +5585,7 @@ function invitiInPausa(nonIlPrimoGiorno){
   // un invito al giorno.
   if(attivazioneVisibile() && giorniDaAttivazione()<3) return true;
   if(adattaVisibile()) return true;        // poi la proposta di adattare il piano
+  if(medicoVisibile()) return true;        // il segnale per il medico conta più di qualunque invito
   const oggi = iso(new Date());
   if(_invitoOggi === oggi) return true;
   if(nonIlPrimoGiorno && (!state.firstSeenAt || state.firstSeenAt === oggi)) return true;
@@ -5631,21 +5627,21 @@ function renderInstallBanner(){
   el.hidden=false;
   if(playDaWeb()){
     el.innerHTML =
-      '<button type="button" id="chiudiInstall" aria-label="Chiudi">×</button>'+
+      '<button type="button" class="x" id="chiudiInstall" aria-label="Chiudi">×</button>'+
       '<b>Notturnisti è su Google Play</b>'+
       '<p class="hint" style="margin-top:6px">L\'app Android fa tutto quello che fa questa pagina, in più: promemoria che arrivano anche ad app chiusa, i turni nel calendario del telefono, il widget sulla schermata Home. Gratis come qui. I tuoi turni li porti con un tocco: all\'apertura scegli «Usavi Notturnisti dal browser?».</p>'+
-      '<a class="btn g" id="doPlayApp" href="'+esc(playLink())+'" target="_blank" rel="noopener" style="display:inline-block;text-decoration:none;text-align:center">Apri Google Play →</a>';
+      '<a class="btn azione" id="doPlayApp" href="'+esc(playLink())+'" target="_blank" rel="noopener">Apri Google Play</a>';
     return;
   }
   el.innerHTML =
-    '<button type="button" id="chiudiInstall" aria-label="Chiudi">×</button>'+
+    '<button type="button" class="x" id="chiudiInstall" aria-label="Chiudi">×</button>'+
     '<b>Usa Notturnisti come app</b>'+
     '<p class="hint" style="margin-top:6px">'+(ios
       ? 'Aggiungila alla schermata Home dal menu Condividi di Safari: si apre a tutto schermo e ricorda sempre i tuoi turni.'
       : 'Installala sulla schermata principale: si apre subito, funziona offline e non perdi mai i tuoi turni.')+'</p>'+
     (ios
       ? '<div class="ios-hint" style="margin-top:10px;font-size:13px;color:var(--ink)">Tocca <span style="font-size:16px">⎋</span> in basso su Safari, poi <b>"Aggiungi a schermata Home"</b>.</div>'
-      : '<button class="btn g" type="button" id="doInstallApp">Aggiungi alla schermata Home →</button>');
+      : '<button class="btn azione" type="button" id="doInstallApp">Aggiungi alla schermata Home</button>');
 }
 if($("#installBanner")) $("#installBanner").addEventListener("click", e=>{
   if(e.target.closest("#chiudiInstall")){ state.installBannerOff=true; salva(); renderInstallBanner(); return; }
@@ -5683,10 +5679,10 @@ function renderShareNudge(){
   if(!shareNudgeVisibile()){ el.hidden=true; return; }
   el.hidden=false;
   el.innerHTML =
-    '<button type="button" id="chiudiShareNudge" aria-label="Chiudi">×</button>'+
+    '<button type="button" class="x" id="chiudiShareNudge" aria-label="Chiudi">×</button>'+
     '<b>Chi lavora con te fa i tuoi stessi turni?</b>'+
     '<p class="hint" style="margin-top:6px">Mandagli il tuo ciclo: apre il link e trova l\'app già pronta, con il suo piano.</p>'+
-    '<button class="btn g" type="button" id="doShareNudge">Invita chi lavora con te →</button>';
+    '<button class="btn azione" type="button" id="doShareNudge">Invita chi lavora con te</button>';
 }
 if($("#shareNudge")) $("#shareNudge").addEventListener("click", e=>{
   if(e.target.closest("#chiudiShareNudge")){ state.shareNudgeOff=true; salva(); renderShareNudge(); return; }
@@ -5712,10 +5708,10 @@ function renderIcsNudge(){
   if(!icsNudgeVisibile()){ el.hidden=true; return; }
   el.hidden=false;
   el.innerHTML =
-    '<button type="button" id="chiudiIcsNudge" aria-label="Chiudi">×</button>'+
+    '<button type="button" class="x" id="chiudiIcsNudge" aria-label="Chiudi">×</button>'+
     '<b>Lo sapevi? Puoi vedere i turni nel calendario del telefono</b>'+
     '<p class="hint" style="margin-top:6px">Turni e ore di sonno nel calendario che usi già (Google, Apple…), aggiornati da soli: li vedi dove guardi già i tuoi appuntamenti.</p>'+
-    '<button class="btn g" type="button" id="doIcsNudge">Aggiungili al calendario →</button>';
+    '<button class="btn azione" type="button" id="doIcsNudge">Aggiungili al calendario</button>';
 }
 if($("#icsNudge")) $("#icsNudge").addEventListener("click", e=>{
   if(e.target.closest("#chiudiIcsNudge")){ state.icsNudgeOff=true; salva(); renderIcsNudge(); return; }
@@ -5749,11 +5745,11 @@ function renderIcsExpireNudge(){
   // a chi l'ha già attivato (window.NTPaid.paid()) — a loro non serve.
   const gia = window.NTPaid && window.NTPaid.paid();
   el.innerHTML =
-    '<button type="button" id="chiudiIcsExpireNudge" aria-label="Chiudi">×</button>'+
+    '<button type="button" class="x" id="chiudiIcsExpireNudge" aria-label="Chiudi">×</button>'+
     '<b>Il calendario esportato sta per scadere</b>'+
     '<p class="hint" style="margin-top:6px">I 28 giorni dell\'ultimo export finiscono presto: se non lo rifai, il telefono continua a mostrare turni vecchi.'+
     (gia?'':' O smetti di doverci pensare: il calendario automatico (gratis) si aggiorna da solo.')+'</p>'+
-    '<button class="btn g" type="button" id="doIcsExpireNudge">Esporta di nuovo →</button>'+
+    '<button class="btn azione" type="button" id="doIcsExpireNudge">Esporta di nuovo</button>'+
     (gia?'':'<button class="lnk" type="button" id="doIcsExpireNudgePay" style="margin-left:10px">O aggiornalo da solo →</button>');
 }
 if($("#icsExpireNudge")) $("#icsExpireNudge").addEventListener("click", e=>{
@@ -5815,10 +5811,10 @@ function renderClubBanner(){
   if(!clubBannerVisibile()){ el.hidden=true; return; }
   el.hidden=false;
   el.innerHTML =
-    '<button type="button" id="chiudiClub" aria-label="Chiudi">×</button>'+
+    '<button type="button" class="x" id="chiudiClub" aria-label="Chiudi">×</button>'+
     '<b>Altri consigli per chi lavora a turni</b>'+
     '<p class="hint" style="margin-top:6px">Guide pratiche su sonno, luce e alimentazione da chi i turni li fa da sempre — su <b>notturnisti.club</b>.</p>'+
-    '<a class="btn g" href="https://notturnisti.club/planner/" target="_blank" rel="noopener" style="display:inline-block;text-decoration:none;text-align:center">Scopri di più →</a>';
+    '<a class="btn azione" href="https://notturnisti.club/planner/" target="_blank" rel="noopener">Scopri di più</a>';
 }
 if($("#clubBanner")) $("#clubBanner").addEventListener("click", e=>{
   if(e.target.closest("#chiudiClub")){ state.clubBannerOff=true; salva(); renderClubBanner(); return; }
@@ -5866,13 +5862,13 @@ function renderDonateNudge(){
   if(!donateNudgeVisibile()){ el.hidden=true; return; }
   el.hidden=false;
   el.innerHTML =
-    '<button type="button" id="chiudiDonateNudge" aria-label="Chiudi">×</button>'+
+    '<button type="button" class="x" id="chiudiDonateNudge" aria-label="Chiudi">×</button>'+
     (donateMomento()
       ? '<b>Le ultime notti che hai annotato sono andate bene</b>'+
         '<p class="hint" style="margin-top:6px">Notturnisti resta gratis per chiunque: niente funzioni a pagamento, niente account. Lo sviluppo lo copro io. Se ti sta aiutando, un caffè — anche piccolo — lo tiene in piedi.</p>'
       : '<b>Notturnisti resta gratis per chiunque</b>'+
         '<p class="hint" style="margin-top:6px">Nessuna funzione a pagamento, nessun account obbligatorio: lo sviluppo lo copro io. Se in queste settimane ti è stato utile, un contributo libero — anche piccolo — aiuta a tenerlo in piedi.</p>')+
-    '<a class="btn g" href="'+esc(donateUrl())+'" target="_blank" rel="noopener" id="doDonateNudge" style="display:inline-block;text-decoration:none;text-align:center">Offrimi un caffè →</a>';
+    '<a class="btn azione" href="'+esc(donateUrl())+'" target="_blank" rel="noopener" id="doDonateNudge">Offrimi un caffè</a>';
 }
 if($("#donateNudge")) $("#donateNudge").addEventListener("click", e=>{
   if(e.target.closest("#chiudiDonateNudge")){ state.donateNudgeOff=true; salva(); renderDonateNudge(); return; }
@@ -6069,6 +6065,27 @@ function renderFormaGiorno(P){
     '</svg>'+
     '<div class="fg-legend">'+legenda.join("")+'</div>';
 }
+// A letto molto presto prima di un mattino: le due strade con gli orari veri,
+// nel giorno in cui servono (prima era una nota con un rimando a Impostazioni,
+// e il tester restava a guardare un «a letto alle 20:50» senza alternative).
+// È la stessa preferenza di Impostazioni (state.mattinoBifasico).
+function sceltaLettoPresto(P){
+  if(!P.s || dnum(state.focus)<dnum(giornoVero())) return "";
+  const presto = P.s.kind==="pre-turno" && P.s.onset<=NT.CFG.bifasicoSoglia;
+  if(!presto && P.s.kind!=="pre-turno-bifasico") return "";
+  const sonnoCon=v=>{ const prima=state.mattinoBifasico; state.mattinoBifasico=v; let r=null;
+    try{ const Q=NT.plan(); r={a:Q.s.onset, b:Q.s.onset+Q.s.dur}; }catch(x){} state.mattinoBifasico=prima; return r; };
+  const tutto=sonnoCon(false), diviso=sonnoCon(true);
+  if(!tutto || !diviso || tutto.a===diviso.a) return "";
+  const on=!!state.mattinoBifasico;
+  const opz=(v,nome,o,acceso)=>'<button type="button" class="vb'+(acceso?" on":"")+'" data-mattinobif="'+(v?1:0)+'" aria-pressed="'+acceso+'"><b>'+nome+'</b><span>a letto alle '+hhmm(o.a)+'</span></button>';
+  const nb=P.nb, attacco = !nb.rest ? "Domani attacchi alle "+hhmm(nb.start) : "Domani si parte presto";
+  const spiega = store.get("lettoPrestoScelto", false) ? "" : '<p class="dn-hint">Tutto stanotte: le ore piene, ma prima delle 21 addormentarsi è difficile per molti. '+
+    'Più tardi + pisolino: a letto a un\'ora normale, e il resto lo recuperi con un pisolino dopo il turno.</p>';
+  return '<div class="dopo-notte" role="group" aria-label="Prima di un turno molto presto, come dormi">'+
+    '<span class="dn-lab">'+esc(attacco)+' · vale per i turni molto presto</span>'+
+    '<div class="dn-scelta">'+opz(false,"Tutto stanotte",tutto,!on)+opz(true,"Più tardi + pisolino",diviso,on)+'</div>'+spiega+'</div>';
+}
 // Dopo una notte: sonno diviso o tutto insieme. È una preferenza sola
 // (state.sonnoDiurno, anche in Impostazioni), ma la si sceglie meglio qui,
 // nel giorno in cui conta, con gli orari veri delle due strade. Solo quando
@@ -6166,11 +6183,22 @@ function renderEssenziale(P, CARDS){
   // scomodo — Lavie 1986). Se quel ramo non è già attivo (kind resterebbe
   // "pre-turno-bifasico", non "pre-turno"), c'è un modo di risolverlo che
   // l'utente potrebbe non aver ancora trovato da solo.
-  if(P.s.kind==="pre-turno" && P.s.onset<=NT.CFG.bifasicoSoglia && !state.avvisoBifasicoOff)
-    voci.push({t:dSv(P.s.onset)+0.5, html:
-      '<div class="drem-rec">L\'orario a letto ('+hhmm(P.s.onset)+') è presto: addormentarsi lì può essere difficile, non solo scomodo. '+
-      '<button class="lnk" data-open-bifasico style="display:inline">C\'è un\'opzione per dividerlo →</button>'+
-      ' <button class="lnk" data-off-bifasico style="display:inline;color:var(--faint)">Non mostrarlo più</button></div>'});
+  const lp=sceltaLettoPresto(P);
+  if(lp) voci.push({t:dSv(P.s.onset)+0.3, html:lp});
+
+  // Tempo libero: le ore da sveglio fuori da turno, viaggio, sonno e pisolini.
+  // Risponde a «e la palestra quando la faccio?» (e figli, spesa…) senza un
+  // modulo in più. Al suo posto nella giornata, alla prima finestra.
+  const liberi=liberiDelGiorno(P);
+  if(liberi.length){
+    const tot=liberi.reduce((a,w)=>a+(w.b-w.a),0);
+    const altre=liberi.slice(1).map(w=>hhmm(w.a)+"–"+hhmm(w.b)).join(", ");
+    const dettLiberi='<div class="rows">'+liberi.map(w=>'<div class="row"><b>'+hhmm(w.a)+' → '+hhmm(w.b)+'</b><span>'+dur(w.b-w.a)+'</span></div>').join("")+'</div>'+
+      '<div class="why">Attività fisica, palestra: vanno bene in quasi tutto il tempo libero. Evita solo gli sforzi intensi nell\'ultima ora prima di dormire o di un pisolino, perché rendono più difficile addormentarsi. Se sei all\'aperto conta anche la luce: segui la riga «Luce».'+
+      '<cite>Stutz, Eiholzer & Spengler 2019 (esercizio serale e sonno)</cite></div>';
+    voci.push({t:dSv(liberi[0].a)+0.1, html:riga("liberi","Libero",hhmm(liberi[0].a)+" → "+hhmm(liberi[0].b),
+      altre ? "poi "+altre : "in tutto "+dur(tot), false, ICON.calendar, dettLiberi)});
+  }
 
   // ── tutte le altre righe vengono dalle schede, che sono GIÀ in ordine di giornata ──
   for(const cd of CARDS){
@@ -6181,7 +6209,11 @@ function renderEssenziale(P, CARDS){
     const ora = isFinite(cd.at) ? hhmm(cd.at) : null;
     const frase = (v,o)=> (v && v!==o) ? v : "";
     if(cd.nap){
-      voci.push({t, html:riga("nap"+cd.nap.k,"Pisolino",cd.val,cd.small||"",false,ICON.bed,dett(cd))});
+      // Quello che si decide PRIMA del pisolino sta qui, nella sua riga; la
+      // domanda «l'hai fatto?» arriva nel diario quando è cominciato.
+      const liv=cd.nap.livello, prima = (isFinite(liv) && liv<2 ? '<button type="button" class="lnk" data-skip-recupero="'+(liv+1)+'" style="margin-top:6px">Non riesco a farlo: proponimi un\'alternativa</button>' : '')+
+        (cd.nap.min<=30 ? '<p class="ed-sub" style="margin-top:8px">Se vuoi più lucidità, un caffè appena prima: l\'effetto arriva mentre dormi.'+(isFinite(P.cut)?' Dopo le '+hhmm(P.cut)+' meglio di no: disturba il sonno di stanotte.':'')+'</p>' : '');
+      voci.push({t, html:riga("nap"+cd.nap.k,"Pisolino",cd.val,cd.small||"",false,ICON.bed,dett(cd)+prima)});
     } else if(cd.k==="s"){
       // niente riga a sé: l'orario di sveglia è già la fine di "Dormi". Tenerla
       // separata mostrava l'ora di andare a letto sotto l'etichetta "Sveglia" —
@@ -6249,6 +6281,9 @@ function renderEssenziale(P, CARDS){
     }
   }
 
+  // L'indizio parla delle voci della giornata: sotto il box del diario (t=-2), sopra la prima voce.
+  if(state.turniConfigurati && !store.get("perchéVisto", false) && voci.some(v=>/class="erow"/.test(v.html)))
+    voci.push({t:-1, html:'<p class="esshint">Tocca una voce per sapere perché.</p>'});
   voci.sort((a,b)=>a.t-b.t);
   // Niente etichetta "Adesso" qui: il modulo #ora sopra questa lista
   // (renderOra/adessoLine) è già l'unico eroe per "cosa succede adesso" —
@@ -6258,8 +6293,6 @@ function renderEssenziale(P, CARDS){
   let h=voci.map(v=>v.html).join("");
   // Ogni voce si apre e spiega il suo perché, ma l'unico indizio era la
   // freccina: al primo piano lo si dice una volta, finché non se ne apre una.
-  if(state.turniConfigurati && !store.get("perchéVisto", false) && voci.some(v=>/class="erow"/.test(v.html)))
-    h='<p class="esshint">Tocca una voce per sapere perché.</p>'+h;
 
   // Affina la finestra di sonno: si chiede DOPO aver mostrato il piano
   if(state.freeBed==="23:30" && state.freeWake==="07:30")
@@ -7739,6 +7772,11 @@ function diaryClick(e){
     state.sonnoDiurno=sd.dataset.sonnod; store.set("smontoScelto", true);
     if($("#sonnoD")) $("#sonnoD").value=state.sonnoDiurno;
     haptic(8); salva(); render(); track("setup_item", {item:"smonto_"+(state.sonnoDiurno==="diviso"?"diviso":"unito")}); return; }
+  const mb=e.target.closest("[data-mattinobif]");
+  if(mb){ if(mb.getAttribute("aria-pressed")==="true") return;
+    state.mattinoBifasico = mb.dataset.mattinobif==="1"; store.set("lettoPrestoScelto", true);
+    if($("#mattinoBif")) $("#mattinoBif").checked=state.mattinoBifasico;
+    haptic(8); salva(); render(); track("setup_item", {item:"presto_"+(state.mattinoBifasico?"diviso":"tutto")}); return; }
   if(e.target.closest("[data-off-bifasico]")){ state.avvisoBifasicoOff=true; salva(); render(); return; }
   if(e.target.id==="doSum"){
     const txt=summaryText();
@@ -7748,7 +7786,8 @@ function diaryClick(e){
   }
   if(e.target.closest("[data-wake]") || e.target.closest("[data-bed]")
      || e.target.closest("[data-sleep-wake]") || e.target.closest("[data-sleep-bed]")
-     || e.target.closest("[data-napa]") || e.target.closest("[data-napb]")) return;   // i campi orario si gestiscono da soli
+     || e.target.closest("[data-napa]") || e.target.closest("[data-napb]")
+     || e.target.closest("[data-nap-in-a]") || e.target.closest("[data-nap-in-b]")) return;   // i campi orario si gestiscono da soli
   const ap=e.target.closest("[data-asplan]");
   if(ap){ const k=iso(state.focus), c=cards(NT.plan()).find(x=>x.k==="d");
     if(c){ state.beds[k]=c.bedPiano; state.wakes[k]=c.wakePiano;
@@ -7768,8 +7807,8 @@ function diaryClick(e){
     const bIn=cardEl.querySelector("[data-sleep-bed]")||cardEl.querySelector("[data-bed]");
     const wIn=cardEl.querySelector("[data-sleep-wake]")||cardEl.querySelector("[data-wake]");
     const c=cards(NT.plan()).find(x=>x.k==="d");
-    const bedVal=(bIn && bIn.value) ? bIn.value : (state.beds[k] || (c ? c.bedPiano : ""));
-    const wakeVal=(wIn && wIn.value) ? wIn.value : (wakes[k] || (c ? c.wakePiano : ""));
+    const bedVal=(bIn && bIn.value) ? bIn.value : (cs.dataset.defBed || state.beds[k] || (c ? c.bedPiano : ""));
+    const wakeVal=(wIn && wIn.value) ? wIn.value : (cs.dataset.defWake || wakes[k] || (c ? c.wakePiano : ""));
     if(bedVal) state.beds[k]=bedVal;
     if(wakeVal) wakes[k]=wakeVal;
     store.set("beds",state.beds);
@@ -7779,6 +7818,22 @@ function diaryClick(e){
     render();
     return;
   }
+  if(e.target.closest("[data-annulla-sleep]")){ state.diaryEditing.delete("sleep:"+iso(state.focus)); render(); return; }
+  if(e.target.closest("[data-voto-edit]")){ state.diaryEditing.add("voto:"+iso(state.focus)); render(); return; }
+  const nAltri=e.target.closest("[data-nap-altri]");
+  if(nAltri){ state.diaryEditing.add("nap:"+iso(state.focus)+":"+nAltri.dataset.napAltri); render(); return; }
+  const nAnn=e.target.closest("[data-nap-annulla]");
+  if(nAnn){ state.diaryEditing.delete("nap:"+iso(state.focus)+":"+nAnn.dataset.napAnnulla); render(); return; }
+  const nSalva=e.target.closest("[data-nap-salva]");
+  if(nSalva){ const k=iso(state.focus), i=nSalva.dataset.napSalva, box=nSalva.closest(".drem")||document;
+    const a=(box.querySelector("[data-nap-in-a]")||{}).value, b=(box.querySelector("[data-nap-in-b]")||{}).value;
+    const g=state.pisolini[k]=state.pisolini[k]||{};
+    g[i]={si:true, a:a||i, b:b||"", min:+nSalva.dataset.min||0};
+    state.diaryEditing.delete("nap:"+k+":"+i);
+    store.set("pisolini",state.pisolini); toast("Pisolino registrato"); render(); return; }
+  const nRiapri=e.target.closest("[data-nap-riapri]");
+  if(nRiapri){ const k=iso(state.focus), g=state.pisolini[k]=state.pisolini[k]||{};
+    delete g[nRiapri.dataset.napRiapri]; store.set("pisolini",state.pisolini); render(); return; }
   const cn=e.target.closest("[data-confirm-nap]");
   if(cn){ state.diaryEditing.delete("nap:"+iso(state.focus)+":"+cn.dataset.confirmNap); render(); return; }
   const en=e.target.closest("[data-edit-nap]");
@@ -7794,18 +7849,16 @@ function diaryClick(e){
     const g=state.pisolini[k]=state.pisolini[k]||{};
     const era=g[i]||{};
     const scelta=np.dataset.nap;
-    g[i] = (era[scelta]) ? {} : (scelta==="si" ? {si:true} : {no:true, min:+np.dataset.min||0});
-    // "Fatto" apre subito la modifica (nessun orario reale esiste ancora) —
-    // stesso principio del sonno: la modalità si traccia in modo esplicito,
-    // non inferita da "esiste già un valore" (un solo orario su due
-    // impostato a metà strada sembrava "già confermato" e faceva sparire
-    // il secondo campo prima che l'utente avesse finito di scriverlo).
-    if(scelta==="si" && !era.si) state.diaryEditing.add("nap:"+k+":"+i);
-    store.set("pisolini",state.pisolini); render(); return; }
+    // «Sì, così» registra gli orari previsti in un tocco; «Saltato» al tocco.
+    // Per orari diversi c'è «Altri orari», come per il sonno.
+    g[i] = scelta==="si" ? {si:true, a:i, b:np.dataset.fine||"", min:+np.dataset.min||0, napp:era.napp} : {no:true, min:+np.dataset.min||0};
+    if(!g[i].napp) delete g[i].napp;
+    store.set("pisolini",state.pisolini); if(scelta==="si") toast("Pisolino registrato"); render(); return; }
   const d=e.target.closest("[data-diary]");
   if(d){ const k=iso(state.focus), v=+d.dataset.diary;
     if(diary[k]===v){ delete diary[k]; delete diaryAt[k]; }
     else { diary[k]=v; diaryAt[k]=Date.now(); }
+    state.diaryEditing.delete("voto:"+k);
     store.set("diaryAt",diaryAt);
     if(!store.set("diary",diary)) toast("Qui non posso salvare, ma online sì");
     render();
@@ -9813,6 +9866,11 @@ function notifPerm(){
 function aggiornaPermNotif(){
   platform.notify.permission().then(p=>{ if(p!==notifPerm()){ _notifPerm=p; renderAttivazione(); } }).catch(()=>{});
 }
+// Le notifiche partono sempre da ieri, non dal giorno guardato nell'app: prima,
+// chiudendo l'app mentre si guardava la settimana dopo, quelle dei giorni in
+// mezzo sparivano; e la sveglia del sonno in corso (stanotte, giorno di ieri)
+// non c'era mai, e con lei «Come hai dormito?» di oggi. Il passato si scarta.
+function statoPerNotifiche(){ const f=new Date(); f.setDate(f.getDate()-1); f.setHours(12,0,0,0); return Object.assign({}, state, {focus:f}); }
 var _ultimiPromemoria = [];   // l'ultima coda mandata al telefono, per «Vedi i prossimi promemoria»
 function ntNotifiche(){
   try{
@@ -9821,7 +9879,7 @@ function ntNotifiche(){
     // riceveva cambi turno e "vai a dormire" di turni non suoi.
     if(promemoriaSpenti() || !state.turniConfigurati){ platform.notify.schedule([]).catch(()=>{}); return; }
     if(!window.NTNotif || !window.NTNotif.buildSchedule) return;
-    const items = window.NTNotif.buildSchedule(state, { days:platform.notify.days, types:tipiNotifiche() });
+    const items = window.NTNotif.buildSchedule(statoPerNotifiche(), { days:platform.notify.days+1, types:tipiNotifiche() });
     _ultimiPromemoria = items;
     try{ const na=notificaAdatta(); if(na) items.push(na); }catch(e){}
     // Diagnostica minima (letta dal test sul telefono): quante ne aggiunge
@@ -9834,6 +9892,7 @@ function ntNotifiche(){
 // Ricarica il piano al ritorno in foreground (SW potrebbe aver perso i timer)
 document.addEventListener("visibilitychange", ()=>{
   if(document.visibilityState === "visible"){ ntNotifiche(); aggiornaPermNotif(); }
+  else if(_dopoDiarioT){ clearTimeout(_dopoDiarioT); _dopoDiarioT=null; try{ ntNotifiche(); }catch(e){} }   // l'app si chiude subito dopo aver annotato
 });
 // App nativa: ritorno in primo piano (riarma) e tocco su una notifica (tab giusto).
 platform.onResume(()=>{ ntNotifiche(); aggiornaPermNotif(); });
@@ -9885,9 +9944,10 @@ function apriDestinazione(tab){
       apriOpzioni(); setTimeout(()=>{ const b=$('[data-opz="'+(k==="viaggio"?4:3)+'"]'); if(b){ if(b.getAttribute("aria-expanded")!=="true") b.click(); b.scrollIntoView({block:"start",behavior:"smooth"}); } }, 300); return; }
     setTab("oggi");
     if(t==="diario" || t==="pisolino") setTimeout(()=>{
-      const drem=$("#essenziale .drem"); if(!drem) return;
-      const nap=t==="pisolino" && drem.querySelector("[data-nap]");
-      const dove=nap ? nap.closest(".diary") : drem;
+      const drem=$("#essenziale .drem");
+      const napQ=t==="pisolino" && drem && drem.querySelector("[data-nap-q]");
+      const napRiga=t==="pisolino" && $('#essenziale [data-row^="nap"]');
+      const dove=napQ || napRiga || drem; if(!dove) return;
       dove.scrollIntoView({behavior:"smooth",block:"center"});
       dove.classList.remove("evidenzia"); void dove.offsetWidth; dove.classList.add("evidenzia");
     }, 150);

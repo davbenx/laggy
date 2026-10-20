@@ -34,7 +34,7 @@ async function apri(diario){
 { const d={}; for(let i=1;i<=12;i++) d[ds(i)]= i%4===0 ? 3 : (i%2 ? 1 : 2);
   const {p,ctx}=await apri(d);
   const t=await p.evaluate(()=>{ const e=document.querySelector("#medicoCard"); return e.hidden ? "" : e.innerText; });
-  ok(/medico competente/.test(t) && /Non è una diagnosi/.test(t), "molte note di poca energia: il segnale suggerisce il medico competente, senza diagnosi");
+  ok(/medico competente/.test(t) && /non è una diagnosi/i.test(t), "molte note di poca energia: il segnale suggerisce il medico competente, senza diagnosi");
   await p.click("#doMedicoOk"); await p.waitForTimeout(200); await p.reload(); await p.waitForTimeout(1200);
   ok(await p.evaluate(()=>document.querySelector("#medicoCard").hidden), "dopo «Ho capito» non torna");
   await ctx.close(); }
