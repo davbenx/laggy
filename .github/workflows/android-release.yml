@@ -40,8 +40,8 @@ jobs:
           cache: npm
           cache-dependency-path: app/package-lock.json
 
-      - uses: android-actions/setup-android@v3
-
+      # L'SDK Android è già sui runner ubuntu-latest (ANDROID_HOME), come per
+      # android-e2e: setup-android@v3 falliva con sdkmanager 16.
       - name: Prove prima di compilare
         run: node --test tests/*.test.js
 

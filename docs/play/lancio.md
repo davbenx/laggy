@@ -1,6 +1,6 @@
 # Lancio su Google Play — piano completo
 
-Testi della scheda: `scheda.md`. Risposte ai moduli: `moduli.md`. Grafica: `img/`.
+Testi della scheda: `scheda.md`. Risposte ai moduli: `moduli.md`. Account sviluppatore e «Crea app»: `account.md`. Grafica: `img/`.
 Principio guida: si convince mostrando con chiarezza cosa fa l'app e cosa no, senza promesse
 gonfiate, recensioni finte o pressioni. È anche ciò che Google premia: le regole sui metadati
 vietano superlativi non verificabili ("n. 1", "il migliore"), nomi di altre app e parole chiave

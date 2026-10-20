@@ -74,7 +74,7 @@ Usavi Notturnisti dal browser? All'apertura scegli «Porta qui i tuoi turni».
 - Termini d'uso: https://app.notturnisti.club/termini/ (Play Console non ha un campo apposito: il link è nell'app, al primo passo e in Impostazioni)
 
 ## Grafica (in docs/play/img/)
-- Icona 512×512: icon-512.png (nella radice del repository)
+- Icona 512×512: img/icona-app-512.png (a tutto quadrato, fondo crema; Play arrotonda gli angoli)
 - Immagine in evidenza 1024×500: feature-1024x500.png
 - Screenshot telefono 1080×1920, in quest'ordine (i primi tre sono quelli che si vedono senza scorrere):
   1. 01-oggi — Il tuo piano di oggi, sul tuo turno
