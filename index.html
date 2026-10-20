@@ -690,6 +690,13 @@ cursor:pointer;font-family:inherit;color:var(--ink)}
    elementi per tab, qualunque sia la loro specificità — è esattamente
    quello che teneva "Condividi il tuo ciclo" visibile su ogni tab. */
 .cycshare-btn{display:flex}
+.share3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.share3-az{display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center;padding:14px 6px 12px;min-height:118px;
+background:var(--s1);border:1px solid var(--line);border-radius:var(--r);color:var(--ink);font:inherit;cursor:pointer}
+.share3-az svg{width:22px;height:22px;color:var(--blue)}
+.share3-az b{font-size:13.5px;line-height:1.2}
+.share3-az span{font-size:11.5px;line-height:1.3;color:var(--dim)}
+.share3-az:active{background:var(--s2)}
 input,select,textarea{background:var(--bg);border:1px solid var(--line);color:var(--ink);padding:10px 11px;
 border-radius:var(--r);font-family:var(--sans);font-size:16px;width:100%;font-variant-numeric:tabular-nums}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft)}
@@ -930,6 +937,13 @@ justify-content:center;flex:none;width:44px;height:44px;border-radius:999px}
 .acasa{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--s1);border:1px solid var(--line);border-radius:var(--r);
 padding:12px 14px;min-height:56px;margin:6px 0 var(--gap-sezione);color:var(--ink);font:inherit;cursor:pointer}
 .acasa[hidden]{display:none}
+.sapevi{display:flex;align-items:flex-start;gap:10px;background:var(--s1);border:1px dashed var(--line);border-radius:var(--r);
+padding:12px 6px 12px 14px;margin:-6px 0 var(--gap-sezione);font-size:13.5px;line-height:1.45;color:var(--dim)}
+.sapevi[hidden]{display:none}
+.sapevi>div{flex:1;min-width:0}
+.sapevi b{color:var(--ink)}
+.sapevi .lnk{display:inline-block;margin-top:4px;font-size:13.5px;padding:6px 0}
+.sapevi .x{flex:none;width:44px;height:44px;margin:-10px 0 -10px;border:0;background:none;color:var(--faint);font-size:20px;cursor:pointer;border-radius:50%}
 .acasa:hover{border-color:var(--blue-lt)}
 .acasa svg{flex:none;color:var(--blue)}
 .acasa b{display:block;font-size:15px;font-weight:600}
@@ -968,6 +982,12 @@ letter-spacing:.01em;padding:9px 0 8px;min-height:56px;cursor:pointer;position:r
 border:1px solid var(--line);border-radius:var(--r);padding:13px 15px;font:inherit;color:inherit;
 cursor:pointer;min-height:52px;margin-top:12px;box-shadow:var(--shadow-card)}
 .tsec:hover{border-color:var(--blue-lt)}
+.tgruppo{margin-top:var(--gap-sezione)}
+.tgruppo>.eyebrow{display:block;margin:0 0 8px}
+.tgruppo-box{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow-card);overflow:hidden}
+.tgruppo-box .tsec{margin:0;border:0;border-radius:0;box-shadow:none;background:none}
+.tgruppo-box .tsec+.tsec{border-top:1px solid var(--line)}
+body.tab-turni.sottopagina .tgruppo{display:none}
 .tsec>svg{flex:none;color:var(--dim);width:19px;height:19px;padding:9px;border-radius:999px;
 background:var(--s2);box-sizing:content-box}
 .tsec-tx{flex:1;min-width:0}
@@ -1258,6 +1278,13 @@ color:var(--su-blu);display:flex;align-items:center;justify-content:center;margi
 /* Le tre sezioni sotto (regolarità, ciclo, sveglia): eyebrow fuori dalla
    card come nel mockup, poi la card con le righe di dettaglio dentro. */
 .andamento-eyebrow{display:block;margin-bottom:8px}
+.carico .car-r{display:grid;grid-template-columns:minmax(0,1fr) 66px 66px;gap:6px;align-items:baseline;padding:7px 0;border-top:1px solid var(--line)}
+.carico .car-r:first-child{border-top:0;padding-top:0}
+.carico .car-r>span{font-size:14px;color:var(--ink)}
+.carico .car-r>b{text-align:right;font-size:17px;font-variant-numeric:tabular-nums}
+.carico .car-testa>b{font-size:11.5px;font-weight:700;color:var(--faint);text-transform:uppercase;letter-spacing:.04em}
+.car-frase{margin:10px 0 0;font-size:13.5px;line-height:1.45;color:var(--dim)}
+.andamento-fondo{margin-top:var(--gap-sezione)}
 .andamento-sezione{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);
 padding:6px 16px;box-shadow:var(--shadow-card)}
 .andamento-sezione .rows{border-top:none;margin-top:0;padding-top:0}
@@ -1634,6 +1661,8 @@ header b{font-size:23px}
   <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 3L10 14M21 3l-7 18-4-7-7-4z"/></svg>
   <span><b id="aCasaTit">Manda a casa i tuoi orari di oggi</b><small>Quando dormi e quando ci sei, in un messaggio.</small></span>
 </button>
+<!-- «Lo sapevi?»: una funzione mai usata, una volta sola, in fondo. -->
+<div class="sapevi solo-oggi" id="loSapevi" role="note" hidden></div>
 
 <!-- Non più un titolo "Turni" separato sopra: l'intervallo del ciclo fa
      già da titolo ("Turni 13–27 settembre"), il nome della tab è già
@@ -1804,7 +1833,7 @@ header b{font-size:23px}
 
 <button type="button" class="tsec" id="doAndamenti">
   <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:var(--orange);background:var(--orange-soft)"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 6h6v6"/></svg>
-  <span class="tsec-tx"><span class="eyebrow" style="display:block">Come sto dormendo</span><b id="andamentiAnteprima" style="font-family:var(--serif)">—</b></span>
+  <span class="tsec-tx"><span class="eyebrow" style="display:block">Sonno e carico</span><b id="andamentiAnteprima" style="font-family:var(--serif)">—</b></span>
   <span class="tchev">›</span>
 </button>
 
@@ -1813,7 +1842,7 @@ header b{font-size:23px}
     <button type="button" class="themebtn" id="chiudiAndamenti" aria-label="Torna a Turni">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
     </button>
-    <h1 class="tab-title" style="margin:0">Come sto dormendo</h1>
+    <h1 class="tab-title" style="margin:0">Sonno e carico</h1>
   </div>
   <div id="andamenti"></div>
 </div>
@@ -1822,11 +1851,22 @@ header b{font-size:23px}
      spesso (il tempo libero con chi aspetta, come stanno dormendo), poi gli
      strumenti per decisioni occasionali (uno scambio, le ferie). -->
 <!-- Simulatore Scambio Turno: strumento autonomo dentro la scheda Turni -->
-<button type="button" class="tsec" id="doScambioTurno">
-  <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:var(--blue);background:var(--blue-soft)"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
-  <span class="tsec-tx"><span class="eyebrow" style="display:block">Cambio turno</span><b style="font-family:var(--serif)">Mi conviene lo scambio?</b><span style="font-size:12.5px;color:var(--dim);display:block;margin-top:2px">Sonno e 11 ore di riposo, prima di accettare.</span></span>
+<!-- Decisioni occasionali sul calendario: un riquadro, due righe. -->
+<div class="tgruppo solo-turni" role="group" aria-labelledby="tgDecidere">
+  <span class="eyebrow" id="tgDecidere">Decidere</span>
+  <div class="tgruppo-box">
+<button type="button" class="tsec" id="doFerie">
+  <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:var(--blue);background:var(--blue-soft)"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4M9 14.5l2 2 4-4"/></svg>
+  <span class="tsec-tx"><b style="font-family:var(--serif)">Quando prendere le ferie?</b><span style="font-size:12.5px;color:var(--dim);display:block;margin-top:2px">Più giorni a casa con meno ferie.</span></span>
   <span class="tchev">›</span>
 </button>
+<button type="button" class="tsec" id="doScambioTurno">
+  <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:var(--blue);background:var(--blue-soft)"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
+  <span class="tsec-tx"><b style="font-family:var(--serif)">Mi conviene lo scambio?</b><span style="font-size:12.5px;color:var(--dim);display:block;margin-top:2px">Sonno e 11 ore di riposo, prima di accettare.</span></span>
+  <span class="tchev">›</span>
+</button>
+  </div>
+</div>
 
 <!-- Come "Quando ho tempo libero" e "Come sto dormendo": una pagina a sé con
      la freccia indietro, non un pannello che si apre sotto. -->
@@ -1859,11 +1899,6 @@ header b{font-size:23px}
 
 <!-- Ferie: dove metterle perché si attacchino ai riposi del ciclo. Accanto
      allo scambio: sono i due strumenti per decisioni occasionali sui turni. -->
-<button type="button" class="tsec solo-turni" id="doFerie">
-  <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:var(--blue);background:var(--blue-soft)"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4M9 14.5l2 2 4-4"/></svg>
-  <span class="tsec-tx"><span class="eyebrow" style="display:block">Ferie</span><b style="font-family:var(--serif)">Quando prenderle?</b><span style="font-size:12.5px;color:var(--dim);display:block;margin-top:2px">Più giorni a casa con meno ferie.</span></span>
-  <span class="tchev">›</span>
-</button>
 <div id="feriePagina" class="solo-turni" hidden>
   <div style="display:flex;align-items:center;gap:12px;margin:2px 0 var(--gap-sezione)">
     <button type="button" class="themebtn" id="chiudiFerie" aria-label="Torna a Turni">
@@ -1896,30 +1931,18 @@ header b{font-size:23px}
      body.tab-x #cycShareBox{display:none} che lo nascondono fuori da
      Turni, qualunque sia la loro specificità (stesso bug di
      specificità già trovato e corretto altrove in questo file). -->
+<!-- Condividere: un riquadro, tre azioni affiancate (prima tre schede
+     grandi più un link, quasi quattro schermi). Il QR è il modo «di persona»
+     dell'invito: sta sotto, come scelta secondaria. -->
 <div id="cycShareBox" class="cycshare-btn" style="flex-direction:column;gap:8px;margin-top:var(--gap-sezione)">
   <span class="eyebrow">Condividi i tuoi turni</span>
-  <!-- Il calendario del telefono vive solo in Impostazioni › Funziona da
-       solo, con promemoria e widget: si accende una volta e lavora da solo.
-       Qui restano i modi di mandare i turni a qualcuno. -->
-  <div class="tools" style="margin:0">
-    <!-- Un formato per situazione, in ordine d'uso: messaggio (chiunque, in
-         chat), link o QR (chi ha l'app e vuole confrontare), carta/PDF (frigo,
-         bacheca). -->
-    <button type="button" id="doCycShare" class="tool">
-      <span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg></span>
-      <span class="tool-tx"><b>Invita chi lavora con te</b><span>Un link con il tuo ciclo: chi non ha l'app la trova già pronta, chi ce l'ha vede i tuoi turni accanto ai suoi.</span></span>
-    </button>
-    <button type="button" class="lnk" id="doCycQR" style="align-self:flex-start;font-size:13px;padding:6px 2px;margin-top:-2px">Oppure mostralo come QR, da inquadrare di persona</button>
-    <div class="ecc" id="qrBoxCyc" hidden><div id="qrHolderCyc" style="display:flex;justify-content:center;margin:14px 0"></div></div>
-    <button type="button" id="doShareWhatsApp" class="tool">
-      <span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.41a8.204 8.204 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.19 8.19 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24m4.52 11.66c-.19.53-1.06 1.04-1.47 1.08-.38.04-.88.06-2.84-.73-2.34-.95-3.84-3.34-3.96-3.49-.11-.16-.96-1.27-.96-2.42 0-1.15.6-1.72.82-1.95.21-.23.46-.29.62-.29.15 0 .31 0 .44.01.14.01.33-.05.51.39.19.46.66 1.6.72 1.72.06.12.1.26.02.42-.08.16-.12.26-.24.4-.12.14-.26.31-.37.42-.12.12-.24.25-.1.5.14.24.62 1.03 1.34 1.67.92.82 1.7 1.08 1.94 1.2.24.12.39.1.53-.06.15-.17.62-.72.79-.97.16-.25.33-.21.55-.13.22.08 1.41.67 1.65.79.24.12.4.18.46.28.06.11.06.63-.13 1.16"/></svg></span>
-      <span class="tool-tx"><b>Manda i miei turni</b><span>Un messaggio con i turni dei prossimi giorni, per WhatsApp o dove vuoi: per chi lavora con te o per la famiglia.</span></span>
-    </button>
-    <button type="button" id="doPrint" class="tool tool-1line">
-      <span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8V3h12v5"/><rect x="4" y="8" width="16" height="8" rx="1.5"/><path d="M8 13h8v7H8z"/></svg></span>
-      <span class="tool-tx"><b>Stampa o salva in PDF</b><span>Un calendario da appendere (5 settimane) e il dettaglio giorno per giorno: sonno, pisolini, caffè, luce</span></span>
-    </button>
+  <div class="share3">
+    <button type="button" id="doCycShare" class="share3-az"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg><b>Invita un collega</b><span>vede i tuoi turni accanto ai suoi</span></button>
+    <button type="button" id="doShareWhatsApp" class="share3-az"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.41a8.204 8.204 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.19 8.19 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24m4.52 11.66c-.19.53-1.06 1.04-1.47 1.08-.38.04-.88.06-2.84-.73-2.34-.95-3.84-3.34-3.96-3.49-.11-.16-.96-1.27-.96-2.42 0-1.15.6-1.72.82-1.95.21-.23.46-.29.62-.29.15 0 .31 0 .44.01.14.01.33-.05.51.39.19.46.66 1.6.72 1.72.06.12.1.26.02.42-.08.16-.12.26-.24.4-.12.14-.26.31-.37.42-.12.12-.24.25-.1.5.14.24.62 1.03 1.34 1.67.92.82 1.7 1.08 1.94 1.2.24.12.39.1.53-.06.15-.17.62-.72.79-.97.16-.25.33-.21.55-.13.22.08 1.41.67 1.65.79.24.12.4.18.46.28.06.11.06.63-.13 1.16"/></svg><b>Manda i turni</b><span>un messaggio con i prossimi giorni</span></button>
+    <button type="button" id="doPrint" class="share3-az"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8V3h12v5"/><rect x="4" y="8" width="16" height="8" rx="1.5"/><path d="M8 13h8v7H8z"/></svg><b>Stampa o PDF</b><span>il calendario da appendere</span></button>
   </div>
+  <button type="button" class="lnk" id="doCycQR" style="align-self:center;font-size:13px;padding:8px 4px">Mostra il QR da inquadrare</button>
+  <div class="ecc" id="qrBoxCyc" hidden><div id="qrHolderCyc" style="display:flex;justify-content:center;margin:6px 0 10px"></div></div>
 </div>
 
 <div id="luciditaGiornoWrap"></div>
@@ -4272,6 +4295,7 @@ function render(){
   renderFormaGiorno(P);                // si azzera da solo in dettaglio
   renderEssenziale(P, CARDS);          // si azzera da solo in dettaglio
   renderACasa();
+  renderLoSapevi();
   const tab = state.tab || (ess ? "oggi" : "ciclo");
   const giornata = document.body.classList.contains("giornata");
   // "piu" (la vecchia terza tab, eliminata) non è più un valore raggiungibile
@@ -6642,8 +6666,8 @@ function renderMese(){
       if(r.malattia) v.push(r.malattia+(r.malattia===1?" giorno di malattia":" giorni di malattia"));
       return v.length ? '<p class="mese-spec">'+esc(v.join(" · "))+'</p>' : ''; })()+
     '<p class="hint">Dall\'inizio alla fine di ogni turno, pause comprese. Per controllare le ore, non è un conteggio ufficiale.</p>'+
-    (r.ignoti?'<button type="button" class="lnk mese-medico" data-mese-segna>'+r.ignoti+(r.ignoti===1?' giorno ancora da segnare':' giorni ancora da segnare')+' →</button><br>':'')+
-    '<button type="button" class="lnk mese-medico" data-riepilogo-medico>Riepilogo per il medico competente →</button>';
+    (r.ignoti?'<button type="button" class="lnk mese-medico" data-mese-segna>'+r.ignoti+(r.ignoti===1?' giorno ancora da segnare':' giorni ancora da segnare')+' →</button>':'')+
+    '';
 }
 function durataBreve(m){ m=Math.round(m/15)*15; const h=Math.floor(m/60), r=m%60; return h ? h+"h"+(r?String(r).padStart(2,"0"):"") : r+" min"; }
 if($("#meseBox")) $("#meseBox").addEventListener("click", e=>{
@@ -6981,6 +7005,52 @@ function esempioAndamentoHtml(){
       '</svg>'+
     '</div>';
 }
+// Il carico dei turni in una finestra di n giorni da oggi+da: notti
+// (almeno 3 ore fra le 22 e le 6), la serie più lunga di notti, i riposi
+// sotto le 11 ore fra un turno e l'altro (il minimo del D.lgs. 66/2003),
+// domeniche e festivi, ore. Ferie, malattia e orari veri compresi.
+function caricoTurni(da, n){
+  const f0=state.focus, oggi=giornoVero();
+  const notte=(s,e)=>{ const ov=(a,b)=>Math.max(0, Math.min(e,b)-Math.max(s,a)); return ov(-120,360)+ov(1320,1800); };
+  const r={notti:0, serieMax:0, brevi:0, festivi:0, ore:0, turni:0, ignoti:0};
+  let serie=0, fineIeri=null;
+  try{
+    for(let o=da-1;o<da+n;o++){
+      const d=day(oggi,o), conta=o>=da; state.focus=d;
+      let c="?", b=null; try{ c=NT.codeAt(0); b=NT.block(0); }catch(e){}
+      if(c==="?" || !b){ if(conta) r.ignoti++; serie=0; fineIeri=null; continue; }
+      if(b.rest){ serie=0; continue; }
+      const base=dnum(d)*1440;
+      if(notte(b.start,b.end)>=180){ serie++; if(conta){ r.notti++; r.serieMax=Math.max(r.serieMax, serie); } } else serie=0;
+      if(conta){ r.turni++; r.ore+=(b.end-b.start)/60;
+        if(d.getDay()===0 || festivoIT(d)) r.festivi++;
+        if(fineIeri!==null && base+b.start-fineIeri<660) r.brevi++; }
+      fineIeri=base+b.end;
+    }
+  } finally { state.focus=f0; }
+  return r;
+}
+function caricoHtml(){
+  const P=caricoTurni(-30,30), F=caricoTurni(0,30);
+  const v=(R,k)=> R.ignoti>=25 ? "—" : k==="ore" ? String(Math.round(R.ore)) : String(R[k]);
+  const riga=(t,k)=>'<div class="car-r"><span>'+t+'</span><b>'+v(P,k)+'</b><b>'+v(F,k)+'</b></div>';
+  // una frase sola: la cosa più utile da sapere, prima su quello che arriva
+  const noti=R=>R.ignoti<25;
+  let frase="";
+  if(noti(F) && F.serieMax>=4) frase="Nei prossimi 30 giorni arrivi a "+F.serieMax+" notti di fila: dopo la terza la stanchezza cresce di più [Folkard 2003]. Fai i pisolini prima del turno.";
+  else if(noti(F) && F.brevi) frase=(F.brevi===1?"Una volta":F.brevi+" volte")+" nei prossimi 30 giorni stacchi e riattacchi in meno di 11 ore: in quei giorni il sonno va protetto più del solito.";
+  else if(noti(P) && P.serieMax>=4) frase="Nell'ultimo mese hai fatto fino a "+P.serieMax+" notti di fila: dopo la terza la stanchezza cresce di più [Folkard 2003].";
+  else if(noti(P) && P.brevi) frase=(P.brevi===1?"Una volta":P.brevi+" volte")+" nell'ultimo mese hai avuto meno di 11 ore fra un turno e l'altro.";
+  else if(noti(P) || noti(F)) frase="Niente serie lunghe di notti né riposi sotto le 11 ore: un carico che si recupera bene.";
+  else frase="Segna i turni in «I turni del mese» per vedere il carico.";
+  return '<div><span class="eyebrow andamento-eyebrow">Il carico dei turni · 30 giorni</span>'+
+    '<div class="andamento-sezione carico">'+
+      '<div class="car-r car-testa"><span></span><b>Passati</b><b>In arrivo</b></div>'+
+      riga("Notti","notti")+riga("Notti di fila, al massimo","serieMax")+riga("Riposi sotto le 11 ore","brevi")+
+      riga("Domeniche e festivi","festivi")+riga("Ore di turno","ore")+
+      '<p class="car-frase">'+esc(frase).replace(/\[(.+?)\]/,'<span class="hint">($1)</span>')+'</p>'+
+    '</div></div>';
+}
 function renderAndamenti(){
   const el=$("#andamenti"); if(!el) return;
   // Tutti gli insight calcolati PRIMA di costruire qualunque HTML: serve
@@ -7038,13 +7108,18 @@ function renderAndamenti(){
       }
     }
   }catch(e){}
+  // Il carico dei turni: dai turni soli, senza diario — la pagina non è mai
+  // vuota, ed è il rischio di stanchezza più documentato (notti di fila,
+  // riposi brevi). Prima i dati del passato, accanto quelli in arrivo.
+  try{ sezioni.push(caricoHtml()); }catch(e){}
   try{
     const reg=regolaritaSonno();
     if(reg){
+      const parola=sd=> sd<=30 ? "molto regolare" : sd<=60 ? "abbastanza regolare" : sd<=90 ? "variabile" : "molto variabile";
       let righe='';
-      if(reg.sdBed!=null) righe+='<div class="row"><b style="min-width:148px">Vai a letto</b><span>con una variazione tipica di circa ±'+hm(reg.sdBed)+" da un giorno all'altro</span></div>";
-      if(reg.sdWake!=null) righe+='<div class="row"><b style="min-width:148px">Ti svegli</b><span>con una variazione tipica di circa ±'+hm(reg.sdWake)+" da un giorno all'altro</span></div>";
-      if(righe) sezioni.push('<div><span class="eyebrow andamento-eyebrow">Regolarità degli orari, da '+reg.n+' notti</span>'+
+      if(reg.sdBed!=null) righe+='<div class="row"><b style="min-width:118px">Vai a letto</b><span>'+parola(reg.sdBed)+' <span class="hint">· ±'+hm(reg.sdBed)+'</span></span></div>';
+      if(reg.sdWake!=null) righe+='<div class="row"><b style="min-width:118px">Ti svegli</b><span>'+parola(reg.sdWake)+' <span class="hint">· ±'+hm(reg.sdWake)+'</span></span></div>';
+      if(righe) sezioni.push('<div><span class="eyebrow andamento-eyebrow">Orari del sonno, da '+reg.n+' notti</span>'+
         '<div class="andamento-sezione"><div class="rows">'+righe+'</div></div></div>');
     }
   }catch(e){}
@@ -7062,43 +7137,18 @@ function renderAndamenti(){
       '<div class="andamento-sezione"><div class="rows">'+righe+'</div></div></div>');
   }
 
-  if(ws && ws.consigli.length){
-    let righe='';
-    if(ws.liberi) righe+='<div class="row"><b style="min-width:148px">Nei giorni liberi</b><span>ti alzi verso le '+
-      hhmm(ws.liberi.media)+' ('+ws.liberi.n+' volte)</span></div>';
-    if(ws.anticipi) righe+='<div class="row"><b style="min-width:148px">Quando devi anticipare</b><span>'+
-      (ws.anticipi.scarto>0?"ti alzi "+hm(ws.anticipi.scarto)+" dopo il piano":
-       ws.anticipi.scarto<0?"ti alzi "+hm(-ws.anticipi.scarto)+" prima del piano":"sei puntuale")+
-      ' ('+ws.anticipi.n+' volte)</span></div>';
-    // Ogni consiglio, tranne quello già promosso in cima (per riferimento
-    // dell'oggetto, non del testo: due consigli diversi potrebbero avere
-    // per caso lo stesso testo).
-    ws.consigli.forEach(c=>{ if(capo && capo.fonte==="ws" && capo.chiave===c) return;
-      righe+='<div class="row" style="margin-top:5px;flex-wrap:wrap"><span style="color:var(--amber)">'+c.text+'</span>'+
-      (c.action?'<button class="lnk" data-apply-field="'+esc(c.action.field)+'" data-apply-value="'+esc(String(c.action.value))+'" style="margin-top:4px">'+esc(c.action.label)+' →</button>':'')+
-      '</div>'; });
-    sezioni.push('<div><span class="eyebrow andamento-eyebrow">Come scivola la tua sveglia, da '+ws.n+' annotate</span>'+
-      '<div class="andamento-sezione"><div class="rows">'+righe+'</div></div></div>');
-  }
-
-  if(sm){
-    // Il verdetto resta qui SOLO se non è già stato promosso in cima.
-    let righe=(sm.verdict && !(capo && capo.fonte==="sm")?'<div class="row"><span style="color:var(--amber)">'+sm.verdict+'</span></div>'
-        :'<div class="row"><span class="hint" style="width:100%">Su '+sm.tot+' notti annotate</span></div>');
-    righe+='<div class="row" style="margin-top:6px"><button class="btn g" id="doSum">Copia il riepilogo</button></div>';
-    sezioni.push('<div class="andamento-sezione"><div class="rows">'+righe+'</div></div>');
-  }
-
   const rowsHtml = sezioni.join("");
   const url = donateUrl();
-  // Solo quando c'è già qualcosa di vero da vedere — mai sull'esempio,
-  // mai prima che l'app abbia dato qualcosa in cambio.
-  const doneHtml = (capoHtml || heroHtml || rowsHtml) && url
-    ? '<p class="hint" style="width:100%;margin-top:14px">Questa pagina, come tutta l\'app, resta gratis. Se ti è utile, <a href="'+esc(url)+'" target="_blank" rel="noopener">un contributo libero</a> è benvenuto, mai necessario.</p>'
-    : '';
-  el.innerHTML = (capoHtml || heroHtml || rowsHtml)
-    ? capoHtml+heroHtml+rowsHtml+doneHtml
-    : esempioAndamentoHtml()+'<span class="hint" style="width:100%;margin-top:14px;display:block">Annota il sonno per qualche giorno dal glance di Oggi: con qualche notte dietro, questa pagina comincia a mostrare cose vere — quale giorno del ciclo ti pesa di più, come cambia il tuo umore col debito di sonno, quanto sono regolari i tuoi orari.</span>';
+  // Senza diario: un invito di una riga al posto del numero, niente esempi finti.
+  const invito = heroHtml ? "" : '<div class="andamento-sezione"><p style="margin:0"><b>Quanto sonno ti manca</b></p>'+
+    '<p class="hint" style="margin:4px 0 0">Annota come hai dormito dal riquadro di Oggi, un tocco al mattino: dopo tre notti lo vedi qui.</p></div>';
+  const fondo='<div class="andamento-fondo">'+
+      '<button type="button" class="btn g" data-riepilogo-medico style="width:100%;min-height:46px">Riepilogo per il medico competente</button>'+
+      '<p class="hint" style="margin:6px 2px 0">Un PDF con turni, notti e riposi degli ultimi 12 mesi'+(sm?' e il sonno che hai annotato':'')+': da portare alla visita.</p>'+
+      (sm?'<button class="lnk" id="doSum" style="margin-top:8px">Copia il riepilogo del diario</button>':'')+
+      (url && (heroHtml||capoHtml) ? '<p class="hint" style="margin-top:14px">Questa pagina, come tutta l\'app, resta gratis. Se ti è utile, <a href="'+esc(url)+'" target="_blank" rel="noopener">un contributo libero</a> è benvenuto, mai necessario.</p>' : '')+
+    '</div>';
+  el.innerHTML = capoHtml + (heroHtml || invito) + rowsHtml + fondo;
 }
 
 // Anteprima del bottone "Andamenti" in Turni: legge il numero già
@@ -7111,9 +7161,11 @@ function renderAndamentiPreview(){
   let trend=null;
   try{ if(window.NTHistory) trend=window.NTHistory.sleepTrend({beds:state.beds,wakes:state.wakes}, NT_planSafe, {days:30}); }catch(e){}
   if(!trend || trend.n<3){
-    // con pochissime notti la pagina mostra l'esempio, con numeri finti
-    const poche=Object.keys(diary).length<5 && Object.keys(wakes).length<5;
-    el.textContent = poche ? "Annota qualche notte per vederlo" : "Ancora pochi dati"; return;
+    // senza diario: quello che si sa dai turni soli
+    let F=null; try{ F=caricoTurni(0,30); }catch(e){}
+    el.textContent = !F || F.ignoti>=25 ? "Notti, riposi brevi e sonno"
+      : F.notti ? (F.notti===1?"1 notte":F.notti+" notti")+" nei prossimi 30 giorni" : "Nessuna notte nei prossimi 30 giorni";
+    return;
   }
   // "-1h 20m" non diceva se è sonno che manca o che avanza: a parole.
   const d=trend.debtNow;
@@ -8208,7 +8260,7 @@ function buildMedicoSheet(){
 }
 function stampaRiepilogoMedico(){
   if(!buildMedicoSheet()){ toast("Imposta prima i turni"); return; }
-  track("setup_item", {item:"medico_pdf"});
+  track("setup_item", {item:"medico_pdf"}); usata("medico");
   stampaFoglio("Riepilogo per il medico competente");
 }
 // Il foglio da dare a chi aspetta: solo i giorni e le ore libere, niente
@@ -8322,6 +8374,49 @@ function renderACasa(){
   el.hidden=!ok;
   if(ok) $("#aCasaTit").textContent="Manda a casa i tuoi orari di "+nomeGiornoFocus(false, true);
 }
+/* «Lo sapevi?»: una funzione utile che la persona non ha mai aperto, una
+   alla volta, ognuna una volta sola, al più una ogni 3 giorni, mai nei primi
+   3 giorni d'uso né quando c'è già un altro invito. «Prova» la apre. */
+function usata(k){ const u=store.mappa("funzioniUsate"); if(!u[k]){ u[k]=iso(new Date()); store.set("funzioniUsate", u); } }
+const CONSIGLI_FUNZIONE=[
+  {k:"mese", t:"Puoi ricopiare il foglio turni in un minuto, un tocco per giorno, o importarlo da un file.", a:()=>apriSegna()},
+  {k:"ferie", t:"L'app trova i giorni di ferie che ti danno più giorni a casa, attaccati ai riposi.", a:()=>apriFerie()},
+  {k:"persone", t:"Aggiungi chi lavora con te o chi ti aspetta a casa: vedi subito quando siete liberi insieme.", a:()=>apriVederci()},
+  {k:"scambio", t:"Prima di accettare uno scambio di turno, controlla come cambiano sonno e riposi.", a:()=>apriScambioTurno()},
+  {k:"sonno", t:"In «Sonno e carico» vedi notti di fila e riposi brevi del mese, anche senza diario.", a:()=>apriAndamenti()},
+  {k:"medico", t:"Per la visita del medico competente c'è un riepilogo di 12 mesi: turni, notti, riposi.", a:()=>apriAndamenti(), dopo:60}
+];
+function consiglioFunzione(){
+  const S=store.mappa("loSapevi"), oggi=iso(new Date());
+  const u=store.mappa("funzioniUsate");
+  const giaUsata=c=> u[c.k] || (c.k==="persone" && ((state.people||[]).length || state.pPattern));
+  if(S.oggi && S.oggi.d===oggi){ const c=CONSIGLI_FUNZIONE.find(x=>x.k===S.oggi.k); return (S.chiuso===oggi || !c || giaUsata(c)) ? null : c; }
+  if(!state.turniConfigurati || !state.firstSeenAt || document.body.classList.contains("primo-avvio")) return null;
+  const giorni=(new Date(oggi)-new Date(state.firstSeenAt))/864e5;
+  if(giorni<3 || invitiInPausa(true)) return null;
+  if(S.oggi && (new Date(oggi)-new Date(S.oggi.d))/864e5<3) return null;
+  const visti=S.visti||[];
+  const lista=CONSIGLI_FUNZIONE.slice().sort((a,b)=> state.repeat===false ? (a.k==="mese"?-1:b.k==="mese"?1:0) : 0);
+  const c=lista.find(x=>!visti.includes(x.k) && !giaUsata(x) && giorni>=(x.dopo||0));
+  if(!c) return null;
+  store.set("loSapevi", {visti:visti.concat(c.k), oggi:{k:c.k, d:oggi}});
+  return c;
+}
+function renderLoSapevi(){
+  const el=$("#loSapevi"); if(!el) return;
+  let c=null;
+  try{ if(iso(state.focus)===iso(giornoVero())) c=consiglioFunzione(); }catch(e){}
+  el.hidden=!c; if(!c) return;
+  el.dataset.k=c.k;
+  el.innerHTML='<div><b>Lo sapevi?</b> '+esc(c.t)+'<br><button type="button" class="lnk" data-sapevi-prova>Prova →</button></div>'+
+    '<button type="button" class="x" data-sapevi-chiudi aria-label="Chiudi, non lo mostro più">×</button>';
+}
+if($("#loSapevi")) $("#loSapevi").addEventListener("click", e=>{
+  const el=$("#loSapevi"), k=el.dataset.k;
+  if(e.target.closest("[data-sapevi-chiudi]")){ const S=store.mappa("loSapevi"); S.chiuso=iso(new Date()); store.set("loSapevi", S); el.hidden=true; track("setup_item", {item:"sapevi_no_"+k}); return; }
+  if(e.target.closest("[data-sapevi-prova]")){ const c=CONSIGLI_FUNZIONE.find(x=>x.k===k); if(!c) return;
+    track("setup_item", {item:"sapevi_si_"+k}); el.hidden=true; setTab("turni"); c.a(); }
+});
 async function mandaACasa(){
   const testo=testoACasa(); if(!testo){ toast("Segna prima il turno di questo giorno"); return; }
   track("share_created", {tipo:"a_casa"});
@@ -8348,7 +8443,7 @@ function segnaSottopagina(){
 }
 function apriAndamenti(){
   chiudiVederci(); chiudiScambio(); chiudiFerie(); chiudiSegna();
-  document.body.classList.add("andamenti-aperta"); segnaSottopagina();
+  document.body.classList.add("andamenti-aperta"); segnaSottopagina(); usata("sonno");
   renderAndamenti();
   const p=$("#andamentiPagina"); if(p) p.hidden=false;
   try{ window.scrollTo(0,0); }catch(e){}
@@ -8512,6 +8607,8 @@ if($("#cycToday")) $("#cycToday").onclick=()=>{ if(suOggi()){ apriSelettoreData(
 if($("#doCycQR")) $("#doCycQR").onclick=()=>{
   const b=$("#qrBoxCyc"); if(!b) return;
   b.hidden=!b.hidden;
+  $("#doCycQR").textContent=b.hidden?"Mostra il QR da inquadrare":"Nascondi il QR";
+  $("#doCycQR").setAttribute("aria-expanded", String(!b.hidden));
   if(!b.hidden){ renderQR("#qrHolderCyc"); track("share_created", {tipo:"qr"}); }
 };
 
@@ -8656,7 +8753,7 @@ function aggiornaScambio(){
 function apriScambioTurno(giornoA){
   const pg=$("#scambioPagina"); if(!pg) return;
   chiudiAndamenti(); chiudiVederci(); chiudiFerie(); chiudiSegna();
-  document.body.classList.add("scambio-aperta"); segnaSottopagina();
+  document.body.classList.add("scambio-aperta"); segnaSottopagina(); usata("scambio");
   pg.hidden=false;
   const targetA=giornoA || state.focus || giornoVero();
   const offA=Math.round((dnum(targetA)-dnum(state.focus))/86400000);
@@ -8814,7 +8911,7 @@ function apriFerie(){
   chiudiAndamenti(); chiudiVederci(); chiudiScambio(); chiudiSegna();
   document.body.classList.add("ferie-aperta"); segnaSottopagina();
   pg.hidden=false;
-  renderFerie(); track("setup_item", {item:"ferie_aperte"});
+  renderFerie(); track("setup_item", {item:"ferie_aperte"}); usata("ferie");
   try{ window.scrollTo(0,0); }catch(e){}
 }
 function chiudiFerie(){
@@ -8907,7 +9004,7 @@ function apriSegna(){
   const pg=$("#segnaPagina"); if(!pg) return;
   chiudiAndamenti(); chiudiVederci(); chiudiScambio(); chiudiFerie();
   document.body.classList.add("segna-aperta"); segnaSottopagina();
-  pg.hidden=false; _imp=null; renderSegna(); renderImport();
+  pg.hidden=false; _imp=null; renderSegna(); renderImport(); usata("mese");
   track("setup_item", {item:"mese_aperto"});
   try{ window.scrollTo(0,0); }catch(e){}
   // la voce «foto o PDF» c'è solo se il server sa leggerle
@@ -10563,6 +10660,7 @@ if($("#status")) $("#status").addEventListener("click", e=>{
     if(tg){ haptic(10); state.ecc[iso(state.focus)]=tg.dataset.turnoGiorno; salva(); render(); toast("Turno segnato"); } }
 });
 if($("#andamenti")) $("#andamenti").addEventListener("click", e=>{
+  if(e.target.closest("[data-riepilogo-medico]")){ stampaRiepilogoMedico(); return; }
   const ap=e.target.closest("[data-apply-field]");
   if(ap){
     const f=ap.dataset.applyField, v=ap.dataset.applyValue;
