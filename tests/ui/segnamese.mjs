@@ -24,7 +24,7 @@ const nuova=async(url, nat, ai)=>{
   const p=await ctx.newPage(); p.on("pageerror",e=>errs.push(e.message));
   await p.goto(url); await p.waitForTimeout(900);
   await p.click('[data-tab="turni"]'); await p.waitForTimeout(250);
-  await p.click("#doSegnaMese"); await p.waitForTimeout(300);
+  await p.click("#meseBox [data-mese-segna]"); await p.waitForTimeout(300);
   return p;
 };
 const stato=p=>p.evaluate(()=>JSON.parse(localStorage.getItem("nt:state")));

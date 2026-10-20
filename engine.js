@@ -310,7 +310,7 @@ function spansNight(b){
 function impegnoA(off){
   const e = state.evento;
   if(!e || !e.d || !/^\d{4}-\d{2}-\d{2}$/.test(e.d)) return null;
-  if(iso(day(state.focus,off)) !== e.d) return null;
+  if(chiaveA(off) !== e.d) return null;   // senza una Date per chiamata: constraint() la chiede migliaia di volte
   const m = /^([01]\d|2[0-3]):([0-5]\d)$/.exec(String(e.h||""));
   return m ? (+m[1])*60 + (+m[2]) : null;
 }

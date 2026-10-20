@@ -39,11 +39,11 @@ const pre=await p.evaluate(()=>document.querySelectorAll("[data-togli]").length)
 ok(pre===6, "il compositore parte dal ciclo attuale ("+pre+" giorni)");
 await p.click("[data-chiudi-schema]").catch(async()=>{ await p.evaluate(()=>{ sceltaSchemaAperta=false; }); });
 
-// 4. lucidità: niente sui giorni passati e su quelli senza turno
+// 4. impegno importante: senza impegno segnato, nessuna riga (né inviti) su nessun giorno
 p=await nuovo(); await p.goto("http://localhost:8765/index.html"); await p.waitForTimeout(700);
 await p.click("[data-pick=N]"); await p.click("#qhConfermaOrario"); await p.waitForTimeout(400); await p.click("#doChiudiPrimoPiano");
 const luc=()=>p.evaluate(()=>/lucid|in forma/i.test(document.querySelector("#luciditaGiornoWrap").innerText));
-ok(!(await luc()), "lucidità: non c'è oggi (la notte prima è già passata)");
-await p.click("#prev"); await p.waitForTimeout(200); ok(!(await luc()), "lucidità: non c'è ieri");
-await p.click("#next"); await p.click("#next"); await p.waitForTimeout(200); ok(!(await luc()), "lucidità: non c'è su un giorno senza turno");
+ok(!(await luc()), "impegno: nessuna riga oggi");
+await p.click("#prev"); await p.waitForTimeout(200); ok(!(await luc()), "impegno: nessuna riga ieri");
+await p.click("#next"); await p.click("#next"); await p.waitForTimeout(200); ok(!(await luc()), "impegno: nessun invito sui giorni futuri");
 console.log("errori:", errs); await b.close();

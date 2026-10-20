@@ -17,10 +17,20 @@ await p.goto("http://localhost:8766/index.html"); await p.waitForTimeout(900);
 await p.evaluate(()=>{ const d=document.querySelector("body > [role=dialog] [data-x]"); d&&d.click(); });
 await p.click("text=Conosco già il mio schema"); await p.click("[data-preset-ob='0']"); await p.click("[data-pos='0']"); await p.click("#qhConfermaOrari"); await p.waitForTimeout(400);
 await p.click("#doChiudiPrimoPiano").catch(()=>{});
-// lucidità: oggi no, domani sì
-ok(await p.evaluate(()=>document.querySelector("#luciditaGiornoWrap").innerText.trim()===""), "lucido: su oggi l'invito non c'è (la notte prima è già passata)");
-await p.click("#next"); await p.waitForTimeout(200);
-ok(await p.evaluate(()=>/lucid|in forma/i.test(document.querySelector("#luciditaGiornoWrap").innerText)), "lucido: su domani l'invito c'è");
+// impegno importante: si segna dalla scheda del giorno (non su oggi: la notte prima è passata)
+await p.click("#shiftPill"); await p.waitForTimeout(200);
+ok(await p.evaluate(()=>!document.querySelector("[data-qs-impegno]")), "impegno: nella scheda di oggi non si può segnare");
+await p.click("#qsClose"); await p.click("#next"); await p.waitForTimeout(200);
+await p.click("#shiftPill"); await p.waitForTimeout(200);
+await p.click("[data-qs-impegno]"); await p.waitForTimeout(250);
+await p.evaluate(()=>{ const i=document.querySelector("[data-qs-impegno-h]"); i.value="08:30"; i.dispatchEvent(new Event("change",{bubbles:true})); });
+await p.waitForTimeout(200);
+const ev=await p.evaluate(()=>JSON.parse(localStorage.getItem("nt:state")).evento);
+await p.click("#qsClose"); await p.waitForTimeout(200);
+ok(ev && ev.h==="08:30" && /Mente lucida alle 08:30/.test(await p.evaluate(()=>document.querySelector("#luciditaGiornoWrap").innerText)), "impegno su domani alle 08:30: salvato, e Oggi lo ricorda quel giorno → "+JSON.stringify(ev));
+await p.click("[data-lucidita-cambia]"); await p.waitForTimeout(200);
+await p.click("[data-qs-impegno]"); await p.waitForTimeout(200); await p.click("#qsClose");
+ok(await p.evaluate(()=>!JSON.parse(localStorage.getItem("nt:state")).evento && document.querySelector("#luciditaGiornoWrap").innerText.trim()===""), "«Cambia» riapre la scheda; un altro tocco lo toglie");
 await p.click("#goToday");
 // attiva calendario e controlla stato reale
 await p.click('[data-attiva="calendario"]'); await p.waitForTimeout(3000);

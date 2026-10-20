@@ -10,7 +10,7 @@ const apri=async(st, extra={})=>{
   const ctx=await b.newContext({locale:"it-IT",viewport:{width:360,height:740}});
   await ctx.addInitScript(([st,extra])=>{ if(sessionStorage.getItem("x")) return; sessionStorage.setItem("x","1");
     localStorage.setItem("nt:state",JSON.stringify(st)); localStorage.setItem("nt:turniConfigurati","true"); localStorage.setItem("nt:firstPlanBannerChiuso","true");
-    localStorage.setItem("nt:attivazioneNascosta","true");
+    localStorage.setItem("nt:attivazioneNascosta","true"); localStorage.setItem("nt:analytics-consent","false");
     for(const k in extra) localStorage.setItem("nt:"+k, JSON.stringify(extra[k])); }, [st,extra]);
   const p=await ctx.newPage(); p.on("pageerror",e=>errs.push(e.message));
   await p.goto("http://localhost:8765/index.html"); await p.waitForTimeout(900);
@@ -37,7 +37,7 @@ await p.context().close();
 S.oggi.d=fa(3);
 p=await apri(Object.assign({firstSeenAt:fa(10)}, ST), {loSapevi:S, funzioniUsate:{mese:fa(3)}});
 t=await tip(p);
-ok(/^ferie:/.test(t), "tre giorni dopo il prossimo: ferie → "+t);
+ok(/^calendario:/.test(t), "tre giorni dopo il prossimo: il calendario del telefono → "+t);
 await p.click("[data-sapevi-chiudi]"); await p.waitForTimeout(200);
 await p.reload(); await p.waitForTimeout(900);
 ok(await tip(p)==="", "× lo chiude: ricaricando non torna");
@@ -47,12 +47,12 @@ p=await apri(Object.assign({firstSeenAt:fa(10)}, ST), {loSapevi:{visti:["mese"],
 ok(await tip(p)==="", "al massimo uno ogni 3 giorni");
 await p.context().close();
 // chi ha già persone e ha usato il mese: si salta al successivo non usato
-p=await apri(Object.assign({firstSeenAt:fa(10), people:[{name:"Anna",pattern:"MMRR",anchor:fa(2)}]}, ST), {funzioniUsate:{mese:fa(5), ferie:fa(5)}});
+p=await apri(Object.assign({firstSeenAt:fa(10), people:[{name:"Anna",pattern:"MMRR",anchor:fa(2)}]}, ST), {funzioniUsate:{mese:fa(5), ferie:fa(5), calendario:fa(5)}});
 t=await tip(p);
-ok(/^scambio:/.test(t), "salta le funzioni già usate (mese, ferie, persone) → "+t);
+ok(/^scambio:/.test(t), "salta le funzioni già usate (mese, calendario, ferie, persone) → "+t);
 await p.context().close();
 // il riepilogo per il medico solo dopo 2 mesi d'uso
-p=await apri(Object.assign({firstSeenAt:fa(20)}, ST), {funzioniUsate:{mese:1,ferie:1,persone:1,scambio:1,sonno:1}});
+p=await apri(Object.assign({firstSeenAt:fa(20)}, ST), {funzioniUsate:{mese:1,calendario:1,colleghi:1,ferie:1,scambio:1,sonno:1}});
 ok(await tip(p)==="", "riepilogo per il medico: non prima di due mesi d'uso");
 await p.context().close();
 ok(!errs.length, "nessun errore di pagina "+JSON.stringify(errs));
