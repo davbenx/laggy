@@ -25,6 +25,7 @@ let p=await apri({turniConfigurati:true,pattern:"RRRRN",anchor:tra(0),shifts:SH,
 let W=await p.evaluate(()=>window.__widget);
 ok(W && W.v===3 && W.voci.length>0, "il widget riceve le voci delle prossime 48 ore");
 ok(W.turno && /Notte/.test(W.turno.t) && W.turno.s>Date.now()+3*864e5, "il prossimo turno c'è anche se è fra 4 giorni → "+(W.turno&&W.turno.t));
+ok(W.giorni.slice(1).every(g=>/^[a-z]{3}\u00a0\d{1,2}$/.test(g.g)), "le etichette dei giorni non vanno a capo («dom 25» restava «dom») → "+W.giorni.map(g=>g.g).join(", "));
 ok(W.giorni[1].c==="Fe" && /•$/.test(W.giorni[2].c) && W.giorni[4].c==="N", "settimana: Fe per le ferie, • per la reperibilità → "+W.giorni.map(g=>g.c).join(" "));
 ok(W.diario && W.diario.d===tra(0) && /^\d\d:\d\d$/.test(W.diario.bed) && W.diario.a-W.diario.da===8*3600e3 && !W.diario.sonno && !W.diario.voto, "domanda del diario: orari del piano, per 8 ore dalla sveglia → "+JSON.stringify(W.diario));
 await p.context().close();
