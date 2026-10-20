@@ -11,7 +11,7 @@ await p.click("#goToday"); ok(/^Oggi/.test(await p.evaluate(()=>document.querySe
 await p.evaluate(()=>{ window.__picker=0; const j=document.querySelector("#jumpDate"); j.showPicker=()=>{ window.__picker++; }; });
 await p.click("#goToday"); ok(await p.evaluate(()=>window.__picker)===1, "su oggi apre il calendario del telefono");
 await p.click('[data-tab="turni"]'); await p.waitForTimeout(200);
-ok(await p.evaluate(()=>document.querySelector("#andamentiAnteprima").innerText)==="Annota qualche notte per vederlo", "Turni: 'Come sto dormendo' non mostra i numeri dell'esempio come tuoi");
+ok(/notti? nei prossimi 30 giorni|Nessuna notte/.test(await p.evaluate(()=>document.querySelector("#andamentiAnteprima").innerText)), "Turni: «Sonno e carico» senza diario mostra il carico dei turni, non numeri d'esempio → "+await p.evaluate(()=>document.querySelector("#andamentiAnteprima").innerText));
 await p.evaluate(()=>document.querySelector("#doPartner").click()); await p.waitForTimeout(200);
 ok(await p.evaluate(()=>document.querySelector("#piuCal").hidden), "Quando ho tempo libero: niente calendario di coppia senza una persona");
 await p.evaluate(()=>document.querySelector("#chiudiVederci").click());

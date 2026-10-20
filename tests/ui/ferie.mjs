@@ -22,7 +22,7 @@ const SH={M:{n:"Mattino",s:420,e:840},P:{n:"Pomeriggio",s:840,e:1260},N:{n:"Nott
 // MPNSR che parte oggi
 let p=await nuova({turniConfigurati:true,pattern:"MPNSR",anchor:iso(oggi),shifts:SH,repeat:true,firstSeenAt:"2026-01-01"});
 await p.click("#doFerie"); await p.waitForTimeout(300);
-ok(await p.evaluate(()=>!document.querySelector("#feriePagina").hidden && getComputedStyle(document.querySelector("#cyc")).display==="none" && getComputedStyle(document.querySelector("#doFerie")).display==="none"),
+ok(await p.evaluate(()=>!document.querySelector("#feriePagina").hidden && getComputedStyle(document.querySelector("#cyc")).display==="none" && document.querySelector("#doFerie").offsetParent===null),
   "la pagina Ferie si apre da sola, il resto di Turni si nasconde");
 ok(await base(p)===2, "senza ferie il riposo più lungo è di 2 giorni (smonto + riposo)");
 let L=await lunghezze(p); ok(L.length===3 && L.every(x=>x===7), "3 giorni di ferie → 7 giorni a casa, 3 proposte → "+L);
@@ -59,7 +59,7 @@ for(const [apri,chiudi] of [["#doAndamenti","#chiudiAndamenti"],["#doPartner","#
   ok(v.cyc==="none" && v.tsec, apri+": il resto di Turni nascosto mentre è aperta");
 }
 await p.click('[data-tab="oggi"]'); await p.waitForTimeout(200);
-ok(await p.evaluate(()=>getComputedStyle(document.querySelector("#doFerie")).display==="none" && getComputedStyle(document.querySelector("#feriePagina")).display==="none"), "Ferie non compare in Oggi");
+ok(await p.evaluate(()=>document.querySelector("#doFerie").offsetParent===null && getComputedStyle(document.querySelector("#feriePagina")).display==="none"), "Ferie non compare in Oggi");
 await p.context().close();
 // ciclo che non si ripete e finisce presto
 p=await nuova({turniConfigurati:true,pattern:"MPN",anchor:iso(oggi),shifts:SH,repeat:false,firstSeenAt:"2026-01-01"});

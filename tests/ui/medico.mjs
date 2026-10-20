@@ -14,6 +14,8 @@ const apri=async(st, extra={}, opz={})=>{
   const p=await ctx.newPage(); p.on("pageerror",e=>errs.push(e.message));
   await p.goto("http://localhost:8765/index.html"); await p.waitForTimeout(900);
   await p.click('[data-tab="turni"]'); await p.waitForTimeout(300);
+  // il riepilogo sta in «Sonno e carico», in fondo
+  await p.click("#doAndamenti"); await p.waitForTimeout(300);
   return p;
 };
 const foglio=p=>p.evaluate(()=>{ const s=document.querySelector("#printSheet .ps-doc"); if(!s) return null;
@@ -23,7 +25,7 @@ const anno=new Date(); anno.setFullYear(anno.getFullYear()-1);
 const SH={M:{n:"Mattino",s:420,e:840},P:{n:"Pomeriggio",s:840,e:1260},N:{n:"Notte",s:1260,e:1860}};
 // MPNSR da più di un anno: 1 notte ogni 5 giorni, nessun riposo breve
 let p=await apri({turniConfigurati:true,pattern:"MPNSR",anchor:iso(anno),shifts:SH,repeat:true,firstSeenAt:iso(anno)});
-await p.click("[data-riepilogo-medico]"); await p.waitForTimeout(500);
+await p.click("#andamenti [data-riepilogo-medico]"); await p.waitForTimeout(500);
 let f=await foglio(p);
 const giorni=Math.round((new Date()-new Date(new Date().getFullYear(), new Date().getMonth()-11, 1))/864e5)+1;
 const notti=+f.sint["Notti (almeno 3 ore fra le 22 e le 6)"], turni=+f.sint["Turni"];
@@ -38,7 +40,7 @@ await p.context().close();
 const dia={}, wk={}, bd={};
 for(let i=1;i<=10;i++){ const d=new Date(); d.setDate(d.getDate()-i); const k=iso(d); dia[k]=2+(i%3); wk[k]="06:00"; bd[k]=i%2?"23:00":"02:00"; }
 p=await apri({turniConfigurati:true,pattern:"PMRR",anchor:iso(anno),shifts:{P:{n:"Pomeriggio",s:840,e:1320},M:{n:"Mattino",s:360,e:840}},repeat:true,firstSeenAt:iso(new Date(Date.now()-60*864e5))},{diary:dia,wakes:wk,beds:bd});
-await p.click("[data-riepilogo-medico]"); await p.waitForTimeout(500);
+await p.click("#andamenti [data-riepilogo-medico]"); await p.waitForTimeout(500);
 f=await foglio(p);
 const brevi=+f.sint["Riposi sotto le 11 ore fra due turni"];
 ok(Math.abs(brevi-giorni/4)<=1, "pomeriggio → mattino: un riposo breve ogni ciclo ("+brevi+")");
@@ -49,7 +51,7 @@ await p.context().close();
 p=await apri({turniConfigurati:true,pattern:"MPNSR",anchor:iso(anno),shifts:SH,repeat:true,firstSeenAt:iso(anno)},{},{userAgent:UA,isMobile:true,hasTouch:true});
 await p.evaluate(()=>{ window.__files=[]; navigator.canShare=()=>true;
   navigator.share=async(o)=>{ for(const f of o.files||[]){ const t=await f.text(); window.__files.push({type:f.type, head:t.slice(0,8), pagine:(t.match(/\/Type \/Page /g)||[]).length, testo:/\(Riepilogo\)/.test(t) && /\(medico\)/.test(t) && /\(Totale\)/.test(t)}); } }; });
-await p.evaluate(()=>document.querySelector("[data-riepilogo-medico]").click()); await p.waitForTimeout(900);
+await p.evaluate(()=>document.querySelector("#andamenti [data-riepilogo-medico]").click()); await p.waitForTimeout(900);
 const pdf=await p.evaluate(()=>({f:window.__files, printed:window.__printed}));
 ok(pdf.printed===0 && pdf.f.length===1 && pdf.f[0].head.startsWith("%PDF") && pdf.f[0].pagine>=1 && pdf.f[0].testo, "iPhone: il riepilogo diventa un PDF da condividere → "+JSON.stringify(pdf.f));
 await p.context().close();

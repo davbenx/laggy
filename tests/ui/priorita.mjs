@@ -34,8 +34,8 @@ for(const g of [0,1,3,8,20]){
   }
   if(g===20){
     await p.click('[data-tab="turni"]'); await p.waitForTimeout(300);
-    const ord=await p.evaluate(()=>["#doPartner","#doAndamenti","#doScambioTurno","#doFerie"].map(s=>document.querySelector(s).getBoundingClientRect().top));
-    ok(ord.every((y,i)=>!i || y>ord[i-1]), "Turni: tempo libero → come sto dormendo → scambio → ferie");
+    const ord=await p.evaluate(()=>["#doPartner","#doAndamenti","#doFerie","#doScambioTurno","#doCycShare"].map(s=>document.querySelector(s).getBoundingClientRect().top));
+    ok(ord.every((y,i)=>!i || y>ord[i-1]), "Turni: tempo libero → sonno e carico → ferie → scambio → condividi");
   }
   await p.context().close();
 }
