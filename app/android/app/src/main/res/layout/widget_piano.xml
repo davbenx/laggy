@@ -83,6 +83,26 @@
         android:progressTint="@color/w_accento"
         android:progressBackgroundTint="@color/w_chip" />
 
+    <!-- Diario dal widget, la mattina: due o tre risposte a un tocco. -->
+    <LinearLayout
+        android:id="@+id/w_diario"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal"
+        android:visibility="gone">
+        <TextView android:id="@+id/w_db1" android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1"
+            android:gravity="center" android:background="@drawable/widget_bottone_pri" android:text="Sì, così"
+            android:textColor="@color/w_su_accento" android:textSize="13sp" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" />
+        <TextView android:id="@+id/w_db2" android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1"
+            android:layout_marginStart="6dp" android:gravity="center" android:background="@drawable/widget_bottone" android:text="Altri orari"
+            android:textColor="@color/w_ink" android:textSize="13sp" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" />
+        <TextView android:id="@+id/w_db3" android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1"
+            android:layout_marginStart="6dp" android:gravity="center" android:background="@drawable/widget_bottone" android:text="Bene"
+            android:textColor="@color/w_ink" android:textSize="13sp" android:textStyle="bold" android:maxLines="1" android:ellipsize="end"
+            android:visibility="gone" />
+    </LinearLayout>
+
     <LinearLayout
         android:id="@+id/w_prossimi"
         android:layout_width="match_parent"

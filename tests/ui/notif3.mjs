@@ -34,7 +34,7 @@ ok(await p.evaluate(()=>window.__pend.some(n=>n.extra.kind==="coffee")), "accend
 await p.locator("#opzFunzioni").screenshot({path:SP+"/n-opz.png"});
 // widget: settimana nel payload
 const pub=await p.evaluate(()=>window.__pub);
-ok(pub && pub.v===2 && pub.giorni.length===7 && pub.giorni[0].g==="oggi", "widget: 7 giorni nel payload "+JSON.stringify(pub&&pub.giorni.slice(0,3)));
+ok(pub && pub.v===3 && pub.giorni.length===7 && pub.giorni[0].g==="oggi", "widget: 7 giorni nel payload "+JSON.stringify(pub&&pub.giorni.slice(0,3)));
 // tocco su "Che turno fai domani?" → pannello di domani
 await p.evaluate(()=>window.__fire("LN:localNotificationActionPerformed",{notification:{extra:{tab:"domani"}}})); await p.waitForTimeout(800);
 ok(await p.evaluate(()=>!document.querySelector("#quickShiftModal").hidden && /Domani/i.test(document.querySelector("#qsDateTitle").innerText)), "tocco su 'Che turno fai domani?' apre il pannello di domani");
