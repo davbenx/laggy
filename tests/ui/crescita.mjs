@@ -29,7 +29,8 @@ for(const [giorni, atteso] of [[1,false],[4,true]]){
   await p.goto("http://localhost:8766/index.html"); await p.waitForTimeout(700);
   await configura(p, 10, giorni);
   const lista=await vis(p,"#setupChecklist"), invito=await vis(p,"#shareNudge");
-  ok(lista && invito===atteso, "lista di attivazione da "+giorni+" giorni: invito a condividere "+(atteso?"visibile":"in pausa")+" (lista "+lista+", invito "+invito+")");
+  // un invito alla volta: dal quarto giorno l'invito a condividere prende il posto della lista
+  ok(lista===!atteso && invito===atteso, "lista di attivazione da "+giorni+" giorni: "+(atteso?"invito a condividere al posto della lista":"lista, invito in pausa")+" (lista "+lista+", invito "+invito+")");
   if(atteso){
     await p.click("#doShareNudge"); await p.waitForTimeout(500);
     const sh=await p.evaluate(()=>window.__share.pop()||{});
@@ -74,7 +75,8 @@ for(const [giorni, atteso] of [[1,false],[4,true]]){
 { const UA="Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1";
   const ctx=await b.newContext({locale:"it-IT",userAgent:UA,isMobile:true,hasTouch:true,viewport:{width:390,height:844}});
   const p=await ctx.newPage(); p.on("pageerror",e=>errs.push(e.message));
-  await p.goto("http://localhost:8765/index.html"); await p.waitForTimeout(700); await configura(p, 10, 4);
+  await p.goto("http://localhost:8765/index.html"); await p.waitForTimeout(700); await configura(p, 10, 1);
+  if(await vis(p,"#apriAttivazione")){ await p.click("#apriAttivazione"); await p.waitForTimeout(200); }   // dal secondo giorno la lista è una riga
   ok(await vis(p,'#setupChecklist [data-attiva="installa"]') && !(await vis(p,"#installBanner")), "iPhone: installazione nella lista e nessun invito doppio");
   await p.evaluate(()=>{ localStorage.setItem("nt:diary", JSON.stringify({"2026-01-01":4})); }); await p.click('#setupChecklist [data-attiva="installa"]'); await p.waitForTimeout(1500);
   const copia=await p.evaluate(async()=>{ const r=await (await caches.open("passaggio-ios")).match("/__passaggio"); return r ? Object.keys(await r.json()).length : 0; });

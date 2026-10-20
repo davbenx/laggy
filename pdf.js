@@ -31,7 +31,7 @@ function larg(s, size, bold) {
     const c = (BASE[ch] || ch).charCodeAt(0);
     w += (c >= 32 && c <= 126) ? WH[c - 32] : 556;
   }
-  return w * size / 1000 * (bold ? 1.06 : 1);
+  return w * size / 1000 * (bold ? 1.1 : 1);   // Helvetica-Bold è più larga di circa un decimo
 }
 function enc(s) {
   let out = "";
@@ -121,7 +121,11 @@ function aCapo(riga, w, size) {
 }
 function scriviRiga(d, x, y, riga, size, grigio) {
   let cx = x;
-  riga.forEach((p, i) => { if (i) cx += larg(" ", size); d.testo(cx, y, p.t, size, p.bold, grigio); cx += larg(p.t, size, p.bold); });
+  riga.forEach((p, i) => {
+    // niente spazio prima della punteggiatura (dopo un grassetto: "71." non "71 .")
+    if (i && !/^[.,;:!?)»]/.test(p.t)) cx += larg(" ", size, riga[i - 1].bold);
+    d.testo(cx, y, p.t, size, p.bold, grigio); cx += larg(p.t, size, p.bold);
+  });
 }
 function taglia(s, w, size, bold) {
   s = String(s).trim();
@@ -216,6 +220,52 @@ function paginaTabella(d, h1, sub, tab, foot) {
   if (foot) d.testo(M, Math.min(y + 16, PH - M), foot.textContent.replace(/\s+/g, " ").trim(), 7.5, false, 0.35);
 }
 
+// Un documento a righe (section.ps-doc): titolo, sottotitolo, sezioni (h2),
+// paragrafi che vanno a capo, tabelle con le colonne che dicono loro
+// (data-cols: pesi relativi) e una nota in fondo. Il testo scorre sulle
+// pagine; l'intestazione di una tabella si ripete se la tabella continua.
+function paginaDoc(d, sec) {
+  const W = PW - 2 * M; let y;
+  const nuova = () => { d.nuova(); y = M; };
+  const spazio = h => { if (y + h > PH - M) nuova(); };
+  const paragrafo = (el, size, grigio, bold) => righe(el).forEach(r =>
+    aCapo(bold ? r.map(p => ({ ...p, bold: true })) : r, W, size).forEach(l => {
+      spazio(size * 1.4); y += size * 1.4; scriviRiga(d, M, y, l, size, grigio);
+    }));
+  const tabella = tab => {
+    const th = [...tab.querySelectorAll("thead th")];
+    const pesi = (tab.dataset.cols || "").split(",").map(Number);
+    const cols = th.map((_, i) => pesi[i] > 0 ? pesi[i] : 1), tot = cols.reduce((a, b) => a + b, 0);
+    const xs = [], lw = cols.map(c => c / tot * W); let acc = M; lw.forEach(w => { xs.push(acc); acc += w; });
+    const testa = () => {
+      spazio(16 + 14); d.rett(M, y, W, 16, { fill: 0 });
+      th.forEach((t, i) => d.testo(xs[i] + 4, y + 11, taglia(t.textContent, lw[i] - 6, 7.5, true), 7.5, true, 1));
+      y += 16;
+    };
+    y += 4; testa();
+    [...tab.querySelectorAll("tbody tr")].forEach(tr => {
+      const celle = [...tr.children].map(td => righe(td));
+      const n = Math.max(1, ...celle.map(r => r.length)), h = n * 9.2 + 5;
+      if (y + h > PH - M) { nuova(); testa(); }
+      if (tr.classList.contains("oggi") || tr.classList.contains("tot")) d.rett(M, y, W, h, { fill: 0.92 });
+      celle.forEach((r, i) => r.forEach((l, j) => scriviRiga(d, xs[i] + 4, y + 10.5 + j * 9.2,
+        l.map(p => ({ ...p, t: taglia(p.t, lw[i] - 8, 8.5, p.bold) })), 8.5, 0)));
+      d.rett(M, y + h, W, 0.01, { stroke: 0.75, lw: 0.4 });
+      y += h;
+    });
+    y += 6;
+  };
+  nuova();
+  [...sec.children].forEach(el => {
+    if (el.matches("h1")) { paragrafo(el, 16, 0, true); y += 4; }
+    else if (el.matches("h2")) { y += 12; spazio(40); paragrafo(el, 11, 0, true); y += 2; }
+    else if (el.matches(".ps-sub")) { paragrafo(el, 9, 0.3); y += 4; }
+    else if (el.matches(".ps-foot")) { y += 8; paragrafo(el, 7.5, 0.35); }
+    else if (el.matches("table")) tabella(el);
+    else if (el.matches("p")) { paragrafo(el, 8.5, 0); y += 3; }
+  });
+}
+
 // Il foglio #printSheet già costruito → Blob PDF.
 export function pdfDaFoglio(el) {
   const d = documento();
@@ -223,6 +273,7 @@ export function pdfDaFoglio(el) {
   for (let i = 0; i < figli.length; i++) {
     const f = figli[i];
     if (f.matches("section.pc")) { paginaCalendario(d, f); continue; }
+    if (f.matches("section.ps-doc")) { paginaDoc(d, f); continue; }
     if (f.matches("table")) {
       const prima = figli.slice(0, i).reverse();
       const h1 = prima.find(x => x.matches("h1")), sub = prima.find(x => x.matches(".ps-sub"));
