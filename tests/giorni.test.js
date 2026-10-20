@@ -62,3 +62,16 @@ test("notifiche: pisolino preventivo e settimana con i nomi dei giorni speciali"
   assert.ok(sett, "c'è il riepilogo della domenica");
   assert.match(sett.body, /Ferie/);
 });
+
+test("tanti giorni segnati non rallentano il piano", () => {
+  // centinaia di eccezioni e giorni speciali (un anno importato dal foglio
+  // turni) devono costare quanto nessuna: prima ogni domanda al motore
+  // rielencava tutte le date e creava una Date, e Turni bloccava i telefoni medi
+  const ecc = {}, giorni = {};
+  for (let i = -300; i < 300; i++) { const d = new Date("2026-10-19T12:00:00"); d.setDate(d.getDate() + i);
+    const k = d.toISOString().slice(0, 10); if (i % 2) ecc[k] = "N"; if (i % 3 === 0) giorni[k] = { t: "reperibile" }; }
+  const tempo = cfg => { const e = createEngine(Object.assign({ pattern: "MPNSR", anchor: "2026-10-19", focus: "2026-10-19T12:00:00" }, cfg));
+    e.buildEvents(14); const t0 = performance.now(); for (let k = 0; k < 3; k++) e.buildEvents(28); return performance.now() - t0; };
+  const vuoto = Math.min(tempo({}), tempo({})), pieno = Math.min(tempo({ ecc, giorni }), tempo({ ecc, giorni }));
+  assert.ok(pieno < vuoto * 2 + 20, "vuoto " + vuoto.toFixed(0) + " ms, pieno " + pieno.toFixed(0) + " ms");
+});
