@@ -3154,7 +3154,7 @@ function fromHash(hashStr){
 // solo alla riapertura dell'app, e la domanda arrivava anche dopo aver risposto.
 const DIARIO_CHIAVI = new Set(["wakes","beds","pisolini","diary"]);
 let _dopoDiarioT = null;
-function dopoDiario(){ clearTimeout(_dopoDiarioT); _dopoDiarioT = setTimeout(()=>{ try{ ntNotifiche(); }catch(e){} }, 300); }
+function dopoDiario(){ clearTimeout(_dopoDiarioT); _dopoDiarioT = setTimeout(()=>{ try{ ntNotifiche(); }catch(e){} try{ ntWidget(); }catch(e){} }, 300); }
 const store = {
   get(k,d){ try{ const v=localStorage.getItem("nt:"+k); return v?JSON.parse(v):d; }catch(e){ return d; } },
   set(k,v){ let ok=true; try{ localStorage.setItem("nt:"+k,JSON.stringify(v)); }catch(e){ ok=false; }
@@ -7596,26 +7596,60 @@ function ntWidget(){
   const voci=ev.filter(e=>+e.end>ora && +e.start<ora+48*3600e3)
     .map(e=>({s:+e.start, e:+e.end, t:e.title, k:e.tipo}))
     .sort((a,b)=>a.s-b.s);
-  // La settimana per il widget allargato: sigla del turno, colore per tipo
-  // (lavoro di giorno, notte, riposo) e ora in cui andare a letto.
+  // Il prossimo turno, anche fra giorni: la prima cosa che si guarda.
+  const tn=ev.filter(e=>e.tipo==="turno" && +e.end>ora).sort((a,b)=>a.start-b.start)[0];
+  const turno=tn ? {s:+tn.start, e:+tn.end, t:tn.title} : null;
+  // La settimana per il widget allargato: sigla del turno (o del giorno
+  // speciale), colore per tipo, ora in cui andare a letto, reperibilità.
   const GG=["dom","lun","mar","mer","gio","ven","sab"], giorni=[];
   const oggi=giornoVero();
   for(let o=0;o<7;o++){
     const d=day(oggi,o), f=state.focus; state.focus=d;
     let c="?"; try{ c=NT.codeAt(0); }catch(e){}
     state.focus=f;
+    const g=state.giorni[iso(d)]||{};
     const P=c==="?"?null:NT_planSafe(d);
     const tipo = !P || P.b.rest ? "riposo" : P.night ? "notte" : "lavoro";
-    giorni.push({d:iso(d), g:o===0?"oggi":GG[d.getDay()]+" "+d.getDate(), c:c==="?"?"?":c, t:tipo, s:P?hhmm(P.s.onset):""});
+    const sigla=(SIGLA_SPECIALE[g.t]||(c==="?"?"?":c))+(g.t==="reperibile"?"•":g.t==="extra"?"+":"");
+    giorni.push({d:iso(d), g:o===0?"oggi":GG[d.getDay()]+" "+d.getDate(), c:sigla, t:tipo, s:P?hhmm(P.s.onset):""});
   }
-  platform.widget.publish(voci, giorni);
+  platform.widget.publish(voci, giorni, {turno, diario:diarioWidget()});
+}
+// Il diario dal widget: dalla sveglia del sonno di stanotte per 8 ore, la
+// domanda sul sonno (con gli orari del piano) e poi quella sull'energia.
+// Le risposte le salva il widget; l'app le prende alla prossima apertura.
+function diarioWidget(){
+  const f=state.focus;
+  try{
+    const g=giornoVero(); state.focus=g;
+    const P=NT.plan(), c=cards(P).find(x=>x.k==="d");
+    const k=iso(g), bed=state.beds[k]||(c&&c.bedPiano)||"", wake=wakes[k]||(c&&c.wakePiano)||"";
+    if(!/^\d\d:\d\d$/.test(bed) || !/^\d\d:\d\d$/.test(wake)) return null;
+    const da=new Date(g); da.setHours(+wake.slice(0,2), +wake.slice(3,5), 0, 0);
+    if(da.getTime()>Date.now()+12*3600e3) da.setDate(da.getDate()-1);
+    return {d:k, bed, wake, da:da.getTime(), a:da.getTime()+8*3600e3, sonno:!!wakes[k], voto:diary[k]!=null};
+  }catch(e){ return null; }
+  finally{ state.focus=f; }
+}
+// Le risposte date dal widget, applicate senza mai sovrascrivere quello che
+// è già stato annotato nell'app.
+async function risposteWidget(){
+  if(!platform.widget.available) return;
+  const R=await platform.widget.risposte(); let n=0;
+  for(const k in R){ if(!/^\d{4}-\d{2}-\d{2}$/.test(k)) continue; const r=R[k]||{};
+    if(r.sonno && !wakes[k] && /^\d\d:\d\d$/.test(r.bed||"") && /^\d\d:\d\d$/.test(r.wake||"")){ state.beds[k]=r.bed; wakes[k]=r.wake; n++; }
+    if(r.voto>=1 && r.voto<=5 && diary[k]==null){ diary[k]=+r.voto; diaryAt[k]=+r.at||Date.now(); n++; } }
+  if(!n) return;
+  store.set("beds",state.beds); store.set("wakes",wakes); store.set("diaryAt",diaryAt); store.set("diary",diary);
+  track("setup_item", {item:"diario_widget"});
+  render();
 }
 // Tocco su un giorno del widget: l'app si apre su quel giorno.
 platform.onApriGiorno(d=>{ const x=new Date(d+"T12:00:00"); if(isNaN(+x)) return; state.focus=x; cicloOff=0; setTab("oggi"); render(); });
 if(platform.widget.available){
   addEventListener("nt:config-changed", ()=>setTimeout(ntWidget, 500));
-  addEventListener("load", ()=>setTimeout(ntWidget, 1500));
-  platform.onResume(ntWidget);
+  addEventListener("load", ()=>setTimeout(()=>{ risposteWidget().catch(()=>{}).then(ntWidget); }, 1500));
+  platform.onResume(()=>{ risposteWidget().catch(()=>{}).then(ntWidget); });
 }
 if(platform.calendar.available){
   addEventListener("nt:config-changed", ()=>ntCalendarioNativo());

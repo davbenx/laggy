@@ -35,6 +35,17 @@ public class WidgetPlugin extends Plugin {
         call.resolve(r);
     }
 
+    /** Le risposte del diario date dal widget: si consegnano una volta e si cancellano. */
+    @PluginMethod
+    public void risposte(PluginCall call) {
+        SharedPreferences sp = getContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        String json = sp.getString(NotturnistiWidget.KEY_RISPOSTE, "{}");
+        sp.edit().remove(NotturnistiWidget.KEY_RISPOSTE).apply();
+        JSObject r = new JSObject();
+        r.put("json", json);
+        call.resolve(r);
+    }
+
     /** Quanti widget Notturnisti ci sono sulla schermata Home. */
     @PluginMethod
     public void count(PluginCall call) {

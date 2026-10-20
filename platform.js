@@ -392,10 +392,17 @@ export const calendar = {
 // widget sceglie solo cosa vale adesso. Web: nessun widget possibile, no-op.
 export const widget = {
   available: isNative && !!plugin("NTWidget"),
-  async publish(voci, giorni) {
+  // extra: {turno: il prossimo turno, diario: la domanda del mattino}
+  async publish(voci, giorni, extra) {
     const W = plugin("NTWidget"); if (!W) return false;
-    try { const r = await W.publish({ json: JSON.stringify({ v: 2, at: Date.now(), voci, giorni: giorni || [] }) }); widgetSalvaConteggio(r); return true; }
+    try { const r = await W.publish({ json: JSON.stringify(Object.assign({ v: 3, at: Date.now(), voci, giorni: giorni || [] }, extra || {})) }); widgetSalvaConteggio(r); return true; }
     catch (e) { return false; }
+  },
+  // Le risposte del diario date dal widget ({giorno: {sonno, bed, wake, voto, at}}):
+  // si leggono una volta e il widget le dimentica.
+  async risposte() {
+    const W = plugin("NTWidget"); if (!W || !W.risposte) return {};
+    try { const r = await W.risposte(); return JSON.parse(r && r.json || "{}") || {}; } catch (e) { return {}; }
   },
   // Quanti widget ci sono (l'ultimo valore noto è anche in localStorage,
   // così la lista di attivazione lo sa subito, senza attendere il nativo).
