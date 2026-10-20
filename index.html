@@ -7871,13 +7871,13 @@ const CONSIGLI_FUNZIONE=[
       if(installPromptEvento){ const ev=installPromptEvento; ev.prompt(); ev.userChoice.then(r=>{ if(r.outcome==="accepted") track("pwa_installed"); installPromptEvento=null; render(); }); } }},
   {k:"statistiche", quando:()=>!!window.NTAnalytics && !window.NTAnalytics.answered(), scelta:true,
     t:()=>"Ci aiuti a migliorare l'app? Conta in forma anonima cosa si usa (niente turni, orari o diario, niente che dica chi sei). Puoi cambiare idea in Impostazioni."},
-  {k:"mese", t:()=>"Puoi ricopiare il foglio turni in un minuto, un tocco per giorno, o importarlo da un file.", a:()=>{ setTab("turni"); apriSegna(); }},
-  {k:"calendario", quando:()=>!inLista("calendario") && (platform.calendar.available ? !platform.calendar.attivo() : !(window.NTPaid && window.NTPaid.paid())),
-    t:()=>"Turni e ore di sonno nel calendario del telefono, aggiornati da soli: li vedi dove guardi già i tuoi impegni.", cta:()=>"Attiva", a:()=>apriCalendarioDaWizard()},
   {k:"colleghi", quando:()=>!((state.people||[]).length || state.pPattern),
     t:()=> conCicloDaMandare() ? "Manda il tuo ciclo a chi lavora con te: trova l'app già pronta, e vedete subito quando siete liberi insieme."
       : "Aggiungi chi lavora con te o chi ti aspetta a casa: vedi subito quando siete liberi insieme.",
     a:()=>{ if(conCicloDaMandare()) invitaChiLavoraConTe(); else { setTab("turni"); apriVederci(); } }},
+  {k:"mese", t:()=>"Puoi ricopiare il foglio turni in un minuto, un tocco per giorno, o importarlo da un file.", a:()=>{ setTab("turni"); apriSegna(); }},
+  {k:"calendario", quando:()=>!inLista("calendario") && (platform.calendar.available ? !platform.calendar.attivo() : !(window.NTPaid && window.NTPaid.paid())),
+    t:()=>"Turni e ore di sonno nel calendario del telefono, aggiornati da soli: li vedi dove guardi già i tuoi impegni.", cta:()=>"Attiva", a:()=>apriCalendarioDaWizard()},
   {k:"ferie", t:()=>"L'app trova i giorni di ferie che ti danno più giorni a casa, attaccati ai riposi.", a:()=>{ setTab("turni"); apriFerie(); }},
   {k:"scambio", t:()=>"Prima di accettare uno scambio di turno, controlla come cambiano sonno e riposi.", a:()=>{ setTab("turni"); apriScambioTurno(); }},
   {k:"sonno", t:()=>"In «Sonno e carico» vedi notti di fila e riposi brevi del mese, anche senza diario.", a:()=>{ setTab("turni"); apriAndamenti(); }},
@@ -7895,8 +7895,10 @@ function vistiLoSapevi(S){
   const visti=(S.visti||[]).map(k=>k==="persone"?"colleghi":k);
   if(!S.migrato){
     const da={colleghi:"shareNudgeOff", installa:"installBannerOff", calendario:"icsNudgeOff", grazie:["clubBannerOff","donateNudgeOff"]};
+    const prima=visti.length;
     for(const k in da) if([].concat(da[k]).some(f=>state[f]) && !visti.includes(k)) visti.push(k);
-    S.visti=visti; S.migrato=1; store.set("loSapevi", S);
+    // si scrive solo se c'era qualcosa da portare: i vecchi flag non tornano
+    if(visti.length>prima){ S.visti=visti; S.migrato=1; store.set("loSapevi", S); }
   }
   return visti;
 }

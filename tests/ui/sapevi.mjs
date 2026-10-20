@@ -17,7 +17,8 @@ const apri=async(st, extra={})=>{
   return p;
 };
 const tip=p=>p.evaluate(()=>{ const el=document.querySelector("#loSapevi"); return el.hidden ? "" : el.dataset.k+": "+el.textContent; });
-const ST={turniConfigurati:true,pattern:"MPNSR",anchor:fa(3),shifts:SH,repeat:true};
+// con una persona già aggiunta: qui si prova la sequenza dei consigli sul mese
+const ST={turniConfigurati:true,pattern:"MPNSR",anchor:fa(3),shifts:SH,repeat:true,people:[{name:"Anna",pattern:"MMRR",anchor:fa(2)}]};
 // primi giorni: niente
 let p=await apri(Object.assign({firstSeenAt:fa(1)}, ST));
 ok(await tip(p)==="", "nei primi giorni d'uso niente consigli");
