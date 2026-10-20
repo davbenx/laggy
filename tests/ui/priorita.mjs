@@ -22,6 +22,10 @@ for(const g of [0,1,3,8,20]){
   const p=await apri(g);
   const v=await sopra(p), y=await p.evaluate(()=>document.querySelector("#ora").getBoundingClientRect().top);
   ok(v.length<=1 && y<740-120, "giorno "+g+": "+(v.join(",")||"nessun invito")+" sopra il piano, «Adesso» a "+Math.round(y)+" px (prima schermata)");
+  const modello=await p.evaluate(sel=>sel.map(s=>document.querySelector(s)).filter(e=>e && !e.hidden && e.getBoundingClientRect().height>2 && !e.querySelector("#apriAttivazione") && e.id!=="statsNudge").map(e=>{
+    const x=e.querySelector(":scope > .x"), r=x && x.getBoundingClientRect(), c=e.getBoundingClientRect();
+    return {id:e.id, x:!!x && r.width>=44 && Math.abs(r.right-c.right)<8, freccia:/→/.test([...e.querySelectorAll(".btn")].map(b=>b.textContent).join(""))}; }), INVITI);
+  ok(modello.every(m=>m.x && !m.freccia), "giorno "+g+": stesso modello (× in alto a destra, azione senza freccia) → "+JSON.stringify(modello));
   if(g===0) ok(await p.evaluate(()=>document.querySelectorAll("#setupChecklist [data-attiva]").length>0), "primo giorno: la lista intera, con le voci da attivare");
   if(g===1 && v.includes("#setupChecklist")){
     const h=await p.evaluate(()=>document.querySelector("#setupChecklist").getBoundingClientRect().height);
