@@ -17,11 +17,21 @@ export const DEFAULTS = {
   mattinoBifasico:false  // sonno bifasico prima dei turni di mattina molto presto
 };
 
+// Giorni speciali, uno per data in state.giorni: {t, s, e, w}.
+//   t  tipo (sotto); s/e  orari veri di quel giorno in minuti (straordinario,
+//   formazione); w  il turno che c'era prima di ferie/malattia, per tornare
+//   indietro anche con i turni segnati a mano (che un ciclo non ricorda).
+// Ferie e malattia sono assenze: per il piano valgono come riposo. La
+// formazione è un giorno di lavoro con i suoi orari. Reperibilità e turno
+// extra si aggiungono al giorno com'è.
+export const GIORNI_SPECIALI = {ferie:"Ferie", malattia:"Malattia", formazione:"Formazione", reperibile:"Reperibilità", extra:"Turno extra"};
+const ASSENZE = {ferie:1, malattia:1};
+
 const LIMITI = {cTo:[0,240,25], cFrom:[0,240,25],
                 prep:[10,180,45], maxAdvance:[20,120,60]};
 
 export function createEngine(config){
-  const state = Object.assign({}, DEFAULTS, {ecc:{}, wakes:{}, beds:{}, pisolini:{}}, config||{});
+  const state = Object.assign({}, DEFAULTS, {ecc:{}, giorni:{}, wakes:{}, beds:{}, pisolini:{}}, config||{});
   state.focus = config && config.focus ? new Date(config.focus) : new Date();
   state.ecc = (state.ecc && typeof state.ecc==="object") ? state.ecc : {};
   state.wakes = state.wakes || {}; state.beds = state.beds || {}; state.pisolini = state.pisolini || {};
@@ -63,7 +73,16 @@ export function createEngine(config){
     if(state.pShifts!=null) state.pShifts = turni(state.pShifts);
     if(state.pPattern && !giorno(state.pAnchor)) state.pAnchor = state.anchor;
     if(typeof state.repeat!=="boolean") state.repeat = !(state.repeat===0 || state.repeat==="0" || state.repeat==="false");
-    for(const k of ["ecc","wakes","beds","pisolini"]) if(!oggetto(state[k])) state[k] = {};
+    for(const k of ["ecc","giorni","wakes","beds","pisolini"]) if(!oggetto(state[k])) state[k] = {};
+    const gg={};
+    for(const k in state.giorni){ const v=state.giorni[k]; if(!giorno(k) || !oggetto(v)) continue;
+      const o={}; if(GIORNI_SPECIALI[v.t]) o.t=v.t;
+      const S=+v.s, E=+v.e;
+      if(!ASSENZE[o.t] && v.s!=null && v.e!=null && isFinite(S) && isFinite(E) && S>=0 && S<1440 && E>S && E-S<=1440){ o.s=Math.round(S); o.e=Math.round(E); }
+      if(o.t==="formazione" && o.s==null){ o.s=540; o.e=1020; }
+      if(typeof v.w==="string" && /^[A-Z?]$/.test(v.w)) o.w=v.w;
+      if(o.t || o.s!=null) gg[k]=o; }
+    state.giorni = gg;
     for(const k of ["pWake","pBed"]) if(state[k]!=null && !/^([01]\d|2[0-3]):[0-5]\d$/.test(String(state[k]))) state[k] = "";
     if(!{bassa:1, media:1, alta:1}[state.caffSens]) state.caffSens = DEFAULTS.caffSens;
     if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(String(state.freeWake))) state.freeWake="07:30";
@@ -138,10 +157,32 @@ function codeAt(off){
   return p[((n % p.length) + p.length) % p.length];
 }
 
+function giornoA(off){
+  if(!state.giorni) return null;
+  for(const _ in state.giorni){ const g = state.giorni[iso(day(state.focus,off))]; return g || null; }
+  return null;
+}
+
+// Il turno di un giorno con le sue eccezioni: ferie e malattia sono riposo,
+// la formazione e gli orari veri (straordinario) sostituiscono quelli del turno.
 function block(off){
+  const g = giornoA(off), tipo = g && g.t || null;
+  if(tipo && ASSENZE[tipo]) return {c:"R", rest:true, tipo};
   const c = codeAt(off), d = state.shifts[c];
-  if(!d) return {c, rest:true};
-  return {c, name:d.n, start:d.s, end:d.e, rest:false};
+  if(tipo==="formazione") return {c, name:GIORNI_SPECIALI.formazione, start:g.s, end:g.e, rest:false, tipo};
+  if(!d) return {c, rest:true, tipo};
+  if(g && g.s!=null) return {c, name:d.n, start:g.s, end:g.e, rest:false, tipo, oreVere:true, previsto:d.e-d.s};
+  return {c, name:d.n, start:d.s, end:d.e, rest:false, tipo};
+}
+
+// Come si chiama un giorno, per elenchi e notifiche: "?" se non si sa.
+function etichetta(off){
+  const c = codeAt(off);
+  const g = giornoA(off), tipo = g && g.t || null;
+  if(tipo && (ASSENZE[tipo] || tipo==="formazione")) return GIORNI_SPECIALI[tipo];
+  if(c === "?") return "?";
+  const d = state.shifts[c];
+  return d ? d.n : "Riposo";
 }
 
 const WAKE_LO = 240, WAKE_HI = 720;
@@ -679,6 +720,18 @@ function plan(){
     }
   }
 
+  // Reperibilità: si può essere chiamati di notte, e allora la notte di sonno
+  // salta. Un pisolino nel primo pomeriggio mette da parte una riserva
+  // [Dinges 1987, pisolino profilattico], abbastanza lontano dalla sera da
+  // non rubare il sonno se poi non chiama nessuno.
+  { const g = giornoA(0);
+    if(g && g.t==="reperibile" && !naps.some(x=>!x.turno)){
+      let inizio = Math.max(wake + 360, 780);
+      if(!b.rest && b.start < inizio + 90 && b.end > inizio - 30) inizio = b.end + state.cFrom + CFG.windDown;
+      const p = dallInizio(inizio, CFG.napCiclo, s.onset - 300, {rep:true});
+      if(p) naps.push(p);
+    } }
+
   // Stessa regola del sonno principale: niente pisolini mentre si è al lavoro
   // o in viaggio (quelli in pausa al lavoro, x.turno, sono voluti). Se uno
   // tocca il turno lo si accorcia; se non resta abbastanza, si toglie.
@@ -815,6 +868,7 @@ function tipoPisolino(n){
   if(n.bifasico) return "recuperobif";
   if(n.rec) return "recupero";
   if(n.lungo) return "veglialunga";
+  if(n.rep) return "reperibile";
   if(n.debito!=null) return "debito"+(n.livello!=null?n.livello:"");
   return "prenotte";
 }
@@ -872,11 +926,12 @@ function buildEvents(days){
     let P; try{ P=plan(); }catch(e){ continue; }
     const base=day(f0,o);
     // il turno lo sai già: evento sì, sveglia no
-    if(ICS.turni && !P.b.rest) ev(base,P.b.start,P.b.end,"turno","Turno "+(P.b.name||P.b.c),"",false);
+    if(ICS.turni && !P.b.rest) ev(base,P.b.start,P.b.end,"turno",P.b.tipo==="formazione"?P.b.name:"Turno "+(P.b.name||P.b.c),"",false);
     if(ICS.sonno && P.s.dur > 0) ev(base,P.s.onset,P.s.onset+P.s.dur,"sonno","Sonno",
       "Pianificato da notturnisti.club",true,true);
     if(ICS.pisolini) P.naps.forEach(n=>ev(base,n.a,n.b,"pisolino-"+tipoPisolino(n),
-      (n.rec||n.debito)?"Pisolino di recupero":((n.b-n.a)<40?"Pisolino breve":"Pisolino"),"",true));
+      (n.rec||n.debito)?"Pisolino di recupero":n.rep?"Pisolino preventivo":((n.b-n.a)<40?"Pisolino breve":"Pisolino"),
+      n.rep?"Sei reperibile: una riserva di sonno se ti chiamano stanotte.":"",true));
     if(ICS.caffe) ev(base,P.cut,P.cut+15,"caffe","Ultimo caffè",
       "Dopo quest'ora la caffeina è ancora in circolo quando provi a dormire.",true);
     // La luce è la leva principale sull'orologio: senza, il piano si disfa.
@@ -984,7 +1039,7 @@ function buildIcs(days){
 
   normalizza();
   return {
-    state, plan, buildIcs, buildCouple, buildEvents, buildCoupleEvents, codeAt, block,
+    state, plan, buildIcs, buildCouple, buildEvents, buildCoupleEvents, codeAt, block, giornoA, etichetta,
     sharedDays, freeOverlap, asPartner,
     setIcs(o){ Object.assign(ICS, o||{}); return ICS; },
     // Esposti anche questi: prima privati alla closure, ma index.html (che
@@ -1048,6 +1103,37 @@ export function decEcc(str){
   return o;
 }
 
+// Giorni speciali per link e calendario automatico: "20261015F",
+// "20261016_420-900" (solo orari veri), "20261017C540-1020". Senza assenze
+// (ferie, malattia) quando escono dal telefono verso il server: per il piano
+// bastano le eccezioni "R", e la malattia è un dato di salute.
+const LETTERA = {ferie:"F", malattia:"M", formazione:"C", reperibile:"P", extra:"X"};
+const DA_LETTERA = Object.fromEntries(Object.entries(LETTERA).map(([k,v])=>[v,k]));
+export function encGiorni(giorni, {daGiorni=60, oggi=new Date(), senzaAssenze=false}={}){
+  if(!giorni || typeof giorni!=="object") return "";
+  const m = new Date(oggi); m.setDate(m.getDate()-daGiorni);
+  const minIso = m.getFullYear()+"-"+String(m.getMonth()+1).padStart(2,"0")+"-"+String(m.getDate()).padStart(2,"0");
+  const out=[];
+  for(const k of Object.keys(giorni).filter(k=>/^\d{4}-\d{2}-\d{2}$/.test(k) && k>=minIso).sort()){
+    const g=giorni[k]; if(!g || typeof g!=="object") continue;
+    const t = senzaAssenze && ASSENZE[g.t] ? null : g.t;
+    const ore = (isFinite(+g.s) && isFinite(+g.e) && g.s!=null && g.e!=null) ? Math.round(+g.s)+"-"+Math.round(+g.e) : "";
+    if(!LETTERA[t] && !ore) continue;
+    out.push(k.replace(/-/g,"")+(LETTERA[t]||"_")+ore);
+  }
+  return out.slice(-400).join(".");
+}
+export function decGiorni(str){
+  const o={};
+  for(const part of String(str||"").split(".").slice(0,400)){
+    const m=/^(\d{4})(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])([FMCPX_])(?:(\d{1,4})-(\d{1,4}))?$/.exec(part); if(!m) continue;
+    const g={}; if(DA_LETTERA[m[4]]) g.t=DA_LETTERA[m[4]];
+    if(m[5]!=null){ g.s=+m[5]; g.e=+m[6]; }
+    if(g.t || g.s!=null) o[m[1]+"-"+m[2]+"-"+m[3]]=g;
+  }
+  return o;
+}
+
 export function buildFeed(config, opts={}){
   const e = createEngine(config);
   if(opts.ics) e.setIcs(opts.ics);
@@ -1087,6 +1173,7 @@ export function parseConfig(params){
   const adv=num("adv",15,180);if(adv!==undefined) cfg.maxAdvance=adv;
   cfg.repeat = p.get("rep")!=="0";
   if(p.get("x")){ const x=decEcc(p.get("x")); if(Object.keys(x).length) cfg.ecc=x; }
+  if(p.get("g")){ const g=decGiorni(p.get("g")); if(Object.keys(g).length) cfg.giorni=g; }
   if(p.get("pp")){ cfg.pPattern=seq(p.get("pp")); cfg.pAnchor=okDate(p.get("pa"))?p.get("pa"):cfg.anchor;
     if(p.get("ps")){ const psh=decShifts(p.get("ps")); if(psh) cfg.pShifts=psh; }
     if(okTime(p.get("pw"))) cfg.pWake=p.get("pw");

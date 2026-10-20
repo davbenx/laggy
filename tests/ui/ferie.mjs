@@ -44,7 +44,7 @@ await p.evaluate(()=>{ const s=document.querySelector("#ferieMese"); s.value="";
 await p.waitForTimeout(200);
 await p.click('[data-ferie-segna="0"]'); await p.waitForTimeout(400);
 const dopo=await base(p), toast=await p.evaluate(()=>document.querySelector("#toast").textContent);
-ok(dopo===7 && /3 giorni segnati come riposo/.test(toast), "«Segna»: i 3 giorni diventano riposo, il riposo più lungo ora è 7 → "+dopo+" · "+toast.trim());
+ok(dopo===7 && /3 giorni segnati come ferie/.test(toast), "«Segna»: i 3 giorni diventano riposo, il riposo più lungo ora è 7 → "+dopo+" · "+toast.trim());
 await p.click(".toast-undo"); await p.waitForTimeout(400);
 ok(await base(p)===2, "Annulla: tutto come prima");
 await p.click("#chiudiFerie"); await p.waitForTimeout(200);

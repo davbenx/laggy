@@ -124,8 +124,8 @@ export function buildSchedule(config, opts = {}) {
 
     if (want("nap") && P.naps)
       P.naps.forEach((n, i) => push(base, n.a, "nap",
-        (n.rec || n.debito) ? "Pisolino di recupero" : "Pisolino",
-        "Fino alle " + hhmm(at(mid, n.b)) + ".", { tab: "pisolino" }));
+        (n.rec || n.debito) ? "Pisolino di recupero" : n.rep ? "Pisolino preventivo" : "Pisolino",
+        "Fino alle " + hhmm(at(mid, n.b)) + (n.rep ? ": sei reperibile, una riserva se ti chiamano stanotte." : "."), { tab: "pisolino" }));
 
     if (want("coffee"))
       push(base, P.cut, "coffee", "Ultimo caffè",
@@ -198,8 +198,8 @@ export function buildSchedule(config, opts = {}) {
       const righe = [];
       for (let k = 1; k <= 7; k++) {
         const d = new Date(base); d.setDate(d.getDate() + k); e.state.focus = d;
-        const c = e.codeAt(0); const sh = e.state.shifts && e.state.shifts[c];
-        righe.push(GIORNI[d.getDay()] + " " + (c === "?" ? "?" : sh ? sh.n : "riposo"));
+        const nome = e.etichetta ? e.etichetta(0) : "?";
+        righe.push(GIORNI[d.getDay()] + " " + (nome === "Riposo" ? "riposo" : nome));
       }
       e.state.focus = base;
       push(base, 19 * 60, "settimana", "La tua settimana", righe.join(" · "), { tab: "turni" });
