@@ -24,10 +24,24 @@ statistiche facoltative).
 - Link e messaggi che l'utente invia (WhatsApp, email) partono per sua azione
   verso app scelte da lui: non sono raccolta.
 
+- **Lettura dei turni da foto (facoltativa).** È attiva solo se sul server c'è
+  `ANTHROPIC_API_KEY`; senza, la voce non compare. Se la accendi, aggiungi:
+  *Foto e video → Foto* (e *File e documenti*, per i PDF), **raccolti**,
+  **non condivisi**, **elaborati temporaneamente** (il file non si salva),
+  **facoltativi**, scopo **Funzionalità dell'app**. Il foglio può contenere
+  nomi di colleghi: va detto anche nell'informativa privacy, che lo prevede già.
+
+## Accesso all'app (App access)
+- Risposta: **No**, nessuna parte è soggetta a limitazioni. Nell'app Android
+  non ci sono account, login, acquisti o codici: tutto è disponibile subito.
+  Il codice QR serve solo a condividere il proprio ciclo, non dà accesso a niente.
+
 ## Dichiarazione per le app di salute (Health apps)
 - L'app ha funzionalità relative alla salute: **Sì**.
-- Funzionalità: gestione del sonno; benessere sul lavoro (lavoro a turni,
-  stanchezza al rientro).
+- Da spuntare: **Salute e attività fisica → Gestione del sonno**. Nient'altro:
+  niente Medicina (non diagnostica né cura), niente dispositivo medico, niente
+  ricerca su soggetti umani. Stanchezza e sonnolenza al lavoro sono una
+  conseguenza del piano di sonno, non una funzione a sé.
 - Dispositivo medico / funzioni cliniche: **No**. Nell'app e nella scheda:
   «non è un dispositivo medico».
 - Health Connect: **non usato**.
