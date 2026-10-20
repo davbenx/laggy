@@ -64,5 +64,20 @@ await p.context().close();
 p=await apri(Object.assign({firstSeenAt:fa(20)}, ST), {funzioniUsate:{mese:1,calendario:1,colleghi:1,ferie:1,scambio:1,sonno:1}});
 ok(await tip(p)==="", "riepilogo per il medico: non prima di due mesi d'uso");
 await p.context().close();
+// Android dal browser, app non ancora su Play: l'invito al test, in due passi
+{ const ctx=await b.newContext({locale:"it-IT",viewport:{width:360,height:740},userAgent:"Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Mobile Safari/537.36"});
+  await ctx.addInitScript(([st])=>{ if(sessionStorage.getItem("x")) return; sessionStorage.setItem("x","1");
+    localStorage.setItem("nt:state",JSON.stringify(st)); localStorage.setItem("nt:turniConfigurati","true"); localStorage.setItem("nt:firstPlanBannerChiuso","true");
+    localStorage.setItem("nt:attivazioneNascosta","true"); localStorage.setItem("nt:analytics-consent","false"); localStorage.setItem("nt:backupDone","true"); }, [Object.assign({firstSeenAt:fa(10)}, ST)]);
+  const q=await ctx.newPage(); q.on("pageerror",e=>errs.push(e.message)); q.on("popup",w=>w.close().catch(()=>{}));
+  await q.goto("http://localhost:8765/index.html"); await q.waitForTimeout(900);
+  const t=await tip(q);
+  const L=await q.evaluate(()=>[...document.querySelectorAll("#loSapevi [data-sapevi-link]")].map(a=>a.href));
+  ok(/^tester:/.test(t) && L.length===2 && /groups\.google\.com/.test(L[0]) && /apps\/testing\/club\.notturnisti\.app/.test(L[1]), "Android dal web: invito al test su Play con i due passi → "+t.slice(0,60));
+  await q.evaluate(()=>{ const a=document.querySelector("#loSapevi [data-sapevi-link]"); a.addEventListener("click",e=>e.preventDefault()); a.click(); }); await q.waitForTimeout(200);
+  ok(await q.evaluate(()=>!document.querySelector("#loSapevi").hidden), "dopo il primo passo il riquadro resta");
+  await q.evaluate(()=>{ const a=[...document.querySelectorAll("#loSapevi [data-sapevi-link]")].pop(); a.addEventListener("click",e=>e.preventDefault()); a.click(); }); await q.waitForTimeout(200);
+  ok(await q.evaluate(()=>document.querySelector("#loSapevi").hidden), "dopo il secondo si chiude");
+  await ctx.close(); }
 ok(!errs.length, "nessun errore di pagina "+JSON.stringify(errs));
 await b.close();
