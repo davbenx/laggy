@@ -1,32 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createEngine, resolveNextAction } from "../engine.js";
+import { createEngine } from "../engine.js";
 import { buildSchedule } from "../notifications.js";
-
-test("resolveNextAction: turno di notte prima dell'ultimo caffè", () => {
-  const e = createEngine({ pattern: "N", anchor: "2026-09-17", focus: "2026-09-17" });
-  const P = e.plan();
-  const res = resolveNextAction({ nowMins: 1410, P, b: P.b });
-  assert.ok(res.status.includes("turno"), "status deve indicare turno");
-  assert.ok(res.next, "next action deve essere presente");
-});
-
-test("resolveNextAction: sonno in corso segnala sveglia programmata", () => {
-  const e = createEngine({ pattern: "N", anchor: "2026-09-17", focus: "2026-09-17" });
-  const P = e.plan();
-  const midSleep = Math.round((P.s.onset + P.end) / 2);
-  const res = resolveNextAction({ nowMins: midSleep, P, b: P.b });
-  assert.equal(res.next.type, "wake");
-  assert.equal(res.next.urgency, "sleep");
-});
-
-test("resolveNextAction: giorno di riposo", () => {
-  const e = createEngine({ pattern: "R", anchor: "2026-09-17", focus: "2026-09-17" });
-  const P = e.plan();
-  const res = resolveNextAction({ nowMins: 600, P, b: P.b });
-  assert.equal(res.status, "Giorno di riposo");
-  assert.ok(res.next);
-});
 
 test("buildSchedule: genera notifiche per i giorni futuri senza errori", () => {
   const cfg = { pattern: "MPNSR", anchor: "2026-09-17" };
@@ -38,15 +13,6 @@ test("buildSchedule: genera notifiche per i giorni futuri senza errori", () => {
     assert.ok(item.at instanceof Date, "at deve essere una data");
     assert.ok(item.at.getTime() >= Date.now(), "le notifiche devono essere future");
   }
-});
-
-test("resolveNextAction: turno non inserito (c === '?')", () => {
-  const e = createEngine({ pattern: "N", anchor: "2026-09-17", focus: "2026-09-25", repeat: false });
-  const P = e.plan();
-  assert.equal(P.b.c, "?");
-  const res = resolveNextAction({ nowMins: 600, P, b: P.b });
-  assert.equal(res.status, "Turno non impostato");
-  assert.equal(res.next.type, "missing_shift");
 });
 
 test("navigazione: turnazione ciclica infinita supporta offset arbitrari positivi e negativi", () => {

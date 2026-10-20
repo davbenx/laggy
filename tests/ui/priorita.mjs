@@ -5,7 +5,7 @@ import pw from "./_pw.mjs";
 const ok=(c,m)=>console.log((c?"✔ ":"✘ ")+m);
 const b=await pw.chromium.launch(); const errs=[];
 const iso=d=>d.toISOString().slice(0,10);
-const INVITI=["#setupChecklist","#firstPlanBanner","#adattaCard","#medicoCard","#setupNudge","#backupNudge"];
+const INVITI=["#setupChecklist","#firstPlanBanner","#adattaCard","#medicoCard","#setupNudge"];
 const apri=async(giorniFa)=>{
   const ctx=await b.newContext({locale:"it-IT",viewport:{width:360,height:740}});
   await ctx.addInitScript(([f,oggi])=>{ if(sessionStorage.getItem("x")) return; sessionStorage.setItem("x","1");

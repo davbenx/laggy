@@ -8,7 +8,6 @@
 // Va sempre etichettato "modellato dai tuoi orari, non una misura".
 
 const parseHM = s => { const m = /^(\d{1,2}):(\d{2})$/.exec(String(s || "")); return m ? (+m[1]) * 60 + (+m[2]) : null; };
-const wrap720 = x => { while (x > 720) x -= 1440; while (x < -720) x += 1440; return x; };
 const minOf = d => d.getHours() * 60 + d.getMinutes();
 // Arrotondato ai 5 minuti come hhmm() nel core (è un modello, non una
 // misura — mostrare i minuti esatti del campionamento, es. "01:19", li

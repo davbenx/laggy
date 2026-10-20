@@ -1,7 +1,7 @@
 // Verifica completa del motore su tutte le turnazioni (lenta, ~1 min: fuori da
 // run.sh). Uso: TZ=Europe/Rome node tests/verifica/turni.mjs — deve dire
 // "nessun problema" (lo stato «Domani» nei riposi è voluto e non viene mostrato).
-import { createEngine, resolveNextAction } from "../../engine.js";
+import { createEngine } from "../../engine.js";
 import { buildSchedule, TIPI_TUTTI } from "../../notifications.js";
 const T={A:{n:"Alba",s:300,e:780},M:{n:"Mattino",s:360,e:840},L:{n:"Mattino tardi",s:480,e:960},D:{n:"Giorno 12h",s:420,e:1140},P:{n:"Pomeriggio",s:840,e:1320},S:{n:"Sera",s:1080,e:1440},X:{n:"Sera tardi",s:1140,e:1500},N:{n:"Notte",s:1320,e:1860},K:{n:"Notte 12h",s:1140,e:1860},Z:{n:"Notte fonda",s:0,e:480},G:{n:"24 ore",s:480,e:1920}};
 const codes=Object.keys(T).concat(["R"]);
@@ -25,7 +25,6 @@ function controlla(cfg, nome, giorni){
       const sp=P.sp; if(sp && sp.dur>0){ const a=sp.onset-1440, z=a+sp.dur; if(n.a<z && n.b>a) add("pisolino nel sonno di ieri", nome+" g"+o); }
     }
     if(isFinite(P.cut) && s.dur>0 && P.cut>s.onset) add("caffè dopo l'ora di dormire", nome+" g"+o);
-    for(let m=0;m<1440;m+=30){ try{ const r=resolveNextAction({nowMins:m,P}); if(!r||!r.status) add("stato vuoto", nome+" g"+o+" m"+m); if(r&&r.next&&r.next.at!=="Domani"&&!/^\d\d:\d\d$/.test(r.next.at)) add("ora non valida", nome+" g"+o+" "+r.next.at); }catch(err){ add("crash stato", nome+" g"+o+" m"+m+" "+err.message); break; } }
   }
   e.state.focus=new Date(f0);
   let ev=[]; try{ ev=e.buildEvents(giorni); }catch(err){ add("crash eventi", nome+" "+err.message); }

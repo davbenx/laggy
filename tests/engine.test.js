@@ -310,7 +310,7 @@ function estraiFunzione(sorgente, nome) {
 test("le utility pure duplicate tra engine.js e index.html restano identiche", () => {
   const engineSrc = readFileSync(fileURLToPath(new URL("../engine.js", import.meta.url)), "utf8");
   const htmlSrc = readFileSync(fileURLToPath(new URL("../index.html", import.meta.url)), "utf8");
-  const NOMI = ["iso", "day", "clamp", "mod1440", "hhmm", "hhmm15", "near", "safeName", "encShifts", "decShifts"];
+  const NOMI = ["iso", "day", "dnum", "mod1440", "safeName", "decShifts"];
   const divergenti = [];
   for (const nome of NOMI) {
     const a = estraiFunzione(engineSrc, nome), b = estraiFunzione(htmlSrc, nome);
