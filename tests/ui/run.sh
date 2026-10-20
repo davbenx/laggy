@@ -25,7 +25,7 @@ if [ -z "${AXE_JS:-}" ]; then
   mkdir -p "$OUT/axe" && (cd "$OUT/axe" && npm i --silent --no-save axe-core@4.10.2 >/dev/null 2>&1)
   export AXE_JS="$OUT/axe/node_modules/axe-core/axe.min.js"
 fi
-SUITE=("$@"); [ ${#SUITE[@]} -eq 0 ] && SUITE=(personas comp nudge robust opz attiva fix5 msg share3 ux3 adatta notif3 native2 inviti indietro cancella footlinks notiftap ios crescita push primo mese prossimi overflow perf e2e)
+SUITE=("$@"); [ ${#SUITE[@]} -eq 0 ] && SUITE=(personas comp nudge robust opz attiva fix5 msg share3 ux3 adatta notif3 native2 inviti indietro cancella footlinks notiftap ios crescita push primo mese prossimi limitato scimmia scimmia-nativo overflow perf pesante offline e2e)
 fail=0
 for s in "${SUITE[@]}"; do
   f=tests/ui/$s.mjs; [ -f "$f" ] || f=tests/ui/$s.cjs

@@ -36,7 +36,7 @@
     s.textContent =
       "#pf-open{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;background:var(--blue);color:#fff;border:none;" +
       "border-radius:var(--r);padding:13px 16px;font:inherit;font-weight:700;font-size:15px;cursor:pointer;min-height:48px;margin-top:12px}" +
-      ".pf-modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center;z-index:9999}" +
+      ".pf-modal{position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center;z-index:9999}" +
       "@media(min-width:560px){.pf-modal{align-items:center}}" +
       ".pf-card{background:var(--bg);color:var(--ink);width:100%;max-width:560px;max-height:92vh;overflow:auto;" +
       "border-radius:16px 16px 0 0;padding:20px}@media(min-width:560px){.pf-card{border-radius:16px}}" +

@@ -30,4 +30,7 @@ for (const f of FILES) {
   mkdirSync(dirname(join(out, f)), { recursive: true });
   cpSync(src, join(out, f));
 }
-console.log("www/: " + FILES.length + " file copiati da " + root);
+// Pagina di riserva dell'app (capacitor.config.json › server.errorPath):
+// WebView troppo vecchio o pagina che non si carica. Solo nell'app.
+cpSync(join(here, "..", "aggiorna.html"), join(out, "aggiorna.html"));
+console.log("www/: " + (FILES.length + 1) + " file copiati da " + root);

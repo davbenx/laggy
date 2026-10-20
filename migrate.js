@@ -73,7 +73,7 @@
     var d = document.createElement("div");
     d.setAttribute("role", "dialog");
     d.setAttribute("aria-modal", "true");
-    d.style.cssText = "position:fixed;inset:0;z-index:99999;background:rgba(10,12,16,.72);display:flex;align-items:center;justify-content:center;padding:16px";
+    d.style.cssText = "position:fixed;top:0;right:0;bottom:0;left:0;z-index:99999;background:rgba(10,12,16,.72);display:flex;align-items:center;justify-content:center;padding:16px";
     d.innerHTML = '<div style="max-width:420px;width:100%;background:var(--s1,#1c1f24);color:var(--ink,#f2f2f2);border-radius:18px;padding:20px 18px;box-shadow:0 12px 40px rgba(0,0,0,.4);font:15px/1.45 system-ui,sans-serif">' + html + "</div>";
     document.body.appendChild(d);
     return d;

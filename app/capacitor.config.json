@@ -5,12 +5,16 @@
   "android": {
     "allowMixedContent": false,
     "captureInput": false,
-    "webContentsDebuggingEnabled": false
+    "webContentsDebuggingEnabled": false,
+    "minWebViewVersion": 64
   },
   "plugins": {
     "LocalNotifications": {
       "smallIcon": "ic_stat_notturnisti",
       "iconColor": "#3D7BE0"
     }
+  },
+  "server": {
+    "errorPath": "aggiorna.html"
   }
 }
