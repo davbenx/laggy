@@ -28,6 +28,8 @@ ok(await base(p)===2, "senza ferie il riposo più lungo è di 2 giorni (smonto +
 let L=await lunghezze(p); ok(L.length===3 && L.every(x=>x===7), "3 giorni di ferie → 7 giorni a casa, 3 proposte → "+L);
 const ferieOk=await p.evaluate(()=>[...document.querySelectorAll(".ferie-prop")].every(s=>s.querySelectorAll(".fg.ferie").length===3 && /Ferie: /.test(s.innerText)));
 ok(ferieOk, "ogni proposta mostra 3 giorni di ferie, evidenziati e scritti");
+const turniFerie=await p.evaluate(()=>{ const s=document.querySelector(".ferie-prop"); return {testo:s.querySelector(".ferie-cosa").textContent, sigle:[...s.querySelectorAll(".fg.ferie i")].map(i=>i.textContent).join("")}; });
+ok(/Mattino/.test(turniFerie.testo) && /Pomeriggio/.test(turniFerie.testo) && /Notte/.test(turniFerie.testo) && turniFerie.sigle==="MPN", "si vede quali turni lasci: "+turniFerie.testo+" · "+turniFerie.sigle);
 await piu(p,2); L=await lunghezze(p); ok(L[0]===9, "5 giorni di ferie → 9 giorni a casa → "+L);
 await piu(p,-4); L=await lunghezze(p); ok(L[0]===3 && await p.evaluate(()=>document.querySelector('[data-ferie-n="-1"]').disabled), "1 giorno → 3 a casa; sotto 1 non si scende → "+L);
 await piu(p,2);
