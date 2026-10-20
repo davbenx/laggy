@@ -45,6 +45,27 @@ export function createEngine(config){
       // esattamente come un 5 per prep sarebbe riportato a 10.
       state[k] = (isFinite(v) && v>=0) ? Math.min(Math.max(Math.round(v),lo),hi) : def;
     }
+    // Struttura: uno stato salvato rotto (versione vecchia, memoria corrotta,
+    // copia fatta a mano) non deve far cadere il disegno di una scheda.
+    // Quello che non ha la forma giusta torna al valore di partenza.
+    const oggetto=v=>!!v && typeof v==="object" && !Array.isArray(v);
+    const turni=o=>{ if(!oggetto(o)) return null; const r={};
+      for(const k in o){ const v=o[k]; if(!/^[A-Z]$/.test(k) || k==="R" || !oggetto(v)) continue;
+        const S=+v.s, E=+v.e; if(v.s==null || v.e==null || !isFinite(S) || !isFinite(E) || E<=S) continue;
+        r[k]=Object.assign({}, v, {n:(typeof v.n==="string" && v.n) ? v.n : k, s:S, e:E}); }
+      return Object.keys(r).length ? r : null; };
+    const seq=v=>typeof v==="string" ? v.toUpperCase().replace(/[^A-Z]/g,"").slice(0,400) : "";
+    const giorno=v=>typeof v==="string" && /^\d{4}-\d{2}-\d{2}$/.test(v) && !isNaN(+new Date(v+"T12:00:00"));
+    state.shifts = turni(state.shifts) || JSON.parse(JSON.stringify(DEFAULTS.shifts));
+    state.pattern = seq(state.pattern) || DEFAULTS.pattern;
+    if(!giorno(state.anchor)) state.anchor = DEFAULTS.anchor;
+    state.pPattern = seq(state.pPattern);
+    if(state.pShifts!=null) state.pShifts = turni(state.pShifts);
+    if(state.pPattern && !giorno(state.pAnchor)) state.pAnchor = state.anchor;
+    if(typeof state.repeat!=="boolean") state.repeat = !(state.repeat===0 || state.repeat==="0" || state.repeat==="false");
+    for(const k of ["ecc","wakes","beds","pisolini"]) if(!oggetto(state[k])) state[k] = {};
+    for(const k of ["pWake","pBed"]) if(state[k]!=null && !/^([01]\d|2[0-3]):[0-5]\d$/.test(String(state[k]))) state[k] = "";
+    if(!{bassa:1, media:1, alta:1}[state.caffSens]) state.caffSens = DEFAULTS.caffSens;
     if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(String(state.freeWake))) state.freeWake="07:30";
     if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(String(state.freeBed)))  state.freeBed="23:30";
     sincronizzaNeed();
@@ -103,10 +124,16 @@ function eccezioneA(off){
   return (typeof e === "string" && e) ? e : null;
 }
 
+// codeAt è chiamata decine di migliaia di volte per disegnare una schermata:
+// ciclo ripulito e giorno d'inizio si ricalcolano solo quando cambiano, e
+// dnum(focus)+off è lo stesso giorno di calendario di dnum(day(focus,off)).
+let _ciclo = {src:null, p:"R"}, _inizio = {src:null, n:0};
 function codeAt(off){
-  const ecc = eccezioneA(off); if(ecc) return ecc;
-  const p = (state.pattern.toUpperCase().replace(/[^A-Z]/g,"") || "R");
-  const n = dnum(day(state.focus,off)) - dnum(new Date(state.anchor+"T12:00:00"));
+  if(state.ecc){ for(const _ in state.ecc){ const e = eccezioneA(off); if(e) return e; break; } }
+  if(_ciclo.src !== state.pattern) _ciclo = {src:state.pattern, p:(String(state.pattern||"").toUpperCase().replace(/[^A-Z]/g,"") || "R")};
+  if(_inizio.src !== state.anchor) _inizio = {src:state.anchor, n:dnum(new Date(state.anchor+"T12:00:00"))};
+  const p = _ciclo.p;
+  const n = dnum(state.focus) + off - _inizio.n;
   if(state.repeat === false) return (n < 0 || n >= p.length) ? "?" : p[n];
   return p[((n % p.length) + p.length) % p.length];
 }

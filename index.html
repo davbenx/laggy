@@ -275,7 +275,7 @@ border-radius:var(--r);font-family:inherit;font-size:12.5px;font-weight:600;curs
    oggi" il tocco va al bottone. */
 .today-wrap{position:relative;display:inline-flex;flex:none}
 .today-pick{display:none}
-html.ios .today-pick{display:block;position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;border:0;opacity:0;font-size:16px;-webkit-appearance:none;appearance:none;cursor:pointer}
+html.ios .today-pick{display:block;position:absolute;top:0;right:0;bottom:0;left:0;width:100%;height:100%;margin:0;padding:0;border:0;opacity:0;font-size:16px;-webkit-appearance:none;appearance:none;cursor:pointer}
 html.ios .today-wrap:has(.today.full) .today-pick{display:none}
 /* iPhone: niente zoom col doppio tocco (resta lo zoom con due dita) e
    niente zoom automatico entrando in un campo: Safari lo fa sotto i 16px. */
@@ -294,7 +294,7 @@ border-bottom:2px solid currentColor;transform:rotate(45deg);margin-left:2px;mar
 .shiftpill.warn{background:var(--risk-soft);color:var(--risk);border:1px solid var(--risk-lt)}
 
 /* Quick Shift Switcher */
-.qs-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+.qs-backdrop{position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
 z-index:999;display:flex;align-items:flex-end;justify-content:center;animation:qsFadeIn .18s ease}
 .qs-backdrop[hidden]{display:none !important}
 @media(min-width:600px){.qs-backdrop{align-items:center}}
@@ -695,7 +695,7 @@ min-height:48px;font:inherit;font-size:16px;font-weight:600;cursor:pointer;box-s
 #doSetup{width:100%;min-height:48px;font-size:16px}
 #doSetup.sec{width:auto;min-height:40px;font-size:14px;font-weight:500;padding:8px 14px;
 background:none;border:none;color:var(--blue);text-decoration:underline;text-underline-offset:3px;display:block;margin:8px auto 0}
-body.wiz-open .onboard{display:flex;flex-direction:column;min-height:calc(100dvh - 24px);margin:0}
+body.wiz-open .onboard{display:flex;flex-direction:column;min-height:calc(100vh - 24px);min-height:calc(100dvh - 24px);margin:0}
 /* #linkChoice usa lo stile .onboard ma non è il wizard — condividere la
    classe lo rendeva visibile ogni volta che il wizard si apriva per
    qualunque motivo, anche settimane dopo l'unica volta in cui serviva
@@ -1012,7 +1012,7 @@ border:1px solid var(--blue-lt);border-radius:var(--r);color:var(--blue);font:in
 .cal-sync-card, .piu-cal{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;box-shadow:var(--shadow-card)}
 .switch{position:relative;display:inline-block;width:46px;height:26px;flex:none}
 .switch input{opacity:0;width:0;height:0}
-.switch .slider{position:absolute;cursor:pointer;inset:0;background:var(--s2);border:1.5px solid var(--line);border-radius:999px;transition:.2s cubic-bezier(0.2,0.8,0.4,1)}
+.switch .slider{position:absolute;cursor:pointer;top:0;right:0;bottom:0;left:0;background:var(--s2);border:1.5px solid var(--line);border-radius:999px;transition:.2s cubic-bezier(0.2,0.8,0.4,1)}
 .switch .slider::before{position:absolute;content:"";height:18px;width:18px;left:3px;bottom:2.5px;background:#fff;border-radius:50%;transition:.2s cubic-bezier(0.2,0.8,0.4,1);box-shadow:0 2px 5px rgba(0,0,0,0.25)}
 .switch input:checked + .slider{background:var(--blue-fill);border-color:var(--blue-fill)}
 .switch input:checked + .slider::before{transform:translateX(18px)}
@@ -1240,10 +1240,13 @@ header b{font-size:23px}
   <button class="btn" id="doOpen" style="min-height:44px">Cambia</button>
 </div>
 
+<!-- Se non parte per chi gestisce il sito: su Cloudflare, Speed → Optimization,
+     Rocket Loader e la minificazione del JavaScript vanno spenti; una
+     Content-Security-Policy deve consentire gli script inline. -->
 <div class="jsoff" id="jsoff">
   <b>La pagina non si è avviata.</b>
-  <p>Tutto quello che vedi qui sotto è calcolato da uno script contenuto in questa pagina. Se stai leggendo questo messaggio, quello script non è stato eseguito fino in fondo.</p>
-  <p>Quasi sempre è l'hosting che lo riscrive o lo blocca. Su Cloudflare, in <b>Speed → Optimization</b>, devono essere spenti <b>Rocket Loader</b> e la minificazione automatica del JavaScript. Se hai impostato una <b>Content-Security-Policy</b>, deve consentire gli script inline.</p>
+  <p>Prova a ricaricarla. Se succede ancora, quasi sempre il browser è troppo vecchio: aggiorna Chrome o Safari (su iPhone si aggiorna con iOS), oppure apri questo indirizzo con un altro browser.</p>
+  <p>Se l'hai aperta da un'app (Instagram, Facebook, Gmail…), usa «Apri nel browser».</p>
   <p>Se invece hai disattivato JavaScript nel browser, questo strumento non può funzionare: fa tutti i calcoli sul tuo dispositivo, senza mandare niente a un server.</p>
 </div>
 <noscript><style>#jsoff{display:block}#jsoff p:nth-of-type(1),#jsoff p:nth-of-type(2){display:none}</style></noscript>
@@ -2933,7 +2936,10 @@ function fromHash(hashStr){
 }
 const store = {
   get(k,d){ try{ const v=localStorage.getItem("nt:"+k); return v?JSON.parse(v):d; }catch(e){ return d; } },
-  set(k,v){ try{ localStorage.setItem("nt:"+k,JSON.stringify(v)); return true; }catch(e){ return false; } }
+  set(k,v){ try{ localStorage.setItem("nt:"+k,JSON.stringify(v)); return true; }catch(e){ return false; } },
+  // un oggetto giorno → valore (diario, sveglie…): qualunque altra cosa salvata lì è un dato rotto
+  mappa(k){ const v=this.get(k,null); return (v && typeof v==="object" && !Array.isArray(v)) ? v : {}; },
+  lista(k){ const v=this.get(k,null); return Array.isArray(v) ? v : []; }
 };
 // Interruttore luce/buio in alto: passa sempre al tema opposto a quello che
 // si vede, e lo ricorda ("light" | "dark"; "auto" = segue il telefono, finché
@@ -2975,16 +2981,16 @@ const store = {
   addEventListener("error", e=>segna(dove(e && e.filename)));
   addEventListener("unhandledrejection", ()=>segna("promessa"));
 })();
-let diary = store.get("diary",{});
+let diary = store.mappa("diary");
 // Quando è stato inserito ogni voto — non il voto stesso, solo il momento.
 // Serve per una cosa sola: sapere se un voto basso è abbastanza recente da
 // contare come "adesso" nel blocco Ora (la funzione che prima aveva il
 // check-in a parte, ora trasferita qui). La scala 1-5 di per sé non sa
 // "quando": è legata al giorno del sonno, non al momento in cui la scrivi.
-let diaryAt = store.get("diaryAt",{});
-state.wakes = store.get("wakes",{});
-state.beds  = store.get("beds",{});
-state.pisolini = store.get("pisolini",{});
+let diaryAt = store.mappa("diaryAt");
+state.wakes = store.mappa("wakes");
+state.beds  = store.mappa("beds");
+state.pisolini = store.mappa("pisolini");
 state.backupDone = store.get("backupDone", false);
 const wakes = state.wakes;   // stesso oggetto: il motore lo legge da state
 function haptic(ms){
@@ -3075,8 +3081,21 @@ function busyOf(off){
 // unico posto che incrocia i due occupati. freeOverlap() la riassume in un
 // numero; adessoLine() legge le finestre stesse per dire QUANDO, non solo
 // quanto — prima le ricalcolavo daccapo in entrambi i punti.
+// Occupato di un giorno, per me o per una persona: ricordato solo per il giro
+// in corso, come i piani sopra. Con più persone il mio veniva ricalcolato per
+// ognuna, giorno per giorno: centinaia di piani a ogni disegno.
+let _occupati = new Map();
+const IO = {};   // "me", come chiave: person vuoto vuol già dire "il partner principale"
+function occupatiDi(off, person){
+  if(!_occupati.size) Promise.resolve().then(()=>_occupati.clear());
+  const chi = person===IO ? IO : (person || "partner"), g = dnum(state.focus)+off;
+  let m=_occupati.get(chi); if(!m){ m=new Map(); _occupati.set(chi,m); }
+  if(m.has(g)) return m.get(g);
+  const r = person===IO ? busyOf(off) : asPartner(()=>busyOf(off), person);
+  m.set(g,r); return r;
+}
 function finestreCondivise(off, person){
-  const A=busyOf(off), B=asPartner(()=>busyOf(off), person);
+  const A=occupatiDi(off, IO), B=occupatiDi(off, person);
   if(!B) return null;
   const merged=[...A,...B].sort((x,y)=>x[0]-y[0]);
   let cur=0; const libere=[];
@@ -3653,6 +3672,10 @@ function cards(P){
 /* ===================== RENDER ===================== */
 const FEEDBACK="notturnisti.club+pianificatore"+"@"+"gmail.com";
 const $=s=>document.querySelector(s);
+// Valore di un campo che potrebbe non esserci. Niente "?." e "??" in questo
+// file: con quelli i browser prima di Chrome 80 / iOS 13.4 scartano l'intero
+// script e la pagina resta vuota.
+const valoreDi=s=>{ const e=$(s); return e ? e.value : undefined; };
 const DLAB=["a pezzi","stanco","così così","sveglio","in forma"];
 // Il pallino distingueva 5 livelli solo per colore — un'informazione
 // color-only su un indicatore da 16px, verificato in audit. Cinque forme
@@ -3689,7 +3712,9 @@ function dayKind(off){
   state.focus=f; return g;
 }
 function diarySummary(){
-  const keys=Object.keys(diary); if(keys.length<5) return null;
+  // le ultime 120 voci: oltre, il calcolo per giorno pesa sui telefoni lenti
+  // e il confronto parla di com'eri mesi fa
+  const keys=Object.keys(diary).sort().slice(-120); if(keys.length<5) return null;
   const by={}, f=state.focus;
   for(const k of keys){
     const d=new Date(k+"T12:00:00"); if(isNaN(+d)) continue;
@@ -3757,7 +3782,7 @@ function cycleSummary(){
 }
 
 function wakeSummary(){
-  const keys=Object.keys(wakes).sort(); if(keys.length<5) return null;
+  const keys=Object.keys(wakes).sort().slice(-90); if(keys.length<5) return null;   // le più recenti, come sopra
   const f0=state.focus, liberi=[], letti=[], anticipi=[];
   for(const k of keys){
     const d=new Date(k+"T12:00:00"); if(isNaN(+d)) continue;
@@ -3977,6 +4002,7 @@ function pickToday(i){
   renderToday(); render();
 }
 function render(){
+  _pianiDelGiro = new Map(); _occupati = new Map();
   // salva() qui, non solo nei singoli gestori: trovati (in questa sessione,
   // da segnalazioni reali) SEI punti diversi che cambiano preferenze vere
   // — turni, orari, se il ciclo si ripete, i preset — senza mai chiamare
@@ -4043,7 +4069,7 @@ function render(){
   // (verificato su ogni chiamata a setTab() e ogni data-tab nel markup).
   const showStrip = (tab==="turni") || (!ess && tab!=="oggi"); // ciclo/dettaglio legacy
   const showDay = (tab==="oggi" && giornata) || (!ess && tab!=="turni");
-  if(showStrip){ renderStrip(P, f, S); renderMese(); renderAndamenti(); renderAndamentiPreview(); renderPartner(CARDS); renderPartnerPreview(); renderPiuCal(); }
+  if(showStrip){ renderStrip(P, f, S); renderMese(); if(document.body.classList.contains("andamenti-aperta")) renderAndamenti(); renderAndamentiPreview(); renderPartner(CARDS); renderPartnerPreview(); renderPiuCal(); }
   if(tab==="oggi") renderBand(P, CARDS);
   if(showDay){ renderCards(P, f, CARDS); }
   renderOpzSummaries();
@@ -4950,7 +4976,7 @@ function proponiSceltaNotifiche(){
   if(store.get("notifScelta", false) || document.querySelector("#sceltaNotif")) return;
   const N=window.NTNotif||{};
   const d=document.createElement("div"); d.id="sceltaNotif"; d.setAttribute("role","dialog"); d.setAttribute("aria-modal","true"); d.setAttribute("aria-labelledby","sceltaNotifT");
-  d.style.cssText="position:fixed;inset:0;z-index:9999;background:rgba(10,12,16,.6);display:flex;align-items:flex-end;justify-content:center;padding:12px";
+  d.style.cssText="position:fixed;top:0;right:0;bottom:0;left:0;z-index:9999;background:rgba(10,12,16,.6);display:flex;align-items:flex-end;justify-content:center;padding:12px";
   d.innerHTML='<div class="card" style="max-width:460px;width:100%;margin:0 0 calc(8px + var(--sab));padding:18px 16px">'+
     '<b id="sceltaNotifT" style="font-size:17px;display:block">Quanti promemoria vuoi?</b>'+
     '<p class="hint" style="margin:4px 0 12px">Puoi cambiarlo quando vuoi in Impostazioni, anche tipo per tipo.</p>'+
@@ -5186,7 +5212,7 @@ function suggerimentiAdatta(){
 }
 const chiaveAdatta=c=>c.action.field+"="+c.action.value;
 function suggerimentoAdatta(){
-  const no=store.get("adattaNo", []);
+  const no=store.lista("adattaNo");
   return suggerimentiAdatta().find(c=>!no.includes(chiaveAdatta(c))) || null;
 }
 // Un segnale, non una diagnosi. Più di un notturnista su quattro ha i sintomi
@@ -5234,7 +5260,7 @@ function annullaAdatta(){
   const {prima, f, v}=_adattaFatto;
   track("adatta", {esito: tipoAdatta(f)+"_annullato"});
   Object.assign(state, prima); NT.sincronizzaNeed();
-  const no=store.get("adattaNo", []); no.push(f+"="+v); store.set("adattaNo", no.slice(-20));
+  const no=store.lista("adattaNo"); no.push(f+"="+v); store.set("adattaNo", no.slice(-20));
   _adattaFatto=null; salva(); sincronizzaCampiPiano(); render(); toast("Annullato");
 }
 function testoAzione(c){
@@ -5257,7 +5283,7 @@ function renderAdatta(){
   }
   if(!adattaVisibile() || attivazioneVisibile()){ el.hidden=true; return; }
   el.hidden=false;
-  { const k=chiaveAdatta(sg), visti=store.get("adattaVisti", []);
+  { const k=chiaveAdatta(sg), visti=store.lista("adattaVisti");
     if(!visti.includes(k)){ visti.push(k); store.set("adattaVisti", visti.slice(-20)); track("adatta", {esito: tipoAdatta(sg.action.field)+"_proposto"}); } }
   el.innerHTML='<span class="eyebrow" style="color:var(--ok)">Il piano si adatta a te</span>'+
     '<p style="margin:4px 0 0;font-size:14.5px;line-height:1.45">'+esc(sg.breve)+'</p>'+
@@ -5267,7 +5293,7 @@ function renderAdatta(){
 }
 document.addEventListener("click", e=>{
   const si=e.target.closest("#adattaSi"); if(si){ haptic(10); applicaAdatta(si.dataset.f, si.dataset.v, true); return; }
-  if(e.target.closest("#adattaNo")){ const sg=suggerimentoAdatta(); if(sg){ track("adatta", {esito: tipoAdatta(sg.action.field)+"_rifiutato"}); const no=store.get("adattaNo", []); no.push(chiaveAdatta(sg)); store.set("adattaNo", no.slice(-20)); } render(); return; }
+  if(e.target.closest("#adattaNo")){ const sg=suggerimentoAdatta(); if(sg){ track("adatta", {esito: tipoAdatta(sg.action.field)+"_rifiutato"}); const no=store.lista("adattaNo"); no.push(chiaveAdatta(sg)); store.set("adattaNo", no.slice(-20)); } render(); return; }
   if(e.target.closest("#adattaAnnulla")){ annullaAdatta(); return; }
   if(e.target.closest("#adattaOk")){ _adattaFatto=null; render(); }
 });
@@ -5308,9 +5334,9 @@ function notificheInvito(items){
   const annotata=d=>diary[d]!=null || !!wakes[d] || !!((state.beds||{})[d]);
   // diario
   if(tipi.includes("diario")){
-    const st=store.get("diarioNotif", {prog:[], ignorate:0, ferma:0});
+    const st=store.mappa("diarioNotif");
     // le date passate dicono com'è andata
-    st.prog=(st.prog||[]).filter(d=>{ if(d>=oggi) return true; if(annotata(d)) st.ignorate=0; else st.ignorate=(st.ignorate||0)+1; return false; });
+    st.prog=(Array.isArray(st.prog)?st.prog:[]).filter(d=>{ if(d>=oggi) return true; if(annotata(d)) st.ignorate=0; else st.ignorate=(st.ignorate||0)+1; return false; });
     if(st.ignorate>=6 && !st.ferma) st.ferma=now;
     const ultimaAnnotata=Math.max(0, ...Object.values(diaryAt||{}).map(Number).filter(isFinite));
     if(st.ferma && ultimaAnnotata>st.ferma){ st.ferma=0; st.ignorate=0; }
@@ -5336,7 +5362,7 @@ function notificheInvito(items){
   }
   // un consiglio
   if(tipi.includes("consigli") && state.firstSeenAt && (now-new Date(state.firstSeenAt+"T00:00:00"))/864e5>=3){
-    const fatti=store.get("consigliFatti", []);
+    const fatti=store.lista("consigliFatti");
     const cand=[
       {k:"viaggio", ok:!(state.cTo===25 && state.cFrom===25), t:"Quanto ci metti ad arrivare al lavoro?", b:"Per ora conto 25 minuti. Con il tuo tempo vero, sveglia e rientro diventano precisi."},
       {k:"liberi", ok:!(state.freeBed==="23:30" && state.freeWake==="07:30") || !!suggerimentoAdatta(), t:"Come dormi nei giorni liberi?", b:"È il punto da cui parte tutto il piano: dimmelo una volta e diventa davvero tuo."},
@@ -5765,7 +5791,7 @@ function proponiRecensione(){
     // Non una notte buona isolata ma una serie (serieBuona), e niente segnali
     // di frustrazione: un errore oggi, notifiche negate dal telefono.
     if(!serieBuona()) return;
-    if(Object.values(store.get("errVisti",{})).includes(new Date().toISOString().slice(0,10))) return;
+    if(Object.values(store.mappa("errVisti")).includes(new Date().toISOString().slice(0,10))) return;
     if(notifPerm()==="denied") return;
     if(attivazioneVisibile() || adattaVisibile()) return;
     const ultima = store.get("recensioneChiesta", 0);
@@ -6794,17 +6820,19 @@ function renderAndamenti(){
 // ricalcolarlo — un solo posto che sa cos'è "il debito di sonno".
 function renderAndamentiPreview(){
   const el=$("#andamentiAnteprima"); if(!el) return;
-  // Le card di esempio (finché non ci sono notti annotate) hanno numeri
-  // finti: in anteprima non vanno mostrati come se fossero tuoi.
-  const esempio=!!$("#andamenti .andamento-insight-eyebrow") && /esempio/i.test($("#andamenti").innerText.slice(0,200));
-  const num=esempio ? null : $("#andamenti .andamento-num");
-  if(esempio){ el.textContent="Annota qualche notte per vederlo"; return; }
+  // Calcola da sé solo il numero che mostra: la pagina intera (riepiloghi,
+  // confronti) si costruisce quando la si apre, non a ogni disegno di Turni.
+  let trend=null;
+  try{ if(window.NTHistory) trend=window.NTHistory.sleepTrend({beds:state.beds,wakes:state.wakes}, NT_planSafe, {days:30}); }catch(e){}
+  if(!trend || trend.n<3){
+    // con pochissime notti la pagina mostra l'esempio, con numeri finti
+    const poche=Object.keys(diary).length<5 && Object.keys(wakes).length<5;
+    el.textContent = poche ? "Annota qualche notte per vederlo" : "Ancora pochi dati"; return;
+  }
   // "-1h 20m" non diceva se è sonno che manca o che avanza: a parole.
-  const v = num ? num.textContent.trim() : "";
-  el.textContent = !num ? "Ancora pochi dati"
-    : /^[-−]/.test(v) ? "Ti mancano "+v.replace(/^[-−]\s*/,"")+" di sonno"
-    : /^\+/.test(v) ? "Sonno in pari, anzi "+v+" in più"
-    : (/^0/.test(v) ? "Sonno in pari" : "Ti mancano "+v+" di sonno");
+  const d=trend.debtNow;
+  el.textContent = d>0 ? "Ti mancano "+hm(d)+" di sonno"
+    : d===0 ? "Sonno in pari" : "Sonno in pari, anzi +"+hm(-d)+" in più";
 }
 
 // Turni: la card partner (gestione nel wizard, risultato qui)
@@ -6818,7 +6846,7 @@ function renderAndamentiPreview(){
 function renderPersonaShifts(){
   const box=$("#personaShiftsBox"), list=$("#personaShiftsList");
   if(!box||!list) return;
-  const seq=($("#personaPattern")?.value||"").toUpperCase().replace(/[^A-Z]/g,"");
+  const seq=(valoreDi("#personaPattern")||"").toUpperCase().replace(/[^A-Z]/g,"");
   const lettere=[...new Set(seq.split("").filter(c=>c&&c!=="R"))];
   if(!lettere.length){ list.innerHTML='<p class="hint" style="margin:0">Scrivi prima la sua sequenza, qui sopra.</p>'; return; }
   const prev={};
@@ -7257,7 +7285,15 @@ if(platform.calendar.available){
   platform.onResume(()=>ntCalendarioNativo(true));   // a ogni ritorno: la finestra di 42 giorni avanza
 }
 
-function NT_planSafe(d){ const f=state.focus; state.focus=new Date(d); let P=null; try{ P=NT.plan(); }catch(e){} state.focus=f; return P; }
+// Piano di un altro giorno. Ricordato solo per il giro in corso (si svuota
+// da solo a fine giro, e a ogni render): gli andamenti chiedono gli stessi
+// giorni più volte, e un dato vecchio dopo un cambio non può restare.
+let _pianiDelGiro = new Map();
+function NT_planSafe(d){
+  const k=iso(new Date(d)); if(_pianiDelGiro.has(k)) return _pianiDelGiro.get(k);
+  if(!_pianiDelGiro.size) Promise.resolve().then(()=>_pianiDelGiro.clear());
+  const f=state.focus; state.focus=new Date(d); let P=null; try{ P=NT.plan(); }catch(e){} state.focus=f;
+  _pianiDelGiro.set(k,P); return P; }
 // Valore corrente a destra dei tre bottoni di Opzioni che ne hanno uno solo
 // e onesto da mostrare (non "Dettagli del piano": 5 campi diversi, nessun
 // numero rappresenta gli altri quattro). Costa pochissimo, ma non ha senso
@@ -7381,8 +7417,9 @@ function apriSelettoreData(){ const j=$("#jumpDate"); if(!j) return; j.value=iso
 if($("#jumpDate")){
   const apriSelettore=()=>{
     $("#jumpDate").value=iso(state.focus);
-    if($("#jumpDate").showPicker) $("#jumpDate").showPicker();
-    else $("#jumpDate").click();
+    // showPicker può lanciare (senza gesto dell'utente, in un iframe):
+    // allora il clic, come nei browser che non lo hanno.
+    try{ if($("#jumpDate").showPicker) $("#jumpDate").showPicker(); else $("#jumpDate").click(); }catch(e){ $("#jumpDate").click(); }
   };
   $("#dateLabel").addEventListener("click", apriSelettore);
   $("#dateLabel").addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); apriSelettore(); } });
@@ -7803,6 +7840,7 @@ if($("#doPrint")) $("#doPrint").onclick=()=>{
 function apriAndamenti(){
   chiudiVederci(); chiudiScambio();
   document.body.classList.add("andamenti-aperta");
+  renderAndamenti();
   const p=$("#andamentiPagina"); if(p) p.hidden=false;
   try{ window.scrollTo(0,0); }catch(e){}
 }
@@ -8789,7 +8827,7 @@ const LIMITI = {need:[300,660,480], cTo:[0,240,25], cFrom:[0,240,25],
                 prep:[10,180,45], maxAdvance:[20,120,60]};
 function bind(id,key,fn){
   const el=$(id); if(!el) return;
-  el.value=fn?fn(state[key]):(state[key]??"");
+  el.value=fn?fn(state[key]):(state[key]==null?"":state[key]);
   el.addEventListener("input",()=>{
     let v=el.value;
     // Un menu a tendina restituisce testo. Senza questa conversione "480" finisce
@@ -8870,7 +8908,7 @@ if($("#doChiediLink")) $("#doChiediLink").onclick=async()=>{
 };
 if($("#doConfirmPersona")) $("#doConfirmPersona").onclick=()=>{
   const btn=$("#doConfirmPersona"), err=$("#personaLinkErr");
-  const link=$("#personaLink")?.value||"", name=$("#personaName")?.value.trim()||"";
+  const link=valoreDi("#personaLink")||"", name=(valoreDi("#personaName")||"").trim()||"";
   let per=personaDaLink(link);
   const daLinkCondiviso=!!per;   // share_accepted è solo per chi arriva da un link altrui, non dall'inserimento a mano
   // Il link è la via più veloce, ma non tutti quelli che si vogliono
@@ -8878,7 +8916,7 @@ if($("#doConfirmPersona")) $("#doConfirmPersona").onclick=()=>{
   // fisso e non avrebbe motivo di aprirla mai. Per loro resta l'inserimento
   // a mano, con la stessa scelta "che orari fa" già vista per il partner.
   if(!per){
-    const modo=$("#personaMode")?.value;
+    const modo=valoreDi("#personaMode");
     if(modo==="day"){
       // Tutto automatico: lunedì-venerdì lavoro, weekend riposo, sonno
       // 23-8. Non legge i campi manuali — restano nascosti apposta, non
@@ -8891,24 +8929,24 @@ if($("#doConfirmPersona")) $("#doConfirmPersona").onclick=()=>{
       // restano i tuoi (non li congelo qui — se li cambi in futuro, anche
       // il suo li segue, giusto perché sono "i tuoi", non una fotografia),
       // ma la data di partenza va chiesta davvero, è l'unica cosa diversa.
-      const anc=$("#personaAnchor")?.value;
+      const anc=valoreDi("#personaAnchor");
       if(anc){
         per={pattern:state.pattern, anchor:anc};
-        if($("#personaWake")?.value) per.wake=$("#personaWake").value;
-        if($("#personaBed")?.value) per.bed=$("#personaBed").value;
+        if(valoreDi("#personaWake")) per.wake=$("#personaWake").value;
+        if(valoreDi("#personaBed")) per.bed=$("#personaBed").value;
       }
     } else {
-      const seq=($("#personaPattern")?.value||"").toUpperCase().replace(/[^A-Z]/g,"");
+      const seq=(valoreDi("#personaPattern")||"").toUpperCase().replace(/[^A-Z]/g,"");
       if(seq){
-        per={pattern:seq, anchor:$("#personaAnchor")?.value||null};
+        per={pattern:seq, anchor:valoreDi("#personaAnchor")||null};
         if(modo==="custom") per.shifts=raccogliPersonaShifts();
-        if($("#personaWake")?.value) per.wake=$("#personaWake").value;
-        if($("#personaBed")?.value) per.bed=$("#personaBed").value;
+        if(valoreDi("#personaWake")) per.wake=$("#personaWake").value;
+        if(valoreDi("#personaBed")) per.bed=$("#personaBed").value;
       }
     }
   }
   if(!per){
-    if(err) err.textContent = $("#personaMode")?.value==="mine"
+    if(err) err.textContent = valoreDi("#personaMode")==="mine"
       ? "Manca la data di partenza del suo ciclo — è l'unica cosa che serve per \"I tuoi stessi turni\"."
       : "Manca sia un link valido sia una sequenza scritta a mano — serve almeno uno dei due.";
     return;
@@ -9106,7 +9144,7 @@ state.pAnchor=state.pAnchor||state.anchor;
 // leggono. L'elenco è la parte nuova, accanto, non sopra.
 state.people = Array.isArray(state.people) ? state.people : [];
 for(const [id,k] of [["#anchor","anchor"],["#oWake","freeWake"],
-  ["#cTo","cTo"],["#cFrom","cFrom"],["#prep","prep"],["#adv","maxAdvance"]]) { const el=$(id); if(el) el.value=state[k]??""; }
+  ["#cTo","cTo"],["#cFrom","cFrom"],["#prep","prep"],["#adv","maxAdvance"]]) { const el=$(id); if(el) el.value=state[k]==null?"":state[k]; }
 // La lunghezza riparte da quella esatta della sequenza già salvata (se
 // c'è), non arrotondata: ora ogni valore fra 1 e 28 è selezionabile, non
 // serve più avvicinarsi a una delle quattro tappe di prima.
@@ -9346,7 +9384,7 @@ addEventListener("nt:config-changed", ()=>{
 // riga venga eseguita, e con let lì si romperebbe tutto (TDZ).
 var _notifPerm;
 function notifPerm(){
-  if(_notifPerm===undefined) _notifPerm = ("Notification" in window) ? Notification.permission : "unsupported";
+  if(_notifPerm===undefined) _notifPerm = (window.Notification && Notification.permission) ? Notification.permission : "unsupported";
   return _notifPerm;
 }
 function aggiornaPermNotif(){
@@ -9624,7 +9662,7 @@ addEventListener("nt:refresh", ()=>{ if(_refreshInAttesa) return; _refreshInAtte
    alla schermata Home si fa da Condividi → Aggiungi a Home; lì non c'è prompt. */
 (function(){
   "use strict";
-  if("serviceWorker" in navigator && !window.NT_APP.nativo){
+  if(navigator.serviceWorker && !window.NT_APP.nativo){
     addEventListener("load", function(){
       navigator.serviceWorker.register("./sw.js").then(function(reg){
         // Ricezione messaggi dal SW (es. NT_NAV per cambio tab da notifica)

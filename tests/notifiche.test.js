@@ -28,7 +28,9 @@ test("niente notifiche dentro il sonno pianificato (tranne 'ora di alzarti')", (
   const L = buildSchedule(cfg, { days: 14, types: TIPI_TUTTI });
   const e = createEngine(cfg); const sonni = [];
   for (let o = -1; o < 15; o++) { const d = new Date(); d.setDate(d.getDate() + o); e.state.focus = d;
-    try { const P = e.plan(); const m = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime(); sonni.push([m + P.s.onset * 6e4, m + (P.s.onset + P.s.dur) * 6e4]); } catch (_) {} }
+    // ore di calendario, non millisecondi: nei giorni del cambio d'ora (23 o 25 ore) la somma sbaglia di un'ora
+    const at = min => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, min).getTime();
+    try { const P = e.plan(); sonni.push([at(P.s.onset), at(P.s.onset + P.s.dur)]); } catch (_) {} }
   const dentro = L.filter(n => n.kind !== "wake" && sonni.some(([a, z]) => +n.at > a + 6e4 && +n.at < z - 6e4));
   assert.deepEqual(dentro.map(n => n.title + " " + n.at), []);
 });

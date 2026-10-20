@@ -54,6 +54,8 @@ function cacheName() {
     ).catch(() => {});
     return name;
   })();
+  // Un fallimento (offline) non resta in memoria per 20 minuti: si riprova al prossimo giro.
+  _cacheNamePromise.catch(() => { _cacheNamePromise = null; });
   return _cacheNamePromise;
 }
 
@@ -85,27 +87,51 @@ self.addEventListener("fetch", e => {
     e.respondWith(
       fetch(req).then(res => {
         const copy = res.clone();
-        cacheName().then(name => caches.open(name)).then(c => c.put("./index.html", copy));
+        cacheName().then(name => caches.open(name)).then(c => c.put("./index.html", copy)).catch(() => {});
         return res;
-      }).catch(() => cacheName().then(name => caches.open(name)).then(c => c.match("./index.html")))
+      }).catch(() => cacheName().catch(() => null)
+        // offline cacheName() fallisce (scarica i file): allora qualunque copia salvata
+        .then(name => name ? caches.open(name).then(c => c.match("./index.html")) : null)
+        .then(r => r || caches.match("./index.html")))
     );
     return;
   }
 
-  // Statici della stessa origine (font compresi, ora locali): cache-first (nella cache corrente),
-  // aggiorna in background.
+  // Script della stessa origine: rete prima, come la pagina. Con cache-first,
+  // dopo ogni rilascio la prima apertura univa la pagina nuova agli script
+  // vecchi (aggiornati solo in background): versioni mischiate. La cache resta
+  // per l'offline e per una rete che non risponde entro 4 secondi.
+  if (url.origin === location.origin && /\.(m?js|webmanifest)$/.test(url.pathname)) {
+    // La richiesta parte subito: cacheName() scarica tutti i file per
+    // calcolare la versione, e aspettarla rallentava ogni avvio.
+    // no-cache: chiede sempre al server se è cambiato (risposta minima se no),
+    // anche dove gli header lascerebbero al browser una copia vecchia.
+    const rete = fetch(req, { cache: "no-cache" });
+    const nome = cacheName().catch(() => null);
+    rete.then(res => {
+      if (res && res.status === 200) { const copy = res.clone(); nome.then(n => n && caches.open(n).then(c => c.put(req, copy))); }
+    }).catch(() => {});
+    const dallaCache = () => nome.then(n => n ? caches.open(n).then(c => c.match(req)) : undefined).then(r => r || caches.match(req));
+    e.respondWith(new Promise(resolve => {
+      let fatto = false;
+      const fine = r => { if (!fatto && r) { fatto = true; resolve(r); } };
+      rete.then(fine, () => dallaCache().then(r => { if (!fatto) { fatto = true; resolve(r || Response.error()); } }));
+      setTimeout(() => dallaCache().then(fine), 4000);
+    }));
+    return;
+  }
+
+  // Altri statici della stessa origine (icone, font): dalla cache se c'è, in
+  // qualunque versione (un'icona o un font vecchio non rompe niente), senza
+  // aspettare cacheName(); altrimenti rete, e si ricordano per l'offline.
   e.respondWith(
-    cacheName().then(name => caches.open(name)).then(cache =>
-      cache.match(req).then(cached => {
-        const net = fetch(req).then(res => {
-          if (res && res.status === 200 && url.origin === location.origin) {
-            cache.put(req, res.clone());
-          }
-          return res;
-        }).catch(() => cached);
-        return cached || net;
-      })
-    )
+    caches.match(req).then(cached => cached || fetch(req).then(res => {
+      if (res && res.status === 200 && url.origin === location.origin) {
+        const copy = res.clone();
+        cacheName().then(name => caches.open(name)).then(c => c.put(req, copy)).catch(() => {});
+      }
+      return res;
+    }))
   );
 });
 

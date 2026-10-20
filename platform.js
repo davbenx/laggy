@@ -36,18 +36,18 @@ const webNotify = {
   async exactStatus() { return "granted"; },
   async requestExact() { return "granted"; },
   async permission() {
-    if (!("Notification" in window)) return "unsupported";
+    if (!(window.Notification && Notification.permission)) return "unsupported";
     return Notification.permission;             // "granted" | "denied" | "default"
   },
   async request() {
-    if (!("Notification" in window)) return "unsupported";
+    if (!(window.Notification && Notification.permission)) return "unsupported";
     return Notification.requestPermission();
   },
   // Service worker: armato con timer. Limite noto (docs/app-nativa.md §1): i
   // timer muoiono quando il browser chiude il SW, quindi è best-effort.
   async schedule(items) {
-    if (!("serviceWorker" in navigator)) return false;
-    if (!("Notification" in window) || Notification.permission !== "granted") return false;
+    if (!navigator.serviceWorker) return false;
+    if (!(window.Notification && Notification.permission) || Notification.permission !== "granted") return false;
     const sw = navigator.serviceWorker.controller;
     if (!sw) return false;
     sw.postMessage({ type: "NT_SCHEDULE", items });
@@ -63,7 +63,7 @@ const webNotify = {
   },
   // Una notifica subito, per vedere che arrivano (non tocca la coda del piano).
   async prova() {
-    if (!("Notification" in window) || Notification.permission !== "granted" || !("serviceWorker" in navigator)) return false;
+    if (!(window.Notification && Notification.permission) || Notification.permission !== "granted" || !navigator.serviceWorker) return false;
     const reg = await navigator.serviceWorker.ready;
     setTimeout(() => reg.showNotification("Notturnisti", { body: PROVA, tag: "nt-prova", icon: "./icon-192.png" }), 3000);
     return true;
@@ -77,7 +77,7 @@ webNotify.canaliSpenti = async () => [];
 // rimanda solo quando gli orari cambiano. Lista vuota (promemoria spenti):
 // iscrizione cancellata, sul server e nel browser.
 function pushPossibile() {
-  return typeof navigator !== "undefined" && "serviceWorker" in navigator && typeof window !== "undefined" && "PushManager" in window;
+  return typeof navigator !== "undefined" && !!navigator.serviceWorker && typeof window !== "undefined" && !!window.PushManager;
 }
 const u8 = s => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((s.length + 3) % 4)), c => c.charCodeAt(0));
 async function syncPush(items) {
