@@ -389,6 +389,13 @@ padding:16px 18px;margin:2px 0 var(--gap-sezione);box-shadow:0 4px 20px rgba(45,
 .attiva-voce .tx span{display:block;font-size:12.5px;color:var(--dim);margin-top:1px}
 .attiva-voce .go{flex:none;color:var(--blue);font-weight:700;font-size:13px}
 .attiva-voce.ok{cursor:default}
+.attiva-voce.ok{min-height:44px;padding:8px 2px}
+.attiva-voce.ok .tx span{display:none}
+.attiva-riga{display:flex;align-items:center;gap:10px;width:100%;text-align:left;font:inherit;color:var(--ink);background:none;border:0;padding:0;min-height:44px;cursor:pointer}
+.attiva-riga .tx{flex:1;min-width:0}
+.attiva-riga .tx b{display:block;font-size:15px}
+.attiva-riga .tx span{display:block;font-size:12.5px;color:var(--dim);margin-top:2px}
+.attiva-riga .tchev{color:var(--dim);font-size:20px}
 .attiva-voce.gest{cursor:pointer}
 #adattaCard{border-left-color:var(--ok)}
 .adatta-azioni{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
@@ -510,6 +517,7 @@ html.js-lento .jsoff{display:block}
 .mese-testa b{font-size:15px;color:var(--ink)}
 .mese-testa button{background:none;border:0;color:var(--blue);font:inherit;font-size:20px;line-height:1;padding:8px 12px;margin:-8px -6px;cursor:pointer}
 .mese-testa button[disabled]{color:var(--faint);opacity:.4;cursor:default}
+.mese-medico{display:block;margin-top:6px;font-size:13.5px;text-align:left}
 .mese-num{display:grid;grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:8px;margin-top:10px}
 .mese-num div{background:var(--bg);border-radius:10px;padding:8px 10px}
 .mese-num b{display:block;font-size:20px;color:var(--ink);font-variant-numeric:tabular-nums}
@@ -832,6 +840,21 @@ justify-content:center;flex:none;width:44px;height:44px;border-radius:999px}
 .empty img{opacity:.9;margin-bottom:9px;border-radius:9px}
 .empty p{font-size:14px;color:var(--dim);line-height:1.55;max-width:36ch;margin:0 auto}
 .wizowl{display:block;margin:0 auto 12px;border-radius:9px}
+.dopo-notte{margin:-2px 0 10px;padding:0 2px}
+.dn-lab{display:block;font-size:12px;color:var(--dim);margin:0 0 6px}
+.dn-scelta{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--s2);border:1px solid var(--line);border-radius:var(--r);padding:2px}
+.dn-scelta .vb{display:flex;flex-direction:column;align-items:center;gap:1px;padding:7px 8px;min-height:48px}
+.dn-scelta .vb b{font-size:13.5px}
+.dn-scelta .vb span{font-size:12px;font-weight:500;color:var(--dim)}
+.dn-scelta .vb.on span{color:var(--blue)}
+.dn-hint{font-size:12.5px;color:var(--dim);line-height:1.5;margin:7px 0 0}
+.acasa{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--s1);border:1px solid var(--line);border-radius:var(--r);
+padding:12px 14px;min-height:56px;margin:6px 0 var(--gap-sezione);color:var(--ink);font:inherit;cursor:pointer}
+.acasa[hidden]{display:none}
+.acasa:hover{border-color:var(--blue-lt)}
+.acasa svg{flex:none;color:var(--blue)}
+.acasa b{display:block;font-size:15px;font-weight:600}
+.acasa small{display:block;font-size:12.5px;color:var(--dim);margin-top:2px}
 .essnudge{font-size:12.5px;color:var(--faint);margin-top:14px;line-height:1.55}
 .esshint{font-size:13px;color:var(--dim);margin:0 2px 10px}
 .qh-fiducia{font-size:12.5px;color:var(--dim);margin:-8px 0 14px}
@@ -973,30 +996,43 @@ body.tab-turni .datebar,body.tab-turni .daynav,body.tab-turni .cap.giornata,body
 body.tab-turni #icsBox,body.tab-turni .piu-info,
 body.tab-turni #setupChecklist,body.tab-turni #adattaCard,body.tab-turni #medicoCard,body.tab-turni #statsNudge,body.tab-turni #donateNudge,body.tab-turni #firstPlanBanner,
 body.tab-turni footer{display:none}
-/* Pagine Andamenti e "Quando possiamo vederci" (dentro la tab Turni,
-   non tab a sé): quando una è aperta, nasconde il contenuto normale di
-   Turni invece di scorrerci sotto o sopra — una pagina alla volta,
-   come le altre. Le due pagine stesse si mostrano/nascondono da sé
-   (attributo hidden), non da qui; il JS le tiene anche mutuamente
-   esclusive. */
-body.tab-turni.andamenti-aperta .cap.ciclo,
-body.tab-turni.andamenti-aperta #cyc,body.tab-turni.andamenti-aperta #meseBox,body.tab-turni.andamenti-aperta #cycShareBox,
-body.tab-turni.andamenti-aperta .cycbar,body.tab-turni.andamenti-aperta #cycRange,
-body.tab-turni.andamenti-aperta #doScambioTurno,body.tab-turni.andamenti-aperta #scambioBox,
-body.tab-turni.andamenti-aperta #doPartner,
-body.tab-turni.andamenti-aperta #doAndamenti,
-body.tab-turni.vederci-aperta .cap.ciclo,
-body.tab-turni.vederci-aperta #cyc,body.tab-turni.vederci-aperta #meseBox,body.tab-turni.vederci-aperta #cycShareBox,
-body.tab-turni.vederci-aperta .cycbar,body.tab-turni.vederci-aperta #cycRange,
-body.tab-turni.vederci-aperta #doScambioTurno,body.tab-turni.vederci-aperta #scambioBox,
-body.tab-turni.vederci-aperta #doPartner,
-body.tab-turni.vederci-aperta #doAndamenti,
-body.tab-turni.scambio-aperta .cap.ciclo,
-body.tab-turni.scambio-aperta #cyc,body.tab-turni.scambio-aperta #meseBox,body.tab-turni.scambio-aperta #cycShareBox,
-body.tab-turni.scambio-aperta .cycbar,body.tab-turni.scambio-aperta #cycRange,
-body.tab-turni.scambio-aperta #doScambioTurno,
-body.tab-turni.scambio-aperta #doPartner,
-body.tab-turni.scambio-aperta #doAndamenti{display:none}
+/* Pagine dentro Turni (Andamenti, Quando ho tempo libero, Scambio, Ferie):
+   quando una è aperta (body.sottopagina) il contenuto normale di Turni si
+   nasconde invece di scorrerci sotto o sopra, una pagina alla volta. Le
+   pagine stesse si mostrano/nascondono da sé (attributo hidden); il JS le
+   tiene mutuamente esclusive. Una regola sola per tutte: prima ogni pagina
+   aveva la sua copia dello stesso elenco. */
+body.tab-turni.sottopagina .cap.ciclo,body.tab-turni.sottopagina #cyc,body.tab-turni.sottopagina #meseBox,
+body.tab-turni.sottopagina #cycShareBox,body.tab-turni.sottopagina .cycbar,body.tab-turni.sottopagina #cycRange,
+body.tab-turni.sottopagina .tsec{display:none}
+/* Elementi che vivono solo in una scheda: una classe invece di un id in più
+   negli elenchi di ogni scheda. */
+body:not(.tab-turni) .solo-turni,body:not(.tab-oggi) .solo-oggi{display:none}
+/* Ferie: contatore, proposte e la fila dei giorni (stessi colori della striscia) */
+.ferie-q{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:6px 14px;margin-bottom:var(--gap-sezione)}
+.ferie-riga{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:52px;font-size:15px;font-weight:600;color:var(--ink)}
+.ferie-riga+.ferie-riga,.ferie-q .riga-sw{border-top:1px solid var(--line)}
+.ferie-q .riga-sw{padding-top:4px;margin-bottom:0}
+.ferie-riga select{font:inherit;font-size:14px;font-weight:500;padding:8px 10px;border-radius:var(--r);border:1px solid var(--line);background:var(--bg);color:var(--ink);max-width:60%}
+.contatore{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:var(--r);background:var(--bg)}
+.contatore button{background:none;border:0;color:var(--blue);font:inherit;font-size:22px;line-height:1;min-width:44px;min-height:44px;cursor:pointer}
+.contatore button[disabled]{color:var(--faint);opacity:.4;cursor:default}
+.contatore output{min-width:2ch;text-align:center;font-size:17px;font-variant-numeric:tabular-nums}
+.ferie-base{font-size:13.5px;color:var(--dim);line-height:1.5;margin:0 0 12px}
+.ferie-prop{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:14px 15px;margin-bottom:10px}
+.ferie-prop.migliore{border-color:var(--blue-lt)}
+.ferie-testa{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px}
+.ferie-testa b{font-family:var(--serif);font-size:21px;color:var(--ink)}
+.ferie-testa span{font-size:13.5px;color:var(--dim)}
+.ferie-quando{font-size:14px;color:var(--ink);margin:4px 0 10px}
+.ferie-giorni{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px}
+.fg{display:flex;flex-direction:column;align-items:center;justify-content:center;width:30px;height:38px;border-radius:7px;background:var(--s2);color:var(--dim);font-size:11px;line-height:1.15}
+.fg b{font-size:12.5px;color:var(--ink)}
+.fg.ferie{background:var(--blue);color:var(--su-blu)}
+.fg.ferie b{color:var(--su-blu)}
+.fg.smonto{background:transparent;border:1px dashed var(--dim)}
+.ferie-cosa{font-size:13.5px;color:var(--dim);line-height:1.5;margin:0 0 6px}
+.ferie-cosa b{color:var(--ink)}
 body.tab-oggi #scambioPagina,body.tab-opzioni #scambioPagina{display:none}
 /* La tab "Più" è sparita: ogni sua funzione si è spostata dove
    concettualmente appartiene (condividere/stampare il ciclo → Turni,
@@ -1193,6 +1229,10 @@ header b{font-size:23px}
   #printSheet thead{display:table-header-group}
   #printSheet tr{break-inside:avoid;page-break-inside:avoid}
   .ps-foot{margin-top:3mm;font-size:7.5pt;color:#444}
+  #printSheet .ps-doc h2{font-family:var(--serif);font-size:11pt;margin:5mm 0 1mm}
+  #printSheet .ps-doc p{font-size:8.5pt;line-height:1.4;margin:1.5mm 0}
+  #printSheet .ps-doc table{margin:1mm 0 2mm}
+  #printSheet tr.tot td{background:#eee}
   /* Pagina 1: calendario da muro. In bianco e nero si distingue lo stesso:
      notte grigio scuro, lavoro grigio chiaro, riposo bianco. */
   #printSheet .pc{break-after:page;page-break-after:always}
@@ -1508,6 +1548,12 @@ header b{font-size:23px}
 
 <div id="formaGiorno"></div>
 <div class="ess" id="essenziale"></div>
+<!-- Il giorno in un messaggio per chi sta a casa: quando dormi e quando ci sei.
+     Sotto la lista della giornata, perché ne è il riassunto. -->
+<button type="button" class="acasa solo-oggi" id="aCasa" hidden>
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 3L10 14M21 3l-7 18-4-7-7-4z"/></svg>
+  <span><b id="aCasaTit">Manda a casa i tuoi orari di oggi</b><small>Quando dormi e quando ci sei, in un messaggio.</small></span>
+</button>
 
 <!-- Non più un titolo "Turni" separato sopra: l'intervallo del ciclo fa
      già da titolo ("Turni 13–27 settembre"), il nome della tab è già
@@ -1548,42 +1594,6 @@ header b{font-size:23px}
      stesso state.pattern/anchor/repeat, che potevano disallinearsi tra
      loro. Ora quella griglia (con le date vere, la parte migliore
      delle due) vive solo dentro "Modifica →" / Opzioni → Turni e ciclo. -->
-<!-- Simulatore Scambio Turno: strumento autonomo dentro la scheda Turni -->
-<button type="button" class="tsec" id="doScambioTurno">
-  <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:var(--blue);background:var(--blue-soft)"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
-  <span class="tsec-tx"><span class="eyebrow" style="display:block">Cambio turno</span><b style="font-family:var(--serif)">Mi conviene lo scambio?</b><span style="font-size:12.5px;color:var(--dim);display:block;margin-top:2px">Prima di accettare: quanto sonno ti costa e se ti restano almeno 11 ore di riposo tra due turni.</span></span>
-  <span class="tchev">›</span>
-</button>
-
-<!-- Come "Quando ho tempo libero" e "Come sto dormendo": una pagina a sé con
-     la freccia indietro, non un pannello che si apre sotto. -->
-<div id="scambioPagina" hidden>
-  <div style="display:flex;align-items:center;gap:12px;margin:2px 0 var(--gap-sezione)">
-    <button type="button" class="themebtn" id="chiudiScambio" aria-label="Torna a Turni">
-      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
-    </button>
-    <h1 class="tab-title" style="margin:0">Mi conviene lo scambio?</h1>
-  </div>
-<div class="ecc" id="scambioBox">
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
-    <div>
-      <label style="display:block;font-size:12px;font-weight:600;color:var(--dim);margin-bottom:4px" for="swapA">Il tuo giorno:</label>
-      <select id="swapA" style="width:100%;font-size:13px;padding:7px 8px;border-radius:var(--r);background:var(--bg);border:1px solid var(--line);color:var(--ink)"></select>
-    </div>
-    <div>
-      <label style="display:block;font-size:12px;font-weight:600;color:var(--dim);margin-bottom:4px" for="swapB">Scambia con:</label>
-      <select id="swapB" style="width:100%;font-size:13px;padding:7px 8px;border-radius:var(--r);background:var(--bg);border:1px solid var(--line);color:var(--ink)"></select>
-    </div>
-  </div>
-
-  <div id="swapVerdict" style="margin-bottom:12px"></div>
-  <div id="swapOut"></div>
-  <div id="swapActionWrap" style="margin-top:14px">
-    <button type="button" class="btn pri" id="swapApplica" style="width:100%;min-height:42px;font-size:14px;font-weight:600">Applica questo scambio nel piano</button>
-  </div>
-</div>
-</div>
-
 <!-- Anteprima, non il contenuto intero in linea: apre la sua pagina a
      sé (come Andamenti), non un'altra sezione da scorrere dentro Turni.
      Fonde quella che prima era "Quando sono disponibile" (solo tue,
@@ -1697,6 +1707,72 @@ header b{font-size:23px}
     <h1 class="tab-title" style="margin:0">Come sto dormendo</h1>
   </div>
   <div id="andamenti"></div>
+</div>
+
+<!-- Ordine delle sezioni di Turni: prima quello che i turnisti chiedono più
+     spesso (il tempo libero con chi aspetta, come stanno dormendo), poi gli
+     strumenti per decisioni occasionali (uno scambio, le ferie). -->
+<!-- Simulatore Scambio Turno: strumento autonomo dentro la scheda Turni -->
+<button type="button" class="tsec" id="doScambioTurno">
+  <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:var(--blue);background:var(--blue-soft)"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
+  <span class="tsec-tx"><span class="eyebrow" style="display:block">Cambio turno</span><b style="font-family:var(--serif)">Mi conviene lo scambio?</b><span style="font-size:12.5px;color:var(--dim);display:block;margin-top:2px">Sonno e 11 ore di riposo, prima di accettare.</span></span>
+  <span class="tchev">›</span>
+</button>
+
+<!-- Come "Quando ho tempo libero" e "Come sto dormendo": una pagina a sé con
+     la freccia indietro, non un pannello che si apre sotto. -->
+<div id="scambioPagina" hidden>
+  <div style="display:flex;align-items:center;gap:12px;margin:2px 0 var(--gap-sezione)">
+    <button type="button" class="themebtn" id="chiudiScambio" aria-label="Torna a Turni">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+    </button>
+    <h1 class="tab-title" style="margin:0">Mi conviene lo scambio?</h1>
+  </div>
+<div class="ecc" id="scambioBox">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+    <div>
+      <label style="display:block;font-size:12px;font-weight:600;color:var(--dim);margin-bottom:4px" for="swapA">Il tuo giorno:</label>
+      <select id="swapA" style="width:100%;font-size:13px;padding:7px 8px;border-radius:var(--r);background:var(--bg);border:1px solid var(--line);color:var(--ink)"></select>
+    </div>
+    <div>
+      <label style="display:block;font-size:12px;font-weight:600;color:var(--dim);margin-bottom:4px" for="swapB">Scambia con:</label>
+      <select id="swapB" style="width:100%;font-size:13px;padding:7px 8px;border-radius:var(--r);background:var(--bg);border:1px solid var(--line);color:var(--ink)"></select>
+    </div>
+  </div>
+
+  <div id="swapVerdict" style="margin-bottom:12px"></div>
+  <div id="swapOut"></div>
+  <div id="swapActionWrap" style="margin-top:14px">
+    <button type="button" class="btn pri" id="swapApplica" style="width:100%;min-height:42px;font-size:14px;font-weight:600">Applica questo scambio nel piano</button>
+  </div>
+</div>
+</div>
+
+<!-- Ferie: dove metterle perché si attacchino ai riposi del ciclo. Accanto
+     allo scambio: sono i due strumenti per decisioni occasionali sui turni. -->
+<button type="button" class="tsec solo-turni" id="doFerie">
+  <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:var(--blue);background:var(--blue-soft)"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4M9 14.5l2 2 4-4"/></svg>
+  <span class="tsec-tx"><span class="eyebrow" style="display:block">Ferie</span><b style="font-family:var(--serif)">Quando prenderle?</b><span style="font-size:12.5px;color:var(--dim);display:block;margin-top:2px">Più giorni a casa con meno ferie.</span></span>
+  <span class="tchev">›</span>
+</button>
+<div id="feriePagina" class="solo-turni" hidden>
+  <div style="display:flex;align-items:center;gap:12px;margin:2px 0 var(--gap-sezione)">
+    <button type="button" class="themebtn" id="chiudiFerie" aria-label="Torna a Turni">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+    </button>
+    <h1 class="tab-title" style="margin:0">Quando prendere le ferie</h1>
+  </div>
+  <div class="ferie-q">
+    <div class="ferie-riga"><span id="ferieNLab">Giorni di ferie</span>
+      <span class="contatore" role="group" aria-labelledby="ferieNLab">
+        <button type="button" data-ferie-n="-1" aria-label="Un giorno in meno">−</button>
+        <output id="ferieN" aria-live="polite">3</output>
+        <button type="button" data-ferie-n="1" aria-label="Un giorno in più">+</button>
+      </span></div>
+    <div class="ferie-riga"><label for="ferieMese">Quando</label><select id="ferieMese"></select></div>
+    <label class="riga-sw" for="ferieSmonto"><span>Conta lo smonto come giorno a casa</span><span class="switch"><input type="checkbox" id="ferieSmonto" checked><span class="slider"></span></span></label>
+  </div>
+  <div id="ferieOut" aria-live="polite"></div>
 </div>
 
 <!-- Condividere il ciclo: tre azioni sorelle (link, QR, stampa — stesso
@@ -3162,23 +3238,28 @@ function scambio(offA, offB, giorni){
 // prendere un appuntamento o vedere qualcuno senza doverlo dedurre da solo.
 // Da oggi (non dal giorno che si sta guardando): è "quando sono libero" da
 // adesso in avanti, per la pagina, il messaggio e il foglio.
+// Le ore da sveglio e libere di un giorno (almeno un'ora e mezza di fila),
+// dalla sveglia a quando si va a letto: fuori turno, viaggio, sonno e pisolini.
+function liberiDelGiorno(P){
+  const occ=[[P.s.onset,P.s.onset+P.s.dur]].concat(P.naps.map(x=>[x.a,x.b]));
+  if(!P.b.rest) occ.push([P.b.start - state.cTo, P.b.end + state.cFrom]);
+  occ.sort((a,b)=>a[0]-b[0]);
+  const out=[]; let t=P.wake;
+  const fine=P.s.onset;                        // fino a quando vai a letto stasera
+  for(const [a,z] of occ){
+    if(a>t && a<=fine && a-t>=90) out.push({a:t, b:Math.min(a,fine)});
+    t=Math.max(t,z);
+  }
+  if(fine-t>=90) out.push({a:t, b:fine});
+  return out;
+}
 function finestreLibere(giorni){
   const fPrima=state.focus, f0=giornoVero(), out=[];
   for(let o=0;o<giorni;o++){
     state.focus=day(f0,o);
     if(NT.codeAt(0)==="?") continue;
     let P; try{ P=NT.plan(); }catch(e){ continue; }
-    // occupato: turno, sonno e pisolini, sulla scala del giorno
-    const occ=[[P.s.onset,P.s.onset+P.s.dur]].concat(P.naps.map(x=>[x.a,x.b]));
-    if(!P.b.rest) occ.push([P.b.start - state.cTo, P.b.end + state.cFrom]);
-    occ.sort((a,b)=>a[0]-b[0]);
-    let t=P.wake;
-    const fine=P.s.onset;                        // fino a quando vai a letto stasera
-    for(const [a,z] of occ){
-      if(a>t && a<=fine && a-t>=90) out.push({d:day(f0,o), a:t, b:Math.min(a,fine)});
-      t=Math.max(t,z);
-    }
-    if(fine-t>=90) out.push({d:day(f0,o), a:t, b:fine});
+    liberiDelGiorno(P).forEach(w=>out.push({d:day(f0,o), a:w.a, b:w.b}));
   }
   state.focus=fPrima;
   return out;
@@ -4062,6 +4143,7 @@ function render(){
   renderDonateNudge();
   renderFormaGiorno(P);                // si azzera da solo in dettaglio
   renderEssenziale(P, CARDS);          // si azzera da solo in dettaglio
+  renderACasa();
   const tab = state.tab || (ess ? "oggi" : "ciclo");
   const giornata = document.body.classList.contains("giornata");
   // "piu" (la vecchia terza tab, eliminata) non è più un valore raggiungibile
@@ -5124,6 +5206,7 @@ async function gestisciFunzione(id){
     toast("Per toglierlo: tieni premuto il widget sulla schermata Home e trascinalo su «Rimuovi»");
   }
 }
+let attivazioneAperta=false;   // la lista compatta aperta in questa sessione
 function renderAttivazione(){
   const voci=vociAttivazione(), fatte=voci.filter(x=>x.ok).length;
   const el=$("#setupChecklist");
@@ -5133,12 +5216,30 @@ function renderAttivazione(){
       el.hidden=false; el.className="card attiva-card";
       // l'installazione proposta dalla lista conta come la proposta del banner
       if(!installBannerTracciato && voci.some(x=>x.id==="installa" && !x.ok)){ installBannerTracciato=true; track("install_prompt_shown"); }
+      // Intera solo il primo giorno (quando si imposta tutto); dopo, una riga
+      // che si apre: la lista occupava quasi una schermata e spingeva «Adesso»,
+      // il motivo per cui si apre l'app, in fondo alla prima schermata.
+      const compatta = store.get("attivazioneDal","")!==iso(new Date()) && !attivazioneAperta;
+      // Un invito alla volta sopra il piano: il giorno in cui ne compare un
+      // altro, la riga compatta cede il posto (torna domani; è sempre in Impostazioni).
+      if(compatta && [backupNudgeVisibile, installBannerVisibile, shareNudgeVisibile, icsNudgeVisibile, statsNudgeVisibile, clubBannerVisibile, donateNudgeVisibile].some(f=>{ try{ return f(); }catch(e){ return false; } })){
+        el.hidden=true; return renderOpzFunzioni(voci);
+      }
+      if(compatta){
+        el.innerHTML='<button type="button" class="attiva-riga" id="apriAttivazione" aria-expanded="false">'+
+          '<span class="tx"><b>Rendi automatico il tuo piano</b><span>'+esc(voci.filter(x=>!x.ok).map(x=>x.t).join(" · "))+'</span></span>'+
+          '<span class="attiva-prog">'+fatte+' di '+voci.length+'</span><span class="tchev" aria-hidden="true">›</span></button>';
+        return renderOpzFunzioni(voci);
+      }
       el.innerHTML='<div class="attiva-head"><b style="font-size:15px">Rendi automatico il tuo piano</b><span class="attiva-prog">'+fatte+' di '+voci.length+'</span></div>'+
         '<div class="attiva-bar"><i style="width:'+Math.round(100*fatte/voci.length)+'%"></i></div>'+
         htmlVociAttivazione(voci)+
         '<button type="button" class="lnk" id="nascondiAttivazione" style="font-size:12px;color:var(--faint);padding:6px 0 0">Nascondi (resta in Impostazioni)</button>';
     }
   }
+  renderOpzFunzioni(voci);
+}
+function renderOpzFunzioni(voci){
   const op=$("#opzFunzioni");
   if(op){
     op.className="opz-gruppo opz-funz";
@@ -5189,6 +5290,7 @@ document.addEventListener("click", e=>{ if(e.target.closest("#doRecuperaDati") &
 document.addEventListener("click", e=>{
   const b=e.target.closest("[data-attiva]"); if(b){ eseguiAttivazione(b.dataset.attiva); return; }
   const g=e.target.closest("[data-gestisci]"); if(g){ gestisciFunzione(g.dataset.gestisci); return; }
+  if(e.target.closest("#apriAttivazione")){ attivazioneAperta=true; renderAttivazione(); const f=document.querySelector("#setupChecklist [data-attiva]"); if(f) f.focus(); return; }
   if(e.target.closest("#nascondiAttivazione")){ store.set("attivazioneNascosta", true); render(); }
 });
 // Lo stato di notifiche e widget cambia fuori dall'app (permesso di sistema,
@@ -5233,9 +5335,11 @@ function renderMedico(){
   el.hidden=false;
   el.innerHTML='<b>Da qualche settimana segni spesso poca energia</b>'+
     '<p class="hint" style="margin-top:6px">Succede a tanti che lavorano a turni, e non sempre basta organizzare meglio il sonno. Se dormi male o hai molto sonno durante il giorno con regolarità, parlane con il medico competente alla prossima visita periodica, o con il tuo medico: possono aiutarti più di un\'app. Non è una diagnosi, solo un segnale da non lasciar passare.</p>'+
-    '<button class="btn g" type="button" id="doMedicoOk">Ho capito</button>';
+    '<div style="display:flex;flex-wrap:wrap;gap:8px"><button class="btn" type="button" data-riepilogo-medico>Prepara il riepilogo per la visita</button>'+
+    '<button class="btn g" type="button" id="doMedicoOk">Ho capito</button></div>';
 }
 if($("#medicoCard")) $("#medicoCard").addEventListener("click", e=>{
+  if(e.target.closest("[data-riepilogo-medico]")){ stampaRiepilogoMedico(); return; }
   if(e.target.closest("#doMedicoOk")){ store.set("medicoVisto", true); track("setup_item", {item:"medico_visto"}); renderMedico(); }
 });
 function adattaVisibile(){
@@ -5965,6 +6069,29 @@ function renderFormaGiorno(P){
     '</svg>'+
     '<div class="fg-legend">'+legenda.join("")+'</div>';
 }
+// Dopo una notte: sonno diviso o tutto insieme. È una preferenza sola
+// (state.sonnoDiurno, anche in Impostazioni), ma la si sceglie meglio qui,
+// nel giorno in cui conta, con gli orari veri delle due strade. Solo quando
+// il sonno principale cade di giorno dopo un turno e le due strade
+// differiscono davvero; dopo la prima scelta resta solo il selettore.
+function sceltaDopoNotte(P){
+  if(!P.s || (P.s.kind!=="diurno" && P.s.kind!=="corto")) return "";
+  if(dnum(state.focus)<dnum(giornoVero())) return "";
+  const cur=state.sonnoDiurno||"diviso", unito = cur==="diviso" ? "unicoPisolino" : cur;
+  const fineCon=v=>{ const prima=state.sonnoDiurno; state.sonnoDiurno=v; let e=null;
+    try{ const Q=NT.plan(); e=Q.s.onset+Q.s.dur; }catch(x){} state.sonnoDiurno=prima; return e; };
+  const eD=fineCon("diviso"), eU=fineCon(unito);
+  if(eD==null || eU==null || eD===eU) return "";
+  const corto=P.s.kind==="corto", diviso=cur==="diviso";
+  const opz=(val,nome,fine,on)=>'<button type="button" class="vb'+(on?" on":"")+'" data-sonnod="'+val+'" aria-pressed="'+on+'"><b>'+nome+'</b><span>fino alle '+hhmm(fine)+'</span></button>';
+  const spiega = store.get("smontoScelto", false) ? "" : '<p class="dn-hint">'+(corto
+    ? 'Corto: il pomeriggio è tuo e stanotte dormi bene. Lungo: recuperi di più adesso, ma stasera il sonno arriva più tardi.'
+    : 'Diviso: un sonno più corto e un pisolino prima della prossima notte (di giorno si dorme più leggeri). Tutto insieme: un blocco solo, se di giorno dormi bene.')+'</p>';
+  return '<div class="dopo-notte" role="group" aria-label="Dopo la notte, come dormi">'+
+    '<span class="dn-lab">Dopo la notte · vale per tutte le notti</span>'+
+    '<div class="dn-scelta">'+opz("diviso", corto?"Corto":"Diviso", eD, diviso)+opz(unito, corto?"Lungo":"Tutto insieme", eU, !diviso)+'</div>'+
+    spiega+'</div>';
+}
 function renderEssenziale(P, CARDS){
   const el=$("#essenziale"); if(!el) return;
   // quali righe erano aperte: si legge dal DOM prima di ridisegnare, così
@@ -6031,6 +6158,8 @@ function renderEssenziale(P, CARDS){
   const scCard = CARDS.find(c=>c.k==="s");
   const dettSonno = dett(scCard);
   voci.push({t:dSv(P.s.onset), html:riga("sonno","Dormi",sonnoWin(P),sonnoSub,false,ICON.moon,dettSonno)});
+  const dn=sceltaDopoNotte(P);
+  if(dn) voci.push({t:dSv(P.s.onset)+0.3, html:dn});
 
   // Letto troppo presto prima di un turno di mattina: stessa soglia della
   // scelta bifasica (sotto le 21, addormentarsi è difficile, non solo
@@ -6361,9 +6490,11 @@ function renderMese(){
       '<div><b>'+r.festivi+'</b><span>domeniche e festivi</span></div>'+
       '<div><b>'+r.liberi+'</b><span>giorni senza turno</span></div>'+
     '</div>'+
-    '<p class="hint">Dall\'inizio alla fine di ogni turno, pause comprese'+(r.ignoti?'; '+r.ignoti+(r.ignoti===1?' giorno ancora da segnare':' giorni ancora da segnare'):'')+'. Per controllare le ore, non è un conteggio ufficiale.</p>';
+    '<p class="hint">Dall\'inizio alla fine di ogni turno, pause comprese'+(r.ignoti?'; '+r.ignoti+(r.ignoti===1?' giorno ancora da segnare':' giorni ancora da segnare'):'')+'. Per controllare le ore, non è un conteggio ufficiale.</p>'+
+    '<button type="button" class="lnk mese-medico" data-riepilogo-medico>Riepilogo per il medico competente →</button>';
 }
 if($("#meseBox")) $("#meseBox").addEventListener("click", e=>{
+  if(e.target.closest("[data-riepilogo-medico]")){ stampaRiepilogoMedico(); return; }
   const b=e.target.closest("[data-mese]"); if(!b || b.disabled) return;
   meseOff=Math.max(-12, Math.min(12, meseOff + +b.dataset.mese)); renderMese();
 });
@@ -7603,6 +7734,11 @@ function diaryChange(e){
 }
 function diaryClick(e){
   if(e.target.closest("[data-open-bifasico]")){ apriBifasico(); return; }
+  const sd=e.target.closest("[data-sonnod]");
+  if(sd){ if(sd.getAttribute("aria-pressed")==="true") return;
+    state.sonnoDiurno=sd.dataset.sonnod; store.set("smontoScelto", true);
+    if($("#sonnoD")) $("#sonnoD").value=state.sonnoDiurno;
+    haptic(8); salva(); render(); track("setup_item", {item:"smonto_"+(state.sonnoDiurno==="diviso"?"diviso":"unito")}); return; }
   if(e.target.closest("[data-off-bifasico]")){ state.avvisoBifasicoOff=true; salva(); render(); return; }
   if(e.target.id==="doSum"){
     const txt=summaryText();
@@ -7753,6 +7889,88 @@ function paginaCalendario(oggi){
       'Turno, orario e ora in cui vado a dormire. Piano indicativo, non un dispositivo medico · notturnisti.club</p></div>'+
     '</section>';
 }
+// Riepilogo di 12 mesi per il medico competente: i numeri che servono alla
+// sorveglianza sanitaria del lavoro notturno, dai turni segnati (ciclo e
+// cambi). Notte = almeno 3 ore fra le 22 e le 6 (la fascia notturna più
+// comune nei contratti; per il D.Lgs 66/2003 il periodo notturno comprende
+// sempre mezzanotte–5). Riposo breve = meno di 11 ore fra la fine di un turno
+// e l'inizio del successivo (art. 7). Niente paghe né indennità.
+function riepilogoAnno(){
+  // giorno di calendario, non giornoVero(): il foglio porta la data in cui lo si prepara
+  const oggi=new Date(), fPrima=state.focus; oggi.setHours(12,0,0,0);
+  const inizio=new Date(oggi.getFullYear(), oggi.getMonth()-11, 1, 12);
+  const notte=(s,e)=>{ const ov=(a,b)=>Math.max(0, Math.min(e,b)-Math.max(s,a)); return ov(-120,360)+ov(1320,1800); };
+  const mesi=[], tot={turni:0, ore:0, notti:0, oreNotte:0, festivi:0, brevi:0, lunghi:0, serieMax:0};
+  let fineIeri=null, serie=0;
+  try{
+    for(let d=new Date(inizio); dnum(d)<=dnum(oggi); d.setDate(d.getDate()+1)){
+      const k=d.getFullYear()*12+d.getMonth();
+      let m=mesi[mesi.length-1];
+      if(!m || m.k!==k){ m={k, primo:new Date(d), turni:0, ore:0, notti:0, oreNotte:0, festivi:0, brevi:0}; mesi.push(m); }
+      state.focus=new Date(d);
+      let c="?"; try{ c=NT.codeAt(0); }catch(e){}
+      const sh = c==="?" ? null : state.shifts[c];
+      if(!sh){ serie=0; if(c==="?") fineIeri=null; continue; }
+      const base=dnum(d)*1440, oreN=notte(sh.s, sh.e)/60;
+      m.turni++; m.ore+=(sh.e-sh.s)/60; m.oreNotte+=oreN;
+      if(oreN>=3){ m.notti++; serie++; tot.serieMax=Math.max(tot.serieMax, serie); } else serie=0;
+      if(d.getDay()===0 || festivoIT(d)) m.festivi++;
+      if(sh.e-sh.s>=720) tot.lunghi++;
+      if(fineIeri!==null && base+sh.s-fineIeri<660) m.brevi++;
+      fineIeri=base+sh.e;
+    }
+  } finally { state.focus=fPrima; }
+  mesi.forEach(m=>["turni","ore","notti","oreNotte","festivi","brevi"].forEach(x=>tot[x]+=m[x]));
+  // il sonno annotato nello stesso periodo
+  const da=iso(inizio), a=iso(oggi), dentro=k=>k>=da && k<=a;
+  const durate=Object.keys(state.wakes||{}).filter(k=>dentro(k) && (state.beds||{})[k]).map(k=>{
+    let x=t(state.wakes[k])-t(state.beds[k]); while(x<=0) x+=1440; return x; }).filter(x=>x>=60 && x<=960);
+  const voti=Object.keys(diary).filter(dentro).map(k=>+diary[k]).filter(v=>v>=1 && v<=5);
+  return {inizio, oggi, mesi, tot, durate, voti};
+}
+function buildMedicoSheet(){
+  const el=$("#printSheet"); if(!el || !state.turniConfigurati) return 0;
+  const r=riepilogoAnno(), T=r.tot;
+  const n=v=>Math.round(v).toLocaleString(LINGUA);
+  const data=d=>d.toLocaleDateString(LINGUA,{day:"numeric", month:"long", year:"numeric"});
+  const riga=(voce,val)=>'<tr><td>'+voce+'</td><td><b>'+val+'</b></td></tr>';
+  const mesi=r.mesi.map(m=>{ const nome=m.primo.toLocaleDateString(LINGUA,{month:"long", year:"numeric"});
+    return '<tr><td>'+esc(nome.charAt(0).toUpperCase()+nome.slice(1))+'</td><td>'+m.turni+'</td><td>'+n(m.ore)+'</td><td>'+m.notti+'</td><td>'+n(m.oreNotte)+'</td><td>'+m.festivi+'</td><td>'+m.brevi+'</td></tr>'; }).join("");
+  const media=v=>v.reduce((a,b)=>a+b,0)/v.length;
+  let sonno="";
+  if(r.durate.length>=3 || r.voti.length>=3){
+    const parti=[];
+    if(r.durate.length>=3) parti.push("Su "+r.durate.length+" notti annotate: in media <b>"+esc(dur(Math.round(media(r.durate)/5)*5))+"</b> di sonno; "+r.durate.filter(x=>x<300).length+" sotto le 5 ore.");
+    if(r.voti.length>=3) parti.push("Voto medio a «Come hai dormito?»: <b>"+media(r.voti).toFixed(1).replace(".",",")+" su 5</b> ("+r.voti.length+" voti).");
+    sonno='<h2>Il sonno annotato</h2><p>'+parti.join(" ")+'</p>';
+  }
+  const prima = state.firstSeenAt && state.firstSeenAt>iso(r.inizio)
+    ? " Prima del "+esc(data(new Date(state.firstSeenAt+"T12:00:00")))+" i turni sono ricostruiti dal ciclo, senza i cambi." : "";
+  el.innerHTML='<section class="ps-doc">'+
+    '<h1>Riepilogo dei turni per il medico competente</h1>'+
+    '<p class="ps-sub">Dal '+esc(data(r.inizio))+' al '+esc(data(r.oggi))+' · preparato il '+esc(data(new Date()))+' con Notturnisti</p>'+
+    '<h2>In sintesi</h2>'+
+    '<table data-cols="3,1"><thead><tr><th>Voce</th><th>Ultimi 12 mesi</th></tr></thead><tbody>'+
+      riga("Turni", n(T.turni))+riga("Ore di turno", n(T.ore))+
+      riga("Notti (almeno 3 ore fra le 22 e le 6)", n(T.notti))+riga("Ore lavorate fra le 22 e le 6", n(T.oreNotte))+
+      riga("Notti di fila, al massimo", T.serieMax)+riga("Riposi sotto le 11 ore fra due turni", T.brevi)+
+      riga("Turni da 12 ore o più", T.lunghi)+riga("Domeniche e festivi lavorati", T.festivi)+
+    '</tbody></table>'+
+    '<p>Per il D.Lgs 66/2003 lavora di notte chi fa almeno 3 ore nel periodo notturno per almeno 80 giorni l\'anno, salvo quanto stabilisce il contratto collettivo. In questi 12 mesi le notti sono <b>'+T.notti+'</b>.</p>'+
+    '<h2>Mese per mese</h2>'+
+    '<table data-cols="2.4,1,1,1,1.2,1.4,1.4"><thead><tr><th>Mese</th><th>Turni</th><th>Ore</th><th>Notti</th><th>Ore 22–6</th><th>Dom. e festivi</th><th>Riposi &lt; 11 h</th></tr></thead><tbody>'+
+      mesi+'<tr class="tot"><td><b>Totale</b></td><td><b>'+T.turni+'</b></td><td><b>'+n(T.ore)+'</b></td><td><b>'+T.notti+'</b></td><td><b>'+n(T.oreNotte)+'</b></td><td><b>'+T.festivi+'</b></td><td><b>'+T.brevi+'</b></td></tr>'+
+    '</tbody></table>'+
+    sonno+
+    '<p class="ps-foot">Calcolato dai turni segnati nell\'app (ciclo e cambi), dall\'inizio alla fine di ogni turno: non è un registro delle presenze né un documento medico.'+prima+' notturnisti.club</p>'+
+  '</section>';
+  return 1;
+}
+function stampaRiepilogoMedico(){
+  if(!buildMedicoSheet()){ toast("Imposta prima i turni"); return; }
+  track("setup_item", {item:"medico_pdf"});
+  stampaFoglio("Riepilogo per il medico competente");
+}
 // Il foglio da dare a chi aspetta: solo i giorni e le ore libere, niente
 // sonno/turni/caffè. Riusa finestreLibere() — la stessa vista di "Quando sono
 // disponibile" — e lo stesso foglio di stampa, con un contenuto diverso.
@@ -7827,6 +8045,52 @@ async function mandaOrariLiberi(){
   try{ await navigator.clipboard.writeText(testo); toast("Orari copiati: incollali nel messaggio"); }
   catch(e){ prompt("Copia questo messaggio:", testo); }
 }
+// «Manda a casa i tuoi orari»: il giorno guardato in un messaggio per chi
+// vive con te, con i fatti del piano (turno, rientro, sonno, quando ci sei,
+// a letto). Niente stime inventate tipo "energia al 20%": solo orari.
+function nomeGiornoFocus(maiuscola, breve){
+  const n=dnum(state.focus), o=dnum(giornoVero());
+  const t = n===o ? "oggi" : n===o+1 ? "domani" : state.focus.toLocaleDateString(LINGUA,{weekday:"long", day:"numeric", ...(breve?{}:{month:"long"})});
+  return maiuscola ? t.charAt(0).toUpperCase()+t.slice(1) : t;
+}
+function testoACasa(){
+  let P; try{ if(NT.codeAt(0)==="?") return ""; P=NT.plan(); }catch(e){ return ""; }
+  const b=P.b, pb=P.pb, nb=P.nb, voci=[];
+  const notteIeri = !pb.rest && pb.end>1440;
+  const stato = !b.rest ? (b.name||b.c)+" "+hhmm(b.start)+"–"+hhmm(b.end) : notteIeri ? "smonto dalla notte" : "riposo";
+  if(notteIeri) voci.push([pb.end-1440, "torno a casa verso le "+hhmm(pb.end-1440+state.cFrom)]);
+  // il sonno di stanotte che finisce tardi (dopo una notte, o un riposo lungo)
+  const spA=P.sp.onset-1440;
+  if(P.wake>=540) voci.push([Math.max(spA,0), (spA>=300 ? "dormo "+hhmm(spA)+"–"+hhmm(P.wake) : "dormo fino alle "+hhmm(P.wake))]);
+  P.naps.filter(x=>!x.turno && x.a>=0 && x.a<1440).forEach(x=>voci.push([x.a, "pisolino "+hhmm(x.a)+"–"+hhmm(x.b)]));
+  const liberi=liberiDelGiorno(P);
+  // ogni finestra al suo posto nella giornata (fra due finestre c'è un pisolino o il turno)
+  liberi.forEach((w,i)=>voci.push([w.a, (i ? "di nuovo " : "ci sono ")+hhmm(w.a)+"–"+hhmm(w.b)]));
+  if(!liberi.length) voci.push([P.wake+1, "poco tempo libero"]);
+  const on=P.s.onset;
+  if(on>=1440+300) voci.push([on, "dopo il turno dormo dalle "+hhmm(on)]);
+  else if(on>=360 && on<1080) voci.push([on, "dormo "+hhmm(on)+"–"+hhmm(on+P.s.dur)]);
+  else voci.push([on, "a letto alle "+hhmm(on)+(!nb.rest && !NT.startsInNight(nb) && nb.start<720 ? " (domani attacco alle "+hhmm(nb.start)+")" : "")]);
+  voci.sort((x,y)=>x[0]-y[0]);
+  return nomeGiornoFocus(true)+": "+stato+"\n"+voci.map(v=>"• "+v[1]).join("\n")+
+    "\n\n(dal mio piano Notturnisti · app.notturnisti.club)";
+}
+function renderACasa(){
+  const el=$("#aCasa"); if(!el) return;
+  let ok=state.turniConfigurati;
+  try{ if(ok && NT.codeAt(0)==="?") ok=false; }catch(e){ ok=false; }
+  el.hidden=!ok;
+  if(ok) $("#aCasaTit").textContent="Manda a casa i tuoi orari di "+nomeGiornoFocus(false, true);
+}
+async function mandaACasa(){
+  const testo=testoACasa(); if(!testo){ toast("Segna prima il turno di questo giorno"); return; }
+  track("share_created", {tipo:"a_casa"});
+  try{ if(platform.canShare()){ await platform.share({title:"I miei orari", text:testo}); return; } }
+  catch(e){ if(e && e.name==="AbortError") return; }
+  try{ await navigator.clipboard.writeText(testo); toast("Messaggio copiato: incollalo dove vuoi"); }
+  catch(e){ prompt("Copia questo messaggio:", testo); }
+}
+if($("#aCasa")) $("#aCasa").onclick=mandaACasa;
 if($("#doPrint")) $("#doPrint").onclick=()=>{
   if(!buildPrintSheet()){ toast("Imposta prima i turni"); return; }
   track("share_created", {tipo:"pdf_ciclo"});
@@ -7837,26 +8101,31 @@ if($("#doPrint")) $("#doPrint").onclick=()=>{
 // aprono/chiudono come le altre tab, solo senza un loro bottone in
 // fondo. Aprirne una chiude sempre l'altra, non possono stare aperte
 // insieme.
+// body.sottopagina: c'è una pagina di Turni aperta (una regola CSS sola le copre tutte)
+function segnaSottopagina(){
+  const aperte=["andamenti-aperta","vederci-aperta","scambio-aperta","ferie-aperta"].some(c=>document.body.classList.contains(c));
+  document.body.classList.toggle("sottopagina", aperte);
+}
 function apriAndamenti(){
-  chiudiVederci(); chiudiScambio();
-  document.body.classList.add("andamenti-aperta");
+  chiudiVederci(); chiudiScambio(); chiudiFerie();
+  document.body.classList.add("andamenti-aperta"); segnaSottopagina();
   renderAndamenti();
   const p=$("#andamentiPagina"); if(p) p.hidden=false;
   try{ window.scrollTo(0,0); }catch(e){}
 }
 function chiudiAndamenti(){
-  document.body.classList.remove("andamenti-aperta");
+  document.body.classList.remove("andamenti-aperta"); segnaSottopagina();
   const p=$("#andamentiPagina"); if(p) p.hidden=true;
 }
 function apriVederci(){
-  chiudiAndamenti(); chiudiScambio();
-  document.body.classList.add("vederci-aperta");
+  chiudiAndamenti(); chiudiScambio(); chiudiFerie();
+  document.body.classList.add("vederci-aperta"); segnaSottopagina();
   const p=$("#vederciPagina"); if(p) p.hidden=false;
   renderPiuCal();
   try{ window.scrollTo(0,0); }catch(e){}
 }
 function chiudiVederci(){
-  document.body.classList.remove("vederci-aperta");
+  document.body.classList.remove("vederci-aperta"); segnaSottopagina();
   const p=$("#vederciPagina"); if(p) p.hidden=true;
 }
 if($("#doAndamenti")) $("#doAndamenti").onclick=apriAndamenti;
@@ -8146,8 +8415,8 @@ function aggiornaScambio(){
 
 function apriScambioTurno(giornoA){
   const pg=$("#scambioPagina"); if(!pg) return;
-  chiudiAndamenti(); chiudiVederci();
-  document.body.classList.add("scambio-aperta");
+  chiudiAndamenti(); chiudiVederci(); chiudiFerie();
+  document.body.classList.add("scambio-aperta"); segnaSottopagina();
   pg.hidden=false;
   const targetA=giornoA || state.focus || giornoVero();
   const offA=Math.round((dnum(targetA)-dnum(state.focus))/86400000);
@@ -8156,13 +8425,167 @@ function apriScambioTurno(giornoA){
   try{ window.scrollTo(0,0); }catch(e){}
 }
 function chiudiScambio(){
-  document.body.classList.remove("scambio-aperta");
+  document.body.classList.remove("scambio-aperta"); segnaSottopagina();
   const pg=$("#scambioPagina"); if(pg) pg.hidden=true;
 }
 if($("#doScambioTurno")) $("#doScambioTurno").onclick=()=>apriScambioTurno();
 if($("#chiudiScambio")) $("#chiudiScambio").onclick=chiudiScambio;
 if($("#swapA")) $("#swapA").addEventListener("change",aggiornaScambio);
 if($("#swapB")) $("#swapB").addEventListener("change",aggiornaScambio);
+
+/* ─── Ferie: dove metterle perché si attacchino ai riposi del ciclo ─────────
+   Tutto dal ciclo e dai cambi segnati, nel telefono. Per ogni giorno dei
+   prossimi 12 mesi: lavoro, riposo, smonto (il riposo dopo una notte: a casa
+   dal mattino) o ignoto (ciclo che non si ripete). Una finestra scorre sui
+   giorni: dentro, ogni giorno di lavoro diventa un giorno di ferie, al massimo
+   n. Con un mese scelto le ferie si mettono solo lì, ma la finestra può
+   allungarsi sui riposi attorno. Niente regole di contratto: in alcuni lo
+   smonto non è riposo, per questo è una scelta dell'utente. */
+function giorniCiclo(giorni){
+  const f0=giornoVero(), fPrima=state.focus, out=[];
+  state.focus=f0;
+  try{
+    for(let o=1;o<=giorni;o++){
+      const d=day(f0,o), c=NT.codeAt(o);
+      if(c==="?"){ out.push({d, ignoto:true}); continue; }
+      const b=NT.block(o), ieri=NT.block(o-1);
+      out.push({d, lavoro:!b.rest, smonto: b.rest && !ieri.rest && ieri.end>1440});
+    }
+  } finally { state.focus=fPrima; }
+  return out;
+}
+const meseDi=d=>iso(d).slice(0,7);
+// Il primo giorno di una finestra non conta se è uno smonto e lo si è escluso
+// (dentro la finestra non ce ne sono: la notte prima sarebbe già di ferie).
+const inizioACasa=(G,a,r,smonto)=> (!smonto && G[a].smonto && a<r) ? a+1 : a;
+function proposteFerie(G, n, mese, smonto){
+  const ok=g=>!mese || meseDi(g.d)===mese;
+  const cand=[]; let l=0, usate=0;
+  for(let r=0;r<G.length;r++){
+    const g=G[r];
+    if(g.ignoto || (g.lavoro && !ok(g))){ l=r+1; usate=0; continue; }
+    if(g.lavoro) usate++;
+    while(usate>n){ if(G[l].lavoro) usate--; l++; }
+    const a=inizioACasa(G,l,r,smonto);
+    if(usate>0 && (!mese || G.slice(a,r+1).some(ok))) cand.push({a, r, lung:r-a+1, usate});
+  }
+  // la più lunga; a parità, meno ferie, poi più sabati e domeniche (il tempo
+  // con chi lavora di giorno), poi la più vicina
+  const weekend=c=>{ let n=0; for(let i=c.a;i<=c.r;i++){ const g=G[i].d.getDay(); if(g===0||g===6) n++; } return n; };
+  cand.forEach(c=>c.fs=weekend(c));
+  cand.sort((x,y)=>y.lung-x.lung || x.usate-y.usate || y.fs-x.fs || x.a-y.a);
+  const scelte=[];
+  for(const c of cand){
+    if(scelte.length>=3) break;
+    if(!scelte.some(x=>c.a<=x.r && c.r>=x.a)) scelte.push(c);
+  }
+  // in ordine di data: si leggono come un calendario; "migliore" solo se lo è davvero
+  if(scelte.length>1 && scelte[0].lung>scelte[1].lung) scelte[0].migliore=true;
+  return scelte.sort((x,y)=>x.a-y.a);
+}
+// Il riposo più lungo senza ferie: il termine di paragone delle proposte.
+function riposoPiuLungo(G, mese, smonto){
+  let best=null, a=-1;
+  for(let r=0;r<=G.length;r++){
+    const casa=r<G.length && !G[r].ignoto && !G[r].lavoro;
+    if(casa){ if(a<0) a=r; continue; }
+    if(a<0) continue;
+    const s=inizioACasa(G,a,r-1,smonto), lung=r-s;
+    if(lung>0 && (!best || lung>best.lung) && (!mese || G.slice(s,r).some(g=>meseDi(g.d)===mese))) best={a:s, r:r-1, lung};
+    a=-1;
+  }
+  return best;
+}
+const GIORNI_DOM = giorniBrevi({ maiuscola: true });   // Dom, Lun… come getDay()
+function periodoTesto(da, a){
+  const anno = a.getFullYear()!==giornoVero().getFullYear();
+  const lungo = d=>d.toLocaleDateString(LINGUA,{weekday:"long", day:"numeric", month:"long", ...(anno?{year:"numeric"}:{})});
+  const corto = d=>d.toLocaleDateString(LINGUA,{weekday:"long", day:"numeric"});
+  return "da "+(da.getMonth()===a.getMonth() && da.getFullYear()===a.getFullYear() ? corto(da) : lungo(da))+" a "+lungo(a);
+}
+let _ferie = {G:[], proposte:[]};
+function preferenzeFerie(){
+  const p=store.mappa("ferie");
+  return { n: Math.min(20, Math.max(1, +p.n || 3)), smonto: p.smonto !== false };
+}
+function renderFerie(){
+  const out=$("#ferieOut"); if(!out) return;
+  const pref=preferenzeFerie(), sel=$("#ferieMese");
+  $("#ferieN").textContent=pref.n;
+  document.querySelectorAll("[data-ferie-n]").forEach(b=>{ b.disabled = (+b.dataset.ferieN<0 ? pref.n<=1 : pref.n>=20); });
+  $("#ferieSmonto").checked=pref.smonto;
+  // i mesi: da questo ai prossimi 11
+  if(sel && !sel.options.length){
+    const oggi=giornoVero();
+    sel.innerHTML='<option value="">Prossimi 12 mesi</option>'+Array.from({length:12},(_,i)=>{
+      const d=new Date(oggi.getFullYear(), oggi.getMonth()+i, 15);
+      const nome=d.toLocaleDateString(LINGUA,{month:"long", year:"numeric"});
+      return '<option value="'+meseDi(d)+'">'+esc(nome.charAt(0).toUpperCase()+nome.slice(1))+'</option>';
+    }).join("");
+  }
+  if(!state.turniConfigurati){ out.innerHTML='<p class="ferie-base">Imposta prima i turni: le proposte vengono dal tuo ciclo.</p>'; return; }
+  const mese=sel ? sel.value : "";
+  const G=giorniCiclo(366), noti=G.filter(g=>!g.ignoto).length;
+  _ferie={G, proposte:[]};
+  if(noti<7){ out.innerHTML='<p class="ferie-base">Il tuo ciclo non si ripete e i giorni segnati finiscono presto. Segna i turni dei prossimi mesi per avere proposte.</p>'; return; }
+  const nomeMese = mese ? " a "+new Date(mese+"-15T12:00:00").toLocaleDateString(LINGUA,{month:"long"}) : "";
+  const base=riposoPiuLungo(G, mese, pref.smonto);
+  const P=_ferie.proposte=proposteFerie(G, pref.n, mese, pref.smonto);
+  const gg=n=>n===1?"1 giorno":n+" giorni";
+  let h='<p class="ferie-base">'+(base
+    ? 'Senza ferie, il riposo più lungo'+nomeMese+' è di <b>'+gg(base.lung)+'</b>: '+esc(periodoTesto(G[base.a].d, G[base.r].d))+'.'
+    : 'Senza ferie non hai riposi'+nomeMese+'.')+'</p>';
+  if(!P.length) h+='<p class="ferie-base">Nessun giorno di lavoro da trasformare in ferie'+nomeMese+'.</p>';
+  P.forEach((p,i)=>{
+    const giorni=G.slice(p.a,p.r+1);
+    const ferie=giorni.filter(g=>g.lavoro);
+    const chip=giorni.map((g,k)=>'<span class="fg'+(g.lavoro?' ferie':(k===0&&g.smonto?' smonto':''))+'">'+GIORNI_DOM[g.d.getDay()]+'<b>'+g.d.getDate()+'</b></span>').join("");
+    const quali=ferie.map(g=>g.d.toLocaleDateString(LINGUA,{weekday:"short", day:"numeric", ...(g.d.getMonth()!==giorni[0].d.getMonth()?{month:"short"}:{})})).join(", ");
+    h+='<section class="ferie-prop'+(p.migliore?' migliore':'')+'" aria-label="Proposta '+(i+1)+': '+gg(p.lung)+' a casa con '+gg(p.usate)+' di ferie">'+
+      '<div class="ferie-testa"><b>'+gg(p.lung)+' a casa</b><span>'+(p.migliore?'la più lunga · ':'')+'con '+(p.usate===1?"1 giorno":p.usate+" giorni")+' di ferie</span></div>'+
+      '<p class="ferie-quando">'+esc(periodoTesto(giorni[0].d, giorni[giorni.length-1].d))+'</p>'+
+      '<div class="ferie-giorni" aria-hidden="true">'+chip+'</div>'+
+      '<p class="ferie-cosa">Ferie: <b>'+esc(quali)+'</b>'+(giorni[0].smonto?'. Il primo giorno è lo smonto: a casa dal mattino':'')+'.</p>'+
+      '<button type="button" class="lnk" data-ferie-segna="'+i+'">Segna queste ferie nel calendario →</button>'+
+    '</section>';
+  });
+  h+='<p class="hint" style="margin-top:4px">Dal tuo ciclo e dai cambi che hai segnato. Controlla le regole del tuo contratto: in alcuni lo smonto non è riposo e le ferie si contano in modo diverso.</p>';
+  out.innerHTML=h;
+}
+function segnaFerie(i){
+  const p=_ferie.proposte[i]; if(!p) return;
+  const giorni=_ferie.G.slice(p.a,p.r+1).filter(g=>g.lavoro).map(g=>iso(g.d));
+  const prima={}; giorni.forEach(k=>{ prima[k]=state.ecc[k]; state.ecc[k]="R"; });
+  salva(); render(); renderFerie(); haptic(10);
+  track("setup_item", {item:"ferie_segnate"});
+  toastUndo((giorni.length===1?"1 giorno segnato":giorni.length+" giorni segnati")+" come riposo: il piano ora ne tiene conto", ()=>{
+    giorni.forEach(k=>{ if(prima[k]==null) delete state.ecc[k]; else state.ecc[k]=prima[k]; });
+    salva(); render(); renderFerie();
+  });
+}
+function apriFerie(){
+  const pg=$("#feriePagina"); if(!pg) return;
+  chiudiAndamenti(); chiudiVederci(); chiudiScambio();
+  document.body.classList.add("ferie-aperta"); segnaSottopagina();
+  pg.hidden=false;
+  renderFerie(); track("setup_item", {item:"ferie_aperte"});
+  try{ window.scrollTo(0,0); }catch(e){}
+}
+function chiudiFerie(){
+  document.body.classList.remove("ferie-aperta"); segnaSottopagina();
+  const pg=$("#feriePagina"); if(pg) pg.hidden=true;
+}
+if($("#doFerie")) $("#doFerie").onclick=apriFerie;
+if($("#chiudiFerie")) $("#chiudiFerie").onclick=chiudiFerie;
+if($("#feriePagina")){
+  $("#feriePagina").addEventListener("click", e=>{
+    const b=e.target.closest("[data-ferie-n]");
+    if(b && !b.disabled){ const p=preferenzeFerie(); p.n=Math.min(20, Math.max(1, p.n + +b.dataset.ferieN)); store.set("ferie", p); haptic(6); renderFerie(); return; }
+    const s=e.target.closest("[data-ferie-segna]"); if(s) segnaFerie(+s.dataset.ferieSegna);
+  });
+  $("#ferieMese").addEventListener("change", renderFerie);
+  $("#ferieSmonto").addEventListener("change", e=>{ const p=preferenzeFerie(); p.smonto=e.target.checked; store.set("ferie", p); renderFerie(); });
+}
 
 if($("#swapApplica")) $("#swapApplica").onclick=()=>{
   const a=+$("#swapA").value, b=+$("#swapB").value;
@@ -9429,6 +9852,7 @@ platform.onBackButton(()=>{
   if(document.body.classList.contains("andamenti-aperta")){ chiudiAndamenti(); return true; }
   if(document.body.classList.contains("vederci-aperta")){ chiudiVederci(); return true; }
   if(document.body.classList.contains("scambio-aperta")){ chiudiScambio(); return true; }
+  if(document.body.classList.contains("ferie-aperta")){ chiudiFerie(); return true; }
   if(sceltaSchemaAperta){ sceltaSchemaAperta=false; demoEsempioSubflow="home"; render(); return true; }
   if(demoEsempioVisibile() && demoEsempioSubflow!=="home"){
     const su={orario:"home", posizione:(schemaInScelta&&schemaInScelta.composto?"componi":"schema"), componi:"schema", orari:(state.repeat!==false && schemaInScelta?"posizione":"segna")}[demoEsempioSubflow] || (state.turniConfigurati?"prossimi":"home");
