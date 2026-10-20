@@ -1105,10 +1105,11 @@ body:not(.tab-turni) .solo-turni,body:not(.tab-oggi) .solo-oggi{display:none}
 .ferie-testa span{font-size:13.5px;color:var(--dim)}
 .ferie-quando{font-size:14px;color:var(--ink);margin:4px 0 10px}
 .ferie-giorni{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px}
-.fg{display:flex;flex-direction:column;align-items:center;justify-content:center;width:30px;height:38px;border-radius:7px;background:var(--s2);color:var(--dim);font-size:11px;line-height:1.15}
+.fg{display:flex;flex-direction:column;align-items:center;justify-content:center;width:30px;height:50px;border-radius:7px;background:var(--s2);color:var(--dim);font-size:11px;line-height:1.15}
 .fg b{font-size:12.5px;color:var(--ink)}
 .fg.ferie{background:var(--blue);color:var(--su-blu)}
 .fg.ferie b{color:var(--su-blu)}
+.fg i{font-style:normal;font-size:10.5px;font-weight:700;margin-top:1px;opacity:.85}
 .fg.smonto{background:transparent;border:1px dashed var(--dim)}
 .ferie-cosa{font-size:13.5px;color:var(--dim);line-height:1.5;margin:0 0 6px}
 .ferie-cosa b{color:var(--ink)}
@@ -8688,7 +8689,8 @@ function giorniCiclo(giorni){
       const d=day(f0,o), c=NT.codeAt(o);
       if(c==="?"){ out.push({d, ignoto:true}); continue; }
       const b=NT.block(o), ieri=NT.block(o-1);
-      out.push({d, lavoro:!b.rest, smonto: b.rest && !ieri.rest && ieri.end>1440});
+      // il turno di quel giorno, per dire quali turni lasci con le ferie
+      out.push({d, lavoro:!b.rest, smonto: b.rest && !ieri.rest && ieri.end>1440, c, nome:NT.etichetta(o)});
     }
   } finally { state.focus=fPrima; }
   return out;
@@ -8778,8 +8780,9 @@ function renderFerie(){
   P.forEach((p,i)=>{
     const giorni=G.slice(p.a,p.r+1);
     const ferie=giorni.filter(g=>g.lavoro);
-    const chip=giorni.map((g,k)=>'<span class="fg'+(g.lavoro?' ferie':(k===0&&g.smonto?' smonto':''))+'">'+GIORNI_DOM[g.d.getDay()]+'<b>'+g.d.getDate()+'</b></span>').join("");
-    const quali=ferie.map(g=>g.d.toLocaleDateString(LINGUA,{weekday:"short", day:"numeric", ...(g.d.getMonth()!==giorni[0].d.getMonth()?{month:"short"}:{})})).join(", ");
+    const sigla=g=>g.lavoro ? g.c : g.smonto ? "S" : "R";
+    const chip=giorni.map((g,k)=>'<span class="fg'+(g.lavoro?' ferie':(k===0&&g.smonto?' smonto':''))+'">'+GIORNI_DOM[g.d.getDay()]+'<b>'+g.d.getDate()+'</b><i>'+esc(sigla(g))+'</i></span>').join("");
+    const quali=ferie.map(g=>g.d.toLocaleDateString(LINGUA,{weekday:"short", day:"numeric", ...(g.d.getMonth()!==giorni[0].d.getMonth()?{month:"short"}:{})})+" "+g.nome).join(" · ");
     h+='<section class="ferie-prop'+(p.migliore?' migliore':'')+'" aria-label="Proposta '+(i+1)+': '+gg(p.lung)+' a casa con '+gg(p.usate)+' di ferie">'+
       '<div class="ferie-testa"><b>'+gg(p.lung)+' a casa</b><span>'+(p.migliore?'la più lunga · ':'')+'con '+(p.usate===1?"1 giorno":p.usate+" giorni")+' di ferie</span></div>'+
       '<p class="ferie-quando">'+esc(periodoTesto(giorni[0].d, giorni[giorni.length-1].d))+'</p>'+
