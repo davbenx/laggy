@@ -138,8 +138,29 @@ const near = (m,r) => { while(m-r>720) m-=1440; while(m-r<-720) m+=1440; return 
 
 const iso = d => d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 
+// La chiave "AAAA-MM-GG" del giorno focus+off, senza creare una Date per
+// ogni domanda: eccezioni e giorni speciali si cercano decine di migliaia di
+// volte per disegnare una schermata, e new Date + formattazione a ogni
+// chiamata rendeva Turni tre volte più lenta (telefoni medi bloccati).
+let _fuoco = {t:NaN, n:0};
+const _chiavi = new Map();
+const p2 = n => n < 10 ? "0"+n : ""+n;
+function chiaveA(off){
+  const t = +state.focus;
+  if(t !== _fuoco.t) _fuoco = {t, n:dnum(state.focus)};
+  const n = _fuoco.n + off;
+  let k = _chiavi.get(n);
+  if(k === undefined){
+    const d = new Date(n*864e5);
+    k = d.getUTCFullYear()+"-"+p2(d.getUTCMonth()+1)+"-"+p2(d.getUTCDate());
+    if(_chiavi.size > 4000) _chiavi.clear();
+    _chiavi.set(n, k);
+  }
+  return k;
+}
+
 function eccezioneA(off){
-  const e = state.ecc && state.ecc[iso(day(state.focus,off))];
+  const e = state.ecc && state.ecc[chiaveA(off)];
   return (typeof e === "string" && e) ? e : null;
 }
 
@@ -148,7 +169,9 @@ function eccezioneA(off){
 // dnum(focus)+off è lo stesso giorno di calendario di dnum(day(focus,off)).
 let _ciclo = {src:null, p:"R"}, _inizio = {src:null, n:0};
 function codeAt(off){
-  if(state.ecc){ for(const _ in state.ecc){ const e = eccezioneA(off); if(e) return e; break; } }
+  // niente for…in per sapere se ce ne sono: su un oggetto con centinaia di
+  // date costa quanto elencarle tutte, a ogni chiamata
+  if(state.ecc){ const e = eccezioneA(off); if(e) return e; }
   if(_ciclo.src !== state.pattern) _ciclo = {src:state.pattern, p:(String(state.pattern||"").toUpperCase().replace(/[^A-Z]/g,"") || "R")};
   if(_inizio.src !== state.anchor) _inizio = {src:state.anchor, n:dnum(new Date(state.anchor+"T12:00:00"))};
   const p = _ciclo.p;
@@ -159,8 +182,7 @@ function codeAt(off){
 
 function giornoA(off){
   if(!state.giorni) return null;
-  for(const _ in state.giorni){ const g = state.giorni[iso(day(state.focus,off))]; return g || null; }
-  return null;
+  return state.giorni[chiaveA(off)] || null;
 }
 
 // Il turno di un giorno con le sue eccezioni: ferie e malattia sono riposo,
