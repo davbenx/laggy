@@ -10,7 +10,7 @@ const apri=async(st, extra={})=>{
   const ctx=await b.newContext({locale:"it-IT",viewport:{width:360,height:740}});
   await ctx.addInitScript(([st,extra])=>{ if(sessionStorage.getItem("x")) return; sessionStorage.setItem("x","1");
     localStorage.setItem("nt:state",JSON.stringify(st)); localStorage.setItem("nt:turniConfigurati","true"); localStorage.setItem("nt:firstPlanBannerChiuso","true");
-    localStorage.setItem("nt:attivazioneNascosta","true"); localStorage.setItem("nt:analytics-consent","false");
+    localStorage.setItem("nt:attivazioneNascosta","true"); localStorage.setItem("nt:analytics-consent","false"); localStorage.setItem("nt:backupDone","true");
     for(const k in extra) localStorage.setItem("nt:"+k, JSON.stringify(extra[k])); }, [st,extra]);
   const p=await ctx.newPage(); p.on("pageerror",e=>errs.push(e.message));
   await p.goto("http://localhost:8765/index.html"); await p.waitForTimeout(900);
@@ -51,6 +51,14 @@ await p.context().close();
 p=await apri(Object.assign({firstSeenAt:fa(10), people:[{name:"Anna",pattern:"MMRR",anchor:fa(2)}]}, ST), {funzioniUsate:{mese:fa(5), ferie:fa(5), calendario:fa(5)}});
 t=await tip(p);
 ok(/^scambio:/.test(t), "salta le funzioni già usate (mese, calendario, ferie, persone) → "+t);
+await p.context().close();
+// senza copia di sicurezza, dopo una settimana: il consiglio di salvarla
+p=await apri(Object.assign({firstSeenAt:fa(10)}, ST), {backupDone:false});
+t=await tip(p);
+ok(/^copia:.*solo su questo telefono.*Salva la copia/.test(t), "senza copia di sicurezza: il consiglio di salvarla → "+t);
+await p.context().close();
+p=await apri(Object.assign({firstSeenAt:fa(5)}, ST), {backupDone:false});
+ok(!/^copia:/.test(await tip(p)), "non prima di una settimana");
 await p.context().close();
 // il riepilogo per il medico solo dopo 2 mesi d'uso
 p=await apri(Object.assign({firstSeenAt:fa(20)}, ST), {funzioniUsate:{mese:1,calendario:1,colleghi:1,ferie:1,scambio:1,sonno:1}});

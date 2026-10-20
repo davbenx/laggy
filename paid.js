@@ -108,7 +108,6 @@
   function scCalAction(feedUrl, copyId, isCouple) {
     var os = osName();
     var https = feedUrl.replace(/^webcal/, "https");
-    var cosa = isCouple ? "i riposi in comune" : "i tuoi turni";
     var icsName = isCouple ? "notturnisti-insieme.ics" : "notturnisti.ics";
     var gcalSettingsUrl = "https://calendar.google.com/calendar/u/0/r/settings/addbyurl";
 

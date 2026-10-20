@@ -5,7 +5,7 @@
 import pw from "./_pw.mjs";
 const ok=(c,m)=>{ console.log((c?"✔ ":"✘ ")+m); };
 const b=await pw.chromium.launch(); const errs=[];
-const ALTO=["firstPlanBanner","setupChecklist","adattaCard","medicoCard","setupNudge","backupNudge"];
+const ALTO=["firstPlanBanner","setupChecklist","adattaCard","medicoCard","setupNudge"];
 const visibili = p => p.evaluate(ids=>ids.filter(id=>{ const e=document.getElementById(id); return e && !e.hidden && e.offsetParent!==null; }), ALTO);
 const consiglio = p => p.evaluate(()=>{ const e=document.querySelector("#loSapevi"); return e && !e.hidden ? e.dataset.k : ""; });
 // giorno 1, ciclo appena impostato
@@ -45,7 +45,7 @@ const S=await p.evaluate(()=>({sa:JSON.parse(localStorage.getItem("nt:loSapevi")
 ok(S.sa.visti.includes("colleghi") && S.sa.visti.includes("calendario") && S.st.shareNudgeOff===undefined, "ricordati in «Lo sapevi?», tolti dallo stato: "+JSON.stringify(S.sa.visti));
 await p.context().close();
 // il grazie: dopo un mese, con i link (niente pulsante «Prova»)
-p=await giorno(40, {"analytics-consent":false, funzioniUsate:{mese:1,calendario:1,ferie:1,scambio:1,sonno:1}}, {people:[{name:"A",pattern:"MMRR",anchor:"2026-01-01"}]});
+p=await giorno(40, {"analytics-consent":false, backupDone:true, funzioniUsate:{mese:1,calendario:1,ferie:1,scambio:1,sonno:1}}, {people:[{name:"A",pattern:"MMRR",anchor:"2026-01-01"}]});
 const g=await p.evaluate(()=>{ const e=document.querySelector("#loSapevi"); return {k:e.dataset.k, h:e.hidden, link:[...e.querySelectorAll("[data-sapevi-link]")].map(a=>a.href)}; });
 ok(!g.h && g.k==="grazie" && g.link.some(h=>/notturnisti\.club/.test(h)), "dopo un mese: il grazie, con le guide su notturnisti.club → "+JSON.stringify(g));
 await p.context().close();

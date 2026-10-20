@@ -453,7 +453,7 @@ padding:16px 18px;margin:2px 0 var(--gap-sezione);box-shadow:0 4px 20px rgba(45,
 body.primo-avvio .datebar,body.primo-avvio .daynav,body.primo-avvio #ora,
 body.primo-avvio #status,body.primo-avvio #formaGiorno,body.primo-avvio #essenziale,
 body.primo-avvio #luciditaGiornoWrap,body.primo-avvio #tabbar,
-body.primo-avvio #firstPlanBanner,body.primo-avvio #setupChecklist,body.primo-avvio #adattaCard,body.primo-avvio #medicoCard,body.primo-avvio #setupNudge,body.primo-avvio #backupNudge{display:none!important}
+body.primo-avvio #firstPlanBanner,body.primo-avvio #setupChecklist,body.primo-avvio #adattaCard,body.primo-avvio #medicoCard,body.primo-avvio #setupNudge{display:none!important}
 .qh-btn{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:12px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;min-height:74px;transition:all .15s;font:inherit}
 .qh-btn:hover{border-color:var(--blue);transform:translateY(-1px);background:var(--s2)}
 .qh-btn .qh-ic{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;color:var(--blue);margin-bottom:2px}
@@ -583,7 +583,6 @@ display:flex;flex-direction:column;align-items:center;justify-content:center;gap
 .card{background:var(--s1);border:1px solid var(--line);border-left-width:3px;border-radius:var(--r);padding:14px 15px;margin-bottom:10px;box-shadow:var(--shadow-card)}
 #benvenutoLink{border-left-color:var(--blue)}
 #demoEsempio{border-left-color:var(--blue)}
-#backupNudge{border-left-color:var(--orange)}
 
 /* Inviti in alto (una card alla volta): stesso modello per tutti. Titolo,
    una riga, un'azione piena; chiusura sempre con la × in alto a destra. */
@@ -641,7 +640,6 @@ border-radius:var(--r);font-size:12.5px;font-weight:600;cursor:pointer;font-fami
 .dbtn{flex:1;min-width:52px;min-height:46px;background:var(--s2);border:1px solid var(--line);
 padding:6px 8px;border-radius:var(--r);font-size:14px;font-weight:500;line-height:1.25;
 cursor:pointer;font-family:inherit;color:var(--ink)}
-.dbtn.wide{min-width:132px}
 .dbtn:hover{border-color:var(--blue)}
 /* azione primaria: piena, per essere trovata anche da stanchi */
 .dbtn.pri{background:var(--blue);border-color:var(--blue);color:var(--su-blu);font-weight:600;box-shadow:var(--shadow-btn)}
@@ -681,10 +679,6 @@ footer p{font-size:14px;color:var(--faint);line-height:1.6;margin-bottom:10px}
 footer a{color:var(--blue);text-decoration:none;border-bottom:1px solid var(--blue-lt)}
 .onboard{background:var(--s1);border:1px solid var(--line);border-top:3px solid var(--blue);
 border-radius:var(--r);padding:18px 18px 20px;margin-bottom:20px}
-body.intro .datebar,body.intro .daynav,body.intro #ora,body.intro #status,body.intro .cap,
-body.intro #cyc,body.intro #meseBox,body.intro .tools,
-body.intro #cycShareBox,
-body.intro .setbar{display:none}
 .setbar{display:flex;align-items:center;gap:12px;background:var(--s1);border:1px solid var(--line);
 border-radius:var(--r);padding:11px 13px;margin-bottom:18px}
 .setbar div{flex:1;min-width:0}
@@ -712,11 +706,6 @@ background:none;border:none;width:100%;cursor:pointer;font-family:inherit;text-d
 .onboard b{font-family:var(--serif);font-size:19px;display:block;margin-bottom:6px}
 .onboard>p{font-size:14px;color:var(--dim);line-height:1.55;margin-bottom:18px}
 
-/* onboarding come wizard: uno step per volta, avanti/indietro, barra di avanzamento */
-.wizhead{margin-bottom:20px}
-.wizbar{height:6px;background:var(--s2);border-radius:99px;overflow:hidden}
-.wizbar>i{display:block;height:100%;width:25%;background:var(--blue);border-radius:99px;transition:width .28s ease}
-.wizstep{font-size:12.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);font-weight:600;margin-top:9px}
 .wstep{animation:wfade .22s ease}
 @keyframes evidenzia{0%,40%{box-shadow:0 0 0 3px var(--blue)}100%{box-shadow:0 0 0 3px transparent}}
 .evidenzia{animation:evidenzia 1.6s ease-out;border-radius:12px}
@@ -724,31 +713,6 @@ background:none;border:none;width:100%;cursor:pointer;font-family:inherit;text-d
 @keyframes wfade{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:none}}
 .wq{font-family:var(--serif);font-size:23px;line-height:1.25;margin:0 0 6px}
 .wsub{font-size:14px;color:var(--dim);line-height:1.55;margin:0 0 18px}
-.wiznav{display:flex;align-items:flex-start;gap:10px;margin-top:8px}
-.wnav-main{flex:1;min-width:0}
-.wback{flex:none;background:var(--s2);border:1px solid var(--line);color:var(--dim);
-border-radius:var(--r);padding:0 16px;min-height:48px;font:inherit;font-size:14px;font-weight:600;cursor:pointer}
-.wback:hover{color:var(--ink)}
-.wnext{width:100%;background:var(--blue);color:var(--su-blu);border:none;border-radius:var(--r);
-min-height:48px;font:inherit;font-size:16px;font-weight:600;cursor:pointer;box-shadow:var(--shadow-btn)}
-.wnext:hover{filter:brightness(1.06)}
-#doSetup{width:100%;min-height:48px;font-size:16px}
-#doSetup.sec{width:auto;min-height:40px;font-size:14px;font-weight:500;padding:8px 14px;
-background:none;border:none;color:var(--blue);text-decoration:underline;text-underline-offset:3px;display:block;margin:8px auto 0}
-body.wiz-open .onboard{display:flex;flex-direction:column;min-height:calc(100vh - 24px);min-height:calc(100dvh - 24px);margin:0}
-/* #linkChoice usa lo stile .onboard ma non è il wizard — condividere la
-   classe lo rendeva visibile ogni volta che il wizard si apriva per
-   qualunque motivo, anche settimane dopo l'unica volta in cui serviva
-   davvero, con nessun gestore collegato ai bottoni (quello si collega solo
-   quando c'è davvero un link in conflitto da risolvere): un bottone che
-   non fa nulla, mostrato senza motivo. Questa regola più specifica vince
-   sempre sull'altra quando il suo hidden dice di stare nascosto. */
-body.wiz-open #linkChoice[hidden]{display:none}
-body.wiz-open #demoEsempio, body.intro #demoEsempio,
-body.wiz-open #backupNudge, body.intro #backupNudge{display:none!important}
-body.wiz-open .wsteps{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:8px}
-body.wiz-open .wiznav{position:sticky;bottom:0;background:var(--bg-blur);padding:10px 0 var(--sab)}
-@supports (backdrop-filter:blur(1px)){body.wiz-open .wiznav{backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}}
 .tools{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 22px}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);
 color:var(--bg);padding:11px 16px;border-radius:var(--r);
@@ -769,17 +733,17 @@ font:inherit;font-weight:700;padding:0 0 0 10px;cursor:pointer}
    principali, non ripetuto su ognuno. .tabbtn resta fuori: ha già un suo
    :active dedicato sull'icona (.tabbtn:active svg) più avanti — sommare
    anche questo raddoppiava lo schiacciamento solo lì. */
-.tool,.btn,.dbtn,.wnext,#doSetup,.tp,.tsec,.gcell,button.lnk,.skip,.qh-btn,.qh-opt-btn{
+.tool,.btn,.dbtn,.tp,.tsec,.gcell,button.lnk,.skip,.qh-btn,.qh-opt-btn{
   transition:transform .1s ease, opacity .1s ease;
 }
-.tool:active,.btn:active,.dbtn:active,.wnext:active,#doSetup:active,
+.tool:active,.btn:active,.dbtn:active,
 .tp:active,.tsec:active,.gcell:active,button.lnk:active,.skip:active,
 .qh-btn:active,.qh-opt-btn:active{
   transform:scale(.97); opacity:.85;
 }
 @media (prefers-reduced-motion:reduce){
-  .tool,.btn,.dbtn,.wnext,#doSetup,.tp,.tsec,.gcell,button.lnk,.skip,.qh-btn,.qh-opt-btn{transition:none}
-  .tool:active,.btn:active,.dbtn:active,.wnext:active,#doSetup:active,
+  .tool,.btn,.dbtn,.tp,.tsec,.gcell,button.lnk,.skip,.qh-btn,.qh-opt-btn{transition:none}
+  .tool:active,.btn:active,.dbtn:active,
   .tp:active,.tsec:active,.gcell:active,button.lnk:active,.skip:active,
   .qh-btn:active,.qh-opt-btn:active{transform:none}
 }
@@ -862,7 +826,6 @@ justify-content:center;flex:none;width:44px;height:44px;border-radius:999px}
 .empty{text-align:center;padding:16px 8px 6px}
 .empty img{opacity:.9;margin-bottom:9px;border-radius:9px}
 .empty p{font-size:14px;color:var(--dim);line-height:1.55;max-width:36ch;margin:0 auto}
-.wizowl{display:block;margin:0 auto 12px;border-radius:9px}
 .dq{font-size:15px;color:var(--ink);line-height:1.4;margin:2px 0 10px}
 .dq-az{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 .dq-az .dbtn{flex:1 1 auto;min-height:44px}
@@ -898,7 +861,6 @@ padding:12px 6px 12px 14px;margin:-6px 0 var(--gap-sezione);font-size:13.5px;lin
 .sapevi .lnk{display:inline-block;margin-top:4px;font-size:13.5px;padding:6px 0}
 .sapevi-az{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:6px}
 .sapevi-az .btn{min-height:40px;padding:0 14px}
-body.wiz-open #loSapevi,body.intro #loSapevi{display:none!important}
 .sapevi .x{flex:none;width:44px;height:44px;margin:-10px 0 -10px;border:0;background:none;color:var(--faint);font-size:20px;cursor:pointer;border-radius:50%}
 .acasa:hover{border-color:var(--blue-lt)}
 .acasa svg{flex:none;color:var(--blue)}
@@ -915,7 +877,6 @@ text-decoration:underline;text-underline-offset:2px;padding:12px 2px;margin:-12p
 body.essenziale:not(.tabs) .cap,body.essenziale:not(.tabs) #cyc,body.essenziale:not(.tabs) #meseBox,
 body.essenziale:not(.tabs) #icsBox,body.essenziale:not(.tabs) #scambioBox,
 body.essenziale:not(.tabs) .tools{display:none}
-body.intro #formaGiorno,body.intro #essenziale{display:none}
 
 /* ── navigazione a tab: destinazioni separate + barra in basso (feel da app) ── */
 body.tabs .setbar{display:none}          /* "Cambia" duplicava il tab Turni: unica sede */
@@ -1030,7 +991,7 @@ body.tab-oggi #vederciPagina,body.tab-oggi #partner,body.tab-oggi .piu-cal,
 body.tab-oggi .tools,body.tab-oggi .piu-info,body.tab-oggi footer{display:none}
 
 /* TURNI: ciclo, giorni liberi, partner, modifica */
-body.tab-turni #status,body.tab-turni #ora,body.tab-turni #benvenutoLink,body.tab-turni #demoEsempio,body.tab-turni #backupNudge,body.tab-turni #formaGiorno,body.tab-turni #essenziale,
+body.tab-turni #status,body.tab-turni #ora,body.tab-turni #benvenutoLink,body.tab-turni #demoEsempio,body.tab-turni #formaGiorno,body.tab-turni #essenziale,
 body.tab-turni .datebar,body.tab-turni .daynav,body.tab-turni #luciditaGiornoWrap,
 body.tab-turni #icsBox,body.tab-turni .piu-info,
 body.tab-turni #setupChecklist,body.tab-turni #adattaCard,body.tab-turni #medicoCard,body.tab-turni #firstPlanBanner,
@@ -1085,7 +1046,7 @@ body.tab-oggi #scambioPagina,body.tab-opzioni #scambioPagina{display:none}
 .persone-add{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:12px;background:var(--blue-soft);
 border:1px solid var(--blue-lt);border-radius:var(--r);color:var(--blue);font:inherit;font-size:14px;font-weight:600;cursor:pointer}
 .persone-modo{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin:14px 0 6px}
-.cal-sync-card, .piu-cal{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;box-shadow:var(--shadow-card)}
+.piu-cal{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;box-shadow:var(--shadow-card)}
 .switch{position:relative;display:inline-block;width:46px;height:26px;flex:none}
 .switch input{opacity:0;width:0;height:0}
 .switch .slider{position:absolute;cursor:pointer;top:0;right:0;bottom:0;left:0;background:var(--s2);border:1.5px solid var(--line);border-radius:999px;transition:.2s cubic-bezier(0.2,0.8,0.4,1)}
@@ -1141,9 +1102,9 @@ text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:600;color:v
 .opz-gruppo>.tool.azione::after{content:none}
 .opz-gruppo .tool-tx .tool-val{display:block;max-width:none;padding:0;margin-top:3px;font-size:13px;font-weight:700;color:var(--blue);white-space:normal}
 .opz-gruppo .tool-tx .tool-val::after{content:none}
-/* Dentro Opzioni i passi del wizard perdono titolo e introduzione (sono
-   già il nome della riga) e l'invito ai promemoria (sta in cima). */
-.ecc .wstep>.wq,.ecc .wstep>.wsub,.ecc .solo-wizard{display:none}
+/* Dentro Impostazioni i passi perdono titolo e introduzione: sono già il
+   nome della riga. */
+.ecc .wstep>.wq,.ecc .wstep>.wsub{display:none}
 #chiudiOpzioni{padding:11px;margin:-11px}
 .opz-info .hint a{display:inline-block;padding:6px 0}
 /* Link in fondo: griglia a 2 colonne, un link per cella alta 44px, senza
@@ -1179,7 +1140,7 @@ list-style:none;min-height:44px;display:flex;align-items:center}
 .piu-info-in b{color:var(--ink)}
 /* OPZIONI: solo la configurazione */
 body.tab-oggi #doScambioTurno,body.tab-oggi #scambioBox,
-body.tab-opzioni #firstPlanBanner,body.tab-opzioni #setupChecklist,body.tab-opzioni #adattaCard,body.tab-opzioni #medicoCard,body.tab-opzioni #status,body.tab-opzioni #ora,body.tab-opzioni #benvenutoLink,body.tab-opzioni #demoEsempio,body.tab-opzioni #backupNudge,body.tab-opzioni #formaGiorno,body.tab-opzioni #essenziale,
+body.tab-opzioni #firstPlanBanner,body.tab-opzioni #setupChecklist,body.tab-opzioni #adattaCard,body.tab-opzioni #medicoCard,body.tab-opzioni #status,body.tab-opzioni #ora,body.tab-opzioni #benvenutoLink,body.tab-opzioni #demoEsempio,body.tab-opzioni #formaGiorno,body.tab-opzioni #essenziale,
 body.tab-opzioni .datebar,body.tab-opzioni .daynav,body.tab-opzioni .cap.ciclo,body.tab-opzioni #cyc,body.tab-opzioni #meseBox,
 body.tab-opzioni #cycShareBox,
 body.tab-opzioni .cycbar,body.tab-opzioni #cycRange,body.tab-opzioni #doAndamenti,body.tab-opzioni #doScambioTurno,body.tab-opzioni #scambioBox,
@@ -1194,10 +1155,6 @@ body:not(.tab-opzioni) #opzioni{display:none}
 #opzioni .opz-testa{position:sticky;top:var(--appbar-h,64px);z-index:19;background:var(--bg-blur);padding:6px 0;box-shadow:-20px 0 0 var(--bg-blur),20px 0 0 var(--bg-blur);clip-path:inset(0 -20px)}
 @supports (backdrop-filter:blur(1px)){#opzioni .opz-testa{backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}}
 .opz-info{margin-top:0}
-/* Il nodo "prima di chiudere, salva" appartiene alla fine del wizard — dentro
-   Dettagli del piano (Opzioni) è fuori contesto, Salva/Esporta hanno già la
-   loro sezione a parte. Vedi il commento sul markup di #wizSaveArea. */
-#opzBox4 #wizSaveArea{display:none}
 .opz-info a{color:var(--blue);text-decoration:none;border-bottom:1px solid var(--blue-lt)}
 /* Andamenti, come nel mockup: sezioni separate (ognuna la propria card),
    non più tutto scaricato dentro un'unica card grande — prima #andamenti
@@ -1234,11 +1191,6 @@ padding:6px 16px;box-shadow:var(--shadow-card)}
 .whero{background:var(--blue-soft);border-radius:20px;padding:18px;margin-bottom:var(--gap-sezione)}
 .whero-num{font-family:var(--serif);font-size:22px;font-weight:600;line-height:1.25;margin:4px 0 4px;color:var(--ink)}
 .whero-sub{font-size:13px;color:var(--dim)}
-.wintro{font-size:14.5px;color:var(--ink);line-height:1.6;margin:0 0 20px;padding:14px 15px;
-background:var(--s1);border-radius:var(--r);border:1px solid var(--line)}
-.wintro b{color:var(--ink);font-weight:600}
-/* durante l'onboarding a schermo intero: niente barre app */
-body.intro .appbar,body.intro .tabbar,body.intro #opzioni{display:none}
 
 @media (max-width:430px){
 .wrap{padding:0 16px}
@@ -1341,20 +1293,15 @@ header b{font-size:23px}
   <h2 class="wq">Hai aperto un link con turni diversi dai tuoi</h2>
   <p class="wsub" id="linkChoiceWho">Non coincide con la configurazione che hai già su questo telefono.</p>
   <button class="btn g" type="button" id="linkAsPerson" style="width:100%;margin-top:14px">È di qualcuno che vuoi seguire → aggiungila alla lista</button>
-  <button class="btn" type="button" id="linkReplace" style="width:100%;margin-top:10px">È il mio backup → sostituisci la mia configurazione</button>
+  <button class="btn" type="button" id="linkReplace" style="width:100%;margin-top:10px">È la mia copia di sicurezza → sostituisci quella che ho</button>
   <button class="skip" type="button" id="linkIgnore" style="margin-top:10px">Non ora, resta con quella che ho</button>
 </div>
-<div class="onboard" id="onboard" hidden>
-  <div class="wizhead">
-    <img class="wizowl" src="./owl-mark.png" alt="" width="40" height="40">
-    <div class="wizbar"><i id="wizProg"></i></div>
-    <div class="wizstep" id="wizStepLabel">Passo 1 di 4</div>
-  </div>
-
+<!-- Deposito dei passi di configurazione: Impostazioni li sposta nei suoi
+     pannelli la prima volta che si aprono (apriSezioneInline). -->
+<div id="onboard" hidden>
   <div class="wsteps" id="wsteps">
 
   <section class="wstep" data-step="1">
-    <p class="wintro">Segui il tuo ciclo di turni e Notturnisti ti dice, giorno per giorno, quando dormire, quando prendere luce e quando fermarti col caffè — così il corpo fa meno fatica a stare al passo. Due tocchi, se il tuo schema è già tra i più comuni.</p>
     <h2 class="wq">Che turni fai?</h2>
     <p class="wsub">Scegli lo schema più vicino ai tuoi. Non c'è il tuo? Scegli <b>Personalizza</b> e te lo costruisci in due minuti.</p>
     <div class="q">
@@ -1489,63 +1436,10 @@ header b{font-size:23px}
       <label class="riga-sw" for="mattinoBif"><span>Prima di un turno molto presto, dividi il sonno</span><span class="switch"><input type="checkbox" id="mattinoBif"><span class="slider"></span></span></label>
       <span class="hint">Se dovresti coricarti prima delle 21: un sonno più corto a un'ora naturale, più un pisolino dopo il turno.</span>
     </div>
-    <!-- Le notifiche erano raggiungibili solo da un bottone sepolto in
-         Opzioni, mai menzionate qui — chi configura tutto il resto non
-         sapeva nemmeno che esistessero. Un accenno qui, non un prompt
-         automatico (quello resta vietato): il permesso vero lo chiede
-         comunque solo ntChiediPermesso(), solo al tocco. -->
-    <div class="q solo-wizard">
-      <p class="hint">Vuoi un promemoria sul telefono quando ti devi coricare o svegliare? <button class="lnk" type="button" id="doNotificheWiz" style="display:inline">Attiva i promemoria →</button></p>
-    </div>
-    <!-- Questo pezzo appartiene alla CHIUSURA del wizard, non a "Dettagli
-         del piano" in sé — apriSezioneInline(4) sposta fisicamente questa
-         .wstep dentro #opzBox4 la prima volta che si apre da Opzioni, dove
-         Salva/Esporta hanno già la loro sezione a parte subito sotto: senza
-         #wizSaveArea in quel contesto, comparivano due inviti a salvare/
-         esportare uno sopra l'altro. La regola CSS (#opzBox4 #wizSaveArea)
-         lo nasconde SOLO lì; durante il wizard vero il nodo è ancora al suo
-         posto originale, invariato. -->
-    <div id="wizSaveArea">
-    <div class="q" id="wizSaveBox" style="margin-top:22px;padding-top:18px;border-top:1px solid var(--line)">
-      <b>Prima di chiudere, salva la configurazione</b>
-      <p class="hint">Sta tutta in un link — se la perdi, la riscrivi da capo.</p>
-      <button class="btn g" type="button" id="doSaveWizEnd" style="margin-top:6px">Salva la configurazione →</button>
-      <label class="p1" style="margin-top:10px;display:flex;align-items:center;gap:8px">
-        <input type="checkbox" id="wizSaveConfirm"> Ho salvato la configurazione
-      </label>
-    </div>
-    <div class="q" style="margin-top:14px">
-      <div style="background:var(--s1);border:1px solid var(--blue);border-radius:var(--r);padding:14px 16px;box-shadow:var(--shadow-btn)">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
-          <span style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;background:var(--blue-soft);color:var(--blue)">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-            </svg>
-          </span>
-          <b style="font-size:15px;color:var(--ink)">Metti i tuoi orari nel calendario del telefono</b>
-        </div>
-        <p class="hint" style="margin:0 0 10px;color:var(--dim);line-height:1.4">Trovi sonno, sveglie e ultimo caffè nel calendario che guardi già, senza dover aprire l'app.</p>
-        <button class="btn pri" type="button" id="doOpenCalendario" style="display:block;width:100%;text-align:center;font-weight:700">Sincronizza con il calendario →</button>
-      </div>
-    </div>
-    </div>
   </section>
 
   </div>
 
-  <div class="wiznav">
-    <button class="wback" id="wizBack" hidden>← Indietro</button>
-    <div class="wnav-main">
-      <button class="wnext" id="wizNext">Avanti →</button>
-      <button class="btn" id="doSetup" hidden>Vedi il mio piano</button>
-      <!-- Solo al passo 2 del primo avvio: turni + oggi bastano già per un
-           piano vero (viaggio, caffeina ecc. hanno default sensati) — il
-           resto (passi 3-4) resta a un tocco ma non è più obbligatorio
-           per vedere qualcosa di reale. -->
-      <button class="lnk" type="button" id="doVediSubito" hidden style="display:block;width:100%;text-align:center;margin-top:8px">Vedi il mio piano ora →</button>
-    </div>
-  </div>
-  <button class="skip" id="doSkip">Guarda un esempio</button>
 </div>
 <div id="benvenutoLink" class="card" hidden></div>
 <div id="demoEsempio" class="card" hidden></div>
@@ -1556,7 +1450,6 @@ header b{font-size:23px}
 <div id="adattaCard" class="card invito" hidden></div>
 <div id="medicoCard" class="card invito" hidden></div>
 <div id="setupNudge" class="card" hidden></div>
-<div id="backupNudge" class="card invito" hidden></div>
 <!-- Data sopra Adesso, non sotto: prima di sapere "cosa fare adesso" serve
      sapere di quale giorno si sta parlando (specie sfogliando avanti). -->
 <div class="datebar">
@@ -2792,7 +2685,7 @@ var qrcodegen;
 // prima che il resto di questo script (che lo usa ovunque, via NT.) parta —
 // stessa garanzia di ordine che un normalizzatore await avrebbe dato, senza
 // bisogno di riscrivere tutto in async. I moduli sono già strict di default.
-import { createEngine, resolveNextAction, encEcc, decEcc, encGiorni, decGiorni, GIORNI_SPECIALI } from "./engine.js";
+import { createEngine, encEcc, decEcc, encGiorni, decGiorni, GIORNI_SPECIALI } from "./engine.js";
 import { LINGUA, giorniBrevi, mesiBrevi } from "./lingua.js";   // formato di date e giorni: un solo punto
 import platform from "./platform.js";
 /* MOTORE NOTTURNISTI v4 — turni arbitrari.
@@ -2838,7 +2731,6 @@ Object.assign(state, {
 });
 
 const t = s => (+s.slice(0,2))*60 + (+s.slice(3,5));
-const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
 const day = (d,n) => { const x=new Date(d); x.setDate(x.getDate()+n); return x; };
 // Minuti reali trascorsi dalla mezzanotte del giorno a fuoco (state.focus).
 // Di solito coincide con "che ora è adesso" (state.focus è oggi) — ma se il
@@ -2902,7 +2794,6 @@ const hhmm = m => { const x=mod1440(Math.round(m/5)*5);
 // stesso orario ma al quarto d'ora, per i menu che hanno solo quei gradini
 const hhmm15 = m => { const x=mod1440(Math.round(m/15)*15);
   return String(Math.floor(x/60)).padStart(2,"0")+":"+String(x%60).padStart(2,"0"); };
-const near = (m,r) => { while(m-r>720) m-=1440; while(m-r<-720) m+=1440; return m; };
 
 const iso = d => d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 const parseIso = s => new Date(s + "T12:00:00");
@@ -3067,6 +2958,7 @@ const store = {
   get(k,d){ try{ const v=localStorage.getItem("nt:"+k); return v?JSON.parse(v):d; }catch(e){ return d; } },
   set(k,v){ let ok=true; try{ localStorage.setItem("nt:"+k,JSON.stringify(v)); }catch(e){ ok=false; }
     if(DIARIO_CHIAVI.has(k)) dopoDiario();
+    passaggioIOS();
     return ok; },
   // un oggetto giorno → valore (diario, sveglie…): qualunque altra cosa salvata lì è un dato rotto
   mappa(k){ const v=this.get(k,null); return (v && typeof v==="object" && !Array.isArray(v)) ? v : {}; },
@@ -3359,7 +3251,6 @@ function toastUndo(msg, azione){
 /* ===================== TESTI ===================== */
 const esc = x => String(x==null?"":x).replace(/[&<>"']/g,
   c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const COL={R:"var(--faint)"};
 const nameOf=c=>c==="?"?"Da inserire":(state.shifts[c]?state.shifts[c].n:"Riposo");
 // un codice turno è "notturno" se attraversa o parte nel cuore della notte
 function isNightCode(c){ const sh=state.shifts&&state.shifts[c]; if(!sh) return false;
@@ -3634,7 +3525,6 @@ function cards(P){
   let ult=wake, piuLunga=0;
   for(const [a,z] of tratti){ if(a-ult>piuLunga) piuLunga=a-ult; ult=Math.max(ult,z); }
   if(night || filate >= 1020 || piuLunga >= 1140){
-    const fine = finiti;
     const senzaPisolino = Math.max(0, b.end - wake);
     const spezzata = filate < senzaPisolino - 20;
     // Dawson & Reid parte da 17 ore: sotto quella soglia non estrapolo un numero
@@ -3757,24 +3647,6 @@ const $=s=>document.querySelector(s);
 // file: con quelli i browser prima di Chrome 80 / iOS 13.4 scartano l'intero
 // script e la pagina resta vuota.
 const valoreDi=s=>{ const e=$(s); return e ? e.value : undefined; };
-const DLAB=["a pezzi","stanco","così così","sveglio","in forma"];
-// Il pallino distingueva 5 livelli solo per colore — un'informazione
-// color-only su un indicatore da 16px, verificato in audit. Cinque forme
-// diverse leggibili a quella scala non ci stanno davvero (le stesse icone
-// dei volti, provate in miniatura, perdono il tratto sotto i 13px). Tre
-// forme reggono: giù/piatto/su, la stessa direzione già usata nella curva
-// della bocca dei volti, ridotta all'essenziale geometrico. Il voto esatto
-// (1-5) resta nel title e nella card del giorno — qui serve un colpo
-// d'occhio, non la precisione.
-const ICON_TEND = {
-  giu:   '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>',
-  piatto:'<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 12h12"/></svg>',
-  su:    '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>',
-};
-// Il colore resta, ma come rinforzo — non più l'unico canale: la forma
-// porta già l'informazione da sola.
-const DCOL_TEND = {giu:"var(--orange-fill)", piatto:"var(--faint)", su:"var(--blue)"};
-const DEMO=["\u{1F62B}","\u{1F615}","\u{1F610}","\u{1F642}","\u{1F600}"];
 
 // riepilogo descrittivo: come hai dormito, raggruppato per turno
 function dayKind(off){
@@ -4133,7 +4005,6 @@ function render(){
   renderAttivazione();
   renderAdatta();
   renderMedico();
-  renderBackupNudge();
   renderFormaGiorno(P);                // si azzera da solo in dettaglio
   renderEssenziale(P, CARDS);          // si azzera da solo in dettaglio
   renderACasa();
@@ -4566,7 +4437,6 @@ const isoOggi = () => iso(new Date());
 const lunediDi = d => { const x=new Date(d); x.setDate(x.getDate()-((x.getDay()+6)%7)); return x; };
 
 function demoEsempioVisibile(){
-  if(document.body && (document.body.classList.contains("wiz-open") || document.body.classList.contains("intro"))) return false;
   return sceltaSchemaAperta || !(state.turniConfigurati || demoEsempioChiuso);
 }
 // Minuti "dalle/alle" → turno. Fine prima dell'inizio = finisce il giorno
@@ -4602,7 +4472,6 @@ function renderDemoEsempio(){
   const opt=(attr,ic,nome,sotto)=>'<button type="button" class="qh-opt-btn" '+attr+'><span class="qh-opt-ic">'+ic+'</span><div class="qh-opt-tx"><b>'+esc(nome)+'</b>'+(sotto?'<small>'+esc(sotto)+'</small>':'')+'</div><span class="qh-opt-arrow">→</span></button>';
   const indietro=(dest,txt)=>'<button type="button" class="lnk" data-subflow="'+dest+'" style="margin-bottom:10px;font-size:13px">← '+txt+'</button>';
   const chiudi = (sceltaSchemaAperta && state.turniConfigurati) ? '<button type="button" class="lnk" data-chiudi-schema style="margin-bottom:10px;font-size:13px">← Annulla</button>' : "";
-  const ic = k => k==="N"?ICON.moon : k==="M"?ICON.sun : k==="R"?ICON.sparkles : ICON.dim;
   const f = demoEsempioSubflow;
   const avanzate = '<button type="button" class="lnk" id="qhAvanzate" style="display:block;width:100%;text-align:center;margin-top:12px;font-size:12.5px;color:var(--dim)">Impostazioni avanzate</button>';
 
@@ -4925,7 +4794,6 @@ if($("#demoEsempio")) $("#demoEsempio").addEventListener("click", e=>{
 });
 
 function firstPlanBannerVisibile(){
-  if(document.body && (document.body.classList.contains("wiz-open") || document.body.classList.contains("intro"))) return false;
   const mostraBenvenuto = primaVoltaDaLink && !benvenutoLinkChiuso;
   return !!(state.turniConfigurati && !firstPlanBannerChiuso && !mostraBenvenuto && !sceltaSchemaAperta);
 }
@@ -5108,7 +4976,6 @@ function giorniDaAttivazione(){
 function attivazioneVisibile(){
   if(!state.turniConfigurati || sceltaSchemaAperta || store.get("attivazioneNascosta", false)) return false;
   if(firstPlanBannerVisibile()) return false;
-  if(document.body && (document.body.classList.contains("wiz-open") || document.body.classList.contains("intro"))) return false;
   if(!vociAttivazione().some(x=>!x.ok)) return false;
   const dal = store.get("attivazioneDal", "");
   if(!dal){ store.set("attivazioneDal", iso(new Date())); return true; }
@@ -5171,11 +5038,6 @@ function renderAttivazione(){
       // che si apre: la lista occupava quasi una schermata e spingeva «Adesso»,
       // il motivo per cui si apre l'app, in fondo alla prima schermata.
       const compatta = store.get("attivazioneDal","")!==iso(new Date()) && !attivazioneAperta;
-      // Un invito alla volta sopra il piano: il giorno in cui ne compare un
-      // altro, la riga compatta cede il posto (torna domani; è sempre in Impostazioni).
-      if(compatta && [backupNudgeVisibile].some(f=>{ try{ return f(); }catch(e){ return false; } })){
-        el.hidden=true; return renderOpzFunzioni(voci);
-      }
       if(compatta){
         el.innerHTML='<button type="button" class="attiva-riga" id="apriAttivazione" aria-expanded="false">'+
           '<span class="tx"><b>Rendi automatico il tuo piano</b><span>'+esc(voci.filter(x=>!x.ok).map(x=>x.t).join(" · "))+'</span></span>'+
@@ -5295,7 +5157,6 @@ if($("#medicoCard")) $("#medicoCard").addEventListener("click", e=>{
 function adattaVisibile(){
   if(_adattaFatto) return true;
   if(!state.turniConfigurati || sceltaSchemaAperta || firstPlanBannerVisibile()) return false;
-  if(document.body && (document.body.classList.contains("wiz-open") || document.body.classList.contains("intro"))) return false;
   return !!suggerimentoAdatta();
 }
 const tipoAdatta=f=> f==="maxAdvance" ? "anticipo" : "liberi";
@@ -5447,7 +5308,6 @@ function notificheInvito(items){
 
 function renderSetupNudge(){
   const el=$("#setupNudge"); if(!el) return;
-  if(document.body && (document.body.classList.contains("wiz-open") || document.body.classList.contains("intro"))){ el.hidden=true; return; }
   const mostraBenvenuto = primaVoltaDaLink && !benvenutoLinkChiuso;
   if(state.turniConfigurati || !demoEsempioChiuso || mostraBenvenuto){ el.hidden=true; return; }
   el.hidden=false;
@@ -5470,36 +5330,6 @@ if($("#setupNudge")) $("#setupNudge").addEventListener("click", e=>{
   }
 });
 
-// Chi usa "Vedi il mio piano ora →" al passo 2 esce dal wizard SENZA passare
-// dalla spunta obbligatoria "Ho salvato la configurazione" (quella vive solo
-// sull'ultimo passo, qui non c'è arrivato) — i suoi turni veri restano solo
-// nel localStorage di questo browser, senza che nessuno glielo dica. Questo
-// banner è il modo in cui quell'avviso arriva comunque, senza reintrodurre
-// il blocco che l'uscita rapida voleva togliere: si vede su Oggi finché non
-// salva o non lo chiude, sparisce da solo appena state.backupDone diventa
-// vero (salvaConfigurazione() lo imposta).
-let usciteRapide = false, backupNudgeChiuso = false;
-// Estratta a parte: install/share/ics devono cederle il passo quando è
-// attiva (i turni non salvati sono un rischio di perdita dati vero, più
-// urgente di un invito a installare o condividere) — prima nessuno dei
-// banner successivi sapeva di lei, potevano comparire insieme.
-function backupNudgeVisibile(){
-  return usciteRapide && !state.backupDone && !backupNudgeChiuso;
-}
-function renderBackupNudge(){
-  const el=$("#backupNudge"); if(!el) return;
-  if(!backupNudgeVisibile()){ el.hidden=true; return; }
-  el.hidden=false;
-  el.innerHTML =
-    '<button type="button" class="x" id="chiudiBackupNudge" aria-label="Chiudi">×</button>'+
-    '<b>Non hai ancora salvato i tuoi turni</b>'+
-    '<p class="hint" style="margin-top:6px">Stanno solo su questo telefono'+(window.NT_APP.nativo?'':', in questo browser')+'. Se li perdi (nuovo telefono, dati cancellati), li riscrivi da capo — salva il link ora, richiede un tocco.</p>'+
-    '<button class="btn azione" type="button" id="doSalvaOraNudge">Salva la configurazione</button>';
-}
-if($("#backupNudge")) $("#backupNudge").addEventListener("click", e=>{
-  if(e.target.closest("#chiudiBackupNudge")){ backupNudgeChiuso=true; renderBackupNudge(); return; }
-  if(e.target.closest("#doSalvaOraNudge")) salvaConfigurazione();
-});
 
 // Invito a installare l'app — prima viveva solo come un bottone infilato
 // nella tab Più, mai su Oggi dove si passa davvero il tempo, mai nel
@@ -6416,30 +6246,6 @@ function insightSettimana(cs, ws, sm, corr){
   return null;
 }
 
-// Esempio statico di "Il tuo andamento" per chi non ha ancora abbastanza dati
-// (diario troppo giovane) — stessa identica struttura/classi della pagina vera
-// (renderAndamenti sotto), numeri plausibili ma inventati, mai spacciati per
-// dati reali: l'eyebrow "Esempio" lo dice chiaro, in ogni card. Dimostra
-// invece di spiegare, come renderPiuCal() fa già per il calendario che si
-// aggiorna da solo — qui non si possono usare i dati VERI dell'utente (non li
-// ha ancora abbastanza), quindi l'onestà sta nell'etichetta, non nel dato.
-// Niente pulsanti "applica" veri: sarebbe pericoloso collegarli per sbaglio
-// al listener data-apply-field che scrive nello stato reale.
-function esempioAndamentoHtml(){
-  const ESB='<span class="andamento-insight-eyebrow" style="color:var(--faint)">Esempio</span>';
-  return '<div class="andamento-insight">'+
-      '<span class="aic">'+ICON.sun+'</span>'+
-      '<div>'+ESB+'Quando il piano ti chiede di alzarti prima, in media ti alzi 25 minuti dopo. Il valore che hai messo (60 min) è più di quanto reggi.'+
-      '<div style="margin-top:8px"><span class="lnk" style="cursor:default">Prova 40 min →</span></div></div></div>'+
-    '<div class="andamento-hero" style="margin-top:10px">'+ESB+
-      '<div class="andamento-num" style="color:var(--orange)">-1h 20m</div>'+
-      '<span class="hint" style="display:block">Dormi in media 6h40 contro 8h00 pianificate</span>'+
-      '<svg viewBox="0 0 280 44" style="width:100%;height:44px;display:block;margin-top:10px" role="img" aria-label="Esempio di andamento del debito di sonno">'+
-        '<polyline points="4,30 43,26 82,32 121,20 160,14 199,18 238,10 276,8" fill="none" stroke="var(--orange)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>'+
-        '<circle cx="276" cy="8" r="3.5" fill="var(--orange)"/>'+
-      '</svg>'+
-    '</div>';
-}
 // Il carico dei turni in una finestra di n giorni da oggi+da: notti
 // (almeno 3 ore fra le 22 e le 6), la serie più lunga di notti, i riposi
 // sotto le 11 ore fra un turno e l'altro (il minimo del D.lgs. 66/2003),
@@ -6789,7 +6595,6 @@ function calDeviceOS(){
 function calSyncHtml(feedUrl, copyBtnId, isCouple){
   const os = calDeviceOS();
   const https = feedUrl.replace(/^webcal/, "https");
-  const cosa = isCouple ? "i riposi in comune" : "i tuoi turni";
   const icsName = isCouple ? "notturnisti-insieme.ics" : "notturnisti.ics";
   const gcalSettingsUrl = "https://calendar.google.com/calendar/u/0/r/settings/addbyurl";
 
@@ -7180,11 +6985,8 @@ function apriFinestraSonno(){
 // il vero riduttore di frizione — non serve più ricordarsi di aprire
 // l'app, ci pensa la sveglia del calendario del telefono. Prima invisibile
 // a un utente nuovo: viveva solo in Più (ora sparita), mai menzionata
-// durante l'onboarding. Se il wizard a schermo pieno è aperto (primo
-// avvio), va chiuso per primo — altrimenti la tab cambierebbe sotto,
-// nascosta.
+// durante l'onboarding.
 function apriCalendarioDaWizard(){
-  if(document.body.classList.contains("wiz-open")) chiudiIntro(false);
   // Nell'app: niente feed, si va dritti all'interruttore del calendario del telefono.
   if(!platform.calendar.available && window.NTPaid && window.NTPaid.open){
     window.NTPaid.open(window.NTPaid.paid() ? "account" : "attiva");
@@ -7311,9 +7113,8 @@ function chiudiQuickShift(){
   if(document.body.classList.contains("segna-aperta")) renderSegna();
 }
 
-// Retrocompatibilità per chiamate pregresse ad apriEcc / chiudiEcc
+// Retrocompatibilità per chiamate pregresse ad apriEcc
 function apriEcc(d){ apriQuickShift(d); }
-function chiudiEcc(){ chiudiQuickShift(); }
 
 const PANNELLI=["#icsBox","#opzBox1","#opzBox3","#opzBox4"];
 function soloUno(id){
@@ -7444,15 +7245,15 @@ if($("#qsVaiScambio")) $("#qsVaiScambio").addEventListener("click",()=>{
 
 // tocco lungo su un giorno del ciclo apre il quick shift per quel giorno
 {
-  let timer=null, mosso=false;
+  let timer=null;
   const giornoDi=e=>{ const el=e.target.closest(".crow"); return el? day(state.focus,+el.dataset.off) : null; };
   $("#cyc").addEventListener("pointerdown",e=>{
-    const d=giornoDi(e); if(!d) return; mosso=false;
+    const d=giornoDi(e); if(!d) return;
     timer=setTimeout(()=>{ timer=null; eccAppena=true; apriQuickShift(d); }, 550);
   });
   const stop=()=>{ if(timer){ clearTimeout(timer); timer=null; } };
   for(const ev of ["pointerup","pointercancel","pointerleave"]) $("#cyc").addEventListener(ev,stop);
-  $("#cyc").addEventListener("pointermove",()=>{ mosso=true; stop(); });
+  $("#cyc").addEventListener("pointermove",stop);
 }
 function diaryChange(e){
   const napp=e.target.closest("[data-napp]");
@@ -7875,6 +7676,11 @@ const CONSIGLI_FUNZIONE=[
     t:()=> conCicloDaMandare() ? "Manda il tuo ciclo a chi lavora con te: trova l'app già pronta, e vedete subito quando siete liberi insieme."
       : "Aggiungi chi lavora con te o chi ti aspetta a casa: vedi subito quando siete liberi insieme.",
     a:()=>{ if(conCicloDaMandare()) invitaChiLavoraConTe(); else { setTab("turni"); apriVederci(); } }},
+  // I dati stanno solo sul telefono: la copia è un link, e l'unico modo per
+  // ritrovarli su un telefono nuovo. Dopo una settimana, quando c'è qualcosa da perdere.
+  {k:"copia", dopo:7, quando:()=>!state.backupDone,
+    t:()=>"I tuoi turni stanno solo su questo telefono"+(window.NT_APP.nativo?"":", in questo browser")+". La copia di sicurezza è un link: se cambi telefono, lo apri e ritrovi tutto.",
+    cta:()=>"Salva la copia", a:()=>salvaConfigurazione()},
   {k:"mese", t:()=>"Puoi ricopiare il foglio turni in un minuto, un tocco per giorno, o importarlo da un file.", a:()=>{ setTab("turni"); apriSegna(); }},
   {k:"calendario", quando:()=>!inLista("calendario") && (platform.calendar.available ? !platform.calendar.attivo() : !(window.NTPaid && window.NTPaid.paid())),
     t:()=>"Turni e ore di sonno nel calendario del telefono, aggiornati da soli: li vedi dove guardi già i tuoi impegni.", cta:()=>"Attiva", a:()=>apriCalendarioDaWizard()},
@@ -7910,7 +7716,7 @@ function consiglioFunzione(){
   if(!state.turniConfigurati || !state.firstSeenAt || document.body.classList.contains("primo-avvio")) return null;
   const visti=vistiLoSapevi(S);
   const giorni=(new Date(oggi)-new Date(state.firstSeenAt))/864e5;
-  if(giorni<3 || invitiInPausa(true) || backupNudgeVisibile()) return null;
+  if(giorni<3 || invitiInPausa(true)) return null;
   if(S.oggi && (new Date(oggi)-new Date(S.oggi.d))/864e5<3) return null;
   const lista=CONSIGLI_FUNZIONE.slice().sort((a,b)=> state.repeat===false ? (a.k==="mese"?-1:b.k==="mese"?1:0) : 0);
   const c=lista.find(x=>!visti.includes(x.k) && giorni>=(x.dopo||0) && disponibile(x));
@@ -8011,29 +7817,11 @@ const cycGo=n=>{
   if(nx) nx.disabled = state.repeat !== false ? false : cicloOff>=cicloMax();
   render();
 };
-// Le tre sezioni di Opzioni non aprono più il wizard a schermo pieno — lo
-// stesso contenuto (con tutti i suoi campi già collegati) si sposta
-// direttamente qui, la prima volta che serve. wizShow() interroga sempre
-// "#wsteps .wstep" al momento, non un riferimento fisso: spostare un passo
-// altrove non lo confonde, semplicemente smette di vederlo lì — motivo per
-// cui questo funziona senza duplicare né gli id né i gestori già scritti.
-// "Turni e ciclo" include anche il passo 2 (che turno è oggi, il primo
-// giorno del ciclo) — la sua stessa descrizione lo prometteva già, ma
-// prima nessuno dei tre bottoni ci portava davvero: un buco vero, non
-// solo di questo giro di lavoro.
-// Estratta da apriIntro() (dove viveva da sola): i campi dei passi del
-// wizard mostrano il valore salvato SOLO se qualcosa li ripopola da state
-// — apriIntro() lo faceva, ma solo lei, e solo al primo avvio/dalla
-// schermata intera. Aprendo lo stesso passo più tardi da Opzioni
-// (apriSezioneInline sotto) nessuno lo richiamava: i campi restavano al
-// valore che il markup mostra di default (la prima opzione, deselezionato)
-// invece del valore vero — sembrava che il salvataggio non avesse
-// funzionato, quando invece stava salvando bene, solo non lo si vedeva più
-// una volta chiusa la pagina. Trovato da uno screenshot reale (Sonno
-// diceva giustamente 00:30→09:15 nel riepilogo, ma il selettore sotto
-// mostrava 19:00). Richiamata da entrambi i punti da cui questi campi
-// diventano visibili: nessuno dei due deve ricordarsi a mano quali campi
-// popolare, un solo posto che lo sa davvero.
+// Le sezioni di Impostazioni non hanno campi propri: la prima volta che si
+// aprono ci si spostano i passi di configurazione (#onboard), con i loro id
+// e gestori. «Turni e ciclo» prende i passi 1 e 2 (turni e posizione nel
+// ciclo). sincronizzaCampiPiano() riporta nei campi i valori salvati ogni
+// volta che diventano visibili: senza, mostrerebbero i valori del markup.
 // Un orario salvato fuori dalla griglia delle tendine (non a quarti d'ora, o
 // fuori intervallo: arriva così da un link o da versioni precedenti) prima
 // faceva ricadere la tendina su 23:30/07:30, cioè mostrava un orario diverso
@@ -8087,7 +7875,6 @@ function apriSezioneInline(n){
   });
   sincronizzaCampiPiano();
   if(passi.includes(1)){ renderWizSeqGrid(); mostraAvanzate(); }
-  if(n===4){ const wsc=$("#wizSaveConfirm"); if(wsc) wsc.checked = !!state.backupDone; }
   render();
   if(box.scrollIntoView) box.scrollIntoView({behavior:"smooth",block:"nearest"});
 }
@@ -8839,7 +8626,7 @@ async function salvaConfigurazione(){
   // Prima il foglio di condivisione nativo del telefono — un tocco, scegli
   // WhatsApp o SMS dalla lista che il telefono stesso propone, invece di
   // copiare e dover cambiare app a mano.
-  const testo="La mia configurazione Notturnisti — salvala per non perderla, o passarla a un altro dispositivo.";
+  const testo="La mia copia di sicurezza di Notturnisti: aprila su un telefono nuovo per ritrovare turni e impostazioni.";
   const isFirstSave = !state.backupDone;
   try{
     if(platform.canShare()){
@@ -9327,7 +9114,6 @@ if($("#personaLink")) $("#personaLink").addEventListener("input", ()=>{
 if($("#personaPattern")) $("#personaPattern").addEventListener("input", ()=>{
   const box=$("#personaShiftsBox"); if(box && !box.hidden) renderPersonaShifts();
 });
-if($("#doOpenCalendario")) $("#doOpenCalendario").onclick=()=>apriCalendarioDaWizard();
 // Un messaggio già scritto per chiederle i turni: cosa toccare per mandare
 // il suo link, e il nostro, così anche lei vede subito i giorni in comune.
 if($("#doChiediLink")) $("#doChiediLink").onclick=async()=>{
@@ -9640,114 +9426,6 @@ window.addEventListener("hashchange", ()=>{
     gestisciLinkChoice(p, h);
   }
 });
-function chiudiIntro(gotoOggi){
-  const o=$("#onboard"); if(o) o.hidden=true;
-  if(document.body && document.body.classList){ document.body.classList.remove("intro"); document.body.classList.remove("wiz-open"); }
-  // "Salva e vedi il piano" deve portare davvero al piano: se il wizard era
-  // aperto per la configurazione principale (da Opzioni → Turni e ciclo/Sonno/
-  // Dettagli), senza questo si resta sulla tab da cui si era partiti invece di
-  // vedere il risultato. Non vale per "modifica partner": lì si resta in Turni,
-  // dove la card del partner appena salvata è visibile.
-  if(gotoOggi && typeof setTab==="function") setTab("oggi");
-}
-const WIZ = { step:1, total:4, optFrom:3, edit:false };
-function wizShow(n){
-  WIZ.step = Math.max(1, Math.min(WIZ.total, n));
-  document.querySelectorAll("#wsteps .wstep").forEach(s=>{ s.hidden = (+s.dataset.step !== WIZ.step); });
-  const prog=$("#wizProg"); if(prog) prog.style.width = Math.round(WIZ.step/WIZ.total*100)+"%";
-  const lab=$("#wizStepLabel"); if(lab) lab.textContent = "Passo "+WIZ.step+" di "+WIZ.total;
-  const last = WIZ.step===WIZ.total;
-  const back=$("#wizBack"); if(back) back.hidden = WIZ.step===1;
-  const next=$("#wizNext");
-  if(next){ next.hidden=false;
-    next.textContent = last ? (WIZ.edit?"Salva e vedi il piano":"Vedi il mio piano") : "Avanti →"; }
-  const setup=$("#doSetup");
-  if(setup){ setup.hidden = !(WIZ.edit && !last);
-    // Se "Avanti" e "Salva" convivono (modifica), il salvataggio scende di peso:
-    // due bottoni pieni a tutta larghezza generano paralisi decisionale.
-    setup.classList.toggle("sec", !last && WIZ.edit); }
-  // "Guarda un esempio" ha senso solo al primo avvio — durante una modifica
-  // era comunque visibile e permetteva di chiudere il wizard aggirando la
-  // spunta obbligatoria, un'altra via d'uscita mai controllata.
-  const skip=$("#doSkip"); if(skip) skip.hidden = WIZ.edit;
-  // Turni (passo 1) + oggi (passo 2) bastano già per un piano vero — il
-  // resto ha default sensati. Solo al primo avvio, solo al passo 2: in
-  // modifica non ha senso (si sta già vedendo il piano sotto).
-  const vs=$("#doVediSubito"); if(vs) vs.hidden = !(WIZ.step===2 && !WIZ.edit);
-  const sc=$("#wsteps"); if(sc && sc.scrollTo) sc.scrollTo(0,0);
-  if(WIZ.step===1) renderWizSeqGrid();
-  if(WIZ.step===4){ renderWizPeopleList();
-    // Chi ha già salvato la configurazione corrente non deve rispuntare
-    // nulla — la spunta riflette quello che è vero adesso, non parte
-    // sempre vuota. Se qualcosa cambia dopo, il resto del meccanismo
-    // (nt:config-changed) già riporta backupDone a false da solo.
-    const wsc=$("#wizSaveConfirm"); if(wsc) wsc.checked = !!state.backupDone;
-  }
-}
-function wizReset(){ wizShow(1); }
-if($("#wizNext")) $("#wizNext").onclick=()=>{
-  if(WIZ.step>=WIZ.total){
-    const b=$("#doSetup"); if(b) b.click();
-  }
-  else{ track("onboarding_step_completed",{step:WIZ.step}); wizShow(WIZ.step+1); }
-};
-if($("#doSaveWizEnd")) $("#doSaveWizEnd").onclick=async()=>{
-  await salvaConfigurazione();
-  const wsc=$("#wizSaveConfirm"); if(wsc) wsc.checked=true;
-};
-if($("#wizBack")) $("#wizBack").onclick=()=>wizShow(WIZ.step-1);
-
-function apriIntro(nascondiPiano){
-  const o=$("#onboard"); if(!o) return;
-  o.hidden=false;
-  // WIZ.edit non diventa mai true da nessuna parte in questo momento (unico
-  // ingresso al wizard a schermo pieno: doConfiguraEsempio/doConfiguraLaTua,
-  // entrambi al primo avvio) — apriIntro() è sempre un vero inizio, non una
-  // riapertura per modificare.
-  WIZ.gotoOggi=true;   // di default "vedi il piano" porta a Oggi
-  // "wiz-open" governa solo la disposizione (schermo pieno, navigazione
-  // fissa in fondo) — sempre attiva quando il wizard è aperto, qualunque
-  // sia la via d'ingresso. "intro" resta per l'altra cosa che faceva già
-  // (nascondere l'anteprima del piano): le due cose non devono dipendere
-  // dalla stessa classe solo perché prima capitava che coincidessero.
-  if(document.body && document.body.classList){
-    document.body.classList.add("wiz-open");
-    if(nascondiPiano) document.body.classList.add("intro");
-  }
-  sincronizzaCampiPiano();
-  mostraAvanzate();
-  renderToday();
-  wizReset();
-  if(!nascondiPiano && o.scrollIntoView) o.scrollIntoView({behavior:"smooth",block:"start"});
-}
-// Categoria grezza del piano appena configurato, per plan_generated — mai
-// il pattern vero (nt:X, lettere che potrebbero un giorno voler dire
-// qualcosa) o gli orari reali, solo "che tipo di turnista sei" a grandi
-// linee: riusa isNightCode(), già usata per colorare la striscia.
-function categoriaPattern(){
-  try{
-    const lettere=Object.keys(state.shifts||{});
-    return lettere.some(isNightCode) ? "notte" : "giorno";
-  }catch(e){ return "sconosciuto"; }
-}
-if($("#doSetup")) $("#doSetup").onclick=()=>{
-  state.turniConfigurati = true;
-  store.set("turniConfigurati", true);
-  track("onboarding_completed"); track("plan_generated",{pattern_type:categoriaPattern()});
-  salva();
-  toast("Configurazione completata!");
-  chiudiIntro(WIZ.gotoOggi);
-  render();
-};
-if($("#doSkip")) $("#doSkip").onclick=()=>{ track("onboarding_abandoned",{step:WIZ.step}); chiudiIntro(false); };
-if($("#doVediSubito")) $("#doVediSubito").onclick=()=>{
-  state.turniConfigurati = true;
-  store.set("turniConfigurati", true);
-  usciteRapide=true; toast("Il tuo piano è pronto");
-  track("onboarding_completed"); track("plan_generated",{pattern_type:categoriaPattern()});
-  chiudiIntro(true);
-  render();
-};
 if($("#doOpen")) $("#doOpen").onclick=()=>{
   // Il wizard a schermo pieno resta solo per il primo avvio — se qualche
   // sezione è già stata spostata dentro Opzioni (basta averne aperta una),
@@ -9772,19 +9450,30 @@ function passaggioIOS(){
     }, 800);
   }catch(e){}
 }
+// Gira anche ogni 4 secondi, come rete di sicurezza: se niente è cambiato
+// dall'ultima volta non riscrive lo stato (prima riscriveva tutto, e su iPhone
+// ricopiava ogni volta anche tutti i dati per il passaggio alla Home).
+// var senza valore iniziale: salva() può partire prima di questa riga.
+var _ultimoSalvato;
 function salva(){
-  passaggioIOS();
-  store.set("turniConfigurati", !!state.turniConfigurati);
-  const salvato = store.set("state",{turniConfigurati:state.turniConfigurati,pattern:state.pattern,anchor:state.anchor,shifts:state.shifts,
+  const dati={turniConfigurati:state.turniConfigurati,pattern:state.pattern,anchor:state.anchor,shifts:state.shifts,
     cTo:state.cTo,cFrom:state.cFrom,need:state.need,prep:state.prep,freeWake:state.freeWake,freeBed:state.freeBed,
     maxAdvance:state.maxAdvance,pPattern:state.pPattern,pAnchor:state.pAnchor,
     pShifts:state.pShifts,pWake:state.pWake,pBed:state.pBed,pName:state.pName,people:state.people,personaGlance:state.personaGlance,
     repeat:state.repeat,ecc:state.ecc,giorni:state.giorni,evento:state.evento,
-    napTurno:state.napTurno,sonnoDiurno:state.sonnoDiurno,mattinoBifasico:state.mattinoBifasico,avvisoBifasicoOff:state.avvisoBifasicoOff,firstSeenAt:state.firstSeenAt,pausa:state.pausa,caffSens:state.caffSens,vista:state.vista});
-  if(!salvato && state.turniConfigurati && !_avvisoSalvataggio){
-    _avvisoSalvataggio=true;
-    setTimeout(()=>toast("Questo browser non permette di salvare: i turni restano solo finché l'app è aperta. Fai una copia di sicurezza (Impostazioni)."), 600);
+    napTurno:state.napTurno,sonnoDiurno:state.sonnoDiurno,mattinoBifasico:state.mattinoBifasico,avvisoBifasicoOff:state.avvisoBifasicoOff,firstSeenAt:state.firstSeenAt,pausa:state.pausa,caffSens:state.caffSens,vista:state.vista};
+  const testo=JSON.stringify(dati);
+  if(testo!==_ultimoSalvato){
+    store.set("turniConfigurati", !!state.turniConfigurati);
+    const salvato = store.set("state", dati);
+    if(salvato) _ultimoSalvato=testo;
+    if(!salvato && state.turniConfigurati && !_avvisoSalvataggio){
+      _avvisoSalvataggio=true;
+      setTimeout(()=>toast("Questo browser non permette di salvare: i turni restano solo finché l'app è aperta. Fai una copia di sicurezza (Impostazioni)."), 600);
+    }
   }
+  // La firma si calcola sempre, anche senza scritture: il primo salva() può
+  // partire prima che _cfgSig esista, ed è un giro successivo a fissarla.
   // segnala i cambi di configurazione (non di vista) così il modulo del
   // calendario automatico può tenere allineato il feed. Il primo salva non conta.
   try{
@@ -9865,10 +9554,6 @@ platform.onBackButton(()=>{
   if(dlg){ dlg.remove(); return true; }
   if($("#pf-modal")){ $("#pf-modal").remove(); return true; }
   const qs=$("#quickShiftModal"); if(qs && !qs.hidden){ chiudiQuickShift(); return true; }
-  if(document.body.classList.contains("wiz-open") || document.body.classList.contains("intro")){
-    if(WIZ.step>1) wizShow(WIZ.step-1); else { chiudiIntro(false); render(); }
-    return true;
-  }
   if(document.body.classList.contains("andamenti-aperta")){ chiudiAndamenti(); return true; }
   if(document.body.classList.contains("vederci-aperta")){ chiudiVederci(); return true; }
   if(document.body.classList.contains("scambio-aperta")){ chiudiScambio(); return true; }
@@ -9975,7 +9660,6 @@ function ntChiediPermesso(){
   }).catch(()=>{});
 }
 window.ntChiediPermesso = ntChiediPermesso;
-if($("#doNotificheWiz")) $("#doNotificheWiz").onclick=ntChiediPermesso;
 
 
 // ── navigazione a tab (feel da app): Oggi · Turni · Più ──
