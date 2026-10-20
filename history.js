@@ -12,7 +12,10 @@ export function sleepTrend(diary, planFor, opts = {}) {
   const need = opts.need || 480;
   const beds = (diary && diary.beds) || {};
   const wakes = (diary && diary.wakes) || {};
-  const dates = Object.keys(wakes).filter(k => beds[k] != null).sort();
+  // Solo le ultime `days` notti annotate: il debito è quello di questo periodo
+  // (prima si sommava tutto lo storico, mentre la scheda dice "ultime N notti"),
+  // e con anni di diario calcolare il piano di ogni giorno bloccava i telefoni lenti.
+  const dates = Object.keys(wakes).filter(k => beds[k] != null).sort().slice(-days);
 
   const series = [];
   let debt = 0;
@@ -29,7 +32,7 @@ export function sleepTrend(diary, planFor, opts = {}) {
     series.push({ date: k, actual, planned, debt });
   }
 
-  const recent = series.slice(-days);
+  const recent = series;
   const avg = a => a.length ? Math.round(a.reduce((x, y) => x + y, 0) / a.length) : null;
   return {
     series: recent,
