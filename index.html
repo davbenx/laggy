@@ -300,7 +300,9 @@ z-index:999;display:flex;align-items:flex-end;justify-content:center;animation:q
 @media(min-width:600px){.qs-backdrop{align-items:center}}
 .qs-sheet{background:var(--s1);border:1px solid var(--line);border-radius:18px;width:calc(100% - 24px);max-width:440px;
 margin:0 12px calc(72px + var(--sab));padding:18px 20px 20px;box-shadow:0 8px 32px rgba(0,0,0,0.4);
-animation:qsSlideUp .2s ease;display:flex;flex-direction:column;gap:13px;position:relative;z-index:1000}
+animation:qsSlideUp .2s ease;display:flex;flex-direction:column;gap:13px;position:relative;z-index:1000;
+max-height:calc(100vh - 88px - var(--sab));max-height:calc(100dvh - 88px - var(--sab));overflow-y:auto;overscroll-behavior:contain}
+.qs-header{position:sticky;top:-18px;background:var(--s1);margin-top:-18px;padding-top:18px;z-index:1}
 @media(min-width:600px){.qs-sheet{margin:0;border-radius:var(--r);box-shadow:var(--shadow-card)}}
 @keyframes qsFadeIn{from{opacity:0}to{opacity:1}}
 @keyframes qsSlideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
@@ -316,6 +318,16 @@ gap:3px;transition:all .15s ease}
 .qs-btn:hover{border-color:var(--blue);background:var(--blue-soft);color:var(--blue)}
 .qs-btn.active{border-color:var(--blue-fill);background:var(--blue-fill);color:var(--su-blu)}
 .qs-shift-time{font-size:12px;font-weight:400;opacity:.8}
+.qs-spec{display:flex;flex-direction:column;gap:8px}
+.qs-spec .eyebrow{display:block}
+.qs-chips{display:flex;flex-wrap:wrap;gap:7px}
+.qs-chip{background:var(--bg);border:1.5px solid var(--line);border-radius:999px;padding:0 13px;min-height:38px;font:inherit;
+font-size:13.5px;font-weight:600;color:var(--ink);cursor:pointer}
+.qs-chip[aria-pressed="true"]{border-color:var(--blue-fill);background:var(--blue-fill);color:var(--su-blu)}
+.qs-ore{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13.5px;color:var(--dim)}
+.qs-ore input{min-height:40px;font:inherit;font-size:15px;width:auto!important;flex:1 1 0;min-width:0}
+.qs-ore>span:first-child{flex-basis:100%}
+.qs-ore small{flex-basis:100%;font-size:12px;color:var(--faint)}
 .qs-reset{background:none;border:1px solid var(--line);border-radius:var(--r);color:var(--dim);padding:9px;font-size:13px;
 font-weight:600;cursor:pointer;transition:all .15s ease;font-family:inherit}
 .qs-reset:hover{border-color:var(--risk);color:var(--risk);background:var(--risk-soft)}
@@ -457,7 +469,9 @@ body.primo-avvio #clubBanner,body.primo-avvio #donateNudge{display:none!importan
    nell'app significa sempre qualcosa (blu=sonno, arancio=turno,
    rosso=rischio), non "questo è il terzo tipo di turno che hai
    configurato". Lettera neutra, come il resto dei testi secondari. */
-.ccode{font-size:12px;font-weight:600;width:13px;flex:none;text-align:center;color:var(--faint)}
+.ccode{font-size:12px;font-weight:600;width:18px;flex:none;text-align:center;color:var(--faint);position:relative}
+.crow.spec .ccode{font-size:10.5px;color:var(--dim)}
+.crow.rep .ccode::after{content:"";position:absolute;top:-1px;right:-3px;width:5px;height:5px;border-radius:50%;background:var(--orange-fill)}
 /* Striscia del ciclo: pillola sottile, come nel mockup approvato — prima
    era una fascia più alta e squadrata (17px, radius 3px, bordo), un
    linguaggio visivo diverso da tutto il resto della app redesignata. */
@@ -518,9 +532,47 @@ html.js-lento .jsoff{display:block}
 .mese-testa button{background:none;border:0;color:var(--blue);font:inherit;font-size:20px;line-height:1;padding:8px 12px;margin:-8px -6px;cursor:pointer}
 .mese-testa button[disabled]{color:var(--faint);opacity:.4;cursor:default}
 .mese-medico{display:block;margin-top:6px;font-size:13.5px;text-align:left}
+/* I turni del mese: pennelli + griglia */
+.sg-testa{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 10px}
+.sg-testa b{font-family:var(--serif);font-size:18px;color:var(--ink)}
+.sg-testa button{min-width:44px;min-height:44px;border-radius:50%;border:1px solid var(--line);background:var(--s1);color:var(--ink);font-size:20px;cursor:pointer}
+.sg-testa button:disabled{opacity:.35;cursor:default}
+.sg-pennelli{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 12px}
+.sg-pen{border:1.5px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;min-height:40px;padding:0 13px;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer}
+.sg-pen[aria-pressed="true"]{background:var(--blue-fill);border-color:var(--blue-fill);color:var(--su-blu)}
+.sg-griglia{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.sg-gs{font-size:11px;font-weight:700;color:var(--faint);text-align:center;padding:2px 0;text-transform:uppercase}
+.sg-g{position:relative;min-height:52px;border-radius:10px;border:1px solid var(--line);background:var(--s1);color:var(--ink);font:inherit;cursor:pointer;
+display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:2px 0;min-width:0}
+.sg-g small{font-size:11px;color:var(--faint);font-variant-numeric:tabular-nums}
+.sg-g b{font-size:12.5px;line-height:1.1;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sg-g.lav{background:var(--warm-tint)}
+.sg-g.notte{background:var(--cool-tint)}
+.sg-g.ass b{color:var(--blue)}
+.sg-g.vuoto b{color:var(--faint);font-weight:400}
+.sg-g.mio{border-color:var(--blue);border-width:1.5px}
+.sg-g.oggi small{color:var(--blue);font-weight:800}
+.sg-g.rep::after{content:"";position:absolute;top:5px;right:5px;width:6px;height:6px;border-radius:50%;background:var(--orange-fill)}
+.sg-g.ore::before{content:"";position:absolute;bottom:4px;left:50%;margin-left:-6px;width:12px;height:2px;border-radius:2px;background:var(--orange-fill)}
+.sg-g:disabled{opacity:0;pointer-events:none}
+.sg-legenda{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--dim);margin:10px 0 0}
+.sg-legenda i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:1px}
+.sg-importa{margin-top:var(--gap-sezione);border-top:1px solid var(--line);padding-top:16px}
+.sg-h{font-family:var(--serif);font-size:17px;margin:0;color:var(--ink)}
+.sg-fonti{display:flex;flex-direction:column;gap:8px}
+.sg-fonti .btn{min-height:46px;width:100%}
+.sg-box{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-top:12px}
+.sg-box p{margin:0 0 8px}
+.sg-map{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:8px 10px;align-items:center;margin:10px 0}
+.sg-map b{font-size:14px;overflow-wrap:anywhere}
+.sg-map small{display:block;font-size:12px;color:var(--faint);font-weight:400}
+.sg-map select,.sg-box select,.sg-box input[type=text]{width:100%;min-height:42px;font:inherit;font-size:14px}
+.sg-azioni{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.sg-azioni .btn{flex:1 1 140px;min-height:46px}
 .mese-num{display:grid;grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:8px;margin-top:10px}
 .mese-num div{background:var(--bg);border-radius:10px;padding:8px 10px}
 .mese-num b{display:block;font-size:20px;color:var(--ink);font-variant-numeric:tabular-nums}
+.mese-spec{margin:10px 0 0;font-size:13px;color:var(--dim);line-height:1.45}
 .mese-num span{font-size:12px;color:var(--dim)}
 .mese .hint{margin:8px 0 0}
 .key i{display:inline-block;width:10px;height:7px;border-radius:3px;margin-right:5px;vertical-align:1px}
@@ -1607,6 +1659,35 @@ header b{font-size:23px}
      busta paga, le notti fatte, i festivi). Niente stima della paga: con le
      regole dei contratti sarebbe facile sbagliare, e sui soldi un errore costa. -->
 <section class="mese" id="meseBox" aria-label="Il mese in numeri"></section>
+<!-- I turni del mese: la prima cosa che chiede chi ha turni che cambiano
+     (sondaggio sui notturnisti: allinearsi al foglio turni). Un tocco per
+     giorno, oppure dal foglio stesso: file, calendario del telefono, foto. -->
+<button type="button" class="tsec solo-turni" id="doSegnaMese">
+  <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:var(--blue);background:var(--blue-soft)"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4M8 14h2M12 14h2M16 14h.5M8 17h2M12 17h2"/></svg>
+  <span class="tsec-tx"><span class="eyebrow" style="display:block">I turni del mese</span><b style="font-family:var(--serif)">Segna o importa i turni</b><span style="font-size:12.5px;color:var(--dim);display:block;margin-top:2px">Un tocco per giorno, o dal foglio turni.</span></span>
+  <span class="tchev">›</span>
+</button>
+<div id="segnaPagina" class="solo-turni" hidden>
+  <div style="display:flex;align-items:center;gap:12px;margin:2px 0 var(--gap-sezione)">
+    <button type="button" class="themebtn" id="chiudiSegna" aria-label="Torna a Turni">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+    </button>
+    <h1 class="tab-title" style="margin:0">I turni del mese</h1>
+  </div>
+  <div id="segnaOut"></div>
+  <section class="sg-importa" aria-labelledby="sgImpTit">
+    <h2 class="sg-h" id="sgImpTit">Hai già i turni da qualche parte?</h2>
+    <p class="hint" style="margin:2px 0 10px">Li leggo io e ti chiedo conferma prima di segnarli.</p>
+    <div class="sg-fonti">
+      <button type="button" class="btn g" id="sgDaCalendario" hidden>Dal calendario del telefono</button>
+      <button type="button" class="btn g" id="sgDaFile">Da un file (.xlsx, .csv, .ics)</button>
+      <button type="button" class="btn g" id="sgDaFoto" hidden>Da una foto o un PDF</button>
+      <input type="file" id="sgFile" accept=".ics,.csv,.txt,.xlsx,text/calendar,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden>
+      <input type="file" id="sgFoto" accept="image/*,application/pdf" hidden>
+    </div>
+    <div id="sgImport" aria-live="polite"></div>
+  </section>
+</div>
 <!-- Il cluster "Condividi" (link/QR/stampa) si è spostato più in basso,
      dopo Quando sono disponibile e Andamenti: era la prima cosa vista
      sotto la striscia, davanti a due sezioni usate più spesso (la propria
@@ -1955,6 +2036,7 @@ header b{font-size:23px}
       <button type="button" class="qs-close" id="qsClose" aria-label="Chiudi">✕</button>
     </div>
     <div class="qs-grid" id="qsGrid"></div>
+    <div class="qs-spec" id="qsSpec"></div>
     <button type="button" class="qs-reset" id="qsReset" hidden>✕ Torna alla sequenza standard</button>
     <button type="button" class="btn g" id="qsVaiPiano" style="width:100%;min-height:44px;margin-top:6px" hidden>Vedi il piano di questo giorno</button>
     <button type="button" class="lnk" id="qsVaiScambio" style="font-size:12.5px;text-align:center;width:100%;margin-top:2px;padding:10px 0">⇄ Mi conviene uno scambio di turno? →</button>
@@ -2775,7 +2857,7 @@ var qrcodegen;
 // prima che il resto di questo script (che lo usa ovunque, via NT.) parta —
 // stessa garanzia di ordine che un normalizzatore await avrebbe dato, senza
 // bisogno di riscrivere tutto in async. I moduli sono già strict di default.
-import { createEngine, resolveNextAction, encEcc, decEcc } from "./engine.js";
+import { createEngine, resolveNextAction, encEcc, decEcc, encGiorni, decGiorni, GIORNI_SPECIALI } from "./engine.js";
 import { LINGUA, giorniBrevi, mesiBrevi } from "./lingua.js";   // formato di date e giorni: un solo punto
 import platform from "./platform.js";
 /* MOTORE NOTTURNISTI v4 — turni arbitrari.
@@ -2794,6 +2876,8 @@ import platform from "./platform.js";
 // funzioni che prima erano bare qui dentro.
 const NT = createEngine({});
 const state = NT.state;
+// Nella striscia del ciclo, al posto della lettera del turno.
+const SIGLA_SPECIALE={ferie:"Fe", malattia:"Ma", formazione:"Fo"};
 // Campi che il motore non conosce — appartengono solo all'app (persone
 // extra tracciate, preferenze di visualizzazione, promemoria "non mostrarlo
 // più"), quindi non fanno parte di engine.js: si aggiungono qui, sullo
@@ -2963,8 +3047,11 @@ function toCompactHash(){
 // tracciata e l'elenco di chi altro segui (prima si perdevano nome e
 // persone oltre la prima: "salvalo per non perderla" non era vero per chi
 // ne segue più di una).
-function toHash(){
+// perServer: la copia che va al calendario automatico non porta ferie e
+// malattia (per il piano bastano i riposi già nelle eccezioni).
+function toHash(perServer){
   const p=hashParamsBase();
+  const g=encGiorni(state.giorni,{senzaAssenze:!!perServer}); if(g) p.set("g",g);
   if(state.pPattern){ p.set("pp",state.pPattern); p.set("pa",state.pAnchor||state.anchor);
     if(state.pShifts) p.set("ps",encShifts(state.pShifts));
     if(state.pWake) p.set("pw",state.pWake);
@@ -3001,6 +3088,7 @@ function fromHash(hashStr){
   state.maxAdvance=num("adv",state.maxAdvance,15,180);
   state.repeat = p.get("rep")!=="0";
   if(p.get("x")){ const x=decEcc(p.get("x")); if(Object.keys(x).length) state.ecc=Object.assign({}, state.ecc||{}, x); }
+  if(p.get("g")){ const g=decGiorni(p.get("g")); if(Object.keys(g).length) state.giorni=Object.assign({}, state.giorni||{}, g); }
   if(p.get("pp")){ state.pPattern=seq(p.get("pp"));
     state.pAnchor=okDate(p.get("pa"))?p.get("pa"):state.anchor;
     if(p.get("ps")){ const psh=decShifts(p.get("ps")); if(psh) state.pShifts=psh; }
@@ -3632,9 +3720,10 @@ function cards(P){
   out.push(mc);
 
   for(const n of naps){
-    out.push({k:"s",lab:n.turno?"Pisolino in turno":n.corto?"Pisolino breve, prima di uscire":n.dopo?"Recupero dopo il turno":(n.rec||n.debito)?"Pisolino di recupero":((n.b-n.a)<40?"Pisolino breve":(n.b-n.a)>=60?"Pisolino lungo":"Pisolino"),
-      val:hhmm(n.a)+" → "+hhmm(n.b), small:dur(n.b-n.a),
-      sub:n.corto?("Prima non c'era spazio per un pisolino intero: venti minuti, presi appena puoi, valgono più di niente.")
+    out.push({k:"s",lab:n.turno?"Pisolino in turno":n.rep?"Pisolino preventivo":n.corto?"Pisolino breve, prima di uscire":n.dopo?"Recupero dopo il turno":(n.rec||n.debito)?"Pisolino di recupero":((n.b-n.a)<40?"Pisolino breve":(n.b-n.a)>=60?"Pisolino lungo":"Pisolino"),
+      val:hhmm(n.a)+" → "+hhmm(n.b), small:dur(n.b-n.a)+(n.rep?" · sei reperibile":""),
+      sub:n.rep?("Oggi sei reperibile: se ti chiamano stanotte, la notte di sonno salta. Questo pisolino è una riserva messa da parte prima, lontano abbastanza dalla sera da non rubarti il sonno se non chiama nessuno.")
+         :n.corto?("Prima non c'era spazio per un pisolino intero: venti minuti, presi appena puoi, valgono più di niente.")
          :n.dopo?("Prima del turno non c'era spazio. Recuperi appena stacchi, invece di portarti il debito a domani.")
          :n.rec?(n.last?"L'ultimo è corto apposta: stasera devi dormire a un orario normale."
                        :"È la seconda metà del tuo riposo, non un extra.")
@@ -3644,7 +3733,9 @@ function cards(P){
          :((n.b-n.a)<40&&!n.rec&&!n.lungo&&!n.debito&&!n.turno)?("Hai dormito abbastanza, ma fra la sveglia di stamattina e il letto di stanotte passano "+hm(n.ore||0)+" di fila. Un pisolino corto prima di uscire non ti ruba il sonno di stanotte e ti rende più sicura la strada di casa.")
          :(n.first?"Il pisolino che rende di più in tutto il ciclo. Fallo anche senza sonno, prima di uscire di casa."
                   :"Recupera quello che il sonno del mattino non è riuscito a darti."),
-      rows:(n.rec||n.dopo)?[]:[["Poi","mangi con calma ed esci: c'è tempo per svegliarti bene"],
+      rows:n.rep?[["Se ti chiamano","un caffè appena esci va bene; dopo le 3 del mattino evitalo se poi torni a dormire. Al rientro, un sonno corto prima del resto della giornata"],
+        ["Al risveglio","per un quarto d'ora sei più impedito di prima del pisolino: non metterti subito alla guida"]]
+        :(n.rec||n.dopo)?[]:[["Poi","mangi con calma ed esci: c'è tempo per svegliarti bene"],
         ["Al risveglio","per un quarto d'ora sei più impedito di prima del pisolino: non metterti subito alla guida né a fare cose delicate"]],
       nap:{k:hhmm(n.a), fine:hhmm(n.b), min:n.b-n.a, turno:!!n.turno, livello:n.livello},
       why:"Dormire prima di entrare riduce il crollo di attenzione nelle ore centrali della notte, quando gli errori costano di più. Un'ora e mezza copre un ciclo intero; se non hai tempo, venti minuti restano meglio di niente.",
@@ -4762,7 +4853,8 @@ function renderDemoEsempio(){
         (giorniSegna<42?'<button type="button" class="lnk" id="qhAltriGiorni" style="font-size:13px">+ altri 14 giorni</button>':'<span></span>')+
         '<button type="button" class="lnk" id="qhOrariVariabili" style="font-size:13px">Orari dei turni</button>'+
       '</div>'+
-      '<button type="button" class="btn pri" id="qhConfermaSegna" style="width:100%;margin-top:14px;min-height:46px;font-weight:700">Fatto →</button>';
+      '<button type="button" class="btn pri" id="qhConfermaSegna" style="width:100%;margin-top:14px;min-height:46px;font-weight:700">Fatto →</button>'+
+      '<button type="button" class="btn g" id="qhImporta" style="width:100%;margin-top:8px;min-height:44px">Ho il foglio turni: importalo</button>';
   } else if(f === "componi"){
     // Il ciclo si compone qui, toccando i turni nell'ordine in cui li fai:
     // niente tabella di lettere nelle Opzioni.
@@ -4927,6 +5019,14 @@ if($("#demoEsempio")) $("#demoEsempio").addEventListener("click", e=>{
   }
   if(e.target.closest("#qhAltriGiorni")){ giorniSegna=Math.min(42, giorniSegna+14); renderDemoEsempio(); return; }
   if(e.target.closest("#qhOrariVariabili")){ state.repeat=false; demoEsempioSubflow="orari"; renderDemoEsempio(); return; }
+  if(e.target.closest("#qhImporta")){
+    // si chiude la configurazione come «turni variabili» e si apre il mese
+    passo("segna_importa");
+    state.repeat=false; state.pattern="R"; state.anchor="2000-01-01";
+    primoPianoPronto("variabile", "Importa il foglio turni, poi controlla il mese");
+    setTab("turni"); apriSegna();
+    return;
+  }
   if(e.target.closest("#qhConfermaSegna")){
     passo("segna");
     state.repeat=false;
@@ -6364,8 +6464,12 @@ function renderHeader(P, f){
       pillEl.textContent = "Da impostare";
       pillEl.className = "shiftpill warn";
     } else {
-      pillEl.textContent = serie ? nameOf(c)+" "+serie.posizione+"/"+serie.totale : nameOf(c);
-      pillEl.className = "shiftpill" + (haEcc ? " modificato" : "");
+      // giorno speciale: il suo nome (Ferie, Formazione…) o il turno con l'aggiunta
+      const gs=state.giorni[iso(state.focus)]||{};
+      const nomeG = gs.t==="ferie"||gs.t==="malattia"||gs.t==="formazione" ? GIORNI_SPECIALI[gs.t]
+        : nameOf(c)+(gs.t==="reperibile"?" · reperibile":gs.t==="extra"?" · extra":"");
+      pillEl.textContent = serie && !gs.t ? nameOf(c)+" "+serie.posizione+"/"+serie.totale : nomeG;
+      pillEl.className = "shiftpill" + (haEcc || gs.t || gs.s!=null ? " modificato" : "");
     }
     pillEl.style.cursor = "pointer";
     pillEl.title = haEcc ? "Turno modificato manualmente (tocca per cambiare)" : "Tocca per cambiare turno al volo";
@@ -6383,7 +6487,8 @@ function renderHeader(P, f){
   if(bn){
     bn.textContent = nomeCiclo;
     const oggi=NT.codeAt(dnum(giornoVero())-dnum(state.focus));
-    bd.textContent=state.pattern+" · oggi "+(oggi==="?"?"da inserire":(state.shifts[oggi]?state.shifts[oggi].n:"riposo"));
+    const nomeOggi=NT.etichetta(dnum(giornoVero())-dnum(state.focus));
+    bd.textContent=state.pattern+" · oggi "+(oggi==="?"?"da inserire":nomeOggi==="Riposo"?"riposo":nomeOggi);
   }
   // "Il tuo ciclo — Sanità in quinta", come nel mockup: prima diceva solo
   // "Il tuo ciclo", il nome viveva solo nel vecchio #setbar (nascosto dai tab).
@@ -6490,15 +6595,19 @@ function festivoIT(d){
 let meseOff=0;
 function datiMese(off){
   const oggi=giornoVero(), primo=new Date(oggi.getFullYear(), oggi.getMonth()+off, 1, 12), fPrima=state.focus;
-  const r={primo, ore:0, turni:0, notti:0, festivi:0, liberi:0, ignoti:0};
+  const r={primo, ore:0, turni:0, notti:0, festivi:0, liberi:0, ignoti:0,
+    ferie:0, malattia:0, formazione:0, reperibile:0, extra:0, straordinario:0};
   for(let d=new Date(primo); d.getMonth()===primo.getMonth(); d.setDate(d.getDate()+1)){
     state.focus=new Date(d);
     let c="?"; try{ c=NT.codeAt(0); }catch(e){}
-    if(c==="?"){ r.ignoti++; continue; }
-    const sh=state.shifts[c];
-    if(!sh){ r.liberi++; continue; }
-    r.turni++; r.ore+=Math.max(0, sh.e-sh.s)/60;
-    try{ const b=NT.block(0); if(NT.spansNight(b)||NT.startsInNight(b)) r.notti++; }catch(e){}
+    let b=null; try{ b=NT.block(0); }catch(e){}
+    if(b && b.tipo) r[b.tipo]++;
+    if(c==="?" && !(b && b.tipo)){ r.ignoti++; continue; }
+    if(!b || b.rest){ r.liberi++; continue; }
+    r.turni++; r.ore+=Math.max(0, b.end-b.start)/60;
+    // straordinario: solo gli orari veri più lunghi del turno previsto
+    if(b.oreVere && b.previsto) r.straordinario+=Math.max(0, (b.end-b.start)-b.previsto);
+    if(NT.spansNight(b)||NT.startsInNight(b)) r.notti++;
     if(d.getDay()===0 || festivoIT(d)) r.festivi++;
   }
   state.focus=fPrima;
@@ -6523,11 +6632,22 @@ function renderMese(){
       '<div><b>'+r.festivi+'</b><span>domeniche e festivi</span></div>'+
       '<div><b>'+r.liberi+'</b><span>giorni senza turno</span></div>'+
     '</div>'+
-    '<p class="hint">Dall\'inizio alla fine di ogni turno, pause comprese'+(r.ignoti?'; '+r.ignoti+(r.ignoti===1?' giorno ancora da segnare':' giorni ancora da segnare'):'')+'. Per controllare le ore, non è un conteggio ufficiale.</p>'+
+    (()=>{ const v=[];
+      if(r.straordinario>=15) v.push("+"+durataBreve(r.straordinario)+" oltre l'orario");
+      if(r.extra) v.push(r.extra+(r.extra===1?" turno extra":" turni extra"));
+      if(r.reperibile) v.push(r.reperibile+(r.reperibile===1?" giorno di reperibilità":" giorni di reperibilità"));
+      if(r.formazione) v.push(r.formazione+(r.formazione===1?" giorno di formazione":" giorni di formazione"));
+      if(r.ferie) v.push(r.ferie+(r.ferie===1?" giorno di ferie":" giorni di ferie"));
+      if(r.malattia) v.push(r.malattia+(r.malattia===1?" giorno di malattia":" giorni di malattia"));
+      return v.length ? '<p class="mese-spec">'+esc(v.join(" · "))+'</p>' : ''; })()+
+    '<p class="hint">Dall\'inizio alla fine di ogni turno, pause comprese. Per controllare le ore, non è un conteggio ufficiale.</p>'+
+    (r.ignoti?'<button type="button" class="lnk mese-medico" data-mese-segna>'+r.ignoti+(r.ignoti===1?' giorno ancora da segnare':' giorni ancora da segnare')+' →</button><br>':'')+
     '<button type="button" class="lnk mese-medico" data-riepilogo-medico>Riepilogo per il medico competente →</button>';
 }
+function durataBreve(m){ m=Math.round(m/15)*15; const h=Math.floor(m/60), r=m%60; return h ? h+"h"+(r?String(r).padStart(2,"0"):"") : r+" min"; }
 if($("#meseBox")) $("#meseBox").addEventListener("click", e=>{
   if(e.target.closest("[data-riepilogo-medico]")){ stampaRiepilogoMedico(); return; }
+  if(e.target.closest("[data-mese-segna]")){ sgOff=meseOff; apriSegna(); return; }
   const b=e.target.closest("[data-mese]"); if(!b || b.disabled) return;
   meseOff=Math.max(-12, Math.min(12, meseOff + +b.dataset.mese)); renderMese();
 });
@@ -6567,9 +6687,10 @@ function renderStrip(P, f, S){
     // (il pisolino non è nella striscia: simulate() non calcola i pisolini,
     // solo plan() lo fa — chiamarlo per ogni giorno della striscia costerebbe
     // un plan() completo x13 a ogni render, non solo una lettura leggera)
-    ch+='<div class="crow'+(o===0?" on":"")+(state.ecc[iso(d)]?" mod":"")+'" data-off="'+o+'" role="button" tabindex="0">'+
+    const gs=state.giorni[iso(d)]||{}, sigla=SIGLA_SPECIALE[gs.t]||"";
+    ch+='<div class="crow'+(o===0?" on":"")+(state.ecc[iso(d)]||gs.s!=null?" mod":"")+(sigla?" spec":"")+(gs.t==="reperibile"?" rep":"")+'" data-off="'+o+'" role="button" tabindex="0">'+
       '<span class="clab">'+d.toLocaleDateString(LINGUA,{weekday:"short"}).slice(0,3)+' '+d.getDate()+'</span>'+
-      '<span class="ccode">'+k+'</span>'+
+      '<span class="ccode"'+(gs.t?' title="'+esc(GIORNI_SPECIALI[gs.t])+'"':'')+'>'+(sigla||esc(k)+(gs.t==="extra"?"+":""))+'</span>'+
       '<span class="crail">'+
       seg.map(([x,w,cl])=>'<span class="cbar '+cl+'" style="left:'+x+'%;width:'+w+'%"></span>').join("")+
       (o===0 && cpx(oggiM)>=0 && cpx(oggiM)<=100 ? '<span class="cnow" style="left:'+cpx(oggiM)+'%" title="adesso"></span>' : '')+
@@ -7648,17 +7769,19 @@ function apriQuickShift(d){
   for(const k of keys){
     const nome=(k==="R")?"Riposo":(state.shifts[k]?state.shifts[k].n:k);
     const orario=(k==="R")?"Libero":(state.shifts[k]?hhmm(state.shifts[k].s)+"–"+hhmm(state.shifts[k].e):"");
-    const isActive=(eccAttuale?eccAttuale===k:codeAttivo===k);
+    const gAtt=state.giorni[targetIso], assente=gAtt && (gAtt.t==="ferie"||gAtt.t==="malattia"||gAtt.t==="formazione");
+    const isActive=!assente && (eccAttuale?eccAttuale===k:codeAttivo===k);
     html+='<button type="button" class="qs-btn'+(isActive?' active':'')+'" data-qs="'+esc(k)+'">'+
       '<span>'+esc(nome)+'</span>'+
       (orario?'<span class="qs-shift-time">'+esc(orario)+'</span>':'')+
       '</button>';
   }
   $("#qsGrid").innerHTML=html;
+  renderQsSpeciale();
 
   const resetBtn=$("#qsReset");
   if(resetBtn){
-    resetBtn.hidden=!eccAttuale;
+    resetBtn.hidden=!eccAttuale && !state.giorni[targetIso];
   }
 
   modal.hidden=false;
@@ -7674,6 +7797,7 @@ function chiudiQuickShift(){
   const pillEl=$("#shiftPill");
   if(pillEl) pillEl.classList.remove("is-open");
   quickShiftTarget=null;
+  if(document.body.classList.contains("segna-aperta")) renderSegna();
 }
 
 // Retrocompatibilità per chiamate pregresse ad apriEcc / chiudiEcc
@@ -7689,8 +7813,9 @@ if($("#qsGrid")) $("#qsGrid").addEventListener("click",e=>{
   const btn=e.target.closest("[data-qs]");
   if(!btn||!quickShiftTarget) return;
   haptic(10);
-  const k=btn.dataset.qs;
-  state.ecc[iso(quickShiftTarget)]=k;
+  // Un turno scelto qui vale per quello che è: niente più assenza o
+  // formazione, e gli orari veri erano quelli del turno di prima.
+  scegliTurno(iso(quickShiftTarget), btn.dataset.qs);
   salva();
   chiudiQuickShift();
   render();
@@ -7700,11 +7825,70 @@ if($("#qsReset")) $("#qsReset").addEventListener("click",()=>{
   if(!quickShiftTarget) return;
   haptic(10);
   delete state.ecc[iso(quickShiftTarget)];
+  delete state.giorni[iso(quickShiftTarget)];
   salva();
   chiudiQuickShift();
   render();
 });
 
+// Giorni speciali, nel foglio del giorno sotto i turni: un tocco segna o
+// toglie. Ferie, malattia e formazione prendono il posto del turno;
+// reperibilità e turno extra si aggiungono a quello che c'è.
+function renderQsSpeciale(){
+  const el=$("#qsSpec"); if(!el || !quickShiftTarget) return;
+  const d=iso(quickShiftTarget), g=state.giorni[d]||{};
+  const off=Math.round((dnum(quickShiftTarget)-dnum(state.focus))/86400000);
+  let b=null; try{ b=NT.block(off); }catch(e){}
+  const chip=t=>'<button type="button" class="qs-chip" data-qs-spec="'+t+'" aria-pressed="'+(g.t===t)+'">'+esc(GIORNI_SPECIALI[t])+'</button>';
+  const lavoro=b && !b.rest;
+  el.innerHTML='<span class="eyebrow">Giorno speciale</span>'+
+    '<div class="qs-chips">'+["ferie","malattia","reperibile","formazione","extra"].map(chip).join("")+'</div>'+
+    (g.t==="extra" && !lavoro ? '<p class="hint" style="margin:0;font-size:12.5px">Scegli qui sopra quale turno fai.</p>' : '')+
+    (g.t==="reperibile" ? '<p class="hint" style="margin:0;font-size:12.5px">Nel piano trovi un pisolino nel pomeriggio: una riserva di sonno se ti chiamano.</p>' : '')+
+    (lavoro ? '<div class="qs-ore"><span>'+(g.t==="formazione"?"Orari":"Orari veri")+'</span>'+
+      '<input type="time" data-qs-ora="s" value="'+hhmm(b.start)+'" aria-label="Inizio">'+
+      '<span>→</span><input type="time" data-qs-ora="e" value="'+hhmm(b.end)+'" aria-label="Fine">'+
+      (g.t==="formazione" ? '' : '<small>'+(g.s!=null ? 'Diversi dal solito per questo giorno (es. straordinario).' : 'Cambiali solo se oggi esci prima o resti di più.')+'</small>')+
+      '</div>' : '');
+}
+const GIORNO_BASE={ferie:1, malattia:1, formazione:1};
+function segnaSpeciale(d, t){
+  const g=Object.assign({}, state.giorni[d]||{}), prima=g.t;
+  // si esce da un'assenza o da una formazione: torna il turno di prima
+  if(GIORNO_BASE[prima]){ if(g.w) state.ecc[d]=g.w; else delete state.ecc[d]; delete g.w; delete g.s; delete g.e; }
+  if(prima===t) delete g.t;
+  else {
+    g.t=t;
+    if(GIORNO_BASE[t]){ if(state.ecc[d]) g.w=state.ecc[d]; state.ecc[d]="R"; delete g.s; delete g.e;
+      if(t==="formazione"){ g.s=540; g.e=1020; } }
+  }
+  if(g.t || g.s!=null) state.giorni[d]=g; else delete state.giorni[d];
+}
+if($("#qsSpec")) $("#qsSpec").addEventListener("click",e=>{
+  const c=e.target.closest("[data-qs-spec]"); if(!c || !quickShiftTarget) return;
+  haptic(10);
+  segnaSpeciale(iso(quickShiftTarget), c.dataset.qsSpec);
+  salva(); render(); apriQuickShift(quickShiftTarget);
+});
+if($("#qsSpec")) $("#qsSpec").addEventListener("change",e=>{
+  const inp=e.target.closest("[data-qs-ora]"); if(!inp || !quickShiftTarget || !inp.value) return;
+  const d=iso(quickShiftTarget), off=Math.round((dnum(quickShiftTarget)-dnum(state.focus))/86400000);
+  let b; try{ b=NT.block(off); }catch(err){ return; }
+  const g=Object.assign({}, state.giorni[d]||{});
+  let s0=b.start, e0=b.end;
+  const v=t(inp.value);
+  if(inp.dataset.qsOra==="s") s0=v; else { e0=v; while(e0<=s0) e0+=1440; }
+  // l'inizio resta nello stesso giorno; la fine dopo l'inizio, entro 16 ore
+  while(e0<=s0) e0+=1440;
+  if(e0-s0>960){ toast("Un turno di più di 16 ore? Controlla gli orari"); renderQsSpeciale(); return; }
+  const sh=state.shifts[NT.codeAt(off)];
+  if(g.t!=="formazione" && sh && sh.s===s0 && sh.e===e0){ delete g.s; delete g.e; }
+  else { g.s=s0; g.e=e0; }
+  if(g.t || g.s!=null) state.giorni[d]=g; else delete state.giorni[d];
+  // niente ridisegno del foglio: chi scrive l'ora a mano perderebbe il campo
+  salva(); render();
+  if($("#qsReset")) $("#qsReset").hidden=false;
+});
 if($("#qsClose")) $("#qsClose").addEventListener("click",chiudiQuickShift);
 if($("#quickShiftModal")) $("#quickShiftModal").addEventListener("click",e=>{
   if(e.target===$("#quickShiftModal")) chiudiQuickShift();
@@ -7925,7 +8109,7 @@ function paginaCalendario(oggi){
     const num = d.getDate()+(d.getDate()===1||i===0 ? " "+d.toLocaleDateString(LINGUA,{month:"short"}) : "");
     celle.push('<div class="pc-g pc-'+tipo+(passato?' pc-pass':'')+(dnum(d)===dnum(oggi)?' pc-oggi':'')+'">'+
       '<span class="pc-n">'+esc(num)+'</span>'+
-      (P ? '<b>'+esc(P.b.rest?"Riposo":(P.b.name||P.b.c))+'</b>'+
+      (P ? '<b>'+esc(P.b.rest?(P.b.tipo==="ferie"?"Ferie":"Riposo"):(P.b.name||P.b.c))+'</b>'+
         (P.b.rest?'':'<span>'+hhmm(P.b.start)+'–'+hhmm(P.b.end)+'</span>')+
         '<span class="pc-s">dormi '+hhmm(P.s.onset)+'</span>' : '')+
       '</div>');
@@ -7962,7 +8146,9 @@ function riepilogoAnno(){
       if(!m || m.k!==k){ m={k, primo:new Date(d), turni:0, ore:0, notti:0, oreNotte:0, festivi:0, brevi:0}; mesi.push(m); }
       state.focus=new Date(d);
       let c="?"; try{ c=NT.codeAt(0); }catch(e){}
-      const sh = c==="?" ? null : state.shifts[c];
+      // orari veri del giorno (straordinario, formazione), ferie e malattia come riposo
+      let b=null; if(c!=="?"){ try{ b=NT.block(0); }catch(e){} }
+      const sh = b && !b.rest ? {s:b.start, e:b.end} : null;
       if(!sh){ serie=0; if(c==="?") fineIeri=null; continue; }
       const base=dnum(d)*1440, oreN=notte(sh.s, sh.e)/60;
       m.turni++; m.ore+=(sh.e-sh.s)/60; m.oreNotte+=oreN;
@@ -8156,11 +8342,11 @@ if($("#doPrint")) $("#doPrint").onclick=()=>{
 // insieme.
 // body.sottopagina: c'è una pagina di Turni aperta (una regola CSS sola le copre tutte)
 function segnaSottopagina(){
-  const aperte=["andamenti-aperta","vederci-aperta","scambio-aperta","ferie-aperta"].some(c=>document.body.classList.contains(c));
+  const aperte=["andamenti-aperta","vederci-aperta","scambio-aperta","ferie-aperta","segna-aperta"].some(c=>document.body.classList.contains(c));
   document.body.classList.toggle("sottopagina", aperte);
 }
 function apriAndamenti(){
-  chiudiVederci(); chiudiScambio(); chiudiFerie();
+  chiudiVederci(); chiudiScambio(); chiudiFerie(); chiudiSegna();
   document.body.classList.add("andamenti-aperta"); segnaSottopagina();
   renderAndamenti();
   const p=$("#andamentiPagina"); if(p) p.hidden=false;
@@ -8171,7 +8357,7 @@ function chiudiAndamenti(){
   const p=$("#andamentiPagina"); if(p) p.hidden=true;
 }
 function apriVederci(){
-  chiudiAndamenti(); chiudiScambio(); chiudiFerie();
+  chiudiAndamenti(); chiudiScambio(); chiudiFerie(); chiudiSegna();
   document.body.classList.add("vederci-aperta"); segnaSottopagina();
   const p=$("#vederciPagina"); if(p) p.hidden=false;
   renderPiuCal();
@@ -8468,7 +8654,7 @@ function aggiornaScambio(){
 
 function apriScambioTurno(giornoA){
   const pg=$("#scambioPagina"); if(!pg) return;
-  chiudiAndamenti(); chiudiVederci(); chiudiFerie();
+  chiudiAndamenti(); chiudiVederci(); chiudiFerie(); chiudiSegna();
   document.body.classList.add("scambio-aperta"); segnaSottopagina();
   pg.hidden=false;
   const targetA=giornoA || state.focus || giornoVero();
@@ -8608,17 +8794,21 @@ function renderFerie(){
 function segnaFerie(i){
   const p=_ferie.proposte[i]; if(!p) return;
   const giorni=_ferie.G.slice(p.a,p.r+1).filter(g=>g.lavoro).map(g=>iso(g.d));
-  const prima={}; giorni.forEach(k=>{ prima[k]=state.ecc[k]; state.ecc[k]="R"; });
+  const prima={}, primaG={};
+  giorni.forEach(k=>{ prima[k]=state.ecc[k]; primaG[k]=state.giorni[k];
+    const g={t:"ferie"}; if(state.ecc[k]) g.w=state.ecc[k];
+    state.ecc[k]="R"; state.giorni[k]=g; });
   salva(); render(); renderFerie(); haptic(10);
   track("setup_item", {item:"ferie_segnate"});
-  toastUndo((giorni.length===1?"1 giorno segnato":giorni.length+" giorni segnati")+" come riposo: il piano ora ne tiene conto", ()=>{
-    giorni.forEach(k=>{ if(prima[k]==null) delete state.ecc[k]; else state.ecc[k]=prima[k]; });
+  toastUndo((giorni.length===1?"1 giorno segnato":giorni.length+" giorni segnati")+" come ferie: il piano ora ne tiene conto", ()=>{
+    giorni.forEach(k=>{ if(prima[k]==null) delete state.ecc[k]; else state.ecc[k]=prima[k];
+      if(primaG[k]==null) delete state.giorni[k]; else state.giorni[k]=primaG[k]; });
     salva(); render(); renderFerie();
   });
 }
 function apriFerie(){
   const pg=$("#feriePagina"); if(!pg) return;
-  chiudiAndamenti(); chiudiVederci(); chiudiScambio();
+  chiudiAndamenti(); chiudiVederci(); chiudiScambio(); chiudiSegna();
   document.body.classList.add("ferie-aperta"); segnaSottopagina();
   pg.hidden=false;
   renderFerie(); track("setup_item", {item:"ferie_aperte"});
@@ -8638,6 +8828,283 @@ if($("#feriePagina")){
   });
   $("#ferieMese").addEventListener("change", renderFerie);
   $("#ferieSmonto").addEventListener("change", e=>{ const p=preferenzeFerie(); p.smonto=e.target.checked; store.set("ferie", p); renderFerie(); });
+}
+
+/* ── I turni del mese: un tocco per giorno, o dal foglio turni ───────────
+   Si sceglie un «pennello» (un turno, riposo, ferie…) e si toccano i giorni:
+   per un mese di turni che cambiano basta un minuto. Lo stesso pennello su
+   un giorno che lo ha già lo toglie. «Altro…» apre il foglio del giorno
+   (orari veri, formazione, turno extra). Sotto, l'importazione: file,
+   calendario del telefono, foto o PDF; ogni volta si conferma cosa vuol
+   dire ogni sigla prima di segnare, e si può annullare. */
+let sgOff=0, sgPennello=null, _imp=null, _importa=null, _aiOn=null;
+const caricaImporta=()=> _importa || (_importa=import("./importa.js"));
+function pennelliSegna(){
+  const sh=state.shifts||{};
+  const lav=Object.keys(sh).filter(k=>sh[k] && !sh[k].rest);
+  // Malattia, formazione, turno extra e orari veri sono rari: stanno in «Altro…»
+  return lav.map(k=>({k, t:sh[k].n})).concat([{k:"R",t:"Riposo"},{k:"ferie",t:"Ferie"},{k:"reperibile",t:"Reperibile"},
+    {k:"dettagli",t:"Altro…"},{k:"cancella",t:"Cancella"}]);
+}
+function siglaCella(nome){ return nome.length<=5 ? nome : nome.slice(0,3)+"."; }
+function renderSegna(){
+  const el=$("#segnaOut"); if(!el) return;
+  const pen=pennelliSegna();
+  if(!pen.some(p=>p.k===sgPennello)) sgPennello=pen[0].k;
+  const oggi=giornoVero(), primo=new Date(oggi.getFullYear(), oggi.getMonth()+sgOff, 1, 12);
+  const nome=primo.toLocaleDateString(LINGUA,{month:"long",year:"numeric"});
+  const vuote=(primo.getDay()+6)%7;
+  let celle=GIORNI_SETT.map(g=>'<span class="sg-gs" aria-hidden="true">'+esc(g.slice(0,1))+'</span>').join("");
+  for(let i=0;i<vuote;i++) celle+='<button type="button" class="sg-g" disabled tabindex="-1" aria-hidden="true"></button>';
+  let daSegnare=0;
+  for(let d=new Date(primo); d.getMonth()===primo.getMonth(); d.setDate(d.getDate()+1)){
+    const k=iso(d), off=dnum(d)-dnum(state.focus), g=state.giorni[k]||{};
+    let c="?", b=null; try{ c=NT.codeAt(off); b=NT.block(off); }catch(e){}
+    let nomeG=NT.etichetta(off), cl="";
+    if(g.t && GIORNO_BASE[g.t]) cl=g.t==="formazione"?" lav":" ass";
+    else if(c==="?"){ cl=" vuoto"; nomeG="—"; daSegnare++; }
+    else if(b && !b.rest) cl=(NT.spansNight(b)||NT.startsInNight(b))?" notte":" lav";
+    const extra=[g.t==="reperibile"?"reperibile":"", g.t==="extra"?"turno extra":"", g.s!=null&&g.t!=="formazione"?"orari "+hhmm(g.s)+"–"+hhmm(g.e):""].filter(Boolean);
+    const lab=d.toLocaleDateString(LINGUA,{weekday:"long",day:"numeric",month:"long"})+": "+(nomeG==="—"?"da segnare":nomeG)+(extra.length?", "+extra.join(", "):"");
+    celle+='<button type="button" class="sg-g'+cl+(state.ecc[k]||state.giorni[k]?" mio":"")+(g.t==="reperibile"?" rep":"")+(g.s!=null&&g.t!=="formazione"?" ore":"")+(dnum(d)===dnum(oggi)?" oggi":"")+'" data-sg="'+k+'" aria-label="'+esc(lab)+'">'+
+      '<small>'+d.getDate()+'</small><b>'+esc(siglaCella(nomeG)+(g.t==="extra"?"+":""))+'</b></button>';
+  }
+  el.innerHTML='<div class="sg-testa"><button type="button" data-sg-mese="-1" aria-label="Mese precedente"'+(sgOff<=-6?' disabled':'')+'>‹</button>'+
+      '<b aria-live="polite">'+esc(nome.charAt(0).toUpperCase()+nome.slice(1))+'</b>'+
+      '<button type="button" data-sg-mese="1" aria-label="Mese successivo"'+(sgOff>=12?' disabled':'')+'>›</button></div>'+
+    '<p class="hint" style="margin:0 0 8px" aria-live="polite">'+(sgPennello==="dettagli" ? "Tocca un giorno per malattia, formazione, turno extra o orari diversi."
+      : sgPennello==="cancella" ? "Tocca i giorni da riportare come prima." : "Scegli cosa segnare, poi tocca i giorni. Un secondo tocco lo toglie.")+'</p>'+
+    '<div class="sg-pennelli" role="group" aria-label="Cosa segni">'+pen.map(p=>'<button type="button" class="sg-pen" data-pen="'+esc(p.k)+'" aria-pressed="'+(p.k===sgPennello)+'">'+esc(p.t)+'</button>').join("")+'</div>'+
+    '<div class="sg-griglia">'+celle+'</div>'+
+    '<p class="sg-legenda"><span><i style="background:var(--orange-fill)"></i>reperibile</span><span><i style="background:var(--blue)"></i>bordo: segnato da te</span>'+
+      (daSegnare?'<span>— da segnare: '+daSegnare+'</span>':'')+'</p>';
+}
+// Un turno scelto a mano per un giorno (dal foglio del giorno o dal pennello).
+function scegliTurno(d, k){
+  state.ecc[d]=k;
+  const g=state.giorni[d];
+  if(g){ const n=Object.assign({}, g); delete n.s; delete n.e; delete n.w;
+    if(GIORNO_BASE[n.t] || (n.t==="extra" && k==="R")) delete n.t;
+    if(n.t) state.giorni[d]=n; else delete state.giorni[d]; }
+}
+let _segnaRender=0;
+function dopoSegna(){ salva(); renderSegna(); clearTimeout(_segnaRender); _segnaRender=setTimeout(()=>{ try{ render(); }catch(e){} }, 400); }
+function pennella(dIso){
+  const pen=sgPennello, g=state.giorni[dIso]||{};
+  if(pen==="dettagli"){ apriQuickShift(new Date(dIso+"T12:00:00")); return; }
+  haptic(6);
+  if(pen==="cancella"){ delete state.ecc[dIso]; delete state.giorni[dIso]; }
+  else if(pen==="ferie"||pen==="reperibile") segnaSpeciale(dIso, pen);
+  else if(state.ecc[dIso]===pen && !GIORNO_BASE[g.t]){ delete state.ecc[dIso];
+    if(g.s!=null){ const n=Object.assign({},g); delete n.s; delete n.e; if(n.t) state.giorni[dIso]=n; else delete state.giorni[dIso]; } }
+  else scegliTurno(dIso, pen);
+  dopoSegna();
+}
+function apriSegna(){
+  const pg=$("#segnaPagina"); if(!pg) return;
+  chiudiAndamenti(); chiudiVederci(); chiudiScambio(); chiudiFerie();
+  document.body.classList.add("segna-aperta"); segnaSottopagina();
+  pg.hidden=false; _imp=null; renderSegna(); renderImport();
+  track("setup_item", {item:"mese_aperto"});
+  try{ window.scrollTo(0,0); }catch(e){}
+  // la voce «foto o PDF» c'è solo se il server sa leggerle
+  if(_aiOn===null){ _aiOn=false;
+    fetch((window.NT_CAL.api||"")+"/turni-ai",{cache:"no-store"}).then(r=>r.ok?r.json():{}).then(j=>{ _aiOn=!!(j&&j.on); if($("#sgDaFoto")) $("#sgDaFoto").hidden=!_aiOn; }).catch(()=>{}); }
+  if($("#sgDaFoto")) $("#sgDaFoto").hidden=!_aiOn;
+  if($("#sgDaCalendario")) $("#sgDaCalendario").hidden=!platform.calendar.available;
+}
+function chiudiSegna(){
+  document.body.classList.remove("segna-aperta"); segnaSottopagina();
+  const pg=$("#segnaPagina"); if(pg) pg.hidden=true; _imp=null;
+}
+if($("#doSegnaMese")) $("#doSegnaMese").onclick=apriSegna;
+if($("#chiudiSegna")) $("#chiudiSegna").onclick=chiudiSegna;
+if($("#segnaOut")) $("#segnaOut").addEventListener("click", e=>{
+  const m=e.target.closest("[data-sg-mese]");
+  if(m && !m.disabled){ sgOff=Math.max(-6, Math.min(12, sgOff + +m.dataset.sgMese)); renderSegna(); return; }
+  const p=e.target.closest("[data-pen]");
+  if(p){ sgPennello=p.dataset.pen; haptic(4); renderSegna(); return; }
+  const c=e.target.closest("[data-sg]"); if(c) pennella(c.dataset.sg);
+});
+
+/* Importazione. _imp: {fonte, giorni, tab, righe, err} */
+const NOMI_VALORE=()=>{ const sh=state.shifts||{};
+  return Object.keys(sh).filter(k=>sh[k]&&!sh[k].rest).map(k=>[k, sh[k].n])
+    .concat([["R","Riposo"],["ferie","Ferie"],["malattia","Malattia"],["reperibile","Reperibilità"],["formazione","Formazione"],["","Non è un turno: salta"]]); };
+function renderImport(){
+  const el=$("#sgImport"); if(!el) return;
+  const I=_imp;
+  if(!I){ el.innerHTML=""; return; }
+  const chiudi='<button type="button" class="btn g" data-imp-annulla>Annulla</button>';
+  if(I.stato==="consenso"){
+    el.innerHTML='<div class="sg-box"><p><b>Foto o PDF del foglio turni</b></p>'+
+      '<p class="hint">Il file va al server di Notturnisti e ad <b>Anthropic</b> (Claude), che lo legge e mi restituisce i turni. Non lo salviamo. Se nel foglio ci sono i nomi dei colleghi, meglio ritagliare la tua riga; altrimenti scrivi il tuo nome come è scritto nel foglio, così leggo solo quello. <a href="'+esc(window.NT_APP.base.replace(/[^/]*$/,""))+'privacy/" target="_blank" rel="noopener">Privacy</a></p>'+
+      '<label class="hint" for="sgNome" style="display:block;margin:6px 0 4px">Il tuo nome nel foglio (se ci sono più persone)</label>'+
+      '<input type="text" id="sgNome" maxlength="40" autocomplete="off" value="'+esc(store.get("sgNome","")||"")+'">'+
+      '<label class="riga-sw" for="sgOk" style="margin-top:10px"><span>Ho capito: il file va ad Anthropic per essere letto</span><span class="switch"><input type="checkbox" id="sgOk"><span class="slider"></span></span></label>'+
+      '<div class="sg-azioni"><button type="button" class="btn pri" id="sgScegliFoto" disabled>Scegli il file</button>'+chiudi+'</div></div>';
+    return;
+  }
+  if(I.stato==="attesa"){ el.innerHTML='<div class="sg-box" role="status"><p>'+esc(I.msg||"Leggo…")+'</p></div>'; return; }
+  if(I.stato==="errore"){ el.innerHTML='<div class="sg-box" role="alert"><p>'+esc(I.msg)+'</p><div class="sg-azioni">'+chiudi.replace("Annulla","Chiudi")+'</div></div>'; return; }
+  if(I.stato==="calendari"){
+    el.innerHTML='<div class="sg-box"><p><b>Da quale calendario?</b></p><p class="hint">Eventi da oggi a tre mesi avanti. Scegli quello dove ci sono i turni.</p>'+
+      '<div class="sg-fonti">'+I.calendari.map(c=>'<button type="button" class="btn g" data-imp-cal="'+esc(c.id)+'">'+esc(c.titolo)+' · '+c.n+(c.n===1?' evento':' eventi')+'</button>').join("")+'</div>'+
+      '<div class="sg-azioni">'+chiudi+'</div></div>';
+    return;
+  }
+  if(I.stato==="persona"){
+    const T=I.tab, mesi=[...Array(12).keys()].map(i=>new Date(2026,i,1).toLocaleDateString(LINGUA,{month:"long"}));
+    el.innerHTML='<div class="sg-box"><p><b>Qual è la tua riga?</b></p>'+
+      '<select id="sgRiga" aria-label="La tua riga">'+T.persone.map(p=>'<option value="'+p.indice+'">'+esc(p.nome)+'</option>').join("")+'</select>'+
+      (T.meseNoto?'':'<p class="hint" style="margin:10px 0 4px">Di che mese è il foglio?</p><div style="display:flex;gap:8px"><select id="sgMeseImp" aria-label="Mese">'+mesi.map((m,i)=>'<option value="'+(i+1)+'"'+(i+1===T.mese?' selected':'')+'>'+esc(m)+'</option>').join("")+'</select>'+
+        '<select id="sgAnnoImp" aria-label="Anno">'+[T.anno-1,T.anno,T.anno+1].map(a=>'<option'+(a===T.anno?' selected':'')+'>'+a+'</option>').join("")+'</select></div>')+
+      '<div class="sg-azioni"><button type="button" class="btn pri" data-imp-riga>Avanti</button>'+chiudi+'</div></div>';
+    return;
+  }
+  if(I.stato==="mappa"){
+    const G=I.gruppi, opz=NOMI_VALORE(), n=I.giorni.length;
+    const date=I.giorni.map(x=>x.data).sort(), fmt=k=>new Date(k+"T12:00:00").toLocaleDateString(LINGUA,{day:"numeric",month:"long"});
+    const visti=G.slice(0,16);
+    el.innerHTML='<div class="sg-box"><p><b>Ho trovato '+n+(n===1?' giorno':' giorni')+'</b>, dal '+esc(fmt(date[0]))+' al '+esc(fmt(date[date.length-1]))+'.</p>'+
+      '<p class="hint">Controlla cosa vuol dire ogni voce del foglio.</p>'+
+      (I.nota?'<p class="hint">'+esc(I.nota)+'</p>':'')+
+      '<div class="sg-map">'+visti.map((g,i)=>'<label for="sgV'+i+'"><b>'+esc(g.etichetta)+'</b><small>'+(g.s!=null?hhmm(g.s)+'–'+hhmm(g.e)+' · ':'')+g.n+(g.n===1?' giorno':' giorni')+'</small></label>'+
+        '<select id="sgV'+i+'" data-imp-v="'+i+'">'+opz.map(([v,t])=>'<option value="'+esc(v)+'"'+((g.v||"")===v?' selected':'')+'>'+esc(t)+'</option>').join("")+'</select>').join("")+'</div>'+
+      (G.length>visti.length?'<p class="hint">Altre '+(G.length-visti.length)+' voci rare vengono saltate.</p>':'')+
+      '<p class="hint">Quello che c\'è già in quei giorni viene sostituito. Puoi annullare subito dopo.</p>'+
+      '<div class="sg-azioni"><button type="button" class="btn pri" data-imp-applica>Segna i turni</button>'+chiudi+'</div></div>';
+  }
+}
+async function avviaImport(fonte, fn){
+  _imp={stato:"attesa", fonte, msg:"Leggo…"}; renderImport();
+  try{ await fn(); }
+  catch(e){ _imp={stato:"errore", msg: e && e.utente ? e.message : "Non riesco a leggerlo. Prova a salvarlo come .csv o .xlsx, oppure segna i giorni qui sopra."}; renderImport(); }
+}
+const erroreUtente=m=>{ const e=new Error(m); e.utente=true; return e; };
+async function daGiorni(giorni, fonte, nota){
+  const IM=await caricaImporta();
+  const min=iso(day(giornoVero(),-60)), max=iso(day(giornoVero(),400));
+  giorni=giorni.filter(x=>x.data>=min && x.data<=max);
+  if(!giorni.length) throw erroreUtente("Non ho trovato turni da oggi in avanti (o negli ultimi due mesi) in questo file.");
+  _imp={stato:"mappa", fonte, giorni, nota, gruppi:IM.gruppi(giorni, state.shifts||{})};
+  renderImport();
+  try{ $("#sgImport").scrollIntoView({behavior:"smooth", block:"start"}); }catch(e){}
+}
+async function daTabella(righe, fonte){
+  const IM=await caricaImporta();
+  const T=IM.tabellaInGiorni(righe, {anno:giornoVero().getFullYear()});
+  if(T.tipo==="griglia" && T.giorni.length===0 && T.persone.length>1){ _imp={stato:"persona", fonte, righe, tab:T}; renderImport(); return; }
+  if(T.tipo==="griglia" && !T.meseNoto && T.persone.length===1){ _imp={stato:"persona", fonte, righe, tab:T}; renderImport(); return; }
+  if(!T.giorni.length) throw erroreUtente("Non riconosco la forma di questo foglio. Servono le date (o i numeri dei giorni) e i turni accanto.");
+  return daGiorni(T.giorni, fonte);
+}
+function applicaImport(){
+  const I=_imp; if(!I || I.stato!=="mappa") return;
+  const scelte={}; I.gruppi.forEach((g,i)=>{ const s=document.querySelector('[data-imp-v="'+i+'"]'); scelte[g.chiave]= s ? s.value : ""; });
+  caricaImporta().then(IM=>{
+    const P=IM.piano(I.giorni, scelte, state.shifts||{});
+    if(!P.length){ toast("Nessun giorno da segnare: tutte le voci sono «salta»"); return; }
+    const primaE=JSON.parse(JSON.stringify(state.ecc)), primaG=JSON.parse(JSON.stringify(state.giorni));
+    for(const x of P){
+      if(x.v){
+        delete state.giorni[x.data]; delete state.ecc[x.data];
+        if(x.v==="ferie"||x.v==="malattia"||x.v==="formazione") segnaSpeciale(x.data, x.v);
+        else scegliTurno(x.data, x.v);
+        if(x.s!=null){ state.giorni[x.data]=Object.assign({}, state.giorni[x.data]||{}, {s:x.s, e:x.e}); }
+      }
+      if(x.rep){ const g=state.giorni[x.data]; if(!g || !GIORNO_BASE[g.t]) state.giorni[x.data]=Object.assign({}, g||{}, {t:"reperibile"});
+        // solo reperibilità, in un giorno che non si sapeva: è un giorno senza turno
+        if(!x.v && NT.codeAt(Math.round((dnum(new Date(x.data+"T12:00:00"))-dnum(state.focus))/864e5))==="?") state.ecc[x.data]="R"; }
+    }
+    // chi parte da zero con i turni variabili: niente più "da impostare" sui giorni importati
+    const primo=P[0].data;
+    const a=giornoVero(); sgOff=(+primo.slice(0,4)-a.getFullYear())*12+(+primo.slice(5,7)-1-a.getMonth());
+    sgOff=Math.max(-6, Math.min(12, sgOff));
+    track("setup_item", {item:"import_"+I.fonte});
+    _imp=null; renderImport(); salva(); render(); renderSegna();
+    try{ window.scrollTo({top:0, behavior:"smooth"}); }catch(e){}
+    toastUndo((P.length===1?"1 giorno segnato":P.length+" giorni segnati")+" dal foglio turni", ()=>{
+      state.ecc=primaE; state.giorni=primaG; NT.state.ecc=primaE; NT.state.giorni=primaG; salva(); render(); renderSegna();
+    });
+  });
+}
+function leggiFile(f){
+  return new Promise((ok,ko)=>{ const r=new FileReader(); r.onload=()=>ok(r.result); r.onerror=()=>ko(r.error);
+    if(/\.xlsx$/i.test(f.name)) r.readAsArrayBuffer(f); else r.readAsText(f); });
+}
+if($("#sgDaFile")) $("#sgDaFile").onclick=()=>{ const i=$("#sgFile"); i.value=""; i.click(); };
+if($("#sgFile")) $("#sgFile").addEventListener("change", e=>{
+  const f=e.target.files && e.target.files[0]; if(!f) return;
+  avviaImport("file", async()=>{
+    if(f.size>5e6) throw erroreUtente("Il file è troppo grande (più di 5 MB).");
+    if(/\.xls$/i.test(f.name)) throw erroreUtente("I file .xls vecchi non li so leggere: aprilo e salvalo come .xlsx o .csv.");
+    const IM=await caricaImporta(), dati=await leggiFile(f);
+    if(/\.ics$/i.test(f.name) || /BEGIN:VCALENDAR/.test(typeof dati==="string"?dati.slice(0,200):"")) return daGiorni(IM.eventiInGiorni(IM.leggiIcs(dati)), "file");
+    if(/\.xlsx$/i.test(f.name)){
+      let righe; try{ righe=await IM.leggiXlsx(dati); }catch(err){ if(String(err&&err.message)==="xlsx-non-supportato") throw erroreUtente("Questo telefono non apre i file .xlsx: salvalo come .csv e riprova."); throw err; }
+      return daTabella(righe, "file");
+    }
+    return daTabella(IM.leggiCsv(dati), "file");
+  });
+});
+if($("#sgDaCalendario")) $("#sgDaCalendario").onclick=()=>avviaImport("calendario", async()=>{
+  const da=day(giornoVero(),-1); da.setHours(0,0,0,0); const a=day(da,93);
+  const r=await platform.calendar.leggi(+da, +a);
+  if(!r.permesso) throw erroreUtente("Serve il permesso del calendario: lo trovi nelle impostazioni del telefono, alla voce Notturnisti.");
+  if(!r.calendari.length) throw erroreUtente("Nei calendari del telefono non ci sono eventi nei prossimi tre mesi.");
+  if(r.calendari.length===1) return daGiorni((await caricaImporta()).eventiInGiorni(r.eventi), "calendario");
+  _imp={stato:"calendari", calendari:r.calendari, eventi:r.eventi}; renderImport();
+});
+if($("#sgDaFoto")) $("#sgDaFoto").onclick=()=>{ _imp={stato:"consenso"}; renderImport(); };
+// Le foto si rimpiccioliscono qui: bastano 2000 pixel per leggere una tabella.
+async function fotoInBase64(f){
+  if(f.type==="application/pdf"){
+    if(f.size>5e6) throw erroreUtente("Il PDF è troppo grande (più di 5 MB): mandane solo la pagina con i tuoi turni.");
+    const b=new Uint8Array(await f.arrayBuffer()); let s=""; for(let i=0;i<b.length;i+=32768) s+=String.fromCharCode.apply(null, b.subarray(i,i+32768));
+    return {tipo:"application/pdf", dati:btoa(s)};
+  }
+  const url=URL.createObjectURL(f);
+  try{
+    const img=await new Promise((ok,ko)=>{ const i=new Image(); i.onload=()=>ok(i); i.onerror=ko; i.src=url; });
+    const k=Math.min(1, 2000/Math.max(img.naturalWidth, img.naturalHeight));
+    const c=document.createElement("canvas"); c.width=Math.round(img.naturalWidth*k); c.height=Math.round(img.naturalHeight*k);
+    c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+    return {tipo:"image/jpeg", dati:c.toDataURL("image/jpeg",0.85).split(",")[1]};
+  } catch(e){ throw erroreUtente("Questa foto non si apre: prova a farne uno screenshot."); }
+  finally{ URL.revokeObjectURL(url); }
+}
+if($("#sgFoto")) $("#sgFoto").addEventListener("change", e=>{
+  const f=e.target.files && e.target.files[0]; if(!f) return;
+  const nome=(store.get("sgNome","")||"").trim();
+  avviaImport("foto", async()=>{
+    _imp={stato:"attesa", fonte:"foto", msg:"Leggo il foglio… può volerci un minuto."}; renderImport();
+    const F=await fotoInBase64(f), primo=new Date(giornoVero().getFullYear(), giornoVero().getMonth()+Math.max(0,sgOff), 1);
+    let r; try{
+      r=await fetch((window.NT_CAL.api||"")+"/turni-ai",{method:"POST", headers:{"content-type":"application/json"},
+        body:JSON.stringify({tipo:F.tipo, dati:F.dati, nome, mese:primo.getMonth()+1, anno:primo.getFullYear()})});
+    }catch(err){ throw erroreUtente("Serve la connessione a internet per leggere una foto."); }
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok) throw erroreUtente((j && j.error ? j.error.charAt(0).toUpperCase()+j.error.slice(1)+"." : "Non riesco a leggerlo.")+" Puoi segnare i giorni qui sopra.");
+    if(!j.giorni || !j.giorni.length) throw erroreUtente((j.nota || "Non ho trovato turni in questo file.")+" Puoi segnare i giorni qui sopra.");
+    return daGiorni(j.giorni, "foto", j.nota);
+  });
+});
+if($("#sgImport")){
+  $("#sgImport").addEventListener("click", e=>{
+    if(e.target.closest("[data-imp-annulla]")){ _imp=null; renderImport(); return; }
+    if(e.target.closest("#sgScegliFoto")){ const n=$("#sgNome"); store.set("sgNome", n?n.value.trim().slice(0,40):""); const i=$("#sgFoto"); i.value=""; i.click(); return; }
+    const cal=e.target.closest("[data-imp-cal]");
+    if(cal && _imp && _imp.eventi){ const ev=_imp.eventi.filter(x=>x.calendario===cal.dataset.impCal); avviaImport("calendario", async()=>daGiorni((await caricaImporta()).eventiInGiorni(ev), "calendario")); return; }
+    if(e.target.closest("[data-imp-riga]") && _imp && _imp.stato==="persona"){
+      const I=_imp, riga=+$("#sgRiga").value, mese=$("#sgMeseImp")?+$("#sgMeseImp").value:I.tab.mese, anno=$("#sgAnnoImp")?+$("#sgAnnoImp").value:I.tab.anno;
+      avviaImport(I.fonte, async()=>{ const T=(await caricaImporta()).tabellaInGiorni(I.righe, {riga, mese, anno});
+        if(!T.giorni.length) throw erroreUtente("In questa riga non ci sono turni."); return daGiorni(T.giorni, I.fonte); });
+      return;
+    }
+    if(e.target.closest("[data-imp-applica]")) applicaImport();
+  });
+  $("#sgImport").addEventListener("change", e=>{ if(e.target.id==="sgOk"){ const b=$("#sgScegliFoto"); if(b) b.disabled=!e.target.checked; } });
 }
 
 if($("#swapApplica")) $("#swapApplica").onclick=()=>{
@@ -8988,7 +9455,14 @@ async function condividiCicloWhatsApp(){
 
     let orario = "";
     const sh = state.shifts && state.shifts[code];
-    if(sh && !sh.rest && typeof sh.s === "number" && typeof sh.e === "number"){
+    // Giorni speciali: ferie e formazione col loro nome, gli orari veri del
+    // giorno. La malattia resta «Riposo»: è un dato di salute, non si manda.
+    let bb=null; try{ bb=NT.block(dnum(dd) - dnum(state.focus)); }catch(e){}
+    if(bb && bb.tipo==="ferie") nome="Ferie";
+    if(bb && bb.tipo==="malattia") nome=nameOf("R");
+    if(bb && bb.tipo==="formazione") nome="Formazione";
+    if(bb && !bb.rest) orario = " (" + hhmm(bb.start) + "–" + hhmm(bb.end) + ")";
+    else if(!bb && sh && !sh.rest && typeof sh.s === "number" && typeof sh.e === "number"){
       orario = " (" + hhmm(sh.s) + "–" + hhmm(sh.e) + ")";
     }
 
@@ -9818,7 +10292,7 @@ function salva(){
     cTo:state.cTo,cFrom:state.cFrom,need:state.need,prep:state.prep,freeWake:state.freeWake,freeBed:state.freeBed,
     maxAdvance:state.maxAdvance,pPattern:state.pPattern,pAnchor:state.pAnchor,
     pShifts:state.pShifts,pWake:state.pWake,pBed:state.pBed,pName:state.pName,people:state.people,personaGlance:state.personaGlance,
-    repeat:state.repeat,ecc:state.ecc,evento:state.evento,
+    repeat:state.repeat,ecc:state.ecc,giorni:state.giorni,evento:state.evento,
     napTurno:state.napTurno,sonnoDiurno:state.sonnoDiurno,mattinoBifasico:state.mattinoBifasico,avvisoBifasicoOff:state.avvisoBifasicoOff,installBannerOff:state.installBannerOff,shareNudgeOff:state.shareNudgeOff,icsNudgeOff:state.icsNudgeOff,icsExportedAt:state.icsExportedAt,icsExpireNudgeSeenAt:state.icsExpireNudgeSeenAt,firstSeenAt:state.firstSeenAt,clubBannerOff:state.clubBannerOff,donateNudgeOff:state.donateNudgeOff,pausa:state.pausa,caffSens:state.caffSens,vista:state.vista});
   if(!salvato && state.turniConfigurati && !_avvisoSalvataggio){
     _avvisoSalvataggio=true;
@@ -9833,7 +10307,7 @@ function salva(){
     const sig=JSON.stringify([!!state.turniConfigurati,state.pattern,state.shifts,state.anchor,state.repeat,
       state.freeWake,state.freeBed,state.cTo,state.cFrom,state.need,state.prep,state.maxAdvance,
       state.pPattern,state.pAnchor,state.pShifts,state.pWake,state.pBed,state.pName,state.people,
-      state.ecc,state.evento,state.napTurno,state.pausa,state.caffSens]);
+      state.ecc,state.giorni,state.evento,state.napTurno,state.pausa,state.caffSens]);
     if(_cfgSig!==null && sig!==_cfgSig) dispatchEvent(new Event("nt:config-changed"));
     _cfgSig=sig;
   }catch(e){}
@@ -9912,6 +10386,7 @@ platform.onBackButton(()=>{
   if(document.body.classList.contains("vederci-aperta")){ chiudiVederci(); return true; }
   if(document.body.classList.contains("scambio-aperta")){ chiudiScambio(); return true; }
   if(document.body.classList.contains("ferie-aperta")){ chiudiFerie(); return true; }
+  if(document.body.classList.contains("segna-aperta")){ if(_imp){ _imp=null; renderImport(); return true; } chiudiSegna(); return true; }
   if(sceltaSchemaAperta){ sceltaSchemaAperta=false; demoEsempioSubflow="home"; render(); return true; }
   if(demoEsempioVisibile() && demoEsempioSubflow!=="home"){
     const su={orario:"home", posizione:(schemaInScelta&&schemaInScelta.composto?"componi":"schema"), componi:"schema", orari:(state.repeat!==false && schemaInScelta?"posizione":"segna")}[demoEsempioSubflow] || (state.turniConfigurati?"prossimi":"home");
@@ -10026,6 +10501,7 @@ function setTab(t){
   chiudiAndamenti();
   chiudiVederci();
   chiudiScambio();
+  chiudiSegna();
   document.body.classList.add("tab-"+tab);
   // Opzioni non è più una delle due tab vere e proprie (Oggi/Turni): non
   // ha un suo bottone nella barra, quindi non tocca mai state.tab — si
@@ -10107,7 +10583,7 @@ window.NT = {
     repeat:state.repeat, pPattern:state.pPattern, pAnchor:state.pAnchor,
     pShifts:state.pShifts?JSON.parse(JSON.stringify(state.pShifts)):null, pWake:state.pWake, pBed:state.pBed,
     freeWake:state.freeWake, freeBed:state.freeBed, need:state.need,
-    focus:new Date(state.focus), params:toHash() }; },
+    focus:new Date(state.focus), params:toHash(true) }; },
   diary(){ return { wakes:{...state.wakes}, beds:{...state.beds} }; },
   planFor(date){ const f=state.focus; state.focus=new Date(date); let P=null; try{ P=NT.plan(); }catch(e){} state.focus=f; return P; },
   setRoster(seq, anchorISO, repeat){ const s=String(seq||"").toUpperCase().replace(/[^A-Z]/g,"").slice(0,400);
@@ -10122,7 +10598,7 @@ window.NT = {
   // Solo i campi che parseConfig() del server produce, già validati lì.
   applyConfig(cfg){
     if(!cfg || !cfg.pattern || state.turniConfigurati) return false;
-    for(const k of ["pattern","anchor","shifts","repeat","ecc","freeWake","freeBed","caffSens","cTo","cFrom","prep","maxAdvance","pPattern","pAnchor","pShifts","pWake","pBed"])
+    for(const k of ["pattern","anchor","shifts","repeat","ecc","giorni","freeWake","freeBed","caffSens","cTo","cFrom","prep","maxAdvance","pPattern","pAnchor","pShifts","pWake","pBed"])
       if(cfg[k]!==undefined) state[k]=JSON.parse(JSON.stringify(cfg[k]));
     state.turniConfigurati=true; store.set("turniConfigurati", true);
     NT.normalizza(); salva(); render(); return true;

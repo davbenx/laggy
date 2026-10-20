@@ -18,6 +18,7 @@ const CORE = [
   "./lingua.js",
   "./migrate.js",
   "./analytics.js",
+  "./importa.js",
   "./fonts/inter-latin.woff2",
   "./fonts/noto-serif-latin.woff2"
 ];

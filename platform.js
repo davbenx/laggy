@@ -363,6 +363,25 @@ export const calendar = {
       return { on: true, permesso: true, esiste: true, n };
     } catch (e) { return { on: true, errore: String(e && e.message || e), n: 0 }; }
   },
+  // Importazione dei turni: gli eventi degli ALTRI calendari del telefono
+  // (non quelli scritti dall'app) fra due date. Solo lettura, solo qui: gli
+  // eventi non lasciano il telefono. Restituisce {permesso, calendari, eventi}.
+  async leggi(from, to) {
+    if (!this.available) return { permesso: false, calendari: [], eventi: [] };
+    if (!(await calPermesso(true))) return { permesso: false, calendari: [], eventi: [] };
+    const C = plugin("CapacitorCalendar"), st = calState(), nostri = [st.id, st.idCoppia].filter(Boolean).map(String);
+    let cal = []; try { cal = ((await C.listCalendars()).result || []); } catch (e) {}
+    const r = await C.listEventsInRange({ from, to });
+    const eventi = (r.result || []).filter(e => !nostri.includes(String(e.calendarId))).map(e => {
+      // tutto il giorno: le date arrivano a mezzanotte UTC, si leggono in UTC
+      const g = x => { const d = new Date(x); return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()); };
+      return { titolo: e.title || "", calendario: String(e.calendarId), tuttoIlGiorno: !!e.isAllDay,
+        inizio: e.isAllDay ? g(e.startDate) : new Date(e.startDate), fine: e.isAllDay ? g(e.endDate) : new Date(e.endDate) };
+    });
+    const calendari = cal.filter(c => !nostri.includes(String(c.id))).map(c => ({ id: String(c.id), titolo: c.title || "Calendario",
+      n: eventi.filter(e => e.calendario === String(c.id)).length })).filter(c => c.n > 0).sort((a, b) => b.n - a.n);
+    return { permesso: true, calendari, eventi };
+  },
   // Riscrive tutto alla prossima sincronizzazione (dimentica la firma).
   riscrivi() { const st = calState(); st.sig = null; calSave(st); }
 };

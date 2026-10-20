@@ -77,7 +77,7 @@ export async function writeSub(env, id, sub) {
 // con lo STESSO parseConfig del browser/feed, e restituisce la config del motore.
 export function sanitizeConfig(obj) {
   const params = new URLSearchParams();
-  for (const k of ["p","a","s","w","wb","cs","n","ct","cf","pr","adv","rep","x","pp","pa","ps","pw","pwb"]) {
+  for (const k of ["p","a","s","w","wb","cs","n","ct","cf","pr","adv","rep","x","g","pp","pa","ps","pw","pwb"]) {
     if (obj && obj[k] != null && obj[k] !== "") params.set(k, String(obj[k]));
   }
   if (!params.get("p")) return null;             // senza pattern non c'è piano
