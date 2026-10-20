@@ -65,9 +65,10 @@ ok(await p.evaluate(()=>document.body.classList.contains("tab-oggi")), "indietro
 await p.evaluate(()=>window.__fire("App:backButton", {canGoBack:false})); await p.waitForTimeout(200);
 ok((await lg()).includes("App.minimizeApp"), "indietro da Oggi manda l'app in secondo piano");
 // condivisione
-const shareBtn = await p.evaluate(()=>!!document.querySelector("#doShare"));
-await p.evaluate(()=>document.querySelector("#doShare") && document.querySelector("#doShare").click()); await p.waitForTimeout(500);
-ok((await lg()).some(x=>/^Share\.share https:\/\/app\.notturnisti\.club\/#/.test(x)), "«Invita chi lavora con te» apre il pannello nativo con il link all'app e il proprio ciclo: "+(await lg()).filter(x=>x.startsWith("Share")).pop());
+await p.evaluate(()=>document.querySelector("#doCycShare").click()); await p.waitForTimeout(500);
+ok((await lg()).some(x=>/^Share\.share https:\/\/app\.notturnisti\.club\/#/.test(x)), "«Invita un collega» (Turni) apre il pannello nativo con il link all'app e il proprio ciclo: "+(await lg()).filter(x=>x.startsWith("Share")).pop());
+await p.evaluate(()=>document.querySelector("#doShare").click()); await p.waitForTimeout(500);
+ok(/^Share\.share https:\/\/app\.notturnisti\.club\/(\s|$)/.test((await lg()).filter(x=>x.startsWith("Share")).pop()||""), "«Consiglia Notturnisti» (Impostazioni) manda il link all'app, senza i propri turni: "+(await lg()).filter(x=>x.startsWith("Share")).pop());
 // disattiva calendario
 await p.evaluate(()=>document.querySelector("#doOpzioni").click()); await p.waitForTimeout(300);
 p.once("dialog", d=>d.accept());

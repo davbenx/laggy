@@ -14,7 +14,7 @@ ok(!(await visibile(p,"setupChecklist")), "web: con il banner del primo piano ap
 await p.click("#doChiudiPrimoPiano"); await p.waitForTimeout(300);
 ok(await visibile(p,"setupChecklist"), "web: chiuso il banner compare la lista: "+(await voci(p)).join(" | "));
 await p.screenshot({path:"/tmp/a-1-web.png"});
-ok(!(await visibile(p,"shareNudge")) && !(await visibile(p,"statsNudge")), "web: mentre c'è la lista, gli altri inviti tacciono");
+ok(!(await visibile(p,"loSapevi")), "web: mentre c'è la lista, i consigli tacciono");
 await p.click('[data-attiva="notifiche"]'); await p.waitForTimeout(500); await p.evaluate(()=>{ const x=document.querySelector('#sceltaNotif [data-scelta=\"essenziali\"]'); x&&x.click(); }); await p.waitForTimeout(200);
 ok((await voci(p)).includes("✓Promemoria sul telefono"), "web: 'Promemoria' attivato con un tocco");
 await p.click('[data-attiva="turni"]'); await p.waitForTimeout(300);

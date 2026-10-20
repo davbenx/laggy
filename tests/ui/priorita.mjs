@@ -5,7 +5,7 @@ import pw from "./_pw.mjs";
 const ok=(c,m)=>console.log((c?"✔ ":"✘ ")+m);
 const b=await pw.chromium.launch(); const errs=[];
 const iso=d=>d.toISOString().slice(0,10);
-const INVITI=["#setupChecklist","#firstPlanBanner","#adattaCard","#medicoCard","#setupNudge","#backupNudge","#installBanner","#shareNudge","#icsNudge","#icsExpireNudge","#statsNudge","#clubBanner","#donateNudge"];
+const INVITI=["#setupChecklist","#firstPlanBanner","#adattaCard","#medicoCard","#setupNudge","#backupNudge"];
 const apri=async(giorniFa)=>{
   const ctx=await b.newContext({locale:"it-IT",viewport:{width:360,height:740}});
   await ctx.addInitScript(([f,oggi])=>{ if(sessionStorage.getItem("x")) return; sessionStorage.setItem("x","1");
@@ -22,7 +22,7 @@ for(const g of [0,1,3,8,20]){
   const p=await apri(g);
   const v=await sopra(p), y=await p.evaluate(()=>document.querySelector("#ora").getBoundingClientRect().top);
   ok(v.length<=1 && y<740-120, "giorno "+g+": "+(v.join(",")||"nessun invito")+" sopra il piano, «Adesso» a "+Math.round(y)+" px (prima schermata)");
-  const modello=await p.evaluate(sel=>sel.map(s=>document.querySelector(s)).filter(e=>e && !e.hidden && e.getBoundingClientRect().height>2 && !e.querySelector("#apriAttivazione") && e.id!=="statsNudge").map(e=>{
+  const modello=await p.evaluate(sel=>sel.map(s=>document.querySelector(s)).filter(e=>e && !e.hidden && e.getBoundingClientRect().height>2 && !e.querySelector("#apriAttivazione")).map(e=>{
     const x=e.querySelector(":scope > .x"), r=x && x.getBoundingClientRect(), c=e.getBoundingClientRect();
     return {id:e.id, x:!!x && r.width>=44 && Math.abs(r.right-c.right)<8, freccia:/→/.test([...e.querySelectorAll(".btn")].map(b=>b.textContent).join(""))}; }), INVITI);
   ok(modello.every(m=>m.x && !m.freccia), "giorno "+g+": stesso modello (× in alto a destra, azione senza freccia) → "+JSON.stringify(modello));

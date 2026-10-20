@@ -17,7 +17,7 @@ const ds=n=>{ const d=new Date(); d.setDate(d.getDate()-n); return d.toISOString
 async function configura(p, primoUso, attivDal){
   await p.click("text=Conosco già il mio schema"); await p.click("[data-preset-ob='0']"); await p.click("[data-pos='0']"); await p.click("#qhConfermaOrari"); await p.waitForTimeout(400);
   await p.evaluate(([f,a])=>{ const st=JSON.parse(localStorage.getItem("nt:state")); st.firstSeenAt=f; st.turniConfigurati=true; localStorage.setItem("nt:state",JSON.stringify(st));
-    localStorage.setItem("nt:turniConfigurati","true"); localStorage.setItem("nt:firstPlanBannerChiuso","true"); if(a) localStorage.setItem("nt:attivazioneDal", JSON.stringify(a)); }, [ds(primoUso), attivDal?ds(attivDal):null]);
+    localStorage.setItem("nt:turniConfigurati","true"); localStorage.setItem("nt:firstPlanBannerChiuso","true"); localStorage.setItem("nt:analytics-consent", "false"); if(a) localStorage.setItem("nt:attivazioneDal", JSON.stringify(a)); }, [ds(primoUso), attivDal?ds(attivDal):null]);
   await p.reload(); await p.waitForTimeout(2500);
 }
 const vis=(p,sel)=>p.evaluate(s=>{ const e=document.querySelector(s); return !!e && !e.hidden && e.offsetParent!==null; }, sel);
@@ -28,11 +28,11 @@ for(const [giorni, atteso] of [[1,false],[4,true]]){
   const p=await ctx.newPage(); p.on("pageerror",e=>errs.push(e.message));
   await p.goto("http://localhost:8766/index.html"); await p.waitForTimeout(700);
   await configura(p, 10, giorni);
-  const lista=await vis(p,"#setupChecklist"), invito=await vis(p,"#shareNudge");
-  // un invito alla volta: dal quarto giorno l'invito a condividere prende il posto della lista
-  ok(lista===!atteso && invito===atteso, "lista di attivazione da "+giorni+" giorni: "+(atteso?"invito a condividere al posto della lista":"lista, invito in pausa")+" (lista "+lista+", invito "+invito+")");
+  const lista=await vis(p,"#setupChecklist"), invito=await p.evaluate(()=>{ const e=document.querySelector("#loSapevi"); return e && !e.hidden ? e.dataset.k : ""; });
+  // la lista resta in alto; dal quarto giorno, in fondo, il consiglio di mandare il ciclo
+  ok(lista && invito===(atteso?"colleghi":""), "lista di attivazione da "+giorni+" giorni: "+(atteso?"in fondo il consiglio di mandare il ciclo":"nessun consiglio, la lista basta")+" (lista "+lista+", consiglio «"+invito+"»)");
   if(atteso){
-    await p.click("#doShareNudge"); await p.waitForTimeout(500);
+    await p.click("#loSapevi [data-sapevi-prova]"); await p.waitForTimeout(500);
     const sh=await p.evaluate(()=>window.__share.pop()||{});
     ok(/#/.test(sh.url||"") && /se fai gli stessi/.test(sh.text||"") && !/configurazione/i.test(sh.text||""), "l'invito manda il proprio ciclo, non il backup → "+JSON.stringify(sh).slice(0,160));
     const ciclo=sh.url||"";
@@ -77,7 +77,7 @@ for(const [giorni, atteso] of [[1,false],[4,true]]){
   const p=await ctx.newPage(); p.on("pageerror",e=>errs.push(e.message));
   await p.goto("http://localhost:8765/index.html"); await p.waitForTimeout(700); await configura(p, 10, 1);
   if(await vis(p,"#apriAttivazione")){ await p.click("#apriAttivazione"); await p.waitForTimeout(200); }   // dal secondo giorno la lista è una riga
-  ok(await vis(p,'#setupChecklist [data-attiva="installa"]') && !(await vis(p,"#installBanner")), "iPhone: installazione nella lista e nessun invito doppio");
+  ok(await vis(p,'#setupChecklist [data-attiva="installa"]') && !(await p.evaluate(()=>!document.querySelector("#loSapevi").hidden && document.querySelector("#loSapevi").dataset.k==="installa")), "iPhone: installazione nella lista e nessun consiglio doppio");
   await p.evaluate(()=>{ localStorage.setItem("nt:diary", JSON.stringify({"2026-01-01":4})); }); await p.click('#setupChecklist [data-attiva="installa"]'); await p.waitForTimeout(1500);
   const copia=await p.evaluate(async()=>{ const r=await (await caches.open("passaggio-ios")).match("/__passaggio"); return r ? Object.keys(await r.json()).length : 0; });
   ok(copia>3, "iPhone: Safari lascia la copia per l'app sulla Home ("+copia+" chiavi)");

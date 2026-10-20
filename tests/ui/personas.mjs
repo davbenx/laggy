@@ -16,7 +16,7 @@ await setTime(p,"#qhDa","22:00"); await setTime(p,"#qhA","06:00");
 await p.click("#qhConfermaOrario"); await p.waitForTimeout(700); let s=await st(p); await shot(p,"2-piano-oggi");
 ok(s.shifts.N.s===1320 && s.shifts.N.e===1800 && /Notte/.test(s.pill) && s.repeat===false && !s.primo, "P1 Notte 22–06 solo oggi: turno salvato "+s.shifts.N.s+"–"+s.shifts.N.e+", oggi "+s.pill);
 ok(/prossimi giorni/.test(s.banner||""), "P1 banner chiede dei prossimi giorni: "+s.banner);
-ok(await p.evaluate(()=>document.querySelector("#shareNudge").hidden), "P1 nessun invito a condividere un ciclo che non c'è");
+ok(await p.evaluate(()=>document.querySelector("#loSapevi").hidden), "P1 nessun consiglio il primo giorno");
 // domani: un tocco dal piano
 await p.click("#next"); await p.waitForTimeout(300); await shot(p,"3-domani");
 const chips = await p.evaluate(()=>[...document.querySelectorAll("[data-turno-giorno]")].map(b=>b.textContent));

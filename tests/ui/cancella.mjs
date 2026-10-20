@@ -15,7 +15,7 @@ await p.goto("http://localhost:8766/index.html"); await p.waitForTimeout(800);
 await p.click("text=Conosco già il mio schema"); await p.click("[data-preset-ob='0']"); await p.click("[data-pos='0']"); await p.click("#qhConfermaOrari"); await p.waitForTimeout(500);
 await p.evaluate(()=>document.querySelector("#doOpzioni").click()); await p.waitForTimeout(300);
 ok(await p.evaluate(()=>document.querySelector("#versioneApp").textContent)==="Versione 1.0.0 (7)", "versione dell'app in Impostazioni");
-ok(await p.evaluate(()=>getComputedStyle(document.querySelector("#doIcs")).display==="none"), "nell'app il file per il calendario non c'è");
+ok(await p.evaluate(()=>!document.querySelector("#doIcs") && document.querySelector("#icsBox").hidden), "nell'app il file per il calendario non c'è");
 let n=0; p.on("dialog", d=>{ n++; d.accept(); });
 await p.evaluate(()=>{ window.__log=[]; document.querySelector("#doCancellaTutto").click(); }); await p.waitForTimeout(1500);
 ok(n===2, "due conferme prima di cancellare");
