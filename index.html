@@ -7670,6 +7670,12 @@ const CONSIGLI_FUNZIONE=[
     cta:()=> playDaWeb() ? "Apri Google Play" : isIOSPerInstall() ? "" : "Installa",
     a:()=>{ if(playDaWeb()){ track("setup_item", {item:"play"}); window.open(playLink(), "_blank", "noopener"); return; }
       if(installPromptEvento){ const ev=installPromptEvento; ev.prompt(); ev.userChoice.then(r=>{ if(r.outcome==="accepted") track("pwa_installed"); installPromptEvento=null; render(); }); } }},
+  // Test chiuso su Google Play (servono 12 tester per 14 giorni): chi usa
+  // il web da Android è il tester ideale. Sparisce da sé quando NT_APP.play
+  // ha il link dell'app pubblicata (lì subentra «installa»).
+  {k:"tester", quando:()=>!window.NT_APP.nativo && !window.NT_APP.play && /Android/i.test(navigator.userAgent||""),
+    t:()=>"L'app Android di Notturnisti è in prova su Google Play: promemoria ad app chiusa, widget e calendario del telefono. Per pubblicarla servono tester per 14 giorni: ti va di aiutare? Prima entra nel gruppo, poi tocca «Diventa un tester».",
+    passi:true, link:()=>[["https://groups.google.com/g/tester-notturnisti","1. Entra nel gruppo"],["https://play.google.com/apps/testing/club.notturnisti.app","2. Diventa un tester"]]},
   {k:"statistiche", quando:()=>!!window.NTAnalytics && !window.NTAnalytics.answered(), scelta:true,
     t:()=>"Ci aiuti a migliorare l'app? Conta in forma anonima cosa si usa (niente turni, orari o diario, niente che dica chi sei). Puoi cambiare idea in Impostazioni."},
   {k:"colleghi", quando:()=>!((state.people||[]).length || state.pPattern),
@@ -7746,7 +7752,12 @@ if($("#loSapevi")) $("#loSapevi").addEventListener("click", e=>{
   if(e.target.closest("[data-sapevi-chiudi]")){ const S=store.mappa("loSapevi"); S.chiuso=iso(new Date()); store.set("loSapevi", S); el.hidden=true; track("setup_item", {item:"sapevi_no_"+k}); return; }
   const si=e.target.closest("[data-sapevi-si]"), no=e.target.closest("[data-sapevi-no]");
   if(si || no){ try{ window.NTAnalytics && window.NTAnalytics.setEnabled(!!si); }catch(err){} fatto(); render(); return; }
-  if(e.target.closest("[data-sapevi-link]")){ track("setup_item", {item:"sapevi_si_"+k}); fatto(); return; }
+  const lk=e.target.closest("[data-sapevi-link]");
+  if(lk){ track("setup_item", {item:"sapevi_si_"+k});
+    // Con più link in sequenza (passi:true) il riquadro resta finché non si tocca l'ultimo.
+    const tutti=[...el.querySelectorAll("[data-sapevi-link]")];
+    if(!(c && c.passi) || lk===tutti[tutti.length-1]) fatto();
+    return; }
   if(e.target.closest("[data-sapevi-prova]") && c){ track("setup_item", {item:"sapevi_si_"+k}); el.hidden=true; c.a(); }
 });
 async function mandaACasa(){
