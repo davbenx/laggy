@@ -865,6 +865,7 @@ padding:12px 6px 12px 14px;margin:-6px 0 var(--gap-sezione);font-size:13.5px;lin
 .essnudge{font-size:12.5px;color:var(--faint);margin-top:14px;line-height:1.55}
 .esshint{font-size:13px;color:var(--dim);margin:0 2px 10px}
 .ed-cambia{display:block;margin-top:10px;font-size:13px;text-align:left}
+#ora[hidden]{display:none}
 .essrischio{display:flex;align-items:flex-start;gap:10px;margin:0 0 10px;padding:11px 13px;border-radius:var(--r);background:var(--risk-soft);color:var(--ink);font-size:14px;line-height:1.45}
 .essrischio .eic{flex:none;color:var(--risk);display:flex}
 .essrischio .eic svg{width:18px;height:18px}
@@ -4252,14 +4253,12 @@ function votoOraRecente(){
 function renderOra(Pfocus){
   const el=$("#ora"); if(!el) return;
   if(state.vista==="dettaglio"){ el.innerHTML=""; return; }
-  let P=Pfocus;
   const vero = giornoVero();
-  const sfoglioAltrove = dnum(state.focus)!==dnum(vero);
-  if(sfoglioAltrove){
-    const f=state.focus; state.focus=vero;
-    try{ P=NT.plan(); }catch(e){ P=Pfocus; }
-    state.focus=f;
-  }
+  // «Adesso» parla del momento presente: su un altro giorno starebbe sotto una
+  // data e un turno che non sono i suoi. Lì il piano di quel giorno basta.
+  el.hidden = dnum(state.focus)!==dnum(vero);
+  if(el.hidden){ el.innerHTML=""; return; }
+  const P=Pfocus;
   const isToday = true;
   let r=null;
   const now = new Date();

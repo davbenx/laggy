@@ -17,8 +17,9 @@ const server = http.createServer(async (req, res) => {
     const p = decodeURIComponent(new URL(req.url, "http://x").pathname);
     const f = join(ROOT, p.endsWith("/") ? p + "index.html" : p);
     if (!f.startsWith(ROOT)) throw 0;
+    const dati = await readFile(f);
     res.writeHead(200, { "content-type": TIPI[extname(f)] || "application/octet-stream", "access-control-allow-origin": "*" });
-    res.end(await readFile(f));
+    res.end(dati);
   } catch (e) { res.writeHead(404); res.end(); }
 });
 await new Promise(r => server.listen(0, "127.0.0.1", r));
@@ -40,6 +41,9 @@ async function app(stato, extra = {}) {
     for (const k in ex) localStorage.setItem(k, ex[k]);
   }, [stato, extra]);
   const p = await ctx.newPage();
+  // Orologio fermo alle 10 del mattino: un piano tipico, non quello dell'ora in cui si lancia lo script.
+  const dieci = new Date(); dieci.setHours(10, 0, 0, 0);
+  await p.clock.setFixedTime(dieci);
   await p.goto(URL0); await p.waitForTimeout(1200);
   return p;
 }
@@ -61,10 +65,10 @@ const SCATTI = [
   ["07-scambio", "Cambio turno:", "ti conviene?", async () => {
     const p = await app(BASE, QUIETI); await clic(p, '[data-tab="turni"]'); await clic(p, "#doScambioTurno"); return p; }],
   ["08-mese", "Turni che cambiano?", "Li segni in un minuto", async () => {
-    const ecc = {}; ["M","M","P","R","N","N","R","P","M","R"].forEach((c, i) => { ecc[fa(-i)] = c; });
+    const ecc = {}, seq = ["M","M","P","R","N","N","R","P","M","R","R","P","P","N"];
+    for (let i = -24; i <= 12; i++) ecc[fa(-i)] = seq[(i + 24) % seq.length];
     const p = await app({ ...BASE, pattern:"R", anchor:"2000-01-01", repeat:false, ecc }, QUIETI);
     await clic(p, '[data-tab="turni"]'); await clic(p, "#tEdit");
-    await p.evaluate(() => { const g = document.querySelector("#segnaOut"); window.scrollTo(0, g.getBoundingClientRect().top + scrollY - 70); });
     return p; }],
 ];
 

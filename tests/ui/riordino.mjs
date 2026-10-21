@@ -34,6 +34,15 @@ for(const [n, atteso] of [[1,/domani alle 09:00/],[5,null]]){
   ok(atteso ? atteso.test(t) : t==="", "impegno fra "+n+" giorni: "+(atteso?"l'avviso dice «domani»":"nessun avviso")+" → «"+t+"»");
   await p.context().close();
 }
+// 1c. «Adesso» solo su oggi: sfogliando un altro giorno non sta sotto una data che non è la sua
+p=await apri({turniConfigurati:true,pattern:"MPNSR",anchor:fa(0),shifts:SH,repeat:true,firstSeenAt:fa(30)});
+const vis=()=>p.evaluate(()=>{ const o=document.querySelector("#ora"); return !!o && !o.hidden && o.offsetParent!==null && /Adesso/i.test(o.innerText); });
+const suOggi=await vis();
+await p.evaluate(()=>document.querySelector("#next").click()); await p.waitForTimeout(250);
+const suDomani=await vis();
+await p.evaluate(()=>document.querySelector("#goToday").click()); await p.waitForTimeout(250);
+ok(suOggi && !suDomani && await vis(), "«Adesso»: c'è su oggi, sparisce su domani, torna con «Oggi»");
+await p.context().close();
 // 2. turni variabili, mese vuoto: il riquadro resta, con «Segna o importa»
 p=await apri({turniConfigurati:true,pattern:"R",anchor:"2000-01-01",shifts:SH,repeat:false,firstSeenAt:fa(30)});
 await p.click('[data-tab="turni"]'); await p.waitForTimeout(300);

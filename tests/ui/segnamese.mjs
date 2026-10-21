@@ -33,7 +33,7 @@ const tmp=mkdtempSync(join(tmpdir(),"nt-"));
 
 // 1. web: pennelli
 let p=await nuova("http://localhost:8765/index.html");
-ok(await p.evaluate(()=>!document.querySelector("#segnaPagina").hidden && document.body.classList.contains("sottopagina") && getComputedStyle(document.querySelector("#cyc")).display==="none"), "la pagina si apre da Turni e nasconde il resto");
+ok(await p.evaluate(()=>document.body.classList.contains("turni-aperta") && !!document.querySelector("#ttMese #segnaOut") && document.body.classList.contains("sottopagina") && getComputedStyle(document.querySelector("#cyc")).display==="none"), "turni variabili: il mese si apre in «I tuoi turni» e nasconde il resto");
 ok(await p.evaluate(()=>document.querySelectorAll("[data-pen]").length===8 && document.querySelector('[data-pen="M"]').getAttribute("aria-pressed")==="true"), "8 pennelli, il primo turno scelto");
 ok(await p.evaluate(()=>document.querySelector("#sgDaCalendario").hidden && document.querySelector("#sgDaFoto").hidden), "sul web senza AI: niente calendario del telefono né foto");
 await p.click('[data-pen="N"]');
@@ -77,8 +77,8 @@ await p.selectOption("#sgRiga", {label:"Benesso Davide"}); await p.click("[data-
 ok(await p.evaluate(()=>/30 giorni/.test(document.querySelector("#sgImport").textContent)), "30 giorni trovati nella riga scelta");
 await p.click("[data-imp-annulla]"); await p.waitForTimeout(150);
 ok(await p.evaluate(()=>document.querySelector("#sgImport").textContent===""), "Annulla chiude l'importazione senza segnare");
-await p.click("#chiudiSegna"); await p.waitForTimeout(200);
-ok(await p.evaluate(()=>document.querySelector("#segnaPagina").hidden && !document.body.classList.contains("sottopagina")), "freccia indietro: si torna a Turni");
+await p.click("#chiudiTuoiTurni"); await p.waitForTimeout(200);
+ok(await p.evaluate(()=>document.querySelector("#tuoiTurniPagina").hidden && !document.body.classList.contains("sottopagina") && document.body.classList.contains("tab-turni")), "freccia indietro: si torna a Turni");
 await p.context().close();
 
 // 4. app Android: calendario del telefono, due calendari, si sceglie quello dei turni
