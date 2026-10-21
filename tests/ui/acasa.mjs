@@ -12,7 +12,7 @@ await ctx.addInitScript(a=>{ window.__msg=[]; navigator.share=async o=>{ window.
   localStorage.setItem("nt:turniConfigurati","true"); localStorage.setItem("nt:firstPlanBannerChiuso","true"); }, iso(new Date()));
 const p=await ctx.newPage(); p.on("pageerror",e=>errs.push(e.message));
 await p.goto("http://localhost:8765/index.html"); await p.waitForTimeout(900);
-ok(/di oggi$/.test(await p.evaluate(()=>document.querySelector("#aCasaTit").textContent)), "su Oggi: «Manda a casa i tuoi orari di oggi»");
+ok(/di oggi$/.test(await p.evaluate(()=>document.querySelector("#aCasaTit").textContent)), "su Oggi: «Condividi i tuoi orari di oggi»");
 for(let i=0;i<5;i++){ await p.click("#aCasa"); await p.waitForTimeout(200); await p.click("#next"); await p.waitForTimeout(250); }
 const m=await p.evaluate(()=>window.__msg);
 const ore=t=>t.split("\n").filter(r=>r.startsWith("• ")).map(r=>(r.match(/\d\d:\d\d/)||[""])[0]);

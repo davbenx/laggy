@@ -33,7 +33,7 @@ ok(s.pattern.length===6 && s.repeat && /Giorno 12h/.test(s.pill) && !s.opz && !s
 await p.evaluate(()=>document.querySelector('#tabbar [data-tab="turni"]').click()); await p.waitForTimeout(200);
 await p.click("#tEdit"); await p.waitForTimeout(300); s=await st(p);
 const titolo=await p.evaluate(()=>document.querySelector("#demoEsempio .qh-h").textContent);
-ok(titolo==="E nei prossimi giorni?" && !s.opz, "Turni → Modifica apre il flusso lineare ('"+titolo+"'), non le Opzioni");
+ok(titolo==="Come sono i tuoi turni?" && !s.opz, "Turni → Modifica apre il flusso lineare ('"+titolo+"'), non le Opzioni");
 await p.click('[data-subflow="schema"]'); await p.click("#doCustomRot"); await p.waitForTimeout(150);
 const pre=await p.evaluate(()=>document.querySelectorAll("[data-togli]").length);
 ok(pre===6, "il compositore parte dal ciclo attuale ("+pre+" giorni)");
