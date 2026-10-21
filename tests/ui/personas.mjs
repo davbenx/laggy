@@ -64,12 +64,21 @@ ok(s.pattern==="RRNNNNN" && s.repeat===true && s.shifts.N.s===1320, "P5 notte fi
 
 // P6 turni variabili: griglia dei prossimi giorni
 p = await nuovo(); await p.click("[data-pick=M]"); await p.click("#qhConfermaOrario"); await p.waitForTimeout(400);
-await p.click("#doProssimiSegna"); await p.waitForTimeout(200);
-const tap=async(o,n)=>{ for(let i=0;i<n;i++){ await p.click('[data-segna="'+dIso(o)+'"]'); } };
-await tap(1,1); await tap(2,3); await tap(3,4); await tap(4,2); await shot(p,"8-segna");
-await p.click("#qhAltriGiorni"); const celle=await p.evaluate(()=>document.querySelectorAll("[data-segna]").length);
-await p.click("#qhConfermaSegna"); await p.waitForTimeout(600); s=await st(p);
-ok(s.ecc[dIso(1)]==="M" && s.ecc[dIso(2)]==="N" && s.ecc[dIso(3)]==="R" && s.ecc[dIso(4)]==="P" && s.repeat===false, "P6 giorni segnati: "+[1,2,3,4].map(o=>s.ecc[dIso(o)]).join(",")+" (griglia estendibile a "+celle+" giorni)");
+await p.click("#doProssimiSegna"); await p.waitForTimeout(300);
+ok(await p.evaluate(()=>document.body.classList.contains("turni-aperta") && !!document.querySelector("#ttMese #segnaOut")), "P6 «Cambiano»: si apre «I tuoi turni» con il mese");
+// matita, poi i giorni (se il giorno è nel mese dopo, si sfoglia)
+const segna=async(o,pen)=>{ await p.evaluate(([d,pen])=>{ document.querySelector('[data-pen="'+pen+'"]').click();
+  let c=document.querySelector('[data-sg="'+d+'"]'); if(!c){ document.querySelector('[data-sg-mese="1"]').click(); c=document.querySelector('[data-sg="'+d+'"]'); }
+  c.click(); }, [dIso(o),pen]).catch(()=>{}); await p.waitForTimeout(120); };
+for(const [o,pen] of [[1,"M"],[2,"N"],[3,"R"],[4,"P"]]){
+  await p.evaluate(()=>{ const t=document.querySelector("#segnaOut .sg-testa b"); window.__m=t&&t.textContent; });
+  await segna(o,pen);
+  // si torna al mese corrente per il giorno dopo
+  await p.evaluate(()=>{ const t=document.querySelector("#segnaOut .sg-testa b"); if(t && window.__m && t.textContent!==window.__m) document.querySelector('[data-sg-mese="-1"]').click(); });
+}
+await shot(p,"8-segna");
+await p.click("#ttFatto"); await p.waitForTimeout(600); s=await st(p);
+ok(s.ecc[dIso(1)]==="M" && s.ecc[dIso(2)]==="N" && s.ecc[dIso(3)]==="R" && s.ecc[dIso(4)]==="P" && s.repeat===false && await p.evaluate(()=>document.body.classList.contains("tab-oggi")), "P6 giorni segnati nel mese: "+[1,2,3,4].map(o=>s.ecc[dIso(o)]).join(",")+", «Fatto» torna a Oggi");
 await p.evaluate(()=>{ for(let i=0;i<5;i++) document.querySelector("#next").click(); }); await p.waitForTimeout(300);
 ok(await p.evaluate(()=>/Che turno fai/.test(document.querySelector("#status").innerText)), "P6 un giorno non segnato chiede il turno con un tocco");
 ok(/pronto\./.test((await st(p)).banner||"") || (await st(p)).banner===null, "P6 dopo aver segnato i giorni il banner non richiede più i prossimi giorni");

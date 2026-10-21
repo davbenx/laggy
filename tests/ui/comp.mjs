@@ -31,9 +31,10 @@ ok(s.pattern.length===6 && s.repeat && /Giorno 12h/.test(s.pill) && !s.opz && !s
 
 // 3. Turni → Modifica: stesso flusso, ciclo attuale già caricato
 await p.evaluate(()=>document.querySelector('#tabbar [data-tab="turni"]').click()); await p.waitForTimeout(200);
-await p.click("#tEdit"); await p.waitForTimeout(300); s=await st(p);
+await p.click("#tEdit"); await p.waitForTimeout(300);
+await p.click('[data-tt="schema"]'); await p.waitForTimeout(200); s=await st(p);
 const titolo=await p.evaluate(()=>document.querySelector("#demoEsempio .qh-h").textContent);
-ok(titolo==="Come sono i tuoi turni?" && !s.opz, "Turni → Modifica apre il flusso lineare ('"+titolo+"'), non le Opzioni");
+ok(titolo==="Come sono i tuoi turni?" && !s.opz && await p.evaluate(()=>document.body.classList.contains("turni-aperta")), "Turni → Modifica → Cambia schema: il flusso dentro «I tuoi turni» ('"+titolo+"'), non le Opzioni");
 await p.click('[data-subflow="schema"]'); await p.click("#doCustomRot"); await p.waitForTimeout(150);
 const pre=await p.evaluate(()=>document.querySelectorAll("[data-togli]").length);
 ok(pre===6, "il compositore parte dal ciclo attuale ("+pre+" giorni)");

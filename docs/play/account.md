@@ -43,7 +43,7 @@ L'indirizzo della sede diventa pubblico solo se si sceglie di guadagnare su Play
 |---|---|
 | Icona dell'app (512×512, PNG 32 bit, ≤1 MB) | `img/icona-app-512.png`: a tutto quadrato, fondo crema `#F7F3EA` come l'icona sul telefono. Play arrotonda gli angoli da solo |
 | Immagine in evidenza (1024×500) | `img/feature-1024x500.png` |
-| Screenshot del telefono (2–8, 1080×1920) | `img/01-oggi.png` … `img/08-impostazioni.png`, in quest'ordine |
+| Screenshot del telefono (2–8, 1080×1920) | `img/01-oggi.png` … `img/08-mese.png`, in quest'ordine |
 | Nome, descrizione breve, descrizione completa | `scheda.md` |
 | Categoria, tag, contatti, privacy | `scheda.md` → «Categoria, tag e contatti» |
 

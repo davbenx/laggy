@@ -41,7 +41,7 @@ Non ti impone orari fissi. Annota come hai dormito con un tocco, anche dalla not
 PER CHI TI ASPETTA
 • Manda i tuoi turni o il tuo tempo libero su WhatsApp, o dove vuoi.
 • Trova il tempo libero in comune con partner, famiglia o chi lavora con te.
-• Mi conviene lo scambio? Prima di accettare un cambio turno vedi quanto sonno ti costa e se ti restano almeno 11 ore di riposo.
+• Cambio turno: ti conviene? Prima di accettarlo vedi quanto sonno ti costa e se ti restano almeno 11 ore di riposo.
 • Stampa o salva in PDF un calendario da appendere al frigo.
 • Il mese in numeri: ore di turno, notti, domeniche e festivi, per tenere il conto.
 
@@ -83,5 +83,7 @@ Usavi Notturnisti dal browser? All'apertura scegli «Porta qui i tuoi turni».
   4. 04-perche — Ogni consiglio spiegato
   5. 05-adatta — Il piano si adatta a come dormi davvero
   6. 06-liberi — Il tuo tempo libero, da mandare a chi ti aspetta
-  7. 07-scambio — Mi conviene lo scambio di turno?
-  8. 08-impostazioni — Promemoria e calendario: scegli tu
+  7. 07-scambio — Cambio turno: ti conviene?
+  8. 08-mese — Turni che cambiano? Li segni in un minuto
+
+  Si rigenerano con l'app vera: `node app/scripts/screenshot-store.mjs`.
