@@ -453,7 +453,7 @@ padding:16px 18px;margin:2px 0 var(--gap-sezione);box-shadow:0 4px 20px rgba(45,
 body.primo-avvio .datebar,body.primo-avvio .daynav,body.primo-avvio #ora,
 body.primo-avvio #status,body.primo-avvio #formaGiorno,body.primo-avvio #essenziale,
 body.primo-avvio #luciditaGiornoWrap,body.primo-avvio #tabbar,
-body.primo-avvio #firstPlanBanner,body.primo-avvio #setupChecklist,body.primo-avvio #adattaCard,body.primo-avvio #medicoCard,body.primo-avvio #setupNudge{display:none!important}
+body.primo-avvio #firstPlanBanner,body.primo-avvio #setupChecklist,body.primo-avvio #adattaCard,body.primo-avvio #medicoCard,body.primo-avvio #setupNudge,body.primo-avvio #aCasa,body.primo-avvio #loSapevi{display:none!important}
 .qh-btn{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:12px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;min-height:74px;transition:all .15s;font:inherit}
 .qh-btn:hover{border-color:var(--blue);transform:translateY(-1px);background:var(--s2)}
 .qh-btn .qh-ic{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;color:var(--blue);margin-bottom:2px}
@@ -868,9 +868,11 @@ padding:12px 6px 12px 14px;margin:-6px 0 var(--gap-sezione);font-size:13.5px;lin
 .acasa small{display:block;font-size:12.5px;color:var(--dim);margin-top:2px}
 .essnudge{font-size:12.5px;color:var(--faint);margin-top:14px;line-height:1.55}
 .esshint{font-size:13px;color:var(--dim);margin:0 2px 10px}
+.ed-cambia{display:block;margin-top:10px;font-size:13px;text-align:left}
 .essrischio{display:flex;align-items:flex-start;gap:10px;margin:0 0 10px;padding:11px 13px;border-radius:var(--r);background:var(--risk-soft);color:var(--ink);font-size:14px;line-height:1.45}
 .essrischio .eic{flex:none;color:var(--risk);display:flex}
 .essrischio .eic svg{width:18px;height:18px}
+.qh-eyebrow{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--blue);font-weight:700;margin:0 0 6px}
 .qh-fiducia{font-size:12.5px;color:var(--dim);margin:-8px 0 14px}
 .essnudge button{background:none;border:none;color:var(--blue);font:inherit;cursor:pointer;
 text-decoration:underline;text-underline-offset:2px;padding:12px 2px;margin:-12px -2px}
@@ -1104,7 +1106,16 @@ text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:600;color:v
 .opz-gruppo .tool-tx .tool-val::after{content:none}
 /* Dentro Impostazioni i passi perdono titolo e introduzione: sono già il
    nome della riga. */
-.ecc .wstep>.wq,.ecc .wstep>.wsub{display:none}
+.ecc .wstep>.wq,.ecc .wstep>.wsub,.ecc .solo-guida,.ecc .shhead{display:none}
+/* Una riga per turno, leggibile anche a 360px: lettera, nome e × sopra, orari sotto. */
+.ecc .sh{grid-template-columns:34px 1fr 1fr 28px;row-gap:6px}
+.ecc .sh [data-fld=key]{grid-column:1;grid-row:1}
+.ecc .sh [data-fld=n]{grid-column:2/4;grid-row:1}
+.ecc .sh .x{grid-column:4;grid-row:1}
+.ecc .sh [data-fld=s]{grid-column:2;grid-row:2}
+.ecc .sh [data-fld=e]{grid-column:3;grid-row:2}
+.ecc .sh .p1{grid-column:2/-1;grid-row:3}
+.ecc .sh input{font-size:15px;min-height:42px}
 #chiudiOpzioni{padding:11px;margin:-11px}
 .opz-info .hint a{display:inline-block;padding:6px 0}
 /* Link in fondo: griglia a 2 colonne, un link per cella alta 44px, senza
@@ -1304,7 +1315,7 @@ header b{font-size:23px}
   <section class="wstep" data-step="1">
     <h2 class="wq">Che turni fai?</h2>
     <p class="wsub">Scegli lo schema più vicino ai tuoi. Non c'è il tuo? Scegli <b>Personalizza</b> e te lo costruisci in due minuti.</p>
-    <div class="q">
+    <div class="q solo-guida">
       <!-- oPreset resta la fonte dello stato (presetIndex/onchange invariati):
            le card qui sotto lo guidano, non lo sostituiscono. -->
       <select id="oPreset" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0" aria-hidden="true" tabindex="-1"></select>
@@ -1480,7 +1491,7 @@ header b{font-size:23px}
      Sotto la lista della giornata, perché ne è il riassunto. -->
 <button type="button" class="acasa solo-oggi" id="aCasa" hidden>
   <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 3L10 14M21 3l-7 18-4-7-7-4z"/></svg>
-  <span><b id="aCasaTit">Manda a casa i tuoi orari di oggi</b><small>Quando dormi e quando ci sei, in un messaggio.</small></span>
+  <span><b id="aCasaTit">Condividi i tuoi orari di oggi</b><small>Quando dormi e quando sei libero, in un messaggio.</small></span>
 </button>
 <!-- «Lo sapevi?»: una funzione mai usata, una volta sola, in fondo. -->
 <div class="sapevi solo-oggi" id="loSapevi" role="note" hidden></div>
@@ -1677,7 +1688,7 @@ header b{font-size:23px}
 </button>
 <button type="button" class="tsec" id="doScambioTurno">
   <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:var(--blue);background:var(--blue-soft)"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
-  <span class="tsec-tx"><b style="font-family:var(--serif)">Mi conviene lo scambio?</b><span style="font-size:12.5px;color:var(--dim);display:block;margin-top:2px">Sonno e 11 ore di riposo, prima di accettare.</span></span>
+  <span class="tsec-tx"><b style="font-family:var(--serif)">Cambio turno: mi conviene?</b><span style="font-size:12.5px;color:var(--dim);display:block;margin-top:2px">Prima di accettare: sonno e 11 ore di riposo.</span></span>
   <span class="tchev">›</span>
 </button>
   </div>
@@ -1690,7 +1701,7 @@ header b{font-size:23px}
     <button type="button" class="themebtn" id="chiudiScambio" aria-label="Torna a Turni">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
     </button>
-    <h1 class="tab-title" style="margin:0">Mi conviene lo scambio?</h1>
+    <h1 class="tab-title" style="margin:0">Cambio turno: mi conviene?</h1>
   </div>
 <div class="ecc" id="scambioBox">
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
@@ -1867,7 +1878,7 @@ header b{font-size:23px}
     <div class="qs-spec" id="qsSpec"></div>
     <button type="button" class="qs-reset" id="qsReset" hidden>✕ Torna alla sequenza standard</button>
     <button type="button" class="btn g" id="qsVaiPiano" style="width:100%;min-height:44px;margin-top:6px" hidden>Vedi il piano di questo giorno</button>
-    <button type="button" class="lnk" id="qsVaiScambio" style="font-size:12.5px;text-align:center;width:100%;margin-top:2px;padding:10px 0">⇄ Mi conviene uno scambio di turno? →</button>
+    <button type="button" class="lnk" id="qsVaiScambio" style="font-size:12.5px;text-align:center;width:100%;margin-top:2px;padding:10px 0">⇄ Cambio turno: mi conviene? →</button>
   </div>
 </div>
 
@@ -4473,10 +4484,11 @@ function renderDemoEsempio(){
   const indietro=(dest,txt)=>'<button type="button" class="lnk" data-subflow="'+dest+'" style="margin-bottom:10px;font-size:13px">← '+txt+'</button>';
   const chiudi = (sceltaSchemaAperta && state.turniConfigurati) ? '<button type="button" class="lnk" data-chiudi-schema style="margin-bottom:10px;font-size:13px">← Annulla</button>' : "";
   const f = demoEsempioSubflow;
-  const avanzate = '<button type="button" class="lnk" id="qhAvanzate" style="display:block;width:100%;text-align:center;margin-top:12px;font-size:12.5px;color:var(--dim)">Impostazioni avanzate</button>';
+  const avanzate = '<button type="button" class="lnk" id="qhAvanzate" style="display:block;width:100%;text-align:center;margin-top:12px;font-size:12.5px;color:var(--dim)">Cambia solo orari e nomi dei turni</button>';
 
   if(f === "home" && !sceltaSchemaAperta){
     el.innerHTML =
+      '<p class="qh-eyebrow">Il piano del sonno per chi lavora a turni</p>'+
       '<h2 class="qh-h">Che turno fai oggi?</h2>'+
       '<p class="qh-sub">Un tocco e hai il piano: quando dormire, l\'ultimo caffè, la luce.</p>'+
       '<p class="qh-fiducia">Gratis, senza account: turni e sonno restano sul tuo telefono.</p>'+
@@ -4510,8 +4522,10 @@ function renderDemoEsempio(){
   } else if(f === "prossimi"){
     el.innerHTML =
       chiudi+
-      '<h2 class="qh-h">E nei prossimi giorni?</h2>'+
-      '<p class="qh-sub">Scegli quello che ti somiglia di più: cambi idea quando vuoi.</p>'+
+      // Chi ha già un ciclo lo sta cambiando; chi ha segnato solo oggi deve ancora dire il resto.
+      (state.turniConfigurati && !(state.repeat===false && !Object.keys(state.ecc||{}).some(k=>k>isoOggi()))
+        ? '<h2 class="qh-h">Come sono i tuoi turni?</h2><p class="qh-sub">Scegli il caso tuo e rifai il ciclo in pochi passi.</p>'
+        : '<h2 class="qh-h">E nei prossimi giorni?</h2><p class="qh-sub">Scegli quello che ti somiglia di più: cambi idea quando vuoi.</p>')+
       '<div class="qh-flow-options">'+
         opt('data-subflow="schema"',ICON.cycle,"Si ripetono a ciclo","Es. in quinta, 2·2·2·2, ciclo continuo, 12 ore")+
         opt('data-subflow="riposi"',ICON.calendar,"Faccio sempre lo stesso turno","Scegli tu in quali giorni riposi")+
@@ -5703,7 +5717,8 @@ function renderEssenziale(P, CARDS){
   // contenuto resta, nel posto giusto.
   const scCard = CARDS.find(c=>c.k==="s");
   const dettSonno = dett(scCard);
-  voci.push({t:dSv(P.s.onset), html:riga("sonno","Dormi",sonnoWin(P),sonnoSub,false,ICON.moon,dettSonno)});
+  voci.push({t:dSv(P.s.onset), html:riga("sonno","Dormi",sonnoWin(P),sonnoSub,false,ICON.moon,
+    dettSonno+'<button type="button" class="lnk ed-cambia" data-cambia="3">Orari che non fanno per te? Dimmi come dormi →</button>')});
   const dn=sceltaDopoNotte(P);
   if(dn) voci.push({t:dSv(P.s.onset)+0.3, html:dn});
 
@@ -5742,7 +5757,8 @@ function renderEssenziale(P, CARDS){
       // domanda «l'hai fatto?» arriva nel diario quando è cominciato.
       const liv=cd.nap.livello, prima = (isFinite(liv) && liv<2 ? '<button type="button" class="lnk" data-skip-recupero="'+(liv+1)+'" style="margin-top:6px">Non riesco a farlo: proponimi un\'alternativa</button>' : '')+
         (cd.nap.min<=30 ? '<p class="ed-sub" style="margin-top:8px">Se vuoi più lucidità, un caffè appena prima: l\'effetto arriva mentre dormi.'+(isFinite(P.cut)?' Dopo le '+hhmm(P.cut)+' meglio di no: disturba il sonno di stanotte.':'')+'</p>' : '');
-      voci.push({t, html:riga("nap"+cd.nap.k,"Pisolino",cd.val,cd.small||"",false,ICON.bed,dett(cd)+prima)});
+      voci.push({t, html:riga("nap"+cd.nap.k,"Pisolino",cd.val,cd.small||"",false,ICON.bed,dett(cd)+prima+
+        '<button type="button" class="lnk ed-cambia" data-cambia="4">Pisolini sul lavoro e altre impostazioni →</button>')});
     } else if(cd.k==="s"){
       // niente riga a sé: l'orario di sveglia è già la fine di "Dormi". Tenerla
       // separata mostrava l'ora di andare a letto sotto l'etichetta "Sveglia" —
@@ -5829,9 +5845,8 @@ function renderEssenziale(P, CARDS){
 
   // Affina la finestra di sonno: si chiede DOPO aver mostrato il piano
   if(state.freeBed==="23:30" && state.freeWake==="07:30")
-    h += '<div class="essnudge">Piano calcolato su un sonno tipico 23:30 → 07:30. '+
-      'Se nei giorni liberi dormi diverso, <button data-act="finestra">affinalo</button>: '+
-      'sposta tutti gli orari e rende il piano davvero tuo.</div>';
+    h += '<div class="essnudge">Il piano parte da un sonno tipico, 23:30 → 07:30. '+
+      'Nei giorni liberi dormi in altri orari? <button data-act="finestra">Dimmi i tuoi</button> e il piano si adatta a te.</div>';
 
   el.innerHTML=h;
 }
@@ -7387,6 +7402,11 @@ if($("#essenziale")) $("#essenziale").addEventListener("toggle", e=>{
   if(r.open && !store.get("perchéVisto", false)){ store.set("perchéVisto", true); const h=$("#essenziale .esshint"); if(h) h.remove(); }
 }, true);
 ["#essenziale","#andamenti"].forEach(s=>{ const el=$(s); if(el){ el.addEventListener("change",diaryChange); el.addEventListener("click",diaryClick); } });
+// Dalle righe «Dormi» e «Pisolino» al pannello dove si cambiano davvero.
+if($("#essenziale")) $("#essenziale").addEventListener("click", e=>{
+  const b=e.target.closest("[data-cambia]"); if(!b) return;
+  apriOpzioni(); apriSezioneInline(+b.dataset.cambia);
+});
 // Il foglio per il frigo: si costruisce apposta, non si spreme il DOM vivo.
 // Copre un giro completo di ciclo, con le sole informazioni che servono.
 function buildPrintSheet(){
@@ -7616,7 +7636,7 @@ async function mandaOrariLiberi(){
   try{ await navigator.clipboard.writeText(testo); toast("Orari copiati: incollali nel messaggio"); }
   catch(e){ prompt("Copia questo messaggio:", testo); }
 }
-// «Manda a casa i tuoi orari»: il giorno guardato in un messaggio per chi
+// «Condividi i tuoi orari»: il giorno guardato in un messaggio per chi
 // vive con te, con i fatti del piano (turno, rientro, sonno, quando ci sei,
 // a letto). Niente stime inventate tipo "energia al 20%": solo orari.
 function nomeGiornoFocus(maiuscola, breve){
@@ -7651,7 +7671,7 @@ function renderACasa(){
   let ok=state.turniConfigurati;
   try{ if(ok && NT.codeAt(0)==="?") ok=false; }catch(e){ ok=false; }
   el.hidden=!ok;
-  if(ok) $("#aCasaTit").textContent="Manda a casa i tuoi orari di "+nomeGiornoFocus(false, true);
+  if(ok) $("#aCasaTit").textContent="Condividi i tuoi orari di "+nomeGiornoFocus(false, true);
 }
 /* «Lo sapevi?», in fondo a Oggi: l'unico canale per far scoprire qualcosa
    (installare l'app, il calendario, le statistiche, una funzione mai usata,
@@ -8967,9 +8987,9 @@ const PRESETS=[
  {sector:"Industria", title:"Turni settimanali", sub:"Una settimana per turno: 5 giorni, poi due liberi", p:"MMMMMRRPPPPPRRNNNNNRR", s:T3},
  {sector:null, title:"Due turni", sub:"Mattina e pomeriggio, mai di notte — 5 giorni, poi due liberi", p:"MMMMMRRPPPPPRR",
   s:{M:{n:"Mattino",s:360,e:840},P:{n:"Pomeriggio",s:840,e:1320}}},
- {sector:"Dodici ore", title:"Dodici ore · 2-2-4", sub:"2 giorni, 2 notti, 4 riposi — sanità, vigilanza, RSA", p:"DDNNRRRR",
+ {sector:"Dodici ore", title:"2 giorni, 2 notti", sub:"7–19 due volte, 19–7 due volte, smonto e 3 riposi — 8 giorni", p:"DDNNSRRR",
   s:{D:{n:"Giorno 12h",s:420,e:1140},N:{n:"Notte 12h",s:1140,e:1860}}},
- {sector:"Dodici ore", title:"Dodici ore · 1-1-2", sub:"Giorno, notte, 2 riposi — 4 giorni", p:"DNRR",
+ {sector:"Dodici ore", title:"Giorno, notte, smonto, riposo", sub:"7–19, poi 19–7, poi smonto e riposo — 4 giorni", p:"DNSR",
   s:{D:{n:"Giorno 12h",s:420,e:1140},N:{n:"Notte 12h",s:1140,e:1860}}},
  {sector:null, title:"Spezzato", sub:"Trasporti, ristorazione — pausa lunga a metà giornata", p:"SSSSSRR",
   s:{S:{n:"Spezzato",s:660,e:1380}}},
