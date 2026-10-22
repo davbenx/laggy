@@ -14,6 +14,7 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(WidgetPlugin.class);
         registerPlugin(PrintPlugin.class);
         registerPlugin(ReviewPlugin.class);
+        registerPlugin(AlarmPlugin.class);
         super.onCreate(savedInstanceState);
         // Se Android chiude il motore della pagina (memoria scarsa, crash del
         // WebView), di default l'intera app si chiude di colpo. Qui invece si

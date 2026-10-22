@@ -57,9 +57,11 @@ const SCATTI = [
     await p.evaluate(() => { const d = document.querySelector('#essenziale details[data-row="luce"]'); d.open = true;
       window.scrollTo(0, d.getBoundingClientRect().top + scrollY - 70); });
     return p; }],
-  ["05-adatta", "Il piano si adatta", "a come dormi davvero", async () => {
-    const w = {}, bd = {}; for (let i = 1; i <= 30; i++) { w[fa(i)] = "09:00"; bd[fa(i)] = "00:30"; }
-    return app(BASE, Object.assign({}, QUIETI, { "nt:wakes":JSON.stringify(w), "nt:beds":JSON.stringify(bd) })); }],
+  ["05-orologio", "Il tuo orologio,", "calcolato su di te", async () => {
+    const p = await app({ ...BASE, freeBed:"00:30", freeWake:"09:00" }, QUIETI);
+    await clic(p, '[data-tab="turni"]'); await clic(p, "#doAndamenti");
+    await p.evaluate(() => { const o = document.querySelector("#orologio"); window.scrollTo(0, o.getBoundingClientRect().top + scrollY - 70); });
+    return p; }],
   ["06-liberi", "Il tuo tempo libero,", "per chi ti aspetta", async () => {
     const p = await app(BASE, QUIETI); await clic(p, '[data-tab="turni"]'); await clic(p, "#doPartner"); return p; }],
   ["07-scambio", "Cambio turno:", "ti conviene?", async () => {

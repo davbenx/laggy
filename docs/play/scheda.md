@@ -9,33 +9,42 @@ Notturnisti: turni e sonno
 (Alternativa da valutare dopo un mese con i dati di "Termini di ricerca" in
 Play Console, se "calendario turni" porta molte visite: `Notturnisti – Calendario turni`, 30.)
 
-## Descrizione breve (max 80) — 72 caratteri
-Calendario turni che ti dice quando dormire, il caffè e la luce. Gratis.
+## Descrizione breve (max 80) — 68 caratteri
+Turni di lavoro e sonno: quando dormire, il caffè e la luce. Gratis.
+
+«Turni di lavoro» è la chiave con cui si cercano i calendari turni (tutti i
+primi risultati la hanno nel nome): qui sta in testa.
 
 Varianti per l'esperimento sulla scheda (Play Console → Esperimenti sulla scheda dello Store), una alla volta:
+- A0 (72, la prima versione): `Calendario turni che ti dice quando dormire, il caffè e la luce. Gratis.`
 - B (70): `Il calendario turni che ti dice quando dormire. Gratis, senza account.`
 - C (74): `Turni di notte? Quando dormire, il caffè e la luce, sul tuo turno. Gratis.`
 
 ## Descrizione completa (max 4000)
 Lavori a turni? Notturnisti è il calendario dei turni che fa una cosa in più: ti dice, giorno per giorno, quando dormire, fino a che ora prendere il caffè, quando cercare la luce e quando fare un pisolino, calcolati sul tuo ciclo vero. Notti, mattine, pomeriggi, smonti e riposi.
 
-Gratis, senza abbonamenti. Senza account. Senza pubblicità. I tuoi turni restano sul tuo telefono: niente da perdere su un server.
+Un tocco per iniziare. Zero account. Tutto gratis, anche promemoria, widget, sveglia e calendario: niente abbonamenti, niente pubblicità.
+
+Pensata in italiano, sui turni italiani: smonto, quinta e sesta, 12 ore, reperibilità, festivi, le 11 ore di riposo fra un turno e l'altro.
 
 PERCHÉ NON UN SEMPLICE CALENDARIO TURNI
 Un calendario ti dice che domani fai la notte. Notturnisti ti dice anche cosa fare oggi per arrivarci in forma: a che ora andare a letto, quando fare il pisolino, quando smettere con il caffè, e come rientrare dopo l'ultima notte senza perdere due giorni.
 
 COME FUNZIONA
-• Scegli il turno di oggi con un tocco, oppure il tuo schema: in quinta, in sesta, 12 ore, settimane alterne… o componilo tu, anche con turni irregolari o che cambiano ogni settimana.
+• Scegli il turno di oggi con un tocco, oppure il tuo schema, anche con turni irregolari o che cambiano ogni settimana.
 • Il piano tiene conto di come dormi davvero nei giorni liberi, del tragitto, di quanto ti resta addosso il caffè e se puoi fare un pisolino al lavoro.
 • Prima di un cambio turno ti prepara: a letto prima quando torni alle mattine, sonno lungo e pisolino prima della prima notte.
-• Ogni consiglio ha il suo perché, spiegato in parole semplici.
+• Ogni consiglio ha il suo perché, spiegato in parole semplici, con gli studi da cui viene. E in cima al piano, in una riga, perché la giornata è fatta così.
+• Hai già i turni su un'altra app, in un foglio Excel o in una foto? Li importi in un minuto. Puoi anche tenere la tua app dei turni: Notturnisti legge il calendario del telefono.
 
 FUNZIONA DA SOLO
 • Promemoria: quando prepararti a dormire, l'ultimo caffè, il rientro dopo la notte (l'ora più a rischio per chi guida), e un consiglio in più nei giorni impegnativi, come la terza notte di fila. Scegli tu quali: al massimo 4 al giorno, mai mentre dormi.
 • Calendario del telefono: turni e sonno nell'app Calendario, aggiornati da soli.
 • Widget sulla schermata Home: cosa fare adesso, quanto manca alla prossima cosa e la tua settimana.
+• Sveglia: un tocco e la sveglia per fine sonno è nell'app Orologio del telefono.
 
 SI ADATTA A TE
+Il tuo orologio: quando arriva la melatonina, il tuo minimo corporeo, quando sei più lucido, e se sei allodola o gufo. Calcolato dai tuoi orari, senza questionari e senza dispositivi da indossare.
 Non ti impone orari fissi. Annota come hai dormito con un tocco, anche dalla notifica del mattino. Se nei giorni liberi dormi in orari diversi da quelli impostati, o fai fatica ad anticipare la sveglia, l'app te lo propone e aggiorna il piano. Turno cambiato all'ultimo momento? Lo cambi con un tocco e il piano si ricalcola.
 
 PER CHI TI ASPETTA
@@ -49,10 +58,10 @@ PER CHI È
 Per chi lavora a turni e di notte: infermieri e OSS, medici, operai e turnisti dell'industria, forze dell'ordine, vigili del fuoco, autisti, guardie giurate, addetti alla logistica, all'assistenza e all'accoglienza.
 
 PRIVACY, SUL SERIO
-Turni, orari e diario restano sul tuo telefono: il piano si calcola lì. Nessun account, nessuna pubblicità, nessuna profilazione. Le statistiche d'uso anonime sono spente finché non le accendi tu.
+Turni, orari e diario restano sul tuo telefono: il piano si calcola lì. Nessuna profilazione; le statistiche d'uso anonime sono spente finché non le accendi tu.
 
 COSA NON È
-Notturnisti dà indicazioni generali di benessere e organizzazione basate sulla letteratura scientifica sul sonno e sul lavoro a turni. Non è un dispositivo medico, non fa diagnosi e non sostituisce il parere di un medico. Le notifiche non sono una sveglia.
+Notturnisti dà indicazioni generali di benessere e organizzazione basate sulla letteratura scientifica sul sonno e sul lavoro a turni. Non è un dispositivo medico, non fa diagnosi e non sostituisce il parere di un medico. Le notifiche non sono una sveglia: la sveglia la mette l'app Orologio.
 
 Un progetto indipendente, nato da chi i turni li fa. Segnalazioni e idee: dall'app, Impostazioni → Segnala cosa non torna.
 
@@ -81,7 +90,7 @@ Usavi Notturnisti dal browser? All'apertura scegli «Porta qui i tuoi turni».
   2. 02-turni — Tutta la settimana a colpo d'occhio
   3. 03-onboarding — Che turno fai oggi? Un tocco e hai il piano
   4. 04-perche — Ogni consiglio spiegato
-  5. 05-adatta — Il piano si adatta a come dormi davvero
+  5. 05-orologio — Il tuo orologio, calcolato su di te
   6. 06-liberi — Il tuo tempo libero, per chi ti aspetta
   7. 07-scambio — Cambio turno: ti conviene?
   8. 08-mese — Turni che cambiano? Li segni in un minuto

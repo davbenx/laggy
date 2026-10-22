@@ -68,4 +68,7 @@
          attiva la sincronizzazione. -->
     <uses-permission android:name="android.permission.READ_CALENDAR" />
     <uses-permission android:name="android.permission.WRITE_CALENDAR" />
+    <!-- Sveglia nell'app Orologio (AlarmPlugin): permesso normale, concesso
+         all'installazione senza chiedere niente. -->
+    <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
 </manifest>

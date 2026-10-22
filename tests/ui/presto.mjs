@@ -21,7 +21,8 @@ let r=await leggi(p);
 ok(r.opz.length===2 && r.opz[0].on==="true" && r.dormi.includes(r.opz[0].ora.replace("a letto alle ","")) && r.hint, "riposo prima di un mattino alle 06: «Tutto stanotte» / «Più tardi + pisolino» con l'ora di letto ("+r.opz.map(o=>o.ora).join(" / ")+")");
 await p.click('[data-row="sonno"] summary'); await p.waitForTimeout(150);
 const det=await p.evaluate(()=>document.querySelector('[data-row="sonno"] .ed').innerText);
-ok(/Domani attacchi alle 06:00: stanotte la sveglia è alle 04:50/.test(det) && !/senza guardare l'orologio/.test(det), "il dettaglio dice il motivo, non «dormi senza guardare l'orologio»");
+// l'ora del turno la dice già la riga «Il piano, in breve»: qui la sveglia e da dove viene
+ok(/Stanotte la sveglia è alle 04:50, contata all'indietro dal turno di domani/.test(det) && !/senza guardare l'orologio/.test(det), "il dettaglio dice il motivo, non «dormi senza guardare l'orologio»");
 await p.click('[data-mattinobif="1"]'); await p.waitForTimeout(400);
 r=await leggi(p);
 ok(r.opz[1].on==="true" && r.dormi.includes(r.opz[1].ora.replace("a letto alle ","")) && !r.hint, "scelto «Più tardi + pisolino»: «Dormi» si sposta, la spiegazione sparisce");
