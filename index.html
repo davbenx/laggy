@@ -207,6 +207,13 @@ font-size:16px;line-height:1.6;padding:0 0 64px;-webkit-font-smoothing:antialias
 .eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);font-weight:600}
 header{border:none;padding:0;margin:0}
 /* Barra in alto: titolo della schermata e azioni, fino ai bordi dello schermo. */
+/* Intestazione delle pagine interne: stessa barra dell'app, con lo spazio
+   della barra di stato del telefono (--sat) e lo stesso sfondo sfumato, così
+   il titolo non finisce sotto orario e batteria. Una sola regola per tutte. */
+.pag-testa{display:flex;align-items:center;gap:12px;background:var(--bg-blur);position:sticky;top:0;z-index:20;
+padding:calc(var(--sat) + 10px) 20px 10px;margin:0 -20px var(--gap-sezione)}
+@supports (backdrop-filter:blur(1px)){.pag-testa{backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}}
+.pag-testa .tab-title{margin:0}
 .appbar{display:flex;align-items:center;gap:10px;background:var(--bg-blur);
 padding:calc(var(--sat) + 10px) 20px 10px;margin:0 -20px 4px;position:sticky;top:0;z-index:20}
 @supports (backdrop-filter:blur(1px)){.appbar{backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}}
@@ -663,6 +670,7 @@ cursor:pointer;font-family:inherit;color:var(--ink)}
    quello che teneva "Condividi il tuo ciclo" visibile su ogni tab. */
 .cycshare-btn{display:flex}
 .share3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.share3.share2{grid-template-columns:repeat(2,minmax(0,1fr))}
 .share3-az{display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center;padding:14px 6px 12px;min-height:118px;
 background:var(--s1);border:1px solid var(--line);border-radius:var(--r);color:var(--ink);font:inherit;cursor:pointer}
 .share3-az svg{width:22px;height:22px;color:var(--blue)}
@@ -870,6 +878,7 @@ justify-content:center;flex:none;width:44px;height:44px;border-radius:999px}
 .drem-done,.dq-riga{line-height:1.5}
 .drem-done .lnk,.dq-riga .lnk{min-height:0;padding:10px 6px;margin:-10px 0;vertical-align:baseline}
 .dopo-notte{margin:-2px 0 10px;padding:0 2px}
+.dn-vale{font-size:12px;color:var(--faint);margin:6px 2px 0}
 .dn-lab{display:block;font-size:12px;color:var(--dim);margin:0 0 6px}
 .dn-scelta{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--s2);border:1px solid var(--line);border-radius:var(--r);padding:2px}
 .dn-scelta .vb{display:flex;flex-direction:column;align-items:center;gap:1px;padding:7px 8px;min-height:48px}
@@ -1171,6 +1180,12 @@ text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:600;color:v
 .opz-info .hint a{display:inline-block;padding:6px 0}
 /* Link in fondo: griglia a 2 colonne, un link per cella alta 44px, senza
    puntini né sottolineature che si accavallano quando vanno a capo. */
+.opz-gruppo.az>.tool::after{transform:none}
+.opz-gruppo.az>a.tool{text-decoration:none;color:inherit}
+.opz-gruppo.az>a.tool::after{content:"↗";font-size:15px}
+.opz-gruppo.az>.tool[hidden]{display:none}
+.foot-legal{display:flex;flex-wrap:wrap;gap:4px 16px;justify-content:center;margin:16px 0 0;font-size:13px}
+.foot-legal a{color:var(--dim);text-decoration:none;border-bottom:0;padding:8px 2px}
 .opz-info .foot-links{display:grid;grid-template-columns:1fr 1fr;column-gap:16px;margin:10px 0 0;font-size:14px}
 .opz-info .foot-links>span{display:contents}
 .opz-info .foot-links>span[hidden]{display:none}
@@ -1214,8 +1229,6 @@ body:not(.tab-opzioni) #opzioni{display:none}
 /* La freccia per uscire resta a portata di dito mentre si scorre: la pagina
    è lunga, e sul web su iPhone non c'è un tasto indietro. Sotto la barra in
    alto (anche lei fissa): --appbar-h la misura lo script. */
-#opzioni .opz-testa{position:sticky;top:var(--appbar-h,64px);z-index:19;background:var(--bg-blur);padding:6px 0;box-shadow:-20px 0 0 var(--bg-blur),20px 0 0 var(--bg-blur);clip-path:inset(0 -20px)}
-@supports (backdrop-filter:blur(1px)){#opzioni .opz-testa{backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}}
 .opz-info{margin-top:0}
 .opz-info a{color:var(--blue);text-decoration:none;border-bottom:1px solid var(--blue-lt)}
 /* Andamenti, come nel mockup: sezioni separate (ognuna la propria card),
@@ -1317,6 +1330,22 @@ header b{font-size:23px}
   .pc-piede p{font-size:8pt;color:#333;margin:0;line-height:1.35}
   .pc-qr svg{width:26mm;height:26mm;display:block}
 }
+
+/* ───────── SUPERFICI ─────────
+   Sei tipi, e basta (elenco completo in docs/stile.md):
+   1 Pagina    sfondo --bg
+   2 Gruppo    --s1 + bordo --line + raggio --r: elenchi, calcoli, editor
+   3 Eroe      --blue-soft + bordo --blue-lt, raggio 20: SOLO «Adesso» e
+               «prossima finestra libera», uno per schermata
+   4 Invito    gruppo con barra a sinistra (blu): una proposta da accettare
+   5 Avviso    --risk-soft + bordo --risk-line: solo rischio
+   6 Nota      testo --dim senza riquadro
+   L'azzurro pieno non serve ai calcoli e agli editor: prima lo avevano
+   .ecc (cambio turno, persone, editor), la card Lucidità e le note
+   informative, e si confondevano con «Adesso». */
+.ecc,.lucidita-card,.status.info{background:var(--s1);border-color:var(--line)}
+.status.info{border-left-color:var(--blue)}
+.qh-card{border-color:var(--line)}
 </style>
 </head>
 <body>
@@ -1533,7 +1562,7 @@ header b{font-size:23px}
 <!-- Il giorno in un messaggio per chi sta a casa: quando dormi e quando ci sei.
      Sotto la lista della giornata, perché ne è il riassunto. -->
 <button type="button" class="acasa solo-oggi" id="aCasa" hidden>
-  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 3L10 14M21 3l-7 18-4-7-7-4z"/></svg>
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
   <span><b id="aCasaTit">Condividi i tuoi orari di oggi</b><small>Quando dormi e quando sei libero, in un messaggio.</small></span>
 </button>
 <!-- «Lo sapevi?»: una funzione mai usata, una volta sola, in fondo. -->
@@ -1566,11 +1595,11 @@ header b{font-size:23px}
 <!-- I turni del mese (un tocco per giorno, o dal foglio turni): si apre
      dal riquadro del mese, qui sopra. -->
 <div id="segnaPagina" class="solo-turni" hidden>
-  <div style="display:flex;align-items:center;gap:12px;margin:2px 0 var(--gap-sezione)">
+  <div class="pag-testa">
     <button type="button" class="themebtn" id="chiudiSegna" aria-label="Torna a Turni">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
     </button>
-    <h1 class="tab-title" style="margin:0">I turni del mese</h1>
+    <h1 class="tab-title">I turni del mese</h1>
   </div>
   <div id="segnaOut"></div>
   <section class="sg-importa" aria-labelledby="sgImpTit">
@@ -1589,9 +1618,9 @@ header b{font-size:23px}
 <!-- «I tuoi turni»: tutta la turnazione in un posto (da Turni › Modifica,
      Impostazioni, lista di attivazione). ← torna da dove si è partiti. -->
 <div id="tuoiTurniPagina" class="solo-turni" hidden>
-  <div style="display:flex;align-items:center;gap:12px;margin:2px 0 var(--gap-sezione)">
+  <div class="pag-testa">
     <button type="button" class="themebtn" id="chiudiTuoiTurni" aria-label="Indietro"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
-    <h1 class="tab-title" style="margin:0">I tuoi turni</h1>
+    <h1 class="tab-title">I tuoi turni</h1>
   </div>
   <div class="tt-riepilogo" id="ttRiepilogo"></div>
   <div id="ttMese"></div>
@@ -1631,11 +1660,11 @@ header b{font-size:23px}
 </button>
 
 <div id="vederciPagina" hidden>
-  <div style="display:flex;align-items:center;gap:12px;margin:2px 0 var(--gap-sezione)">
+  <div class="pag-testa">
     <button type="button" class="themebtn" id="chiudiVederci" aria-label="Torna a Turni">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
     </button>
-    <h1 class="tab-title" style="margin:0">Quando ho tempo libero</h1>
+    <h1 class="tab-title">Quando ho tempo libero</h1>
   </div>
   <div id="partner"></div>
   <!-- Gestione delle persone tracciate: viveva in Opzioni ("Persone"),
@@ -1725,11 +1754,11 @@ header b{font-size:23px}
 </button>
 
 <div id="andamentiPagina" hidden>
-  <div style="display:flex;align-items:center;gap:12px;margin:2px 0 var(--gap-sezione)">
+  <div class="pag-testa">
     <button type="button" class="themebtn" id="chiudiAndamenti" aria-label="Torna a Turni">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
     </button>
-    <h1 class="tab-title" style="margin:0">Sonno e carico</h1>
+    <h1 class="tab-title">Sonno e carico</h1>
   </div>
   <div id="andamenti"></div>
 </div>
@@ -1758,11 +1787,11 @@ header b{font-size:23px}
 <!-- Come "Quando ho tempo libero" e "Come sto dormendo": una pagina a sé con
      la freccia indietro, non un pannello che si apre sotto. -->
 <div id="scambioPagina" hidden>
-  <div style="display:flex;align-items:center;gap:12px;margin:2px 0 var(--gap-sezione)">
+  <div class="pag-testa">
     <button type="button" class="themebtn" id="chiudiScambio" aria-label="Torna a Turni">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
     </button>
-    <h1 class="tab-title" style="margin:0">Cambio turno: mi conviene?</h1>
+    <h1 class="tab-title">Cambio turno: mi conviene?</h1>
   </div>
 <div class="ecc" id="scambioBox">
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
@@ -1787,11 +1816,11 @@ header b{font-size:23px}
 <!-- Ferie: dove metterle perché si attacchino ai riposi del ciclo. Accanto
      allo scambio: sono i due strumenti per decisioni occasionali sui turni. -->
 <div id="feriePagina" class="solo-turni" hidden>
-  <div style="display:flex;align-items:center;gap:12px;margin:2px 0 var(--gap-sezione)">
+  <div class="pag-testa">
     <button type="button" class="themebtn" id="chiudiFerie" aria-label="Torna a Turni">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
     </button>
-    <h1 class="tab-title" style="margin:0">Quando prendere le ferie</h1>
+    <h1 class="tab-title">Quando prendere le ferie</h1>
   </div>
   <div class="ferie-q">
     <div class="ferie-riga"><span id="ferieNLab">Giorni di ferie</span>
@@ -1825,7 +1854,7 @@ header b{font-size:23px}
   <span class="eyebrow">Condividi i tuoi turni</span>
   <div class="share3">
     <button type="button" id="doCycShare" class="share3-az"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg><b>Invita un collega</b><span>vede i tuoi turni accanto ai suoi</span></button>
-    <button type="button" id="doShareWhatsApp" class="share3-az"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.41a8.204 8.204 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.19 8.19 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24m4.52 11.66c-.19.53-1.06 1.04-1.47 1.08-.38.04-.88.06-2.84-.73-2.34-.95-3.84-3.34-3.96-3.49-.11-.16-.96-1.27-.96-2.42 0-1.15.6-1.72.82-1.95.21-.23.46-.29.62-.29.15 0 .31 0 .44.01.14.01.33-.05.51.39.19.46.66 1.6.72 1.72.06.12.1.26.02.42-.08.16-.12.26-.24.4-.12.14-.26.31-.37.42-.12.12-.24.25-.1.5.14.24.62 1.03 1.34 1.67.92.82 1.7 1.08 1.94 1.2.24.12.39.1.53-.06.15-.17.62-.72.79-.97.16-.25.33-.21.55-.13.22.08 1.41.67 1.65.79.24.12.4.18.46.28.06.11.06.63-.13 1.16"/></svg><b>Manda i turni</b><span>un messaggio con i prossimi giorni</span></button>
+    <button type="button" id="doShareWhatsApp" class="share3-az"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg><b>Manda i turni</b><span>un messaggio con i prossimi giorni</span></button>
     <button type="button" id="doPrint" class="share3-az"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8V3h12v5"/><rect x="4" y="8" width="16" height="8" rx="1.5"/><path d="M8 13h8v7H8z"/></svg><b>Stampa o PDF</b><span>il calendario da appendere</span></button>
   </div>
   <button type="button" class="lnk" id="doCycQR" style="align-self:center;font-size:13px;padding:8px 4px">Mostra il QR da inquadrare</button>
@@ -1835,11 +1864,11 @@ header b{font-size:23px}
 <div id="luciditaGiornoWrap"></div>
 
 <div id="opzioni">
-  <div class="opz-testa" style="display:flex;align-items:center;gap:12px;margin:2px 0 var(--gap-sezione)">
+  <div class="pag-testa">
     <button type="button" class="themebtn" id="chiudiOpzioni" aria-label="Torna indietro">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
     </button>
-    <h1 class="tab-title" style="margin:0">Impostazioni</h1>
+    <h1 class="tab-title">Impostazioni</h1>
   </div>
   <!-- Opzioni in tre blocchi (prima erano cinque, con promemoria e
        calendario ripetuti in due posti e "Turni" in due righe che aprivano
@@ -1914,16 +1943,23 @@ header b{font-size:23px}
       <span class="switch"><input type="checkbox" id="optStats" aria-label="Statistiche d'uso anonime" aria-describedby="optStatsHint"><span class="slider"></span></span>
     </label>
     <p class="hint" id="optStatsHint" style="margin:2px 0 0">Ci aiutano a migliorare l'app: contano in forma anonima cosa si usa, per esempio quanti accendono i promemoria o su che tipo di telefono. Niente turni, orari o diario, e niente che dica chi sei. Spente finché non le accendi.</p>
-    <p style="margin:10px 0 0;display:flex;flex-direction:column;align-items:flex-start"><button class="lnk" id="doShare" style="padding:10px 0">Consiglia Notturnisti</button><button class="lnk" id="doFeed" style="padding:10px 0">Segnala cosa non torna</button></p>
-    <nav class="foot-links" aria-label="Informazioni">
-      <a href="https://notturnisti.club/planner" target="_blank" rel="noopener">Come si usa</a>
-      <a href="https://notturnisti.club/chi-siamo/" target="_blank" rel="noopener">Chi siamo</a>
+    <span class="eyebrow opz-eb">Aiutaci</span>
+    <div class="opz-gruppo az">
+      <button class="tool tool-1line" id="doShare" type="button"><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></span><span class="tool-tx"><b>Consiglia Notturnisti</b></span></button>
+      <a class="tool tool-1line" id="doReviewLnk" href="#" target="_blank" rel="noopener" hidden><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2"/></svg></span><span class="tool-tx"><b>Valuta su Google Play</b></span></a>
+      <a class="tool tool-1line" id="doDonateLnk" href="#" target="_blank" rel="noopener" hidden><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.7A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11z"/></svg></span><span class="tool-tx"><b>Sostieni il progetto</b></span></a>
+      <button class="tool tool-1line" id="doFeed" type="button"><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 22V4M4 4h13l-2 4 2 4H4"/></svg></span><span class="tool-tx"><b>Segnala cosa non torna</b></span></button>
+    </div>
+    <span class="eyebrow opz-eb">Scopri</span>
+    <div class="opz-gruppo az">
+      <a class="tool tool-1line" href="https://notturnisti.club/planner" target="_blank" rel="noopener"><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5zM4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg></span><span class="tool-tx"><b>Come si usa</b></span></a>
+      <a class="tool tool-1line" href="https://notturnisti.club/chi-siamo/" target="_blank" rel="noopener"><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6M16 4.8a3.5 3.5 0 0 1 0 6.4M18 14c2.2.6 3.5 2.3 3.5 6"/></svg></span><span class="tool-tx"><b>Chi siamo</b></span></a>
+      <a class="tool tool-1line" href="https://notturnisti.club" target="_blank" rel="noopener"><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></span><span class="tool-tx"><b>notturnisti.club</b></span></a>
+    </div>
+    <nav class="foot-legal" aria-label="Note legali">
       <a href="https://app.notturnisti.club/privacy/" target="_blank" rel="noopener">Privacy</a>
       <a href="https://app.notturnisti.club/termini/" target="_blank" rel="noopener">Termini d'uso</a>
       <a href="https://app.notturnisti.club/licenze/" target="_blank" rel="noopener">Licenze</a>
-      <a href="https://notturnisti.club" target="_blank" rel="noopener">notturnisti.club</a>
-      <span id="doDonateLnkWrap" hidden><a id="doDonateLnk" href="#" target="_blank" rel="noopener">Sostieni il progetto</a></span>
-      <span id="doReviewLnkWrap" hidden><a id="doReviewLnk" href="#" target="_blank" rel="noopener">Valuta su Google Play</a></span>
     </nav>
     <p class="hint" style="margin:14px 0 0;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center">
       <span id="versioneApp">Versione web</span>
@@ -5642,14 +5678,14 @@ function sceltaDopoNotte(P){
   const eD=fineCon("diviso"), eU=fineCon(unito);
   if(eD==null || eU==null || eD===eU) return "";
   const corto=P.s.kind==="corto", diviso=cur==="diviso";
-  const opz=(val,nome,fine,on)=>'<button type="button" class="vb'+(on?" on":"")+'" data-sonnod="'+val+'" aria-pressed="'+on+'"><b>'+nome+'</b><span>fino alle '+hhmm(fine)+'</span></button>';
+  const opz=(val,nome,fine,on,extra)=>'<button type="button" class="vb'+(on?" on":"")+'" data-sonnod="'+val+'" aria-pressed="'+on+'"><b>'+nome+'</b><span>'+(extra||"")+'fino alle '+hhmm(fine)+'</span></button>';
   const spiega = store.get("smontoScelto", false) ? "" : '<p class="dn-hint">'+(corto
-    ? 'Corto: il pomeriggio è tuo e stanotte dormi bene. Lungo: recuperi di più adesso, ma stasera il sonno arriva più tardi.'
-    : 'Diviso: un sonno più corto e un pisolino prima della prossima notte (di giorno si dorme più leggeri). Tutto insieme: un blocco solo, se di giorno dormi bene.')+'</p>';
+    ? 'Sonno breve: il pomeriggio è tuo e stanotte dormi bene. Sonno lungo: recuperi di più adesso, ma stasera il sonno arriva più tardi.'
+    : 'In due tempi: un sonno più corto e un pisolino prima della prossima notte (di giorno si dorme più leggeri). Tutto di fila: un blocco solo, se di giorno dormi bene.')+'</p>';
   return '<div class="dopo-notte" role="group" aria-label="Dopo la notte, come dormi">'+
-    '<span class="dn-lab">Dopo la notte · vale per tutte le notti</span>'+
-    '<div class="dn-scelta">'+opz("diviso", corto?"Corto":"Diviso", eD, diviso)+opz(unito, corto?"Lungo":"Tutto insieme", eU, !diviso)+'</div>'+
-    spiega+'</div>';
+    '<span class="dn-lab">Dopo il turno, come dormi?</span>'+
+    '<div class="dn-scelta">'+opz("diviso", corto?"Sonno breve":"In due tempi", eD, diviso, corto?"":"poi un pisolino · ")+opz(unito, corto?"Sonno lungo":"Tutto di fila", eU, !diviso)+'</div>'+
+    spiega+'<p class="dn-vale">Vale per tutte le notti.</p></div>';
 }
 function renderEssenziale(P, CARDS){
   const el=$("#essenziale"); if(!el) return;
@@ -6678,6 +6714,9 @@ function renderPartnerPreview(){
   const quando = scarto===0 ? "oggi" : scarto===1 ? "domani" : x.d.toLocaleDateString(LINGUA,{weekday:"long"});
   el.textContent = quando.charAt(0).toUpperCase()+quando.slice(1)+(finestraTuttoIlGiorno(x)?"":" "+hhmm(x.a)+"–"+hhmm(x.b));
 }
+// Icone di condivisione: una per «manda con qualsiasi app», una per stampa/PDF.
+var ICO_SHARE='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>';
+var ICO_PRINT='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8V3h12v5"/><rect x="4" y="8" width="16" height="8" rx="1.5"/><path d="M8 13h8v7H8z"/></svg>';
 function renderPartner(CARDS){
   const el=$("#partner"); if(!el) return;
   let h="";
@@ -6760,15 +6799,11 @@ function renderPartner(CARDS){
   // riguarda il ciclo, non specificamente la disponibilità, e la
   // vogliamo prima vista lì, non sepolta qui dentro. ──
   h+='<span class="eyebrow" style="display:block;margin:var(--gap-sezione) 0 8px">Condividi</span>'+
-    '<div class="tools">'+
-    '<button class="tool" data-partner-msg type="button">'+
-      '<span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8.5 8.5 0 0 1-12.4 7.6L3 21l1.5-5.2A8.5 8.5 0 1 1 21 12z"/></svg></span>'+
-      '<span class="tool-tx"><b>Manda i miei orari liberi</b><span>Un messaggio con i prossimi giorni (almeno due settimane), per WhatsApp o dove vuoi. Solo il mio tempo libero, niente turni né sonno.</span></span>'+
-    '</button>'+
-    '<button class="tool tool-1line" data-partner-sheet type="button">'+
-      '<span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M6 14h12v7H6z"/></svg></span>'+
-      '<span class="tool-tx"><b>Stampa o salva in PDF</b></span>'+
-    '</button>'+
+    '<div class="share3 share2">'+
+    '<button class="share3-az" data-partner-msg type="button">'+ICO_SHARE+
+      '<b>Manda i miei orari</b><span>un messaggio con il tempo libero</span></button>'+
+    '<button class="share3-az" data-partner-sheet type="button">'+ICO_PRINT+
+      '<b>Stampa o PDF</b><span>il calendario da appendere</span></button>'+
     '</div>';
   const es=$("#partnerShare"); if(es) es.innerHTML=h;
 }
@@ -7787,6 +7822,10 @@ function stampaFoglio(titolo){
 // SMS…), si legge sul telefono e non serve una stampante. Raggruppati per
 // giorno, quanti giorni dice giorniDaCondividere(): abbastanza per organizzarsi, abbastanza corto da
 // leggersi in una schermata. Solo le finestre libere, come il foglio.
+// Chiusura di ogni messaggio che esce dall'app: chi lo riceve vede cos'è e
+// può aprirlo. Una riga di nome e, sola in fondo, l'indirizzo con https (le
+// app ne fanno un'anteprima cliccabile). «?s=» dice da quale messaggio arriva.
+function firmaMessaggio(tipo){ return "Notturnisti · il piano del sonno per chi lavora a turni\nhttps://app.notturnisti.club/?s="+tipo; }
 function testoOrariLiberi(){
   const w=finestreLibere(giorniDaCondividere()), perGiorno=new Map();
   w.forEach(x=>{ const k=iso(x.d); if(!perGiorno.has(k)) perGiorno.set(k,{d:x.d,f:[]}); perGiorno.get(k).f.push(x); });
@@ -7795,7 +7834,7 @@ function testoOrariLiberi(){
     const ore=g.f.map(x=>hhmm(x.a)+"–"+hhmm(x.b)).join(", ");
     return "• "+nome.charAt(0).toUpperCase()+nome.slice(1)+": "+ore;
   });
-  return righe.length ? "Il mio tempo libero nei prossimi "+giorniDaCondividere()+" giorni:\n"+righe.join("\n") : "";
+  return righe.length ? "Il mio tempo libero nei prossimi "+giorniDaCondividere()+" giorni:\n"+righe.join("\n")+"\n\n"+firmaMessaggio("liberi") : "";
 }
 async function mandaOrariLiberi(){
   if(!state.turniConfigurati){ toast("Imposta prima i turni"); return; }
@@ -7836,7 +7875,7 @@ function testoACasa(){
   else voci.push([on, "a letto alle "+hhmm(on)+(!nb.rest && !NT.startsInNight(nb) && nb.start<720 ? " (domani attacco alle "+hhmm(nb.start)+")" : "")]);
   voci.sort((x,y)=>x[0]-y[0]);
   return nomeGiornoFocus(true)+": "+stato+"\n"+voci.map(v=>"• "+v[1]).join("\n")+
-    "\n\n(dal mio piano Notturnisti · app.notturnisti.club)";
+    "\n\n"+firmaMessaggio("oggi");
 }
 function renderACasa(){
   const el=$("#aCasa"); if(!el) return;
@@ -9044,7 +9083,10 @@ async function condividiCicloWhatsApp(){
     ? (start.getDate() + "–" + d2Str)
     : (d1Str + " – " + d2Str);
 
-  let testo = "📅 *I miei turni — " + nomeCiclo + "* (" + rangeStr + "):\n\n";
+  // Testo semplice: gli asterischi e i trattini bassi valgono solo in WhatsApp
+  // (altrove restano come simboli) e le emoji fanno rumore. Il punto elenco
+  // passa da ogni app.
+  let testo = "I miei turni (" + nomeCiclo + "), " + rangeStr + ":\n\n";
 
   for(let i = 0; i < count; i++){
     const dd = day(start, i);
@@ -9066,24 +9108,15 @@ async function condividiCicloWhatsApp(){
       orario = " (" + hhmm(sh.s) + "–" + hhmm(sh.e) + ")";
     }
 
-    let emoji = "✨";
-    if(code === "N" || (typeof isNightCode === "function" && isNightCode(code))) emoji = "🌙";
-    else if(code === "M") emoji = "☀️";
-    else if(code === "P") emoji = "⛅";
-    else if(code === "S") emoji = "🛌";
-    else if(code === "R") emoji = "✨";
-    else if(code === "?") emoji = "❓";
-    else if(sh && !sh.rest) emoji = "💼";
-
     const isOggi = iso(dd) === iso(giornoVero());
-    const badge = isOggi ? " · _oggi_" : "";
+    const badge = isOggi ? " · oggi" : "";
     const dataLabel = giorni[dd.getDay()] + " " + dd.getDate() + " " + mesi[dd.getMonth()];
 
-    testo += emoji + " *" + dataLabel + "*: " + nome + orario + badge + "\n";
+    testo += "• " + dataLabel + ": " + nome + orario + badge + "\n";
   }
 
   const link = window.NT_APP.base + "#" + toCompactHash();
-  testo += "\n🔗 Confronta i tuoi turni con i miei:\n" + link;
+  testo += "\nConfronta i tuoi turni con i miei su Notturnisti:\n" + link;
   // Pannello di condivisione del telefono: WhatsApp, Telegram, SMS… (prima
   // solo wa.me, che escludeva le altre app e nell'app Android passava dal
   // browser). wa.me resta il ripiego dove il pannello non c'è (computer).
@@ -9126,8 +9159,8 @@ async function invitaChiLavoraConTe(){
   return consigliaApp();
 }
 async function consigliaApp(){
-  const url=window.NT_APP.nativo ? "https://app.notturnisti.club/" : window.NT_APP.base;
-  const testo="Uso Notturnisti per i turni: mi dice quando dormire, il caffè e la luce, giorno per giorno. Gratis, senza account.";
+  const url="https://app.notturnisti.club/?s=consiglio";
+  const testo="Uso Notturnisti per i turni: ogni giorno mi dice quando dormire, l'ultimo caffè e la luce. Gratis, senza account.";
   try{
     if(platform.canShare()){ await platform.share({title:"Notturnisti",text:testo,url}); track("share_created", {tipo:"app"}); return; }
   }catch(e){ if(e && e.name==="AbortError") return; }
@@ -9148,11 +9181,11 @@ if(store.get("sub") && $("#privacyNotaAbbonato")) $("#privacyNotaAbbonato").hidd
 if(!window.NT_APP.nativo && platform.notify.pushStato && platform.notify.pushStato()!=="no" && $("#notifHint"))
   $("#notifHint").textContent="Arrivano anche ad app chiusa: per svegliarla all'ora giusta il nostro server conserva solo gli orari dei promemoria (non cosa dicono), finché li tieni accesi. Non sostituiscono la sveglia.";
 if(window.NT_APP.nativo){
-  if($("#notifHint")) $("#notifHint").textContent="I promemoria arrivano anche ad app chiusa. Se mancano, controlla che il risparmio batteria non limiti Notturnisti. Non sostituiscono la sveglia.";
+  if($("#notifHint")) $("#notifHint").textContent="I promemoria arrivano anche con l'app chiusa. Non sono una sveglia: per quella, «Metti la sveglia» in «Dormi». Non ti arrivano? Controlla che il risparmio batteria non limiti Notturnisti.";
   // Android 12+: senza "Sveglie e promemoria" la sveglia può arrivare con
   // qualche minuto di ritardo. Si propone solo a chi ha già le notifiche.
   const riga=document.createElement("p"); riga.className="hint"; riga.hidden=true; riga.style.margin="6px 2px 0";
-  riga.innerHTML='La sveglia può arrivare con qualche minuto di ritardo. <button class="lnk" type="button" style="display:inline">Rendila puntuale →</button>';
+  riga.innerHTML='Possono arrivare con qualche minuto di ritardo. <button class="lnk" type="button" style="display:inline">Falli arrivare all\'ora esatta →</button>';
   if($("#notifHint")) $("#notifHint").after(riga);
   const aggiornaEsatta=()=>Promise.all([platform.notify.permission(),platform.notify.exactStatus()])
     .then(([p,x])=>{ riga.hidden=!(p==="granted" && x!=="granted"); }).catch(()=>{});
@@ -9169,12 +9202,12 @@ if(window.NT_APP.nativo){
 // Punto permanente e silenzioso per chi vuole sostenere il progetto senza
 // aspettare il nudge periodico (donateNudge) o essere passato da Andamenti/
 // dal calendario attivo: sempre lì, mai un obbligo.
-{ const du=donateUrl(), dw=$("#doDonateLnkWrap"), dl=$("#doDonateLnk");
-  if(du && dw && dl){ dl.href=du; dw.hidden=false; } }
+{ const du=donateUrl(), dl=$("#doDonateLnk");
+  if(du && dl){ dl.href=du; dl.hidden=false; } }
 // Nell'app, al posto della donazione: il link alla scheda Play per chi vuole
 // lasciare un voto quando lo decide lui, senza aspettare il riquadro.
-{ const rw=$("#doReviewLnkWrap"), rl=$("#doReviewLnk");
-  if(platform.review.available && rw && rl){ rl.href=platform.review.url; rw.hidden=false; } }
+{ const rl=$("#doReviewLnk");
+  if(platform.review.available && rl){ rl.href=platform.review.url; rl.hidden=false; } }
 
 /* --- editor turni --- */
 function renderShifts(){
