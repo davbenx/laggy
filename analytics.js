@@ -72,6 +72,7 @@
     migrazione: ["fase"],             // dalla vecchia app: export_web | import_app
     recensione_chiesta: [],          // aperto il riquadro stelle di Play (non dice se è comparso)
   diario_rapido: [],               // sonno registrato con «Come previsto» dalla notifica
+  sveglia_messa: [],               // sveglia chiesta all'Orologio del telefono (app Android)
     errore: ["dove"]                  // errore JavaScript: solo il file (index, engine…), mai il messaggio
   };
 

@@ -21,12 +21,14 @@ async function apri(porta, app, alarm){
   await p.goto("http://localhost:"+porta+"/index.html"); await p.waitForTimeout(1500);
   return p;
 }
-const bottone=p=>p.evaluate(()=>{ const d=document.querySelector('#essenziale details[data-row="sonno"]'); if(!d) return null; d.open=true;
-  const s=d.querySelector("[data-sveglia]"); return s ? {ora:s.dataset.sveglia, testo:s.textContent, fine:d.querySelector(".essrow").textContent} : null; });
+// il pulsante sta sotto «Dormi», sempre visibile (non nel dettaglio a scomparsa)
+const bottone=p=>p.evaluate(()=>{ const t=document.querySelector('#essenziale [data-row="sonno"]'); if(!t) return null; const v=t.closest(".tl");
+  const s=v.querySelector(".tl-extra [data-sveglia]"); if(!s) return null; const r=s.getBoundingClientRect(), q=s.parentElement.getBoundingClientRect();
+  return {ora:s.dataset.sveglia, testo:s.textContent, fine:v.querySelector(".essrow").textContent, visibile:r.height>0&&!t.open, largo:Math.abs((r.left+r.right)-(q.left+q.right))<=2}; });
 
 { const p=await apri(8766, true, true);
   const s=await bottone(p);
-  ok(s && /^\d\d:\d\d$/.test(s.ora) && s.fine.includes(s.ora), "app: «Metti la sveglia» nel dettaglio di Dormi, all'ora di fine sonno → "+JSON.stringify(s));
+  ok(s && /^\d\d:\d\d$/.test(s.ora) && s.fine.includes(s.ora) && s.visibile && s.largo, "app: «Metti la sveglia» nel dettaglio di Dormi, all'ora di fine sonno → "+JSON.stringify(s));
   await p.click("[data-sveglia]"); await p.waitForTimeout(300);
   const [h,m]=s.ora.split(":").map(Number), sv=await p.evaluate(()=>window.__sveglie);
   ok(sv.length===1 && sv[0].hour===h && sv[0].minutes===m && sv[0].message==="Notturnisti", "tocco: sveglia chiesta all'Orologio → "+JSON.stringify(sv));

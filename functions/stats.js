@@ -372,6 +372,7 @@ function render(){
     kpi(fmt(total(rows,"notifications_enabled")), "Notifiche attivate", "nel periodo")+
     kpi(fmt(total(rows,"recensione_chiesta")), "Richieste di recensione", "riquadro Play aperto (Google decide se mostrarlo)")+
     kpi(fmt(total(rows,"share_opened")), "Link aperti da chi li riceve", "su "+fmt(total(rows,"share_created"))+" mandati")+
+    kpi(fmt(total(rows,"sveglia_messa")), "Sveglie messe nell'Orologio", "dal piano, solo app Android")+
     kpi(fmt(total(rows,"diario_rapido")), "Notti registrate dalla notifica", "«Come previsto»")+
     kpi(fmt(feedDistinct), "Calendari ICS vivi", coupleDistinct? ("più "+fmt(coupleDistinct)+" di coppia") : "feed distinti letti nel periodo");
 
@@ -398,10 +399,12 @@ function render(){
     if(steps[k].skip) sItems.push({k:"Configurazione completa, saltato al passo "+k, n:steps[k].skip});
   });
   $("#steps").innerHTML=rowsHtml(sItems);
-  var VOCI={turni:"Turni dei prossimi giorni",notifiche:"Promemoria",calendario:"Calendario del telefono",widget:"Widget",file_ics:"File .ics scaricato",play:"Dal web a Google Play"};
+  var VOCI={turni:"Turni dei prossimi giorni",notifiche:"Promemoria",calendario:"Calendario del telefono",widget:"Widget",file_ics:"File .ics scaricato",play:"Dal web a Google Play",
+    mese_aperto:"Il mio mese aperto",import_ciclo:"Import: ciclo riconosciuto e applicato",ferie_aperte:"Ferie: pianificatore aperto",ferie_segnate:"Ferie: segnate",ferie_con:"Ferie: scelto «a casa con»",
+    festivi_riposo:"Festivi contati come riposo",medico_visto:"Riepilogo medico aperto",medico_pdf:"Riepilogo medico in PDF",diario_widget:"Voto dal widget",tuoi_turni:"Pagina «I tuoi turni» aperta"};
   $("#setup").innerHTML=rowsHtml(byProp(rows,"setup_item").map(function(x){ return {k:VOCI[x.k]||x.k, n:x.n}; }));
 
-  var FORMATI={turni_msg:"Messaggio con i turni",liberi_msg:"Messaggio con gli orari liberi",link:"Invito con il ciclo",app:"Invito (solo l'app)",qr:"QR del ciclo",pdf_ciclo:"Stampa/PDF del ciclo",pdf_liberi:"Stampa/PDF orari liberi",chiedi_link:"Richiesta del link a una persona"};
+  var FORMATI={a_casa:"Orari del giorno mandati a casa",turni_msg:"Messaggio con i turni",liberi_msg:"Messaggio con gli orari liberi",link:"Invito con il ciclo",app:"Invito (solo l'app)",qr:"QR del ciclo",pdf_ciclo:"Stampa/PDF del ciclo",pdf_liberi:"Stampa/PDF orari liberi",chiedi_link:"Richiesta del link a una persona"};
   $("#share").innerHTML=rowsHtml(byProp(rows,"share_created").map(function(x){ return {k:FORMATI[x.k]||x.k, n:x.n}; }));
   // funzioni_attive: "a_n1c0w1" (+ "p1" sul web: promemoria con le push, che
   // arrivano anche ad app chiusa) → quote per funzione, per piattaforma
