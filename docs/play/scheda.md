@@ -9,10 +9,14 @@ Notturnisti: turni e sonno
 (Alternativa da valutare dopo un mese con i dati di "Termini di ricerca" in
 Play Console, se "calendario turni" porta molte visite: `Notturnisti – Calendario turni`, 30.)
 
-## Descrizione breve (max 80) — 72 caratteri
-Calendario turni che ti dice quando dormire, il caffè e la luce. Gratis.
+## Descrizione breve (max 80) — 68 caratteri
+Turni di lavoro e sonno: quando dormire, il caffè e la luce. Gratis.
+
+«Turni di lavoro» è la chiave con cui si cercano i calendari turni (tutti i
+primi risultati la hanno nel nome): qui sta in testa.
 
 Varianti per l'esperimento sulla scheda (Play Console → Esperimenti sulla scheda dello Store), una alla volta:
+- A0 (72, la prima versione): `Calendario turni che ti dice quando dormire, il caffè e la luce. Gratis.`
 - B (70): `Il calendario turni che ti dice quando dormire. Gratis, senza account.`
 - C (74): `Turni di notte? Quando dormire, il caffè e la luce, sul tuo turno. Gratis.`
 
@@ -28,12 +32,14 @@ COME FUNZIONA
 • Scegli il turno di oggi con un tocco, oppure il tuo schema: in quinta, in sesta, 12 ore, settimane alterne… o componilo tu, anche con turni irregolari o che cambiano ogni settimana.
 • Il piano tiene conto di come dormi davvero nei giorni liberi, del tragitto, di quanto ti resta addosso il caffè e se puoi fare un pisolino al lavoro.
 • Prima di un cambio turno ti prepara: a letto prima quando torni alle mattine, sonno lungo e pisolino prima della prima notte.
-• Ogni consiglio ha il suo perché, spiegato in parole semplici.
+• Ogni consiglio ha il suo perché, spiegato in parole semplici, con gli studi da cui viene.
+• Hai già i turni su un'altra app, in un foglio Excel o in una foto? Li importi in un minuto. Puoi anche tenere la tua app dei turni: Notturnisti legge il calendario del telefono.
 
 FUNZIONA DA SOLO
 • Promemoria: quando prepararti a dormire, l'ultimo caffè, il rientro dopo la notte (l'ora più a rischio per chi guida), e un consiglio in più nei giorni impegnativi, come la terza notte di fila. Scegli tu quali: al massimo 4 al giorno, mai mentre dormi.
 • Calendario del telefono: turni e sonno nell'app Calendario, aggiornati da soli.
 • Widget sulla schermata Home: cosa fare adesso, quanto manca alla prossima cosa e la tua settimana.
+• Sveglia: un tocco e la sveglia per fine sonno è nell'app Orologio del telefono.
 
 SI ADATTA A TE
 Non ti impone orari fissi. Annota come hai dormito con un tocco, anche dalla notifica del mattino. Se nei giorni liberi dormi in orari diversi da quelli impostati, o fai fatica ad anticipare la sveglia, l'app te lo propone e aggiorna il piano. Turno cambiato all'ultimo momento? Lo cambi con un tocco e il piano si ricalcola.

@@ -506,6 +506,18 @@ export const review = {
   url: "https://play.google.com/store/apps/details?id=club.notturnisti.app"
 };
 
+/* ── Sveglia ──────────────────────────────────────────────────────────── */
+// Una sveglia vera nell'app Orologio (plugin locale NTAlarm, solo Android).
+// L'Orologio la mette alla prossima volta che arriva quell'ora: chi chiama
+// deve proporla solo per un orario entro 24 ore.
+export const alarm = {
+  available: isNative && name === "android" && !!plugin("NTAlarm"),
+  set(hour, minutes, message) {
+    const A = plugin("NTAlarm");
+    return A ? A.set({ hour, minutes, message }) : Promise.reject(new Error("non disponibile"));
+  }
+};
+
 /* ── Barre di sistema ──────────────────────────────────────────────────── */
 // Icone della barra di stato e della barra dei gesti leggibili sul tema
 // dell'app: chiare su fondo scuro, scure su fondo chiaro. Senza, seguivano
@@ -528,6 +540,6 @@ export function onBackButton(cb) {
   });
 }
 
-const NTPlatform = { isNative, name, notify, calendar, widget, onResume, onApriGiorno, onNotificationTap, onBackButton, canShare, share, print, review, versione, setSystemBars };
+const NTPlatform = { isNative, name, notify, calendar, widget, onResume, onApriGiorno, onNotificationTap, onBackButton, canShare, share, print, review, alarm, versione, setSystemBars };
 try { if (typeof window !== "undefined") window.NTPlatform = NTPlatform; } catch (e) {}
 export default NTPlatform;

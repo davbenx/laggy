@@ -865,6 +865,7 @@ padding:12px 6px 12px 14px;margin:-6px 0 var(--gap-sezione);font-size:13.5px;lin
 .essnudge{font-size:12.5px;color:var(--faint);margin-top:14px;line-height:1.55}
 .esshint{font-size:13px;color:var(--dim);margin:0 2px 10px}
 .ed-cambia{display:block;margin-top:10px;font-size:13px;text-align:left}
+.ed-sveglia{display:flex;width:100%;justify-content:center;margin-top:12px}
 #ora[hidden]{display:none}
 .essrischio{display:flex;align-items:flex-start;gap:10px;margin:0 0 10px;padding:11px 13px;border-radius:var(--r);background:var(--risk-soft);color:var(--ink);font-size:14px;line-height:1.45}
 .essrischio .eic{flex:none;color:var(--risk);display:flex}
@@ -1534,7 +1535,7 @@ header b{font-size:23px}
   <div id="segnaOut"></div>
   <section class="sg-importa" aria-labelledby="sgImpTit">
     <h2 class="sg-h" id="sgImpTit">Hai già i turni da qualche parte?</h2>
-    <p class="hint" style="margin:2px 0 10px">Li leggo io e ti chiedo conferma prima di segnarli.</p>
+    <p class="hint" style="margin:2px 0 10px">Anche da un'altra app per i turni: tienila, esporta i turni su Google Calendar o in un file. Li leggo io e ti chiedo conferma prima di segnarli.</p>
     <div class="sg-fonti">
       <button type="button" class="btn g" id="sgDaCalendario" hidden>Dal calendario del telefono</button>
       <button type="button" class="btn g" id="sgDaFile">Da un file (.xlsx, .csv, .ics)</button>
@@ -5399,14 +5400,14 @@ function giorniDalPrimoUso(){ return state.firstSeenAt ? (new Date()-new Date(st
 // Si sceglie il MOMENTO, non la persona: chi ha un problema ha sempre
 // «Segnala cosa non torna» in Impostazioni, non come filtro. Il momento:
 // subito dopo aver annotato una notte andata bene (Sveglio o Al meglio),
-// cioè quando l'app ha appena dimostrato di servire. Mai nelle prime due settimane, mai con meno di
+// cioè quando l'app ha appena dimostrato di servire. Mai nella prima settimana, mai con meno di
 // cinque notti annotate, mai mentre c'è altro da sistemare (lista di
 // attivazione, proposta di adattamento), al massimo una volta ogni quattro
 // mesi; Google poi applica la sua quota e può non mostrarlo affatto.
 function proponiRecensione(){
   try{
     if(!platform.review.available) return;
-    if(giorniDalPrimoUso() < 14) return;
+    if(giorniDalPrimoUso() < 7) return;   // le prime recensioni contano: una settimana basta
     // Non una notte buona isolata ma una serie (serieBuona), e niente segnali
     // di frustrazione: un errore oggi, notifiche negate dal telefono.
     if(!serieBuona()) return;
@@ -5693,8 +5694,14 @@ function renderEssenziale(P, CARDS){
   // contenuto resta, nel posto giusto.
   const scCard = CARDS.find(c=>c.k==="s");
   const dettSonno = dett(scCard);
+  // Sveglia vera nell'Orologio del telefono (solo app Android): l'Orologio
+  // la mette alla prossima volta che arriva quell'ora, quindi solo se la
+  // fine del sonno cade nelle prossime 24 ore.
+  const fineSonno=P.s.onset+P.s.dur, traQuanto=fineSonno-minutiDaFocus();
+  const sveglia = platform.alarm.available && traQuanto>0 && traQuanto<=1440
+    ? '<button type="button" class="btn g ed-sveglia" data-sveglia="'+hhmm(fineSonno)+'">Metti la sveglia alle '+hhmm(fineSonno)+'</button>' : "";
   voci.push({t:dSv(P.s.onset), html:riga("sonno","Dormi",sonnoWin(P),sonnoSub,false,ICON.moon,
-    dettSonno+'<button type="button" class="lnk ed-cambia" data-cambia="3">Orari che non fanno per te? Dimmi come dormi →</button>')});
+    dettSonno+sveglia+'<button type="button" class="lnk ed-cambia" data-cambia="3">Orari che non fanno per te? Dimmi come dormi →</button>')});
   const dn=sceltaDopoNotte(P);
   if(dn) voci.push({t:dSv(P.s.onset)+0.3, html:dn});
 
@@ -7369,6 +7376,13 @@ if($("#essenziale")) $("#essenziale").addEventListener("toggle", e=>{
 if($("#essenziale")) $("#essenziale").addEventListener("click", e=>{
   const b=e.target.closest("[data-cambia]"); if(!b) return;
   apriOpzioni(); apriSezioneInline(+b.dataset.cambia);
+});
+if($("#essenziale")) $("#essenziale").addEventListener("click", e=>{
+  const b=e.target.closest("[data-sveglia]"); if(!b) return;
+  const t=b.dataset.sveglia, [h,m]=t.split(":").map(Number);
+  platform.alarm.set(h, m, "Notturnisti")
+    .then(()=>{ toast("Sveglia delle "+t+" messa nell'Orologio"); track("sveglia_messa"); haptic(8); })
+    .catch(()=>toast("Non riesco a metterla: usa l'app Orologio del telefono"));
 });
 // Il foglio per il frigo: si costruisce apposta, non si spreme il DOM vivo.
 // Copre un giro completo di ciclo, con le sole informazioni che servono.
