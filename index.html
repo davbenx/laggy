@@ -900,7 +900,7 @@ padding:12px 6px 12px 14px;margin:-6px 0 var(--gap-sezione);font-size:13.5px;lin
 .essnudge{font-size:12.5px;color:var(--faint);margin-top:14px;line-height:1.55}
 .esshint{font-size:13px;color:var(--dim);margin:0 2px 10px}
 .ed-cambia{display:block;margin-top:10px;font-size:13px;text-align:left}
-.ed-sveglia{display:flex;width:100%;justify-content:center;margin-top:12px}
+.ed-sveglia{display:flex;width:100%;align-items:center;justify-content:center;text-align:center;margin-bottom:8px}
 #ora[hidden]{display:none}
 .oro .oro-tipo{font-family:var(--serif);font-size:22px;font-weight:600;margin:0 0 6px}
 .oro-riga{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid var(--line)}
@@ -1852,7 +1852,6 @@ header b{font-size:23px}
     <button type="button" id="doPrint" class="share3-az"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8V3h12v5"/><rect x="4" y="8" width="16" height="8" rx="1.5"/><path d="M8 13h8v7H8z"/></svg><b>Stampa o PDF</b><span>il calendario da appendere</span></button>
   </div>
   <button type="button" class="lnk" id="doCycQR" style="align-self:center;font-size:13px;padding:8px 4px">Mostra il QR da inquadrare</button>
-  <div class="ecc" id="qrBoxCyc" hidden><div id="qrHolderCyc" style="display:flex;justify-content:center;margin:6px 0 10px"></div></div>
 </div>
 
 <div id="luciditaGiornoWrap"></div>
@@ -1976,6 +1975,21 @@ header b{font-size:23px}
     <button type="button" class="qs-reset" id="qsReset" hidden>✕ Torna alla sequenza standard</button>
     <button type="button" class="btn g" id="qsVaiPiano" style="width:100%;min-height:44px;margin-top:6px" hidden>Vedi il piano di questo giorno</button>
     <button type="button" class="lnk" id="qsVaiScambio" style="font-size:12.5px;text-align:center;width:100%;margin-top:2px;padding:10px 0">⇄ Cambio turno: mi conviene? →</button>
+  </div>
+</div>
+
+<!-- Il QR dell'invito, in sovraimpressione (stesso foglio del cambio turno) -->
+<div id="qrModal" class="qs-backdrop" hidden aria-hidden="true">
+  <div class="qs-sheet" role="dialog" aria-modal="true" aria-label="Codice QR dell'invito">
+    <div class="qs-header">
+      <div>
+        <span class="eyebrow" style="display:block">Invita un collega</span>
+        <b class="qs-title">Fallo inquadrare</b>
+      </div>
+      <button type="button" class="qs-close" id="qrClose" aria-label="Chiudi">✕</button>
+    </div>
+    <div id="qrHolderCyc" style="display:flex;justify-content:center"></div>
+    <p class="esshint" style="margin:0;text-align:center">Basta la fotocamera del suo telefono: si apre l'app con i tuoi turni.</p>
   </div>
 </div>
 
@@ -5740,7 +5754,7 @@ function renderEssenziale(P, CARDS){
     const inizio = ore.length ? ore[0] : (testo.trim().length<=3 ? testo.trim() : "—");
     const resto = ore.length ? "" : (testo.trim().length>3 ? testo.trim() : "");
     const fine = ore.length>1 ? "fino alle "+ore[1] : "";
-    const sotto = [sub, resto, fine].filter(Boolean).join(" · ");
+    const sotto = [resto, fine, sub].filter(Boolean).join(" · ");
     const tipo = /^(sonno|nap)/.test(id) ? "sonno" : id==="turno" ? "turno" : warn ? "rischio" : "";
     const capo='<div class="essrow'+(warn?" warn":"")+(tipo?" tp-"+tipo:"")+'">'+
       '<span class="en mono">'+(quando?'<span class="dwhen">'+quando+'</span>':'')+inizio+'</span>'+
@@ -5783,7 +5797,7 @@ function renderEssenziale(P, CARDS){
   const sveglia = platform.alarm.available && traQuanto>0 && traQuanto<=1440
     ? '<button type="button" class="btn g ed-sveglia" data-sveglia="'+hhmm(fineSonno)+'">Metti la sveglia alle '+hhmm(fineSonno)+'</button>' : "";
   const vSonno={t:dSv(P.s.onset), html:riga("sonno","Dormi",sonnoWin(P),sonnoSub,false,ICON.moon,
-    dettSonno+sveglia+'<button type="button" class="lnk ed-cambia" data-cambia="3">Orari che non fanno per te? Dimmi come dormi →</button>',
+    dettSonno+'<button type="button" class="lnk ed-cambia" data-cambia="3">Orari che non fanno per te? Dimmi come dormi →</button>',
     {a:P.s.onset, z:P.s.onset+P.s.dur, poi:"a letto alle "+hhmm(P.s.onset)})};
   voci.push(vSonno);
   // Le scelte che riguardano il sonno (dopo la notte, letto presto) stanno
@@ -5796,7 +5810,7 @@ function renderEssenziale(P, CARDS){
   // "pre-turno-bifasico", non "pre-turno"), c'è un modo di risolverlo che
   // l'utente potrebbe non aver ancora trovato da solo.
   const lp=sceltaLettoPresto(P);
-  if(dn || lp) vSonno.html=vSonno.html.replace(/<\/div>$/, '<div class="tl-extra">'+(dn||"")+(lp||"")+'</div></div>');
+  if(sveglia || dn || lp) vSonno.html=vSonno.html.replace(/<\/div>$/, '<div class="tl-extra">'+sveglia+(dn||"")+(lp||"")+'</div></div>');
 
   // Tempo libero: le ore da sveglio fuori da turno, viaggio, sonno e pisolini.
   // Risponde a «e la palestra quando la faccio?» (e figli, spesa…) senza un
@@ -6236,12 +6250,12 @@ function festiviCambiati(){ salva(); try{ NT.setFestivo(festivo); }catch(e){} re
 function durataBreve(m){ m=Math.round(m/15)*15; const h=Math.floor(m/60), r=m%60; return h ? h+"h"+(r?String(r).padStart(2,"0"):"") : r+" min"; }
 if($("#meseBox")) $("#meseBox").addEventListener("change", e=>{
   if(e.target.matches("[data-fest-dom]")){ state.festivi=Object.assign({}, state.festivi||{}, {dom:e.target.checked}); festiviCambiati(); }
-  else if(e.target.matches("[data-fest-riposo]")){ state.festiviRiposo=e.target.checked; festiviCambiati(); }
+  else if(e.target.matches("[data-fest-riposo]")){ state.festiviRiposo=e.target.checked; if(e.target.checked) track("setup_item", {item:"festivi_riposo"}); festiviCambiati(); }
 });
 if($("#meseBox")) $("#meseBox").addEventListener("click", e=>{
   if(e.target.closest("[data-riepilogo-medico]")){ stampaRiepilogoMedico(); return; }
   if(e.target.closest("[data-mese-segna]")){ sgOff=meseOff; apriSegna(); return; }
-  if(e.target.closest("[data-fest-apri]")){ festiviAperto=true; renderMese(); return; }
+  if(e.target.closest("[data-fest-apri]")){ festiviAperto=true; usata("festivi"); renderMese(); return; }
   if(e.target.closest("[data-fest-chiudi]")){ festiviAperto=false; renderMese(); return; }
   const fd=e.target.closest("[data-fest-del]");
   if(fd){ const f=Object.assign({}, state.festivi||{}); f.extra=(f.extra||[]).filter(k=>k!==fd.dataset.festDel); state.festivi=f; festiviCambiati(); return; }
@@ -6249,7 +6263,7 @@ if($("#meseBox")) $("#meseBox").addEventListener("click", e=>{
     const v=($("#festData")||{}).value||""; const m=/^\d{4}-(\d\d)-(\d\d)$/.exec(v);
     if(!m){ toast("Scegli il giorno"); return; }
     const k=(+m[1])+"-"+(+m[2]), f=Object.assign({}, state.festivi||{}); f.extra=(f.extra||[]).filter(x=>x!==k).concat(k).sort(); state.festivi=f;
-    festiviCambiati(); return; }
+    usata("festivi"); track("setup_item", {item:"festivi_extra"}); festiviCambiati(); return; }
   const b=e.target.closest("[data-mese]"); if(!b || b.disabled) return;
   meseOff=Math.max(-12, Math.min(12, meseOff + +b.dataset.mese)); renderMese();
 });
@@ -7634,9 +7648,15 @@ function diaryClick(e){
     if(v>=4 && diary[k]===v) proponiRecensione(); }
 }
 // il diario si annota dal glance; le stesse azioni valgono anche nelle schede (storico)
+// Statistiche: quali voci del piano si aprono (una volta al giorno per voce)
+function vocePiano(id){
+  try{ const v=String(id).toLowerCase().replace(/[^a-z0-9_]/g,"").slice(0,18), m=store.mappa("vociAperte"), oggi=isoOggi();
+    if(!v || m[v]===oggi) return; m[v]=oggi; store.set("vociAperte", m); track("setup_item", {item:"voce_"+v}); }catch(e){}
+}
 if($("#essenziale")) $("#essenziale").addEventListener("toggle", e=>{
   const r=e.target; if(!r.dataset || !r.dataset.row) return;
   if(r.open) essAperte.add(r.dataset.row); else essAperte.delete(r.dataset.row);
+  if(r.open){ if(r.dataset.row==="sonno") usata("dormi"); vocePiano(r.dataset.row); }
   if(r.open && !store.get("perchéVisto", false)){ store.set("perchéVisto", true); const h=$("#essenziale .esshint"); if(h) h.remove(); }
 }, true);
 ["#essenziale","#andamenti"].forEach(s=>{ const el=$(s); if(el){ el.addEventListener("change",diaryChange); el.addEventListener("click",diaryClick); } });
@@ -7964,12 +7984,18 @@ const CONSIGLI_FUNZIONE=[
     t:()=>{ const o=orologio(); return "Il tuo orologio è pronto: "+o.tipo.toLowerCase()+", con il minimo corporeo verso le "+hhmm(o.cbt)+". Quando arriva la melatonina e quando sei più lucido, in «Sonno e carico»."; },
     cta:()=>"Vedi il tuo orologio", a:()=>{ setTab("turni"); apriAndamenti(); usata("orologio");
       const el=$("#orologio"); if(el) try{ el.scrollIntoView({block:"start"}); }catch(e){} }},
-  {k:"mese", t:()=>"Puoi ricopiare il foglio turni in un minuto, un tocco per giorno, o importarlo da un file.", a:()=>{ setTab("turni"); apriSegna(); }},
+  {k:"mese", t:()=>"Puoi ricopiare il foglio turni in un minuto, un tocco per giorno, o importarlo da un file. Se ricopi almeno due cicli interi, l'app riconosce lo schema e lo continua da sola.", a:()=>{ setTab("turni"); apriSegna(); }},
+  {k:"festivi", quando:()=>!state.festiviRiposo && !(state.festivi && ((state.festivi.extra||[]).length || state.festivi.dom===false)),
+    t:()=>"Domeniche e festivi del tuo contratto contano come riposo? Segnali una volta: il piano ne tiene conto, anche il santo patrono.",
+    cta:()=>"Aggiungi i tuoi festivi", a:()=>{ setTab("turni"); festiviAperto=true; renderMese(); usata("festivi");
+      const x=$("#meseBox .mese-fest-box"); if(x) try{ x.scrollIntoView({block:"center"}); }catch(e){} }},
   {k:"calendario", quando:()=>!inLista("calendario") && (platform.calendar.available ? !platform.calendar.attivo() : !(window.NTPaid && window.NTPaid.paid())),
     t:()=>"Turni e ore di sonno nel calendario del telefono, aggiornati da soli: li vedi dove guardi già i tuoi impegni.", cta:()=>"Attiva", a:()=>apriCalendarioDaWizard()},
-  {k:"ferie", t:()=>"L'app trova i giorni di ferie che ti danno più giorni a casa, attaccati ai riposi.", a:()=>{ setTab("turni"); apriFerie(); }},
+  {k:"ferie", t:()=>"L'app trova i giorni di ferie che ti danno più giorni a casa, attaccati ai riposi. Se hai aggiunto una persona, puoi sceglierli anche per stare a casa insieme.", a:()=>{ setTab("turni"); apriFerie(); }},
   {k:"scambio", t:()=>"Prima di accettare uno scambio di turno, controlla come cambiano sonno e riposi.", a:()=>{ setTab("turni"); apriScambioTurno(); }},
   {k:"sonno", t:()=>"In «Sonno e carico» vedi notti di fila e riposi brevi del mese, anche senza diario.", a:()=>{ setTab("turni"); apriAndamenti(); }},
+  {k:"dormi", t:()=>"Tocca «Dormi» nel piano: dopo una notte scegli sonno breve o lungo, prima di un mattino presto puoi dormire in due tempi."},
+  {k:"acasa", t:()=>"Chi vive con te non sa quando dormi? «Condividi i tuoi orari di oggi» manda in un messaggio quando dormi e quando sei libero."},
   // Il grazie: dopo due settimane, in un momento buono (mai dopo notti pessime).
   // Sul web il contributo libero; nell'app (regole di Play) solo il Club.
   {k:"grazie", dopo:14, quando:()=>{ const ult=Object.keys(diary).sort().slice(-3).map(x=>+diary[x]);
@@ -8039,7 +8065,7 @@ if($("#loSapevi")) $("#loSapevi").addEventListener("click", e=>{
 });
 async function mandaACasa(){
   const testo=testoACasa(); if(!testo){ toast("Segna prima il turno di questo giorno"); return; }
-  track("share_created", {tipo:"a_casa"});
+  track("share_created", {tipo:"a_casa"}); usata("acasa");
   try{ if(platform.canShare()){ await platform.share({title:"I miei orari", text:testo}); return; } }
   catch(e){ if(e && e.name==="AbortError") return; }
   try{ await navigator.clipboard.writeText(testo); toast("Messaggio copiato: incollalo dove vuoi"); }
@@ -8207,13 +8233,16 @@ if($("#cycPrev"))  $("#cycPrev").onclick =()=>cycGo(cicloOff-passoCiclo());
 if($("#cycNext"))  $("#cycNext").onclick =()=>cycGo(cicloOff+passoCiclo());
 if($("#cycToday")) $("#cycToday").onclick=()=>{ if(suOggi()){ apriSelettoreData(); return; } state.focus=giornoVero(); cycGo(0); };
 
-if($("#doCycQR")) $("#doCycQR").onclick=()=>{
-  const b=$("#qrBoxCyc"); if(!b) return;
-  b.hidden=!b.hidden;
-  $("#doCycQR").textContent=b.hidden?"Mostra il QR da inquadrare":"Nascondi il QR";
-  $("#doCycQR").setAttribute("aria-expanded", String(!b.hidden));
-  if(!b.hidden){ renderQR("#qrHolderCyc"); track("share_created", {tipo:"qr"}); }
-};
+function mostraQR(su){
+  const m=$("#qrModal"); if(!m) return;
+  m.hidden=!su; m.setAttribute("aria-hidden",String(!su));
+  if(su){ renderQR("#qrHolderCyc"); track("share_created", {tipo:"qr"}); $("#qrClose").focus(); }
+  else if($("#doCycQR")) $("#doCycQR").focus();
+}
+if($("#doCycQR")) $("#doCycQR").onclick=()=>mostraQR(true);
+if($("#qrClose")) $("#qrClose").onclick=()=>mostraQR(false);
+if($("#qrModal")) $("#qrModal").addEventListener("click",e=>{ if(e.target===$("#qrModal")) mostraQR(false); });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape" && $("#qrModal") && !$("#qrModal").hidden) mostraQR(false); });
 
 // La griglia del wizard scrive subito, come ogni altro campo del passo (il
 // bind() degli altri input fa lo stesso): non serve un bottone "salva" a
@@ -8547,7 +8576,7 @@ if($("#feriePagina")){
   });
   $("#ferieMese").addEventListener("change", renderFerie);
   $("#feriePrefer").addEventListener("change", e=>{ const p=preferenzeFerie(); p.prefer=e.target.value; store.set("ferie", p); renderFerie(); });
-  $("#ferieCon").addEventListener("change", e=>{ const p=preferenzeFerie(); p.con=+e.target.value; store.set("ferie", p); renderFerie(); });
+  $("#ferieCon").addEventListener("change", e=>{ const p=preferenzeFerie(); p.con=+e.target.value; store.set("ferie", p); renderFerie(); if(p.con>=0) track("setup_item", {item:"ferie_con"}); });
   $("#ferieSmonto").addEventListener("change", e=>{ const p=preferenzeFerie(); p.smonto=e.target.checked; store.set("ferie", p); renderFerie(); });
 }
 
@@ -10010,6 +10039,7 @@ platform.onBackButton(()=>{
   if(dlg){ dlg.remove(); return true; }
   if($("#pf-modal")){ $("#pf-modal").remove(); return true; }
   const qs=$("#quickShiftModal"); if(qs && !qs.hidden){ chiudiQuickShift(); return true; }
+  if($("#qrModal") && !$("#qrModal").hidden){ mostraQR(false); return true; }
   if(document.body.classList.contains("andamenti-aperta")){ chiudiAndamenti(); return true; }
   if(document.body.classList.contains("vederci-aperta")){ chiudiVederci(); return true; }
   if(document.body.classList.contains("scambio-aperta")){ chiudiScambio(); return true; }
@@ -10097,6 +10127,7 @@ function contaFunzioniAttive(){
   try{
     if(!state.turniConfigurati || store.get("funzioniContate","")===isoOggi()) return;
     store.set("funzioniContate", isoOggi());
+    if(!store.get("orologioContato",false) && !(state.freeBed==="23:30" && state.freeWake==="07:30")){ store.set("orologioContato", true); track("setup_item", {item:"orologio_tuo"}); }
     const pl = platform.isNative ? (platform.name==="ios"?"i":"a") : (window.matchMedia("(display-mode: standalone)").matches?"p":"w");
     const cal = platform.calendar.available ? platform.calendar.attivo() : !!(window.NTPaid && window.NTPaid.paid());
     track("funzioni_attive", {mix: pl+"_n"+(promemoriaAttivi()?1:0)+"c"+(cal?1:0)+"w"+(platform.widget.presenti()>0?1:0)+

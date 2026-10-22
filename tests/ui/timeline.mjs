@@ -33,7 +33,7 @@ const base={turniConfigurati:true,pattern:"MPNSR",anchor:iso(new Date()),repeat:
   ok(turno && /\bora\b/.test(turno.cls) && !/\bpast\b/.test(turno.cls), "il turno 06:00–14:00 è in corso");
   ok(caffe && !/\b(past|ora)\b/.test(caffe.cls), "il caffè delle 14:20 è ancora da venire");
   ok(/fino alle 14:00/.test(turno.sotto) && /^06:00$/.test(turno.ora), "intervallo: l'inizio nella colonna dell'ora, la fine sotto il titolo → "+turno.ora+" | "+turno.sotto);
-  ok(/^Stanotte 22:20$/.test(dormi.ora) && /8h · fino alle 06:20/.test(dormi.sotto), "Dormi: «Stanotte 22:20» e «fino alle 06:20» → "+dormi.ora+" | "+dormi.sotto);
+  ok(/^Stanotte 22:20$/.test(dormi.ora) && /^fino alle 06:20 · 8h$/.test(dormi.sotto), "Dormi: «Stanotte 22:20» e «fino alle 06:20 · 8h» → "+dormi.ora+" | "+dormi.sotto);
   const pos=await p.evaluate(()=>{ const a=document.querySelector(".tl-adesso"); if(!a) return null;
     const prima=[...document.querySelectorAll("#essenziale .tl")].filter(x=>x.getBoundingClientRect().bottom<=a.getBoundingClientRect().top+1).map(x=>x.querySelector(".el").textContent);
     return {ora:a.querySelector(".en").textContent, prima}; });

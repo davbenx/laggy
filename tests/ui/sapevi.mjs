@@ -36,7 +36,7 @@ const S=await p.evaluate(()=>JSON.parse(localStorage.getItem("nt:loSapevi")));
 await p.context().close();
 // tre giorni dopo: il successivo, mai quello già visto; × lo chiude per sempre
 S.oggi.d=fa(3);
-p=await apri(Object.assign({firstSeenAt:fa(10)}, ST), {loSapevi:S, funzioniUsate:{mese:fa(3)}});
+p=await apri(Object.assign({firstSeenAt:fa(10)}, ST), {loSapevi:S, funzioniUsate:{mese:fa(3), festivi:fa(3)}});
 t=await tip(p);
 ok(/^calendario:/.test(t), "tre giorni dopo il prossimo: il calendario del telefono → "+t);
 await p.click("[data-sapevi-chiudi]"); await p.waitForTimeout(200);
@@ -48,7 +48,7 @@ p=await apri(Object.assign({firstSeenAt:fa(10)}, ST), {loSapevi:{visti:["mese"],
 ok(await tip(p)==="", "al massimo uno ogni 3 giorni");
 await p.context().close();
 // chi ha già persone e ha usato il mese: si salta al successivo non usato
-p=await apri(Object.assign({firstSeenAt:fa(10), people:[{name:"Anna",pattern:"MMRR",anchor:fa(2)}]}, ST), {funzioniUsate:{mese:fa(5), ferie:fa(5), calendario:fa(5)}});
+p=await apri(Object.assign({firstSeenAt:fa(10), people:[{name:"Anna",pattern:"MMRR",anchor:fa(2)}]}, ST), {funzioniUsate:{mese:fa(5), festivi:fa(5), ferie:fa(5), calendario:fa(5)}});
 t=await tip(p);
 ok(/^scambio:/.test(t), "salta le funzioni già usate (mese, calendario, ferie, persone) → "+t);
 await p.context().close();
@@ -61,7 +61,7 @@ p=await apri(Object.assign({firstSeenAt:fa(5)}, ST), {backupDone:false});
 ok(!/^copia:/.test(await tip(p)), "non prima di una settimana");
 await p.context().close();
 // il riepilogo per il medico solo dopo 2 mesi d'uso
-p=await apri(Object.assign({firstSeenAt:fa(20)}, ST), {funzioniUsate:{mese:1,calendario:1,colleghi:1,ferie:1,scambio:1,sonno:1}});
+p=await apri(Object.assign({firstSeenAt:fa(20)}, ST), {funzioniUsate:{mese:1,festivi:1,calendario:1,colleghi:1,ferie:1,scambio:1,sonno:1,dormi:1,acasa:1}});
 ok(await tip(p)==="", "riepilogo per il medico: non prima di due mesi d'uso");
 await p.context().close();
 // Android dal browser, app non ancora su Play: l'invito al test, in due passi

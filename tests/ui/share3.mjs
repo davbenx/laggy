@@ -17,7 +17,11 @@ for (const [nome,url,init] of [["web","http://localhost:8765/index.html",()=>{ w
   else ok(r.sh.length===1 && r.open.length===0, nome+": 'Manda i miei turni' usa il pannello del telefono "+JSON.stringify(r));
   if(nome!=="computer"){
     await p.click("#doCycQR"); await p.waitForTimeout(200);
-    ok(await p.evaluate(()=>!!document.querySelector("#qrHolderCyc svg")), nome+": QR dal link sotto «Invita chi lavora con te»");
+    ok(await p.evaluate(()=>!!document.querySelector("#qrHolderCyc svg")), nome+": QR dal link");
+    ok(await p.evaluate(()=>{ const m=document.querySelector("#qrModal"), r=m.querySelector(".qs-sheet").getBoundingClientRect();
+      return !m.hidden && getComputedStyle(m).position==="fixed" && r.top>=0 && r.bottom<=innerHeight && !!m.querySelector("svg"); }), nome+": il QR si apre in sovraimpressione, non sotto il link");
+    await p.keyboard.press("Escape"); await p.waitForTimeout(100);
+    ok(await p.evaluate(()=>document.querySelector("#qrModal").hidden), nome+": Esc chiude il QR");
     await p.click("#doPrint"); await p.waitForTimeout(200);
     ok(await p.evaluate(()=>window.__pr===1), nome+": Stampa o salva in PDF");
     await p.evaluate(()=>{ const t=document.querySelector("#toast"); t&&t.remove(); });
