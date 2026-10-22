@@ -4583,6 +4583,8 @@ function renderDemoEsempio(){
       '</div>'+
       '<p class="hint" style="margin:-4px 0 10px;text-align:center;font-size:12px">L\'orario preciso lo scegli al passo dopo.</p>'+
       '<button type="button" class="lnk" data-subflow="schema" style="display:block;width:100%;text-align:center;font-size:13.5px;padding:6px 0">Conosco già il mio schema di turni →</button>'+
+      // Chi ha già i turni in un calendario o in un file fa prima importandoli.
+      '<button type="button" class="lnk" data-importa-primo style="display:block;width:100%;text-align:center;font-size:13.5px;padding:6px 0">Ho già i turni in un calendario o in un file →</button>'+
       // Chi arriva dalla vecchia app (TWA): un link, non più un dialogo a tutto
       // schermo davanti a ogni nuovo utente (migrate.js decide se proporlo).
       (window.NTMigrate && window.NTMigrate.proponibile && window.NTMigrate.proponibile()
@@ -4720,6 +4722,11 @@ function apriFlussoProssimi(sub){
 }
 
 if($("#demoEsempio")) $("#demoEsempio").addEventListener("click", e=>{
+  if(e.target.closest("[data-importa-primo]")){
+    passo("import_subito"); vaiATurniVariabili();
+    setTimeout(()=>{ const x=document.querySelector(".sg-importa"); if(x) try{ x.scrollIntoView({block:"start"}); }catch(err){} }, 350);
+    return;
+  }
   const subBtn = e.target.closest("[data-subflow]");
   if(subBtn){
     // "E nei prossimi giorni?": quale delle tre situazioni sceglie la gente.
@@ -7121,7 +7128,7 @@ function ntWidget(){
   }
   platform.widget.publish(voci, giorni, {turno, diario:diarioWidget()});
 }
-// Il diario dal widget: dalla sveglia del sonno di stanotte per 8 ore, la
+// Il diario dal widget: dalla sveglia del sonno di stanotte per 14 ore, quasi fino a sera, la
 // domanda sul sonno (con gli orari del piano) e poi quella sull'energia.
 // Le risposte le salva il widget; l'app le prende alla prossima apertura.
 function diarioWidget(){
@@ -7133,7 +7140,7 @@ function diarioWidget(){
     if(!/^\d\d:\d\d$/.test(bed) || !/^\d\d:\d\d$/.test(wake)) return null;
     const da=new Date(g); da.setHours(+wake.slice(0,2), +wake.slice(3,5), 0, 0);
     if(da.getTime()>Date.now()+12*3600e3) da.setDate(da.getDate()-1);
-    return {d:k, bed, wake, da:da.getTime(), a:da.getTime()+8*3600e3, sonno:!!wakes[k], voto:diary[k]!=null};
+    return {d:k, bed, wake, da:da.getTime(), a:da.getTime()+14*3600e3, sonno:!!wakes[k], voto:diary[k]!=null};
   }catch(e){ return null; }
   finally{ state.focus=f; }
 }
@@ -8786,6 +8793,14 @@ function renderImport(){
       '<div class="sg-azioni"><button type="button" class="btn pri" id="sgScegliFoto" disabled>Scegli il file</button>'+chiudi+'</div></div>';
     return;
   }
+  if(I.stato==="ciclo"){
+    const C=I.ciclo, nome=c=>(state.shifts&&state.shifts[c]?state.shifts[c].n:"Riposo");
+    el.innerHTML='<div class="sg-box" role="status"><p><b>I turni si ripetono ogni '+C.periodo+' giorni</b></p>'+
+      '<p class="hint">'+esc(C.pattern.split("").map(nome).join(" · "))+'. Vuoi che il piano continui questo ciclo anche dopo?</p>'+
+      '<div class="sg-azioni"><button type="button" class="btn pri" data-imp-ciclo>Sì, continua il ciclo</button>'+
+      '<button type="button" class="btn g" data-imp-annulla>No, solo questi giorni</button></div></div>';
+    return;
+  }
   if(I.stato==="attesa"){ el.innerHTML='<div class="sg-box" role="status"><p>'+esc(I.msg||"Leggo…")+'</p></div>'; return; }
   if(I.stato==="errore"){ el.innerHTML='<div class="sg-box" role="alert"><p>'+esc(I.msg)+'</p><div class="sg-azioni">'+chiudi.replace("Annulla","Chiudi")+'</div></div>'; return; }
   if(I.stato==="calendari"){
@@ -8840,6 +8855,25 @@ async function daTabella(righe, fonte){
   if(!T.giorni.length) throw erroreUtente("Non riconosco la forma di questo foglio. Servono le date (o i numeri dei giorni) e i turni accanto.");
   return daGiorni(T.giorni, fonte);
 }
+// Il ciclo riconosciuto dai giorni importati diventa il ciclo dell'app: da lì
+// in poi il piano continua da solo. I giorni importati che coincidono con il
+// ciclo non servono più come eccezioni.
+function applicaCiclo(){
+  const I=_imp; if(!I || I.stato!=="ciclo") return;
+  const C=I.ciclo, p=C.pattern.length, base=dnum(new Date(C.inizio+"T12:00:00")), tolte=[];
+  const primaE=JSON.parse(JSON.stringify(state.ecc)), prima={pattern:state.pattern, anchor:state.anchor, repeat:state.repeat};
+  state.pattern=C.pattern; state.anchor=C.inizio; state.repeat=true;
+  for(const k of Object.keys(state.ecc)){
+    const n=dnum(new Date(k+"T12:00:00"))-base; if(n<0) continue;
+    if(state.ecc[k]===C.pattern[n%p]){ tolte.push(k); delete state.ecc[k]; }
+  }
+  track("setup_item", {item:"import_ciclo"});
+  _imp=null; renderImport(); salva(); render(); renderSegna();
+  toastUndo("Ciclo di "+p+" giorni attivo: il piano lo continua da solo", ()=>{
+    state.pattern=prima.pattern; state.anchor=prima.anchor; state.repeat=prima.repeat;
+    Object.assign(state.ecc, primaE); salva(); render(); renderSegna();
+  });
+}
 function applicaImport(){
   const I=_imp; if(!I || I.stato!=="mappa") return;
   const scelte={}; I.gruppi.forEach((g,i)=>{ const s=document.querySelector('[data-imp-v="'+i+'"]'); scelte[g.chiave]= s ? s.value : ""; });
@@ -8863,7 +8897,11 @@ function applicaImport(){
     const a=giornoVero(); sgOff=(+primo.slice(0,4)-a.getFullYear())*12+(+primo.slice(5,7)-1-a.getMonth());
     sgOff=Math.max(-6, Math.min(12, sgOff));
     track("setup_item", {item:"import_"+I.fonte});
-    _imp=null; renderImport(); salva(); render(); renderSegna();
+    _imp=null;
+    // I giorni importati si ripetono? Allora si propone di continuare il ciclo.
+    let ciclo=null; try{ ciclo=IM.rilevaCiclo(P, state.shifts||{}); }catch(e){}
+    if(ciclo && state.repeat===false) _imp={stato:"ciclo", ciclo};
+    renderImport(); salva(); render(); renderSegna();
     try{ window.scrollTo({top:0, behavior:"smooth"}); }catch(e){}
     toastUndo((P.length===1?"1 giorno segnato":P.length+" giorni segnati")+" dal foglio turni", ()=>{
       state.ecc=primaE; state.giorni=primaG; NT.state.ecc=primaE; NT.state.giorni=primaG; salva(); render(); renderSegna();
@@ -8934,6 +8972,7 @@ if($("#sgFoto")) $("#sgFoto").addEventListener("change", e=>{
 if($("#sgImport")){
   $("#sgImport").addEventListener("click", e=>{
     if(e.target.closest("[data-imp-annulla]")){ _imp=null; renderImport(); return; }
+    if(e.target.closest("[data-imp-ciclo]")){ applicaCiclo(); return; }
     if(e.target.closest("#sgScegliFoto")){ const n=$("#sgNome"); store.set("sgNome", n?n.value.trim().slice(0,40):""); const i=$("#sgFoto"); i.value=""; i.click(); return; }
     const cal=e.target.closest("[data-imp-cal]");
     if(cal && _imp && _imp.eventi){ const ev=_imp.eventi.filter(x=>x.calendario===cal.dataset.impCal); avviaImport("calendario", async()=>daGiorni((await caricaImporta()).eventiInGiorni(ev), "calendario")); return; }

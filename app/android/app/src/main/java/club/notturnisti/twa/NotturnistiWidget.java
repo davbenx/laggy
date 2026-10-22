@@ -20,7 +20,7 @@ import org.json.JSONObject;
  * Widget "Il tuo piano": cosa vale adesso (o la prossima cosa importante,
  * con il conto alla rovescia), il prossimo turno anche se è fra giorni, la
  * voce successiva e, se il widget è alto abbastanza, la settimana. La
- * mattina, dalla sveglia per 8 ore, al posto delle righe il diario: «Come
+ * mattina, dalla sveglia per 14 ore, al posto delle righe il diario: «Come
  * hai dormito?» e «Come ti senti?», a un tocco; le risposte restano qui
  * finché l'app non le prende (WidgetPlugin.risposte).
  *
@@ -220,7 +220,7 @@ public class NotturnistiWidget extends AppWidgetProvider {
                     pT[n] = k.startsWith("sonno") ? x.getString("t") + " · sveglia " + hhmm(x.getLong("e"), ora) : x.getString("t");
                     pIc[n] = icona(k); n++;
                 }
-                // Diario: dalla sveglia per 8 ore, finché non c'è risposta (nell'app o qui).
+                // Diario: dalla sveglia per 14 ore, finché non c'è risposta (nell'app o qui).
                 JSONObject d = radice.optJSONObject("diario");
                 // la domanda compare da sola all'ora della sveglia
                 if (d != null && d.optLong("da") > ora && d.optLong("da") < prossimoCambio) prossimoCambio = d.optLong("da");
