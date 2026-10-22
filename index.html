@@ -135,6 +135,7 @@ try{
   --orange-bar:#FF6B35;
   --orange:#FF9068; --orange-fill:#FF6B35; --orange-soft:#3A2119;
   --risk:#FF6B5C; --risk-soft:#3A1C18; --risk-line:#7A342C;
+  --picco:#D98CF0;   /* picco di sonnolenza nei grafici: il rosso di --risk qui si confonde con l'arancio del turno */
   --sleep-fill:#2D5A8C; --ok:#5FBF85; --on-warm:#15171A;
   --bg-blur:rgba(20,22,26,0.85);
   --warm-tint:#241C15; --cool-tint:#182029;
@@ -154,6 +155,7 @@ try{
     --blue:#2D5A8C; --blue-fill:#2D5A8C; --blue-soft:#E4EBF3; --blue-lt:#5B87B5; --su-blu:#FFFFFF;
     --orange:#B24B25; --orange-fill:#FF6B35; --orange-bar:#D9541F; --orange-soft:#FCE9E1;
     --risk:#C0392B; --risk-soft:#FBE9E7; --risk-line:#E57368;
+    --picco:#8E2A6B;
     --sleep-fill:#24496F; --ok:#2E7D4F; --on-warm:#15171A;
     --bg-blur:rgba(255,255,255,.82);
     --warm-tint:#FBF1E9; --cool-tint:#EAF0F6;
@@ -176,6 +178,7 @@ try{
   --orange-bar:#FF6B35;
   --orange:#FF9068; --orange-fill:#FF6B35; --orange-soft:#3A2119;
   --risk:#FF6B5C; --risk-soft:#3A1C18; --risk-line:#7A342C;
+  --picco:#D98CF0;   /* picco di sonnolenza nei grafici: il rosso di --risk qui si confonde con l'arancio del turno */
   --sleep-fill:#2D5A8C; --ok:#5FBF85; --on-warm:#15171A;
   --bg-blur:rgba(20,22,26,0.85);
   --warm-tint:#241C15; --cool-tint:#182029;
@@ -188,6 +191,7 @@ try{
   --blue:#2D5A8C; --blue-fill:#2D5A8C; --blue-soft:#E4EBF3; --blue-lt:#5B87B5; --su-blu:#FFFFFF;
   --orange:#B24B25; --orange-fill:#FF6B35; --orange-bar:#D9541F; --orange-soft:#FCE9E1;
   --risk:#C0392B; --risk-soft:#FBE9E7; --risk-line:#E57368;
+  --picco:#8E2A6B;
   --sleep-fill:#24496F; --ok:#2E7D4F; --on-warm:#15171A;
   --bg-blur:rgba(255,255,255,.82);
   --warm-tint:#FBF1E9; --cool-tint:#EAF0F6;
@@ -497,7 +501,13 @@ border-top:5px solid var(--ink)}
    che la striscia usava per conto suo (--sleep-fill/--orange-bar) —
    quei token restano dove servivano altrove (#band), qui la tinta è la
    stessa che l'utente vede già ovunque per "sonno" e "turno". */
-.cbar{position:absolute;top:0;bottom:0;border-radius:99px;background:var(--blue)}
+.cbar{position:absolute;top:0;bottom:0;border-radius:99px;background:var(--blue);z-index:2}
+.crows{position:relative}
+.cgrid{position:absolute;top:0;bottom:0;left:86px;right:0;z-index:1;pointer-events:none}
+.cgrid i{position:absolute;top:0;bottom:0;width:1px;background:var(--line);transform:translateX(-.5px)}
+.caxis{display:flex;align-items:flex-end;gap:8px;height:16px;margin-bottom:2px}
+.caxis .crail{background:none;height:16px}
+.caxis .crail span{position:absolute;bottom:0;transform:translateX(-50%);font-size:10.5px;line-height:1;color:var(--faint);white-space:nowrap}
 .cbar.nap{opacity:.5}
 .lnk{background:none;border:none;padding:6px 0;color:var(--blue);font-family:inherit;
 font-size:14px;cursor:pointer;text-decoration:underline;text-underline-offset:3px;min-height:44px}
@@ -517,7 +527,7 @@ html.js-lento .jsoff{display:block}
 .ecc{background:var(--blue-soft);border:1px solid var(--blue-lt);border-radius:var(--r);padding:14px 15px;margin:10px 0 4px}
 .ecc>b{display:block;font-size:16px;margin-bottom:3px}
 .crow.mod .ccode{text-decoration:underline;text-underline-offset:2px}
-.cbar.sh{background:var(--orange-fill)}
+.cbar.sh{background:var(--orange-bar)}
 .key{display:flex;gap:14px;margin-top:8px;font-size:12px;color:var(--faint);flex-wrap:wrap}
 .mese{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;margin-top:12px}
 .mese-testa{display:flex;align-items:center;justify-content:space-between;gap:8px}
@@ -564,7 +574,7 @@ display:flex;flex-direction:column;align-items:center;justify-content:center;gap
 .sg-azioni .btn{flex:1 1 140px;min-height:46px}
 .mese-num{display:grid;grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:8px;margin-top:10px}
 .mese-num div{background:var(--bg);border-radius:10px;padding:8px 10px}
-.mese-num b{display:block;font-size:20px;color:var(--ink);font-variant-numeric:tabular-nums}
+.mese-num b{display:block;font-size:20px;color:var(--ink)}
 .mese-segna{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;min-height:46px;margin-top:10px;font-weight:600}
 .mese-segna small{font-size:12px;font-weight:400;color:var(--dim);margin-top:1px}
 .mese-vuoto{margin:10px 0 0;font-size:14px;color:var(--dim)}
@@ -573,8 +583,14 @@ display:flex;flex-direction:column;align-items:center;justify-content:center;gap
 .mese .hint{margin:8px 0 0}
 .key i{display:inline-block;width:10px;height:7px;border-radius:3px;margin-right:5px;vertical-align:1px}
 
-.cyb{display:inline-block;width:100%;height:9px;background:var(--s2);border-radius:9px;overflow:hidden;vertical-align:middle}
-.cyb i{display:block;height:100%;background:var(--blue-fill);border-radius:9px}
+.vrow{display:grid;grid-template-columns:minmax(84px,auto) 1fr 30px;align-items:center;gap:10px;padding:5px 0}
+.vlab{font-size:13.5px;color:var(--ink);white-space:nowrap}
+.vbar{height:8px;border-radius:0 4px 4px 0;background:var(--s2);overflow:hidden}
+.vbar i{display:block;height:100%;border-radius:0 4px 4px 0;background:var(--faint);opacity:.55}
+.vrow.giu .vbar i{background:var(--orange);opacity:1}
+.vrow.giu .vlab{font-weight:700}
+.vval{font-size:13.5px;font-weight:600;color:var(--ink);text-align:right}
+.vnota{font-size:13.5px;line-height:1.5;color:var(--ink);margin:10px 0 0}
 
 .card{background:var(--s1);border:1px solid var(--line);border-left-width:3px;border-radius:var(--r);padding:14px 15px;margin-bottom:10px;box-shadow:var(--shadow-card)}
 #benvenutoLink{border-left-color:var(--blue)}
@@ -754,6 +770,7 @@ padding:7px 15px;min-height:38px;border-radius:3px;cursor:pointer}
 .fg-legend{display:flex;gap:14px;margin-top:8px}
 .fg-key{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--faint)}
 .fg-key i{width:8px;height:8px;border-radius:999px;display:inline-block}
+.fg-key i.fg-picco{width:9px;height:9px;background:var(--picco);box-shadow:0 0 0 2px var(--bg),0 0 0 3px var(--line)}
 /* Etichetta di sezione generica — oggi usata per i nomi di settore sopra
    i preset del wizard (Sanità, Industria...). Non più per "Adesso" sopra
    essenziale: quel ruolo lo fa già #ora/.ora-card, il vero eroe della
@@ -1193,7 +1210,7 @@ body:not(.tab-opzioni) #opzioni{display:none}
    un bordo sotto dentro una card più grande. */
 .andamento-hero{background:var(--s1);border:1px solid var(--line);border-radius:20px;
 padding:18px;box-shadow:var(--shadow-card)}
-.andamento-num{font-family:var(--serif);font-size:34px;font-weight:600;line-height:1.15;margin:4px 0 6px}
+.andamento-num{font-family:var(--sans);color:var(--ink);font-size:34px;font-weight:600;line-height:1.15;margin:4px 0 6px}
 /* Badge icona, come le altre card ridisegnate — prima solo testo su
    sfondo colorato, senza l'icona che il mockup usa per l'insight. */
 .andamento-insight{background:var(--blue-soft);border-radius:var(--r);padding:14px;
@@ -5541,17 +5558,23 @@ function renderFormaGiorno(P){
   clo=Math.floor((clo-30)/60)*60; chi=Math.ceil((chi+30)/60)*60;
   const span=Math.max(chi-clo,60), W=335, pos=m=>Math.max(0,Math.min(W,(m-clo)/span*W));
 
-  let segs="";
+  // le ore di riferimento: linee sottili sotto le barre, etichette sotto la striscia
+  let segs="", ore="";
+  for(const m of tacche(clo,chi)){ const x=pos(m), anc = x<16 ? "start" : x>W-16 ? "end" : "middle";
+    segs+='<line x1="'+x.toFixed(1)+'" x2="'+x.toFixed(1)+'" y1="5" y2="25" stroke="var(--line)" stroke-width="1"/>';
+    ore+='<text x="'+x.toFixed(1)+'" y="40" text-anchor="'+anc+'" font-size="10.5" fill="var(--faint)">'+hhmm(m)+'</text>'; }
   const seg=(a,z,fill)=>{ const x0=pos(a),x1=pos(z); if(x1>x0) segs+='<rect x="'+x0.toFixed(1)+'" y="9" width="'+(x1-x0).toFixed(1)+'" height="12" rx="6" fill="'+fill+'"/>'; };
   seg(P.s.onset, P.s.onset+P.s.dur, "var(--blue)");
   for(const n of (P.naps||[])) seg(n.a, n.b, "var(--blue)");
-  if(!P.b.rest) seg(P.b.start, P.b.end, "var(--orange-fill)");
+  if(!P.b.rest) seg(P.b.start, P.b.end, "var(--orange-bar)");
   // Il minimo corporeo (cbt) è il punto di massima sonnolenza: non un
   // segmento a sé altrove nell'app, ma un dato già calcolato dal motore
   // (usato per decidere dove tenere la luce) — qui diventa un piccolo
   // intaglio rosso, ±20 min intorno al minimo, solo se cade nella finestra.
-  const cbtVisibile = isFinite(P.cbt) && P.cbt>=clo-20 && P.cbt<=chi+20;
-  if(cbtVisibile) seg(P.cbt-20, P.cbt+20, "var(--risk)");
+  // È un punto, non una serie: un pallino con l'anello del colore di fondo,
+  // così si distingue per forma oltre che per colore anche sopra il turno.
+  const cbtVisibile = isFinite(P.cbt) && P.cbt>=clo && P.cbt<=chi;
+  const picco = cbtVisibile ? '<circle cx="'+pos(P.cbt).toFixed(1)+'" cy="15" r="5.5" fill="var(--picco)" stroke="var(--bg)" stroke-width="2"/>' : "";
 
   let now="";
   if(nowT!==null && nowT>=clo && nowT<=chi){
@@ -5560,12 +5583,12 @@ function renderFormaGiorno(P){
   }
 
   const legenda=['<span class="fg-key"><i style="background:var(--blue)"></i>Sonno</span>'];
-  if(!P.b.rest) legenda.push('<span class="fg-key"><i style="background:var(--orange-fill)"></i>Turno</span>');
-  if(cbtVisibile) legenda.push('<span class="fg-key"><i style="background:var(--risk)"></i>Picco di sonnolenza</span>');
+  if(!P.b.rest) legenda.push('<span class="fg-key"><i style="background:var(--orange-bar)"></i>Turno</span>');
+  if(cbtVisibile) legenda.push('<span class="fg-key"><i class="fg-picco"></i>Picco di sonnolenza</span>');
 
   el.innerHTML =
-    '<svg viewBox="0 0 '+W+' 30" style="width:100%;height:30px;display:block" role="img" aria-label="Forma della giornata">'+
-      '<rect x="0" y="9" width="'+W+'" height="12" rx="6" fill="var(--s2)"/>'+segs+now+
+    '<svg viewBox="0 0 '+W+' 44" style="width:100%;height:44px;display:block" role="img" aria-label="Forma della giornata, dalle '+hhmm(clo)+' alle '+hhmm(chi)+'">'+
+      '<rect x="0" y="9" width="'+W+'" height="12" rx="6" fill="var(--s2)"/>'+segs+picco+now+ore+
     '</svg>'+
     '<div class="fg-legend">'+legenda.join("")+'</div>';
 }
@@ -6072,6 +6095,11 @@ if($("#meseBox")) $("#meseBox").addEventListener("click", e=>{
   const b=e.target.closest("[data-mese]"); if(!b || b.disabled) return;
   meseOff=Math.max(-12, Math.min(12, meseOff + +b.dataset.mese)); renderMese();
 });
+// Riferimenti orari per le strisce del tempo: le 00, 06, 12 e 18 che cadono
+// nella finestra [clo, chi] (minuti sulla scala del giorno, anche oltre 1440).
+// Senza, una barra di sonno o di turno non si legge: non si sa dove cade la
+// mezzanotte, né se il sonno è di notte o di giorno.
+function tacche(clo, chi){ const out=[]; for(let m=Math.ceil(clo/360)*360; m<=chi; m+=360) out.push(m); return out; }
 function renderStrip(P, f, S){
   // Scala unica per tutte le righe, senza avvolgimenti: così ogni barra
   // resta sul giorno a cui appartiene e non se ne va a finire su quello dopo.
@@ -6097,7 +6125,12 @@ function renderStrip(P, f, S){
   if(oggiInFinestra && isFinite(clo)){ clo=Math.min(clo,oggiM); chi=Math.max(chi,oggiM); }
   clo=Math.floor((clo-30)/60)*60; chi=Math.ceil((chi+30)/60)*60;
   const cspan=Math.max(chi-clo,60), cpx=m=>(m-clo)/cspan*100;
-  let ch="";
+  const tk=tacche(clo,chi);
+  let ch='<div class="caxis" aria-hidden="true"><span class="clab"></span><span class="ccode"></span><span class="crail">'+
+    // proprio sul bordo resta la linea ma non l'etichetta: si accavallerebbe
+    // con la vicina o uscirebbe dal riquadro
+    tk.map(m=>{ const x=cpx(m); return x<7 || x>93 ? '' : '<span style="left:'+x+'%">'+hhmm(m)+'</span>'; }).join("")+'</span></div><div class="crows">'+
+    '<div class="cgrid" aria-hidden="true">'+tk.map(m=>'<i style="left:'+cpx(m)+'%"></i>').join("")+'</div>';
   for(let o=finLo;o<=finHi;o++){
     const d=day(f,o), k=NT.codeAt(o), sd=NT.at(S,o), bb=NT.block(o), seg=[];
     if(!sd||!bb) continue;
@@ -6117,17 +6150,16 @@ function renderStrip(P, f, S){
       (o===0 && cpx(oggiM)>=0 && cpx(oggiM)<=100 ? '<span class="cnow" style="left:'+cpx(oggiM)+'%" title="adesso"></span>' : '')+
       '</span></div>';
   }
-  // Niente più asse orario sotto la striscia (.caxis): la striscia del
-  // ciclo mostra GIORNI, non orari nella giornata — a differenza di
-  // formaGiorno in Oggi, dove le ore sono il punto. Qui ripetevano solo
-  // un'ampiezza approssimativa dell'intera finestra, già leggibile dalle
-  // etichette dei giorni sopra.
+  // Asse orario in alto (00, 06, 12, 18) e le stesse ore come linee sottili
+  // sotto le barre: le barre stanno sull'ora, e senza riferimenti non si
+  // capiva dove cadeva la mezzanotte, né se il sonno fosse di giorno.
+  ch+='</div>';
   // "Il tuo ciclo" torna alle sole funzioni base (sonno + turno): tolti il
   // riposo del partner (vive in "Quando sono disponibile"), l'avviso di
   // rischio (notti di fila, turno rientrante, minimo circadiano: è una riga
   // in Oggi, rischioDelGiorno) e il pallino dell'umore dal diario.
   $("#cyc").innerHTML=ch+
-    '<div class="key">'+'<span><i style="background:var(--blue)"></i>Sonno</span>'+'<span><i style="background:var(--orange-fill)"></i>Turno</span>'+'</div>';
+    '<div class="key">'+'<span><i style="background:var(--blue)"></i>Sonno</span>'+'<span><i style="background:var(--orange-bar)"></i>Turno</span>'+'</div>';
   // L'etichetta del range: stessa finestra usata sopra per costruire la
   // striscia (finestraCiclo()), non un calcolo separato che rischierebbe
   // di disallinearsi da quello che si vede davvero.
@@ -6377,21 +6409,27 @@ function renderAndamenti(){
       if(trend && trend.n>=3){
         const d=trend.debtNow;
         const vals=trend.series.map(s=>s.debt);
-        const W=280,H=44,pad=4;
+        const W=280,H=58,pad=5,Hp=44;   // Hp: il grafico; sotto, le date
         const mn=Math.min(0,...vals), mx=Math.max(0,...vals), span=Math.max(mx-mn,30);
         const xAt=i=> vals.length>1 ? (i/(vals.length-1))*(W-pad*2)+pad : W/2;
-        const yAt=v=> H-pad-((v-mn)/span)*(H-pad*2);
+        const yAt=v=> Hp-pad-((v-mn)/span)*(Hp-pad*2);
         const pts=vals.map((v,i)=>xAt(i).toFixed(1)+","+yAt(v).toFixed(1)).join(" ");
         const lx=xAt(vals.length-1).toFixed(1), ly=yAt(vals[vals.length-1]).toFixed(1);
-        const numColor = d>0 ? "var(--orange)" : "var(--ok)";
+        // Il numero nel colore del testo e senza segno (l'etichetta dice già se
+        // manca o avanza); il colore sta sul punto di oggi. La linea è grigia,
+        // con lo zero (in pari) come riferimento sottile: più su, più sonno da recuperare.
+        const tinta = d>0 ? "var(--orange)" : "var(--ok)", y0=yAt(0).toFixed(1);
         heroHtml='<div class="andamento-hero">'+
           '<span class="hint" style="display:block">'+(d>0?"Sonno che ti manca":"Sonno in più del necessario")+' · ultime '+trend.series.length+' notti</span>'+
-          '<div class="andamento-num" style="color:'+numColor+'">'+(d>0?"-":"+")+hm(Math.abs(d))+'</div>'+
+          '<div class="andamento-num">'+hm(Math.abs(d))+'</div>'+
           '<span class="hint" style="display:block">Dormi in media '+hm(trend.avgActual)+
             (trend.avgPlanned?' contro '+hm(trend.avgPlanned)+' pianificate':'')+'</span>'+
-          '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:'+H+'px;display:block;margin-top:10px" role="img" aria-label="Andamento del debito di sonno">'+
-            '<polyline points="'+pts+'" fill="none" stroke="var(--orange)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>'+
-            '<circle cx="'+lx+'" cy="'+ly+'" r="3.5" fill="var(--orange)"/>'+
+          '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:'+H+'px;display:block;margin-top:10px" role="img" aria-label="Andamento del sonno da recuperare nelle ultime '+trend.series.length+' notti: oggi '+hm(Math.abs(d))+(d>0?' da recuperare':' in più')+'">'+
+            '<line x1="'+pad+'" x2="'+(W-pad)+'" y1="'+y0+'" y2="'+y0+'" stroke="var(--line)" stroke-width="1"/>'+
+            '<polyline points="'+pts+'" fill="none" stroke="var(--faint)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'+
+            '<circle cx="'+lx+'" cy="'+ly+'" r="4.5" fill="'+tinta+'" stroke="var(--s1)" stroke-width="2"/>'+
+            '<text x="'+pad+'" y="'+(H-2)+'" font-size="10" fill="var(--faint)">'+trend.series.length+' notti fa</text>'+
+            '<text x="'+(W-pad)+'" y="'+(H-2)+'" font-size="10" fill="var(--faint)" text-anchor="end">oggi</text>'+
           '</svg>'+
         '</div>';
       }
@@ -6421,16 +6459,25 @@ function renderAndamenti(){
   }catch(e){}
 
   if(cs){
+    // Barre del voto medio (1–5) per giorno del ciclo: una riga per giorno, il
+    // nome per intero, il valore in fondo alla barra. Il colore lo porta solo
+    // il giorno che pesa di più (quello della frase sotto); gli altri restano
+    // neutri, così si vede subito dove guardare.
+    const p=cs.righe.map(r=>r.c).join(""), notte=c=>isNightCode(c);
+    const nome=r=>{ const tot=p.split("").filter(c=>c===r.c).length;
+      let n=1; for(let j=r.i-1;j>=0 && p[j]===r.c;j--) n++;
+      const base = state.shifts[r.c] ? state.shifts[r.c].n : (r.i>0 && notte(p[r.i-1]) ? "Smonto" : "Riposo");
+      return base+(tot>1 && state.shifts[r.c] ? " "+n+"/"+tot : ""); };
+    const segnato = cs.frase ? cs.peggio.i : -1;
     let righe='';
-    cs.righe.forEach(r=>{ const largh = r.avg===null ? 0 : Math.round((r.avg-1)/4*100);
-      righe+='<div class="row"><b style="min-width:34px;font-family:var(--sans)">'+esc(r.c)+'</b>'+
-        '<span style="flex:1"><span class="cyb"><i style="width:'+largh+'%"></i></span></span>'+
-        '<span style="min-width:62px;text-align:right;color:var(--dim)">'+
-        (r.avg===null?"—":r.avg.toFixed(1)+" · "+r.n)+'</span></div>'; });
+    cs.righe.forEach(r=>{ const largh = r.avg===null ? 0 : Math.max(2, Math.round((r.avg-1)/4*100));
+      righe+='<div class="vrow'+(r.i===segnato?" giu":"")+'"><span class="vlab">'+esc(nome(r))+'</span>'+
+        '<span class="vbar"><i style="width:'+largh+'%"></i></span>'+
+        '<span class="vval">'+(r.avg===null?"—":r.avg.toFixed(1).replace(".",","))+'</span></div>'; });
     // La frase resta qui SOLO se non è già stata promossa in cima.
-    if(cs.frase && !(capo && capo.fonte==="cs")) righe+='<div class="row" style="margin-top:6px"><span style="color:var(--amber)">'+cs.frase+'</span></div>';
-    sezioni.push('<div><span class="eyebrow andamento-eyebrow">Il tuo ciclo giorno per giorno, da '+cs.voti+' voti</span>'+
-      '<div class="andamento-sezione"><div class="rows">'+righe+'</div></div></div>');
+    if(cs.frase && !(capo && capo.fonte==="cs")) righe+='<p class="vnota">'+cs.frase.replace(/(\d)\.(\d)/g,"$1,$2")+'</p>';
+    sezioni.push('<div><span class="eyebrow andamento-eyebrow">Come stai, giorno per giorno</span>'+
+      '<div class="andamento-sezione"><p class="hint" style="margin:0 0 6px">Voto medio da 1 a 5, da '+cs.voti+' voti</p>'+righe+'</div></div>');
   }
 
   const rowsHtml = sezioni.join("");
@@ -6568,10 +6615,17 @@ function renderPartner(CARDS){
       '<div class="whero-num">'+esc(giornoCap)+(tutto?"":" "+hhmm(x.a)+" → "+hhmm(x.b))+'</div>'+
       '<div class="whero-sub">'+(tutto?"Libero tutto il giorno":hm(x.b-x.a)+" libere")+'</div>'+
       '</div>';
-    const altre=libere.slice(1,6).map(y=>{
-      const gy=y.d.toLocaleDateString(LINGUA,{weekday:"long",day:"numeric",month:"long"});
+    // Un giorno, una riga: due finestre dello stesso giorno stanno insieme
+    // («07:50–19:30 · 19:50–21:35»), invece di ripetere la data due volte.
+    const perGiorno=[];
+    for(const y of libere.slice(1)){
+      const k=iso(y.d), g=perGiorno.find(z=>z.k===k);
+      if(g) g.f.push(y); else if(perGiorno.length<5) perGiorno.push({k, d:y.d, f:[y]});
+    }
+    const altre=perGiorno.map(g=>{
+      const gy=g.d.toLocaleDateString(LINGUA,{weekday:"long",day:"numeric",month:"long"});
       const gyCap=gy.charAt(0).toUpperCase()+gy.slice(1);
-      return '<div class="row"><b>'+esc(gyCap)+'</b><span>'+(finestraTuttoIlGiorno(y)?"tutto il giorno":hhmm(y.a)+"–"+hhmm(y.b))+'</span></div>';
+      return '<div class="row"><b>'+esc(gyCap)+'</b><span>'+(g.f.some(finestraTuttoIlGiorno)?"tutto il giorno":g.f.map(y=>hhmm(y.a)+"–"+hhmm(y.b)).join(" · "))+'</span></div>';
     }).join("");
     if(altre) h+='<span class="eyebrow" style="display:block;margin:var(--gap-sezione) 0 8px">Prossimi giorni liberi</span><div class="rows">'+altre+'</div>';
   } else {
