@@ -135,6 +135,7 @@ try{
   --orange-bar:#FF6B35;
   --orange:#FF9068; --orange-fill:#FF6B35; --orange-soft:#3A2119;
   --risk:#FF6B5C; --risk-soft:#3A1C18; --risk-line:#7A342C;
+  --picco:#D98CF0;   /* picco di sonnolenza nei grafici: il rosso di --risk qui si confonde con l'arancio del turno */
   --sleep-fill:#2D5A8C; --ok:#5FBF85; --on-warm:#15171A;
   --bg-blur:rgba(20,22,26,0.85);
   --warm-tint:#241C15; --cool-tint:#182029;
@@ -154,6 +155,7 @@ try{
     --blue:#2D5A8C; --blue-fill:#2D5A8C; --blue-soft:#E4EBF3; --blue-lt:#5B87B5; --su-blu:#FFFFFF;
     --orange:#B24B25; --orange-fill:#FF6B35; --orange-bar:#D9541F; --orange-soft:#FCE9E1;
     --risk:#C0392B; --risk-soft:#FBE9E7; --risk-line:#E57368;
+    --picco:#8E2A6B;
     --sleep-fill:#24496F; --ok:#2E7D4F; --on-warm:#15171A;
     --bg-blur:rgba(255,255,255,.82);
     --warm-tint:#FBF1E9; --cool-tint:#EAF0F6;
@@ -176,6 +178,7 @@ try{
   --orange-bar:#FF6B35;
   --orange:#FF9068; --orange-fill:#FF6B35; --orange-soft:#3A2119;
   --risk:#FF6B5C; --risk-soft:#3A1C18; --risk-line:#7A342C;
+  --picco:#D98CF0;   /* picco di sonnolenza nei grafici: il rosso di --risk qui si confonde con l'arancio del turno */
   --sleep-fill:#2D5A8C; --ok:#5FBF85; --on-warm:#15171A;
   --bg-blur:rgba(20,22,26,0.85);
   --warm-tint:#241C15; --cool-tint:#182029;
@@ -188,6 +191,7 @@ try{
   --blue:#2D5A8C; --blue-fill:#2D5A8C; --blue-soft:#E4EBF3; --blue-lt:#5B87B5; --su-blu:#FFFFFF;
   --orange:#B24B25; --orange-fill:#FF6B35; --orange-bar:#D9541F; --orange-soft:#FCE9E1;
   --risk:#C0392B; --risk-soft:#FBE9E7; --risk-line:#E57368;
+  --picco:#8E2A6B;
   --sleep-fill:#24496F; --ok:#2E7D4F; --on-warm:#15171A;
   --bg-blur:rgba(255,255,255,.82);
   --warm-tint:#FBF1E9; --cool-tint:#EAF0F6;
@@ -203,6 +207,13 @@ font-size:16px;line-height:1.6;padding:0 0 64px;-webkit-font-smoothing:antialias
 .eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);font-weight:600}
 header{border:none;padding:0;margin:0}
 /* Barra in alto: titolo della schermata e azioni, fino ai bordi dello schermo. */
+/* Intestazione delle pagine interne: stessa barra dell'app, con lo spazio
+   della barra di stato del telefono (--sat) e lo stesso sfondo sfumato, così
+   il titolo non finisce sotto orario e batteria. Una sola regola per tutte. */
+.pag-testa{display:flex;align-items:center;gap:12px;background:var(--bg-blur);position:sticky;top:0;z-index:20;
+padding:calc(var(--sat) + 10px) 20px 10px;margin:0 -20px var(--gap-sezione)}
+@supports (backdrop-filter:blur(1px)){.pag-testa{backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}}
+.pag-testa .tab-title{margin:0}
 .appbar{display:flex;align-items:center;gap:10px;background:var(--bg-blur);
 padding:calc(var(--sat) + 10px) 20px 10px;margin:0 -20px 4px;position:sticky;top:0;z-index:20}
 @supports (backdrop-filter:blur(1px)){.appbar{backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}}
@@ -383,12 +394,6 @@ padding:16px 18px;margin:2px 0 var(--gap-sezione);box-shadow:0 4px 20px rgba(45,
 .qh-sett{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
 .qh-gg{font:inherit;font-size:13px;font-weight:700;padding:12px 0;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
 .qh-gg.on{background:var(--blue-soft);border-color:var(--blue);color:var(--blue-lt)}
-.qh-calgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:6px}
-.qh-cal{font:inherit;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;border-radius:12px;border:1px solid var(--blue);background:var(--bg);color:var(--ink);cursor:pointer;min-height:56px}
-.qh-cal small{color:var(--dim);font-size:12px}
-.qh-cal b{font-size:13px}
-.qh-cal.riposo{border-color:var(--line)}
-.qh-cal.vuoto{border-style:dashed;border-color:var(--line);color:var(--faint)}
 .attiva-card{border-left-color:var(--blue)}
 .attiva-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
 .attiva-prog{font-size:12px;color:var(--dim);white-space:nowrap}
@@ -497,7 +502,14 @@ border-top:5px solid var(--ink)}
    che la striscia usava per conto suo (--sleep-fill/--orange-bar) —
    quei token restano dove servivano altrove (#band), qui la tinta è la
    stessa che l'utente vede già ovunque per "sonno" e "turno". */
-.cbar{position:absolute;top:0;bottom:0;border-radius:99px;background:var(--blue)}
+.fg.fest::after{content:"";position:absolute;top:3px;right:3px;width:5px;height:5px;border-radius:50%;background:var(--faint)}
+.cbar{position:absolute;top:0;bottom:0;border-radius:99px;background:var(--blue);z-index:2}
+.crows{position:relative}
+.cgrid{position:absolute;top:0;bottom:0;left:86px;right:0;z-index:1;pointer-events:none}
+.cgrid i{position:absolute;top:0;bottom:0;width:1px;background:var(--line);transform:translateX(-.5px)}
+.caxis{display:flex;align-items:flex-end;gap:8px;height:16px;margin-bottom:2px}
+.caxis .crail{background:none;height:16px}
+.caxis .crail span{position:absolute;bottom:0;transform:translateX(-50%);font-size:10.5px;line-height:1;color:var(--faint);white-space:nowrap}
 .cbar.nap{opacity:.5}
 .lnk{background:none;border:none;padding:6px 0;color:var(--blue);font-family:inherit;
 font-size:14px;cursor:pointer;text-decoration:underline;text-underline-offset:3px;min-height:44px}
@@ -517,7 +529,7 @@ html.js-lento .jsoff{display:block}
 .ecc{background:var(--blue-soft);border:1px solid var(--blue-lt);border-radius:var(--r);padding:14px 15px;margin:10px 0 4px}
 .ecc>b{display:block;font-size:16px;margin-bottom:3px}
 .crow.mod .ccode{text-decoration:underline;text-underline-offset:2px}
-.cbar.sh{background:var(--orange-fill)}
+.cbar.sh{background:var(--orange-bar)}
 .key{display:flex;gap:14px;margin-top:8px;font-size:12px;color:var(--faint);flex-wrap:wrap}
 .mese{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;margin-top:12px}
 .mese-testa{display:flex;align-items:center;justify-content:space-between;gap:8px}
@@ -564,7 +576,7 @@ display:flex;flex-direction:column;align-items:center;justify-content:center;gap
 .sg-azioni .btn{flex:1 1 140px;min-height:46px}
 .mese-num{display:grid;grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:8px;margin-top:10px}
 .mese-num div{background:var(--bg);border-radius:10px;padding:8px 10px}
-.mese-num b{display:block;font-size:20px;color:var(--ink);font-variant-numeric:tabular-nums}
+.mese-num b{display:block;font-size:20px;color:var(--ink)}
 .mese-segna{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;min-height:46px;margin-top:10px;font-weight:600}
 .mese-segna small{font-size:12px;font-weight:400;color:var(--dim);margin-top:1px}
 .mese-vuoto{margin:10px 0 0;font-size:14px;color:var(--dim)}
@@ -573,8 +585,14 @@ display:flex;flex-direction:column;align-items:center;justify-content:center;gap
 .mese .hint{margin:8px 0 0}
 .key i{display:inline-block;width:10px;height:7px;border-radius:3px;margin-right:5px;vertical-align:1px}
 
-.cyb{display:inline-block;width:100%;height:9px;background:var(--s2);border-radius:9px;overflow:hidden;vertical-align:middle}
-.cyb i{display:block;height:100%;background:var(--blue-fill);border-radius:9px}
+.vrow{display:grid;grid-template-columns:minmax(84px,auto) 1fr 30px;align-items:center;gap:10px;padding:5px 0}
+.vlab{font-size:13.5px;color:var(--ink);white-space:nowrap}
+.vbar{height:8px;border-radius:0 4px 4px 0;background:var(--s2);overflow:hidden}
+.vbar i{display:block;height:100%;border-radius:0 4px 4px 0;background:var(--faint);opacity:.55}
+.vrow.giu .vbar i{background:var(--orange);opacity:1}
+.vrow.giu .vlab{font-weight:700}
+.vval{font-size:13.5px;font-weight:600;color:var(--ink);text-align:right}
+.vnota{font-size:13.5px;line-height:1.5;color:var(--ink);margin:10px 0 0}
 
 .card{background:var(--s1);border:1px solid var(--line);border-left-width:3px;border-radius:var(--r);padding:14px 15px;margin-bottom:10px;box-shadow:var(--shadow-card)}
 #benvenutoLink{border-left-color:var(--blue)}
@@ -647,6 +665,7 @@ cursor:pointer;font-family:inherit;color:var(--ink)}
    quello che teneva "Condividi il tuo ciclo" visibile su ogni tab. */
 .cycshare-btn{display:flex}
 .share3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.share3.share2{grid-template-columns:repeat(2,minmax(0,1fr))}
 .share3-az{display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center;padding:14px 6px 12px;min-height:118px;
 background:var(--s1);border:1px solid var(--line);border-radius:var(--r);color:var(--ink);font:inherit;cursor:pointer}
 .share3-az svg{width:22px;height:22px;color:var(--blue)}
@@ -754,6 +773,7 @@ padding:7px 15px;min-height:38px;border-radius:3px;cursor:pointer}
 .fg-legend{display:flex;gap:14px;margin-top:8px}
 .fg-key{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--faint)}
 .fg-key i{width:8px;height:8px;border-radius:999px;display:inline-block}
+.fg-key i.fg-picco{width:9px;height:9px;background:var(--picco);box-shadow:0 0 0 2px var(--bg),0 0 0 3px var(--line)}
 /* Etichetta di sezione generica — oggi usata per i nomi di settore sopra
    i preset del wizard (Sanità, Industria...). Non più per "Adesso" sopra
    essenziale: quel ruolo lo fa già #ora/.ora-card, il vero eroe della
@@ -766,47 +786,61 @@ font-weight:600;padding:16px 0 6px;margin-top:2px;border-top:1px solid var(--lin
    e icona in badge — stessa grammatica visiva del mockup approvato
    (icona+titolo a sinistra, orario a destra), non più l'elenco diviso da
    bordi con l'orario enorme al centro. */
-.essrow{display:flex;align-items:center;gap:12px;background:var(--s1);border:1px solid var(--line);
-border-left:3px solid var(--line);border-radius:var(--r);padding:13px 14px;margin-bottom:8px;
-box-shadow:var(--shadow-card);cursor:pointer;transition:transform .12s cubic-bezier(0.2,0.8,0.4,1),background .15s ease,border-color .15s ease}
-.essrow:active{transform:scale(.985)}
-.essrow.t-orange{border-left-color:var(--orange-fill)}
-.essrow.t-blue{border-left-color:var(--blue)}
-.essrow.warn{background:var(--risk-soft);border-left-color:var(--risk)}
-.essrow .eic{flex:none;width:38px;height:38px;border-radius:999px;background:var(--blue-soft);
-color:var(--blue);display:flex;align-items:center;justify-content:center}
-.essrow .eic .ei{display:block;width:19px;height:19px}
-.essrow.t-orange .eic{background:var(--orange-soft);color:var(--orange)}
-.essrow.warn .eic{background:var(--bg);color:var(--risk)}
-.essrow .el{display:block;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);line-height:1.3}
-.essrow{flex-wrap:wrap}
-.essrow .ev{flex:1 1 7.5em;min-width:0}
-/* l'orario va a capo (a destra) se non c'è spazio, invece di schiacciare il titolo */
-.essrow .en{font-size:14px;font-weight:600;line-height:1.3;font-variant-numeric:tabular-nums;
-flex:0 1 auto;margin-left:auto;text-align:right;color:var(--ink)}
-.essrow .en b{font-weight:700}
-/* riga espandibile: unica affordance in Oggi (chevron a destra, riga toccabile) */
-.erow{margin-bottom:8px}
-.erow>summary{list-style:none;cursor:pointer;display:block}
+/* Il piano della giornata come timeline: l'ora a sinistra (è il dato, e per
+   scorrere un programma si guarda l'ora), un nodo su una linea sottile, poi
+   titolo e riga di dettaglio. Niente schede, ombre o strisce colorate: il
+   colore c'è solo dove ha un significato (blu = sonno, arancio = turno,
+   rosso = rischio), come nei grafici. Le voci già passate sbiadiscono. */
+.ess{--tcol:50px;--nodo:28px}
+.tl{position:relative}
+.essrow{display:grid;grid-template-columns:var(--tcol) var(--nodo) minmax(0,1fr) auto;column-gap:10px;align-items:start;
+padding:9px 0;margin:0;cursor:pointer;background:none;border:0;border-radius:0;box-shadow:none;position:relative}
+.essrow::before{content:"";position:absolute;left:calc(var(--tcol) + 10px + var(--nodo)/2 - .5px);top:0;bottom:0;width:1.5px;background:var(--line-forte,var(--line))}
+.tl.tl-first .essrow::before{top:calc(9px + var(--nodo)/2)}
+.tl.tl-last .essrow::before{bottom:calc(100% - 9px - var(--nodo)/2)}
+.tl.tl-first.tl-last .essrow::before{display:none}
+.essrow:active .el{opacity:.7}
+.essrow .en{font-size:15px;font-weight:600;letter-spacing:0;line-height:var(--nodo);font-variant-numeric:tabular-nums;color:var(--ink);text-align:right;white-space:nowrap;position:relative}
+.essrow .en .dwhen{position:absolute;right:0;top:calc(var(--nodo) - 1px);line-height:1.2;font-size:10.5px;font-weight:600;letter-spacing:0;color:var(--faint);margin:0;font-variant-numeric:normal}
+.essrow .enodo{width:var(--nodo);height:var(--nodo);border-radius:50%;background:var(--bg);border:1.5px solid var(--faint);color:var(--dim);
+display:flex;align-items:center;justify-content:center;position:relative;z-index:1}
+.essrow .enodo .ei{display:block;width:15px;height:15px}
+.essrow.tp-sonno .enodo{border-color:var(--blue);color:var(--blue)}
+.essrow.tp-turno .enodo{border-color:var(--orange-bar);color:var(--orange)}
+.essrow.warn .enodo,.essrow.tp-rischio .enodo{border-color:var(--risk);color:var(--risk)}
+.essrow.warn .en,.essrow.tp-rischio .en{color:var(--risk)}
+.essrow .ev{min-width:0;padding-top:1px}
+.essrow .el{display:block;font-size:16px;font-weight:700;line-height:1.3;color:var(--ink);letter-spacing:0;text-transform:none}
+.essrow .es{font-size:13px;font-weight:400;color:var(--dim);margin-top:2px;line-height:1.4;text-transform:none;letter-spacing:normal}
+.essrow .es b{font-weight:700;color:var(--dim)}
+.essrow .echev{line-height:var(--nodo)}
+/* passato: sbiadito, ma leggibile */
+.tl.past .essrow .en,.tl.past .essrow .el,.tl.past .essrow .es{color:var(--faint)}
+.tl.past .essrow .enodo{border-color:var(--line);color:var(--faint)}
+.tl.ora .essrow .enodo{background:var(--blue-soft)}
+.tl.ora .essrow.tp-turno .enodo{background:var(--orange-soft)}
+/* il segno «ora» fra passato e futuro */
+.tl-adesso{display:grid;grid-template-columns:var(--tcol) var(--nodo) minmax(0,1fr);column-gap:10px;align-items:center;height:22px;position:relative}
+.tl-adesso::before{content:"";position:absolute;left:calc(var(--tcol) + 10px + var(--nodo)/2 - .5px);top:0;bottom:0;width:1px;background:var(--line)}
+.tl-adesso .en{font-size:12.5px;font-weight:700;color:var(--blue);text-align:right;font-variant-numeric:tabular-nums}
+.tl-adesso i{justify-self:center;width:9px;height:9px;border-radius:50%;background:var(--blue);position:relative;z-index:1;box-shadow:0 0 0 3px var(--bg)}
+.tl-adesso::after{content:"";position:absolute;left:calc(var(--tcol) + 10px + var(--nodo));right:0;top:50%;height:1px;background:var(--blue);opacity:.45}
+.tl-extra{margin:2px 0 8px}
+/* riga espandibile: chevron a destra, riga toccabile */
+.erow{margin:0}
+.erow>summary{list-style:none;cursor:pointer;display:block;padding:0}
 .erow>summary::-webkit-details-marker{display:none}
-.erow>summary .essrow{margin-bottom:0}
 .echev{flex:none;align-self:center;color:var(--faint);font-size:19px;line-height:1;
 transition:transform .15s ease;padding-left:2px}
 .erow>summary .echev{transform:rotate(90deg)}
 .erow[open]>summary .echev{transform:rotate(-90deg)}
-.erow[open]>summary .essrow{border-color:var(--blue-lt)}
 .erow[open]>summary .el{color:var(--blue)}
-.ed{padding:10px 0 16px 50px}
+.ed{padding:2px 0 16px calc(var(--tcol) + 10px + var(--nodo) + 10px)}
 .ed-sub{font-size:14px;color:var(--dim);line-height:1.55;margin:0 0 9px}
 .ed .why{font-size:14px;color:var(--dim);line-height:1.6;border-left:2px solid var(--line);padding-left:11px;margin-top:9px}
 .ed .why cite{display:block;margin-top:6px;font-size:12px;color:var(--faint);font-style:normal}
 .ed .rows{margin-top:9px}
-@media (max-width:430px){.ed{padding-left:0}}
-.dwhen{display:block;font-size:12.5px;font-weight:600;letter-spacing:.03em;color:var(--dim);
-text-transform:none;margin-bottom:1px;font-variant-numeric:normal}
-.essrow .es{font-size:12.5px;color:var(--dim);margin-top:2px;line-height:1.4;text-transform:none;letter-spacing:normal}
-.essrow .es b{font-weight:700;color:var(--dim)}
-.essrow.warn .en{color:var(--risk)}
+@media (max-width:430px){.ed{padding-left:calc(var(--tcol) + 10px)}}
 /* icona di stato nel blocco Ora: badge a cerchio, stesso motivo ripreso
    in Turni e Più — prima l'icona era "nuda", senza nulla dietro. */
 .ora-h{display:flex;align-items:center;gap:14px}
@@ -839,6 +873,7 @@ justify-content:center;flex:none;width:44px;height:44px;border-radius:999px}
 .drem-done,.dq-riga{line-height:1.5}
 .drem-done .lnk,.dq-riga .lnk{min-height:0;padding:10px 6px;margin:-10px 0;vertical-align:baseline}
 .dopo-notte{margin:-2px 0 10px;padding:0 2px}
+.dn-vale{font-size:12px;color:var(--faint);margin:6px 2px 0}
 .dn-lab{display:block;font-size:12px;color:var(--dim);margin:0 0 6px}
 .dn-scelta{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--s2);border:1px solid var(--line);border-radius:var(--r);padding:2px}
 .dn-scelta .vb{display:flex;flex-direction:column;align-items:center;gap:1px;padding:7px 8px;min-height:48px}
@@ -945,6 +980,8 @@ padding:16px 18px;margin:2px 0 var(--gap-sezione);box-shadow:var(--shadow-btn)}
 .ora-card .eyebrow{color:var(--blue)}
 .ora-card b{display:block;font-family:var(--serif);font-size:20px;font-weight:600;line-height:1.25;margin-top:3px}
 .ora-sub{display:block;font-size:14px;color:var(--dim);line-height:1.5;margin-top:10px;margin-left:58px}
+.ora-poi{display:block;font-size:13px;font-weight:600;color:var(--blue);line-height:1.4;margin-top:8px;margin-left:58px}
+.ora-card.risk .ora-poi{color:var(--dim)}
 .ora-card.risk{background:var(--risk-soft);border-color:var(--risk-line);box-shadow:var(--shadow-card)}
 .ora-card.risk .eyebrow{color:var(--risk)}
 .ora-card.risk b{color:var(--risk)}
@@ -1046,7 +1083,7 @@ body:not(.tab-turni) .solo-turni,body:not(.tab-oggi) .solo-oggi{display:none}
 .ferie-testa span{font-size:13.5px;color:var(--dim)}
 .ferie-quando{font-size:14px;color:var(--ink);margin:4px 0 10px}
 .ferie-giorni{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px}
-.fg{display:flex;flex-direction:column;align-items:center;justify-content:center;width:30px;height:50px;border-radius:7px;background:var(--s2);color:var(--dim);font-size:11px;line-height:1.15}
+.fg{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;width:30px;height:50px;border-radius:7px;background:var(--s2);color:var(--dim);font-size:11px;line-height:1.15}
 .fg b{font-size:12.5px;color:var(--ink)}
 .fg.ferie{background:var(--blue);color:var(--su-blu)}
 .fg.ferie b{color:var(--su-blu)}
@@ -1138,10 +1175,12 @@ text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:600;color:v
 .opz-info .hint a{display:inline-block;padding:6px 0}
 /* Link in fondo: griglia a 2 colonne, un link per cella alta 44px, senza
    puntini né sottolineature che si accavallano quando vanno a capo. */
-.opz-info .foot-links{display:grid;grid-template-columns:1fr 1fr;column-gap:16px;margin:10px 0 0;font-size:14px}
-.opz-info .foot-links>span{display:contents}
-.opz-info .foot-links>span[hidden]{display:none}
-.opz-info .foot-links a{display:flex;align-items:center;min-height:44px;padding:0;margin:0;border-bottom:0;color:var(--blue);text-decoration:none;font-weight:600}
+.opz-gruppo.az>.tool::after{transform:none}
+.opz-gruppo.az>a.tool{text-decoration:none;color:inherit}
+.opz-gruppo.az>a.tool::after{content:"↗";font-size:15px}
+.opz-gruppo.az>.tool[hidden]{display:none}
+.foot-legal{display:flex;flex-wrap:wrap;gap:4px 16px;justify-content:center;margin:16px 0 0;font-size:13px}
+.foot-legal a{color:var(--dim);text-decoration:none;border-bottom:0;padding:8px 2px}
 .riga-sw,.q>label.riga-sw{display:flex;margin-bottom:4px;align-items:center;gap:12px;justify-content:space-between;font-size:15px;font-weight:600;color:var(--ink);cursor:pointer;min-height:44px}
 /* Strumenti di Più: griglia a 2 colonne invece di righe impilate — meno
    scroll, ma il testo di ogni card resta per intero (solo più compatto):
@@ -1181,8 +1220,6 @@ body:not(.tab-opzioni) #opzioni{display:none}
 /* La freccia per uscire resta a portata di dito mentre si scorre: la pagina
    è lunga, e sul web su iPhone non c'è un tasto indietro. Sotto la barra in
    alto (anche lei fissa): --appbar-h la misura lo script. */
-#opzioni .opz-testa{position:sticky;top:var(--appbar-h,64px);z-index:19;background:var(--bg-blur);padding:6px 0;box-shadow:-20px 0 0 var(--bg-blur),20px 0 0 var(--bg-blur);clip-path:inset(0 -20px)}
-@supports (backdrop-filter:blur(1px)){#opzioni .opz-testa{backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}}
 .opz-info{margin-top:0}
 .opz-info a{color:var(--blue);text-decoration:none;border-bottom:1px solid var(--blue-lt)}
 /* Andamenti, come nel mockup: sezioni separate (ognuna la propria card),
@@ -1193,7 +1230,7 @@ body:not(.tab-opzioni) #opzioni{display:none}
    un bordo sotto dentro una card più grande. */
 .andamento-hero{background:var(--s1);border:1px solid var(--line);border-radius:20px;
 padding:18px;box-shadow:var(--shadow-card)}
-.andamento-num{font-family:var(--serif);font-size:34px;font-weight:600;line-height:1.15;margin:4px 0 6px}
+.andamento-num{font-family:var(--sans);color:var(--ink);font-size:34px;font-weight:600;line-height:1.15;margin:4px 0 6px}
 /* Badge icona, come le altre card ridisegnate — prima solo testo su
    sfondo colorato, senza l'icona che il mockup usa per l'insight. */
 .andamento-insight{background:var(--blue-soft);border-radius:var(--r);padding:14px;
@@ -1224,6 +1261,7 @@ padding:6px 16px;box-shadow:var(--shadow-card)}
 @media (max-width:430px){
 .wrap{padding:0 16px}
 .appbar{margin:0 -16px;padding-left:16px;padding-right:16px}
+.pag-testa{margin-left:-16px;margin-right:-16px;padding-left:16px;padding-right:16px}
 .val{font-size:19px}.row b{min-width:88px}
 .cap p{display:none}.clab{width:52px;min-width:52px;white-space:nowrap}
 .sh,.shhead{grid-template-columns:34px 1fr 78px 78px 28px}
@@ -1284,6 +1322,22 @@ header b{font-size:23px}
   .pc-piede p{font-size:8pt;color:#333;margin:0;line-height:1.35}
   .pc-qr svg{width:26mm;height:26mm;display:block}
 }
+
+/* ───────── SUPERFICI ─────────
+   Sei tipi, e basta (elenco completo in docs/stile.md):
+   1 Pagina    sfondo --bg
+   2 Gruppo    --s1 + bordo --line + raggio --r: elenchi, calcoli, editor
+   3 Eroe      --blue-soft + bordo --blue-lt, raggio 20: SOLO «Adesso» e
+               «prossima finestra libera», uno per schermata
+   4 Invito    gruppo con barra a sinistra (blu): una proposta da accettare
+   5 Avviso    --risk-soft + bordo --risk-line: solo rischio
+   6 Nota      testo --dim senza riquadro
+   L'azzurro pieno non serve ai calcoli e agli editor: prima lo avevano
+   .ecc (cambio turno, persone, editor), la card Lucidità e le note
+   informative, e si confondevano con «Adesso». */
+.ecc,.lucidita-card,.status.info{background:var(--s1);border-color:var(--line)}
+.status.info{border-left-color:var(--blue)}
+.qh-card{border-color:var(--line)}
 </style>
 </head>
 <body>
@@ -1500,7 +1554,7 @@ header b{font-size:23px}
 <!-- Il giorno in un messaggio per chi sta a casa: quando dormi e quando ci sei.
      Sotto la lista della giornata, perché ne è il riassunto. -->
 <button type="button" class="acasa solo-oggi" id="aCasa" hidden>
-  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 3L10 14M21 3l-7 18-4-7-7-4z"/></svg>
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
   <span><b id="aCasaTit">Condividi i tuoi orari di oggi</b><small>Quando dormi e quando sei libero, in un messaggio.</small></span>
 </button>
 <!-- «Lo sapevi?»: una funzione mai usata, una volta sola, in fondo. -->
@@ -1533,11 +1587,11 @@ header b{font-size:23px}
 <!-- I turni del mese (un tocco per giorno, o dal foglio turni): si apre
      dal riquadro del mese, qui sopra. -->
 <div id="segnaPagina" class="solo-turni" hidden>
-  <div style="display:flex;align-items:center;gap:12px;margin:2px 0 var(--gap-sezione)">
+  <div class="pag-testa">
     <button type="button" class="themebtn" id="chiudiSegna" aria-label="Torna a Turni">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
     </button>
-    <h1 class="tab-title" style="margin:0">I turni del mese</h1>
+    <h1 class="tab-title">I turni del mese</h1>
   </div>
   <div id="segnaOut"></div>
   <section class="sg-importa" aria-labelledby="sgImpTit">
@@ -1556,9 +1610,9 @@ header b{font-size:23px}
 <!-- «I tuoi turni»: tutta la turnazione in un posto (da Turni › Modifica,
      Impostazioni, lista di attivazione). ← torna da dove si è partiti. -->
 <div id="tuoiTurniPagina" class="solo-turni" hidden>
-  <div style="display:flex;align-items:center;gap:12px;margin:2px 0 var(--gap-sezione)">
+  <div class="pag-testa">
     <button type="button" class="themebtn" id="chiudiTuoiTurni" aria-label="Indietro"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
-    <h1 class="tab-title" style="margin:0">I tuoi turni</h1>
+    <h1 class="tab-title">I tuoi turni</h1>
   </div>
   <div class="tt-riepilogo" id="ttRiepilogo"></div>
   <div id="ttMese"></div>
@@ -1598,11 +1652,11 @@ header b{font-size:23px}
 </button>
 
 <div id="vederciPagina" hidden>
-  <div style="display:flex;align-items:center;gap:12px;margin:2px 0 var(--gap-sezione)">
+  <div class="pag-testa">
     <button type="button" class="themebtn" id="chiudiVederci" aria-label="Torna a Turni">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
     </button>
-    <h1 class="tab-title" style="margin:0">Quando ho tempo libero</h1>
+    <h1 class="tab-title">Quando ho tempo libero</h1>
   </div>
   <div id="partner"></div>
   <!-- Gestione delle persone tracciate: viveva in Opzioni ("Persone"),
@@ -1692,11 +1746,11 @@ header b{font-size:23px}
 </button>
 
 <div id="andamentiPagina" hidden>
-  <div style="display:flex;align-items:center;gap:12px;margin:2px 0 var(--gap-sezione)">
+  <div class="pag-testa">
     <button type="button" class="themebtn" id="chiudiAndamenti" aria-label="Torna a Turni">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
     </button>
-    <h1 class="tab-title" style="margin:0">Sonno e carico</h1>
+    <h1 class="tab-title">Sonno e carico</h1>
   </div>
   <div id="andamenti"></div>
 </div>
@@ -1725,11 +1779,11 @@ header b{font-size:23px}
 <!-- Come "Quando ho tempo libero" e "Come sto dormendo": una pagina a sé con
      la freccia indietro, non un pannello che si apre sotto. -->
 <div id="scambioPagina" hidden>
-  <div style="display:flex;align-items:center;gap:12px;margin:2px 0 var(--gap-sezione)">
+  <div class="pag-testa">
     <button type="button" class="themebtn" id="chiudiScambio" aria-label="Torna a Turni">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
     </button>
-    <h1 class="tab-title" style="margin:0">Cambio turno: mi conviene?</h1>
+    <h1 class="tab-title">Cambio turno: mi conviene?</h1>
   </div>
 <div class="ecc" id="scambioBox">
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
@@ -1754,11 +1808,11 @@ header b{font-size:23px}
 <!-- Ferie: dove metterle perché si attacchino ai riposi del ciclo. Accanto
      allo scambio: sono i due strumenti per decisioni occasionali sui turni. -->
 <div id="feriePagina" class="solo-turni" hidden>
-  <div style="display:flex;align-items:center;gap:12px;margin:2px 0 var(--gap-sezione)">
+  <div class="pag-testa">
     <button type="button" class="themebtn" id="chiudiFerie" aria-label="Torna a Turni">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
     </button>
-    <h1 class="tab-title" style="margin:0">Quando prendere le ferie</h1>
+    <h1 class="tab-title">Quando prendere le ferie</h1>
   </div>
   <div class="ferie-q">
     <div class="ferie-riga"><span id="ferieNLab">Giorni di ferie</span>
@@ -1768,6 +1822,8 @@ header b{font-size:23px}
         <button type="button" data-ferie-n="1" aria-label="Un giorno in più">+</button>
       </span></div>
     <div class="ferie-riga"><label for="ferieMese">Quando</label><select id="ferieMese"></select></div>
+    <div class="ferie-riga"><label for="feriePrefer">Preferisco</label><select id="feriePrefer"><option value="giorni">Più giorni a casa</option><option value="weekend">Più fine settimana</option></select></div>
+    <div class="ferie-riga" id="ferieConRiga" hidden><label for="ferieCon">A casa con</label><select id="ferieCon"></select></div>
     <label class="riga-sw" for="ferieSmonto"><span>Conta lo smonto come giorno a casa</span><span class="switch"><input type="checkbox" id="ferieSmonto" checked><span class="slider"></span></span></label>
   </div>
   <div id="ferieOut" aria-live="polite"></div>
@@ -1792,7 +1848,7 @@ header b{font-size:23px}
   <span class="eyebrow">Condividi i tuoi turni</span>
   <div class="share3">
     <button type="button" id="doCycShare" class="share3-az"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg><b>Invita un collega</b><span>vede i tuoi turni accanto ai suoi</span></button>
-    <button type="button" id="doShareWhatsApp" class="share3-az"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.41a8.204 8.204 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.19 8.19 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24m4.52 11.66c-.19.53-1.06 1.04-1.47 1.08-.38.04-.88.06-2.84-.73-2.34-.95-3.84-3.34-3.96-3.49-.11-.16-.96-1.27-.96-2.42 0-1.15.6-1.72.82-1.95.21-.23.46-.29.62-.29.15 0 .31 0 .44.01.14.01.33-.05.51.39.19.46.66 1.6.72 1.72.06.12.1.26.02.42-.08.16-.12.26-.24.4-.12.14-.26.31-.37.42-.12.12-.24.25-.1.5.14.24.62 1.03 1.34 1.67.92.82 1.7 1.08 1.94 1.2.24.12.39.1.53-.06.15-.17.62-.72.79-.97.16-.25.33-.21.55-.13.22.08 1.41.67 1.65.79.24.12.4.18.46.28.06.11.06.63-.13 1.16"/></svg><b>Manda i turni</b><span>un messaggio con i prossimi giorni</span></button>
+    <button type="button" id="doShareWhatsApp" class="share3-az"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg><b>Manda i turni</b><span>un messaggio con i prossimi giorni</span></button>
     <button type="button" id="doPrint" class="share3-az"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8V3h12v5"/><rect x="4" y="8" width="16" height="8" rx="1.5"/><path d="M8 13h8v7H8z"/></svg><b>Stampa o PDF</b><span>il calendario da appendere</span></button>
   </div>
   <button type="button" class="lnk" id="doCycQR" style="align-self:center;font-size:13px;padding:8px 4px">Mostra il QR da inquadrare</button>
@@ -1802,11 +1858,11 @@ header b{font-size:23px}
 <div id="luciditaGiornoWrap"></div>
 
 <div id="opzioni">
-  <div class="opz-testa" style="display:flex;align-items:center;gap:12px;margin:2px 0 var(--gap-sezione)">
+  <div class="pag-testa">
     <button type="button" class="themebtn" id="chiudiOpzioni" aria-label="Torna indietro">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
     </button>
-    <h1 class="tab-title" style="margin:0">Impostazioni</h1>
+    <h1 class="tab-title">Impostazioni</h1>
   </div>
   <!-- Opzioni in tre blocchi (prima erano cinque, con promemoria e
        calendario ripetuti in due posti e "Turni" in due righe che aprivano
@@ -1881,16 +1937,23 @@ header b{font-size:23px}
       <span class="switch"><input type="checkbox" id="optStats" aria-label="Statistiche d'uso anonime" aria-describedby="optStatsHint"><span class="slider"></span></span>
     </label>
     <p class="hint" id="optStatsHint" style="margin:2px 0 0">Ci aiutano a migliorare l'app: contano in forma anonima cosa si usa, per esempio quanti accendono i promemoria o su che tipo di telefono. Niente turni, orari o diario, e niente che dica chi sei. Spente finché non le accendi.</p>
-    <p style="margin:10px 0 0;display:flex;flex-direction:column;align-items:flex-start"><button class="lnk" id="doShare" style="padding:10px 0">Consiglia Notturnisti</button><button class="lnk" id="doFeed" style="padding:10px 0">Segnala cosa non torna</button></p>
-    <nav class="foot-links" aria-label="Informazioni">
-      <a href="https://notturnisti.club/planner" target="_blank" rel="noopener">Come si usa</a>
-      <a href="https://notturnisti.club/chi-siamo/" target="_blank" rel="noopener">Chi siamo</a>
+    <span class="eyebrow opz-eb">Aiutaci</span>
+    <div class="opz-gruppo az">
+      <button class="tool tool-1line" id="doShare" type="button"><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></span><span class="tool-tx"><b>Consiglia Notturnisti</b></span></button>
+      <a class="tool tool-1line" id="doReviewLnk" href="#" target="_blank" rel="noopener" hidden><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2"/></svg></span><span class="tool-tx"><b>Valuta su Google Play</b></span></a>
+      <a class="tool tool-1line" id="doDonateLnk" href="#" target="_blank" rel="noopener" hidden><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.7A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11z"/></svg></span><span class="tool-tx"><b>Sostieni il progetto</b></span></a>
+      <button class="tool tool-1line" id="doFeed" type="button"><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 22V4M4 4h13l-2 4 2 4H4"/></svg></span><span class="tool-tx"><b>Segnala cosa non torna</b></span></button>
+    </div>
+    <span class="eyebrow opz-eb">Scopri</span>
+    <div class="opz-gruppo az">
+      <a class="tool tool-1line" href="https://notturnisti.club/planner" target="_blank" rel="noopener"><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5zM4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg></span><span class="tool-tx"><b>Come si usa</b></span></a>
+      <a class="tool tool-1line" href="https://notturnisti.club/chi-siamo/" target="_blank" rel="noopener"><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6M16 4.8a3.5 3.5 0 0 1 0 6.4M18 14c2.2.6 3.5 2.3 3.5 6"/></svg></span><span class="tool-tx"><b>Chi siamo</b></span></a>
+      <a class="tool tool-1line" href="https://notturnisti.club" target="_blank" rel="noopener"><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></span><span class="tool-tx"><b>notturnisti.club</b></span></a>
+    </div>
+    <nav class="foot-legal" aria-label="Note legali">
       <a href="https://app.notturnisti.club/privacy/" target="_blank" rel="noopener">Privacy</a>
       <a href="https://app.notturnisti.club/termini/" target="_blank" rel="noopener">Termini d'uso</a>
       <a href="https://app.notturnisti.club/licenze/" target="_blank" rel="noopener">Licenze</a>
-      <a href="https://notturnisti.club" target="_blank" rel="noopener">notturnisti.club</a>
-      <span id="doDonateLnkWrap" hidden><a id="doDonateLnk" href="#" target="_blank" rel="noopener">Sostieni il progetto</a></span>
-      <span id="doReviewLnkWrap" hidden><a id="doReviewLnk" href="#" target="_blank" rel="noopener">Valuta su Google Play</a></span>
     </nav>
     <p class="hint" style="margin:14px 0 0;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center">
       <span id="versioneApp">Versione web</span>
@@ -4511,6 +4574,8 @@ function renderDemoEsempio(){
       '</div>'+
       '<p class="hint" style="margin:-4px 0 10px;text-align:center;font-size:12px">L\'orario preciso lo scegli al passo dopo.</p>'+
       '<button type="button" class="lnk" data-subflow="schema" style="display:block;width:100%;text-align:center;font-size:13.5px;padding:6px 0">Conosco già il mio schema di turni →</button>'+
+      // Chi ha già i turni in un calendario o in un file fa prima importandoli.
+      '<button type="button" class="lnk" data-importa-primo style="display:block;width:100%;text-align:center;font-size:13.5px;padding:6px 0">Ho già i turni in un calendario o in un file →</button>'+
       // Chi arriva dalla vecchia app (TWA): un link, non più un dialogo a tutto
       // schermo davanti a ogni nuovo utente (migrate.js decide se proporlo).
       (window.NTMigrate && window.NTMigrate.proponibile && window.NTMigrate.proponibile()
@@ -4534,7 +4599,9 @@ function renderDemoEsempio(){
     el.innerHTML =
       chiudi+
       // Chi ha già un ciclo lo sta cambiando; chi ha segnato solo oggi deve ancora dire il resto.
-      (state.turniConfigurati && !(state.repeat===false && !Object.keys(state.ecc||{}).some(k=>k>isoOggi()))
+      // «Cambia schema» da «I tuoi turni» è sempre «Come sono i tuoi turni?»:
+      // «E nei prossimi giorni?» è per chi ha segnato solo oggi.
+      (cambiaSchema || state.turniConfigurati && !(state.repeat===false && !Object.keys(state.ecc||{}).some(k=>k>isoOggi()))
         ? '<h2 class="qh-h">Come sono i tuoi turni?</h2><p class="qh-sub">Scegli il caso tuo e rifai il ciclo in pochi passi.</p>'
         : '<h2 class="qh-h">E nei prossimi giorni?</h2><p class="qh-sub">Scegli quello che ti somiglia di più: cambi idea quando vuoi.</p>')+
       '<div class="qh-flow-options">'+
@@ -4648,6 +4715,11 @@ function apriFlussoProssimi(sub){
 }
 
 if($("#demoEsempio")) $("#demoEsempio").addEventListener("click", e=>{
+  if(e.target.closest("[data-importa-primo]")){
+    passo("import_subito"); vaiATurniVariabili();
+    setTimeout(()=>{ const x=document.querySelector(".sg-importa"); if(x) try{ x.scrollIntoView({block:"start"}); }catch(err){} }, 350);
+    return;
+  }
   const subBtn = e.target.closest("[data-subflow]");
   if(subBtn){
     // "E nei prossimi giorni?": quale delle tre situazioni sceglie la gente.
@@ -5541,17 +5613,23 @@ function renderFormaGiorno(P){
   clo=Math.floor((clo-30)/60)*60; chi=Math.ceil((chi+30)/60)*60;
   const span=Math.max(chi-clo,60), W=335, pos=m=>Math.max(0,Math.min(W,(m-clo)/span*W));
 
-  let segs="";
+  // le ore di riferimento: linee sottili sotto le barre, etichette sotto la striscia
+  let segs="", ore="";
+  for(const m of tacche(clo,chi)){ const x=pos(m), anc = x<16 ? "start" : x>W-16 ? "end" : "middle";
+    segs+='<line x1="'+x.toFixed(1)+'" x2="'+x.toFixed(1)+'" y1="5" y2="25" stroke="var(--line)" stroke-width="1"/>';
+    ore+='<text x="'+x.toFixed(1)+'" y="40" text-anchor="'+anc+'" font-size="10.5" fill="var(--faint)">'+hhmm(m)+'</text>'; }
   const seg=(a,z,fill)=>{ const x0=pos(a),x1=pos(z); if(x1>x0) segs+='<rect x="'+x0.toFixed(1)+'" y="9" width="'+(x1-x0).toFixed(1)+'" height="12" rx="6" fill="'+fill+'"/>'; };
   seg(P.s.onset, P.s.onset+P.s.dur, "var(--blue)");
   for(const n of (P.naps||[])) seg(n.a, n.b, "var(--blue)");
-  if(!P.b.rest) seg(P.b.start, P.b.end, "var(--orange-fill)");
+  if(!P.b.rest) seg(P.b.start, P.b.end, "var(--orange-bar)");
   // Il minimo corporeo (cbt) è il punto di massima sonnolenza: non un
   // segmento a sé altrove nell'app, ma un dato già calcolato dal motore
   // (usato per decidere dove tenere la luce) — qui diventa un piccolo
   // intaglio rosso, ±20 min intorno al minimo, solo se cade nella finestra.
-  const cbtVisibile = isFinite(P.cbt) && P.cbt>=clo-20 && P.cbt<=chi+20;
-  if(cbtVisibile) seg(P.cbt-20, P.cbt+20, "var(--risk)");
+  // È un punto, non una serie: un pallino con l'anello del colore di fondo,
+  // così si distingue per forma oltre che per colore anche sopra il turno.
+  const cbtVisibile = isFinite(P.cbt) && P.cbt>=clo && P.cbt<=chi;
+  const picco = cbtVisibile ? '<circle cx="'+pos(P.cbt).toFixed(1)+'" cy="15" r="5.5" fill="var(--picco)" stroke="var(--bg)" stroke-width="2"/>' : "";
 
   let now="";
   if(nowT!==null && nowT>=clo && nowT<=chi){
@@ -5560,12 +5638,12 @@ function renderFormaGiorno(P){
   }
 
   const legenda=['<span class="fg-key"><i style="background:var(--blue)"></i>Sonno</span>'];
-  if(!P.b.rest) legenda.push('<span class="fg-key"><i style="background:var(--orange-fill)"></i>Turno</span>');
-  if(cbtVisibile) legenda.push('<span class="fg-key"><i style="background:var(--risk)"></i>Picco di sonnolenza</span>');
+  if(!P.b.rest) legenda.push('<span class="fg-key"><i style="background:var(--orange-bar)"></i>Turno</span>');
+  if(cbtVisibile) legenda.push('<span class="fg-key"><i class="fg-picco"></i>Picco di sonnolenza</span>');
 
   el.innerHTML =
-    '<svg viewBox="0 0 '+W+' 30" style="width:100%;height:30px;display:block" role="img" aria-label="Forma della giornata">'+
-      '<rect x="0" y="9" width="'+W+'" height="12" rx="6" fill="var(--s2)"/>'+segs+now+
+    '<svg viewBox="0 0 '+W+' 44" style="width:100%;height:44px;display:block" role="img" aria-label="Forma della giornata, dalle '+hhmm(clo)+' alle '+hhmm(chi)+'">'+
+      '<rect x="0" y="9" width="'+W+'" height="12" rx="6" fill="var(--s2)"/>'+segs+picco+now+ore+
     '</svg>'+
     '<div class="fg-legend">'+legenda.join("")+'</div>';
 }
@@ -5603,14 +5681,14 @@ function sceltaDopoNotte(P){
   const eD=fineCon("diviso"), eU=fineCon(unito);
   if(eD==null || eU==null || eD===eU) return "";
   const corto=P.s.kind==="corto", diviso=cur==="diviso";
-  const opz=(val,nome,fine,on)=>'<button type="button" class="vb'+(on?" on":"")+'" data-sonnod="'+val+'" aria-pressed="'+on+'"><b>'+nome+'</b><span>fino alle '+hhmm(fine)+'</span></button>';
+  const opz=(val,nome,fine,on,extra)=>'<button type="button" class="vb'+(on?" on":"")+'" data-sonnod="'+val+'" aria-pressed="'+on+'"><b>'+nome+'</b><span>'+(extra||"")+'fino alle '+hhmm(fine)+'</span></button>';
   const spiega = store.get("smontoScelto", false) ? "" : '<p class="dn-hint">'+(corto
-    ? 'Corto: il pomeriggio è tuo e stanotte dormi bene. Lungo: recuperi di più adesso, ma stasera il sonno arriva più tardi.'
-    : 'Diviso: un sonno più corto e un pisolino prima della prossima notte (di giorno si dorme più leggeri). Tutto insieme: un blocco solo, se di giorno dormi bene.')+'</p>';
+    ? 'Sonno breve: il pomeriggio è tuo e stanotte dormi bene. Sonno lungo: recuperi di più adesso, ma stasera il sonno arriva più tardi.'
+    : 'In due tempi: un sonno più corto e un pisolino prima della prossima notte (di giorno si dorme più leggeri). Tutto di fila: un blocco solo, se di giorno dormi bene.')+'</p>';
   return '<div class="dopo-notte" role="group" aria-label="Dopo la notte, come dormi">'+
-    '<span class="dn-lab">Dopo la notte · vale per tutte le notti</span>'+
-    '<div class="dn-scelta">'+opz("diviso", corto?"Corto":"Diviso", eD, diviso)+opz(unito, corto?"Lungo":"Tutto insieme", eU, !diviso)+'</div>'+
-    spiega+'</div>';
+    '<span class="dn-lab">Dopo il turno, come dormi?</span>'+
+    '<div class="dn-scelta">'+opz("diviso", corto?"Sonno breve":"In due tempi", eD, diviso, corto?"":"poi un pisolino · ")+opz(unito, corto?"Sonno lungo":"Tutto di fila", eU, !diviso)+'</div>'+
+    spiega+'<p class="dn-vale">Vale per tutte le notti.</p></div>';
 }
 function renderEssenziale(P, CARDS){
   const el=$("#essenziale"); if(!el) return;
@@ -5638,23 +5716,44 @@ function renderEssenziale(P, CARDS){
     return x;
   };
 
-  // Una riga del glance: valore sempre visibile, dettaglio a scomparsa sul posto.
-  // Stessa affordance per tutte (chevron a destra, riga toccabile).
-  const riga=(id,lab,num,sub,warn,ic,det)=>{
+  // Una voce della timeline: l'ora a sinistra, il nodo con l'icona, titolo e
+  // riga di dettaglio; il dettaglio a scomparsa si apre sul posto (stessa
+  // affordance per tutte: chevron a destra, riga toccabile).
+  // «num» può essere un orario, un intervallo («22:20 → 06:20», con o senza la
+  // parola Stanotte/Domani davanti) o altro testo: l'inizio va nella colonna
+  // dell'ora, la fine passa in «fino alle …» nella riga sotto il titolo.
+  // «ab» = {a, z, poi}: quando comincia e finisce (stessa scala di minuti del
+  // piano), e come dirlo in «Poi» sotto «Adesso».
+  const oggiVista = dnum(state.focus)===dnum(giornoVero());
+  const nowT = oggiVista ? minutiDaFocus() : null;
+  const statoVoce = ab=>{ if(nowT==null || !ab || ab.a==null) return "";
+    const z = ab.z!=null ? ab.z : ab.a;
+    if(z < nowT) return "past";
+    if(ab.z!=null && ab.a <= nowT) return "ora";
+    return ""; };
+  const riga=(id,lab,num,sub,warn,ic,det,ab)=>{
     const apri = det && essAperte.has(id) ? " open" : "";
-    // tinta del bordo/badge: arancio per le voci "calde" (caffè, luce,
-    // rientro, turno), blu per quelle "fredde" (sonno, pisolino, pasti) —
-    // il rosso di rischio (warn) vince su entrambe.
-    const tone = (ic===ICON.coffee||ic===ICON.sun||ic===ICON.dim||ic===ICON.car||ic===ICON.alarm) ? "orange" : "blue";
-    const capo='<div class="essrow'+(warn?" warn":" t-"+tone)+'">'+
-      '<span class="eic">'+(ic||"")+'</span>'+
+    const testo = String(num).replace(/<[^>]+>/g," ");
+    const ore = testo.match(/\d{1,2}:\d{2}/g)||[];
+    const quando = (String(num).match(/class="dwhen">([^<]+)</)||[])[1]||"";
+    // senza un orario («Nessun tempo per dormire», «?», «—») il testo passa sotto il titolo
+    const inizio = ore.length ? ore[0] : (testo.trim().length<=3 ? testo.trim() : "—");
+    const resto = ore.length ? "" : (testo.trim().length>3 ? testo.trim() : "");
+    const fine = ore.length>1 ? "fino alle "+ore[1] : "";
+    const sotto = [sub, resto, fine].filter(Boolean).join(" · ");
+    const tipo = /^(sonno|nap)/.test(id) ? "sonno" : id==="turno" ? "turno" : warn ? "rischio" : "";
+    const capo='<div class="essrow'+(warn?" warn":"")+(tipo?" tp-"+tipo:"")+'">'+
+      '<span class="en mono">'+(quando?'<span class="dwhen">'+quando+'</span>':'')+inizio+'</span>'+
+      '<span class="enodo">'+(ic||"")+'</span>'+
       '<div class="ev"><div class="el">'+esc(lab)+'</div>'+
-      (sub?'<div class="es">'+sub+'</div>':'')+'</div>'+
-      '<div class="en mono">'+num+'</div>'+
+      (sotto?'<div class="es">'+sotto+'</div>':'')+'</div>'+
       (det?'<span class="echev">›</span>':'')+'</div>';
-    if(!det) return capo;
-    return '<details class="erow"'+apri+' data-row="'+esc(id)+'"><summary>'+capo+'</summary>'+
-      '<div class="ed">'+det+'</div></details>';
+    const stato=statoVoce(ab);
+    const dati = ab&&ab.a!=null ? ' data-a="'+ab.a+'"'+(ab.z!=null?' data-z="'+ab.z+'"':'')+(ab.poi?' data-poi="'+esc(ab.poi)+'"':'') : '';
+    const dentro = det
+      ? '<details class="erow"'+apri+' data-row="'+esc(id)+'"><summary>'+capo+'</summary><div class="ed">'+det+'</div></details>'
+      : capo;
+    return '<div class="tl'+(stato?" "+stato:"")+'"'+dati+'>'+dentro+'</div>';
   };
 
   const wake=P.wake;
@@ -5683,10 +5782,13 @@ function renderEssenziale(P, CARDS){
   const fineSonno=P.s.onset+P.s.dur, traQuanto=fineSonno-minutiDaFocus();
   const sveglia = platform.alarm.available && traQuanto>0 && traQuanto<=1440
     ? '<button type="button" class="btn g ed-sveglia" data-sveglia="'+hhmm(fineSonno)+'">Metti la sveglia alle '+hhmm(fineSonno)+'</button>' : "";
-  voci.push({t:dSv(P.s.onset), html:riga("sonno","Dormi",sonnoWin(P),sonnoSub,false,ICON.moon,
-    dettSonno+sveglia+'<button type="button" class="lnk ed-cambia" data-cambia="3">Orari che non fanno per te? Dimmi come dormi →</button>')});
+  const vSonno={t:dSv(P.s.onset), html:riga("sonno","Dormi",sonnoWin(P),sonnoSub,false,ICON.moon,
+    dettSonno+sveglia+'<button type="button" class="lnk ed-cambia" data-cambia="3">Orari che non fanno per te? Dimmi come dormi →</button>',
+    {a:P.s.onset, z:P.s.onset+P.s.dur, poi:"a letto alle "+hhmm(P.s.onset)})};
+  voci.push(vSonno);
+  // Le scelte che riguardano il sonno (dopo la notte, letto presto) stanno
+  // attaccate a «Dormi»: sono decisioni su quella voce, non voci del programma.
   const dn=sceltaDopoNotte(P);
-  if(dn) voci.push({t:dSv(P.s.onset)+0.3, html:dn});
 
   // Letto troppo presto prima di un turno di mattina: stessa soglia della
   // scelta bifasica (sotto le 21, addormentarsi è difficile, non solo
@@ -5694,7 +5796,7 @@ function renderEssenziale(P, CARDS){
   // "pre-turno-bifasico", non "pre-turno"), c'è un modo di risolverlo che
   // l'utente potrebbe non aver ancora trovato da solo.
   const lp=sceltaLettoPresto(P);
-  if(lp) voci.push({t:dSv(P.s.onset)+0.3, html:lp});
+  if(dn || lp) vSonno.html=vSonno.html.replace(/<\/div>$/, '<div class="tl-extra">'+(dn||"")+(lp||"")+'</div></div>');
 
   // Tempo libero: le ore da sveglio fuori da turno, viaggio, sonno e pisolini.
   // Risponde a «e la palestra quando la faccio?» (e figli, spesa…) senza un
@@ -5707,7 +5809,8 @@ function renderEssenziale(P, CARDS){
       '<div class="why">Attività fisica, palestra: vanno bene in quasi tutto il tempo libero. Evita solo gli sforzi intensi nell\'ultima ora prima di dormire o di un pisolino, perché rendono più difficile addormentarsi. Se sei all\'aperto conta anche la luce: segui la riga «Luce».'+
       '<cite>Stutz, Eiholzer & Spengler 2019 (esercizio serale e sonno)</cite></div>';
     voci.push({t:dSv(liberi[0].a)+0.1, html:riga("liberi","Libero",hhmm(liberi[0].a)+" → "+hhmm(liberi[0].b),
-      altre ? "poi "+altre : "in tutto "+dur(tot), false, ICON.calendar, dettLiberi)});
+      altre ? "poi "+altre : "in tutto "+dur(tot), false, ICON.calendar, dettLiberi,
+      {a:liberi[0].a, z:liberi[0].b, poi:"tempo libero dalle "+hhmm(liberi[0].a)})});
   }
 
   // ── tutte le altre righe vengono dalle schede, che sono GIÀ in ordine di giornata ──
@@ -5724,13 +5827,15 @@ function renderEssenziale(P, CARDS){
       const liv=cd.nap.livello, prima = (isFinite(liv) && liv<2 ? '<button type="button" class="lnk" data-skip-recupero="'+(liv+1)+'" style="margin-top:6px">Non riesco a farlo: proponimi un\'alternativa</button>' : '')+
         (cd.nap.min<=30 ? '<p class="ed-sub" style="margin-top:8px">Se vuoi più lucidità, un caffè appena prima: l\'effetto arriva mentre dormi.'+(isFinite(P.cut)?' Dopo le '+hhmm(P.cut)+' meglio di no: disturba il sonno di stanotte.':'')+'</p>' : '');
       voci.push({t, html:riga("nap"+cd.nap.k,"Pisolino",cd.val,cd.small||"",false,ICON.bed,dett(cd)+prima+
-        '<button type="button" class="lnk ed-cambia" data-cambia="4">Pisolini sul lavoro e altre impostazioni →</button>')});
+        '<button type="button" class="lnk ed-cambia" data-cambia="4">Pisolini sul lavoro e altre impostazioni →</button>',
+        {a:cd.at, z:cd.at+cd.nap.min, poi:"pisolino alle "+hhmm(cd.at)})});
     } else if(cd.k==="s"){
       // niente riga a sé: l'orario di sveglia è già la fine di "Dormi". Tenerla
       // separata mostrava l'ora di andare a letto sotto l'etichetta "Sveglia" —
       // confuso, e comunque un duplicato.
     } else if(cd.k==="c"){
-      voci.push({t, html:riga("caffe","Caffè",ora||cd.val,frase(cd.val,ora)||cd.small||"",false,ICON.coffee,dett(cd))});
+      voci.push({t, html:riga("caffe","Caffè",ora||cd.val,frase(cd.val,ora)||cd.small||"",false,ICON.coffee,dett(cd),
+        {a:cd.at, poi:"ultimo caffè entro le "+hhmm(cd.at)})});
     } else if(cd.k==="l"){
       if(!P.b.rest){
         // Righe pratiche taggate per fase (rowsA=mattino, rowsE=sera): ognuna
@@ -5755,10 +5860,13 @@ function renderEssenziale(P, CARDS){
         // breve, "poi abbassa" ecc.) restava sempre nascosto perché
         // frase() sceglieva sempre cd.val. Uniti senza il prefisso.
         const subLuce=[(cd.val||"").replace(/^Luce\s*/,""),cd.small].filter(Boolean).join(" · ");
-        voci.push({t, html:riga("luce","Luce",ora||"—",subLuce,false,ICON.sun,dettLuce)});
+        const seekBlk=(cd.blocks||[]).find(bl=>bl[0]==="seek");
+        voci.push({t, html:riga("luce","Luce",ora||"—",subLuce,false,ICON.sun,dettLuce,
+          {a:cd.at, z:seekBlk?seekBlk[2]:undefined, poi:"luce dalle "+hhmm(cd.at)})});
         if(splitOra){
           const dettPenombra = righeFase(cd.rowsE)+percheOmbra;
-          voci.push({t:tAvoid, html:riga("penombra","Penombra",hhmm(avoidBlk[1]),"poi buio, per dormire",false,ICON.dim,dettPenombra)});
+          voci.push({t:tAvoid, html:riga("penombra","Penombra",hhmm(avoidBlk[1]),"poi buio, per dormire",false,ICON.dim,dettPenombra,
+            {a:avoidBlk[1], z:avoidBlk[2], poi:"luci basse dalle "+hhmm(avoidBlk[1])})});
         }
       } else if(P.s.meta && P.s.meta.ramp){
         // Non riapre le due schede complete (sarebbe la stessa logica dei
@@ -5768,15 +5876,18 @@ function renderEssenziale(P, CARDS){
         // questo stesso ramo (s.meta.ramp), non un rilevamento nuovo.
         const tSera = dSv(P.s.onset-180);
         const dettSera = '<div class="why">Anche in un giorno libero, la luce di sera sposta l\'orologio nella direzione sbagliata se stai andando verso le notti — tenerla bassa nelle ultime ore aiuta ad arrivarci già un po\' spostato.</div>';
-        voci.push({t:tSera, html:riga("penombra","Penombra",hhmm(P.s.onset-180),"tieni la luce soffusa",false,ICON.dim,dettSera)});
+        voci.push({t:tSera, html:riga("penombra","Penombra",hhmm(P.s.onset-180),"tieni la luce soffusa",false,ICON.dim,dettSera,
+          {a:P.s.onset-180, poi:"luci basse dalle "+hhmm(P.s.onset-180)})});
       }
     } else if(cd.k==="m"){
       // cd.val ripeteva l'orario due volte ("21:30" come valore, "Pasto
       // pieno alle 21:30" come sottotitolo): cd.small dice la stessa cosa
       // senza il doppione ("prima di uscire").
-      voci.push({t, html:riga("pasti","Pasti",ora||cd.val,cd.small||"",false,ICON.plate,dett(cd))});
+      voci.push({t, html:riga("pasti","Pasti",ora||cd.val,cd.small||"",false,ICON.plate,dett(cd),
+        {a:cd.at, poi:"pasto alle "+hhmm(cd.at)})});
     } else if(cd.k==="t"){
-      voci.push({t, html:riga("rientro",cd.lab,ora||cd.val,frase(cd.val,ora)||cd.small||"",!P.b.rest,ICON.car,dett(cd))});
+      voci.push({t, html:riga("rientro",cd.lab,ora||cd.val,frase(cd.val,ora)||cd.small||"",!P.b.rest,ICON.car,dett(cd),
+        {a:cd.at, poi:(P.b.rest?"veglia lunga":"rientro")+" alle "+hhmm(cd.at)})});
     } else if(cd.k==="turno_mancante"){
       voci.push({t, html:
         '<div class="essrow warn" style="cursor:pointer" onclick="haptic(10);apriEcc(state.focus);">'+
@@ -5786,9 +5897,11 @@ function renderEssenziale(P, CARDS){
         '<div class="en mono">?</div>'+
         '</div>'});
     } else if(cd.k==="turno"){
-      voci.push({t, html:riga("turno","Turno",cd.val,cd.small,false,ICON.alarm,null)});
+      voci.push({t, html:riga("turno","Turno",cd.val,cd.small,false,ICON.alarm,null,
+        {a:P.b.start, z:P.b.end, poi:"entri in turno alle "+hhmm(P.b.start)})});
     } else if(cd.k==="cbt"){
-      voci.push({t, html:riga("sonnolenza","Sonnolenza massima",cd.val,cd.small,true,ICON.warn,dett(cd))});
+      voci.push({t, html:riga("sonnolenza","Sonnolenza massima",cd.val,cd.small,true,ICON.warn,dett(cd),
+        {a:cd.at-60, z:cd.at+60, poi:"sonnolenza massima verso le "+hhmm(cd.at)})});
     }
   }
 
@@ -5803,6 +5916,35 @@ function renderEssenziale(P, CARDS){
   // Il perché della giornata, in una riga: se c'è già l'avviso di rischio, è lui il perché.
   if(!rischio && state.turniConfigurati){ try{ const p=perchéOggi(P); if(p) voci.push({t:-3, html:'<p class="essperche"><span>Il piano, in breve</span>'+esc(p)+'</p>'}); }catch(e){} }
   voci.sort((a,b)=>a.t-b.t);
+  // La timeline: prima e ultima voce (accorciano la linea), il segno «ora»
+  // fra passato e futuro, e «Poi» sotto «Adesso».
+  const eVoce=v=>/^<div class="tl[ "]/.test(v.html);
+  const dammi=(v,k)=>{ const m=v.html.match(new RegExp('^<div class="tl[^>]*? data-'+k+'="([^"]*)"')); return m ? m[1] : null; };
+  const idxR=voci.map((v,i)=>eVoce(v)?i:-1).filter(i=>i>=0);
+  if(idxR.length){
+    voci[idxR[0]].html=voci[idxR[0]].html.replace('<div class="tl','<div class="tl tl-first');
+    voci[idxR[idxR.length-1]].html=voci[idxR[idxR.length-1]].html.replace('<div class="tl','<div class="tl tl-last');
+  }
+  if(nowT!=null){
+    const passate=idxR.filter(i=>/^<div class="tl[^"]*\bpast\b/.test(voci[i].html));
+    const dopo=passate.length ? idxR.find(i=>i>passate[passate.length-1]) : undefined;
+    if(dopo!==undefined){
+      const mm=mod1440(Math.round(nowT));
+      voci.splice(dopo, 0, {t:0, html:'<div class="tl-adesso" aria-hidden="true"><span class="en">'+
+        String(Math.floor(mm/60)).padStart(2,"0")+":"+String(mm%60).padStart(2,"0")+'</span><i></i></div>'});
+    }
+    // «Poi»: il prossimo passo, se «Adesso» non lo dice già
+    const card=$("#ora .ora-card");
+    if(card && !card.querySelector(".ora-poi")){
+      const next=voci.find(v=>eVoce(v) && !/^<div class="tl[^"]*\b(past|ora)\b/.test(v.html) && dammi(v,"poi"));
+      if(next){
+        const a=+dammi(next,"a"), testo=dammi(next,"poi");
+        if(!card.textContent.includes(hhmm(a))){
+          const sp=document.createElement("span"); sp.className="ora-poi"; sp.textContent="Poi · "+testo; card.appendChild(sp);
+        }
+      }
+    }
+  }
   // Niente etichetta "Adesso" qui: il modulo #ora sopra questa lista
   // (renderOra/adessoLine) è già l'unico eroe per "cosa succede adesso" —
   // ripeterlo qui sotto come etichetta su una riga creava due segnali
@@ -6001,6 +6143,13 @@ function rischiAvanti(P, n){
   }
   return flag;
 }
+// I festivi di chi usa l'app: domeniche, festivi nazionali e i giorni che il
+// suo contratto aggiunge (il santo patrono, la festa del paese): giorno e
+// mese, ogni anno. Chi ha un orario fisso può dire che nei festivi non lavora.
+function festiviCfg(){ const f=state.festivi||{}; return {extra:Array.isArray(f.extra)?f.extra:[], dom:f.dom!==false}; }
+function festivo(d){ const c=festiviCfg(), m=d.getMonth()+1, g=d.getDate();
+  return (c.dom && d.getDay()===0) || festivoIT(d) || c.extra.includes(m+"-"+g); }
+try{ NT.setFestivo(festivo); }catch(e){}
 // Festivi nazionali italiani (domeniche a parte): fissi più Pasquetta.
 function festivoIT(d){
   const m=d.getMonth()+1, g=d.getDate();
@@ -6027,7 +6176,7 @@ function datiMese(off){
     // straordinario: solo gli orari veri più lunghi del turno previsto
     if(b.oreVere && b.previsto) r.straordinario+=Math.max(0, (b.end-b.start)-b.previsto);
     if(NT.spansNight(b)||NT.startsInNight(b)) r.notti++;
-    if(d.getDay()===0 || festivoIT(d)) r.festivi++;
+    if(festivo(d)) r.festivi++;
   }
   state.focus=fPrima;
   return r;
@@ -6062,16 +6211,53 @@ function renderMese(){
       if(r.malattia) v.push(r.malattia+(r.malattia===1?" giorno di malattia":" giorni di malattia"));
       return v.length ? '<p class="mese-spec">'+esc(v.join(" · "))+'</p>' : ''; })()+
     (vuoto ? '' : '<p class="hint">Ore dall\'inizio alla fine di ogni turno, pause comprese: per controllare, non è un conteggio ufficiale.</p>')+
+    festiviHtml()+
     '<button type="button" class="btn g mese-segna" data-mese-segna>Segna o importa i turni'+
       (r.ignoti && !vuoto ? '<small>'+r.ignoti+(r.ignoti===1?' giorno ancora da segnare':' giorni ancora da segnare')+'</small>' : '')+'</button>';
 }
+// Festivi del contratto: una riga che dice cosa si conta, e un piccolo editor.
+var festiviAperto=false;   // var: letto da renderMese durante l'avvio
+function nomeGiornoMese(k){ const [m,g]=k.split("-").map(Number); return new Date(2000,m-1,g).toLocaleDateString(LINGUA,{day:"numeric",month:"long"}); }
+function festiviHtml(){
+  const c=festiviCfg(), fisso=tipoTurni()==="fisso";
+  const conta="Conto "+(c.dom?"le domeniche e ":"")+"i festivi nazionali"+(c.extra.length?" e "+c.extra.map(nomeGiornoMese).join(", "):"")+".";
+  if(!festiviAperto) return '<p class="hint mese-fest">'+esc(conta)+' <button type="button" class="lnk" data-fest-apri>Aggiungi i tuoi →</button></p>';
+  return '<div class="ecc mese-fest-box">'+
+    '<b style="display:block;margin-bottom:4px">I festivi del tuo contratto</b>'+
+    '<p class="hint" style="margin:0 0 8px">Oltre ai festivi nazionali: il santo patrono o altre feste che per te contano. Si ripetono ogni anno.</p>'+
+    (c.extra.length ? '<div class="qh-chips" style="margin:0 0 10px">'+c.extra.map(k=>'<button type="button" class="btn g" data-fest-del="'+k+'" aria-label="Togli '+esc(nomeGiornoMese(k))+'">'+esc(nomeGiornoMese(k))+' ×</button>').join("")+'</div>' : '')+
+    '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input type="date" id="festData" aria-label="Giorno festivo" style="flex:1;min-width:150px">'+
+    '<button type="button" class="btn g" data-fest-add>Aggiungi</button></div>'+
+    '<label class="chk" style="display:flex;gap:10px;align-items:center;margin-top:12px;min-height:44px"><input type="checkbox" data-fest-dom'+(c.dom?' checked':'')+'> La domenica conta come festivo</label>'+
+    (fisso ? '<label class="chk" style="display:flex;gap:10px;align-items:center;min-height:44px"><input type="checkbox" data-fest-riposo'+(state.festiviRiposo?' checked':'')+'> Nei festivi non lavoro</label>' : '')+
+    '<button type="button" class="lnk" data-fest-chiudi style="margin-top:6px">Fatto</button></div>';
+}
+function festiviCambiati(){ salva(); try{ NT.setFestivo(festivo); }catch(e){} render(); }
 function durataBreve(m){ m=Math.round(m/15)*15; const h=Math.floor(m/60), r=m%60; return h ? h+"h"+(r?String(r).padStart(2,"0"):"") : r+" min"; }
+if($("#meseBox")) $("#meseBox").addEventListener("change", e=>{
+  if(e.target.matches("[data-fest-dom]")){ state.festivi=Object.assign({}, state.festivi||{}, {dom:e.target.checked}); festiviCambiati(); }
+  else if(e.target.matches("[data-fest-riposo]")){ state.festiviRiposo=e.target.checked; festiviCambiati(); }
+});
 if($("#meseBox")) $("#meseBox").addEventListener("click", e=>{
   if(e.target.closest("[data-riepilogo-medico]")){ stampaRiepilogoMedico(); return; }
   if(e.target.closest("[data-mese-segna]")){ sgOff=meseOff; apriSegna(); return; }
+  if(e.target.closest("[data-fest-apri]")){ festiviAperto=true; renderMese(); return; }
+  if(e.target.closest("[data-fest-chiudi]")){ festiviAperto=false; renderMese(); return; }
+  const fd=e.target.closest("[data-fest-del]");
+  if(fd){ const f=Object.assign({}, state.festivi||{}); f.extra=(f.extra||[]).filter(k=>k!==fd.dataset.festDel); state.festivi=f; festiviCambiati(); return; }
+  if(e.target.closest("[data-fest-add]")){
+    const v=($("#festData")||{}).value||""; const m=/^\d{4}-(\d\d)-(\d\d)$/.exec(v);
+    if(!m){ toast("Scegli il giorno"); return; }
+    const k=(+m[1])+"-"+(+m[2]), f=Object.assign({}, state.festivi||{}); f.extra=(f.extra||[]).filter(x=>x!==k).concat(k).sort(); state.festivi=f;
+    festiviCambiati(); return; }
   const b=e.target.closest("[data-mese]"); if(!b || b.disabled) return;
   meseOff=Math.max(-12, Math.min(12, meseOff + +b.dataset.mese)); renderMese();
 });
+// Riferimenti orari per le strisce del tempo: le 00, 06, 12 e 18 che cadono
+// nella finestra [clo, chi] (minuti sulla scala del giorno, anche oltre 1440).
+// Senza, una barra di sonno o di turno non si legge: non si sa dove cade la
+// mezzanotte, né se il sonno è di notte o di giorno.
+function tacche(clo, chi){ const out=[]; for(let m=Math.ceil(clo/360)*360; m<=chi; m+=360) out.push(m); return out; }
 function renderStrip(P, f, S){
   // Scala unica per tutte le righe, senza avvolgimenti: così ogni barra
   // resta sul giorno a cui appartiene e non se ne va a finire su quello dopo.
@@ -6097,7 +6283,12 @@ function renderStrip(P, f, S){
   if(oggiInFinestra && isFinite(clo)){ clo=Math.min(clo,oggiM); chi=Math.max(chi,oggiM); }
   clo=Math.floor((clo-30)/60)*60; chi=Math.ceil((chi+30)/60)*60;
   const cspan=Math.max(chi-clo,60), cpx=m=>(m-clo)/cspan*100;
-  let ch="";
+  const tk=tacche(clo,chi);
+  let ch='<div class="caxis" aria-hidden="true"><span class="clab"></span><span class="ccode"></span><span class="crail">'+
+    // proprio sul bordo resta la linea ma non l'etichetta: si accavallerebbe
+    // con la vicina o uscirebbe dal riquadro
+    tk.map(m=>{ const x=cpx(m); return x<7 || x>93 ? '' : '<span style="left:'+x+'%">'+hhmm(m)+'</span>'; }).join("")+'</span></div><div class="crows">'+
+    '<div class="cgrid" aria-hidden="true">'+tk.map(m=>'<i style="left:'+cpx(m)+'%"></i>').join("")+'</div>';
   for(let o=finLo;o<=finHi;o++){
     const d=day(f,o), k=NT.codeAt(o), sd=NT.at(S,o), bb=NT.block(o), seg=[];
     if(!sd||!bb) continue;
@@ -6117,17 +6308,16 @@ function renderStrip(P, f, S){
       (o===0 && cpx(oggiM)>=0 && cpx(oggiM)<=100 ? '<span class="cnow" style="left:'+cpx(oggiM)+'%" title="adesso"></span>' : '')+
       '</span></div>';
   }
-  // Niente più asse orario sotto la striscia (.caxis): la striscia del
-  // ciclo mostra GIORNI, non orari nella giornata — a differenza di
-  // formaGiorno in Oggi, dove le ore sono il punto. Qui ripetevano solo
-  // un'ampiezza approssimativa dell'intera finestra, già leggibile dalle
-  // etichette dei giorni sopra.
+  // Asse orario in alto (00, 06, 12, 18) e le stesse ore come linee sottili
+  // sotto le barre: le barre stanno sull'ora, e senza riferimenti non si
+  // capiva dove cadeva la mezzanotte, né se il sonno fosse di giorno.
+  ch+='</div>';
   // "Il tuo ciclo" torna alle sole funzioni base (sonno + turno): tolti il
   // riposo del partner (vive in "Quando sono disponibile"), l'avviso di
   // rischio (notti di fila, turno rientrante, minimo circadiano: è una riga
   // in Oggi, rischioDelGiorno) e il pallino dell'umore dal diario.
   $("#cyc").innerHTML=ch+
-    '<div class="key">'+'<span><i style="background:var(--blue)"></i>Sonno</span>'+'<span><i style="background:var(--orange-fill)"></i>Turno</span>'+'</div>';
+    '<div class="key">'+'<span><i style="background:var(--blue)"></i>Sonno</span>'+'<span><i style="background:var(--orange-bar)"></i>Turno</span>'+'</div>';
   // L'etichetta del range: stessa finestra usata sopra per costruire la
   // striscia (finestraCiclo()), non un calcolo separato che rischierebbe
   // di disallinearsi da quello che si vede davvero.
@@ -6283,7 +6473,7 @@ function caricoTurni(da, n){
       const base=dnum(d)*1440;
       if(notte(b.start,b.end)>=180){ serie++; if(conta){ r.notti++; r.serieMax=Math.max(r.serieMax, serie); } } else serie=0;
       if(conta){ r.turni++; r.ore+=(b.end-b.start)/60;
-        if(d.getDay()===0 || festivoIT(d)) r.festivi++;
+        if(festivo(d)) r.festivi++;
         if(fineIeri!==null && base+b.start-fineIeri<660) r.brevi++; }
       fineIeri=base+b.end;
     }
@@ -6377,21 +6567,27 @@ function renderAndamenti(){
       if(trend && trend.n>=3){
         const d=trend.debtNow;
         const vals=trend.series.map(s=>s.debt);
-        const W=280,H=44,pad=4;
+        const W=280,H=58,pad=5,Hp=44;   // Hp: il grafico; sotto, le date
         const mn=Math.min(0,...vals), mx=Math.max(0,...vals), span=Math.max(mx-mn,30);
         const xAt=i=> vals.length>1 ? (i/(vals.length-1))*(W-pad*2)+pad : W/2;
-        const yAt=v=> H-pad-((v-mn)/span)*(H-pad*2);
+        const yAt=v=> Hp-pad-((v-mn)/span)*(Hp-pad*2);
         const pts=vals.map((v,i)=>xAt(i).toFixed(1)+","+yAt(v).toFixed(1)).join(" ");
         const lx=xAt(vals.length-1).toFixed(1), ly=yAt(vals[vals.length-1]).toFixed(1);
-        const numColor = d>0 ? "var(--orange)" : "var(--ok)";
+        // Il numero nel colore del testo e senza segno (l'etichetta dice già se
+        // manca o avanza); il colore sta sul punto di oggi. La linea è grigia,
+        // con lo zero (in pari) come riferimento sottile: più su, più sonno da recuperare.
+        const tinta = d>0 ? "var(--orange)" : "var(--ok)", y0=yAt(0).toFixed(1);
         heroHtml='<div class="andamento-hero">'+
           '<span class="hint" style="display:block">'+(d>0?"Sonno che ti manca":"Sonno in più del necessario")+' · ultime '+trend.series.length+' notti</span>'+
-          '<div class="andamento-num" style="color:'+numColor+'">'+(d>0?"-":"+")+hm(Math.abs(d))+'</div>'+
+          '<div class="andamento-num">'+hm(Math.abs(d))+'</div>'+
           '<span class="hint" style="display:block">Dormi in media '+hm(trend.avgActual)+
             (trend.avgPlanned?' contro '+hm(trend.avgPlanned)+' pianificate':'')+'</span>'+
-          '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:'+H+'px;display:block;margin-top:10px" role="img" aria-label="Andamento del debito di sonno">'+
-            '<polyline points="'+pts+'" fill="none" stroke="var(--orange)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>'+
-            '<circle cx="'+lx+'" cy="'+ly+'" r="3.5" fill="var(--orange)"/>'+
+          '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:'+H+'px;display:block;margin-top:10px" role="img" aria-label="Andamento del sonno da recuperare nelle ultime '+trend.series.length+' notti: oggi '+hm(Math.abs(d))+(d>0?' da recuperare':' in più')+'">'+
+            '<line x1="'+pad+'" x2="'+(W-pad)+'" y1="'+y0+'" y2="'+y0+'" stroke="var(--line)" stroke-width="1"/>'+
+            '<polyline points="'+pts+'" fill="none" stroke="var(--faint)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'+
+            '<circle cx="'+lx+'" cy="'+ly+'" r="4.5" fill="'+tinta+'" stroke="var(--s1)" stroke-width="2"/>'+
+            '<text x="'+pad+'" y="'+(H-2)+'" font-size="10" fill="var(--faint)">'+trend.series.length+' notti fa</text>'+
+            '<text x="'+(W-pad)+'" y="'+(H-2)+'" font-size="10" fill="var(--faint)" text-anchor="end">oggi</text>'+
           '</svg>'+
         '</div>';
       }
@@ -6421,16 +6617,25 @@ function renderAndamenti(){
   }catch(e){}
 
   if(cs){
+    // Barre del voto medio (1–5) per giorno del ciclo: una riga per giorno, il
+    // nome per intero, il valore in fondo alla barra. Il colore lo porta solo
+    // il giorno che pesa di più (quello della frase sotto); gli altri restano
+    // neutri, così si vede subito dove guardare.
+    const p=cs.righe.map(r=>r.c).join(""), notte=c=>isNightCode(c);
+    const nome=r=>{ const tot=p.split("").filter(c=>c===r.c).length;
+      let n=1; for(let j=r.i-1;j>=0 && p[j]===r.c;j--) n++;
+      const base = state.shifts[r.c] ? state.shifts[r.c].n : (r.i>0 && notte(p[r.i-1]) ? "Smonto" : "Riposo");
+      return base+(tot>1 && state.shifts[r.c] ? " "+n+"/"+tot : ""); };
+    const segnato = cs.frase ? cs.peggio.i : -1;
     let righe='';
-    cs.righe.forEach(r=>{ const largh = r.avg===null ? 0 : Math.round((r.avg-1)/4*100);
-      righe+='<div class="row"><b style="min-width:34px;font-family:var(--sans)">'+esc(r.c)+'</b>'+
-        '<span style="flex:1"><span class="cyb"><i style="width:'+largh+'%"></i></span></span>'+
-        '<span style="min-width:62px;text-align:right;color:var(--dim)">'+
-        (r.avg===null?"—":r.avg.toFixed(1)+" · "+r.n)+'</span></div>'; });
+    cs.righe.forEach(r=>{ const largh = r.avg===null ? 0 : Math.max(2, Math.round((r.avg-1)/4*100));
+      righe+='<div class="vrow'+(r.i===segnato?" giu":"")+'"><span class="vlab">'+esc(nome(r))+'</span>'+
+        '<span class="vbar"><i style="width:'+largh+'%"></i></span>'+
+        '<span class="vval">'+(r.avg===null?"—":r.avg.toFixed(1).replace(".",","))+'</span></div>'; });
     // La frase resta qui SOLO se non è già stata promossa in cima.
-    if(cs.frase && !(capo && capo.fonte==="cs")) righe+='<div class="row" style="margin-top:6px"><span style="color:var(--amber)">'+cs.frase+'</span></div>';
-    sezioni.push('<div><span class="eyebrow andamento-eyebrow">Il tuo ciclo giorno per giorno, da '+cs.voti+' voti</span>'+
-      '<div class="andamento-sezione"><div class="rows">'+righe+'</div></div></div>');
+    if(cs.frase && !(capo && capo.fonte==="cs")) righe+='<p class="vnota">'+cs.frase.replace(/(\d)\.(\d)/g,"$1,$2")+'</p>';
+    sezioni.push('<div><span class="eyebrow andamento-eyebrow">Come stai, giorno per giorno</span>'+
+      '<div class="andamento-sezione"><p class="hint" style="margin:0 0 6px">Voto medio da 1 a 5, da '+cs.voti+' voti</p>'+righe+'</div></div>');
   }
 
   const rowsHtml = sezioni.join("");
@@ -6551,6 +6756,9 @@ function renderPartnerPreview(){
   const quando = scarto===0 ? "oggi" : scarto===1 ? "domani" : x.d.toLocaleDateString(LINGUA,{weekday:"long"});
   el.textContent = quando.charAt(0).toUpperCase()+quando.slice(1)+(finestraTuttoIlGiorno(x)?"":" "+hhmm(x.a)+"–"+hhmm(x.b));
 }
+// Icone di condivisione: una per «manda con qualsiasi app», una per stampa/PDF.
+var ICO_SHARE='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>';
+var ICO_PRINT='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8V3h12v5"/><rect x="4" y="8" width="16" height="8" rx="1.5"/><path d="M8 13h8v7H8z"/></svg>';
 function renderPartner(CARDS){
   const el=$("#partner"); if(!el) return;
   let h="";
@@ -6568,10 +6776,17 @@ function renderPartner(CARDS){
       '<div class="whero-num">'+esc(giornoCap)+(tutto?"":" "+hhmm(x.a)+" → "+hhmm(x.b))+'</div>'+
       '<div class="whero-sub">'+(tutto?"Libero tutto il giorno":hm(x.b-x.a)+" libere")+'</div>'+
       '</div>';
-    const altre=libere.slice(1,6).map(y=>{
-      const gy=y.d.toLocaleDateString(LINGUA,{weekday:"long",day:"numeric",month:"long"});
+    // Un giorno, una riga: due finestre dello stesso giorno stanno insieme
+    // («07:50–19:30 · 19:50–21:35»), invece di ripetere la data due volte.
+    const perGiorno=[];
+    for(const y of libere.slice(1)){
+      const k=iso(y.d), g=perGiorno.find(z=>z.k===k);
+      if(g) g.f.push(y); else if(perGiorno.length<5) perGiorno.push({k, d:y.d, f:[y]});
+    }
+    const altre=perGiorno.map(g=>{
+      const gy=g.d.toLocaleDateString(LINGUA,{weekday:"long",day:"numeric",month:"long"});
       const gyCap=gy.charAt(0).toUpperCase()+gy.slice(1);
-      return '<div class="row"><b>'+esc(gyCap)+'</b><span>'+(finestraTuttoIlGiorno(y)?"tutto il giorno":hhmm(y.a)+"–"+hhmm(y.b))+'</span></div>';
+      return '<div class="row"><b>'+esc(gyCap)+'</b><span>'+(g.f.some(finestraTuttoIlGiorno)?"tutto il giorno":g.f.map(y=>hhmm(y.a)+"–"+hhmm(y.b)).join(" · "))+'</span></div>';
     }).join("");
     if(altre) h+='<span class="eyebrow" style="display:block;margin:var(--gap-sezione) 0 8px">Prossimi giorni liberi</span><div class="rows">'+altre+'</div>';
   } else {
@@ -6626,15 +6841,11 @@ function renderPartner(CARDS){
   // riguarda il ciclo, non specificamente la disponibilità, e la
   // vogliamo prima vista lì, non sepolta qui dentro. ──
   h+='<span class="eyebrow" style="display:block;margin:var(--gap-sezione) 0 8px">Condividi</span>'+
-    '<div class="tools">'+
-    '<button class="tool" data-partner-msg type="button">'+
-      '<span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8.5 8.5 0 0 1-12.4 7.6L3 21l1.5-5.2A8.5 8.5 0 1 1 21 12z"/></svg></span>'+
-      '<span class="tool-tx"><b>Manda i miei orari liberi</b><span>Un messaggio con i prossimi giorni (almeno due settimane), per WhatsApp o dove vuoi. Solo il mio tempo libero, niente turni né sonno.</span></span>'+
-    '</button>'+
-    '<button class="tool tool-1line" data-partner-sheet type="button">'+
-      '<span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M6 14h12v7H6z"/></svg></span>'+
-      '<span class="tool-tx"><b>Stampa o salva in PDF</b></span>'+
-    '</button>'+
+    '<div class="share3 share2">'+
+    '<button class="share3-az" data-partner-msg type="button">'+ICO_SHARE+
+      '<b>Manda i miei orari</b><span>un messaggio con il tempo libero</span></button>'+
+    '<button class="share3-az" data-partner-sheet type="button">'+ICO_PRINT+
+      '<b>Stampa o PDF</b><span>il calendario da appendere</span></button>'+
     '</div>';
   const es=$("#partnerShare"); if(es) es.innerHTML=h;
 }
@@ -6910,7 +7121,7 @@ function ntWidget(){
   }
   platform.widget.publish(voci, giorni, {turno, diario:diarioWidget()});
 }
-// Il diario dal widget: dalla sveglia del sonno di stanotte per 8 ore, la
+// Il diario dal widget: dalla sveglia del sonno di stanotte per 14 ore, quasi fino a sera, la
 // domanda sul sonno (con gli orari del piano) e poi quella sull'energia.
 // Le risposte le salva il widget; l'app le prende alla prossima apertura.
 function diarioWidget(){
@@ -6922,7 +7133,7 @@ function diarioWidget(){
     if(!/^\d\d:\d\d$/.test(bed) || !/^\d\d:\d\d$/.test(wake)) return null;
     const da=new Date(g); da.setHours(+wake.slice(0,2), +wake.slice(3,5), 0, 0);
     if(da.getTime()>Date.now()+12*3600e3) da.setDate(da.getDate()-1);
-    return {d:k, bed, wake, da:da.getTime(), a:da.getTime()+8*3600e3, sonno:!!wakes[k], voto:diary[k]!=null};
+    return {d:k, bed, wake, da:da.getTime(), a:da.getTime()+14*3600e3, sonno:!!wakes[k], voto:diary[k]!=null};
   }catch(e){ return null; }
   finally{ state.focus=f; }
 }
@@ -7543,7 +7754,7 @@ function riepilogoAnno(){
       const base=dnum(d)*1440, oreN=notte(sh.s, sh.e)/60;
       m.turni++; m.ore+=(sh.e-sh.s)/60; m.oreNotte+=oreN;
       if(oreN>=3){ m.notti++; serie++; tot.serieMax=Math.max(tot.serieMax, serie); } else serie=0;
-      if(d.getDay()===0 || festivoIT(d)) m.festivi++;
+      if(festivo(d)) m.festivi++;
       if(sh.e-sh.s>=720) tot.lunghi++;
       if(fineIeri!==null && base+sh.s-fineIeri<660) m.brevi++;
       fineIeri=base+sh.e;
@@ -7653,6 +7864,10 @@ function stampaFoglio(titolo){
 // SMS…), si legge sul telefono e non serve una stampante. Raggruppati per
 // giorno, quanti giorni dice giorniDaCondividere(): abbastanza per organizzarsi, abbastanza corto da
 // leggersi in una schermata. Solo le finestre libere, come il foglio.
+// Chiusura di ogni messaggio che esce dall'app: chi lo riceve vede cos'è e
+// può aprirlo. Una riga di nome e, sola in fondo, l'indirizzo con https (le
+// app ne fanno un'anteprima cliccabile). «?s=» dice da quale messaggio arriva.
+function firmaMessaggio(tipo){ return "Notturnisti · il piano del sonno per chi lavora a turni\nhttps://app.notturnisti.club/?s="+tipo; }
 function testoOrariLiberi(){
   const w=finestreLibere(giorniDaCondividere()), perGiorno=new Map();
   w.forEach(x=>{ const k=iso(x.d); if(!perGiorno.has(k)) perGiorno.set(k,{d:x.d,f:[]}); perGiorno.get(k).f.push(x); });
@@ -7661,7 +7876,7 @@ function testoOrariLiberi(){
     const ore=g.f.map(x=>hhmm(x.a)+"–"+hhmm(x.b)).join(", ");
     return "• "+nome.charAt(0).toUpperCase()+nome.slice(1)+": "+ore;
   });
-  return righe.length ? "Il mio tempo libero nei prossimi "+giorniDaCondividere()+" giorni:\n"+righe.join("\n") : "";
+  return righe.length ? "Il mio tempo libero nei prossimi "+giorniDaCondividere()+" giorni:\n"+righe.join("\n")+"\n\n"+firmaMessaggio("liberi") : "";
 }
 async function mandaOrariLiberi(){
   if(!state.turniConfigurati){ toast("Imposta prima i turni"); return; }
@@ -7702,7 +7917,7 @@ function testoACasa(){
   else voci.push([on, "a letto alle "+hhmm(on)+(!nb.rest && !NT.startsInNight(nb) && nb.start<720 ? " (domani attacco alle "+hhmm(nb.start)+")" : "")]);
   voci.sort((x,y)=>x[0]-y[0]);
   return nomeGiornoFocus(true)+": "+stato+"\n"+voci.map(v=>"• "+v[1]).join("\n")+
-    "\n\n(dal mio piano Notturnisti · app.notturnisti.club)";
+    "\n\n"+firmaMessaggio("oggi");
 }
 function renderACasa(){
   const el=$("#aCasa"); if(!el) return;
@@ -8166,7 +8381,7 @@ if($("#swapB")) $("#swapB").addEventListener("change",aggiornaScambio);
    n. Con un mese scelto le ferie si mettono solo lì, ma la finestra può
    allungarsi sui riposi attorno. Niente regole di contratto: in alcuni lo
    smonto non è riposo, per questo è una scelta dell'utente. */
-function giorniCiclo(giorni){
+function giorniCiclo(giorni, persona){
   const f0=giornoVero(), fPrima=state.focus, out=[];
   state.focus=f0;
   try{
@@ -8175,7 +8390,9 @@ function giorniCiclo(giorni){
       if(c==="?"){ out.push({d, ignoto:true}); continue; }
       const b=NT.block(o), ieri=NT.block(o-1);
       // il turno di quel giorno, per dire quali turni lasci con le ferie
-      out.push({d, lavoro:!b.rest, smonto: b.rest && !ieri.rest && ieri.end>1440, c, nome:NT.etichetta(o)});
+      // a casa con la persona scelta: il suo giorno è di riposo (non lavora, non smonta dalla notte)
+      const insieme = persona ? !!(asPartner(()=>{ const pb=NT.block(o); return pb.rest; }, persona)) : false;
+      out.push({d, lavoro:!b.rest, smonto: b.rest && !ieri.rest && ieri.end>1440, c, nome:NT.etichetta(o), festivo:festivo(d), insieme});
     }
   } finally { state.focus=fPrima; }
   return out;
@@ -8184,7 +8401,7 @@ const meseDi=d=>iso(d).slice(0,7);
 // Il primo giorno di una finestra non conta se è uno smonto e lo si è escluso
 // (dentro la finestra non ce ne sono: la notte prima sarebbe già di ferie).
 const inizioACasa=(G,a,r,smonto)=> (!smonto && G[a].smonto && a<r) ? a+1 : a;
-function proposteFerie(G, n, mese, smonto){
+function proposteFerie(G, n, mese, smonto, prefer, conPersona){
   const ok=g=>!mese || meseDi(g.d)===mese;
   const cand=[]; let l=0, usate=0;
   for(let r=0;r<G.length;r++){
@@ -8198,15 +8415,19 @@ function proposteFerie(G, n, mese, smonto){
   // la più lunga; a parità, meno ferie, poi più sabati e domeniche (il tempo
   // con chi lavora di giorno), poi la più vicina
   const weekend=c=>{ let n=0; for(let i=c.a;i<=c.r;i++){ const g=G[i].d.getDay(); if(g===0||g===6) n++; } return n; };
-  cand.forEach(c=>c.fs=weekend(c));
-  cand.sort((x,y)=>y.lung-x.lung || x.usate-y.usate || y.fs-x.fs || x.a-y.a);
+  const insiemeN=c=>{ let n=0; for(let i=c.a;i<=c.r;i++) if(G[i].insieme) n++; return n; };
+  cand.forEach(c=>{ c.fs=weekend(c); c.ins=conPersona ? insiemeN(c) : 0; });
+  // «A casa con»: prima i giorni in cui lei o lui è a casa; «Più fine settimana»:
+  // prima i sabati e le domeniche coperti. Poi come sempre: la più lunga, meno ferie, la più vicina.
+  cand.sort((x,y)=> (conPersona ? y.ins-x.ins : 0) || (prefer==="weekend" ? y.fs-x.fs : 0) ||
+    y.lung-x.lung || x.usate-y.usate || y.fs-x.fs || x.a-y.a);
   const scelte=[];
   for(const c of cand){
     if(scelte.length>=3) break;
     if(!scelte.some(x=>c.a<=x.r && c.r>=x.a)) scelte.push(c);
   }
   // in ordine di data: si leggono come un calendario; "migliore" solo se lo è davvero
-  if(scelte.length>1 && scelte[0].lung>scelte[1].lung) scelte[0].migliore=true;
+  if(scelte.length>1 && scelte[0].lung>scelte[1].lung && !conPersona && prefer!=="weekend") scelte[0].migliore=true;
   return scelte.sort((x,y)=>x.a-y.a);
 }
 // Il riposo più lungo senza ferie: il termine di paragone delle proposte.
@@ -8232,7 +8453,7 @@ function periodoTesto(da, a){
 let _ferie = {G:[], proposte:[]};
 function preferenzeFerie(){
   const p=store.mappa("ferie");
-  return { n: Math.min(20, Math.max(1, +p.n || 3)), smonto: p.smonto !== false };
+  return { n: Math.min(20, Math.max(1, +p.n || 3)), smonto: p.smonto !== false, prefer: p.prefer==="weekend" ? "weekend" : "giorni", con: (p.con===0||+p.con>0) && p.con!=="" ? +p.con : -1 };
 }
 function renderFerie(){
   const out=$("#ferieOut"); if(!out) return;
@@ -8240,6 +8461,13 @@ function renderFerie(){
   $("#ferieN").textContent=pref.n;
   document.querySelectorAll("[data-ferie-n]").forEach(b=>{ b.disabled = (+b.dataset.ferieN<0 ? pref.n<=1 : pref.n>=20); });
   $("#ferieSmonto").checked=pref.smonto;
+  { const fp=$("#feriePrefer"); if(fp) fp.value=pref.prefer;
+    const persone=tuttePersone(), riga=$("#ferieConRiga"), fc=$("#ferieCon");
+    if(riga && fc){
+      riga.hidden=!persone.length;
+      fc.innerHTML='<option value="-1">Nessuno</option>'+persone.map((p,i)=>'<option value="'+i+'">'+esc(p.name||(p.principale?"la persona partner":"Persona "+(i+1)))+'</option>').join("");
+      fc.value=String(pref.con>=0 && pref.con<persone.length ? pref.con : -1);
+    } }
   // i mesi: da questo ai prossimi 11
   if(sel && !sel.options.length){
     const oggi=giornoVero();
@@ -8251,12 +8479,14 @@ function renderFerie(){
   }
   if(!state.turniConfigurati){ out.innerHTML='<p class="ferie-base">Imposta prima i turni: le proposte vengono dal tuo ciclo.</p>'; return; }
   const mese=sel ? sel.value : "";
-  const G=giorniCiclo(366), noti=G.filter(g=>!g.ignoto).length;
+  const persone=tuttePersone(), persona=(pref.con>=0 && pref.con<persone.length) ? persone[pref.con] : null;
+  const nomeConPersona=persona ? (persona.name||(persona.principale?"la persona partner":"Persona "+(pref.con+1))) : "";
+  const G=giorniCiclo(366, persona), noti=G.filter(g=>!g.ignoto).length;
   _ferie={G, proposte:[]};
   if(noti<7){ out.innerHTML='<p class="ferie-base">Il tuo ciclo non si ripete e i giorni segnati finiscono presto. Segna i turni dei prossimi mesi per avere proposte.</p>'; return; }
   const nomeMese = mese ? " a "+new Date(mese+"-15T12:00:00").toLocaleDateString(LINGUA,{month:"long"}) : "";
   const base=riposoPiuLungo(G, mese, pref.smonto);
-  const P=_ferie.proposte=proposteFerie(G, pref.n, mese, pref.smonto);
+  const P=_ferie.proposte=proposteFerie(G, pref.n, mese, pref.smonto, pref.prefer, persona);
   const gg=n=>n===1?"1 giorno":n+" giorni";
   let h='<p class="ferie-base">'+(base
     ? 'Senza ferie, il riposo più lungo'+nomeMese+' è di <b>'+gg(base.lung)+'</b>: '+esc(periodoTesto(G[base.a].d, G[base.r].d))+'.'
@@ -8266,10 +8496,11 @@ function renderFerie(){
     const giorni=G.slice(p.a,p.r+1);
     const ferie=giorni.filter(g=>g.lavoro);
     const sigla=g=>g.lavoro ? g.c : g.smonto ? "S" : "R";
-    const chip=giorni.map((g,k)=>'<span class="fg'+(g.lavoro?' ferie':(k===0&&g.smonto?' smonto':''))+'">'+GIORNI_DOM[g.d.getDay()]+'<b>'+g.d.getDate()+'</b><i>'+esc(sigla(g))+'</i></span>').join("");
+    const chip=giorni.map((g,k)=>'<span class="fg'+(g.lavoro?' ferie':(k===0&&g.smonto?' smonto':''))+(g.festivo?' fest':'')+'"'+(g.festivo?' title="Festivo"':'')+'>'+GIORNI_DOM[g.d.getDay()]+'<b>'+g.d.getDate()+'</b><i>'+esc(sigla(g))+'</i></span>').join("");
     const quali=ferie.map(g=>g.d.toLocaleDateString(LINGUA,{weekday:"short", day:"numeric", ...(g.d.getMonth()!==giorni[0].d.getMonth()?{month:"short"}:{})})+" "+g.nome).join(" · ");
     h+='<section class="ferie-prop'+(p.migliore?' migliore':'')+'" aria-label="Proposta '+(i+1)+': '+gg(p.lung)+' a casa con '+gg(p.usate)+' di ferie">'+
-      '<div class="ferie-testa"><b>'+gg(p.lung)+' a casa</b><span>'+(p.migliore?'la più lunga · ':'')+'con '+(p.usate===1?"1 giorno":p.usate+" giorni")+' di ferie</span></div>'+
+      '<div class="ferie-testa"><b>'+gg(p.lung)+' a casa</b><span>'+(p.migliore?'la più lunga · ':'')+'con '+(p.usate===1?"1 giorno":p.usate+" giorni")+' di ferie'+
+        (persona ? ' · '+p.ins+' con '+esc(nomeConPersona) : '')+(p.fs ? ' · '+p.fs+(p.fs===1?' giorno':' giorni')+' di fine settimana' : '')+'</span></div>'+
       '<p class="ferie-quando">'+esc(periodoTesto(giorni[0].d, giorni[giorni.length-1].d))+'</p>'+
       '<div class="ferie-giorni" aria-hidden="true">'+chip+'</div>'+
       '<p class="ferie-cosa">Ferie: <b>'+esc(quali)+'</b>'+(giorni[0].smonto?'. Il primo giorno è lo smonto: a casa dal mattino':'')+'.</p>'+
@@ -8315,6 +8546,8 @@ if($("#feriePagina")){
     const s=e.target.closest("[data-ferie-segna]"); if(s) segnaFerie(+s.dataset.ferieSegna);
   });
   $("#ferieMese").addEventListener("change", renderFerie);
+  $("#feriePrefer").addEventListener("change", e=>{ const p=preferenzeFerie(); p.prefer=e.target.value; store.set("ferie", p); renderFerie(); });
+  $("#ferieCon").addEventListener("change", e=>{ const p=preferenzeFerie(); p.con=+e.target.value; store.set("ferie", p); renderFerie(); });
   $("#ferieSmonto").addEventListener("change", e=>{ const p=preferenzeFerie(); p.smonto=e.target.checked; store.set("ferie", p); renderFerie(); });
 }
 
@@ -8407,6 +8640,7 @@ function preparaImport(){
   if($("#sgDaCalendario")) $("#sgDaCalendario").hidden=!platform.calendar.available;
 }
 // ── «I tuoi turni» ──────────────────────────────────────────────────────
+var cambiaSchema=false;   // var: letto da renderDemoEsempio durante l'avvio
 let ttDa="turni";   // da dove si è aperta: lì si torna
 function tipoTurni(){
   if(state.repeat===false) return "variabili";
@@ -8491,7 +8725,7 @@ function apriFlussoPagina(sub, ritocco){
 }
 function chiudiFlussoPagina(muto){
   if(!flussoInPagina) return;
-  flussoInPagina=false; ingressoFlusso=""; soloRitocco=""; schemaInScelta=null;
+  flussoInPagina=false; ingressoFlusso=""; soloRitocco=""; schemaInScelta=null; cambiaSchema=false;
   sceltaSchemaAperta=false; demoEsempioSubflow="home";
   const el=$("#demoEsempio"), casa=$("#demoCasa");
   if(el && casa) casa.parentNode.insertBefore(el, casa);
@@ -8512,7 +8746,7 @@ if($("#ttFatto")) $("#ttFatto").onclick=()=>chiudiTuoiTurni();
 if($("#ttRighe")) $("#ttRighe").addEventListener("click", e=>{
   const b=e.target.closest("[data-tt]"); if(!b) return;
   const k=b.dataset.tt; haptic(6);
-  if(k==="schema"){ passo("cambia_schema"); apriFlussoPagina("prossimi"); return; }
+  if(k==="schema"){ passo("cambia_schema"); cambiaSchema=true; apriFlussoPagina("prossimi"); return; }
   if(k==="orari"){ apriFlussoPagina("orari", "orari"); return; }
   if(k==="riposi"){
     turnoInScelta=[...new Set(String(state.pattern).split("").filter(c=>c!=="R"&&c!=="S"))][0]||null;
@@ -8551,6 +8785,14 @@ function renderImport(){
       '<input type="text" id="sgNome" maxlength="40" autocomplete="off" value="'+esc(store.get("sgNome","")||"")+'">'+
       '<label class="riga-sw" for="sgOk" style="margin-top:10px"><span>Ho capito: il file va ad Anthropic per essere letto</span><span class="switch"><input type="checkbox" id="sgOk"><span class="slider"></span></span></label>'+
       '<div class="sg-azioni"><button type="button" class="btn pri" id="sgScegliFoto" disabled>Scegli il file</button>'+chiudi+'</div></div>';
+    return;
+  }
+  if(I.stato==="ciclo"){
+    const C=I.ciclo, nome=c=>(state.shifts&&state.shifts[c]?state.shifts[c].n:"Riposo");
+    el.innerHTML='<div class="sg-box" role="status"><p><b>I turni si ripetono ogni '+C.periodo+' giorni</b></p>'+
+      '<p class="hint">'+esc(C.pattern.split("").map(nome).join(" · "))+'. Vuoi che il piano continui questo ciclo anche dopo?</p>'+
+      '<div class="sg-azioni"><button type="button" class="btn pri" data-imp-ciclo>Sì, continua il ciclo</button>'+
+      '<button type="button" class="btn g" data-imp-annulla>No, solo questi giorni</button></div></div>';
     return;
   }
   if(I.stato==="attesa"){ el.innerHTML='<div class="sg-box" role="status"><p>'+esc(I.msg||"Leggo…")+'</p></div>'; return; }
@@ -8607,6 +8849,25 @@ async function daTabella(righe, fonte){
   if(!T.giorni.length) throw erroreUtente("Non riconosco la forma di questo foglio. Servono le date (o i numeri dei giorni) e i turni accanto.");
   return daGiorni(T.giorni, fonte);
 }
+// Il ciclo riconosciuto dai giorni importati diventa il ciclo dell'app: da lì
+// in poi il piano continua da solo. I giorni importati che coincidono con il
+// ciclo non servono più come eccezioni.
+function applicaCiclo(){
+  const I=_imp; if(!I || I.stato!=="ciclo") return;
+  const C=I.ciclo, p=C.pattern.length, base=dnum(new Date(C.inizio+"T12:00:00")), tolte=[];
+  const primaE=JSON.parse(JSON.stringify(state.ecc)), prima={pattern:state.pattern, anchor:state.anchor, repeat:state.repeat};
+  state.pattern=C.pattern; state.anchor=C.inizio; state.repeat=true;
+  for(const k of Object.keys(state.ecc)){
+    const n=dnum(new Date(k+"T12:00:00"))-base; if(n<0) continue;
+    if(state.ecc[k]===C.pattern[n%p]){ tolte.push(k); delete state.ecc[k]; }
+  }
+  track("setup_item", {item:"import_ciclo"});
+  _imp=null; renderImport(); salva(); render(); renderSegna();
+  toastUndo("Ciclo di "+p+" giorni attivo: il piano lo continua da solo", ()=>{
+    state.pattern=prima.pattern; state.anchor=prima.anchor; state.repeat=prima.repeat;
+    Object.assign(state.ecc, primaE); salva(); render(); renderSegna();
+  });
+}
 function applicaImport(){
   const I=_imp; if(!I || I.stato!=="mappa") return;
   const scelte={}; I.gruppi.forEach((g,i)=>{ const s=document.querySelector('[data-imp-v="'+i+'"]'); scelte[g.chiave]= s ? s.value : ""; });
@@ -8630,7 +8891,11 @@ function applicaImport(){
     const a=giornoVero(); sgOff=(+primo.slice(0,4)-a.getFullYear())*12+(+primo.slice(5,7)-1-a.getMonth());
     sgOff=Math.max(-6, Math.min(12, sgOff));
     track("setup_item", {item:"import_"+I.fonte});
-    _imp=null; renderImport(); salva(); render(); renderSegna();
+    _imp=null;
+    // I giorni importati si ripetono? Allora si propone di continuare il ciclo.
+    let ciclo=null; try{ ciclo=IM.rilevaCiclo(P, state.shifts||{}); }catch(e){}
+    if(ciclo && state.repeat===false) _imp={stato:"ciclo", ciclo};
+    renderImport(); salva(); render(); renderSegna();
     try{ window.scrollTo({top:0, behavior:"smooth"}); }catch(e){}
     toastUndo((P.length===1?"1 giorno segnato":P.length+" giorni segnati")+" dal foglio turni", ()=>{
       state.ecc=primaE; state.giorni=primaG; NT.state.ecc=primaE; NT.state.giorni=primaG; salva(); render(); renderSegna();
@@ -8701,6 +8966,7 @@ if($("#sgFoto")) $("#sgFoto").addEventListener("change", e=>{
 if($("#sgImport")){
   $("#sgImport").addEventListener("click", e=>{
     if(e.target.closest("[data-imp-annulla]")){ _imp=null; renderImport(); return; }
+    if(e.target.closest("[data-imp-ciclo]")){ applicaCiclo(); return; }
     if(e.target.closest("#sgScegliFoto")){ const n=$("#sgNome"); store.set("sgNome", n?n.value.trim().slice(0,40):""); const i=$("#sgFoto"); i.value=""; i.click(); return; }
     const cal=e.target.closest("[data-imp-cal]");
     if(cal && _imp && _imp.eventi){ const ev=_imp.eventi.filter(x=>x.calendario===cal.dataset.impCal); avviaImport("calendario", async()=>daGiorni((await caricaImporta()).eventiInGiorni(ev), "calendario")); return; }
@@ -8910,7 +9176,10 @@ async function condividiCicloWhatsApp(){
     ? (start.getDate() + "–" + d2Str)
     : (d1Str + " – " + d2Str);
 
-  let testo = "📅 *I miei turni — " + nomeCiclo + "* (" + rangeStr + "):\n\n";
+  // Testo semplice: gli asterischi e i trattini bassi valgono solo in WhatsApp
+  // (altrove restano come simboli) e le emoji fanno rumore. Il punto elenco
+  // passa da ogni app.
+  let testo = "I miei turni (" + nomeCiclo + "), " + rangeStr + ":\n\n";
 
   for(let i = 0; i < count; i++){
     const dd = day(start, i);
@@ -8932,24 +9201,15 @@ async function condividiCicloWhatsApp(){
       orario = " (" + hhmm(sh.s) + "–" + hhmm(sh.e) + ")";
     }
 
-    let emoji = "✨";
-    if(code === "N" || (typeof isNightCode === "function" && isNightCode(code))) emoji = "🌙";
-    else if(code === "M") emoji = "☀️";
-    else if(code === "P") emoji = "⛅";
-    else if(code === "S") emoji = "🛌";
-    else if(code === "R") emoji = "✨";
-    else if(code === "?") emoji = "❓";
-    else if(sh && !sh.rest) emoji = "💼";
-
     const isOggi = iso(dd) === iso(giornoVero());
-    const badge = isOggi ? " · _oggi_" : "";
+    const badge = isOggi ? " · oggi" : "";
     const dataLabel = giorni[dd.getDay()] + " " + dd.getDate() + " " + mesi[dd.getMonth()];
 
-    testo += emoji + " *" + dataLabel + "*: " + nome + orario + badge + "\n";
+    testo += "• " + dataLabel + ": " + nome + orario + badge + "\n";
   }
 
   const link = window.NT_APP.base + "#" + toCompactHash();
-  testo += "\n🔗 Confronta i tuoi turni con i miei:\n" + link;
+  testo += "\nConfronta i tuoi turni con i miei su Notturnisti:\n" + link;
   // Pannello di condivisione del telefono: WhatsApp, Telegram, SMS… (prima
   // solo wa.me, che escludeva le altre app e nell'app Android passava dal
   // browser). wa.me resta il ripiego dove il pannello non c'è (computer).
@@ -8992,8 +9252,8 @@ async function invitaChiLavoraConTe(){
   return consigliaApp();
 }
 async function consigliaApp(){
-  const url=window.NT_APP.nativo ? "https://app.notturnisti.club/" : window.NT_APP.base;
-  const testo="Uso Notturnisti per i turni: mi dice quando dormire, il caffè e la luce, giorno per giorno. Gratis, senza account.";
+  const url="https://app.notturnisti.club/?s=consiglio";
+  const testo="Uso Notturnisti per i turni: ogni giorno mi dice quando dormire, l'ultimo caffè e la luce. Gratis, senza account.";
   try{
     if(platform.canShare()){ await platform.share({title:"Notturnisti",text:testo,url}); track("share_created", {tipo:"app"}); return; }
   }catch(e){ if(e && e.name==="AbortError") return; }
@@ -9014,11 +9274,11 @@ if(store.get("sub") && $("#privacyNotaAbbonato")) $("#privacyNotaAbbonato").hidd
 if(!window.NT_APP.nativo && platform.notify.pushStato && platform.notify.pushStato()!=="no" && $("#notifHint"))
   $("#notifHint").textContent="Arrivano anche ad app chiusa: per svegliarla all'ora giusta il nostro server conserva solo gli orari dei promemoria (non cosa dicono), finché li tieni accesi. Non sostituiscono la sveglia.";
 if(window.NT_APP.nativo){
-  if($("#notifHint")) $("#notifHint").textContent="I promemoria arrivano anche ad app chiusa. Se mancano, controlla che il risparmio batteria non limiti Notturnisti. Non sostituiscono la sveglia.";
+  if($("#notifHint")) $("#notifHint").textContent="I promemoria arrivano anche con l'app chiusa. Non sono una sveglia: per quella, «Metti la sveglia» in «Dormi». Non ti arrivano? Controlla che il risparmio batteria non limiti Notturnisti.";
   // Android 12+: senza "Sveglie e promemoria" la sveglia può arrivare con
   // qualche minuto di ritardo. Si propone solo a chi ha già le notifiche.
   const riga=document.createElement("p"); riga.className="hint"; riga.hidden=true; riga.style.margin="6px 2px 0";
-  riga.innerHTML='La sveglia può arrivare con qualche minuto di ritardo. <button class="lnk" type="button" style="display:inline">Rendila puntuale →</button>';
+  riga.innerHTML='Possono arrivare con qualche minuto di ritardo. <button class="lnk" type="button" style="display:inline">Falli arrivare all\'ora esatta →</button>';
   if($("#notifHint")) $("#notifHint").after(riga);
   const aggiornaEsatta=()=>Promise.all([platform.notify.permission(),platform.notify.exactStatus()])
     .then(([p,x])=>{ riga.hidden=!(p==="granted" && x!=="granted"); }).catch(()=>{});
@@ -9035,12 +9295,12 @@ if(window.NT_APP.nativo){
 // Punto permanente e silenzioso per chi vuole sostenere il progetto senza
 // aspettare il nudge periodico (donateNudge) o essere passato da Andamenti/
 // dal calendario attivo: sempre lì, mai un obbligo.
-{ const du=donateUrl(), dw=$("#doDonateLnkWrap"), dl=$("#doDonateLnk");
-  if(du && dw && dl){ dl.href=du; dw.hidden=false; } }
+{ const du=donateUrl(), dl=$("#doDonateLnk");
+  if(du && dl){ dl.href=du; dl.hidden=false; } }
 // Nell'app, al posto della donazione: il link alla scheda Play per chi vuole
 // lasciare un voto quando lo decide lui, senza aspettare il riquadro.
-{ const rw=$("#doReviewLnkWrap"), rl=$("#doReviewLnk");
-  if(platform.review.available && rw && rl){ rl.href=platform.review.url; rw.hidden=false; } }
+{ const rl=$("#doReviewLnk");
+  if(platform.review.available && rl){ rl.href=platform.review.url; rl.hidden=false; } }
 
 /* --- editor turni --- */
 function renderShifts(){
@@ -9656,7 +9916,7 @@ function salva(){
     cTo:state.cTo,cFrom:state.cFrom,need:state.need,prep:state.prep,freeWake:state.freeWake,freeBed:state.freeBed,
     maxAdvance:state.maxAdvance,pPattern:state.pPattern,pAnchor:state.pAnchor,
     pShifts:state.pShifts,pWake:state.pWake,pBed:state.pBed,pName:state.pName,people:state.people,personaGlance:state.personaGlance,
-    repeat:state.repeat,ecc:state.ecc,giorni:state.giorni,evento:state.evento,
+    repeat:state.repeat,ecc:state.ecc,giorni:state.giorni,evento:state.evento,festivi:state.festivi,festiviRiposo:state.festiviRiposo,
     napTurno:state.napTurno,sonnoDiurno:state.sonnoDiurno,mattinoBifasico:state.mattinoBifasico,avvisoBifasicoOff:state.avvisoBifasicoOff,firstSeenAt:state.firstSeenAt,pausa:state.pausa,caffSens:state.caffSens,vista:state.vista};
   const testo=JSON.stringify(dati);
   if(testo!==_ultimoSalvato){

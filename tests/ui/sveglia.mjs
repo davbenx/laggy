@@ -22,7 +22,7 @@ async function apri(porta, app, alarm){
   return p;
 }
 const bottone=p=>p.evaluate(()=>{ const d=document.querySelector('#essenziale details[data-row="sonno"]'); if(!d) return null; d.open=true;
-  const s=d.querySelector("[data-sveglia]"); return s ? {ora:s.dataset.sveglia, testo:s.textContent, fine:d.querySelector(".en").textContent} : null; });
+  const s=d.querySelector("[data-sveglia]"); return s ? {ora:s.dataset.sveglia, testo:s.textContent, fine:d.querySelector(".essrow").textContent} : null; });
 
 { const p=await apri(8766, true, true);
   const s=await bottone(p);

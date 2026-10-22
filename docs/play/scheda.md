@@ -32,10 +32,10 @@ Un calendario ti dice che domani fai la notte. Notturnisti ti dice anche cosa fa
 
 COME FUNZIONA
 • Scegli il turno di oggi con un tocco, oppure il tuo schema, anche con turni irregolari o che cambiano ogni settimana.
-• Il piano tiene conto di come dormi davvero nei giorni liberi, del tragitto, di quanto ti resta addosso il caffè e se puoi fare un pisolino al lavoro.
+• Il piano è una timeline: ora, cosa fare e perché, su come dormi davvero, il tragitto, il caffè e i pisolini.
 • Prima di un cambio turno ti prepara: a letto prima quando torni alle mattine, sonno lungo e pisolino prima della prima notte.
 • Ogni consiglio ha il suo perché, spiegato in parole semplici, con gli studi da cui viene. E in cima al piano, in una riga, perché la giornata è fatta così.
-• Hai già i turni su un'altra app, in un foglio Excel o in una foto? Li importi in un minuto. Puoi anche tenere la tua app dei turni: Notturnisti legge il calendario del telefono.
+• Hai già i turni nel calendario, in un file Excel o in una foto? Li importi dal primo avvio, e se si ripetono il ciclo continua da solo.
 
 FUNZIONA DA SOLO
 • Promemoria: quando prepararti a dormire, l'ultimo caffè, il rientro dopo la notte (l'ora più a rischio per chi guida), e un consiglio in più nei giorni impegnativi, come la terza notte di fila. Scegli tu quali: al massimo 4 al giorno, mai mentre dormi.
@@ -52,7 +52,8 @@ PER CHI TI ASPETTA
 • Trova il tempo libero in comune con partner, famiglia o chi lavora con te.
 • Cambio turno: ti conviene? Prima di accettarlo vedi quanto sonno ti costa e se ti restano almeno 11 ore di riposo.
 • Stampa o salva in PDF un calendario da appendere al frigo.
-• Il mese in numeri: ore di turno, notti, domeniche e festivi, per tenere il conto.
+• Il mese in numeri: ore di turno, notti, domeniche e festivi (anche quelli del tuo contratto).
+• Ferie: dove metterle per stare più a casa, nei fine settimana o con chi ami.
 
 PER CHI È
 Per chi lavora a turni e di notte: infermieri e OSS, medici, operai e turnisti dell'industria, forze dell'ordine, vigili del fuoco, autisti, guardie giurate, addetti alla logistica, all'assistenza e all'accoglienza.
@@ -65,12 +66,15 @@ Notturnisti dà indicazioni generali di benessere e organizzazione basate sulla 
 
 Un progetto indipendente, nato da chi i turni li fa. Segnalazioni e idee: dall'app, Impostazioni → Segnala cosa non torna.
 
-## Note di versione 1.0.0 (max 500)
-Prima versione su Google Play.
-• Il piano di sonno, caffè, luce e pisolini sul tuo turno
-• Promemoria, calendario del telefono e widget
-• Il tuo tempo libero da condividere, anche in PDF
-Usavi Notturnisti dal browser? All'apertura scegli «Porta qui i tuoi turni».
+## Note di versione 1.1.0 (max 500)
+Dalla 1.0.2:
+• Il piano di oggi è una timeline: l'ora a sinistra, le voci passate sbiadite, «Poi» sotto Adesso
+• «Il tuo orologio»: allodola o gufo, melatonina, minimo corporeo
+• Metti la sveglia nell'Orologio con un tocco
+• Grafici con le ore di riferimento
+• Festivi del tuo contratto; ferie con più fine settimana e giorni a casa con il partner
+• Importa i turni dal calendario o da un file fin dall'inizio
+• Messaggi di condivisione più puliti
 
 ## Categoria, tag e contatti
 - Categoria: Salute e fitness

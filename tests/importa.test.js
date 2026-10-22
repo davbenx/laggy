@@ -79,3 +79,31 @@ test("piano: un turno vince sulla reperibilità, gli orari veri restano", () => 
     {data:"2026-11-02", v:"ferie"},
     {data:"2026-11-04", v:"N"}]);
 });
+
+// ── riconoscere il ciclo dai giorni importati ──
+import { rilevaCiclo } from "../importa.js";
+const turniM = { M: {}, P: {}, N: {} };
+const seq = (inizio, codici) => codici.map((v, i) => ({ data: new Date(Date.UTC(2026, 9, 1 + i) ).toISOString().slice(0, 10), v })).map((x, i) => (i === 0 ? { ...x, data: inizio } : x));
+test("rilevaCiclo: MPNSR ripetuto due volte è un ciclo di 5 giorni", () => {
+  const g = seq("2026-10-01", "MPNRRMPNRR".split(""));
+  const c = rilevaCiclo(g, turniM);
+  assert.deepEqual(c, { periodo: 5, pattern: "MPNRR", inizio: "2026-10-01" });
+});
+test("rilevaCiclo: un giro solo non basta", () => {
+  assert.equal(rilevaCiclo(seq("2026-10-01", "MPNRR".split("")), turniM), null);
+});
+test("rilevaCiclo: turni diversi ogni settimana non sono un ciclo", () => {
+  assert.equal(rilevaCiclo(seq("2026-10-01", "MMPNRRPPNMRRNNM".split("")), turniM), null);
+});
+test("rilevaCiclo: un solo valore, o i soli riposi, non sono un ciclo", () => {
+  assert.equal(rilevaCiclo(seq("2026-10-01", "MMMMMMMM".split("")), turniM), null);
+  assert.equal(rilevaCiclo(seq("2026-10-01", "RRRRRRRR".split("")), turniM), null);
+});
+test("rilevaCiclo: un buco nelle date spezza la fila", () => {
+  const g = seq("2026-10-01", "MPNRRMPNRR".split("")); g.splice(5, 1);
+  assert.equal(rilevaCiclo(g, turniM), null);
+});
+test("rilevaCiclo: orari veri diversi dal solito non contano come turno del ciclo", () => {
+  const g = seq("2026-10-01", "MPNRRMPNRR".split("")).map((x, i) => i === 2 ? { ...x, s: 100, e: 200 } : x);
+  assert.equal(rilevaCiclo(g, turniM), null);
+});

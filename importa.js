@@ -312,3 +312,33 @@ export function piano(giorni, scelte, shifts) {
   }
   return Object.values(out).sort((a, b) => a.data < b.data ? -1 : 1).map(o => { delete o.peso; return o; });
 }
+
+/* ── Riconoscere un ciclo ───────────────────────────────────────────────── */
+// Dai giorni importati (date e turno di ognuno) capisce se si ripetono: il
+// foglio di un mese di un turnista a ciclo è lo stesso schema ripetuto, e in
+// quel caso conviene continuarlo invece di chiedere un altro foglio. Prudente:
+// serve una fila di giorni consecutivi, lunga almeno due giri interi, in cui
+// ogni giorno uguale a quello di un periodo prima; ferie e simili la spezzano.
+// Restituisce { periodo, pattern, inizio } o null.
+export function rilevaCiclo(giorni, turni) {
+  const giorno = k => Math.round(new Date(k + "T12:00:00").getTime() / 864e5);
+  const ok = x => x && x.v && turni[x.v] && !x.s;
+  const riposo = x => x && x.v === "R";
+  const ordinati = (giorni || []).filter(x => x && x.data && (ok(x) || riposo(x))).sort((a, b) => a.data < b.data ? -1 : 1);
+  // la fila consecutiva più lunga
+  let best = [], cur = [];
+  for (const x of ordinati) {
+    if (cur.length && giorno(x.data) - giorno(cur[cur.length - 1].data) === 1) cur.push(x); else cur = [x];
+    if (cur.length > best.length) best = cur;
+  }
+  const L = best.length, codice = best.map(x => x.v);
+  for (let p = 2; p <= 28 && 2 * p <= L; p++) {
+    let uguale = true;
+    for (let i = p; i < L; i++) if (codice[i] !== codice[i % p]) { uguale = false; break; }
+    if (!uguale) continue;
+    const pat = codice.slice(0, p);
+    if (new Set(pat).size < 2 || !pat.some(c => c !== "R")) continue;   // un solo valore non è un ciclo
+    return { periodo: p, pattern: pat.join(""), inizio: best[0].data };
+  }
+  return null;
+}

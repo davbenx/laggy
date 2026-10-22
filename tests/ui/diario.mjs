@@ -66,6 +66,6 @@ ok(/Hai fatto il pisolino/.test(await box(p)), "Modifica: si torna alla domanda"
 ok(await p.evaluate(()=>!!document.querySelector('#essenziale [data-row^="nap"] [data-skip-recupero], #essenziale [data-row^="nap"] .ed')), "le scelte da fare prima del pisolino stanno nella sua riga del piano");
 // «e la palestra quando la faccio?»: il tempo libero vero, nella lista della giornata
 const lib=await p.evaluate(()=>{ const r=document.querySelector('#essenziale [data-row="liberi"]'); if(!r) return null;
-  r.open=true; return {val:r.querySelector(".en").innerText, det:r.querySelector(".ed").innerText}; });
-ok(lib && /\d\d:\d\d → \d\d:\d\d/.test(lib.val) && /palestra/i.test(lib.det) && /ultima ora prima di dormire/.test(lib.det), "riga «Libero» con le finestre vere e la nota su palestra e sonno");
+  r.open=true; return {val:r.querySelector(".essrow").innerText, det:r.querySelector(".ed").innerText}; });
+ok(lib && /\d\d:\d\d[\s\S]*fino alle \d\d:\d\d/.test(lib.val) && /palestra/i.test(lib.det) && /ultima ora prima di dormire/.test(lib.det), "riga «Libero» con le finestre vere e la nota su palestra e sonno");
 console.log("errori", errs); await b.close();

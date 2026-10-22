@@ -162,10 +162,28 @@ function eccezioneA(off){
 // ciclo ripulito e giorno d'inizio si ricalcolano solo quando cambiano, e
 // dnum(focus)+off è lo stesso giorno di calendario di dnum(day(focus,off)).
 let _ciclo = {src:null, p:"R"}, _inizio = {src:null, n:0};
+// Festivi a riposo: chi ha un orario fisso (lunedì–venerdì) di solito nei
+// festivi non lavora. La pagina dà la funzione «questa data è festiva?»
+// (setFestivo) perché il calendario dei festivi dipende dal contratto; il
+// motore la chiede solo se state.festiviRiposo è acceso, e una volta sola
+// per giorno (cache).
+let _festivo = null; const _festCache = new Map();
+function setFestivo(fn){ _festivo = typeof fn === "function" ? fn : null; _festCache.clear(); }
+function festivoA(off){
+  const k = chiaveA(off);
+  let v = _festCache.get(k);
+  if(v === undefined){
+    v = !!_festivo(new Date(k+"T12:00:00"));
+    if(_festCache.size > 4000) _festCache.clear();
+    _festCache.set(k, v);
+  }
+  return v;
+}
 function codeAt(off){
   // niente for…in per sapere se ce ne sono: su un oggetto con centinaia di
   // date costa quanto elencarle tutte, a ogni chiamata
   if(state.ecc){ const e = eccezioneA(off); if(e) return e; }
+  if(state.festiviRiposo && _festivo && state.repeat !== false && festivoA(off)) return "R";
   if(_ciclo.src !== state.pattern) _ciclo = {src:state.pattern, p:(String(state.pattern||"").toUpperCase().replace(/[^A-Z]/g,"") || "R")};
   if(_inizio.src !== state.anchor) _inizio = {src:state.anchor, n:dnum(new Date(state.anchor+"T12:00:00"))};
   const p = _ciclo.p;
@@ -1066,7 +1084,7 @@ function buildIcs(days){
     // stesse è cambiata: solo il return si è allargato.
     CFG, constraint, simulate, at,
     startsInNight, spansNight, oraDi, debitoVero, saltatiIeri,
-    freeWakeOk, freeWakeUsata, naturalMid, durataLibera, sincronizzaNeed,
+    freeWakeOk, freeWakeUsata, naturalMid, durataLibera, sincronizzaNeed, setFestivo,
     // index.html la richiama di nuovo dopo aver ripristinato lo state da
     // link/localStorage (quei valori possono arrivare fuori dai limiti
     // sensati) — prima aveva una seconda copia di LIMITI/normalizza() tutta
