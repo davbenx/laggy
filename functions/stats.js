@@ -401,8 +401,10 @@ function render(){
   $("#steps").innerHTML=rowsHtml(sItems);
   var VOCI={turni:"Turni dei prossimi giorni",notifiche:"Promemoria",calendario:"Calendario del telefono",widget:"Widget",file_ics:"File .ics scaricato",play:"Dal web a Google Play",
     mese_aperto:"Il mio mese aperto",import_ciclo:"Import: ciclo riconosciuto e applicato",ferie_aperte:"Ferie: pianificatore aperto",ferie_segnate:"Ferie: segnate",ferie_con:"Ferie: scelto «a casa con»",
-    festivi_riposo:"Festivi contati come riposo",medico_visto:"Riepilogo medico aperto",medico_pdf:"Riepilogo medico in PDF",diario_widget:"Voto dal widget",tuoi_turni:"Pagina «I tuoi turni» aperta"};
-  $("#setup").innerHTML=rowsHtml(byProp(rows,"setup_item").map(function(x){ return {k:VOCI[x.k]||x.k, n:x.n}; }));
+    festivi_riposo:"Festivi contati come riposo",medico_visto:"Riepilogo medico aperto",medico_pdf:"Riepilogo medico in PDF",diario_widget:"Voto dal widget",tuoi_turni:"Pagina «I tuoi turni» aperta",festivi_extra:"Festivi: aggiunto il proprio",orologio_tuo:"Orari di sonno personalizzati"};
+  var SAP={orologio:"Il tuo orologio",mese:"Il mio mese",festivi:"Festivi",dormi:"Dormi (scelte sul sonno)",acasa:"Orari a casa",ferie:"Ferie",colleghi:"Colleghi",calendario:"Calendario",scambio:"Scambio turno",sonno:"Sonno e carico",medico:"Medico",copia:"Copia di sicurezza",installa:"Installa",statistiche:"Statistiche",grazie:"Grazie",tester:"Tester"};
+  function voce(k){ var m=/^sapevi_(si|no)_(.+)$/.exec(k); if(m) return "Lo sapevi «"+(SAP[m[2]]||m[2])+"»: "+(m[1]==="si"?"provato":"chiuso"); m=/^voce_(.+)$/.exec(k); if(m) return "Voce del piano aperta: "+m[1]; return VOCI[k]||k; }
+  $("#setup").innerHTML=rowsHtml(byProp(rows,"setup_item").map(function(x){ return {k:voce(x.k), n:x.n}; }));
 
   var FORMATI={a_casa:"Orari del giorno mandati a casa",turni_msg:"Messaggio con i turni",liberi_msg:"Messaggio con gli orari liberi",link:"Invito con il ciclo",app:"Invito (solo l'app)",qr:"QR del ciclo",pdf_ciclo:"Stampa/PDF del ciclo",pdf_liberi:"Stampa/PDF orari liberi",chiedi_link:"Richiesta del link a una persona"};
   $("#share").innerHTML=rowsHtml(byProp(rows,"share_created").map(function(x){ return {k:FORMATI[x.k]||x.k, n:x.n}; }));

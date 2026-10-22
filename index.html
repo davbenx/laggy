@@ -6255,7 +6255,7 @@ if($("#meseBox")) $("#meseBox").addEventListener("change", e=>{
 if($("#meseBox")) $("#meseBox").addEventListener("click", e=>{
   if(e.target.closest("[data-riepilogo-medico]")){ stampaRiepilogoMedico(); return; }
   if(e.target.closest("[data-mese-segna]")){ sgOff=meseOff; apriSegna(); return; }
-  if(e.target.closest("[data-fest-apri]")){ festiviAperto=true; renderMese(); return; }
+  if(e.target.closest("[data-fest-apri]")){ festiviAperto=true; usata("festivi"); renderMese(); return; }
   if(e.target.closest("[data-fest-chiudi]")){ festiviAperto=false; renderMese(); return; }
   const fd=e.target.closest("[data-fest-del]");
   if(fd){ const f=Object.assign({}, state.festivi||{}); f.extra=(f.extra||[]).filter(k=>k!==fd.dataset.festDel); state.festivi=f; festiviCambiati(); return; }
@@ -6263,7 +6263,7 @@ if($("#meseBox")) $("#meseBox").addEventListener("click", e=>{
     const v=($("#festData")||{}).value||""; const m=/^\d{4}-(\d\d)-(\d\d)$/.exec(v);
     if(!m){ toast("Scegli il giorno"); return; }
     const k=(+m[1])+"-"+(+m[2]), f=Object.assign({}, state.festivi||{}); f.extra=(f.extra||[]).filter(x=>x!==k).concat(k).sort(); state.festivi=f;
-    festiviCambiati(); return; }
+    usata("festivi"); track("setup_item", {item:"festivi_extra"}); festiviCambiati(); return; }
   const b=e.target.closest("[data-mese]"); if(!b || b.disabled) return;
   meseOff=Math.max(-12, Math.min(12, meseOff + +b.dataset.mese)); renderMese();
 });
@@ -7648,9 +7648,15 @@ function diaryClick(e){
     if(v>=4 && diary[k]===v) proponiRecensione(); }
 }
 // il diario si annota dal glance; le stesse azioni valgono anche nelle schede (storico)
+// Statistiche: quali voci del piano si aprono (una volta al giorno per voce)
+function vocePiano(id){
+  try{ const v=String(id).toLowerCase().replace(/[^a-z0-9_]/g,"").slice(0,18), m=store.mappa("vociAperte"), oggi=isoOggi();
+    if(!v || m[v]===oggi) return; m[v]=oggi; store.set("vociAperte", m); track("setup_item", {item:"voce_"+v}); }catch(e){}
+}
 if($("#essenziale")) $("#essenziale").addEventListener("toggle", e=>{
   const r=e.target; if(!r.dataset || !r.dataset.row) return;
   if(r.open) essAperte.add(r.dataset.row); else essAperte.delete(r.dataset.row);
+  if(r.open){ if(r.dataset.row==="sonno") usata("dormi"); vocePiano(r.dataset.row); }
   if(r.open && !store.get("perchéVisto", false)){ store.set("perchéVisto", true); const h=$("#essenziale .esshint"); if(h) h.remove(); }
 }, true);
 ["#essenziale","#andamenti"].forEach(s=>{ const el=$(s); if(el){ el.addEventListener("change",diaryChange); el.addEventListener("click",diaryClick); } });
@@ -7978,12 +7984,18 @@ const CONSIGLI_FUNZIONE=[
     t:()=>{ const o=orologio(); return "Il tuo orologio è pronto: "+o.tipo.toLowerCase()+", con il minimo corporeo verso le "+hhmm(o.cbt)+". Quando arriva la melatonina e quando sei più lucido, in «Sonno e carico»."; },
     cta:()=>"Vedi il tuo orologio", a:()=>{ setTab("turni"); apriAndamenti(); usata("orologio");
       const el=$("#orologio"); if(el) try{ el.scrollIntoView({block:"start"}); }catch(e){} }},
-  {k:"mese", t:()=>"Puoi ricopiare il foglio turni in un minuto, un tocco per giorno, o importarlo da un file.", a:()=>{ setTab("turni"); apriSegna(); }},
+  {k:"mese", t:()=>"Puoi ricopiare il foglio turni in un minuto, un tocco per giorno, o importarlo da un file. Se ricopi almeno due cicli interi, l'app riconosce lo schema e lo continua da sola.", a:()=>{ setTab("turni"); apriSegna(); }},
+  {k:"festivi", quando:()=>!state.festiviRiposo && !(state.festivi && ((state.festivi.extra||[]).length || state.festivi.dom===false)),
+    t:()=>"Domeniche e festivi del tuo contratto contano come riposo? Segnali una volta: il piano ne tiene conto, anche il santo patrono.",
+    cta:()=>"Aggiungi i tuoi festivi", a:()=>{ setTab("turni"); festiviAperto=true; renderMese(); usata("festivi");
+      const x=$("#meseBox .mese-fest-box"); if(x) try{ x.scrollIntoView({block:"center"}); }catch(e){} }},
   {k:"calendario", quando:()=>!inLista("calendario") && (platform.calendar.available ? !platform.calendar.attivo() : !(window.NTPaid && window.NTPaid.paid())),
     t:()=>"Turni e ore di sonno nel calendario del telefono, aggiornati da soli: li vedi dove guardi già i tuoi impegni.", cta:()=>"Attiva", a:()=>apriCalendarioDaWizard()},
-  {k:"ferie", t:()=>"L'app trova i giorni di ferie che ti danno più giorni a casa, attaccati ai riposi.", a:()=>{ setTab("turni"); apriFerie(); }},
+  {k:"ferie", t:()=>"L'app trova i giorni di ferie che ti danno più giorni a casa, attaccati ai riposi. Se hai aggiunto una persona, puoi sceglierli anche per stare a casa insieme.", a:()=>{ setTab("turni"); apriFerie(); }},
   {k:"scambio", t:()=>"Prima di accettare uno scambio di turno, controlla come cambiano sonno e riposi.", a:()=>{ setTab("turni"); apriScambioTurno(); }},
   {k:"sonno", t:()=>"In «Sonno e carico» vedi notti di fila e riposi brevi del mese, anche senza diario.", a:()=>{ setTab("turni"); apriAndamenti(); }},
+  {k:"dormi", t:()=>"Tocca «Dormi» nel piano: dopo una notte scegli sonno breve o lungo, prima di un mattino presto puoi dormire in due tempi."},
+  {k:"acasa", t:()=>"Chi vive con te non sa quando dormi? «Condividi i tuoi orari di oggi» manda in un messaggio quando dormi e quando sei libero."},
   // Il grazie: dopo due settimane, in un momento buono (mai dopo notti pessime).
   // Sul web il contributo libero; nell'app (regole di Play) solo il Club.
   {k:"grazie", dopo:14, quando:()=>{ const ult=Object.keys(diary).sort().slice(-3).map(x=>+diary[x]);
@@ -8053,7 +8065,7 @@ if($("#loSapevi")) $("#loSapevi").addEventListener("click", e=>{
 });
 async function mandaACasa(){
   const testo=testoACasa(); if(!testo){ toast("Segna prima il turno di questo giorno"); return; }
-  track("share_created", {tipo:"a_casa"});
+  track("share_created", {tipo:"a_casa"}); usata("acasa");
   try{ if(platform.canShare()){ await platform.share({title:"I miei orari", text:testo}); return; } }
   catch(e){ if(e && e.name==="AbortError") return; }
   try{ await navigator.clipboard.writeText(testo); toast("Messaggio copiato: incollalo dove vuoi"); }
@@ -10115,6 +10127,7 @@ function contaFunzioniAttive(){
   try{
     if(!state.turniConfigurati || store.get("funzioniContate","")===isoOggi()) return;
     store.set("funzioniContate", isoOggi());
+    if(!store.get("orologioContato",false) && !(state.freeBed==="23:30" && state.freeWake==="07:30")){ store.set("orologioContato", true); track("setup_item", {item:"orologio_tuo"}); }
     const pl = platform.isNative ? (platform.name==="ios"?"i":"a") : (window.matchMedia("(display-mode: standalone)").matches?"p":"w");
     const cal = platform.calendar.available ? platform.calendar.attivo() : !!(window.NTPaid && window.NTPaid.paid());
     track("funzioni_attive", {mix: pl+"_n"+(promemoriaAttivi()?1:0)+"c"+(cal?1:0)+"w"+(platform.widget.presenti()>0?1:0)+
