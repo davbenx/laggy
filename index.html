@@ -873,12 +873,13 @@ justify-content:center;flex:none;width:44px;height:44px;border-radius:999px}
 .drem-done,.dq-riga{line-height:1.5}
 .drem-done .lnk,.dq-riga .lnk{min-height:0;padding:10px 6px;margin:-10px 0;vertical-align:baseline}
 .dopo-notte{margin:-2px 0 10px;padding:0 2px}
-.dn-vale{font-size:12px;color:var(--faint);margin:6px 2px 0}
+.dn-vale{font-size:12px;color:var(--faint);margin:6px 0 0}
 .dn-lab{display:block;font-size:12px;color:var(--dim);margin:0 0 6px}
 .dn-scelta{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--s2);border:1px solid var(--line);border-radius:var(--r);padding:2px}
 .dn-scelta .vb{display:flex;flex-direction:column;align-items:center;gap:1px;padding:7px 8px;min-height:48px}
 .dn-scelta .vb b{font-size:13.5px}
 .dn-scelta .vb span{font-size:12px;font-weight:500;color:var(--dim)}
+.dn-scelta .vb .dn-nota{color:var(--faint)}
 .dn-scelta .vb.on span{color:var(--blue)}
 .dn-hint{font-size:12.5px;color:var(--dim);line-height:1.5;margin:7px 0 0}
 .acasa{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--s1);border:1px solid var(--line);border-radius:var(--r);
@@ -5695,13 +5696,13 @@ function sceltaDopoNotte(P){
   const eD=fineCon("diviso"), eU=fineCon(unito);
   if(eD==null || eU==null || eD===eU) return "";
   const corto=P.s.kind==="corto", diviso=cur==="diviso";
-  const opz=(val,nome,fine,on,extra)=>'<button type="button" class="vb'+(on?" on":"")+'" data-sonnod="'+val+'" aria-pressed="'+on+'"><b>'+nome+'</b><span>'+(extra||"")+'fino alle '+hhmm(fine)+'</span></button>';
+  const opz=(val,nome,fine,on,nota)=>'<button type="button" class="vb'+(on?" on":"")+'" data-sonnod="'+val+'" aria-pressed="'+on+'"><b>'+nome+'</b><span>fino alle '+hhmm(fine)+'</span><span class="dn-nota">'+nota+'</span></button>';
   const spiega = store.get("smontoScelto", false) ? "" : '<p class="dn-hint">'+(corto
     ? 'Sonno breve: il pomeriggio è tuo e stanotte dormi bene. Sonno lungo: recuperi di più adesso, ma stasera il sonno arriva più tardi.'
     : 'In due tempi: un sonno più corto e un pisolino prima della prossima notte (di giorno si dorme più leggeri). Tutto di fila: un blocco solo, se di giorno dormi bene.')+'</p>';
   return '<div class="dopo-notte" role="group" aria-label="Dopo la notte, come dormi">'+
     '<span class="dn-lab">Dopo il turno, come dormi?</span>'+
-    '<div class="dn-scelta">'+opz("diviso", corto?"Sonno breve":"In due tempi", eD, diviso, corto?"":"poi un pisolino · ")+opz(unito, corto?"Sonno lungo":"Tutto di fila", eU, !diviso)+'</div>'+
+    '<div class="dn-scelta">'+opz("diviso", corto?"Sonno breve":"In due tempi", eD, diviso, corto?"pomeriggio libero":"poi un pisolino")+opz(unito, corto?"Sonno lungo":"Tutto di fila", eU, !diviso, corto?"recuperi di più":"un blocco solo")+'</div>'+
     spiega+'<p class="dn-vale">Vale per tutte le notti.</p></div>';
 }
 function renderEssenziale(P, CARDS){
