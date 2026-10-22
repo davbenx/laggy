@@ -508,6 +508,7 @@ border-top:5px solid var(--ink)}
    che la striscia usava per conto suo (--sleep-fill/--orange-bar) —
    quei token restano dove servivano altrove (#band), qui la tinta è la
    stessa che l'utente vede già ovunque per "sonno" e "turno". */
+.fg.fest::after{content:"";position:absolute;top:3px;right:3px;width:5px;height:5px;border-radius:50%;background:var(--faint)}
 .cbar{position:absolute;top:0;bottom:0;border-radius:99px;background:var(--blue);z-index:2}
 .crows{position:relative}
 .cgrid{position:absolute;top:0;bottom:0;left:86px;right:0;z-index:1;pointer-events:none}
@@ -1088,7 +1089,7 @@ body:not(.tab-turni) .solo-turni,body:not(.tab-oggi) .solo-oggi{display:none}
 .ferie-testa span{font-size:13.5px;color:var(--dim)}
 .ferie-quando{font-size:14px;color:var(--ink);margin:4px 0 10px}
 .ferie-giorni{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px}
-.fg{display:flex;flex-direction:column;align-items:center;justify-content:center;width:30px;height:50px;border-radius:7px;background:var(--s2);color:var(--dim);font-size:11px;line-height:1.15}
+.fg{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;width:30px;height:50px;border-radius:7px;background:var(--s2);color:var(--dim);font-size:11px;line-height:1.15}
 .fg b{font-size:12.5px;color:var(--ink)}
 .fg.ferie{background:var(--blue);color:var(--su-blu)}
 .fg.ferie b{color:var(--su-blu)}
@@ -1830,6 +1831,8 @@ header b{font-size:23px}
         <button type="button" data-ferie-n="1" aria-label="Un giorno in più">+</button>
       </span></div>
     <div class="ferie-riga"><label for="ferieMese">Quando</label><select id="ferieMese"></select></div>
+    <div class="ferie-riga"><label for="feriePrefer">Preferisco</label><select id="feriePrefer"><option value="giorni">Più giorni a casa</option><option value="weekend">Più fine settimana</option></select></div>
+    <div class="ferie-riga" id="ferieConRiga" hidden><label for="ferieCon">A casa con</label><select id="ferieCon"></select></div>
     <label class="riga-sw" for="ferieSmonto"><span>Conta lo smonto come giorno a casa</span><span class="switch"><input type="checkbox" id="ferieSmonto" checked><span class="slider"></span></span></label>
   </div>
   <div id="ferieOut" aria-live="polite"></div>
@@ -6140,6 +6143,13 @@ function rischiAvanti(P, n){
   }
   return flag;
 }
+// I festivi di chi usa l'app: domeniche, festivi nazionali e i giorni che il
+// suo contratto aggiunge (il santo patrono, la festa del paese): giorno e
+// mese, ogni anno. Chi ha un orario fisso può dire che nei festivi non lavora.
+function festiviCfg(){ const f=state.festivi||{}; return {extra:Array.isArray(f.extra)?f.extra:[], dom:f.dom!==false}; }
+function festivo(d){ const c=festiviCfg(), m=d.getMonth()+1, g=d.getDate();
+  return (c.dom && d.getDay()===0) || festivoIT(d) || c.extra.includes(m+"-"+g); }
+try{ NT.setFestivo(festivo); }catch(e){}
 // Festivi nazionali italiani (domeniche a parte): fissi più Pasquetta.
 function festivoIT(d){
   const m=d.getMonth()+1, g=d.getDate();
@@ -6166,7 +6176,7 @@ function datiMese(off){
     // straordinario: solo gli orari veri più lunghi del turno previsto
     if(b.oreVere && b.previsto) r.straordinario+=Math.max(0, (b.end-b.start)-b.previsto);
     if(NT.spansNight(b)||NT.startsInNight(b)) r.notti++;
-    if(d.getDay()===0 || festivoIT(d)) r.festivi++;
+    if(festivo(d)) r.festivi++;
   }
   state.focus=fPrima;
   return r;
@@ -6201,13 +6211,45 @@ function renderMese(){
       if(r.malattia) v.push(r.malattia+(r.malattia===1?" giorno di malattia":" giorni di malattia"));
       return v.length ? '<p class="mese-spec">'+esc(v.join(" · "))+'</p>' : ''; })()+
     (vuoto ? '' : '<p class="hint">Ore dall\'inizio alla fine di ogni turno, pause comprese: per controllare, non è un conteggio ufficiale.</p>')+
+    festiviHtml()+
     '<button type="button" class="btn g mese-segna" data-mese-segna>Segna o importa i turni'+
       (r.ignoti && !vuoto ? '<small>'+r.ignoti+(r.ignoti===1?' giorno ancora da segnare':' giorni ancora da segnare')+'</small>' : '')+'</button>';
 }
+// Festivi del contratto: una riga che dice cosa si conta, e un piccolo editor.
+var festiviAperto=false;   // var: letto da renderMese durante l'avvio
+function nomeGiornoMese(k){ const [m,g]=k.split("-").map(Number); return new Date(2000,m-1,g).toLocaleDateString(LINGUA,{day:"numeric",month:"long"}); }
+function festiviHtml(){
+  const c=festiviCfg(), fisso=tipoTurni()==="fisso";
+  const conta="Conto "+(c.dom?"le domeniche e ":"")+"i festivi nazionali"+(c.extra.length?" e "+c.extra.map(nomeGiornoMese).join(", "):"")+".";
+  if(!festiviAperto) return '<p class="hint mese-fest">'+esc(conta)+' <button type="button" class="lnk" data-fest-apri>Aggiungi i tuoi →</button></p>';
+  return '<div class="ecc mese-fest-box">'+
+    '<b style="display:block;margin-bottom:4px">I festivi del tuo contratto</b>'+
+    '<p class="hint" style="margin:0 0 8px">Oltre ai festivi nazionali: il santo patrono o altre feste che per te contano. Si ripetono ogni anno.</p>'+
+    (c.extra.length ? '<div class="qh-chips" style="margin:0 0 10px">'+c.extra.map(k=>'<button type="button" class="btn g" data-fest-del="'+k+'" aria-label="Togli '+esc(nomeGiornoMese(k))+'">'+esc(nomeGiornoMese(k))+' ×</button>').join("")+'</div>' : '')+
+    '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input type="date" id="festData" aria-label="Giorno festivo" style="flex:1;min-width:150px">'+
+    '<button type="button" class="btn g" data-fest-add>Aggiungi</button></div>'+
+    '<label class="chk" style="display:flex;gap:10px;align-items:center;margin-top:12px;min-height:44px"><input type="checkbox" data-fest-dom'+(c.dom?' checked':'')+'> La domenica conta come festivo</label>'+
+    (fisso ? '<label class="chk" style="display:flex;gap:10px;align-items:center;min-height:44px"><input type="checkbox" data-fest-riposo'+(state.festiviRiposo?' checked':'')+'> Nei festivi non lavoro</label>' : '')+
+    '<button type="button" class="lnk" data-fest-chiudi style="margin-top:6px">Fatto</button></div>';
+}
+function festiviCambiati(){ salva(); try{ NT.setFestivo(festivo); }catch(e){} render(); }
 function durataBreve(m){ m=Math.round(m/15)*15; const h=Math.floor(m/60), r=m%60; return h ? h+"h"+(r?String(r).padStart(2,"0"):"") : r+" min"; }
+if($("#meseBox")) $("#meseBox").addEventListener("change", e=>{
+  if(e.target.matches("[data-fest-dom]")){ state.festivi=Object.assign({}, state.festivi||{}, {dom:e.target.checked}); festiviCambiati(); }
+  else if(e.target.matches("[data-fest-riposo]")){ state.festiviRiposo=e.target.checked; festiviCambiati(); }
+});
 if($("#meseBox")) $("#meseBox").addEventListener("click", e=>{
   if(e.target.closest("[data-riepilogo-medico]")){ stampaRiepilogoMedico(); return; }
   if(e.target.closest("[data-mese-segna]")){ sgOff=meseOff; apriSegna(); return; }
+  if(e.target.closest("[data-fest-apri]")){ festiviAperto=true; renderMese(); return; }
+  if(e.target.closest("[data-fest-chiudi]")){ festiviAperto=false; renderMese(); return; }
+  const fd=e.target.closest("[data-fest-del]");
+  if(fd){ const f=Object.assign({}, state.festivi||{}); f.extra=(f.extra||[]).filter(k=>k!==fd.dataset.festDel); state.festivi=f; festiviCambiati(); return; }
+  if(e.target.closest("[data-fest-add]")){
+    const v=($("#festData")||{}).value||""; const m=/^\d{4}-(\d\d)-(\d\d)$/.exec(v);
+    if(!m){ toast("Scegli il giorno"); return; }
+    const k=(+m[1])+"-"+(+m[2]), f=Object.assign({}, state.festivi||{}); f.extra=(f.extra||[]).filter(x=>x!==k).concat(k).sort(); state.festivi=f;
+    festiviCambiati(); return; }
   const b=e.target.closest("[data-mese]"); if(!b || b.disabled) return;
   meseOff=Math.max(-12, Math.min(12, meseOff + +b.dataset.mese)); renderMese();
 });
@@ -6431,7 +6473,7 @@ function caricoTurni(da, n){
       const base=dnum(d)*1440;
       if(notte(b.start,b.end)>=180){ serie++; if(conta){ r.notti++; r.serieMax=Math.max(r.serieMax, serie); } } else serie=0;
       if(conta){ r.turni++; r.ore+=(b.end-b.start)/60;
-        if(d.getDay()===0 || festivoIT(d)) r.festivi++;
+        if(festivo(d)) r.festivi++;
         if(fineIeri!==null && base+b.start-fineIeri<660) r.brevi++; }
       fineIeri=base+b.end;
     }
@@ -7712,7 +7754,7 @@ function riepilogoAnno(){
       const base=dnum(d)*1440, oreN=notte(sh.s, sh.e)/60;
       m.turni++; m.ore+=(sh.e-sh.s)/60; m.oreNotte+=oreN;
       if(oreN>=3){ m.notti++; serie++; tot.serieMax=Math.max(tot.serieMax, serie); } else serie=0;
-      if(d.getDay()===0 || festivoIT(d)) m.festivi++;
+      if(festivo(d)) m.festivi++;
       if(sh.e-sh.s>=720) tot.lunghi++;
       if(fineIeri!==null && base+sh.s-fineIeri<660) m.brevi++;
       fineIeri=base+sh.e;
@@ -8339,7 +8381,7 @@ if($("#swapB")) $("#swapB").addEventListener("change",aggiornaScambio);
    n. Con un mese scelto le ferie si mettono solo lì, ma la finestra può
    allungarsi sui riposi attorno. Niente regole di contratto: in alcuni lo
    smonto non è riposo, per questo è una scelta dell'utente. */
-function giorniCiclo(giorni){
+function giorniCiclo(giorni, persona){
   const f0=giornoVero(), fPrima=state.focus, out=[];
   state.focus=f0;
   try{
@@ -8348,7 +8390,9 @@ function giorniCiclo(giorni){
       if(c==="?"){ out.push({d, ignoto:true}); continue; }
       const b=NT.block(o), ieri=NT.block(o-1);
       // il turno di quel giorno, per dire quali turni lasci con le ferie
-      out.push({d, lavoro:!b.rest, smonto: b.rest && !ieri.rest && ieri.end>1440, c, nome:NT.etichetta(o)});
+      // a casa con la persona scelta: il suo giorno è di riposo (non lavora, non smonta dalla notte)
+      const insieme = persona ? !!(asPartner(()=>{ const pb=NT.block(o); return pb.rest; }, persona)) : false;
+      out.push({d, lavoro:!b.rest, smonto: b.rest && !ieri.rest && ieri.end>1440, c, nome:NT.etichetta(o), festivo:festivo(d), insieme});
     }
   } finally { state.focus=fPrima; }
   return out;
@@ -8357,7 +8401,7 @@ const meseDi=d=>iso(d).slice(0,7);
 // Il primo giorno di una finestra non conta se è uno smonto e lo si è escluso
 // (dentro la finestra non ce ne sono: la notte prima sarebbe già di ferie).
 const inizioACasa=(G,a,r,smonto)=> (!smonto && G[a].smonto && a<r) ? a+1 : a;
-function proposteFerie(G, n, mese, smonto){
+function proposteFerie(G, n, mese, smonto, prefer, conPersona){
   const ok=g=>!mese || meseDi(g.d)===mese;
   const cand=[]; let l=0, usate=0;
   for(let r=0;r<G.length;r++){
@@ -8371,15 +8415,19 @@ function proposteFerie(G, n, mese, smonto){
   // la più lunga; a parità, meno ferie, poi più sabati e domeniche (il tempo
   // con chi lavora di giorno), poi la più vicina
   const weekend=c=>{ let n=0; for(let i=c.a;i<=c.r;i++){ const g=G[i].d.getDay(); if(g===0||g===6) n++; } return n; };
-  cand.forEach(c=>c.fs=weekend(c));
-  cand.sort((x,y)=>y.lung-x.lung || x.usate-y.usate || y.fs-x.fs || x.a-y.a);
+  const insiemeN=c=>{ let n=0; for(let i=c.a;i<=c.r;i++) if(G[i].insieme) n++; return n; };
+  cand.forEach(c=>{ c.fs=weekend(c); c.ins=conPersona ? insiemeN(c) : 0; });
+  // «A casa con»: prima i giorni in cui lei o lui è a casa; «Più fine settimana»:
+  // prima i sabati e le domeniche coperti. Poi come sempre: la più lunga, meno ferie, la più vicina.
+  cand.sort((x,y)=> (conPersona ? y.ins-x.ins : 0) || (prefer==="weekend" ? y.fs-x.fs : 0) ||
+    y.lung-x.lung || x.usate-y.usate || y.fs-x.fs || x.a-y.a);
   const scelte=[];
   for(const c of cand){
     if(scelte.length>=3) break;
     if(!scelte.some(x=>c.a<=x.r && c.r>=x.a)) scelte.push(c);
   }
   // in ordine di data: si leggono come un calendario; "migliore" solo se lo è davvero
-  if(scelte.length>1 && scelte[0].lung>scelte[1].lung) scelte[0].migliore=true;
+  if(scelte.length>1 && scelte[0].lung>scelte[1].lung && !conPersona && prefer!=="weekend") scelte[0].migliore=true;
   return scelte.sort((x,y)=>x.a-y.a);
 }
 // Il riposo più lungo senza ferie: il termine di paragone delle proposte.
@@ -8405,7 +8453,7 @@ function periodoTesto(da, a){
 let _ferie = {G:[], proposte:[]};
 function preferenzeFerie(){
   const p=store.mappa("ferie");
-  return { n: Math.min(20, Math.max(1, +p.n || 3)), smonto: p.smonto !== false };
+  return { n: Math.min(20, Math.max(1, +p.n || 3)), smonto: p.smonto !== false, prefer: p.prefer==="weekend" ? "weekend" : "giorni", con: (p.con===0||+p.con>0) && p.con!=="" ? +p.con : -1 };
 }
 function renderFerie(){
   const out=$("#ferieOut"); if(!out) return;
@@ -8413,6 +8461,13 @@ function renderFerie(){
   $("#ferieN").textContent=pref.n;
   document.querySelectorAll("[data-ferie-n]").forEach(b=>{ b.disabled = (+b.dataset.ferieN<0 ? pref.n<=1 : pref.n>=20); });
   $("#ferieSmonto").checked=pref.smonto;
+  { const fp=$("#feriePrefer"); if(fp) fp.value=pref.prefer;
+    const persone=tuttePersone(), riga=$("#ferieConRiga"), fc=$("#ferieCon");
+    if(riga && fc){
+      riga.hidden=!persone.length;
+      fc.innerHTML='<option value="-1">Nessuno</option>'+persone.map((p,i)=>'<option value="'+i+'">'+esc(p.name||(p.principale?"la persona partner":"Persona "+(i+1)))+'</option>').join("");
+      fc.value=String(pref.con>=0 && pref.con<persone.length ? pref.con : -1);
+    } }
   // i mesi: da questo ai prossimi 11
   if(sel && !sel.options.length){
     const oggi=giornoVero();
@@ -8424,12 +8479,14 @@ function renderFerie(){
   }
   if(!state.turniConfigurati){ out.innerHTML='<p class="ferie-base">Imposta prima i turni: le proposte vengono dal tuo ciclo.</p>'; return; }
   const mese=sel ? sel.value : "";
-  const G=giorniCiclo(366), noti=G.filter(g=>!g.ignoto).length;
+  const persone=tuttePersone(), persona=(pref.con>=0 && pref.con<persone.length) ? persone[pref.con] : null;
+  const nomeConPersona=persona ? (persona.name||(persona.principale?"la persona partner":"Persona "+(pref.con+1))) : "";
+  const G=giorniCiclo(366, persona), noti=G.filter(g=>!g.ignoto).length;
   _ferie={G, proposte:[]};
   if(noti<7){ out.innerHTML='<p class="ferie-base">Il tuo ciclo non si ripete e i giorni segnati finiscono presto. Segna i turni dei prossimi mesi per avere proposte.</p>'; return; }
   const nomeMese = mese ? " a "+new Date(mese+"-15T12:00:00").toLocaleDateString(LINGUA,{month:"long"}) : "";
   const base=riposoPiuLungo(G, mese, pref.smonto);
-  const P=_ferie.proposte=proposteFerie(G, pref.n, mese, pref.smonto);
+  const P=_ferie.proposte=proposteFerie(G, pref.n, mese, pref.smonto, pref.prefer, persona);
   const gg=n=>n===1?"1 giorno":n+" giorni";
   let h='<p class="ferie-base">'+(base
     ? 'Senza ferie, il riposo più lungo'+nomeMese+' è di <b>'+gg(base.lung)+'</b>: '+esc(periodoTesto(G[base.a].d, G[base.r].d))+'.'
@@ -8439,10 +8496,11 @@ function renderFerie(){
     const giorni=G.slice(p.a,p.r+1);
     const ferie=giorni.filter(g=>g.lavoro);
     const sigla=g=>g.lavoro ? g.c : g.smonto ? "S" : "R";
-    const chip=giorni.map((g,k)=>'<span class="fg'+(g.lavoro?' ferie':(k===0&&g.smonto?' smonto':''))+'">'+GIORNI_DOM[g.d.getDay()]+'<b>'+g.d.getDate()+'</b><i>'+esc(sigla(g))+'</i></span>').join("");
+    const chip=giorni.map((g,k)=>'<span class="fg'+(g.lavoro?' ferie':(k===0&&g.smonto?' smonto':''))+(g.festivo?' fest':'')+'"'+(g.festivo?' title="Festivo"':'')+'>'+GIORNI_DOM[g.d.getDay()]+'<b>'+g.d.getDate()+'</b><i>'+esc(sigla(g))+'</i></span>').join("");
     const quali=ferie.map(g=>g.d.toLocaleDateString(LINGUA,{weekday:"short", day:"numeric", ...(g.d.getMonth()!==giorni[0].d.getMonth()?{month:"short"}:{})})+" "+g.nome).join(" · ");
     h+='<section class="ferie-prop'+(p.migliore?' migliore':'')+'" aria-label="Proposta '+(i+1)+': '+gg(p.lung)+' a casa con '+gg(p.usate)+' di ferie">'+
-      '<div class="ferie-testa"><b>'+gg(p.lung)+' a casa</b><span>'+(p.migliore?'la più lunga · ':'')+'con '+(p.usate===1?"1 giorno":p.usate+" giorni")+' di ferie</span></div>'+
+      '<div class="ferie-testa"><b>'+gg(p.lung)+' a casa</b><span>'+(p.migliore?'la più lunga · ':'')+'con '+(p.usate===1?"1 giorno":p.usate+" giorni")+' di ferie'+
+        (persona ? ' · '+p.ins+' con '+esc(nomeConPersona) : '')+(p.fs ? ' · '+p.fs+(p.fs===1?' giorno':' giorni')+' di fine settimana' : '')+'</span></div>'+
       '<p class="ferie-quando">'+esc(periodoTesto(giorni[0].d, giorni[giorni.length-1].d))+'</p>'+
       '<div class="ferie-giorni" aria-hidden="true">'+chip+'</div>'+
       '<p class="ferie-cosa">Ferie: <b>'+esc(quali)+'</b>'+(giorni[0].smonto?'. Il primo giorno è lo smonto: a casa dal mattino':'')+'.</p>'+
@@ -8488,6 +8546,8 @@ if($("#feriePagina")){
     const s=e.target.closest("[data-ferie-segna]"); if(s) segnaFerie(+s.dataset.ferieSegna);
   });
   $("#ferieMese").addEventListener("change", renderFerie);
+  $("#feriePrefer").addEventListener("change", e=>{ const p=preferenzeFerie(); p.prefer=e.target.value; store.set("ferie", p); renderFerie(); });
+  $("#ferieCon").addEventListener("change", e=>{ const p=preferenzeFerie(); p.con=+e.target.value; store.set("ferie", p); renderFerie(); });
   $("#ferieSmonto").addEventListener("change", e=>{ const p=preferenzeFerie(); p.smonto=e.target.checked; store.set("ferie", p); renderFerie(); });
 }
 
@@ -9823,7 +9883,7 @@ function salva(){
     cTo:state.cTo,cFrom:state.cFrom,need:state.need,prep:state.prep,freeWake:state.freeWake,freeBed:state.freeBed,
     maxAdvance:state.maxAdvance,pPattern:state.pPattern,pAnchor:state.pAnchor,
     pShifts:state.pShifts,pWake:state.pWake,pBed:state.pBed,pName:state.pName,people:state.people,personaGlance:state.personaGlance,
-    repeat:state.repeat,ecc:state.ecc,giorni:state.giorni,evento:state.evento,
+    repeat:state.repeat,ecc:state.ecc,giorni:state.giorni,evento:state.evento,festivi:state.festivi,festiviRiposo:state.festiviRiposo,
     napTurno:state.napTurno,sonnoDiurno:state.sonnoDiurno,mattinoBifasico:state.mattinoBifasico,avvisoBifasicoOff:state.avvisoBifasicoOff,firstSeenAt:state.firstSeenAt,pausa:state.pausa,caffSens:state.caffSens,vista:state.vista};
   const testo=JSON.stringify(dati);
   if(testo!==_ultimoSalvato){
