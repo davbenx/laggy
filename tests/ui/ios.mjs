@@ -10,12 +10,14 @@ await p.goto("http://localhost:8765/index.html"); await p.waitForTimeout(700);
 await p.click("text=Conosco già il mio schema"); await p.click("[data-preset-ob='0']"); await p.click("[data-pos='0']"); await p.click("#qhConfermaOrari"); await p.waitForTimeout(500);
 await p.evaluate(()=>{const c=document.querySelector("#doChiudiPrimoPiano"); if(c) c.click();});
 ok(await p.evaluate(()=>document.documentElement.classList.contains("ios")), "iPhone riconosciuto");
-for(const [tab,id] of [["oggi","goToday"],["turni","cycToday"]]){
+// Oggi: si tocca la data in alto; Turni: «Scegli giorno». Dopo la scelta, in
+// Oggi compare «Oggi» accanto alla data, in Turni il bottone diventa «Torna a oggi».
+for(const [tab,id,torna,testo] of [["oggi","dateLabel","goToday","Oggi"],["turni","cycToday","cycToday","Torna a oggi"]]){
   await p.click('[data-tab="'+tab+'"]'); await p.waitForTimeout(400);
   const r=await p.evaluate(id=>{ const bt=document.getElementById(id), r=bt.getBoundingClientRect();
     const top=document.elementFromPoint(r.left+r.width/2, r.top+r.height/2);
     return {sopra: top && top.classList.contains("today-pick"), fs:top?getComputedStyle(top).fontSize:""}; }, id);
-  ok(r.sopra && r.fs==="16px", tab+": il tocco su «Scegli giorno» arriva al campo data (iOS apre il selettore) · "+JSON.stringify(r));
+  ok(r.sopra && r.fs==="16px", tab+": il tocco sulla data arriva al campo data (iOS apre il selettore) · "+JSON.stringify(r));
   // scelta di una data come farebbe il selettore
   const dataScelta=await p.evaluate(id=>{ const inp=document.getElementById(id).parentElement.querySelector(".today-pick");
     const d=new Date(); d.setDate(d.getDate()+5); const v=d.toISOString().slice(0,10);
@@ -23,9 +25,9 @@ for(const [tab,id] of [["oggi","goToday"],["turni","cycToday"]]){
   await p.waitForTimeout(400);
   const dopo=await p.evaluate(id=>{ const bt=document.getElementById(id), r=bt.getBoundingClientRect();
     const top=document.elementFromPoint(r.left+r.width/2, r.top+r.height/2);
-    return {testo:bt.textContent, alBottone: top===bt}; }, id);
-  ok(dopo.testo==="Torna a oggi" && dopo.alBottone, tab+": dopo la scelta ("+dataScelta+") il bottone dice «Torna a oggi» e il tocco va a lui · "+JSON.stringify(dopo));
-  await p.click("#"+id); await p.waitForTimeout(300);
+    return {testo:bt.textContent, alBottone: top===bt}; }, torna);
+  ok(dopo.testo===testo && dopo.alBottone, tab+": dopo la scelta ("+dataScelta+") il bottone dice «"+testo+"» e il tocco va a lui · "+JSON.stringify(dopo));
+  await p.click("#"+torna); await p.waitForTimeout(300);
 }
 const z=await p.evaluate(()=>({ta:getComputedStyle(document.documentElement).touchAction,
   campi:[...document.querySelectorAll("input[type=time],input[type=text],input[type=number],select")].filter(e=>e.offsetParent).map(e=>getComputedStyle(e).fontSize).filter(f=>parseFloat(f)<16).length}));

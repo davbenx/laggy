@@ -34,6 +34,15 @@ for(const [n, atteso] of [[1,/domani alle 09:00/],[5,null]]){
   ok(atteso ? atteso.test(t) : t==="", "impegno fra "+n+" giorni: "+(atteso?"l'avviso dice «domani»":"nessun avviso")+" → «"+t+"»");
   await p.context().close();
 }
+// 1c. «Adesso» solo su oggi: sfogliando un altro giorno non sta sotto una data che non è la sua
+p=await apri({turniConfigurati:true,pattern:"MPNSR",anchor:fa(0),shifts:SH,repeat:true,firstSeenAt:fa(30)});
+const vis=()=>p.evaluate(()=>{ const o=document.querySelector("#ora"); return !!o && !o.hidden && o.offsetParent!==null && /Adesso/i.test(o.innerText); });
+const suOggi=await vis();
+await p.evaluate(()=>document.querySelector("#next").click()); await p.waitForTimeout(250);
+const suDomani=await vis();
+await p.evaluate(()=>document.querySelector("#goToday").click()); await p.waitForTimeout(250);
+ok(suOggi && !suDomani && await vis(), "«Adesso»: c'è su oggi, sparisce su domani, torna con «Oggi»");
+await p.context().close();
 // 2. turni variabili, mese vuoto: il riquadro resta, con «Segna o importa»
 p=await apri({turniConfigurati:true,pattern:"R",anchor:"2000-01-01",shifts:SH,repeat:false,firstSeenAt:fa(30)});
 await p.click('[data-tab="turni"]'); await p.waitForTimeout(300);
@@ -41,7 +50,7 @@ const m=await p.evaluate(()=>{ const e=document.querySelector("#meseBox"); retur
 ok(m.vis && /Nessun turno segnato/.test(m.t) && /Segna o importa i turni/.test(m.t), "mese vuoto: il riquadro resta, con «Segna o importa i turni»");
 ok(await p.evaluate(()=>!document.querySelector("#doSegnaMese")), "niente più una seconda voce per il mese");
 await p.click("#meseBox [data-mese-segna]"); await p.waitForTimeout(300);
-ok(await p.evaluate(()=>!document.querySelector("#segnaPagina").hidden), "il pulsante apre I turni del mese");
+ok(await p.evaluate(()=>document.body.classList.contains("turni-aperta") && !!document.querySelector("#ttMese #segnaOut")), "turni variabili: il pulsante apre il mese in «I tuoi turni»");
 await p.context().close();
 // 3. la scheda di un altro giorno parla di QUEL giorno (prima: del giorno in vista)
 p=await apri({turniConfigurati:true,pattern:"MPNSR",anchor:fa(0),shifts:SH,repeat:true,firstSeenAt:fa(30)});
@@ -66,21 +75,51 @@ const vaFile=await p.evaluate(()=>{ if(!window.NTPaid) return "nopaid"; window.N
 await p.waitForTimeout(400);
 ok(vaFile==="" && await p.evaluate(()=>!document.querySelector("#icsBox").hidden && document.querySelector("#icsBox").offsetParent!==null), "finestra del calendario → «Scarica un file»: si apre il riquadro del file ("+(vaFile||"ok")+")");
 await p.context().close();
-// 5. riscontri dei tester: 12 ore con smonto, «Modifica» del ciclo, sonno modificabile
+// 5. «I tuoi turni»: una pagina sola per cambiare la turnazione; ← torna da dove si è partiti
 p=await apri({turniConfigurati:true,pattern:"MPNSR",anchor:fa(2),shifts:SH,repeat:true,firstSeenAt:fa(30)});
-await p.click('[data-tab="turni"]'); await p.waitForTimeout(300);
-await p.evaluate(()=>document.querySelector("#tEdit").click()); await p.waitForTimeout(300);
-const mod=await p.evaluate(()=>({h:document.querySelector("#demoEsempio .qh-h").textContent, casa:!!document.querySelector("#aCasa").offsetParent, sap:!!document.querySelector("#loSapevi").offsetParent, av:(document.querySelector("#qhAvanzate")||{}).textContent}));
-ok(mod.h==="Come sono i tuoi turni?" && !mod.casa && !mod.sap && mod.av==="Cambia solo orari e nomi dei turni", "Modifica del ciclo: domanda giusta, niente altro sotto → "+JSON.stringify(mod));
-await p.click('[data-subflow="schema"]'); await p.waitForTimeout(200);
+const cl=s=>p.evaluate(s=>document.querySelector(s).click(), s);
+const dove=()=>p.evaluate(()=>({tab:["oggi","turni","opzioni"].find(t=>document.body.classList.contains("tab-"+t)), pagina:document.body.classList.contains("turni-aperta"),
+  h:(document.querySelector("#ttFlusso #demoEsempio:not([hidden]) .qh-h")||{}).textContent||"", righe:[...document.querySelectorAll("#ttRighe [data-tt]")].filter(b=>!b.hidden).map(b=>b.dataset.tt).join(",")}));
+await cl('[data-tab="turni"]'); await p.waitForTimeout(300); await cl("#tEdit"); await p.waitForTimeout(300);
+let d=await dove();
+ok(d.pagina && d.tab==="turni" && d.righe==="orari,posizione,schema" && /In quinta/.test(await p.evaluate(()=>document.querySelector("#ttRiepilogo").innerText)), "Turni › Modifica: «I tuoi turni» con riepilogo e tre righe → "+JSON.stringify(d));
+await cl('[data-tt="schema"]'); await p.waitForTimeout(200); d=await dove();
+const sotto=await p.evaluate(()=>({casa:!!document.querySelector("#aCasa").offsetParent, sap:!!document.querySelector("#loSapevi").offsetParent}));
+ok(d.h==="Come sono i tuoi turni?" && !sotto.casa && !sotto.sap, "Cambia schema: il flusso dentro la pagina, niente altro sotto → "+d.h);
+await cl('[data-subflow="schema"]'); await p.waitForTimeout(200);
 const dodici=await p.evaluate(()=>[...document.querySelectorAll("[data-preset-ob]")].map(b=>b.textContent).filter(t=>/smonto/i.test(t)&&/19–7/.test(t)));
 ok(dodici.length===2, "dodici ore: entrambi gli schemi hanno lo smonto → "+dodici.join(" / "));
-await p.click("[data-chiudi-schema]").catch(()=>{}); await p.waitForTimeout(200);
-await p.evaluate(()=>{ const b=document.querySelector("#tEdit"); b&&b.click(); }); await p.waitForTimeout(200);
-await p.evaluate(()=>document.querySelector("#qhAvanzate").click()); await p.waitForTimeout(400);
-const av=await p.evaluate(()=>{ const bx=document.querySelector("#opzBox1"); const vis=s=>[...bx.querySelectorAll(s)].some(x=>x.offsetParent);
-  const n=bx.querySelector('.sh [data-fld="n"]'); return {catalogo:vis("#presetTiles .tool"), turni:vis(".sh"), largo:n?n.getBoundingClientRect().width:0}; });
-ok(!av.catalogo && av.turni && av.largo>150, "pannello orari: niente catalogo doppio, nome del turno leggibile → "+JSON.stringify(av));
+await cl('[data-subflow="prossimi"]').catch(()=>{}); await p.waitForTimeout(150);
+await cl("[data-chiudi-schema]"); await p.waitForTimeout(200); d=await dove();
+ok(d.pagina && d.h==="" && d.righe==="orari,posizione,schema", "Annulla: si torna alla pagina, non a Oggi");
+await cl('[data-tt="orari"]'); await p.waitForTimeout(200);
+await p.evaluate(()=>{ const i=document.querySelector('[data-ora-da="M"]'); i.value="06:30"; }); await cl("#qhConfermaOrari"); await p.waitForTimeout(300); d=await dove();
+ok(d.pagina && d.h==="" && await p.evaluate(()=>JSON.parse(localStorage.getItem("nt:state")).shifts.M.s)===390, "Orari dei turni: il mattino alle 6:30, e si torna alla pagina");
+await cl('[data-tt="posizione"]'); await p.waitForTimeout(200); await cl('[data-pos="0"]'); await p.waitForTimeout(300); d=await dove();
+ok(d.pagina && await p.evaluate(()=>JSON.parse(localStorage.getItem("nt:state")).anchor)===fa(0), "Oggi dove sei: un tocco riallinea il ciclo e torna alla pagina");
+await cl("#chiudiTuoiTurni"); await p.waitForTimeout(300); d=await dove();
+ok(!d.pagina && d.tab==="turni", "← da Turni torna a Turni");
+await cl("#doOpzioni"); await cl('[data-opz="1"]'); await p.waitForTimeout(300); d=await dove();
+ok(d.pagina, "Impostazioni › I tuoi turni: la stessa pagina");
+await p.evaluate(()=>history.back && 0); await cl("#chiudiTuoiTurni"); await p.waitForTimeout(300); d=await dove();
+ok(!d.pagina && d.tab==="opzioni", "← da Impostazioni torna alle Impostazioni");
+ok(await p.evaluate(()=>!document.querySelector("#opzBox1") && !document.querySelector("#qhAvanzate")), "niente più pannello nascosto né «Impostazioni avanzate»");
+await p.context().close();
+// sempre lo stesso turno: «Giorni di riposo» parte da quelli attuali
+{ const lun=(()=>{ const x=new Date(); x.setHours(12,0,0,0); x.setDate(x.getDate()-((x.getDay()+6)%7)); return iso(x); })();
+  p=await apri({turniConfigurati:true,pattern:"NNNNNRR",anchor:lun,shifts:SH,repeat:true,firstSeenAt:fa(30)});
+  await p.evaluate(()=>document.querySelector('[data-tab="turni"]').click()); await p.evaluate(()=>document.querySelector("#tEdit").click()); await p.waitForTimeout(300);
+  const f=await p.evaluate(()=>({righe:[...document.querySelectorAll("#ttRighe [data-tt]")].filter(b=>!b.hidden).map(b=>b.dataset.tt).join(","), r:document.querySelector("#ttRiepilogo").innerText}));
+  await p.evaluate(()=>document.querySelector('[data-tt="riposi"]').click()); await p.waitForTimeout(200);
+  const on=await p.evaluate(()=>[...document.querySelectorAll(".qh-gg.on")].map(b=>b.dataset.gg).join(","));
+  ok(f.righe==="orari,riposi,schema" && /Sempre Notte/.test(f.r) && on==="5,6", "turno fisso: «Sempre Notte», Giorni di riposo parte da sab-dom → "+JSON.stringify(f)+" "+on);
+  await p.context().close(); }
+// turni variabili: la pagina è il mese; dal riquadro del mese si arriva lì
+p=await apri({turniConfigurati:true,pattern:"R",anchor:"2000-01-01",shifts:SH,repeat:false,firstSeenAt:fa(30)});
+await p.evaluate(()=>document.querySelector('[data-tab="turni"]').click()); await p.waitForTimeout(300);
+await p.evaluate(()=>document.querySelector("#meseBox [data-mese-segna]").click()); await p.waitForTimeout(300);
+const v=await p.evaluate(()=>({pagina:document.body.classList.contains("turni-aperta"), mese:!!document.querySelector("#ttMese #segnaOut"), imp:!!document.querySelector("#ttMese .sg-importa"), righe:[...document.querySelectorAll("#ttRighe [data-tt]")].filter(b=>!b.hidden).map(b=>b.dataset.tt).join(","), fatto:!document.querySelector("#ttFatto").hidden}));
+ok(v.pagina && v.mese && v.imp && v.righe==="orari,schema" && v.fatto, "turni variabili: «I tuoi turni» è il mese (con importazione), più Orari e Cambia schema → "+JSON.stringify(v));
 await p.context().close();
 p=await apri({turniConfigurati:true,pattern:"MPNSR",anchor:fa(2),shifts:SH,repeat:true,firstSeenAt:fa(30)});
 const nudge=await p.evaluate(()=>(document.querySelector("#essenziale .essnudge")||{}).textContent||"");

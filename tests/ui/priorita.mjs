@@ -4,7 +4,8 @@
 import pw from "./_pw.mjs";
 const ok=(c,m)=>console.log((c?"✔ ":"✘ ")+m);
 const b=await pw.chromium.launch(); const errs=[];
-const iso=d=>d.toISOString().slice(0,10);
+// Data locale, come la conta l'app (toISOString è UTC: a cavallo della mezzanotte UTC sbagliava giorno).
+const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 const INVITI=["#setupChecklist","#firstPlanBanner","#adattaCard","#medicoCard","#setupNudge"];
 const apri=async(giorniFa)=>{
   const ctx=await b.newContext({locale:"it-IT",viewport:{width:360,height:740}});

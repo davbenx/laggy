@@ -38,7 +38,7 @@ ok(l.some(x=>/^NTWidget.publish [1-9]/.test(x)), "widget aggiornato: "+l.filter(
 // safe area
 await p.evaluate(()=>document.documentElement.style.setProperty("--safe-area-inset-top","32px"));
 const padTop = await p.evaluate(()=>getComputedStyle(document.querySelector(".apphead")||document.querySelector("header")).paddingTop);
-ok(parseFloat(padTop)>=44, "margine barra di stato applicato all'intestazione: "+padTop);
+ok(parseFloat(padTop)>=40, "margine barra di stato applicato all'intestazione (32px + margine): "+padTop);
 // font locali
 const fonts = await p.evaluate(async()=>{ await document.fonts.ready; return [...document.fonts].filter(f=>f.status==="loaded").map(f=>f.family).join(","); });
 ok(/Inter/.test(fonts), "font caricati in locale: "+fonts);

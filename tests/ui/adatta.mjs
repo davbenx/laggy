@@ -31,7 +31,7 @@ ok(ev && ev.h==="08:30" && /Mente lucida alle 08:30/.test(await p.evaluate(()=>d
 await p.click("[data-lucidita-cambia]"); await p.waitForTimeout(200);
 await p.click("[data-qs-impegno]"); await p.waitForTimeout(200); await p.click("#qsClose");
 ok(await p.evaluate(()=>!JSON.parse(localStorage.getItem("nt:state")).evento && document.querySelector("#luciditaGiornoWrap").innerText.trim()===""), "«Cambia» riapre la scheda; un altro tocco lo toglie");
-await p.click("#goToday");
+await p.evaluate(()=>{ const b=document.querySelector("#goToday"); if(b && !b.hidden) b.click(); });
 // attiva calendario e controlla stato reale
 await p.click('[data-attiva="calendario"]'); await p.waitForTimeout(3000);
 // lo stato del calendario ora vive solo in Impostazioni (tolto il doppione in Turni)

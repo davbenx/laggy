@@ -11,15 +11,17 @@ async function setup(ctx, url="http://localhost:8765/index.html"){
 }
 const bg=p=>p.evaluate(()=>getComputedStyle(document.body).backgroundColor);
 // 1. TEMA: telefono in chiaro → lo scuro si raggiunge, e resta dopo il riavvio
+const tema=async(p,t)=>{ await p.evaluate(t=>document.querySelector('#aspetto [data-tema="'+t+'"]').click(), t); await p.waitForTimeout(100); };
 { const ctx=await b.newContext({viewport:{width:390,height:800},locale:"it-IT",colorScheme:"light"}); const p=await setup(ctx);
-  const a=await bg(p); await p.click("#themeToggle"); const c=await bg(p);
-  ok(a==="rgb(255, 255, 255)" && c==="rgb(20, 22, 26)", "tema: telefono chiaro → tocco → scuro ("+a+" → "+c+")");
-  await p.reload(); await p.waitForTimeout(800); ok(await bg(p)==="rgb(20, 22, 26)", "tema: lo scuro scelto resta dopo la riapertura");
-  await p.click("#themeToggle"); ok(await bg(p)==="rgb(255, 255, 255)", "tema: nuovo tocco → chiaro");
+  ok(!(await p.evaluate(()=>!!document.querySelector("#themeToggle"))), "tema: niente più pulsante in alto");
+  const a=await bg(p); await tema(p,"dark"); const c=await bg(p);
+  ok(a==="rgb(255, 255, 255)" && c==="rgb(20, 22, 26)", "Aspetto: telefono chiaro → Scuro ("+a+" → "+c+")");
+  await p.reload(); await p.waitForTimeout(800); ok(await bg(p)==="rgb(20, 22, 26)", "Aspetto: lo scuro scelto resta dopo la riapertura");
+  await tema(p,"auto"); ok(await bg(p)==="rgb(255, 255, 255)" && await p.evaluate(()=>document.querySelector('#aspetto [data-tema="auto"]').getAttribute("aria-checked"))==="true", "Aspetto: Automatico torna a seguire il telefono");
   await ctx.close(); }
 { const ctx=await b.newContext({viewport:{width:390,height:800},locale:"it-IT",colorScheme:"dark"}); const p=await setup(ctx);
-  const a=await bg(p); await p.click("#themeToggle"); const c=await bg(p); await p.click("#themeToggle"); const d=await bg(p);
-  ok(a==="rgb(20, 22, 26)"&&c==="rgb(255, 255, 255)"&&d==="rgb(20, 22, 26)", "tema: telefono scuro → chiaro → scuro");
+  const a=await bg(p); await tema(p,"light"); const c=await bg(p); await tema(p,"auto"); const d=await bg(p);
+  ok(a==="rgb(20, 22, 26)"&&c==="rgb(255, 255, 255)"&&d==="rgb(20, 22, 26)", "Aspetto: telefono scuro → Chiaro → Automatico");
   await ctx.close(); }
 // 2. SONNO GIORNI LIBERI a 320/360/412 px, anche con orario fuori griglia
 for (const w of [320,360,412]) {

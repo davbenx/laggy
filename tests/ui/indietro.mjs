@@ -56,9 +56,12 @@ ok(await dove()==="tab-oggi", "Impostazioni aperte da Oggi → freccia → Oggi"
 const prima=await p.evaluate(()=>localStorage.getItem("nt:state"));
 await p.evaluate(()=>document.querySelector('[data-tab="turni"]').click()); await p.waitForTimeout(150);
 await p.evaluate(()=>{ const m=[...document.querySelectorAll("button,a")].find(x=>/^Modifica/.test(x.textContent.trim()) && x.offsetParent); m && m.click(); }); await p.waitForTimeout(300);
+await p.evaluate(()=>document.querySelector('[data-tt="schema"]').click()); await p.waitForTimeout(200);
 const inScelta=await h2();
 await p.evaluate(()=>document.querySelector("[data-chiudi-schema]")?.click()); await p.waitForTimeout(250);
-ok(inScelta && !(await h2()) && await p.evaluate(()=>localStorage.getItem("nt:state"))===prima, "Modifica ciclo → Annulla: si torna al piano, niente cambiato ("+inScelta+")");
+ok(inScelta && !(await h2()) && await p.evaluate(()=>document.body.classList.contains("turni-aperta")) && await p.evaluate(()=>localStorage.getItem("nt:state"))===prima, "Modifica › Cambia schema → Annulla: si torna alla pagina, niente cambiato ("+inScelta+")");
+await p.evaluate(()=>document.querySelector("#chiudiTuoiTurni").click()); await p.waitForTimeout(250);
+ok(await dove()==="tab-turni" && await p.evaluate(()=>!document.body.classList.contains("turni-aperta")), "← da «I tuoi turni» si torna a Turni");
 // pannello del turno: chiudi e indietro
 await p.evaluate(()=>document.querySelector('[data-tab="oggi"]').click()); await p.waitForTimeout(150);
 await p.click("#shiftPill"); await p.waitForTimeout(250); await back();
