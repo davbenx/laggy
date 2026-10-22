@@ -867,6 +867,13 @@ padding:12px 6px 12px 14px;margin:-6px 0 var(--gap-sezione);font-size:13.5px;lin
 .ed-cambia{display:block;margin-top:10px;font-size:13px;text-align:left}
 .ed-sveglia{display:flex;width:100%;justify-content:center;margin-top:12px}
 #ora[hidden]{display:none}
+.oro .oro-tipo{font-family:var(--serif);font-size:22px;font-weight:600;margin:0 0 6px}
+.oro-riga{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid var(--line)}
+.oro-riga b{display:block;font-size:14.5px}
+.oro-riga div span{display:block;font-size:12.5px;color:var(--dim);margin-top:1px}
+.oro-riga>.mono{flex:none;font-size:15px;font-weight:600}
+.essperche{font-size:14.5px;line-height:1.45;color:var(--ink);margin:0 2px 14px}
+.essperche span{display:block;font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-bottom:3px}
 .essrischio{display:flex;align-items:flex-start;gap:10px;margin:0 0 10px;padding:11px 13px;border-radius:var(--r);background:var(--risk-soft);color:var(--ink);font-size:14px;line-height:1.45}
 .essrischio .eic{flex:none;color:var(--risk);display:flex}
 .essrischio .eic svg{width:18px;height:18px}
@@ -5815,7 +5822,10 @@ function renderEssenziale(P, CARDS){
   // L'avviso di rischio del giorno (notti di fila, minimo corporeo, rientro
   // ravvicinato): prima lo scriveva solo la vecchia vista «giornata», mai
   // visibile. Qui una riga, sopra la giornata.
-  try{ const r=rischioDelGiorno(P); if(r) voci.push({t:-1.5, html:'<p class="essrischio" role="note"><span class="eic">'+ICON.warn+'</span><span>'+esc(r)+'</span></p>'}); }catch(e){}
+  let rischio="";
+  try{ rischio=rischioDelGiorno(P); if(rischio) voci.push({t:-1.5, html:'<p class="essrischio" role="note"><span class="eic">'+ICON.warn+'</span><span>'+esc(rischio)+'</span></p>'}); }catch(e){}
+  // Il perché della giornata, in una riga: se c'è già l'avviso di rischio, è lui il perché.
+  if(!rischio && state.turniConfigurati){ try{ const p=perchéOggi(P); if(p) voci.push({t:-3, html:'<p class="essperche"><span>Il piano, in breve</span>'+esc(p)+'</p>'}); }catch(e){} }
   voci.sort((a,b)=>a.t-b.t);
   // Niente etichetta "Adesso" qui: il modulo #ora sopra questa lista
   // (renderOra/adessoLine) è già l'unico eroe per "cosa succede adesso" —
@@ -6191,6 +6201,33 @@ function votoRecenteBasso(){
   const media=recenti.reduce((a,b)=>a+b,0)/recenti.length;
   return media<=2.5 ? media : null;
 }
+// Il perché della giornata in una riga: cosa sta facendo il piano oggi e a
+// cosa serve. Solo da quello che il motore ha deciso davvero (tipo di sonno,
+// posto nel blocco di notti, rientro, spostamento): mai una frase che il
+// piano poi non segue.
+function perchéOggi(P){
+  const s=P.s, b=P.b; if(!s || !b || b.c==="?") return "";
+  const m=s.meta||{}, attacco=()=>P.nb && !P.nb.rest ? hhmm(P.nb.start) : "";
+  // «un'ora e mezza», non «1h 30m»: è una frase, si dice a voce.
+  const aVoce=x=>{ x=Math.round(x/15)*15; const h=Math.floor(x/60), r=x%60, q={15:"un quarto d'ora",30:"mezz'ora",45:"tre quarti d'ora"};
+    if(!h) return q[r]||"";
+    return (["","un'ora","due ore","tre ore","quattro ore","cinque ore","sei ore"][h]||h+" ore")+({15:" e un quarto",30:" e mezza",45:" e tre quarti"}[r]||""); };
+  if(P.lateStart) return "Attacchi nel cuore della notte: si dorme prima del turno"+((P.naps||[]).some(n=>n.rec) ? " e si recupera dopo, con un pisolino." : ".");
+  if(P.night){
+    const n=s.nIdx||1, L=s.nLen||1;
+    const dove = L<=1 ? "Una notte sola" : n===1 ? "Prima notte di "+L : n===L ? "Ultima notte" : "Notte "+n+" di "+L;
+    return dove+": "+(s.kind==="corto" ? "dopo il turno un sonno breve, così stanotte torni al tuo orario."
+      : "dopo il turno dormi di giorno, al buio, sempre alla stessa ora.");
+  }
+  if(m.reset) return "Giorno di rientro: stasera a letto al tuo orario, per tornare al ritmo del giorno.";
+  if(m.preNight || s.kind==="pre-notte") return "Domani attacchi la notte: stanotte vai a letto e ti alzi più tardi del solito, così arrivi al turno più sveglio.";
+  if(s.kind==="pre-turno-bifasico" && attacco()) return "Domani attacchi alle "+attacco()+": stasera a letto a un'ora in cui ti addormenti, il resto con un pisolino dopo il turno.";
+  if(s.kind==="pre-turno" && attacco()) return "Domani attacchi alle "+attacco()+": stasera a letto presto, la sveglia la decide il turno.";
+  if(m.esteso>=20) return "Stanotte c'è spazio per "+aVoce(m.esteso)+" di sonno in più: "+(P.nb && P.nb.rest ? "recuperi quello perso nei turni." : "arrivi al prossimo turno con una riserva.");
+  if(isFinite(P.shift) && Math.abs(P.shift)>=30) return "Il sonno si sposta di "+aVoce(Math.abs(P.shift))+" più "+(P.shift>0?"tardi":"presto")+": un passo alla volta verso il prossimo turno, senza strappi.";
+  if(b.rest) return "Giorno libero: tieni gli orari dei tuoi giorni liberi, così l'orologio resta dov'è.";
+  return (b.name ? b.name+": " : "")+"niente da spostare, il piano segue il tuo ritmo.";
+}
 function rischioDelGiorno(P){
   const r0=rischiAvanti(P,7).get(0);
   if(!r0) return "";
@@ -6290,6 +6327,41 @@ function caricoHtml(){
       '<p class="car-frase">'+esc(frase).replace(/\[(.+?)\]/,'<span class="hint">($1)</span>')+'</p>'+
     '</div></div>';
 }
+// «Il tuo orologio»: i punti fissi del ritmo, stimati dagli orari dei giorni
+// liberi (dichiarati, o aggiornati dal diario con «Il piano si adatta»).
+// Sono gli stessi numeri che il motore usa già per luce, pisolini e picco di
+// sonnolenza: qui si mostrano, senza domande in più.
+function orologio(){
+  const mid=mod1440(NT.naturalMid()), cbt=mod1440(NT.naturalMid()+NT.CFG.cbtOffset);
+  const bed=t(state.freeBed), wake=NT.freeWakeUsata();
+  // Metà del sonno nei giorni liberi (MSF di Roenneberg), in cinque fasce.
+  const h=mid/60, tipo = h<2.5 ? "Allodola" : h<3.5 ? "Un po' allodola" : h<5 ? "Né allodola né gufo" : h<6 ? "Un po' gufo" : "Gufo";
+  let lucido=null;
+  try{ if(window.NTAlert){
+    const d=new Date(); d.setHours(0,0,0,0);
+    const sv=new Date(+d+wake*6e4), letto=new Date(+d+(bed>wake?bed:bed+1440)*6e4);
+    const r=window.NTAlert.alertness({now:sv, freeWake:hhmm(wake), freeBed:state.freeBed, lastSleepEnd:sv, nextSleepStart:letto});
+    if(r && r.peak) lucido=r.peak.hhmm;
+  } }catch(e){}
+  return {tipo, mid, cbt, mel:mod1440(bed-120), lucido, partenza: state.freeBed==="23:30" && state.freeWake==="07:30"};
+}
+function orologioHtml(){
+  const o=orologio();
+  const riga=(lab,ora,sub)=>'<div class="oro-riga"><div><b>'+lab+'</b><span>'+sub+'</span></div><span class="mono">'+ora+'</span></div>';
+  return '<div id="orologio"><span class="eyebrow andamento-eyebrow">Il tuo orologio</span>'+
+    '<div class="andamento-sezione oro">'+
+      '<p class="oro-tipo">'+esc(o.tipo)+'</p><p class="hint" style="margin:0 0 6px">Nei giorni liberi, quando niente ti sveglia.</p>'+
+      riga("Metà del sonno", hhmm(o.mid), "il centro del sonno: dice se sei allodola o gufo")+
+      riga("Melatonina", "dalle "+hhmm(o.mel), "il corpo comincia a preparare il sonno: luci basse")+
+      riga("Minimo corporeo", hhmm(o.cbt), "la sonnolenza più forte: la luce prima ti sposta indietro, dopo in avanti")+
+      (o.lucido ? riga("Più lucido", "verso le "+o.lucido, "per le cose che chiedono testa") : "")+
+      '<p class="hint" style="margin:10px 0 0">'+(o.partenza
+        ? 'Per ora dagli orari di partenza: dimmi come dormi nei giorni liberi e diventa il tuo.'
+        : 'Stime dai tuoi orari nei giorni liberi ('+esc(state.freeBed)+' → '+esc(state.freeWake)+'), che il diario può aggiornare. Nei giorni di turno l\'orologio si sposta con il sonno, e il piano lo segue giorno per giorno. Non sono una misura.')+
+      '</p><button type="button" class="lnk" data-oro-cambia style="margin-top:8px">'+(o.partenza?'Dimmi come dormi nei giorni liberi':'Cambia come dormi nei giorni liberi')+' →</button>'+
+      '<div class="why" style="margin-top:10px"><cite>Roenneberg 2003 (cronotipo) · Burgess & Eastman 2005 (melatonina) · Åkerstedt & Folkard 1997 (lucidità)</cite></div>'+
+    '</div></div>';
+}
 function renderAndamenti(){
   const el=$("#andamenti"); if(!el) return;
   // Tutti gli insight calcolati PRIMA di costruire qualunque HTML: serve
@@ -6347,6 +6419,7 @@ function renderAndamenti(){
       }
     }
   }catch(e){}
+  try{ heroHtml+=orologioHtml(); }catch(e){}
   // Il carico dei turni: dai turni soli, senza diario — la pagina non è mai
   // vuota, ed è il rischio di stanchezza più documentato (notti di fila,
   // riposi brevi). Prima i dati del passato, accanto quelli in arrivo.
@@ -7377,6 +7450,10 @@ if($("#essenziale")) $("#essenziale").addEventListener("click", e=>{
   const b=e.target.closest("[data-cambia]"); if(!b) return;
   apriOpzioni(); apriSezioneInline(+b.dataset.cambia);
 });
+if($("#andamenti")) $("#andamenti").addEventListener("click", e=>{
+  if(!e.target.closest("[data-oro-cambia]")) return;
+  apriOpzioni(); apriSezioneInline(3);
+});
 if($("#essenziale")) $("#essenziale").addEventListener("click", e=>{
   const b=e.target.closest("[data-sveglia]"); if(!b) return;
   const t=b.dataset.sveglia, [h,m]=t.split(":").map(Number);
@@ -7684,6 +7761,10 @@ const CONSIGLI_FUNZIONE=[
   {k:"copia", dopo:7, quando:()=>!state.backupDone,
     t:()=>"I tuoi turni stanno solo su questo telefono"+(window.NT_APP.nativo?"":", in questo browser")+". La copia di sicurezza è un link: se cambi telefono, lo apri e ritrovi tutto.",
     cta:()=>"Salva la copia", a:()=>salvaConfigurazione()},
+  {k:"orologio", dopo:7, quando:()=>!(state.freeBed==="23:30" && state.freeWake==="07:30"),
+    t:()=>{ const o=orologio(); return "Il tuo orologio è pronto: "+o.tipo.toLowerCase()+", con il minimo corporeo verso le "+hhmm(o.cbt)+". Quando arriva la melatonina e quando sei più lucido, in «Sonno e carico»."; },
+    cta:()=>"Vedi il tuo orologio", a:()=>{ setTab("turni"); apriAndamenti(); usata("orologio");
+      const el=$("#orologio"); if(el) try{ el.scrollIntoView({block:"start"}); }catch(e){} }},
   {k:"mese", t:()=>"Puoi ricopiare il foglio turni in un minuto, un tocco per giorno, o importarlo da un file.", a:()=>{ setTab("turni"); apriSegna(); }},
   {k:"calendario", quando:()=>!inLista("calendario") && (platform.calendar.available ? !platform.calendar.attivo() : !(window.NTPaid && window.NTPaid.paid())),
     t:()=>"Turni e ore di sonno nel calendario del telefono, aggiornati da soli: li vedi dove guardi già i tuoi impegni.", cta:()=>"Attiva", a:()=>apriCalendarioDaWizard()},
