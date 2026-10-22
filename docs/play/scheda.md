@@ -82,7 +82,7 @@ Usavi Notturnisti dal browser? All'apertura scegli «Porta qui i tuoi turni».
   3. 03-onboarding — Che turno fai oggi? Un tocco e hai il piano
   4. 04-perche — Ogni consiglio spiegato
   5. 05-adatta — Il piano si adatta a come dormi davvero
-  6. 06-liberi — Il tuo tempo libero, da mandare a chi ti aspetta
+  6. 06-liberi — Il tuo tempo libero, per chi ti aspetta
   7. 07-scambio — Cambio turno: ti conviene?
   8. 08-mese — Turni che cambiano? Li segni in un minuto
 

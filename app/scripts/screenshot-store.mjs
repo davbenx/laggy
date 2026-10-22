@@ -60,7 +60,7 @@ const SCATTI = [
   ["05-adatta", "Il piano si adatta", "a come dormi davvero", async () => {
     const w = {}, bd = {}; for (let i = 1; i <= 30; i++) { w[fa(i)] = "09:00"; bd[fa(i)] = "00:30"; }
     return app(BASE, Object.assign({}, QUIETI, { "nt:wakes":JSON.stringify(w), "nt:beds":JSON.stringify(bd) })); }],
-  ["06-liberi", "Il tuo tempo libero,", "da mandare a chi ti aspetta", async () => {
+  ["06-liberi", "Il tuo tempo libero,", "per chi ti aspetta", async () => {
     const p = await app(BASE, QUIETI); await clic(p, '[data-tab="turni"]'); await clic(p, "#doPartner"); return p; }],
   ["07-scambio", "Cambio turno:", "ti conviene?", async () => {
     const p = await app(BASE, QUIETI); await clic(p, '[data-tab="turni"]'); await clic(p, "#doScambioTurno"); return p; }],
@@ -78,10 +78,13 @@ html,body{margin:0;width:1080px;height:1920px;overflow:hidden}
 body{background:radial-gradient(ellipse 90% 60% at 50% 0%,#233246 0%,#181b21 55%,#121418 100%);font-family:S,serif;color:#ECEDEF}
 h1{margin:0;position:absolute;top:118px;left:0;right:0;text-align:center;font-size:86px;font-weight:600;line-height:1.02;letter-spacing:-.5px}
 h1 span{display:block;color:#FF8A5B}
+h1,h1 span{white-space:nowrap}
 .tel{position:absolute;left:150px;top:375px;width:780px;height:1386px;border:10px solid #2a2f37;border-radius:64px;overflow:hidden;
 box-shadow:0 40px 90px rgba(0,0,0,.55);background:#14161A}
 .tel img{display:block;width:780px;height:1386px}
-</style></head><body><h1>${riga1}<span>${riga2}</span></h1><div class="tel"><img src="data:image/png;base64,${img}"></div></body></html>`;
+</style></head><body><h1>${riga1}<span>${riga2}</span></h1><div class="tel"><img src="data:image/png;base64,${img}"></div>
+<script>/* Titolo sempre su due righe: se una riga sfora, carattere più piccolo. */
+const h=document.querySelector("h1"); let f=86; while(h.scrollWidth>1000 && f>50){ f-=2; h.style.fontSize=f+"px"; }</script></body></html>`;
 
 for (const [nome, r1, r2, fai] of SCATTI) {
   const p = await fai(); await p.waitForTimeout(500);
