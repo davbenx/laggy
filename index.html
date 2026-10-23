@@ -1145,6 +1145,9 @@ text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:600;color:v
 .opz-gruppo.az>.tool[hidden]{display:none}
 .foot-legal{display:flex;flex-wrap:wrap;gap:4px 16px;justify-content:center;margin:16px 0 0;font-size:13px}
 .foot-legal a{color:var(--dim);text-decoration:none;border-bottom:0;padding:8px 2px}
+.opz-gruppo .riga-sw{padding:8px 15px;margin:0;border-top:1px solid var(--line)}
+.opz-gruppo .riga-sw:first-child{border-top:0}
+.riga-sw small{display:block;font-size:12.5px;font-weight:400;color:var(--dim);line-height:1.35;margin-top:1px}
 .riga-sw,.q>label.riga-sw{display:flex;margin-bottom:4px;align-items:center;gap:12px;justify-content:space-between;font-size:15px;font-weight:600;color:var(--ink);cursor:pointer;min-height:44px}
 .piu-info{border:1px solid var(--line);border-radius:var(--r);margin:18px 0 8px;background:var(--s1)}
 .piu-info>summary{padding:12px 15px;cursor:pointer;font-size:14px;font-weight:600;color:var(--dim);
@@ -1797,6 +1800,9 @@ header b{font-size:23px}
     <span class="tool-tx"><b>Tragitto, caffè e pisolini</b><span>Tempi di viaggio, effetto del caffè, se puoi dormire al lavoro</span></span></button>
   <div class="ecc" id="opzBox4" hidden></div>
   </div>
+  <span class="eyebrow opz-eb">Cosa vedi nel piano</span>
+  <div class="opz-gruppo" id="opzPianoVoci"></div>
+  <p class="hint" style="margin:6px 2px 0">Dormi, Turno, Pisolino, Ultimo caffè e Rientro ci sono sempre. Il resto lo scegli tu.</p>
   <span class="eyebrow opz-eb">Aspetto</span>
   <div class="aspetto" id="aspetto" role="radiogroup" aria-label="Aspetto">
     <button type="button" role="radio" aria-checked="true" data-tema="auto">Automatico</button>
@@ -2742,7 +2748,10 @@ Object.assign(state, {
   // Quale persona guarda la card compatta di Oggi, quando ce n'è più di
   // una: indice dentro tuttePersone() (0 = principale). Con una sola
   // persona in elenco non cambia nulla — resta sempre lei.
-  personaGlance:0
+  personaGlance:0,
+  // Le voci facoltative del piano che si vedono o no: {luce:false, testa:true…}. Quel che manca
+  // vale il predefinito (vedi PIANO_VOCI): le voci di sempre accese, i momenti migliori spenti.
+  piano:{}
 });
 
 const t = s => (+s.slice(0,2))*60 + (+s.slice(3,5));
@@ -5547,12 +5556,26 @@ function renderFormaGiorno(P){
 // I momenti migliori del giorno (testa, movimento, allenamento): stima dai tuoi orari (alertness.js),
 // fuori da turno e viaggio, pisolini e pasti. Diventano voci della timeline, come caffè e luce.
 function finestreDelGiorno(P){
+  if(!["testa","leggera","intensa"].some(pianoVoce)) return null;
   if(!state.turniConfigurati || dnum(state.focus)<dnum(giornoVero()) || !window.NTAlert || !window.NTAlert.finestreAttivita) return null;
   const b=P.b, cTo=+state.cTo||25, cFrom=+state.cFrom||25, prep=+state.prep||45;
   const occupato=[]; if(b && !b.rest && isFinite(b.start) && isFinite(b.end)) occupato.push([b.start-prep-cTo, b.end+cFrom]);
   for(const n of (P.naps||[])) occupato.push([n.a, n.b]);
   return window.NTAlert.finestreAttivita({wake:P.wake, sleepOnset:P.s.onset, fase:P.cbt, freeWake:state.freeWake, occupato, pasti:P.meals||[]});
 }
+// Le voci del piano che si possono nascondere (le altre — Dormi, Turno, Pisolino, Ultimo caffè,
+// Rientro e gli avvisi — ci sono sempre). Quarto valore = predefinito: le voci che c'erano già
+// restano accese, i momenti migliori sono una scelta.
+const PIANO_VOCI=[
+  ["luce","Luce","Quando prendere o evitare la luce per restare in fase",true],
+  ["penombra","Penombra","Le luci basse prima di dormire",true],
+  ["pasti","Pasti","Quando mangiare nei giorni di turno",true],
+  ["liberi","Tempo libero","Le finestre libere fuori dal lavoro",true],
+  ["testa","Momento per la testa","Quando sei più lucido per pensare, studiare, decidere",false],
+  ["leggera","Momento per muoverti","45 minuti leggeri: camminare, stretching",false],
+  ["intensa","Momento per allenarti","60 minuti più impegnativi, lontano da pasti e sonno",false]
+];
+function pianoVoce(k){ const v=(state.piano||{})[k]; if(v!=null) return !!v; const x=PIANO_VOCI.find(y=>y[0]===k); return x ? x[3] : true; }
 const STIMA_FIN="Una stima dai tuoi orari di sonno, non una misura né un consiglio medico.";
 const VOCI_FIN=[
   ["testa","Testa",ICON.mente,"pensare, studiare","Le ore in cui sei più lucido: almeno 90 minuti dopo il risveglio e 2 ore prima di dormire, fuori dal turno, dal viaggio e dai pasti. "+STIMA_FIN],
@@ -5702,7 +5725,7 @@ function renderEssenziale(P, CARDS){
   // attaccate a «Dormi»: sono decisioni su quella voce, non voci del programma.
   // I momenti migliori (testa, movimento, allenamento) come voci del piano.
   try{ const fin=finestreDelGiorno(P);
-    if(fin) for(const [k,lab,ic,sub,perche] of VOCI_FIN){ const w=fin[k]; if(!w) continue;
+    if(fin) for(const [k,lab,ic,sub,perche] of VOCI_FIN){ const w=fin[k]; if(!w || !pianoVoce(k)) continue;
       voci.push({t:dSv(w.a), html:riga("fin-"+k, lab, hhmm(w.a)+" → "+hhmm(w.z), sub, false, ic, '<div class="why">'+esc(perche)+'</div>', {a:w.a, z:w.z})}); } }catch(e){}
   const dn=sceltaDopoNotte(P);
 
@@ -5840,6 +5863,9 @@ function renderEssenziale(P, CARDS){
       (piu ? "Nella notte tra "+nomeGiorno(state.focus)+" e "+nomeGiorno(day(state.focus,1))+" l'ora torna indietro: alle 03:00 sono le 02:00 e la notte dura un'ora in più."
            : "Nella notte tra "+nomeGiorno(state.focus)+" e "+nomeGiorno(day(state.focus,1))+" l'ora va avanti: alle 02:00 sono le 03:00 e la notte dura un'ora in meno.")+
       " Gli orari del piano sono quelli dell'orologio"+(spans ? ": il tuo turno dura un'ora "+(piu?"in più":"in meno")+" di quanto dice il piano." : ".")+'</p>'}); } }catch(e){}
+  // Le voci facoltative che la persona ha spento in Impostazioni.
+  { const spente=["luce","penombra","pasti","liberi"].filter(k=>!pianoVoce(k));
+    if(spente.length) for(let i=voci.length-1;i>=0;i--){ const m=/data-row="([a-z]+)"/.exec(voci[i].html); if(m && spente.includes(m[1])) voci.splice(i,1); } }
   voci.sort((a,b)=>a.t-b.t);
   // La timeline: prima e ultima voce (accorciano la linea), il segno «ora»
   // fra passato e futuro, e «Poi» sotto «Adesso».
@@ -7151,8 +7177,21 @@ function NT_planSafe(d){
 // farlo girare a ogni render() dell'app: solo quando Opzioni è davvero
 // aperta (classe sul body, non state.tab — che non diventa mai "opzioni",
 // vedi apriOpzioni/setTab).
+// Impostazioni › Cosa vedi nel piano: un interruttore per ogni voce facoltativa.
+function renderPianoVoci(){
+  const el=$("#opzPianoVoci"); if(!el) return;
+  el.innerHTML=PIANO_VOCI.map(([k,nome,desc])=>'<label class="riga-sw" for="pv-'+k+'"><span><b>'+esc(nome)+'</b><small>'+esc(desc)+'</small></span>'+
+    '<span class="switch"><input type="checkbox" id="pv-'+k+'" data-pv="'+k+'"'+(pianoVoce(k)?" checked":"")+'><span class="slider"></span></span></label>').join("");
+}
+if($("#opzPianoVoci")) $("#opzPianoVoci").addEventListener("change", e=>{
+  const k=e.target.dataset && e.target.dataset.pv; if(!k) return;
+  state.piano=Object.assign({}, state.piano, {[k]:e.target.checked}); salva();
+  if(e.target.checked) track("setup_item", {item:"piano_"+k});
+  render(); ntNotifiche();
+});
 function renderOpzSummaries(){
   if(!document.body.classList.contains("tab-opzioni")) return;
+  renderPianoVoci();
   const t=$("#opzValTurni");
   if(t){
     const pi=presetIndex();
@@ -9700,7 +9739,7 @@ function salva(){
   const dati={turniConfigurati:state.turniConfigurati,pattern:state.pattern,anchor:state.anchor,shifts:state.shifts,
     cTo:state.cTo,cFrom:state.cFrom,need:state.need,prep:state.prep,freeWake:state.freeWake,freeBed:state.freeBed,
     maxAdvance:state.maxAdvance,pPattern:state.pPattern,pAnchor:state.pAnchor,
-    pShifts:state.pShifts,pWake:state.pWake,pBed:state.pBed,pName:state.pName,people:state.people,personaGlance:state.personaGlance,
+    pShifts:state.pShifts,pWake:state.pWake,pBed:state.pBed,pName:state.pName,people:state.people,personaGlance:state.personaGlance,piano:state.piano,
     repeat:state.repeat,ecc:state.ecc,giorni:state.giorni,evento:state.evento,festivi:state.festivi,festiviRiposo:state.festiviRiposo,
     napTurno:state.napTurno,sonnoDiurno:state.sonnoDiurno,mattinoBifasico:state.mattinoBifasico,avvisoBifasicoOff:state.avvisoBifasicoOff,firstSeenAt:state.firstSeenAt,pausa:state.pausa,caffSens:state.caffSens,vista:state.vista};
   const testo=JSON.stringify(dati);

@@ -25,7 +25,7 @@ ok((await voci(p)).includes("✓I turni dei prossimi giorni"), "web: dopo aver i
 await p.click('[data-tab="oggi"]'); await p.waitForTimeout(300);
 await p.click("#doOpzioni"); await p.waitForTimeout(300);
 const gruppi=await p.evaluate(()=>[...document.querySelectorAll("#opzioni > .eyebrow")].map(e=>e.textContent));
-ok(gruppi.slice(0,5).join(",")==="Funziona da solo,Il tuo piano,Aspetto,Salva,Informazioni e privacy", "Opzioni per argomento: "+gruppi.join(" · "));
+ok(gruppi.slice(0,6).join(",")==="Funziona da solo,Il tuo piano,Cosa vedi nel piano,Aspetto,Salva,Informazioni e privacy", "Opzioni per argomento: "+gruppi.join(" · "));
 const opzV=await p.evaluate(()=>[...document.querySelectorAll("#opzFunzioni .attiva-voce[data-gestisci]")].map(v=>(v.classList.contains("ok")?"✓":"·")+v.querySelector("b").textContent));
 ok(opzV.length===2, "Opzioni → 'Funziona da solo' con promemoria e calendario (i turni stanno in 'Il tuo piano'): "+opzV.join(" | "));
 await p.screenshot({path:"/tmp/a-2-opzioni.png", fullPage:true});

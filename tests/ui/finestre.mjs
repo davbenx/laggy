@@ -6,7 +6,7 @@ const b=await pw.chromium.launch(); const errs=[];
 async function apri(pat, sh, quando, w=360){
   const ctx=await b.newContext({locale:"it-IT",timezoneId:"Europe/Rome",viewport:{width:w,height:780}});
   await ctx.addInitScript(([pat,sh])=>{ if(sessionStorage.getItem("x")) return; sessionStorage.setItem("x","1");
-    localStorage.setItem("nt:state",JSON.stringify({turniConfigurati:true,pattern:pat,anchor:"2026-11-03",shifts:sh,repeat:true,firstSeenAt:"2026-01-01"}));
+    localStorage.setItem("nt:state",JSON.stringify({turniConfigurati:true,pattern:pat,anchor:"2026-11-03",shifts:sh,repeat:true,firstSeenAt:"2026-01-01",piano:{testa:true,leggera:true,intensa:true}}));
     localStorage.setItem("nt:turniConfigurati","true"); localStorage.setItem("nt:firstPlanBannerChiuso","true"); localStorage.setItem("nt:attivazioneNascosta","true"); },[pat,sh]);
   const p=await ctx.newPage(); p.on("pageerror",e=>errs.push(e.message));
   await p.clock.setFixedTime(new Date(quando));
