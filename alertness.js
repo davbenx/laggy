@@ -19,15 +19,17 @@ const hhmm = d => {
   return String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0");
 };
 
+// Ritmo circadiano a due armoniche (fondamentale 24h + armonica 12h): riproduce
+// la forma reale — nadir notturno profondo, mattino buono, lieve calo pomeridiano,
+// sera alta — invece di una cosinusoide sola che sbaglia mattino vs pomeriggio.
+// min = minuto dell'orologio, wake = risveglio abituale (minuti).
+const ritmo24 = (min, wake) => 0.7 * Math.cos(2 * Math.PI * (min - (wake + 540) % 1440) / 1440);
+const ritmo12 = (min, wake) => 0.5 * Math.cos(2 * Math.PI * (min - (wake + 180) % 1440) / 720);
+
 // opts: { now:Date, freeWake, freeBed, lastSleepEnd:Date|null, nextSleepStart:Date|null }
 export function alertness(opts) {
   const now = opts.now || new Date();
   const wake = parseHM(opts.freeWake) != null ? parseHM(opts.freeWake) : 450;   // 07:30
-  // Ritmo circadiano a due armoniche (fondamentale 24h + armonica 12h): riproduce
-  // la forma reale — nadir notturno profondo, mattino buono, lieve calo pomeridiano,
-  // sera alta — invece di una cosinusoide sola che sbaglia mattino vs pomeriggio.
-  const acro24 = (wake + 540) % 1440;   // picco fondamentale ~9h dopo il risveglio (sera)
-  const acro12 = (wake + 180) % 1440;   // seconda armonica ~3h dopo il risveglio
   const nadir = ((wake - 180) % 1440 + 1440) % 1440;   // ~3h prima del risveglio, per l'etichetta
 
   const lastEnd = opts.lastSleepEnd ? opts.lastSleepEnd.getTime() : now.getTime() - 6 * 3600e3;
@@ -36,9 +38,7 @@ export function alertness(opts) {
   const rawHorizon = opts.nextSleepStart ? opts.nextSleepStart.getTime() - 60 * 60000 : now.getTime() + 16 * 3600e3;
   const horizon = Math.max(rawHorizon, now.getTime() + 60 * 60000);
 
-  const C = min =>
-    0.7 * Math.cos(2 * Math.PI * (min - acro24) / 1440) +
-    0.5 * Math.cos(2 * Math.PI * (min - acro12) / 720);
+  const C = min => ritmo24(min, wake) + ritmo12(min, wake);
   const S = tMs => 1 - Math.exp(-Math.max(0, (tMs - lastEnd) / 3600e3) / 8); // pressione del sonno
   const A = tMs => C(minOf(new Date(tMs))) - 1.1 * S(tMs);                   // allerta netta
 
@@ -60,13 +60,54 @@ export function alertness(opts) {
   };
 }
 
+// Le finestre migliori della giornata per tre cose: pensare (testa), muoversi piano (movimento leggero),
+// allenarsi (movimento impegnativo). Stessa stima dell'allerta: ritmo circadiano + pressione del sonno,
+// con le regole del buon senso (non appena svegli, non subito dopo i pasti, non a ridosso del sonno,
+// non durante il turno). Nessun dato biologico: solo i tuoi orari. Minuti sulla scala del giorno guardato.
+// inp: { wake, sleepOnset, fase (minuto del minimo corporeo, opzionale), freeWake,
+//        occupato:[[a,z]...] (turno con viaggio, sonni, pisolini), pasti:[{at, lt}] }
+const FIN = {
+  testa:   { lungo: 90, dopoSveglia: 90,  primaSonno: 120, dopoPasto: [0, 60],  dopoPastoLt: [0, 30] },
+  leggera: { lungo: 45, dopoSveglia: 45,  primaSonno: 60,  dopoPasto: [0, 30],  dopoPastoLt: [0, 20] },
+  intensa: { lungo: 60, dopoSveglia: 120, primaSonno: 180, dopoPasto: [-60, 120], dopoPastoLt: [-30, 60] }
+};
+export function finestreAttivita(inp) {
+  const fw = isFinite(inp.fase) ? ((inp.fase + 180) % 1440 + 1440) % 1440 : (parseHM(inp.freeWake) != null ? parseHM(inp.freeWake) : 450);
+  const w0 = inp.wake, w1 = inp.sleepOnset;
+  const out = { testa: null, leggera: null, intensa: null };
+  if (!isFinite(w0) || !isFinite(w1) || w1 <= w0) return out;
+  const S = m => 1 - Math.exp(-Math.max(0, (m - w0) / 60) / 8);
+  const A = m => ritmo24(((m % 1440) + 1440) % 1440, fw) + ritmo12(((m % 1440) + 1440) % 1440, fw) - 1.1 * S(m);
+  const F = m => 0.8 * ritmo24(((m % 1440) + 1440) % 1440, fw) + 0.2 * A(m);   // forza e coordinazione seguono soprattutto il ritmo della temperatura
+  const occ = (inp.occupato || []).filter(x => x && isFinite(x[0]) && isFinite(x[1]));
+  const sovrappone = (a, z, x) => a < x[1] && z > x[0];
+  for (const tipo of ["testa", "leggera", "intensa"]) {
+    const R = FIN[tipo], score = tipo === "testa" ? A : F, blocchi = occ.slice();
+    for (const p of (inp.pasti || [])) {
+      const r = p.lt ? R.dopoPastoLt : R.dopoPasto;
+      blocchi.push([p.at + r[0], p.at + r[1]]);
+    }
+    let meglio = null;
+    for (let a = Math.ceil((w0 + R.dopoSveglia) / 15) * 15; a + R.lungo <= w1 - R.primaSonno; a += 15) {
+      const z = a + R.lungo;
+      if (blocchi.some(x => sovrappone(a, z, x))) continue;
+      let somma = 0, n = 0;
+      for (let m = a; m < z; m += 15) { somma += score(m); n++; }
+      const media = somma / n;
+      if (!meglio || media > meglio.media + 1e-9) meglio = { a, z, media };
+    }
+    if (meglio) out[tipo] = { a: meglio.a, z: meglio.z };
+  }
+  return out;
+}
+
 // ─────────── integrazione GRATIS nella pagina (guardata: se manca il ponte, non fa nulla) ───────────
 // Solo modello. La card "Ora" (rischio + azione del momento + check-in) la disegna
 // il core in un unico blocco: qui esponiamo la funzione e, al caricamento, chiediamo
 // un re-render così il core può usarla (il modulo arriva dopo il primo render).
 try {
   if (typeof window !== "undefined") {
-    window.NTAlert = { alertness };
+    window.NTAlert = { alertness, finestreAttivita };
     var _k = function () { try { window.dispatchEvent(new Event("nt:refresh")); } catch (e) {} };
     if (document.readyState === "loading") window.addEventListener("DOMContentLoaded", _k);
     else setTimeout(_k, 0);

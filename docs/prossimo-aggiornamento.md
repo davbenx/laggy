@@ -34,6 +34,16 @@ Fatto quando: un telefono con orologio compila il diario da solo, il giorno pass
 
 Non so ancora: quali dei tester ha un dispositivo compatibile; quanti giorni di storico si vedono dopo il permesso (una fonte terza dice 30, da verificare nella documentazione ufficiale).
 
+## Widget con il mese, anche con la compagna/il compagno (richiesta di utenti)
+Un solo widget che, allargandolo, cambia: piccolo = «cosa fare adesso»; medio = la settimana (c'è già); grande = **il mese**.
+Come nello screenshot di un utente: 4–5 settimane in griglia, per ogni giorno **la mia sigla** (pillola colorata per tipo: lavoro, notte, riposo) e **quella della persona scelta** sotto (colore diverso); oggi evidenziato; ‹ › per i mesi dopo; tocco su un giorno apre l'app su quel giorno (`notturnisti://giorno/AAAA-MM-GG`, già gestito).
+- **Dati**: `ntWidget()` pubblica già `giorni` (7 giorni: sigla, tipo, ora a letto). Estendere a ~90 giorni, per ogni giorno `{d, c, t}` mio e `{pc, pt}` della persona scelta (`tuttePersone()`/`asPartner`), più `ins` = giorno libero insieme (`giorniCiclo(..., persona)`/`finestreCondivise`). Poche decine di KB.
+- **Scelta della persona**: se ce n'è più di una, un tocco sull'intestazione del widget cambia chi si sovrappone (o si sceglie in Impostazioni › «Le tue persone»).
+- **Disegno**: la griglia si disegna nel codice nativo (Canvas → bitmap) e la mostra un `ImageView`: più robusto delle celle di RemoteViews. Riferimento di dimensione: i limiti di memoria dei bitmap dei widget.
+- **Taglia**: scelta del layout dalla dimensione che il launcher comunica (`onAppWidgetOptionsChanged`) con un'isteresi; un tocco sull'intestazione passa a mano da «Adesso» a «Mese», perché i launcher non riportano le dimensioni tutti allo stesso modo.
+- **Prova**: solo su telefono vero (l'aspetto di un widget non si vede da qui); APK di prova e uno o due giri di correzioni.
+- Legge i dati già sul telefono, nessun permesso nuovo.
+
 ## Idee per dopo (in ordine di valore/rischio, da rivedere con i dati reali)
 1. **Foto del foglio turni → importazione** (OCR sul telefono, nessun invio): per chi riceve i turni variabili su carta o PDF. È il punto più faticoso di chi non ha un ciclo.
 2. **Conti per la busta paga e controlli sui riposi**: ore notturne, festive e domeniche del mese (c'è già il mese e i festivi); avviso di «meno di 11 ore tra due turni» e «24 ore di riposo settimanale» secondo la normativa italiana. Da validare con un esperto prima di scrivere cifre.
