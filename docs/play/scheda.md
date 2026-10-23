@@ -66,15 +66,15 @@ Notturnisti dà indicazioni generali di benessere e organizzazione basate sulla 
 
 Un progetto indipendente, nato da chi i turni li fa. Segnalazioni e idee: dall'app, Impostazioni → Segnala cosa non torna.
 
-## Note di versione 1.1.1 (max 500)
+## Note di versione 1.1.2 (max 500)
 Dalla 1.0.2:
-• Il piano di oggi è una timeline; dopo lo smonto resta il giorno del turno fino al risveglio
+• Il piano di oggi è una timeline e segue il tempo anche ad app aperta; dopo lo smonto resta il giorno del turno fino al risveglio
 • «Il tuo orologio»: allodola o gufo, melatonina, minimo corporeo
 • Sveglia nell'Orologio con un tocco; voto del sonno dal widget
-• Grafici con le ore di riferimento
-• Festivi del contratto; ferie con più fine settimana e giorni a casa con una persona
-• Importa i turni da calendario o file fin dall'inizio
-• Messaggi di condivisione più puliti
+• Festivi del contratto; ferie anche a casa con una persona
+• Manda il riepilogo del mese o degli ultimi 12 mesi
+• Importa i turni da calendario o file
+• Su un telefono nuovo ritrovi i tuoi turni dal backup
 
 ## Categoria, tag e contatti
 - Categoria: Salute e fitness
