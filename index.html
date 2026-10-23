@@ -2903,7 +2903,13 @@ function giornoVeroCalcola(){
         // Dalle 04:30 in poi inizia la finestra mattutina e l'app apre sempre su Oggi.
         const inSonnoIeri = oraReale < 270 && Pieri.s && isFinite(Pieri.s.onset) && isFinite(Pieri.s.dur)
           && adessoRel>=Pieri.s.onset && adessoRel<Pieri.s.onset+Pieri.s.dur;
-        if(inTurnoIeri || inSonnoIeri) return ieri;
+        // Dopo un turno di notte il sonno di giorno appartiene ancora a ieri: dallo
+        // smonto fino al risveglio il piano è quello di ieri (con il sonno che sta
+        // per cominciare), non quello di oggi, che parte dopo.
+        const inSonnoDopoTurno = Pieri.b && !Pieri.b.rest && isFinite(Pieri.b.end) && Pieri.s && (Pieri.s.kind==="diurno" || Pieri.s.kind==="corto")
+          && isFinite(Pieri.s.onset) && isFinite(Pieri.s.dur) && Pieri.s.onset>=Pieri.b.end-30
+          && adessoRel>=Pieri.b.end && adessoRel<Pieri.s.onset+Pieri.s.dur;
+        if(inTurnoIeri || inSonnoIeri || inSonnoDopoTurno) return ieri;
       }
     }catch(e){}
   }
@@ -6021,7 +6027,10 @@ function renderHeader(P, f){
     ...(!stessoMese ? { month: "short" } : {}),
     ...(!stessoAnno ? { year: "numeric" } : {})
   });
-  const dataTesto = scarto===0 ? "Oggi, "+giornoTxt
+  // oltre la mezzanotte (turno di notte, sonno dopo lo smonto) il giorno dell'app
+  // non è ancora finito: «Ancora giovedì 22», non «Oggi, giovedì 22» di venerdì mattina
+  const ancora = scarto===0 && dnum(f)<dnum(new Date());
+  const dataTesto = ancora ? "Ancora "+giornoTxt : scarto===0 ? "Oggi, "+giornoTxt
     : scarto===1 ? "Domani, "+giornoTxt
     : scarto===-1 ? "Ieri, "+giornoTxt
     : giornoTxt.charAt(0).toUpperCase()+giornoTxt.slice(1);
