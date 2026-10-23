@@ -8,6 +8,7 @@
 
 import { createEngine } from "./engine.js";
 import { giorniBrevi } from "./lingua.js";
+import { finestreDelPiano } from "./alertness.js";
 
 const MIN = 60000;
 const localMidnight = d => new Date(d.getFullYear(), d.getMonth(), d.getDate());
@@ -31,6 +32,7 @@ export const TIPI = [
   { k: "nap",      nome: "Pisolino",                 desc: "Solo nei giorni in cui il piano lo prevede",                             essenziale: false, canale: "pisolini" },
   { k: "prep",     nome: "Preparati per il turno",   desc: "Un'ora prima dell'inizio del turno",                                     essenziale: false, canale: "turni" },
   { k: "luce",     nome: "Luce del mattino",         desc: "Quando prendere luce per restare in fase",                               essenziale: false, canale: "luce" },
+  { k: "momenti",  nome: "Momenti buoni",            desc: "All'inizio di un momento per la testa, per muoverti o per allenarti: solo quelli che accendi in «Cosa vedi nel piano»", essenziale: false, canale: "momenti" },
   { k: "wake",     nome: "Ora di alzarti",           desc: "Fine del sonno pianificato. Non è una sveglia: per quella c'è la sveglia del telefono (nell'app Android, «Metti la sveglia» in Dormi)", essenziale: false, canale: "sveglie" },
   { k: "settimana",nome: "La tua settimana",         desc: "La domenica sera, i turni dei prossimi 7 giorni",                        essenziale: false, canale: "suggerimenti" },
   // Questi due li prepara index.html (servono il diario e le impostazioni),
@@ -47,7 +49,9 @@ export const TIPI_TUTTI = TIPI.map(t => t.k);
 // cancellava il primo).
 const KIND = { bedtime: 1, wake: 2, nap: 3, coffee: 4, ret: 5, prep: 6, cambio: 7, domani: 8, luce: 9, settimana: 0 };
 // Priorità quando un giorno ne avrebbe troppe (si tengono le prime).
-const PRIO = ["cambio", "ret", "rischio", "bedtime", "domani", "nap", "coffee", "prep", "luce", "wake", "settimana"];
+const PRIO = ["cambio", "ret", "rischio", "bedtime", "domani", "nap", "coffee", "prep", "luce", "wake", "settimana", "momenti"];
+// «momenti»: tre al giorno al massimo, in una fascia di id sua (come «rischio»), fra 970000 e 979999
+const MOMENTI = [["testa", "Buon momento per pensare", "la testa"], ["leggera", "Buon momento per muoverti", "il movimento leggero"], ["intensa", "Buon momento per allenarti", "l'allenamento"]];
 const MAX_AL_GIORNO = 4, UNISCI_ENTRO = 20 * MIN;
 const GIORNI = giorniBrevi();   // dom … sab, come getDay()
 const durTxt = m => { m = Math.round(Math.abs(m)); const h = Math.floor(m / 60), r = m % 60; return h ? h + (r ? "h" + String(r).padStart(2, "0") : " or" + (h === 1 ? "a" : "e")) : r + " min"; };
@@ -73,7 +77,7 @@ export function buildSchedule(config, opts = {}) {
     const k = dayIdx + ":" + kind, n = seq[k] = (seq[k] || 0) + 1;   // contato anche se nel passato: id stabili
     if (when.getTime() <= now) return;            // solo futuro
     // "rischio" non ha una cifra libera in KIND (0–9 usate): una sua fascia di id
-    const id = kind === "rischio" ? 980000 + (dayIdx + 1) * 10 + (n - 1) : dayIdx * 100 + KIND[kind] * 10 + (n - 1);
+    const id = kind === "rischio" ? 980000 + (dayIdx + 1) * 10 + (n - 1) : kind === "momenti" ? 970000 + (dayIdx + 1) * 10 + (n - 1) : dayIdx * 100 + KIND[kind] * 10 + (n - 1);
     out.push({ id, kind, title, body, at: when, extra });
   };
   const fb = /^(\d\d):(\d\d)$/.exec(String(e.state.freeBed || "23:30"));
@@ -169,6 +173,13 @@ export function buildSchedule(config, opts = {}) {
     if (want("prep") && prepLead > 0 && !P.b.rest)
       push(base, P.b.start - prepLead, "prep", "Preparati per il turno",
         "Inizio alle " + hhmm(at(mid, P.b.start)) + ".");
+
+    // I momenti buoni: all'inizio di quelli che la persona ha acceso nel piano (mai da soli: serve l'interruttore).
+    if (want("momenti") && P.s.dur > 0 && config.piano) {
+      const fin = finestreDelPiano(P, config);
+      for (const [k, titolo, cosa] of MOMENTI) { const w = fin[k]; if (config.piano[k] !== true || !w) continue;
+        push(base, w.a, "momenti", titolo, "Dalle " + hhmm(at(mid, w.a)) + " alle " + hhmm(at(mid, w.z)) + ": " + cosa + ". Una stima dai tuoi orari.", { tab: "oggi" }); }
+    }
 
     if (want("luce") && !P.night)
       push(base, P.wake + 15, "luce", "Luce del mattino",

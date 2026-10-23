@@ -957,6 +957,7 @@ padding:16px 18px;margin:2px 0 var(--gap-sezione);box-shadow:var(--shadow-btn)}
 .ora-card .eyebrow{color:var(--blue)}
 .ora-card b{display:block;font-family:var(--serif);font-size:20px;font-weight:600;line-height:1.25;margin-top:3px}
 .ora-sub{display:block;font-size:14px;color:var(--dim);line-height:1.5;margin-top:10px;margin-left:58px}
+.ora-fin{display:block;font-size:13px;color:var(--dim);line-height:1.4;margin-top:6px;margin-left:58px}
 .ora-poi{display:block;font-size:13px;font-weight:600;color:var(--blue);line-height:1.4;margin-top:8px;margin-left:58px}
 .ora-card.risk .ora-poi{color:var(--dim)}
 .ora-card.risk{background:var(--risk-soft);border-color:var(--risk-line);box-shadow:var(--shadow-card)}
@@ -4330,11 +4331,19 @@ function renderOra(Pfocus){
     oraIc = (title && /caff/i.test(title)) ? ICON.coffee : ICON.eye;
   }
 
+  // I momenti migliori in corso (solo quelli accesi), quando il momento non ha altro di più importante da dire.
+  let momenti="";
+  if(!isMissing && !isSevere && !inSmonto && !inDuty && !sleeping){
+    try{ const fin=finestreDelGiorno(P);
+      if(fin){ const v=[["testa","pensare"],["leggera","muoverti piano"],["intensa","allenarti"]].filter(([k])=>pianoVoce(k) && fin[k] && m>=fin[k].a && m<fin[k].z)
+          .map(([k,verbo])=>verbo+" fino alle "+hhmm(fin[k].z));
+        if(v.length) momenti='<span class="ora-fin">Buon momento per '+esc(v.join(" · "))+'</span>'; } }catch(e){}
+  }
   el.innerHTML = '<div class="ora-card' + (accent ? " risk" : "") + '"' + (isMissing ? ' style="cursor:pointer" title="Tocca per inserire il turno di oggi"' : "") + '>' +
     '<div class="ora-h"><span class="ora-ic">' + oraIc + '</span>' +
     '<div class="ora-tx"><span class="eyebrow">Adesso</span>' +
     '<b>' + esc(title) + '</b></div></div>' +
-    '<span class="ora-sub">' + esc(sub) + '</span>' +
+    '<span class="ora-sub">' + esc(sub) + '</span>' + momenti +
     '</div>';
 }
 if($("#ora")) $("#ora").addEventListener("click", () => {
@@ -5557,11 +5566,8 @@ function renderFormaGiorno(P){
 // fuori da turno e viaggio, pisolini e pasti. Diventano voci della timeline, come caffè e luce.
 function finestreDelGiorno(P){
   if(!["testa","leggera","intensa"].some(pianoVoce)) return null;
-  if(!state.turniConfigurati || dnum(state.focus)<dnum(giornoVero()) || !window.NTAlert || !window.NTAlert.finestreAttivita) return null;
-  const b=P.b, cTo=+state.cTo||25, cFrom=+state.cFrom||25, prep=+state.prep||45;
-  const occupato=[]; if(b && !b.rest && isFinite(b.start) && isFinite(b.end)) occupato.push([b.start-prep-cTo, b.end+cFrom]);
-  for(const n of (P.naps||[])) occupato.push([n.a, n.b]);
-  return window.NTAlert.finestreAttivita({wake:P.wake, sleepOnset:P.s.onset, fase:P.cbt, freeWake:state.freeWake, occupato, pasti:P.meals||[]});
+  if(!state.turniConfigurati || dnum(state.focus)<dnum(giornoVero()) || !window.NTAlert || !window.NTAlert.finestreDelPiano) return null;
+  return window.NTAlert.finestreDelPiano(P, state);
 }
 // Le voci del piano che si possono nascondere (le altre — Dormi, Turno, Pisolino, Ultimo caffè,
 // Rientro e gli avvisi — ci sono sempre). Quarto valore = predefinito: le voci che c'erano già
@@ -5726,7 +5732,7 @@ function renderEssenziale(P, CARDS){
   // I momenti migliori (testa, movimento, allenamento) come voci del piano.
   try{ const fin=finestreDelGiorno(P);
     if(fin) for(const [k,lab,ic,sub,perche] of VOCI_FIN){ const w=fin[k]; if(!w || !pianoVoce(k)) continue;
-      voci.push({t:dSv(w.a), html:riga("fin-"+k, lab, hhmm(w.a)+" → "+hhmm(w.z), sub, false, ic, '<div class="why">'+esc(perche)+'</div>', {a:w.a, z:w.z})}); } }catch(e){}
+      voci.push({t:dSv(w.a), html:riga("fin-"+k, lab, hhmm(w.a)+" → "+hhmm(w.z), sub, false, ic, '<div class="why">'+esc(perche)+'</div>', {a:w.a, z:w.z, poi:lab.toLowerCase()+" dalle "+hhmm(w.a)})}); } }catch(e){}
   const dn=sceltaDopoNotte(P);
 
   // Letto troppo presto prima di un turno di mattina: stessa soglia della
@@ -7186,7 +7192,7 @@ function renderPianoVoci(){
 if($("#opzPianoVoci")) $("#opzPianoVoci").addEventListener("change", e=>{
   const k=e.target.dataset && e.target.dataset.pv; if(!k) return;
   state.piano=Object.assign({}, state.piano, {[k]:e.target.checked}); salva();
-  if(e.target.checked) track("setup_item", {item:"piano_"+k});
+  if(e.target.checked){ track("setup_item", {item:"piano_"+k}); if(["testa","leggera","intensa"].includes(k)) usata("momenti"); }
   render(); ntNotifiche();
 });
 function renderOpzSummaries(){
@@ -7961,6 +7967,11 @@ const CONSIGLI_FUNZIONE=[
   // Solo nell'app Android: la sveglia nell'Orologio e il voto dal widget
   {k:"sveglia", quando:()=>platform.alarm.available, t:()=>"Sotto «Dormi» c'è «Metti la sveglia»: la mette nell'Orologio del telefono, all'ora in cui finisce il sonno."},
   {k:"votowidget", quando:()=>platform.widget.available && platform.widget.presenti()>0, t:()=>"Dal widget puoi dire come hai dormito con un tocco, senza aprire l'app: il voto arriva nel diario."},
+  {k:"momenti", quando:()=>!["testa","leggera","intensa"].some(pianoVoce),
+    t:()=>"Vuoi sapere quando pensare, muoverti o allenarti meglio? I momenti migliori si accendono in Impostazioni › Cosa vedi nel piano.",
+    cta:()=>"Vedi", a:()=>{ apriOpzioni(); setTimeout(()=>{ const x=$("#opzPianoVoci"); if(x&&x.scrollIntoView) try{ x.scrollIntoView({block:"center"}); }catch(e){} }, 250); }},
+  {k:"riepilogo", t:()=>"Puoi mandare il riepilogo del tuo mese o degli ultimi 12 mesi: lo trovi in Turni, nella scheda del mese.",
+    cta:()=>"Vedi", a:()=>{ setTab("turni"); setTimeout(()=>{ const x=$("#meseBox"); if(x&&x.scrollIntoView) try{ x.scrollIntoView({block:"center"}); }catch(e){} }, 250); }},
   {k:"dormi", t:()=>"Tocca «Dormi» nel piano: dopo una notte scegli sonno breve o lungo, prima di un mattino presto puoi dormire in due tempi."},
   {k:"acasa", t:()=>"Chi vive con te non sa quando dormi? «Condividi i tuoi orari di oggi» manda in un messaggio quando dormi e quando sei libero."},
   // Il grazie: dopo due settimane, in un momento buono (mai dopo notti pessime).

@@ -101,13 +101,23 @@ export function finestreAttivita(inp) {
   return out;
 }
 
+// Le finestre di un giorno dal piano del motore (P) e dalle impostazioni (cTo/cFrom = viaggio, prep = preparazione):
+// il turno con viaggio e preparazione, e i pisolini, sono tempo occupato. Un solo posto per la pagina e le notifiche.
+export function finestreDelPiano(P, cfg) {
+  const c = cfg || {}, cTo = +c.cTo || 25, cFrom = +c.cFrom || 25, prep = +c.prep || 45;
+  const b = P.b, occupato = [];
+  if (b && !b.rest && isFinite(b.start) && isFinite(b.end)) occupato.push([b.start - prep - cTo, b.end + cFrom]);
+  for (const n of (P.naps || [])) occupato.push([n.a, n.b]);
+  return finestreAttivita({ wake: P.wake, sleepOnset: P.s.onset, fase: P.cbt, freeWake: c.freeWake, occupato, pasti: P.meals || [] });
+}
+
 // ─────────── integrazione GRATIS nella pagina (guardata: se manca il ponte, non fa nulla) ───────────
 // Solo modello. La card "Ora" (rischio + azione del momento + check-in) la disegna
 // il core in un unico blocco: qui esponiamo la funzione e, al caricamento, chiediamo
 // un re-render così il core può usarla (il modulo arriva dopo il primo render).
 try {
   if (typeof window !== "undefined") {
-    window.NTAlert = { alertness, finestreAttivita };
+    window.NTAlert = { alertness, finestreAttivita, finestreDelPiano };
     var _k = function () { try { window.dispatchEvent(new Event("nt:refresh")); } catch (e) {} };
     if (document.readyState === "loading") window.addEventListener("DOMContentLoaded", _k);
     else setTimeout(_k, 0);

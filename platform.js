@@ -219,6 +219,7 @@ const CANALI = [
   { id: "caffe",        name: "Ultimo caffè",              importance: 3 },
   { id: "pisolini",     name: "Pisolini",                  importance: 3 },
   { id: "luce",         name: "Luce",                      importance: 2 },
+  { id: "momenti",      name: "Momenti buoni",             importance: 2 },
   { id: "sveglie",      name: "Ora di alzarti",            importance: 4 },
   { id: "suggerimenti", name: "Suggerimenti e riepiloghi", importance: 2 },
   // «Come hai dormito?» ha un canale suo, a importanza normale: su quello
@@ -228,7 +229,7 @@ const CANALI = [
   { id: "promemoria",   name: "Prova e altri avvisi",      importance: 3 }
 ];
 const CANALE_DI = { cambio: "turni", domani: "turni", prep: "turni", ret: "sicurezza", rischio: "sicurezza", bedtime: "sonno", coffee: "caffe",
-  nap: "pisolini", luce: "luce", wake: "sveglie", settimana: "suggerimenti", tip: "suggerimenti",
+  nap: "pisolini", luce: "luce", momenti: "momenti", wake: "sveglie", settimana: "suggerimenti", tip: "suggerimenti",
   diario: "diario", consigli: "suggerimenti" };
 let _channels = false;
 // Pulsanti nella notifica: solo dove un tocco basta a fare la cosa.

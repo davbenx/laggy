@@ -39,4 +39,20 @@ const P={P:{n:"Pomeriggio",s:840,e:1320}}, N={N:{n:"Notte",s:1320,e:1800}};
 { const p=await apri("RRRR",N,"2026-11-03T10:00:00+01:00",320);
   ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth && [...document.querySelectorAll("#essenziale .tl")].every(x=>x.getBoundingClientRect().right<=innerWidth+1)), "320 px: niente scorrimento laterale");
   await p.context().close(); }
+// «Adesso»: il momento in corso, solo se acceso e solo quando non c'è altro di più importante
+{ const p=await apri("RRRR",N,"2026-11-03T11:45:00+01:00");
+  const t=await p.evaluate(()=>(document.querySelector("#ora .ora-fin")||{}).textContent||"");
+  ok(/^Buon momento per pensare fino alle \d\d:\d\d$/.test(t), "alle 11:45 «Adesso» dice che è un buon momento per pensare → "+t);
+  ok(await p.evaluate(()=>{ const r=[...document.querySelectorAll('#essenziale [data-row^="fin-"]')]; return r.length===3 && r.every(d=>/ dalle \d\d:\d\d$/.test(d.closest(".tl").dataset.poi||"")); }), "le voci portano il loro «Poi» («allenamento dalle 16:45»)");
+  await p.context().close(); }
+{ const ctx=await b.newContext({locale:"it-IT",timezoneId:"Europe/Rome",viewport:{width:360,height:780}});
+  await ctx.addInitScript(()=>{ if(sessionStorage.getItem("x")) return; sessionStorage.setItem("x","1");
+    localStorage.setItem("nt:state",JSON.stringify({turniConfigurati:true,pattern:"RRRR",anchor:"2026-11-03",shifts:{N:{n:"Notte",s:1320,e:1800}},repeat:true,firstSeenAt:"2026-01-01"}));
+    localStorage.setItem("nt:turniConfigurati","true"); localStorage.setItem("nt:firstPlanBannerChiuso","true"); localStorage.setItem("nt:attivazioneNascosta","true"); });
+  const p=await ctx.newPage(); await p.clock.setFixedTime(new Date("2026-11-03T11:45:00+01:00")); await p.goto("http://localhost:8765/index.html"); await p.waitForTimeout(900);
+  ok(await p.evaluate(()=>!document.querySelector("#ora .ora-fin")), "spenti nel piano (predefinito): «Adesso» non ne parla");
+  await ctx.close(); }
+{ const p=await apri("RRRR",N,"2026-11-03T03:00:00+01:00");
+  ok(await p.evaluate(()=>!document.querySelector("#ora .ora-fin")), "di notte, nel sonno: niente consigli sui momenti");
+  await p.context().close(); }
 console.log("errori", errs); await b.close();
