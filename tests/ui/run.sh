@@ -29,7 +29,9 @@ SUITE=("$@"); [ ${#SUITE[@]} -eq 0 ] && SUITE=(personas comp nudge robust opz at
 fail=0
 for s in "${SUITE[@]}"; do
   f=tests/ui/$s.mjs; [ -f "$f" ] || f=tests/ui/$s.cjs
-  outp=$(node "$f" 2>&1); ok=$(grep -c "✔" <<<"$outp"); ko=$(grep -c "✘" <<<"$outp")
+  outp=$(node "$f" 2>&1); rc=$?; ok=$(grep -c "✔" <<<"$outp"); ko=$(grep -c "✘" <<<"$outp")
+  # una suite che si ferma con un errore (timeout, eccezione) non deve passare in silenzio
+  [ $rc -ne 0 ] && outp="$outp"$'\n'"✘ la suite si è interrotta (codice $rc): $(grep -m1 -E "Error|Timeout" <<<"$outp")" && ko=$((ko+1))
   err=$(grep -E "pageerror|^errori.*[A-Za-z]{3}|Error:" <<<"$outp" | grep -vE "errori:? \[\]|errori pagina: \[\]" | head -3)
   printf "%-10s %3s ✔  %s ✘ %s\n" "$s" "$ok" "$ko" "$( [ -n "$err" ] && echo "· $err" )"
   [ "$ko" -gt 0 ] && { grep "✘" <<<"$outp" | sed 's/^/           /'; fail=1; }
