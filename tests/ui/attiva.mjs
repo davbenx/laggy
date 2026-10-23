@@ -21,10 +21,11 @@ await p.click('[data-attiva="turni"]'); await p.waitForTimeout(300);
 ok(await p.evaluate(()=>document.querySelector("#demoEsempio .qh-h").textContent==="E nei prossimi giorni?"), "web: 'I turni dei prossimi giorni' apre il flusso lineare");
 await p.click('[data-subflow="schema"]'); await p.click("[data-preset-ob='0']"); await p.click("[data-pos='2']"); await p.click("#qhConfermaOrari"); await p.waitForTimeout(500);
 ok((await voci(p)).includes("✓I turni dei prossimi giorni"), "web: dopo aver impostato il ciclo la voce risulta fatta: "+(await voci(p)).join(" | "));
-// Opzioni
+// Opzioni (dopo il flusso si resta in «I tuoi turni»: prima si torna a Oggi)
+await p.click('[data-tab="oggi"]'); await p.waitForTimeout(300);
 await p.click("#doOpzioni"); await p.waitForTimeout(300);
 const gruppi=await p.evaluate(()=>[...document.querySelectorAll("#opzioni > .eyebrow")].map(e=>e.textContent));
-ok(gruppi.slice(0,4).join(",")==="Funziona da solo,Il tuo piano,Salva,Informazioni e privacy", "Opzioni per argomento: "+gruppi.join(" · "));
+ok(gruppi.slice(0,5).join(",")==="Funziona da solo,Il tuo piano,Aspetto,Salva,Informazioni e privacy", "Opzioni per argomento: "+gruppi.join(" · "));
 const opzV=await p.evaluate(()=>[...document.querySelectorAll("#opzFunzioni .attiva-voce[data-gestisci]")].map(v=>(v.classList.contains("ok")?"✓":"·")+v.querySelector("b").textContent));
 ok(opzV.length===2, "Opzioni → 'Funziona da solo' con promemoria e calendario (i turni stanno in 'Il tuo piano'): "+opzV.join(" | "));
 await p.screenshot({path:"/tmp/a-2-opzioni.png", fullPage:true});
