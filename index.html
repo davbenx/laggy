@@ -2761,6 +2761,14 @@ function minutiDa(rif, ora){
   return g*1440 + n.getHours()*60 + n.getMinutes();
 }
 function minutiDaFocus(){ return minutiDa(state.focus); }
+// Il giorno d tiene dentro il cambio dell'ora legale (fra il suo mezzogiorno e quello dopo)?
+// "indietro" = la notte dura 25 ore (ottobre), "avanti" = 23 (marzo), altrimenti null.
+function cambioOraDel(d){
+  const a=new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12), b=new Date(d.getFullYear(), d.getMonth(), d.getDate()+1, 12);
+  const delta=b.getTimezoneOffset()-a.getTimezoneOffset();   // minuti: +60 = ora indietro (da CEST a CET), -60 = avanti
+  return delta>0 ? "indietro" : delta<0 ? "avanti" : null;
+}
+const nomeGiorno = d => d.toLocaleDateString(LINGUA, {weekday:"long"});
 // Il "giorno vero" che si sta vivendo — di solito la data del calendario,
 // ma non finché un turno o un sonno cominciati ieri sera sono ancora in
 // corso: aprire l'app alle 01:30 nel mezzo di un turno di notte e vedersi
@@ -5792,6 +5800,15 @@ function renderEssenziale(P, CARDS){
   try{ rischio=rischioDelGiorno(P); if(rischio) voci.push({t:-1.5, html:'<p class="essrischio" role="note"><span class="eic">'+ICON.warn+'</span><span>'+esc(rischio)+'</span></p>'}); }catch(e){}
   // Il perché della giornata, in una riga: se c'è già l'avviso di rischio, è lui il perché.
   if(!rischio && state.turniConfigurati){ try{ const p=perchéOggi(P); if(p) voci.push({t:-3, html:'<p class="essperche"><span>Il piano, in breve</span>'+esc(p)+'</p>'}); }catch(e){} }
+  // Notte del cambio d'ora: il piano parla in ore dell'orologio, quella notte dura 23 o 25 ore.
+  // Lo si dice nel giorno che comprende il cambio (il piano di sabato arriva fino a domenica mattina).
+  try{ const co=cambioOraDel(state.focus); if(co && state.turniConfigurati && dnum(state.focus)>=dnum(giornoVero())){
+    const spans=P.b && !P.b.rest && P.b.start<1560 && P.b.end>1680;
+    const piu=co==="indietro";
+    voci.push({t:-1.4, html:'<p class="essperche"><span>Cambio d\'ora</span>'+
+      (piu ? "Nella notte tra "+nomeGiorno(state.focus)+" e "+nomeGiorno(day(state.focus,1))+" l'ora torna indietro: alle 03:00 sono le 02:00 e la notte dura un'ora in più."
+           : "Nella notte tra "+nomeGiorno(state.focus)+" e "+nomeGiorno(day(state.focus,1))+" l'ora va avanti: alle 02:00 sono le 03:00 e la notte dura un'ora in meno.")+
+      " Gli orari del piano sono quelli dell'orologio"+(spans ? ": il tuo turno dura un'ora "+(piu?"in più":"in meno")+" di quanto dice il piano." : ".")+'</p>'}); } }catch(e){}
   voci.sort((a,b)=>a.t-b.t);
   // La timeline: prima e ultima voce (accorciano la linea), il segno «ora»
   // fra passato e futuro, e «Poi» sotto «Adesso».
