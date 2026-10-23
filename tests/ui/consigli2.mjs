@@ -2,22 +2,24 @@
 // e le statistiche che li misurano: voce del piano aperta (una volta al giorno)
 // e orari di sonno personalizzati (una volta sola).
 import pw from "./_pw.mjs";
+import { nativo } from "./_nativo.mjs";
 const ok=(c,m)=>console.log((c?"✔ ":"✘ ")+m);
 const b=await pw.chromium.launch(); const errs=[];
 globalThis.__inv=[];
 const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 const fa=n=>{ const d=new Date(); d.setDate(d.getDate()-n); return iso(d); };
 const SH={M:{n:"Mattino",s:420,e:840},P:{n:"Pomeriggio",s:840,e:1260},N:{n:"Notte",s:1260,e:1860}};
-const TUTTI=["installa","tester","statistiche","colleghi","copia","orologio","mese","festivi","calendario","ferie","scambio","sonno","grazie","medico","dormi","acasa"];
-async function apri(st, quale){
+const TUTTI=["installa","tester","statistiche","colleghi","copia","orologio","mese","festivi","calendario","ferie","scambio","sonno","grazie","medico","dormi","acasa","sveglia","votowidget"];
+async function apri(st, quale, app){
   const ctx=await b.newContext({locale:"it-IT",viewport:{width:360,height:740}});
+  if(app){ await ctx.addInitScript(nativo); await ctx.addInitScript(()=>{ window.Capacitor.Plugins.NTAlarm={set:async()=>({})}; localStorage.setItem("nt:widgetN","1"); }); }
   await ctx.addInitScript(([st,visti])=>{ if(sessionStorage.getItem("x")) return; sessionStorage.setItem("x","1");
     localStorage.setItem("nt:state",JSON.stringify(st)); localStorage.setItem("nt:turniConfigurati","true"); localStorage.setItem("nt:firstPlanBannerChiuso","true");
     localStorage.setItem("nt:attivazioneNascosta","true"); localStorage.setItem("nt:analytics-consent","true"); localStorage.setItem("nt:backupDone","true");
     localStorage.setItem("nt:loSapevi", JSON.stringify({visti, migrato:1})); }, [st, TUTTI.filter(k=>k!==quale)]);
   const p=await ctx.newPage(); p.on("pageerror",e=>errs.push(e.message));
   await p.route("**/collect", r=>{ (globalThis.__inv=globalThis.__inv||[]).push(r.request().postData()||""); r.fulfill({status:204}); });
-  await p.goto("http://localhost:8765/index.html"); await p.waitForTimeout(1000);
+  await p.goto("http://localhost:"+(app?8766:8765)+"/index.html"); await p.waitForTimeout(1000);
   return p;
 }
 const ST={turniConfigurati:true,pattern:"MPNSR",anchor:fa(3),shifts:SH,repeat:true,firstSeenAt:fa(40),freeBed:"01:00",freeWake:"09:30",people:[{name:"Anna",pattern:"MMRR",anchor:fa(2)}]};
@@ -49,6 +51,14 @@ const coda=async p=>{ await p.waitForTimeout(400); return (globalThis.__inv||[])
   await p.context().close(); }
 
 { const p=await apri({...ST, festiviRiposo:true},"festivi"); ok(!/^festivi/.test(await tip(p)), "chi ha già i festivi come riposo non vede il consiglio");
+  await p.context().close(); }
+
+// solo nell'app: la sveglia nell'Orologio e il voto dal widget
+{ const p=await apri(ST,"sveglia",true); ok(/^sveglia: .*Metti la sveglia/.test(await tip(p)), "app: consiglio sulla sveglia nell'Orologio");
+  await p.context().close(); }
+{ const p=await apri(ST,"votowidget",true); ok(/^votowidget: .*dal widget|^votowidget: .*Dal widget/.test(await tip(p)), "app con il widget: consiglio sul voto dal widget");
+  await p.context().close(); }
+for(const k of ["sveglia","votowidget"]){ const p=await apri(ST,k,false); ok((await tip(p))==="", "sito: nessun consiglio «"+k+"»");
   await p.context().close(); }
 
 console.log("errori", errs); await b.close();

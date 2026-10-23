@@ -678,16 +678,8 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue);bo
 textarea{resize:vertical;line-height:1.6;letter-spacing:.1em}
 input[type=checkbox]{width:auto;accent-color:var(--blue);min-height:auto}
 .hint{font-size:12.5px;color:var(--faint);line-height:1.5}
-.shifts{margin-top:7px;display:grid;gap:6px}
-.sh{display:grid;grid-template-columns:38px 1fr 88px 88px 32px;gap:6px 8px;align-items:center}
 .psh{display:grid;grid-template-columns:32px 1fr 1fr;gap:6px 8px;align-items:center;margin-bottom:6px}
 .psh b{text-align:center}
-.sh input{padding:7px 8px;font-size:12.5px}
-.sh .x{background:none;border:none;color:var(--faint);cursor:pointer;font-size:19px;padding:0;min-height:32px}
-.sh .x:hover{color:var(--orange-fill)}
-.sh .p1{grid-column:1/-1;margin-top:2px}
-.shhead{display:grid;grid-template-columns:38px 1fr 88px 88px 32px;gap:6px;font-size:12px;
-letter-spacing:.06em;text-transform:uppercase;color:var(--faint);font-weight:600;margin-bottom:3px}
 .p1{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--dim);margin-top:6px}
 footer{margin-top:34px;border-top:1px solid var(--line);padding-top:18px}
 footer p{font-size:14px;color:var(--faint);line-height:1.6;margin-bottom:10px}
@@ -709,12 +701,6 @@ overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .inline span{font-size:14px;color:var(--dim)}
 .q>label{display:block;font-size:16px;font-weight:600;margin-bottom:7px;line-height:1.4}
 .q .hint{display:block;margin-top:5px}
-.tp{display:inline-flex;align-items:center;justify-content:center;min-width:36px;min-height:40px;
-margin:0 4px 4px 0;background:var(--bg);border:1px solid var(--line);border-radius:var(--r);
-font-family:inherit;font-size:16px;font-weight:600;color:var(--dim);cursor:pointer}
-.tp:hover{border-color:var(--blue);color:var(--blue)}
-.tp.on{background:var(--blue-fill);border-color:var(--blue-fill);color:var(--su-blu)}
-.tprow{margin-top:2px}
 .skip{display:block;margin-top:12px;min-height:44px;font-size:14px;color:var(--faint);text-align:center;
 background:none;border:none;width:100%;cursor:pointer;font-family:inherit;text-decoration:underline}
 .skip:hover{color:var(--blue)}
@@ -748,18 +734,18 @@ font:inherit;font-weight:700;padding:0 0 0 10px;cursor:pointer}
    principali, non ripetuto su ognuno. .tabbtn resta fuori: ha già un suo
    :active dedicato sull'icona (.tabbtn:active svg) più avanti — sommare
    anche questo raddoppiava lo schiacciamento solo lì. */
-.tool,.btn,.dbtn,.tp,.tsec,.gcell,button.lnk,.skip,.qh-btn,.qh-opt-btn{
+.tool,.btn,.dbtn,.tsec,button.lnk,.skip,.qh-btn,.qh-opt-btn{
   transition:transform .1s ease, opacity .1s ease;
 }
 .tool:active,.btn:active,.dbtn:active,
-.tp:active,.tsec:active,.gcell:active,button.lnk:active,.skip:active,
+.tsec:active,button.lnk:active,.skip:active,
 .qh-btn:active,.qh-opt-btn:active{
   transform:scale(.97); opacity:.85;
 }
 @media (prefers-reduced-motion:reduce){
-  .tool,.btn,.dbtn,.tp,.tsec,.gcell,button.lnk,.skip,.qh-btn,.qh-opt-btn{transition:none}
+  .tool,.btn,.dbtn,.tsec,button.lnk,.skip,.qh-btn,.qh-opt-btn{transition:none}
   .tool:active,.btn:active,.dbtn:active,
-  .tp:active,.tsec:active,.gcell:active,button.lnk:active,.skip:active,
+  .tsec:active,button.lnk:active,.skip:active,
   .qh-btn:active,.qh-opt-btn:active{transform:none}
 }
 
@@ -850,8 +836,8 @@ justify-content:center;flex:none;width:44px;height:44px;border-radius:999px}
 .ora-ic .ei{width:22px;height:22px}
 .ora-card.risk .ora-ic{color:var(--risk);background:var(--bg)}
 /* tinte termiche per le celle del ciclo e della griglia (mute) */
-.crow.twork,.gcell.twork{background:var(--warm-tint)}
-.crow.tnight,.gcell.tnight{background:var(--cool-tint)}
+.crow.twork{background:var(--warm-tint)}
+.crow.tnight{background:var(--cool-tint)}
 /* empty-state col gufo (personalità dove non c'è ancora nulla) */
 .empty{text-align:center;padding:16px 8px 6px}
 .empty img{opacity:.9;margin-bottom:9px;border-radius:9px}
@@ -1011,11 +997,6 @@ line-height:1.2;min-height:2.4em}
 .kface.on{background:var(--s1);border-color:var(--tone,var(--blue));color:var(--tone,var(--blue))}
 
 .ora-kss .hint{width:100%;margin:0 0 2px}
-/* griglia turni variabili (gratis) */
-.grid21{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin:10px 0}
-.gcell{aspect-ratio:1;border:1px solid var(--line);border-radius:9px;background:var(--s1);color:var(--ink);font:inherit;font-weight:700;font-size:16px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-height:42px}
-.gcell small{font-weight:400;font-size:12px;color:var(--faint)}
-.gcell.rest{color:var(--faint);background:var(--bg)}
 /* il diario come promemoria a stati: stessa famiglia visiva delle card di
    Oggi (bordo colorato, badge icona) finché è una domanda aperta; si
    spegne (bordo neutro, niente più badge) una volta risposto — la
@@ -1162,16 +1143,8 @@ text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:600;color:v
 .opz-gruppo .tool-tx .tool-val::after{content:none}
 /* Dentro Impostazioni i passi perdono titolo e introduzione: sono già il
    nome della riga. */
-.ecc .wstep>.wq,.ecc .wstep>.wsub,.ecc .solo-guida,.ecc .shhead{display:none}
+.ecc .wstep>.wq,.ecc .wstep>.wsub{display:none}
 /* Una riga per turno, leggibile anche a 360px: lettera, nome e × sopra, orari sotto. */
-.ecc .sh{grid-template-columns:34px 1fr 1fr 28px;row-gap:6px}
-.ecc .sh [data-fld=key]{grid-column:1;grid-row:1}
-.ecc .sh [data-fld=n]{grid-column:2/4;grid-row:1}
-.ecc .sh .x{grid-column:4;grid-row:1}
-.ecc .sh [data-fld=s]{grid-column:2;grid-row:2}
-.ecc .sh [data-fld=e]{grid-column:3;grid-row:2}
-.ecc .sh .p1{grid-column:2/-1;grid-row:3}
-.ecc .sh input{font-size:15px;min-height:42px}
 #chiudiOpzioni{padding:11px;margin:-11px}
 .opz-info .hint a{display:inline-block;padding:6px 0}
 /* Link in fondo: griglia a 2 colonne, un link per cella alta 44px, senza
@@ -1183,13 +1156,6 @@ text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:600;color:v
 .foot-legal{display:flex;flex-wrap:wrap;gap:4px 16px;justify-content:center;margin:16px 0 0;font-size:13px}
 .foot-legal a{color:var(--dim);text-decoration:none;border-bottom:0;padding:8px 2px}
 .riga-sw,.q>label.riga-sw{display:flex;margin-bottom:4px;align-items:center;gap:12px;justify-content:space-between;font-size:15px;font-weight:600;color:var(--ink);cursor:pointer;min-height:44px}
-/* Strumenti di Più: griglia a 2 colonne invece di righe impilate — meno
-   scroll, ma il testo di ogni card resta per intero (solo più compatto):
-   ridurlo a icona+parola come uno share sheet avrebbe nascosto sfumature
-   vere (es. "senza i tuoi dati" sul foglio orari liberi), non solo tolto
-   decorazione. Classe a parte, non sul .tools/.tool di base: quella
-   resta invariata per l'unico bottone QR già riusato in Turni. */
-.presetTiles{display:flex;flex-direction:column;gap:8px}
 .piu-info{border:1px solid var(--line);border-radius:var(--r);margin:18px 0 8px;background:var(--s1)}
 .piu-info>summary{padding:12px 15px;cursor:pointer;font-size:14px;font-weight:600;color:var(--dim);
 list-style:none;min-height:44px;display:flex;align-items:center}
@@ -1265,9 +1231,7 @@ padding:6px 16px;box-shadow:var(--shadow-card)}
 .pag-testa{margin-left:-16px;margin-right:-16px;padding-left:16px;padding-right:16px}
 .val{font-size:19px}.row b{min-width:88px}
 .cap p{display:none}.clab{width:52px;min-width:52px;white-space:nowrap}
-.sh,.shhead{grid-template-columns:34px 1fr 78px 78px 28px}
 header b{font-size:23px}
-.grid21{gap:4px}.gcell{min-height:36px;font-size:14px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 
@@ -1379,68 +1343,6 @@ header b{font-size:23px}
      pannelli la prima volta che si aprono (apriSezioneInline). -->
 <div id="onboard" hidden>
   <div class="wsteps" id="wsteps">
-
-  <section class="wstep" data-step="1">
-    <h2 class="wq">Che turni fai?</h2>
-    <p class="wsub">Scegli lo schema più vicino ai tuoi. Non c'è il tuo? Scegli <b>Personalizza</b> e te lo costruisci in due minuti.</p>
-    <div class="q solo-guida">
-      <!-- oPreset resta la fonte dello stato (presetIndex/onchange invariati):
-           le card qui sotto lo guidano, non lo sostituiscono. -->
-      <select id="oPreset" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0" aria-hidden="true" tabindex="-1"></select>
-      <div class="presetTiles" id="presetTiles"></div>
-    </div>
-    <!-- Gli orari veri restano sempre visibili e modificabili, anche con un
-         preset scelto: prima si vedevano solo con "Personalizza", quindi un
-         preset con orari leggermente diversi dai tuoi (es. il tuo "Mattino"
-         comincia alle 6:30 non alle 7) non dava mai occasione di accorgersene
-         né di correggerlo qui. Ripetizione/lunghezza/griglia (sotto, dentro
-         #avanzate) restano invece solo per "Personalizza": con un preset
-         sono già decise dal pattern scelto, non c'è niente da rivedere lì. -->
-    <div id="shiftsBox">
-      <div class="q">
-        <label>I tuoi turni</label>
-        <div class="shhead"><span></span><span>Nome</span><span>Inizio</span><span>Fine</span><span></span></div>
-        <div class="shifts" id="shifts"></div>
-        <div class="p1"><button class="btn g" id="addShift" style="margin-top:6px">+ Aggiungi turno</button></div>
-        <span class="hint">Una riga per tipo di turno. La lettera a sinistra è quella che scriverai nella sequenza. Se un turno comincia dopo mezzanotte (02:00–06:00) spunta <b>+1</b>: appartiene alla notte del giorno segnato, non a quella dopo.</span>
-      </div>
-    </div>
-    <div id="avanzate" hidden>
-      <div class="q">
-        <label class="p1"><input type="checkbox" id="repeat" checked> Il turno si ripete sempre uguale</label>
-        <span class="hint">Togli la spunta se il turno te lo comunicano mese per mese: quello che tocchi vale per questi giorni, fuori da lì lo strumento non inventa niente.</span>
-      </div>
-      <div class="q">
-        <label for="seqLen">Quanti giorni dura la tua sequenza?</label>
-        <div class="inline"><input type="number" id="seqLen" min="1" max="28" value="7"><span>giorni</span></div>
-        <span class="hint">Fino a 4 settimane prima che ricominci uguale — o quanti giorni conosci già, se non si ripete.</span>
-      </div>
-      <!-- Solo quando non si ripete: qui, non più in un passo a parte, così
-           la griglia sa subito a quali date reali corrispondono le celle
-           invece di mostrare solo "giorno 1, giorno 2…". Stesso campo
-           #anchor di prima (era nel passo 2, id invariato: bind() lo lega
-           già a state.anchor), spostato qui perché qui serve davvero. -->
-      <div class="q" id="gridStartBox" hidden>
-        <label for="anchor">Dal giorno</label>
-        <input id="anchor" type="date">
-        <span class="hint">Il primo giorno della sequenza, sul calendario vero — le celle sotto mostrano le date da qui in poi.</span>
-      </div>
-      <div class="q">
-        <label>Tocca ogni giorno per impostare il turno</label>
-        <div class="grid21" id="wizSeqGrid"></div>
-        <span class="hint" id="cover"></span>
-      </div>
-    </div>
-  </section>
-
-  <section class="wstep" data-step="2" hidden>
-    <h2 class="wq">Qual è il turno di oggi?</h2>
-    <p class="wsub">Tocca la lettera che corrisponde a oggi: serve a capire a che punto sei del ciclo.</p>
-    <div class="q">
-      <div class="tprow" id="oToday"></div>
-      <span class="hint">Se più avanti il ciclo ti risulta sfasato, torna qui e tocca la lettera giusta.</span>
-    </div>
-  </section>
 
   <section class="wstep" data-step="3" hidden>
     <h2 class="wq">Nei giorni liberi, come dormi?</h2>
@@ -4024,40 +3926,6 @@ function summaryText(){
     .concat(sm.verdict?[sm.verdict]:["Su "+sm.tot+" notti annotate"]) : [];
   return testa.concat(seDebito).concat(seRegolarita).concat(seCiclo).concat(seSveglia).concat(seDiario).join("\n");
 }
-function coverage(){
-  const p=(state.pattern||"").toUpperCase().replace(/[^A-Z]/g,"");
-  if(!p) return null;
-  const a=new Date(state.anchor+"T12:00:00"), z=day(a,p.length-1);
-  const fmt=d=>d.toLocaleDateString(LINGUA,{day:"numeric",month:"long"});
-  const art=d=>[1,8,11].includes(d.getDate())?"all'":"al ";
-  if(state.repeat!==false) return p.length+" giorni, poi ricomincia da capo.";
-  const left=dnum(z)-dnum(new Date());
-  return p.length+" giorni inseriti, dal "+fmt(a)+" "+art(z)+fmt(z)+". "+
-    (left<0 ? "È già finito: aggiungi il turno nuovo in fondo."
-     : left<=6 ? "Finisce fra "+(left||"meno di un")+" giorn"+(left===1?"o":"i")+": aggiungi il prossimo in fondo appena te lo danno."
-     : "Dopo quella data non so cosa fai.");
-}
-// mostra la sequenza e lascia toccare il turno di oggi: più facile di una data
-function renderToday(){
-  const p=(state.pattern||"").toUpperCase().replace(/[^A-Z]/g,"");
-  const oggi=new Date();
-  let idx=-1;
-  if(p.length){
-    const nn=dnum(oggi)-dnum(new Date(state.anchor+"T12:00:00"));
-    idx = state.repeat===false ? ((nn>=0&&nn<p.length)?nn:-1) : ((nn%p.length)+p.length)%p.length;
-  }
-  const html = p.length
-    ? p.split("").map((c,i)=>'<button class="tp'+(i===idx?" on":"")+'" data-tp="'+i+
-        '" aria-pressed="'+(i===idx)+'" title="giorno '+(i+1)+' del ciclo">'+esc(c)+'</button>').join("")
-    : '<span class="hint">Scrivi prima la sequenza dei turni.</span>';
-  { const el=$("#oToday"); if(el) el.innerHTML=html; }
-}
-function pickToday(i){
-  const d=day(new Date(),-i);
-  state.anchor=iso(d);
-  const a=$("#anchor"); if(a) a.value=state.anchor;
-  renderToday(); render();
-}
 function render(){
   _pianiDelGiro = new Map(); _occupati = new Map();
   // salva() qui, non solo nei singoli gestori: trovati (in questa sessione,
@@ -4721,7 +4589,6 @@ function primoPianoPronto(tipo, msg){
   demoEsempioSubflow = "home";
   sceltaSchemaAperta = false; schemaInScelta = null;
   primaVolta = false;
-  renderShifts();
   salva();
   haptic(15);
   track("plan_generated", {pattern_type: tipo});
@@ -6060,8 +5927,6 @@ function renderHeader(P, f){
     pillEl.setAttribute("aria-haspopup", "dialog");
     pillEl.onclick = () => { haptic(10); apriQuickShift(state.focus); };
   }
-  const cov=$("#cover"); if(cov) cov.textContent=coverage()||"";
-  renderToday();
   renderLuciditaCard();
   const avv = NT.freeWakeOk() ? "" : "Questa risposta non è plausibile: sto usando "+hhmm(NT.freeWakeUsata())+".";
   { const el=$("#oWakeWarn"); if(el) el.textContent=avv; }
@@ -7171,7 +7036,7 @@ async function risposteWidget(){
     if(r.voto>=1 && r.voto<=5 && diary[k]==null){ diary[k]=+r.voto; diaryAt[k]=+r.at||Date.now(); n++; } }
   if(!n) return;
   store.set("beds",state.beds); store.set("wakes",wakes); store.set("diaryAt",diaryAt); store.set("diary",diary);
-  track("setup_item", {item:"diario_widget"});
+  track("setup_item", {item:"diario_widget"}); usata("votowidget");
   render();
 }
 // Tocco su un giorno del widget: l'app si apre su quel giorno.
@@ -7214,40 +7079,6 @@ function renderOpzSummaries(){
   const s=$("#opzValSonno");
   if(s) s.textContent = (state.freeBed && state.freeWake) ? state.freeBed+" → "+state.freeWake : "Da impostare";
 }
-// La griglia del wizard, passo 1: sostituisce lo scrivere la sequenza a
-// lettere. Sola visualizzazione — legge state.pattern per mostrare i tocchi
-// già fatti (o una sequenza già salvata, riaprendo per modificare), non
-// scrive nulla da sola: solo il tocco su una cella e il cambio di lunghezza
-// scrivono davvero, così riaprire il passo non trunca mai nulla per sbaglio.
-// Se il turno non si ripete, le celle mostrano la DATA vera (dal campo
-// "Dal giorno" qui sopra) invece del numero di posizione astratto ("giorno
-// 3") — prima questa vista a date vere esisteva solo nel pannello a parte
-// sotto la striscia del ciclo, ora fuso qui: un solo editor, non due.
-function renderWizSeqGrid(){
-  const el=$("#wizSeqGrid"); if(!el) return;
-  const codes=Object.keys(state.shifts||{}).concat(["R"]);
-  const len=Math.min(28,Math.max(1,+($("#seqLen")&&$("#seqLen").value)||7));
-  const seq=(state.pattern||"").split("");
-  const nonRipete = state.repeat===false;
-  const start = nonRipete ? (($("#anchor")&&$("#anchor").value) || state.anchor || iso(new Date())) : null;
-  let cells="";
-  for(let i=0;i<len;i++){
-    const raw=seq[i];
-    const c=(raw && codes.includes(raw)) ? raw : "R";
-    const tint = c==="R" ? " rest" : isNightCode(c) ? " tnight" : " twork";
-    const lab = nonRipete
-      ? (()=>{ const d=new Date(start+"T12:00:00"); d.setDate(d.getDate()+i); return d.getDate()+"/"+(d.getMonth()+1); })()
-      : String(i+1);
-    cells+='<button type="button" class="gcell'+tint+'" data-c="'+esc(c)+'">'+(c==="R"?"—":c)+
-      '<small>'+lab+'</small></button>';
-  }
-  el.innerHTML=cells;
-}
-function patternDaWizGrid(){
-  const el=$("#wizSeqGrid"); if(!el) return "";
-  return Array.prototype.map.call(el.querySelectorAll(".gcell"), c=>c.getAttribute("data-c")).join("");
-}
-
 /* ===================== EVENTI ===================== */
 // azioni della vista essenziale
 $("#essenziale").addEventListener("click",e=>{
@@ -7683,7 +7514,7 @@ if($("#essenziale")) $("#essenziale").addEventListener("click", e=>{
   const b=e.target.closest("[data-sveglia]"); if(!b) return;
   const t=b.dataset.sveglia, [h,m]=t.split(":").map(Number);
   platform.alarm.set(h, m, "Notturnisti")
-    .then(()=>{ toast("Sveglia delle "+t+" messa nell'Orologio"); track("sveglia_messa"); haptic(8); })
+    .then(()=>{ toast("Sveglia delle "+t+" messa nell'Orologio"); track("sveglia_messa"); usata("sveglia"); haptic(8); })
     .catch(()=>toast("Non riesco a metterla: usa l'app Orologio del telefono"));
 });
 // Il foglio per il frigo: si costruisce apposta, non si spreme il DOM vivo.
@@ -8004,6 +7835,9 @@ const CONSIGLI_FUNZIONE=[
   {k:"ferie", t:()=>"L'app trova i giorni di ferie che ti danno più giorni a casa, attaccati ai riposi. Se hai aggiunto una persona, puoi sceglierli anche per stare a casa insieme.", a:()=>{ setTab("turni"); apriFerie(); }},
   {k:"scambio", t:()=>"Prima di accettare uno scambio di turno, controlla come cambiano sonno e riposi.", a:()=>{ setTab("turni"); apriScambioTurno(); }},
   {k:"sonno", t:()=>"In «Sonno e carico» vedi notti di fila e riposi brevi del mese, anche senza diario.", a:()=>{ setTab("turni"); apriAndamenti(); }},
+  // Solo nell'app Android: la sveglia nell'Orologio e il voto dal widget
+  {k:"sveglia", quando:()=>platform.alarm.available, t:()=>"Sotto «Dormi» c'è «Metti la sveglia»: la mette nell'Orologio del telefono, all'ora in cui finisce il sonno."},
+  {k:"votowidget", quando:()=>platform.widget.available && platform.widget.presenti()>0, t:()=>"Dal widget puoi dire come hai dormito con un tocco, senza aprire l'app: il voto arriva nel diario."},
   {k:"dormi", t:()=>"Tocca «Dormi» nel piano: dopo una notte scegli sonno breve o lungo, prima di un mattino presto puoi dormire in due tempi."},
   {k:"acasa", t:()=>"Chi vive con te non sa quando dormi? «Condividi i tuoi orari di oggi» manda in un messaggio quando dormi e quando sei libero."},
   // Il grazie: dopo due settimane, in un momento buono (mai dopo notti pessime).
@@ -8168,10 +8002,6 @@ function sincronizzaCampiPiano(){
   }
   if(selBed && !selImposta(selBed, state.freeBed, true)) selBed.value="23:30";
   mostraDurata();
-  if(oSel){
-    const pi=presetIndex();
-    oSel.value = pi>=0 ? String(pi) : "x";
-  }
   if($("#caffS")) $("#caffS").value=state.caffSens||"alta";
   if($("#napT")) $("#napT").value=state.napTurno||"no";
   if($("#sonnoD")) $("#sonnoD").value=state.sonnoDiurno||"diviso";
@@ -8200,7 +8030,6 @@ function apriSezioneInline(n){
     if(step && step.parentElement!==box){ box.appendChild(step); step.hidden=false; }
   });
   sincronizzaCampiPiano();
-  if(passi.includes(1)){ renderWizSeqGrid(); mostraAvanzate(); }
   render();
   if(box.scrollIntoView) box.scrollIntoView({behavior:"smooth",block:"nearest"});
 }
@@ -8253,27 +8082,6 @@ if($("#doCycQR")) $("#doCycQR").onclick=()=>mostraQR(true);
 if($("#qrClose")) $("#qrClose").onclick=()=>mostraQR(false);
 if($("#qrModal")) $("#qrModal").addEventListener("click",e=>{ if(e.target===$("#qrModal")) mostraQR(false); });
 document.addEventListener("keydown",e=>{ if(e.key==="Escape" && $("#qrModal") && !$("#qrModal").hidden) mostraQR(false); });
-
-// La griglia del wizard scrive subito, come ogni altro campo del passo (il
-// bind() degli altri input fa lo stesso): non serve un bottone "salva" a
-// parte, il tocco stesso è la modifica.
-if($("#wizSeqGrid")) $("#wizSeqGrid").addEventListener("click", e=>{
-  const cell=e.target.closest(".gcell"); if(!cell) return;
-  const codes=Object.keys(state.shifts||{}).concat(["R"]);
-  const cur=cell.getAttribute("data-c"), nc=codes[(codes.indexOf(cur)+1)%codes.length];
-  cell.setAttribute("data-c",nc);
-  cell.classList.remove("rest","twork","tnight");
-  cell.classList.add(nc==="R"?"rest":isNightCode(nc)?"tnight":"twork");
-  cell.childNodes[0].nodeValue = nc==="R"?"—":nc;
-  state.pattern=patternDaWizGrid(); oSel.value="x"; salva();
-});
-if($("#seqLen")) $("#seqLen").addEventListener("change", ()=>{
-  // Cambiare lunghezza ridisegna partendo da quello che c'era: allungare
-  // aggiunge giorni di riposo in coda, accorciare taglia in fondo — non
-  // butta via i tocchi già fatti sui giorni che restano.
-  renderWizSeqGrid();
-  state.pattern=patternDaWizGrid(); oSel.value="x"; salva();
-});
 
 // ── Simulatore Scambio Turno ──
 function calcolaRitorniRapidiScambio(){
@@ -9341,56 +9149,6 @@ if(window.NT_APP.nativo){
 { const rl=$("#doReviewLnk");
   if(platform.review.available && rl){ rl.href=platform.review.url; rl.hidden=false; } }
 
-/* --- editor turni --- */
-function renderShifts(){
-  const keys=Object.keys(state.shifts);
-  $("#shifts").innerHTML=keys.map(k=>{
-    const v=state.shifts[k], p1=v.s>=1440;
-    const s=mod1440(v.s), e=mod1440(v.e);
-    return '<div class="sh" data-k="'+k+'">'+
-      '<input value="'+esc(k)+'" maxlength="1" data-fld="key" style="text-align:center;font-weight:600">'+
-      '<input value="'+esc(v.n)+'" data-fld="n" placeholder="Nome">'+
-      '<input type="time" value="'+hhmm(s)+'" data-fld="s">'+
-      '<input type="time" value="'+hhmm(e)+'" data-fld="e">'+
-      '<button class="x" data-del="'+k+'" title="elimina">×</button>'+
-      '<label class="p1"><input type="checkbox" data-fld="p1"'+(p1?" checked":"")+'> +1 · comincia dopo mezzanotte</label>'+
-      '</div>';
-  }).join("");
-}
-$("#shifts").addEventListener("input",e=>{
-  const row=e.target.closest(".sh"); if(!row) return;
-  const k=row.dataset.k, fld=e.target.dataset.fld, cur=state.shifts[k];
-  if(!cur) return;
-  if(fld==="key"){
-    const nk=(e.target.value||"").toUpperCase().replace(/[^A-Z]/g,"");
-    if(!nk||nk==="R"||state.shifts[nk]) return;
-    const o={}; for(const kk of Object.keys(state.shifts)) o[kk===k?nk:kk]=state.shifts[kk];
-    state.shifts=o; state.pattern=state.pattern.split(k).join(nk);
-    renderShifts(); renderWizSeqGrid(); render(); return;
-  }
-  if(fld==="n") cur.n=safeName(e.target.value)||k;
-  if(fld==="s"||fld==="e"||fld==="p1"){
-    const p1=row.querySelector('[data-fld=p1]').checked;
-    let s=t(row.querySelector('[data-fld=s]').value||"00:00");
-    let en=t(row.querySelector('[data-fld=e]').value||"08:00");
-    if(p1){ s+=1440; en+=1440; }
-    if(en<=s) en+=1440;
-    cur.s=s; cur.e=en;
-  }
-  render();
-});
-$("#shifts").addEventListener("click",e=>{
-  const b=e.target.closest("[data-del]"); if(!b) return;
-  if(Object.keys(state.shifts).length<=1) return;
-  delete state.shifts[b.dataset.del]; renderShifts(); render();
-});
-{
-  const el=$("#oToday");
-  if(el) el.addEventListener("click",e=>{
-    const b=e.target.closest("[data-tp]"); if(!b) return;
-    pickToday(+b.dataset.tp);
-  });
-}
 const selWake=$("#oWake"), selBed=$("#oBed");
 if(selWake){
   let o="";
@@ -9415,15 +9173,6 @@ function leggiFinestra(){
 }
 if(selWake) selWake.addEventListener("change",leggiFinestra);
 if(selBed)  selBed.addEventListener("change",leggiFinestra);
-$("#repeat").addEventListener("change",e=>{ state.repeat=e.target.checked; mostraAvanzate(); render(); });
-$("#addShift").onclick=()=>{
-  const used=new Set(Object.keys(state.shifts).concat(["R"]));
-  const k=[..."ABCDEFGHIJKLMNOPQSTUVWXYZ"].find(x=>!used.has(x));
-  if(!k) return;
-  state.shifts[k]={n:"Nuovo turno",s:540,e:1020};
-  renderShifts(); render();
-};
-
 /* --- preset --- */
 const T3={M:{n:"Mattino",s:360,e:840},P:{n:"Pomeriggio",s:840,e:1320},N:{n:"Notte",s:1320,e:1800}};
 const SAN={M:{n:"Mattino",s:420,e:840},P:{n:"Pomeriggio",s:840,e:1260},N:{n:"Notte",s:1260,e:1860}};
@@ -9437,7 +9186,7 @@ function presetIndex(){
 }
 // sector: null per i preset senza settore condiviso (mostrati come card
 // singola col titolo per intero). title/sub separati invece di un'unica
-// stringa con " · "/parentesi incorporati: prima renderPresetTiles()
+// stringa con " · "/parentesi incorporati: prima la lista dei preset
 // ricavava titolo e sottotitolo tagliando quella stringa, fragile e
 // difficile da leggere. sub è in parole, non lettere del turno (M-P-N...):
 // chi guarda una card la prima volta non ha ancora imparato quella
@@ -9462,71 +9211,6 @@ const PRESETS=[
 // (il titolo "Il tuo ciclo — …" e il valore accanto a "Turni e ciclo" in
 // Opzioni) — non per le card, che titolo/settore li mostrano già separati.
 const nomePreset = p => p.sector ? p.sector+" · "+p.title : p.title;
-const oSel=$("#oPreset");
-oSel.innerHTML='<option value="x">Personalizza — costruisco il mio</option>'+
-  PRESETS.map((p,i)=>'<option value="'+i+'">'+nomePreset(p)+'</option>').join("");
-// Card grandi al posto del <select> compresso — stesso identico stato
-// (oSel resta la fonte di verità, presetIndex()/onchange invariati), solo
-// un modo più veloce da toccare per scegliere fra i preset reali.
-const ICO_TURNO='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>';
-const ICO_PERSONALIZZA='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
-function renderPresetTiles(){
-  const el=$("#presetTiles"); if(!el) return;
-  const tile=(val,ic,b,sp)=>'<button type="button" class="tool" data-preset="'+val+'" aria-pressed="false">'+
-    '<span class="tool-ic">'+ic+'</span><span class="tool-tx"><b>'+esc(b)+'</b>'+(sp?'<span>'+esc(sp)+'</span>':'')+'</span></button>';
-  // Quando lo stesso settore ricorre più volte (Sanità, Industria), il
-  // nome del settore diventa un'etichetta condivisa sopra le sue varianti
-  // invece di ripetersi identico su ogni card — la ripetizione era quello
-  // che rendeva la lista poco chiara. Un settore con una sola voce resta
-  // una card singola, senza etichetta sopra. Raggruppato per settore su
-  // TUTTO l'elenco (non solo fra voci consecutive): se in futuro un preset
-  // di un altro settore finisse inserito in mezzo a due "Sanità", le due
-  // varianti restano comunque sotto un'unica etichetta.
-  const conteggio = {};
-  PRESETS.forEach(p=>{ if(p.sector) conteggio[p.sector]=(conteggio[p.sector]||0)+1; });
-  const gruppi = []; // [{settore:null|string, voci:[{i,p}]}], nell'ordine di prima comparsa
-  PRESETS.forEach((p,i)=>{
-    const chiave = (p.sector && conteggio[p.sector]>1) ? p.sector : null;
-    let g = chiave!==null ? gruppi.find(g=>g.settore===chiave) : null;
-    if(!g){ g={settore:chiave, voci:[]}; gruppi.push(g); }
-    g.voci.push({i,p});
-  });
-  let html="";
-  gruppi.forEach((g,gi)=>{
-    if(g.settore) html+='<div class="essgroup"'+(gi===0?'':' style="margin-top:14px"')+'>'+esc(g.settore)+'</div>';
-    g.voci.forEach(({i,p})=>{ html+=tile(String(i), ICO_TURNO, p.title, p.sub); });
-  });
-  html+=tile("x", ICO_PERSONALIZZA, "Personalizza", "Costruisco il mio in due minuti");
-  el.innerHTML=html;
-}
-function syncPresetTiles(){
-  const el=$("#presetTiles"); if(!el) return;
-  el.querySelectorAll("[data-preset]").forEach(b=>{
-    const scelto = b.dataset.preset===oSel.value;
-    b.classList.toggle("on", scelto);
-    b.setAttribute("aria-pressed", scelto ? "true" : "false");
-  });
-}
-renderPresetTiles();
-if($("#presetTiles")) $("#presetTiles").addEventListener("click", e=>{
-  const b=e.target.closest("[data-preset]"); if(!b) return;
-  oSel.value=b.dataset.preset;
-  oSel.dispatchEvent(new Event("change"));
-});
-function mostraAvanzate(){
-  const perso = oSel.value==="x";
-  const a=$("#avanzate"); if(a) a.hidden=!perso;
-  const gb=$("#gridStartBox"); if(gb) gb.hidden = !(perso && state.repeat===false);
-  if(perso) renderWizSeqGrid();
-  syncPresetTiles();
-}
-oSel.onchange=()=>{
-  mostraAvanzate();
-  if(oSel.value==="x") return;
-  const p=PRESETS[+oSel.value];
-  state.pattern=p.p; state.shifts=JSON.parse(JSON.stringify(p.s));
-  renderShifts(); render();
-};
 $("#caffS").addEventListener("change",e=>{ state.caffSens=e.target.value; salva(); render(); });
 $("#napT").addEventListener("change",e=>{
   state.napTurno=e.target.value;
@@ -9550,7 +9234,7 @@ function bind(id,key,fn){
     // dentro somme come onset+dur, che concatenano invece di sommare.
     if(LIMITI[key] || el.type==="number") v=+v||0;
 
-    if(key==="pattern"||key==="pPattern"){ v=v.toUpperCase().slice(0,400); oSel.value="x"; }
+    if(key==="pattern"||key==="pPattern"){ v=v.toUpperCase().slice(0,400); }
     state[key]=v;
     // salva() qui, non solo affidarsi al giro periodico (setInterval(salva,4000)
     // più sotto): senza, un cambio fatto qui e seguito a stretto giro da una
@@ -9562,16 +9246,7 @@ function bind(id,key,fn){
     salva(); render();
   });
 }
-["pattern","anchor","cTo","cFrom","prep"].forEach(k=>bind("#"+k,k));
-// bind() sopra scrive state.anchor e fa un render() generale, ma non
-// ridisegna la griglia del passo 1 (viene aggiornata solo da trigger
-// espliciti, per non interrompere chi la sta ancora toccando altrove).
-// Quando non si ripete, però, le celle mostrano DATE vere calcolate da
-// questo stesso campo: cambiarlo senza ridisegnare lascerebbe le date
-// vecchie in faccia mentre il dato sotto è già cambiato.
-if($("#anchor")) $("#anchor").addEventListener("input", ()=>{
-  if(state.repeat===false) renderWizSeqGrid();
-});
+["pattern","cTo","cFrom","prep"].forEach(k=>bind("#"+k,k));
 // Aggiungere e rimuovere persone dall'elenco vive solo qui (wizard/Opzioni),
 // non nella tab Turni: lì si guarda, qui si gestisce.
 const PERSONA_MODE_HINT = {
@@ -9861,19 +9536,8 @@ state.pAnchor=state.pAnchor||state.anchor;
 // state.pPattern ecc, invariato, per non toccare i 30+ punti che già lo
 // leggono. L'elenco è la parte nuova, accanto, non sopra.
 state.people = Array.isArray(state.people) ? state.people : [];
-for(const [id,k] of [["#anchor","anchor"],["#oWake","freeWake"],
+for(const [id,k] of [["#oWake","freeWake"],
   ["#cTo","cTo"],["#cFrom","cFrom"],["#prep","prep"],["#adv","maxAdvance"]]) { const el=$(id); if(el) el.value=state[k]==null?"":state[k]; }
-// La lunghezza riparte da quella esatta della sequenza già salvata (se
-// c'è), non arrotondata: ora ogni valore fra 1 e 28 è selezionabile, non
-// serve più avvicinarsi a una delle quattro tappe di prima.
-{ const sl=$("#seqLen");
-  if(sl){ const attuale=(state.pattern||"").length;
-    sl.value = String(Math.min(28, Math.max(1, attuale||7))); }
-}
-
-$("#repeat").checked = state.repeat!==false;
-renderShifts();
-renderWizSeqGrid();
 render();
 // L'app è già partita con i TUOI dati, mai a rischio — questo compare
 // SOPRA, come scelta esplicita, solo se serve davvero.
