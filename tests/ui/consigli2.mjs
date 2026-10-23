@@ -9,7 +9,7 @@ globalThis.__inv=[];
 const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 const fa=n=>{ const d=new Date(); d.setDate(d.getDate()-n); return iso(d); };
 const SH={M:{n:"Mattino",s:420,e:840},P:{n:"Pomeriggio",s:840,e:1260},N:{n:"Notte",s:1260,e:1860}};
-const TUTTI=["installa","tester","statistiche","colleghi","copia","orologio","mese","festivi","calendario","ferie","scambio","sonno","grazie","medico","dormi","acasa","sveglia","votowidget","momenti","riepilogo"];
+const TUTTI=["installa","tester","statistiche","colleghi","copia","orologio","mese","festivi","calendario","ferie","scambio","sonno","grazie","medico","dormi","acasa","sveglia","votowidget","widgetmese","momenti","riepilogo"];
 async function apri(st, quale, app){
   const ctx=await b.newContext({locale:"it-IT",viewport:{width:360,height:740}});
   if(app){ await ctx.addInitScript(nativo); await ctx.addInitScript(()=>{ window.Capacitor.Plugins.NTAlarm={set:async()=>({})}; localStorage.setItem("nt:widgetN","1"); }); }
@@ -70,7 +70,9 @@ const coda=async p=>{ await p.waitForTimeout(400); return (globalThis.__inv||[])
   await p.context().close(); }
 { const p=await apri(ST,"votowidget",true); ok(/^votowidget: .*dal widget|^votowidget: .*Dal widget/.test(await tip(p)), "app con il widget: consiglio sul voto dal widget");
   await p.context().close(); }
-for(const k of ["sveglia","votowidget"]){ const p=await apri(ST,k,false); ok((await tip(p))==="", "sito: nessun consiglio «"+k+"»");
+{ const p=await apri(ST,"widgetmese",true); ok(/^widgetmese: .*Allarga il widget/.test(await tip(p)), "app con il widget: consiglio sul mese");
+  await p.context().close(); }
+for(const k of ["sveglia","votowidget","widgetmese"]){ const p=await apri(ST,k,false); ok((await tip(p))==="", "sito: nessun consiglio «"+k+"»");
   await p.context().close(); }
 
 console.log("errori", errs); await b.close();

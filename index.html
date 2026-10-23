@@ -7124,7 +7124,42 @@ function ntWidget(){
     const sigla=(SIGLA_SPECIALE[g.t]||(c==="?"?"?":c))+(g.t==="reperibile"?"•":g.t==="extra"?"+":"");
     giorni.push({d:iso(d), g:o===0?"oggi":GG[d.getDay()]+"\u00a0"+d.getDate(), c:sigla, t:tipo, s:P?hhmm(P.s.onset):""});
   }
-  platform.widget.publish(voci, giorni, {turno, diario:diarioWidget()});
+  platform.widget.publish(voci, giorni, {turno, diario:diarioWidget(), mese:meseWidget()});
+}
+// Il mese del widget grande: dal lunedì della settimana del primo di questo mese a fine del terzo mese dopo,
+// la mia sigla giorno per giorno e quella di al massimo quattro persone (la stellina sempre dentro), con i giorni in cui siamo liberi insieme.
+// Sigle e tipi («n» notte, «l» lavoro, «r» riposo) arrivano dal motore; il widget li disegna e basta.
+let _meseMemo={k:null, v:null};
+function meseWidget(){
+  // Con quattro persone sono centinaia di piani (oltre mezzo secondo): si rifanno solo se cambia la
+  // configurazione (stessa firma che avvisa notifiche e calendario) o il giorno.
+  const f=state.focus, oggi=giornoVero(), k=_cfgSig&&_cfgSig+"|"+iso(oggi);
+  if(k && _meseMemo.k===k) return _meseMemo.v;
+  try{
+    const uno=new Date(oggi.getFullYear(), oggi.getMonth(), 1, 12), lun=day(uno, -((uno.getDay()+6)%7));
+    const N=Math.ceil((Math.round((new Date(oggi.getFullYear(), oggi.getMonth()+4, 0, 12)-lun)/864e5)+1)/7)*7;
+    const tutte=tuttePersone(), star=Math.min(Math.max(+state.personaGlance||0,0),tutte.length-1);
+    const scelte=tutte.map((p,i)=>i).sort((x,y)=>(x===star?-1:y===star?1:x-y)).slice(0,4).sort((x,y)=>x-y);
+    const tipoDi=P=>P.b.rest?"r":P.night?"n":"l";
+    const io=[], p=scelte.map(i=>({n:tutte[i].name||"Persona "+(i+1), g:[], i:""}));
+    for(let o=0;o<N;o++){
+      const d=day(lun,o); state.focus=d;
+      let c="?"; try{ c=NT.codeAt(0); }catch(e){}
+      const g=state.giorni[iso(d)]||{}, P=c==="?"?null:NT_planSafe(d);
+      io.push((SIGLA_SPECIALE[g.t]||c)+":"+(P?tipoDi(P):"?"));
+      scelte.forEach((pi,k)=>{
+        let s="?:?";
+        if(P) asPartner(()=>{ const pc=NT.codeAt(0); if(pc!=="?") s=pc+":"+tipoDi(NT.plan()); }, tutte[pi]);
+        p[k].g.push(s);
+      });
+    }
+    state.focus=lun;
+    scelte.forEach((pi,k)=>{ let z=""; for(let o=0;o<N;o++){ const l=io[o].endsWith(":?")?null:finestreCondivise(o, tutte[pi]); z+=l&&l.some(([a,b])=>b-a>=180)?"1":"0"; } p[k].i=z; });
+    const v={da:iso(lun), io, p, sel:Math.max(0,scelte.indexOf(star)), star:tutte.length?star+"|"+(tutte[star].name||""):""};
+    if(k) _meseMemo={k, v};
+    return v;
+  }catch(e){ return null; }
+  finally{ state.focus=f; }
 }
 // Il diario dal widget: dalla sveglia del sonno di stanotte per 14 ore, quasi fino a sera, la
 // domanda sul sonno (con gli orari del piano) e poi quella sull'energia.
@@ -7967,6 +8002,7 @@ const CONSIGLI_FUNZIONE=[
   // Solo nell'app Android: la sveglia nell'Orologio e il voto dal widget
   {k:"sveglia", quando:()=>platform.alarm.available, t:()=>"Sotto «Dormi» c'è «Metti la sveglia»: la mette nell'Orologio del telefono, all'ora in cui finisce il sonno."},
   {k:"votowidget", quando:()=>platform.widget.available && platform.widget.presenti()>0, t:()=>"Dal widget puoi dire come hai dormito con un tocco, senza aprire l'app: il voto arriva nel diario."},
+  {k:"widgetmese", quando:()=>platform.widget.available && platform.widget.presenti()>0, t:()=>"Allarga il widget in altezza: diventa il mese, con i tuoi turni e quelli di una persona di «Le tue persone». Il puntino segna i giorni liberi insieme."},
   {k:"momenti", quando:()=>!["testa","leggera","intensa"].some(pianoVoce),
     t:()=>"Vuoi sapere quando pensare, muoverti o allenarti meglio? I momenti migliori si accendono in Impostazioni › Cosa vedi nel piano.",
     cta:()=>"Vedi", a:()=>{ apriOpzioni(); setTimeout(()=>{ const x=$("#opzPianoVoci"); if(x&&x.scrollIntoView) try{ x.scrollIntoView({block:"center"}); }catch(e){} }, 250); }},
@@ -9773,7 +9809,7 @@ function salva(){
     // restavano quelli dell'avvio ("non configurato": niente diario, widget vuoto).
     const sig=JSON.stringify([!!state.turniConfigurati,state.pattern,state.shifts,state.anchor,state.repeat,
       state.freeWake,state.freeBed,state.cTo,state.cFrom,state.need,state.prep,state.maxAdvance,
-      state.pPattern,state.pAnchor,state.pShifts,state.pWake,state.pBed,state.pName,state.people,
+      state.pPattern,state.pAnchor,state.pShifts,state.pWake,state.pBed,state.pName,state.people,state.personaGlance,
       state.ecc,state.giorni,state.evento,state.napTurno,state.pausa,state.caffSens]);
     if(_cfgSig!==null && sig!==_cfgSig) dispatchEvent(new Event("nt:config-changed"));
     _cfgSig=sig;

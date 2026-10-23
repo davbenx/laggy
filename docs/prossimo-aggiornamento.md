@@ -34,15 +34,13 @@ Fatto quando: un telefono con orologio compila il diario da solo, il giorno pass
 
 Non so ancora: quali dei tester ha un dispositivo compatibile; quanti giorni di storico si vedono dopo il permesso (una fonte terza dice 30, da verificare nella documentazione ufficiale).
 
-## Widget con il mese, anche con la compagna/il compagno (richiesta di utenti)
-Un solo widget che, allargandolo, cambia: piccolo = «cosa fare adesso»; medio = la settimana (c'è già); grande = **il mese**.
-Come nello screenshot di un utente: 4–5 settimane in griglia, per ogni giorno **la mia sigla** (pillola colorata per tipo: lavoro, notte, riposo) e **quella della persona scelta** sotto (colore diverso); oggi evidenziato; ‹ › per i mesi dopo; tocco su un giorno apre l'app su quel giorno (`notturnisti://giorno/AAAA-MM-GG`, già gestito).
-- **Dati**: `ntWidget()` pubblica già `giorni` (7 giorni: sigla, tipo, ora a letto). Estendere a ~90 giorni, per ogni giorno `{d, c, t}` mio e `{pc, pt}` della persona scelta (`tuttePersone()`/`asPartner`), più `ins` = giorno libero insieme (`giorniCiclo(..., persona)`/`finestreCondivise`). Poche decine di KB.
-- **Scelta della persona**: se ce n'è più di una, un tocco sull'intestazione del widget cambia chi si sovrappone (o si sceglie in Impostazioni › «Le tue persone»).
-- **Disegno**: la griglia si disegna nel codice nativo (Canvas → bitmap) e la mostra un `ImageView`: più robusto delle celle di RemoteViews. Riferimento di dimensione: i limiti di memoria dei bitmap dei widget.
-- **Taglia**: scelta del layout dalla dimensione che il launcher comunica (`onAppWidgetOptionsChanged`) con un'isteresi; un tocco sull'intestazione passa a mano da «Adesso» a «Mese», perché i launcher non riportano le dimensioni tutti allo stesso modo.
-- **Prova**: solo su telefono vero (l'aspetto di un widget non si vede da qui); APK di prova e uno o due giri di correzioni.
-- Legge i dati già sul telefono, nessun permesso nuovo.
+## Widget con il mese, anche con la compagna/il compagno (fatto nella 1.2.0, da provare sul telefono)
+Un solo widget: piccolo = «adesso», medio = la settimana, **alto almeno ~280 dp (5 righe) = il mese**.
+- La pagina pubblica `mese` (`meseWidget()` in `ntWidget()`): dal lunedì della settimana del primo del mese a fine del terzo mese dopo, `sigla:tipo` mio e di al massimo 4 persone (la stellina sempre dentro), giorni «liberi insieme» (≥ 3 ore) per persona. Si ricalcola solo se cambia la configurazione o il giorno (con 4 persone sono ~0,5 s).
+- `MeseModel` (dati, mesi, scelta persona; test JVM in `MeseModelTest`), `MeseWidget` (disegno Canvas → bitmap, ‹ ›, tocco sul titolo = prossima persona, tocco su un giorno = app su quel giorno, descrizioni per TalkBack).
+- La persona scelta dal widget resta finché non la cambi; se nell'app sposti la stellina, il widget riparte da lei.
+- **Da guardare sul telefono** (l'aspetto non si vede da qui): colori chiaro/scuro, leggibilità delle sigle a 4 e a 6 righe, soglia dei 280 dp su launcher diversi (Pixel, Samsung), tocchi ‹ › titolo giorno, font ingranditi (la griglia è un'immagine: non segue la dimensione del testo).
+- Idee rimaste: passaggio a mano «Adesso/Mese» se qualche launcher non riporta bene l'altezza; legenda del puntino «liberi insieme» nel widget; più di una persona sovrapposta.
 
 ## Idee per dopo (in ordine di valore/rischio, da rivedere con i dati reali)
 1. **Foto del foglio turni → importazione** (OCR sul telefono, nessun invio): per chi riceve i turni variabili su carta o PDF. È il punto più faticoso di chi non ha un ciclo.
