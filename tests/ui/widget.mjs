@@ -16,6 +16,8 @@ const apri=async(st, extra={}, risposte=null)=>{
     localStorage.setItem("nt:state",JSON.stringify(st)); localStorage.setItem("nt:turniConfigurati","true"); localStorage.setItem("nt:firstPlanBannerChiuso","true");
     for(const k in extra) localStorage.setItem("nt:"+k, JSON.stringify(extra[k])); }, [st,extra,risposte]);
   const p=await ctx.newPage(); p.on("pageerror",e=>errs.push(e.message));
+  // alle 16: finito il sonno dopo l'eventuale notte di ieri, «oggi» è il giorno di calendario
+  const sera=new Date(); sera.setHours(16,0,0,0); await p.clock.setFixedTime(sera);
   await p.goto("http://localhost:8766/index.html"); await p.waitForTimeout(2600);
   return p;
 };
