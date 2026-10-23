@@ -579,6 +579,7 @@ display:flex;flex-direction:column;align-items:center;justify-content:center;gap
 .mese-segna{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;min-height:46px;margin-top:10px;font-weight:600}
 .mese-segna small{font-size:12px;font-weight:400;color:var(--dim);margin-top:1px}
 .mese-vuoto{margin:10px 0 0;font-size:14px;color:var(--dim)}
+.mese-manda{display:flex;flex-wrap:wrap;gap:4px 18px;margin:2px 0 4px}
 .mese-spec{margin:10px 0 0;font-size:13px;color:var(--dim);line-height:1.45}
 .mese-num span{font-size:12px;color:var(--dim)}
 .mese .hint{margin:8px 0 0}
@@ -6084,6 +6085,57 @@ function datiMese(off){
   state.focus=fPrima;
   return r;
 }
+// Cosa c'è di speciale in un mese (straordinario, extra, reperibilità, formazione, ferie, malattia), in frasi.
+function specialiMese(r){ const v=[];
+  if(r.straordinario>=15) v.push("+"+durataBreve(r.straordinario)+" oltre l'orario");
+  if(r.extra) v.push(r.extra+(r.extra===1?" turno extra":" turni extra"));
+  if(r.reperibile) v.push(r.reperibile+(r.reperibile===1?" giorno di reperibilità":" giorni di reperibilità"));
+  if(r.formazione) v.push(r.formazione+(r.formazione===1?" giorno di formazione":" giorni di formazione"));
+  if(r.ferie) v.push(r.ferie+(r.ferie===1?" giorno di ferie":" giorni di ferie"));
+  if(r.malattia) v.push(r.malattia+(r.malattia===1?" giorno di malattia":" giorni di malattia"));
+  return v; }
+// Sonno annotato nel diario fra due date (da incluso, a escluso): quante notti, durata media, energia media.
+function sonnoDelPeriodo(da, a){
+  const k0=iso(da), k1=iso(a); let n=0, tot=0, nv=0, voti=0;
+  for(const k of Object.keys(wakes)){ if(k<k0 || k>=k1) continue;
+    const bed=(state.beds||{})[k], wk=wakes[k]; if(!bed || !wk) continue;
+    let m=t(wk)-t(bed); if(m<=0) m+=1440; if(m>=120 && m<=1000){ n++; tot+=m; } }
+  for(const k of Object.keys(diary)){ if(k<k0 || k>=k1) continue; const v=+diary[k]; if(v>=1 && v<=5){ nv++; voti+=v; } }
+  return {n, media:n?tot/n:0, nv, voto:nv?voti/nv:0};
+}
+// Il riepilogo da mandare, in testo semplice: di un mese, o degli ultimi 12 (mese in corso compreso).
+function testoRiepilogo(tipo){
+  const offs = tipo==="anno" ? Array.from({length:12},(_,i)=>i-11) : [meseOff];
+  const R=offs.map(datiMese), somma=k=>R.reduce((s,r)=>s+r[k],0);
+  const turni=somma("turni"), liberi=somma("liberi"), ore=Math.round(somma("ore")), notti=somma("notti"), fest=somma("festivi");
+  if(!turni && !liberi) return "";
+  const mese=r=>{ const n=r.primo.toLocaleDateString(LINGUA,{month:"long",year:"numeric"}); return n; };
+  const righe=[];
+  righe.push("• "+turni+(turni===1?" turno":" turni")+", "+ore+(ore===1?" ora":" ore"));
+  if(notti) righe.push("• "+notti+(notti===1?" notte":" notti"));
+  if(fest) righe.push("• "+fest+(fest===1?" domenica o festivo":" domeniche e festivi"));
+  righe.push("• "+liberi+(liberi===1?" giorno senza turno":" giorni senza turno"));
+  if(tipo!=="anno"){ const sp=specialiMese(R[0]); if(sp.length) righe.push("• "+sp.join(" · ")); }
+  else { const peggio=R.slice().sort((x,y)=>(y.notti-x.notti)||(y.ore-x.ore))[0];
+    if(peggio && (peggio.notti||peggio.ore)) righe.push("• Il mese più pesante: "+mese(peggio)+" ("+(peggio.notti? peggio.notti+(peggio.notti===1?" notte, ":" notti, "):"")+Math.round(peggio.ore)+" ore)"); }
+  const da=R[0].primo, a=new Date(R[R.length-1].primo.getFullYear(), R[R.length-1].primo.getMonth()+1, 1, 12);
+  const s=sonnoDelPeriodo(new Date(da.getFullYear(), da.getMonth(), 1), a);
+  if(s.n || s.nv) righe.push("• Sonno annotato: "+(s.n? s.n+(s.n===1?" notte, in media ":" notti, in media ")+durataBreve(s.media) : "")+
+    (s.n && s.nv ? " · " : "")+(s.nv? "energia "+s.voto.toFixed(1).replace(".",",")+" su 5" : ""));
+  const testa = tipo==="anno" ? "I miei ultimi 12 mesi in turno:" : "Il mio "+mese(R[0])+" in turno:";
+  return testa+"\n"+righe.join("\n")+"\n\n"+firmaMessaggio(tipo);
+}
+async function inviaTesto(testo, titolo, copiato){
+  try{ if(platform.canShare()){ await platform.share({title:titolo, text:testo}); return; } }
+  catch(e){ if(e && e.name==="AbortError") return; }
+  try{ await navigator.clipboard.writeText(testo); toast(copiato||"Messaggio copiato: incollalo dove vuoi"); }
+  catch(e){ prompt("Copia questo messaggio:", testo); }
+}
+function mandaRiepilogo(tipo){
+  const testo=testoRiepilogo(tipo); if(!testo){ toast("Niente da mandare: segna prima i turni"); return; }
+  track("share_created", {tipo}); usata("riepilogo");
+  inviaTesto(testo, tipo==="anno" ? "I miei ultimi 12 mesi" : "Il mio mese");
+}
 function renderMese(){
   const el=$("#meseBox"); if(!el) return;
   if(!state.turniConfigurati){ el.hidden=true; return; }
@@ -6105,15 +6157,9 @@ function renderMese(){
       '<div><b>'+r.festivi+'</b><span>domeniche e festivi</span></div>'+
       '<div><b>'+r.liberi+'</b><span>giorni senza turno</span></div>'+
     '</div>')+
-    (()=>{ const v=[];
-      if(r.straordinario>=15) v.push("+"+durataBreve(r.straordinario)+" oltre l'orario");
-      if(r.extra) v.push(r.extra+(r.extra===1?" turno extra":" turni extra"));
-      if(r.reperibile) v.push(r.reperibile+(r.reperibile===1?" giorno di reperibilità":" giorni di reperibilità"));
-      if(r.formazione) v.push(r.formazione+(r.formazione===1?" giorno di formazione":" giorni di formazione"));
-      if(r.ferie) v.push(r.ferie+(r.ferie===1?" giorno di ferie":" giorni di ferie"));
-      if(r.malattia) v.push(r.malattia+(r.malattia===1?" giorno di malattia":" giorni di malattia"));
-      return v.length ? '<p class="mese-spec">'+esc(v.join(" · "))+'</p>' : ''; })()+
-    (vuoto ? '' : '<p class="hint">Ore dall\'inizio alla fine di ogni turno, pause comprese: per controllare, non è un conteggio ufficiale.</p>')+
+    (()=>{ const v=specialiMese(r); return v.length ? '<p class="mese-spec">'+esc(v.join(" · "))+'</p>' : ''; })()+
+    (vuoto ? '' : '<p class="hint">Ore dall\'inizio alla fine di ogni turno, pause comprese: per controllare, non è un conteggio ufficiale.</p>'+
+      '<p class="mese-manda"><button type="button" class="lnk" data-mese-manda>Manda il mese</button><button type="button" class="lnk" data-anno-manda>Manda gli ultimi 12 mesi</button></p>')+
     festiviHtml()+
     '<button type="button" class="btn g mese-segna" data-mese-segna>Segna o importa i turni'+
       (r.ignoti && !vuoto ? '<small>'+r.ignoti+(r.ignoti===1?' giorno ancora da segnare':' giorni ancora da segnare')+'</small>' : '')+'</button>';
@@ -6144,6 +6190,8 @@ if($("#meseBox")) $("#meseBox").addEventListener("change", e=>{
 if($("#meseBox")) $("#meseBox").addEventListener("click", e=>{
   if(e.target.closest("[data-riepilogo-medico]")){ stampaRiepilogoMedico(); return; }
   if(e.target.closest("[data-mese-segna]")){ sgOff=meseOff; apriSegna(); return; }
+  if(e.target.closest("[data-mese-manda]")){ mandaRiepilogo("mese"); return; }
+  if(e.target.closest("[data-anno-manda]")){ mandaRiepilogo("anno"); return; }
   if(e.target.closest("[data-fest-apri]")){ festiviAperto=true; usata("festivi"); renderMese(); return; }
   if(e.target.closest("[data-fest-chiudi]")){ festiviAperto=false; renderMese(); return; }
   const fd=e.target.closest("[data-fest-del]");
@@ -7924,10 +7972,7 @@ if($("#loSapevi")) $("#loSapevi").addEventListener("click", e=>{
 async function mandaACasa(){
   const testo=testoACasa(); if(!testo){ toast("Segna prima il turno di questo giorno"); return; }
   track("share_created", {tipo:"a_casa"}); usata("acasa");
-  try{ if(platform.canShare()){ await platform.share({title:"I miei orari", text:testo}); return; } }
-  catch(e){ if(e && e.name==="AbortError") return; }
-  try{ await navigator.clipboard.writeText(testo); toast("Messaggio copiato: incollalo dove vuoi"); }
-  catch(e){ prompt("Copia questo messaggio:", testo); }
+  return inviaTesto(testo, "I miei orari");
 }
 if($("#aCasa")) $("#aCasa").onclick=mandaACasa;
 if($("#doPrint")) $("#doPrint").onclick=()=>{
@@ -9695,6 +9740,24 @@ function aggiornaPermNotif(){
 // mezzo sparivano; e la sveglia del sonno in corso (stanotte, giorno di ieri)
 // non c'era mai, e con lei «Come hai dormito?» di oggi. Il passato si scarta.
 function statoPerNotifiche(){ const f=new Date(); f.setDate(f.getDate()-1); f.setHours(12,0,0,0); return Object.assign({}, state, {focus:f}); }
+// Telefono nuovo: se i dati arrivano dal backup di un altro telefono, calendario acceso e numero di
+// widget non valgono più (calendari e widget non si trasferiscono). Si azzerano e si rimostra la
+// lista di attivazione: promemoria, calendario e widget si riaccendono qui.
+async function controllaTelefono(){
+  try{
+    if(!platform.dispositivo.available) return;
+    const id=await platform.dispositivo.id(); if(!id) return;
+    const prima=store.get("dispositivo","");
+    if(prima && prima!==id){
+      platform.dispositivo.dimentica();
+      store.set("attivazioneNascosta", false);
+      track("setup_item", {item:"telefono_nuovo"});
+      toast("Ho ritrovato i tuoi turni da un altro telefono. Qui riattivi promemoria, calendario e widget.");
+      ntNotifiche(); render();
+    }
+    if(prima!==id) store.set("dispositivo", id);
+  }catch(e){}
+}
 var _ultimiPromemoria = [];   // l'ultima coda mandata al telefono, per «Vedi i prossimi promemoria»
 function ntNotifiche(){
   try{
@@ -9829,7 +9892,7 @@ platform.onNotificationTap((tab, kind, azione)=>{
 });
 platform.onResume(leggiCanaliSpenti);
 // Prima attivazione dopo il load (se il permesso è già stato concesso)
-addEventListener("load", ()=>{ setTimeout(ntNotifiche, 1500); aggiornaPermNotif(); setTimeout(leggiCanaliSpenti, 2500); setTimeout(contaFunzioniAttive, 5000); });
+addEventListener("load", ()=>{ controllaTelefono(); setTimeout(ntNotifiche, 1500); aggiornaPermNotif(); setTimeout(leggiCanaliSpenti, 2500); setTimeout(contaFunzioniAttive, 5000); });
 // iPhone: copia per l'app sulla Home aggiornata anche col diario, non solo a ogni salva()
 addEventListener("load", ()=>setTimeout(passaggioIOS, 3000));
 document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState==="hidden") passaggioIOS(); });

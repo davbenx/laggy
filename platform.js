@@ -510,6 +510,15 @@ export const review = {
 // Una sveglia vera nell'app Orologio (plugin locale NTAlarm, solo Android).
 // L'Orologio la mette alla prossima volta che arriva quell'ora: chi chiama
 // deve proporla solo per un orario entro 24 ore.
+// Telefono nuovo: l'impronta del telefono (vedi DevicePlugin). Con i dati ritrovati dal backup di
+// Android arrivano anche le impostazioni legate al telefono vecchio (calendario acceso, numero di
+// widget): la pagina le azzera con dimentica() e fa riattivare.
+export const dispositivo = {
+  available: isNative && name === "android" && !!plugin("NTDispositivo"),
+  async id() { const D = plugin("NTDispositivo"); if (!D) return ""; try { const r = await D.id(); return (r && r.id) || ""; } catch (e) { return ""; } },
+  dimentica() { try { localStorage.removeItem(CAL_KEY); localStorage.removeItem("nt:widgetN"); } catch (e) {} }
+};
+
 export const alarm = {
   available: isNative && name === "android" && !!plugin("NTAlarm"),
   set(hour, minutes, message) {
@@ -540,6 +549,6 @@ export function onBackButton(cb) {
   });
 }
 
-const NTPlatform = { isNative, name, notify, calendar, widget, onResume, onApriGiorno, onNotificationTap, onBackButton, canShare, share, print, review, alarm, versione, setSystemBars };
+const NTPlatform = { isNative, name, notify, calendar, widget, onResume, onApriGiorno, onNotificationTap, onBackButton, canShare, share, print, review, alarm, dispositivo, versione, setSystemBars };
 try { if (typeof window !== "undefined") window.NTPlatform = NTPlatform; } catch (e) {}
 export default NTPlatform;
