@@ -6,6 +6,7 @@
 import pw from "../ui/_pw.mjs";
 import fs from "fs";
 const OUT=process.argv[2]||"/tmp/giorno.json", FILTRO=process.argv[3]||"", PASSO=+(process.argv[4]||60);
+const SET=process.env.SET||"base";   // base | strani | cambioora
 const T={M:[360,840],D:[420,1140],P:[840,1320],N:[1320,1800],K:[1140,1860],Z:[1200,1680],X:[960,1560],A:[240,720],W:[0,480],Q:[1380,1920],G:[480,1920],L:[780,1380],V:[660,1380],E:[300,780],F:[1080,1500]};
 const sh=l=>Object.fromEntries([...new Set(l)].filter(c=>T[c]).map(c=>[c,{n:c,s:T[c][0],e:T[c][1]}]));
 // nome, schema, ripete?
@@ -16,6 +17,22 @@ const CASI=[
  ["Notte tarda 00-08","WWWRR"],["Notte 23-07","QQQRR"],["Guardia 24h","GRR"],["Guardia 24h + 3 riposi","GRRR"],["Lungo 13-23","LLLLLRR"],["Spezzato 11-23","VVVVRR"],
  ["Giorno 06-14","MMMMMRR"],["Pomeriggio 14-22","PPPPPRR"],["Ritorno rapido P→M","PMRR"],["Ritorno rapido N→P","NPMRR"],["Misto irregolare","MNRPNR"],["Notti corte N+R","NNRRRRR"],["Giorno e notte alterni","DKDKRR"]
 ];
+// Casi strani: eccezioni manuali, turni variabili, orari veri, sonno estremo, ferie, reperibilità.
+// terzo elemento = pezzi di stato in più; giorni = quanti giorni campionare.
+const STRANI=[
+ ["Variabili: notte ieri, poi niente","NNR",{repeat:false,giorni:6}],["Variabili: notti sparse","NRNRR",{repeat:false,giorni:6}],
+ ["Scambio: una notte su settimana di riposo","RRRRRRR",{ecc:{"2026-11-03":"N","2026-11-05":"N"},shifts:sh("N"),giorni:5}],
+ ["Orari veri diversi dal turno","RRRRRR",{ecc:{"2026-11-03":"N"},giorni_:{"2026-11-03":{s:1230,e:1830}},shifts:sh("N"),giorni:4}],
+ ["Gufo estremo: letto 03:00, sveglia 11:30","RRRR",{freeBed:"03:00",freeWake:"11:30",shifts:{},giorni:4}],
+ ["Allodola estrema: letto 20:00, sveglia 04:00","RRRR",{freeBed:"20:00",freeWake:"04:00",shifts:{},giorni:4}],
+ ["Notti + sonno unico","NNNRR",{sonnoDiurno:"unicoPisolino",giorni:5}],["Notti + sonno diviso","NNNRR",{sonnoDiurno:"diviso",giorni:5}],
+ ["Mattini presto 05:00 + bifasico","EEEEERR",{mattinoBifasico:true,giorni:7}],["Pisolino al lavoro sì (notti)","NNNRR",{napTurno:"si",giorni:5}],
+ ["Ferie in mezzo a un ciclo","MMMMMRR",{giorni_:{"2026-11-03":{t:"ferie"},"2026-11-04":{t:"ferie"}},giorni:7}],
+ ["Reperibilità su un riposo","MMRR",{giorni_:{"2026-11-04":{t:"reperibile"}},giorni:4}],
+ ["Notte dopo ferie","RRNNR",{giorni_:{"2026-11-02":{t:"ferie"}},giorni:5}],
+];
+const CAMBIO=[["Notti ×3 a cavallo del cambio","NNNRR",{anchor:"2026-10-23",giorni:4,start:"2026-10-24T00:00:00+02:00"}],["Rotazione a cavallo","MPNSR",{anchor:"2026-10-22",giorni:5,start:"2026-10-24T00:00:00+02:00"}],["12h a cavallo","DKSR",{anchor:"2026-10-23",giorni:4,start:"2026-10-24T00:00:00+02:00"}],["Sera 16-02 a cavallo","XXXRR",{anchor:"2026-10-23",giorni:4,start:"2026-10-24T00:00:00+02:00"}],["Guardia 24h a cavallo","GRR",{anchor:"2026-10-24",giorni:3,start:"2026-10-24T00:00:00+02:00"}],
+ ["Primavera: notti ×3","NNNRR",{anchor:"2026-03-27",giorni:4,start:"2026-03-28T00:00:00+01:00"}],["Primavera: rotazione","MPNSR",{anchor:"2026-03-26",giorni:5,start:"2026-03-28T00:00:00+01:00"}],["Primavera: 12h","DKSR",{anchor:"2026-03-27",giorni:4,start:"2026-03-28T00:00:00+01:00"}]];
 const ANCORA="2026-11-02";   // lunedì
 const NOW0=new Date("2026-11-03T00:00:00+01:00").getTime();
 const b=await pw.chromium.launch();
@@ -33,7 +50,7 @@ async function campione(caso, quando){
   await ctx.addInitScript(([st])=>{ if(sessionStorage.getItem("x")) return; sessionStorage.setItem("x","1");
     localStorage.setItem("nt:state",JSON.stringify(st)); localStorage.setItem("nt:turniConfigurati","true");
     localStorage.setItem("nt:firstPlanBannerChiuso","true"); localStorage.setItem("nt:attivazioneNascosta","true"); },
-    [{turniConfigurati:true,pattern:pat,anchor:ANCORA,shifts:sh(pat),repeat:true,firstSeenAt:"2026-01-01"}]);
+    [Object.assign({turniConfigurati:true,pattern:pat,anchor:ANCORA,shifts:sh(pat),repeat:true,firstSeenAt:"2026-01-01"}, (({giorni,giorni_,start,...r})=>r)(caso[2]||{}), caso[2]&&caso[2].giorni_?{giorni:caso[2].giorni_}:{})]);
   const p=await ctx.newPage(); const errs=[]; p.on("pageerror",e=>errs.push(e.message));
   await p.clock.setFixedTime(new Date(quando));
   await p.goto("http://localhost:8765/index.html"); await p.waitForTimeout(450);
@@ -57,14 +74,14 @@ function valuta(caso, quando, r){
   // sonno in corso o in arrivo nelle prossime 10 ore, e non è quello del giorno mostrato
   const vicino=[["prima",P],["questo",F],["dopo",N]].filter(([k,s])=>s&&s.z!=null&&s.z>=nowT-TOL&&s.a<=nowT+600).sort((x,y)=>x[1].a-y[1].a);
   if(vicino.length && vicino[0][0]!=="questo" && !(vicino.some(([k])=>k==="questo"))) push("SONNO_NON_VISTO","il sonno in corso/in arrivo è nel giorno «"+vicino[0][0]+"» ("+vicino[0][1].a+"–"+vicino[0][1].z+"), ora "+nowT);
-  if(F && F.a!=null && F.z!=null && nowT>=F.a && nowT<F.z && !/dorm|sonno|letto|riposo|sveglia|pisolino|buio|luce|Rischio|Calo|Minimo/i.test(S0.ora)) push("ADESSO_NEL_SONNO","in pieno sonno («"+S0.ora.slice(0,70)+"»)");
+  if(F && F.a!=null && F.z!=null && nowT>=F.a && nowT<F.z && !(process.env.STRICT ? /dorm|a letto|sveglia|pisolino/i : /dorm|sonno|letto|riposo|sveglia|pisolino|buio|luce|Rischio|Calo|Minimo/i).test(S0.ora)) push("ADESSO_NEL_SONNO","in pieno sonno («"+S0.ora.slice(0,70)+"»)");
   const T0=S0.turno; if(T0 && T0.z!=null && nowT>=T0.a && nowT<T0.z && !/turno|Rientro|Rischio|Calo|caff|Mancano|Minimo|Rischi|Fatica|vigil/i.test(S0.ora)) push("ADESSO_NEL_TURNO","in turno («"+S0.ora.slice(0,70)+"»)");
   return A;
 }
 const lavori=[];
-for(const caso of CASI){ if(FILTRO && !caso[1].includes(FILTRO)) continue;
-  const L=Math.min(caso[1].length,7); const giorni=L*1440*60e3;
-  for(let t=NOW0; t<NOW0+giorni; t+=PASSO*60e3) lavori.push([caso,t]); }
+for(const caso of (SET==="strani"?STRANI:SET==="cambioora"?CAMBIO:CASI)){ if(FILTRO && !caso[1].includes(FILTRO)) continue;
+  const x=caso[2]||{}, L=x.giorni||Math.min(caso[1].length,7), giorni=L*1440*60e3, t0=x.start?new Date(x.start).getTime():NOW0;
+  for(let t=t0; t<t0+giorni; t+=PASSO*60e3) lavori.push([caso,t]); }
 let i=0, fatti=0; const N=lavori.length;
 await Promise.all(Array.from({length:8},async()=>{ for(;;){ const k=i++; if(k>=N) return; const [caso,t]=lavori[k];
   try{ const r=await campione(caso,t); out.campioni++; out.anomalie.push(...valuta(caso,t,r)); }catch(e){ out.errori.push(caso[0]+" "+new Date(t).toISOString()+" "+e.message.slice(0,80)); }

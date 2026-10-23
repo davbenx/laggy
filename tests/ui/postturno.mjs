@@ -27,8 +27,19 @@ const stato=p=>p.evaluate(()=>({titolo:document.querySelector("#dateLabel").text
   await p.context().close(); }
 { const p=await apri("10:00"), s=await stato(p);
   ok(/^Ancora /.test(s.titolo), "durante il sonno resta il giorno del turno → "+s.titolo);
+  ok(/Dovresti dormire/.test(s.ora), "in pieno sonno «Adesso» dice di dormire, non di rischio → "+s.ora);
   await p.context().close(); }
 { const p=await apri("15:00"), s=await stato(p);
   ok(/^Oggi, /.test(s.titolo), "dopo il risveglio: «Oggi» sul giorno nuovo → "+s.titolo);
   await p.context().close(); }
+// sonno che comincia dopo mezzanotte (letto all'01:00): prima che cominci sei ancora nel giorno di ieri
+{ const ctx=await b.newContext({locale:"it-IT",viewport:{width:360,height:740}});
+  await ctx.addInitScript(()=>{ if(sessionStorage.getItem("x")) return; sessionStorage.setItem("x","1");
+    localStorage.setItem("nt:state",JSON.stringify({turniConfigurati:true,pattern:"RRRR",anchor:"2026-01-01",shifts:{N:{n:"Notte",s:1320,e:1800}},repeat:true,firstSeenAt:"2026-01-01",freeBed:"01:00",freeWake:"09:00"}));
+    localStorage.setItem("nt:turniConfigurati","true"); localStorage.setItem("nt:firstPlanBannerChiuso","true"); localStorage.setItem("nt:attivazioneNascosta","true"); });
+  const out=[];
+  for(const ora of ["00:30","03:00","09:30"]){ const p=await ctx.newPage(); const d=new Date(); d.setHours(...ora.split(":").map(Number),0,0); await p.clock.setFixedTime(d);
+    await p.goto("http://localhost:8765/index.html"); await p.waitForTimeout(900); out.push([ora, await p.evaluate(()=>document.querySelector("#dateLabel").textContent)]); await p.close(); }
+  ok(/^Ancora /.test(out[0][1]) && /^Ancora /.test(out[1][1]) && /^Oggi/.test(out[2][1]), "letto all'01:00: alle 00:30 (prima di dormire) e alle 03:00 ancora ieri, alle 09:30 oggi → "+JSON.stringify(out));
+  await ctx.close(); }
 console.log("errori", errs); await b.close();

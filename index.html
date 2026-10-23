@@ -2808,7 +2808,10 @@ function giornoVeroCalcola(){
         const inSonnoDopoTurno = Pieri.b && !Pieri.b.rest && isFinite(Pieri.b.end) && Pieri.s && (Pieri.s.kind==="diurno" || Pieri.s.kind==="corto")
           && isFinite(Pieri.s.onset) && isFinite(Pieri.s.dur) && Pieri.s.onset>=Pieri.b.end-30
           && adessoRel>=Pieri.b.end && adessoRel<Pieri.s.onset+Pieri.s.dur;
-        if(inTurnoIeri || inSonnoIeri || inSonnoDopoTurno) return ieri;
+        // Il sonno di ieri comincia dopo mezzanotte (letto all'01:00): finché non è iniziato sei
+        // ancora nel giorno di ieri, che ha il «Dormi» che stai per fare.
+        const inAttesaSonno = Pieri.s && isFinite(Pieri.s.onset) && Pieri.s.onset>=1440 && adessoRel<Pieri.s.onset;
+        if(inTurnoIeri || inSonnoIeri || inSonnoDopoTurno || inAttesaSonno) return ieri;
       }
     }catch(e){}
   }
@@ -4258,6 +4261,12 @@ function renderOra(Pfocus){
     title = "Turno non impostato per oggi";
     sub = "Tocca per inserire il turno e calcolare orari precisi di sonno, pause e caffeina.";
     oraIc = ICON.alarm;
+  } else if(sleeping && !inSmonto && !kssSleepy){
+    // Dentro la finestra di sonno del piano il messaggio è «dormi»; il rischio resta in seconda riga
+    // per chi è ancora sveglio (i primi 90 minuti dopo il turno restano il «Rientro»).
+    title = A.t;
+    sub = A.s + (isSevere ? " · Se sei ancora sveglio: rischio alto, niente guida né decisioni critiche." : "");
+    oraIc = ICON.moon;
   } else if(isSevere){
     accent = true;
     if(kssSleepy){
@@ -4278,10 +4287,6 @@ function renderOra(Pfocus){
       sub = "Evita compiti rischiosi e decisioni critiche; fai una pausa di recupero.";
       oraIc = ICON.warn;
     }
-  } else if(sleeping){
-    title = A.t;
-    sub = A.s;
-    oraIc = ICON.moon;
   } else if(A && !A.fallback){
     title = A.t;
     sub = A.s;
@@ -5403,12 +5408,15 @@ function adessoLine(P, riferimento){
   } else {
     if(inWin(m,b.start,b.end)){
       const toEnd=mod1440(b.end-m);
+      // Ore vere che mancano alla fine del turno: nella notte del cambio d'ora l'orologio mente di 60 minuti.
+      const fineVera=new Date(riferimento.getFullYear(), riferimento.getMonth(), riferimento.getDate(), 0, b.end);
+      const veri=Math.round((fineVera-new Date())/60000), mancano=(veri>0 && veri<=1560) ? veri : toEnd;
       // Il rientro è il momento peggiore anche per i turni che iniziano nel cuore
       // della notte (verso le 2): non solo per chi ha fatto tutta la notte.
-      if((P.night||P.lateStart) && toEnd<=90) return {t:"Rientro tra "+hm(toEnd),s:"occhiali da sole, e se hai sonno non guidare: è l'ora peggiore",inDuty:true,toEnd};
+      if((P.night||P.lateStart) && toEnd<=90) return {t:"Rientro tra "+hm(mancano),s:"occhiali da sole, e se hai sonno non guidare: è l'ora peggiore",inDuty:true,toEnd};
       return {
         t: "In turno fino alle " + hhmm(b.end),
-        s: "Mancano " + hm(toEnd) + (P.night ? " · la parte dura arriva nelle ore piccole" : " · mantieni il ritmo"),
+        s: "Mancano " + hm(mancano) + (P.night ? " · la parte dura arriva nelle ore piccole" : " · mantieni il ritmo"),
         inDuty: true,
         toEnd
       };
@@ -9537,6 +9545,7 @@ normalizza();
 // giornoVero() gestisce correttamente il turno di notte ancora in corso.
 const _fromShortcut = new URLSearchParams(location.search).has("t");
 state.focus = _fromShortcut ? new Date() : giornoVero();
+_giornoVisto = iso(state.focus);
 state.pAnchor=state.pAnchor||state.anchor;
 // L'elenco delle persone OLTRE il partner principale — quello resta
 // state.pPattern ecc, invariato, per non toccare i 30+ punti che già lo
@@ -9711,6 +9720,30 @@ document.addEventListener("visibilitychange", ()=>{
 });
 // App nativa: ritorno in primo piano (riarma) e tocco su una notifica (tab giusto).
 platform.onResume(()=>{ ntNotifiche(); aggiornaPermNotif(); });
+// Il tempo passa anche a schermata aperta, e l'app può restare in memoria per ore: ogni minuto e al
+// ritorno in primo piano il giorno mostrato si riallinea al giorno vero (se non hai sfogliato altrove)
+// e «Adesso» e la striscia si ridisegnano, al più ogni 5 minuti. Non si tocca nulla mentre scrivi,
+// con un foglio aperto o in un'altra pagina: lì si aggiorna solo il giorno.
+var _giornoVisto, _ultimoGiro = 0;   // senza «= null»: _giornoVisto si imposta all'avvio, più in alto
+function rinfrescaGiorno(forza){
+  try{
+    if(document.hidden || !state.turniConfigurati) return;
+    const gv=giornoVero(), k=iso(gv), cambiato=!!_giornoVisto && k!==_giornoVisto;
+    if(cambiato && iso(state.focus)===_giornoVisto) state.focus=gv;
+    _giornoVisto=k;
+    const ora=Date.now();
+    if(!cambiato && !forza && ora-_ultimoGiro<5*60000) return;
+    const a=document.activeElement;
+    if(a && /^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName)) return;
+    if(document.querySelector(".qs-backdrop:not([hidden]), #pf-modal, body > [role=dialog], #qrModal:not([hidden])")) return;
+    if(!document.body.classList.contains("tab-oggi")) return;
+    _ultimoGiro=ora;
+    const y=window.scrollY; render(); if(Math.abs(window.scrollY-y)>2) window.scrollTo(0,y);
+  }catch(e){}
+}
+setInterval(()=>rinfrescaGiorno(false), 60000);
+document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState==="visible") rinfrescaGiorno(true); });
+platform.onResume(()=>rinfrescaGiorno(true));
 // Tasto "indietro" (Android): prima chiude ciò che è aperto sopra, poi torna
 // a Oggi; da Oggi l'app va in secondo piano. Prima chiudeva subito l'app,
 // perché le schede non sono pagine distinte nella cronologia.
