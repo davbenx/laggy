@@ -36,4 +36,8 @@ const NOTTE={turniConfigurati:true,pattern:"NNNRR",anchor:"2026-10-24",shifts:{N
 { const p=await apri("2026-10-24T12:00:00+02:00", {turniConfigurati:true,pattern:"MMRR",anchor:"2026-10-24",shifts:{M:{n:"Mattino",s:420,e:840}},repeat:true,firstSeenAt:"2026-01-01"}), n=await nota(p);
   ok(/l'ora torna indietro/.test(n) && !/il tuo turno/.test(n), "turno di giorno: si dice del cambio, non del turno → "+n);
   await p.context().close(); }
+// «Mancano» in ore vere nella notte del cambio (turno 22–06): 8h30 alle 22:30, non 7h30
+{ const mancano=async q=>{ const p=await apri(q, NOTTE); const t=await p.evaluate(()=>document.querySelector("#ora").innerText.replace(/\s+/g," ")); await p.context().close(); return (t.match(/Mancano (\d+h?\d*)/)||[])[1]||t.slice(0,60); };
+  const r=[await mancano("2026-10-24T22:30:00+02:00"), await mancano("2026-10-25T01:30:00+02:00"), await mancano("2026-10-25T00:30:00+02:00")];
+  ok(r[0]==="8h30" && r[1]==="5h30" && r[2]==="6h30", "notte del cambio: «Mancano» in tempo vero (22:30 → 8h30, 01:30 → 5h30, 00:30 → 6h30) → "+r.join(", ")); }
 console.log("errori", errs); await b.close();
