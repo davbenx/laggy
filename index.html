@@ -451,7 +451,7 @@ padding:16px 18px;margin:2px 0 var(--gap-sezione);box-shadow:0 4px 20px rgba(45,
 /* Primo avvio (e scelta del ciclo dal banner): solo la domanda. Il piano
    sotto e gli altri inviti non servono finché non si sa che turno fai. */
 body.primo-avvio .daynav,body.primo-avvio #ora,
-body.primo-avvio #status,body.primo-avvio #formaGiorno,body.primo-avvio #finestre,body.primo-avvio #essenziale,
+body.primo-avvio #status,body.primo-avvio #formaGiorno,body.primo-avvio #essenziale,
 body.primo-avvio #luciditaGiornoWrap,body.primo-avvio #tabbar,
 body.primo-avvio #firstPlanBanner,body.primo-avvio #setupChecklist,body.primo-avvio #adattaCard,body.primo-avvio #medicoCard,body.primo-avvio #setupNudge,body.primo-avvio #aCasa,body.primo-avvio #loSapevi{display:none!important}
 .qh-btn{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:12px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;min-height:74px;transition:all .15s;font:inherit}
@@ -756,22 +756,6 @@ padding:7px 15px;min-height:38px;border-radius:3px;cursor:pointer}
 .vb.on{background:var(--bg);color:var(--blue);box-shadow:0 1px 2px rgba(0,0,0,.08)}
 .ess{margin-bottom:6px}
 #formaGiorno:not(:empty){margin:2px 0 var(--gap-sezione)}
-#finestre:not(:empty){margin:0 0 var(--gap-sezione)}
-.finestre .eyebrow{display:block;margin:0 0 6px}
-.fin-riga{display:flex;flex-direction:column;gap:6px}
-.fin{background:var(--s2);border:1px solid var(--line);border-radius:var(--r);padding:9px 12px;display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0}
-.fin-t{display:flex;flex-direction:column;gap:1px;min-width:0}
-.fin-l{font-size:14px;font-weight:700;color:var(--ink)}
-.fin-o{font-size:15px;font-weight:700;color:var(--ink);white-space:nowrap;font-variant-numeric:tabular-nums;flex:none}
-.fin-n{font-size:12px;color:var(--dim);line-height:1.3}
-.fin.ora{border-color:var(--blue);background:var(--blue-soft)}
-.fin.ora .fin-l,.fin.ora .fin-o{color:var(--blue)}
-.fin.past{opacity:.55}
-.fin.nessuna .fin-o{color:var(--faint)}
-.fin-nota{margin:6px 2px 0}
-.fin-nota .lnk{display:inline;min-height:0;padding:4px 2px;margin:0}
-.fin-perche{margin:4px 2px 0;font-size:13px;line-height:1.5;color:var(--dim)}
-.fin-perche p{margin:0 0 6px}
 .fg-legend{display:flex;gap:14px;margin-top:8px}
 .fg-key{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--faint)}
 .fg-key i{width:8px;height:8px;border-radius:999px;display:inline-block}
@@ -1036,7 +1020,7 @@ body.tab-oggi #vederciPagina,body.tab-oggi #partner,body.tab-oggi .piu-cal,
 body.tab-oggi .tools,body.tab-oggi .piu-info,body.tab-oggi footer{display:none}
 
 /* TURNI: ciclo, giorni liberi, partner, modifica */
-body.tab-turni #status,body.tab-turni #ora,body.tab-turni #benvenutoLink,body.tab-turni #demoEsempio,body.tab-turni #formaGiorno,body.tab-turni #finestre,body.tab-turni #essenziale,
+body.tab-turni #status,body.tab-turni #ora,body.tab-turni #benvenutoLink,body.tab-turni #demoEsempio,body.tab-turni #formaGiorno,body.tab-turni #essenziale,
 body.tab-turni .daynav,body.tab-turni #luciditaGiornoWrap,
 body.tab-turni #icsBox,body.tab-turni .piu-info,
 body.tab-turni #setupChecklist,body.tab-turni #adattaCard,body.tab-turni #medicoCard,body.tab-turni #firstPlanBanner,
@@ -1181,7 +1165,7 @@ list-style:none;min-height:44px;display:flex;align-items:center}
 .piu-info-in b{color:var(--ink)}
 /* OPZIONI: solo la configurazione */
 body.tab-oggi #doScambioTurno,body.tab-oggi #scambioBox,
-body.tab-opzioni #firstPlanBanner,body.tab-opzioni #setupChecklist,body.tab-opzioni #adattaCard,body.tab-opzioni #medicoCard,body.tab-opzioni #status,body.tab-opzioni #ora,body.tab-opzioni #benvenutoLink,body.tab-opzioni #demoEsempio,body.tab-opzioni #formaGiorno,body.tab-opzioni #finestre,body.tab-opzioni #essenziale,
+body.tab-opzioni #firstPlanBanner,body.tab-opzioni #setupChecklist,body.tab-opzioni #adattaCard,body.tab-opzioni #medicoCard,body.tab-opzioni #status,body.tab-opzioni #ora,body.tab-opzioni #benvenutoLink,body.tab-opzioni #demoEsempio,body.tab-opzioni #formaGiorno,body.tab-opzioni #essenziale,
 body.tab-opzioni .daynav,body.tab-opzioni .cap.ciclo,body.tab-opzioni #cyc,body.tab-opzioni #meseBox,
 body.tab-opzioni #cycShareBox,
 body.tab-opzioni .cycbar,body.tab-opzioni #cycRange,body.tab-opzioni #doAndamenti,body.tab-opzioni #doScambioTurno,body.tab-opzioni #scambioBox,
@@ -1459,7 +1443,6 @@ header b{font-size:23px}
 
 
 <div id="formaGiorno"></div>
-<div id="finestre"></div>
 <div class="ess" id="essenziale"></div>
 <!-- Il giorno in un messaggio per chi sta a casa: quando dormi e quando ci sei.
      Sotto la lista della giornata, perché ne è il riassunto. -->
@@ -3996,7 +3979,6 @@ function render(){
   renderAdatta();
   renderMedico();
   renderFormaGiorno(P);                // si azzera da solo in dettaglio
-  renderFinestre(P);
   renderEssenziale(P, CARDS);          // si azzera da solo in dettaglio
   renderACasa();
   renderLoSapevi();
@@ -4166,6 +4148,9 @@ function diaryReminder(P, CARDS){
 const ICO=(p)=>'<svg class="ei" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+p+'</svg>';
 const ICON={
   moon:  ICO('<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>'),
+  mente: ICO('<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>'),
+  passo: ICO('<circle cx="13" cy="4.5" r="1.8"/><path d="M12 8l-3 4 3 2-1 6M12 8l3 3h3M9 12l-2 4"/>'),
+  peso:  ICO('<path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/>'),
   bed:   ICO('<path d="M3 17v-4h18v4M3 13V8a2 2 0 0 1 2-2h5v7M21 13v-2a2 2 0 0 0-2-2h-5"/><path d="M3 17v2M21 17v2"/>'),
   coffee:ICO('<path d="M17 8h1.5a2.5 2.5 0 0 1 0 5H17"/><path d="M4 8h13v5a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V8z"/><path d="M8 2v3M12 2v3"/>'),
   sun:   ICO('<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>'),
@@ -5559,34 +5544,21 @@ function renderFormaGiorno(P){
     '</svg>'+
     '<div class="fg-legend">'+legenda.join("")+'</div>';
 }
-// Le finestre migliori del giorno (testa, movimento, allenamento): una riga di tre caselle sotto la striscia.
-var finPercheAperto=false;   // var: letta da render() durante l'avvio
-function renderFinestre(P){
-  const el=$("#finestre"); if(!el) return;
-  const oggiOFuturo = dnum(state.focus)>=dnum(giornoVero());
-  if(state.vista==="dettaglio" || !state.turniConfigurati || !oggiOFuturo || !window.NTAlert || !window.NTAlert.finestreAttivita){ el.innerHTML=""; return; }
+// I momenti migliori del giorno (testa, movimento, allenamento): stima dai tuoi orari (alertness.js),
+// fuori da turno e viaggio, pisolini e pasti. Diventano voci della timeline, come caffè e luce.
+function finestreDelGiorno(P){
+  if(!state.turniConfigurati || dnum(state.focus)<dnum(giornoVero()) || !window.NTAlert || !window.NTAlert.finestreAttivita) return null;
   const b=P.b, cTo=+state.cTo||25, cFrom=+state.cFrom||25, prep=+state.prep||45;
   const occupato=[]; if(b && !b.rest && isFinite(b.start) && isFinite(b.end)) occupato.push([b.start-prep-cTo, b.end+cFrom]);
   for(const n of (P.naps||[])) occupato.push([n.a, n.b]);
-  const f=window.NTAlert.finestreAttivita({wake:P.wake, sleepOnset:P.s.onset, fase:P.cbt, freeWake:state.freeWake, occupato, pasti:P.meals||[]});
-  const nowT = dnum(state.focus)===dnum(giornoVero()) ? minutiDaFocus() : null;
-  const casella=(lab, w, nota)=>{
-    if(!w) return '<div class="fin nessuna" role="group" aria-label="'+lab+': oggi non c\'è un buon momento"><span class="fin-t"><span class="fin-l">'+lab+'</span><span class="fin-n">oggi non c\'è un buon momento</span></span><b class="fin-o">—</b></div>';
-    const stato = nowT===null ? "" : nowT>=w.z ? " past" : nowT>=w.a ? " ora" : "";
-    return '<div class="fin'+stato+'" role="group" aria-label="'+lab+': '+hhmm(w.a)+' – '+hhmm(w.z)+'"><span class="fin-t"><span class="fin-l">'+lab+'</span><span class="fin-n">'+nota+'</span></span><b class="fin-o">'+hhmm(w.a)+'–'+hhmm(w.z)+'</b></div>';
-  };
-  if(!f.testa && !f.leggera && !f.intensa){ el.innerHTML=""; return; }
-  el.innerHTML='<div class="finestre"><span class="eyebrow">I momenti migliori di oggi</span>'+
-    '<div class="fin-riga">'+casella("Testa", f.testa, "pensare, studiare")+casella("Movimento", f.leggera, "camminare, stretching")+casella("Allenamento", f.intensa, "più impegnativo")+'</div>'+
-    '<p class="hint fin-nota">Stima dai tuoi orari, non una misura. <button type="button" class="lnk" data-fin-perche aria-expanded="'+finPercheAperto+'">'+(finPercheAperto?"Nascondi":"Come lo calcolo")+'</button></p>'+
-    (finPercheAperto ? '<div class="fin-perche"><p><b>Testa</b>: le ore in cui sei più lucido, almeno 90 minuti dopo il risveglio e 2 ore prima di dormire. <b>Movimento</b>: 45 minuti leggeri quando il corpo è più pronto. <b>Allenamento</b>: 60 minuti impegnativi, lontano dai pasti e finiti 3 ore prima di dormire.</p>'+
-      '<p>Tutte fuori dal turno e dal viaggio. Si basano sul tuo ritmo (dai tuoi orari di sonno) e sulla stanchezza accumulata: è un modello, non un consiglio medico.</p></div>' : '')+
-    '</div>';
+  return window.NTAlert.finestreAttivita({wake:P.wake, sleepOnset:P.s.onset, fase:P.cbt, freeWake:state.freeWake, occupato, pasti:P.meals||[]});
 }
-if($("#finestre")) $("#finestre").addEventListener("click", e=>{
-  if(!e.target.closest("[data-fin-perche]")) return;
-  finPercheAperto=!finPercheAperto; if(finPercheAperto) track("setup_item", {item:"finestre_perche"}); render();
-});
+const STIMA_FIN="Una stima dai tuoi orari di sonno, non una misura né un consiglio medico.";
+const VOCI_FIN=[
+  ["testa","Testa",ICON.mente,"pensare, studiare","Le ore in cui sei più lucido: almeno 90 minuti dopo il risveglio e 2 ore prima di dormire, fuori dal turno, dal viaggio e dai pasti. "+STIMA_FIN],
+  ["leggera","Movimento",ICON.passo,"camminare, stretching","45 minuti leggeri quando il corpo è più pronto: almeno 45 minuti dopo il risveglio e un'ora prima di dormire, lontano dai pasti. "+STIMA_FIN],
+  ["intensa","Allenamento",ICON.peso,"più impegnativo","60 minuti più impegnativi, quando forza e coordinazione sono al meglio: almeno 2 ore dopo il risveglio, lontano dai pasti, finiti 3 ore prima di dormire. "+STIMA_FIN]
+];
 // A letto molto presto prima di un mattino: le due strade con gli orari veri,
 // nel giorno in cui servono (prima era una nota con un rimando a Impostazioni,
 // e il tester restava a guardare un «a letto alle 20:50» senza alternative).
@@ -5728,6 +5700,10 @@ function renderEssenziale(P, CARDS){
   voci.push(vSonno);
   // Le scelte che riguardano il sonno (dopo la notte, letto presto) stanno
   // attaccate a «Dormi»: sono decisioni su quella voce, non voci del programma.
+  // I momenti migliori (testa, movimento, allenamento) come voci del piano.
+  try{ const fin=finestreDelGiorno(P);
+    if(fin) for(const [k,lab,ic,sub,perche] of VOCI_FIN){ const w=fin[k]; if(!w) continue;
+      voci.push({t:dSv(w.a), html:riga("fin-"+k, lab, hhmm(w.a)+" → "+hhmm(w.z), sub, false, ic, '<div class="why">'+esc(perche)+'</div>', {a:w.a, z:w.z})}); } }catch(e){}
   const dn=sceltaDopoNotte(P);
 
   // Letto troppo presto prima di un turno di mattina: stessa soglia della
