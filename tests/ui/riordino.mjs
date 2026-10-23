@@ -15,6 +15,8 @@ const apri=async st=>{
     localStorage.setItem("nt:state",JSON.stringify(st)); localStorage.setItem("nt:turniConfigurati","true");
     localStorage.setItem("nt:firstPlanBannerChiuso","true"); localStorage.setItem("nt:attivazioneNascosta","true"); }, st);
   const p=await ctx.newPage(); p.on("pageerror",e=>errs.push(e.message));
+  // alle 16: finito il sonno dopo lo smonto, «oggi» è il giorno nuovo (a mezzogiorno dopo una notte l'app è ancora sul giorno del turno)
+  const sera=new Date(); sera.setHours(16,0,0,0); await p.clock.setFixedTime(sera);
   await p.goto(process.env.URL||"http://localhost:8765/index.html"); await p.waitForTimeout(1000);
   return p;
 };
