@@ -30,15 +30,16 @@ jobs:
         run: ./gradlew recordPaparazziDebug --no-daemon
       - name: Una tavola per momento e tema
         run: |
-          sudo apt-get install -y imagemagick >/dev/null
           cd tools/anteprima-widget/app/src/test/snapshots/images
           mkdir -p /tmp/tavole
+          cp *.png /tmp/tavole/ 2>/dev/null || true
+          sudo apt-get update -qq && sudo apt-get install -y imagemagick >/dev/null || exit 0
           for g in $(ls *.png | sed -E 's/.*_(a_sera|b_sveglia|c_pisolino|d_voto|e_solo_io)_(chiaro|scuro)_h[0-9]+.*/\1_\2/' | sort -u); do
             files=$(ls *_${g}_h*.png | sort -t h -k2 -n | sort -V)
             montage $files -tile 7x1 -geometry +8+8 -background '#1b1b1b' "/tmp/tavole/$g.png"
           done
-          cp *.png /tmp/tavole/ 2>/dev/null || true
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: anteprima-widget
           path: /tmp/tavole
