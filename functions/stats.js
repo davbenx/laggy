@@ -402,7 +402,7 @@ function render(){
   var VOCI={turni:"Turni dei prossimi giorni",notifiche:"Promemoria",calendario:"Calendario del telefono",widget:"Widget",file_ics:"File .ics scaricato",play:"Dal web a Google Play",
     mese_aperto:"Il mio mese aperto",import_ciclo:"Import: ciclo riconosciuto e applicato",ferie_aperte:"Ferie: pianificatore aperto",ferie_segnate:"Ferie: segnate",ferie_con:"Ferie: scelto «a casa con»",
     festivi_riposo:"Festivi contati come riposo",medico_visto:"Riepilogo medico aperto",medico_pdf:"Riepilogo medico in PDF",diario_widget:"Voto dal widget",tuoi_turni:"Pagina «I tuoi turni» aperta",telefono_nuovo:"Telefono nuovo: dati ritrovati dal backup",festivi_extra:"Festivi: aggiunto il proprio",orologio_tuo:"Orari di sonno personalizzati"};
-  var SAP={sveglia:"Sveglia nell'Orologio",votowidget:"Voto dal widget",orologio:"Il tuo orologio",mese:"Il mio mese",festivi:"Festivi",dormi:"Dormi (scelte sul sonno)",acasa:"Orari a casa",ferie:"Ferie",colleghi:"Colleghi",calendario:"Calendario",scambio:"Scambio turno",sonno:"Sonno e carico",medico:"Medico",copia:"Copia di sicurezza",installa:"Installa",statistiche:"Statistiche",grazie:"Grazie",tester:"Tester"};
+  var SAP={momenti:"Momenti migliori",riepilogo:"Riepilogo del mese",sveglia:"Sveglia nell'Orologio",votowidget:"Voto dal widget",widgetmese:"Widget con il mese",orologio:"Il tuo orologio",mese:"Il mio mese",festivi:"Festivi",dormi:"Dormi (scelte sul sonno)",acasa:"Orari a casa",ferie:"Ferie",colleghi:"Colleghi",calendario:"Calendario",scambio:"Scambio turno",sonno:"Sonno e carico",medico:"Medico",copia:"Copia di sicurezza",installa:"Installa",statistiche:"Statistiche",grazie:"Grazie",tester:"Tester"};
   function voce(k){ var m=/^sapevi_(si|no)_(.+)$/.exec(k); if(m) return "Lo sapevi «"+(SAP[m[2]]||m[2])+"»: "+(m[1]==="si"?"provato":"chiuso"); m=/^voce_(.+)$/.exec(k); if(m) return "Voce del piano aperta: "+m[1]; return VOCI[k]||k; }
   $("#setup").innerHTML=rowsHtml(byProp(rows,"setup_item").map(function(x){ return {k:voce(x.k), n:x.n}; }));
 
@@ -417,7 +417,7 @@ function render(){
   var fi=[]; Object.keys(f).forEach(function(k){ var x=f[k], pc=function(v,t){ t=t==null?x.tot:t; return t? Math.round(100*v/t)+"%" : "—"; };
     fi.push({k:(PIATT[k]||k)+": promemoria "+pc(x.n)+(x.pn?" (ad app chiusa "+pc(x.p,x.pn)+")":"")+" · calendario "+pc(x.c)+(k==="a"?" · widget "+pc(x.w):""), n:x.tot}); });
   $("#funzioni").innerHTML=rowsHtml(fi);
-  var TIPON={diario:"Come hai dormito?",consigli:"Consigli",rischio:"Giorni impegnativi",bedtime:"Preparati a dormire",wake:"Ora di alzarti",nap:"Pisolino",coffee:"Ultimo caffè",ret:"Rientro",prep:"Preparati per il turno",cambio:"Cambio turno",domani:"Che turno fai domani?",luce:"Luce",settimana:"La tua settimana",tip:"Il piano si adatta"};
+  var TIPON={diario:"Come hai dormito?",consigli:"Consigli",rischio:"Giorni impegnativi",bedtime:"Preparati a dormire",wake:"Ora di alzarti",nap:"Pisolino",coffee:"Ultimo caffè",ret:"Rientro",prep:"Preparati per il turno",cambio:"Cambio turno",domani:"Che turno fai domani?",luce:"Luce",momenti:"Momenti buoni",settimana:"La tua settimana",tip:"Il piano si adatta"};
   $("#notifAperte").innerHTML=rowsHtml(byProp(rows,"notif_aperta").map(function(x){ return {k:TIPON[x.k]||x.k, n:x.n}; }));
   var ESI={liberi_proposto:"Giorni liberi: proposte",liberi_applicato:"Giorni liberi: applicate",liberi_annullato:"Giorni liberi: annullate",liberi_rifiutato:"Giorni liberi: «lascia così»",
     anticipo_proposto:"Anticipo: proposte",anticipo_applicato:"Anticipo: applicate",anticipo_annullato:"Anticipo: annullate",anticipo_rifiutato:"Anticipo: «lascia così»"};
@@ -426,7 +426,7 @@ function render(){
   $("#errori").innerHTML=rowsHtml(byProp(rows,"errore").map(function(x){ return {k:"Errore in "+x.k, n:x.n}; }));
   var PRESET={essenziali:"Scelta: essenziali",tutte:"Scelta: tutti",mie:"Scelta: personalizzata"};
   $("#notifPreset").innerHTML=rowsHtml(byProp(rows,"notif_tipi").map(function(x){ return {k:PRESET[x.k]||x.k, n:x.n}; }));
-  var CAN={turni:"Spento: cambi di turno",sicurezza:"Spento: rientro dopo la notte",sonno:"Spento: sonno",caffe:"Spento: ultimo caffè",pisolini:"Spento: pisolini",luce:"Spento: luce",sveglie:"Spento: ora di alzarti",suggerimenti:"Spento: suggerimenti"};
+  var CAN={turni:"Spento: cambi di turno",sicurezza:"Spento: rientro dopo la notte",sonno:"Spento: sonno",caffe:"Spento: ultimo caffè",pisolini:"Spento: pisolini",luce:"Spento: luce",momenti:"Spento: momenti buoni",sveglie:"Spento: ora di alzarti",suggerimenti:"Spento: suggerimenti"};
   $("#notifOff").innerHTML=rowsHtml(byProp(rows,"notif_canale_off").map(function(x){ return {k:CAN[x.k]||x.k, n:x.n}; }));
   $("#platOs").innerHTML=rowsHtml(perParte(rows,1,NOME_OS));
   $("#platSup").innerHTML=rowsHtml(perParte(rows,0,NOME_SUP));

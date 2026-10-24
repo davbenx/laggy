@@ -31,6 +31,29 @@ ok(W.giorni.slice(1).every(g=>/^[a-z]{3}\u00a0\d{1,2}$/.test(g.g)), "le etichett
 ok(W.giorni[1].c==="Fe" && /•$/.test(W.giorni[2].c) && W.giorni[4].c==="N", "settimana: Fe per le ferie, • per la reperibilità → "+W.giorni.map(g=>g.c).join(" "));
 ok(W.diario && W.diario.d===tra(0) && /^\d\d:\d\d$/.test(W.diario.bed) && W.diario.a-W.diario.da===14*3600e3 && !W.diario.sonno && !W.diario.voto, "domanda del diario: orari del piano, per 8 ore dalla sveglia → "+JSON.stringify(W.diario));
 await p.context().close();
+
+// il mese: 15 settimane dal lunedì, la mia sigla, le persone (la stellina sempre dentro, al massimo 4)
+{ const gi=n=>{ const d=new Date(); d.setHours(12,0,0,0); d.setDate(d.getDate()+n); return iso(d); };
+  const pers=[0,1,2,3,4,5].map(i=>({name:"P"+i, pattern:["MMRR","NNRR","MPRR","RRMM","PPNR","MRMR"][i], anchor:gi(i)}));
+  const q=await apri({turniConfigurati:true,pattern:"MMNRR",anchor:tra(0),shifts:SH,repeat:true,firstSeenAt:tra(-30),people:pers,personaGlance:5,giorni:{[tra(1)]:{t:"ferie"}}});
+  const M=(await q.evaluate(()=>window.__widget)).mese;
+  const uno=new Date(); uno.setHours(12,0,0,0); uno.setDate(1); const lun=new Date(uno); lun.setDate(1-((uno.getDay()+6)%7));
+  const fine=new Date(); fine.setHours(12,0,0,0); fine.setMonth(fine.getMonth()+4,0);
+  const N=Math.ceil((Math.round((fine-lun)/864e5)+1)/7)*7;
+  ok(M && M.da===iso(lun) && M.io.length===N && N%7===0 && N>=119, "mese: dal lunedì della settimana del primo, fino a fine del terzo mese dopo ("+N+" giorni)");
+  ok(M.io.every(x=>/^[^:]+:[nlr?]$/.test(x)), "mese: ogni giorno è «sigla:tipo» → "+M.io.slice(0,7).join(" "));
+  const ioff=Math.round((new Date(tra(1)+"T12:00:00")-lun)/864e5);
+  ok(/^Fe:/.test(M.io[ioff]), "mese: le mie ferie compaiono con la sigla Fe");
+  ok(M.p.length===4 && M.p.some(x=>x.n==="P5"), "mese: al massimo 4 persone e la stellina (P5) c'è sempre → "+M.p.map(x=>x.n));
+  ok(M.p[M.sel].n==="P5" && M.star==="5|P5", "mese: sel punta alla stellina e la chiave la riconosce → "+M.sel+" "+M.star);
+  ok(M.p.every(x=>x.g.length===N && x.i.length===N && /^[01]+$/.test(x.i)), "mese: ogni persona ha tutti i giorni e i giorni «insieme»");
+  ok(M.p.some(x=>x.i.includes("1")), "mese: ci sono giorni liberi insieme");
+  await q.context().close();
+  const r=await apri({turniConfigurati:true,pattern:"MMNRR",anchor:tra(0),shifts:SH,repeat:true,firstSeenAt:tra(-30)});
+  const M2=(await r.evaluate(()=>window.__widget)).mese;
+  ok(M2 && M2.p.length===0 && M2.star==="" && M2.io.length===N, "mese senza persone: solo le mie sigle");
+  await r.context().close();
+}
 // risposte dal widget: sonno e energia arrivano nel diario
 const k=tra(0);
 p=await apri({turniConfigurati:true,pattern:"MPNSR",anchor:tra(-2),shifts:SH,repeat:true,firstSeenAt:tra(-30)}, {}, {[k]:{sonno:true,bed:"23:10",wake:"06:40",voto:4,at:Date.now()}});

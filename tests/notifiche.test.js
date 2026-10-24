@@ -90,3 +90,25 @@ test("cambio dell'ora: notifiche e testi all'ora giusta anche nei giorni di 23 e
     assert.ok(L.filter(n => /Inizio alle/.test(n.body)).every(n => /Inizio alle 22:00/.test(n.body)), "i testi dicono l'ora vera del turno");
   } finally { if (tzPrima === undefined) delete process.env.TZ; else process.env.TZ = tzPrima; }
 });
+
+test("momenti buoni: solo per le finestre accese nel piano, al loro inizio, mai nel sonno", () => {
+  const cfg = { pattern: "MPNSR", anchor: iso(new Date()), shifts: SH, piano: { intensa: true, testa: true } };
+  const L = buildSchedule(cfg, { days: 14, types: ["momenti"] });
+  assert.ok(L.length > 0, "ce ne sono");
+  assert.ok(L.every(n => n.kind === "momenti"), "solo il tipo acceso");
+  assert.ok(L.every(n => /Buon momento per (pensare|allenarti)/.test(n.title)), "solo testa e allenamento, non il movimento");
+  assert.equal(new Set(L.map(n => n.id)).size, L.length, "id unici");
+  assert.ok(L.every(n => n.id >= 970000 && n.id < 980000), "nella loro fascia di id");
+  const e = createEngine(cfg); const sonni = [];
+  for (let o = -1; o < 15; o++) { const d = new Date(); d.setDate(d.getDate() + o); e.state.focus = d; let P = null; if (e.codeAt(0) !== "?") { try { P = e.plan(); } catch (_) {} }
+    if (P) { const m = new Date(d.getFullYear(), d.getMonth(), d.getDate()); sonni.push([new Date(m.getFullYear(), m.getMonth(), m.getDate(), 0, P.s.onset).getTime(), new Date(m.getFullYear(), m.getMonth(), m.getDate(), 0, P.s.onset + P.s.dur).getTime()]); } }
+  for (const n of L) assert.ok(!sonni.some(([a, z]) => n.at.getTime() > a + 60000 && n.at.getTime() < z - 60000), "dentro il sonno: " + n.at);
+});
+
+test("momenti buoni: senza interruttore nel piano non parte nulla, anche con il tipo acceso", () => {
+  const base = { pattern: "MPNSR", anchor: iso(new Date()), shifts: SH };
+  assert.equal(buildSchedule(base, { days: 14, types: ["momenti"] }).length, 0, "nessun piano");
+  assert.equal(buildSchedule({ ...base, piano: { testa: false, intensa: false } }, { days: 14, types: ["momenti"] }).length, 0, "tutti spenti");
+  assert.equal(buildSchedule({ ...base, piano: { testa: true } }, { days: 14, types: ["cambio"] }).filter(n => n.kind === "momenti").length, 0, "tipo spento");
+  assert.ok(!TIPI_ESSENZIALI.includes("momenti"), "non è fra gli essenziali");
+});

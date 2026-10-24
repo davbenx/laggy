@@ -53,6 +53,7 @@ public class NotturnistiWidget extends AppWidgetProvider {
         super.onReceive(ctx, intent);
         if (AZIONE_TICK.equals(intent.getAction())) aggiornaTutti(ctx);
         if (AZIONE_DIARIO.equals(intent.getAction())) { salvaRisposta(ctx, intent); aggiornaTutti(ctx); }
+        if (MeseWidget.AZIONE.equals(intent.getAction())) { MeseWidget.azione(ctx, intent); aggiornaTutti(ctx); }
     }
 
     static int quanti(Context ctx) {
@@ -63,6 +64,16 @@ public class NotturnistiWidget extends AppWidgetProvider {
         AppWidgetManager mgr = AppWidgetManager.getInstance(ctx);
         int[] ids = mgr.getAppWidgetIds(new ComponentName(ctx, NotturnistiWidget.class));
         if (ids.length > 0) disegna(ctx, mgr, ids);
+    }
+
+    // Larghezza e altezza disponibili in dp, nell'orientamento attuale del telefono.
+    static int[] dimensioni(Context ctx, AppWidgetManager mgr, int id) {
+        Bundle o = mgr.getAppWidgetOptions(id);
+        if (o == null) return new int[]{ 250, 110 };
+        boolean orizzontale = ctx.getResources().getConfiguration().orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+        return orizzontale
+            ? new int[]{ o.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH), o.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT) }
+            : new int[]{ o.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH), o.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT) };
     }
 
     // Altezza disponibile in dp (in verticale conta la massima).
@@ -153,6 +164,7 @@ public class NotturnistiWidget extends AppWidgetProvider {
         int[] pIc = { 0, 0 };
         long prossimoCambio = Long.MAX_VALUE, rinfresco = Long.MAX_VALUE;
         JSONArray giorni = null;
+        JSONObject mese = null;     // i dati del mese, per il widget grande
         JSONObject dia = null;      // la domanda del diario, se è il momento
         String fase = null;         // "sonno" | "voto"
         try {
@@ -161,6 +173,7 @@ public class NotturnistiWidget extends AppWidgetProvider {
             if (json != null) {
                 JSONObject radice = new JSONObject(json);
                 giorni = radice.optJSONArray("giorni");
+                mese = radice.optJSONObject("mese");
                 JSONArray v = radice.getJSONArray("voci");
                 JSONObject turno = radice.optJSONObject("turno");
                 if (turno != null && turno.optLong("e") <= ora) turno = null;
@@ -242,6 +255,21 @@ public class NotturnistiWidget extends AppWidgetProvider {
         for (int id : ids) {
             int h = altezza(mgr, id);
             RemoteViews rv = new RemoteViews(ctx.getPackageName(), R.layout.widget_piano);
+            int[] dim = dimensioni(ctx, mgr, id);
+            // Abbastanza grande: il mese al posto di tutto il resto (si rinfresca anche a mezzanotte, per «oggi»).
+            if (mese != null && MeseWidget.abbastanzaGrande(dim[0], dim[1]) && MeseWidget.mostra(ctx, rv, mese, id, dim[0], dim[1], ora, pi)) {
+                for (int v : new int[]{ R.id.w_etichetta, R.id.w_riga_adesso, R.id.w_progresso, R.id.w_diario, R.id.w_prossimi, R.id.w_settimana }) rv.setViewVisibility(v, View.GONE);
+                rv.setViewVisibility(R.id.w_mese, View.VISIBLE);
+                mgr.updateAppWidget(id, rv);
+                Calendar mezzanotte = Calendar.getInstance(); mezzanotte.add(Calendar.DAY_OF_YEAR, 1);
+                mezzanotte.set(Calendar.HOUR_OF_DAY, 0); mezzanotte.set(Calendar.MINUTE, 1); mezzanotte.set(Calendar.SECOND, 0);
+                rinfresco = Math.min(rinfresco, mezzanotte.getTimeInMillis());
+                continue;
+            }
+            rv.setViewVisibility(R.id.w_mese, View.GONE);
+            rv.setViewVisibility(R.id.w_etichetta, View.VISIBLE); rv.setViewVisibility(R.id.w_riga_adesso, View.VISIBLE); rv.setViewVisibility(R.id.w_prossimi, View.VISIBLE);
+            int pad = (int) (16 * ctx.getResources().getDisplayMetrics().density);
+            rv.setViewPadding(android.R.id.background, pad, pad, pad, pad);
             rv.setTextViewText(R.id.w_etichetta, etichetta);
             rv.setTextViewText(R.id.w_adesso, adesso);
             rv.setTextViewText(R.id.w_sotto, sotto);

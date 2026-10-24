@@ -34,6 +34,14 @@ Fatto quando: un telefono con orologio compila il diario da solo, il giorno pass
 
 Non so ancora: quali dei tester ha un dispositivo compatibile; quanti giorni di storico si vedono dopo il permesso (una fonte terza dice 30, da verificare nella documentazione ufficiale).
 
+## Widget con il mese, anche con la compagna/il compagno (fatto nella 1.2.0, da provare sul telefono)
+Un solo widget: piccolo = «adesso», medio = la settimana, **alto almeno ~280 dp (5 righe) = il mese**.
+- La pagina pubblica `mese` (`meseWidget()` in `ntWidget()`): dal lunedì della settimana del primo del mese a fine del terzo mese dopo, `sigla:tipo` mio e di al massimo 4 persone (la stellina sempre dentro), giorni «liberi insieme» (≥ 3 ore) per persona. Si ricalcola solo se cambia la configurazione o il giorno (con 4 persone sono ~0,5 s).
+- `MeseModel` (dati, mesi, scelta persona; test JVM in `MeseModelTest`), `MeseWidget` (disegno Canvas → bitmap, ‹ ›, tocco sul titolo = prossima persona, tocco su un giorno = app su quel giorno, descrizioni per TalkBack).
+- La persona scelta dal widget resta finché non la cambi; se nell'app sposti la stellina, il widget riparte da lei.
+- **Da guardare sul telefono** (l'aspetto non si vede da qui): colori chiaro/scuro, leggibilità delle sigle a 4 e a 6 righe, soglia dei 280 dp su launcher diversi (Pixel, Samsung), tocchi ‹ › titolo giorno, font ingranditi (la griglia è un'immagine: non segue la dimensione del testo).
+- Idee rimaste: passaggio a mano «Adesso/Mese» se qualche launcher non riporta bene l'altezza; legenda del puntino «liberi insieme» nel widget; più di una persona sovrapposta.
+
 ## Idee per dopo (in ordine di valore/rischio, da rivedere con i dati reali)
 1. **Foto del foglio turni → importazione** (OCR sul telefono, nessun invio): per chi riceve i turni variabili su carta o PDF. È il punto più faticoso di chi non ha un ciclo.
 2. **Conti per la busta paga e controlli sui riposi**: ore notturne, festive e domeniche del mese (c'è già il mese e i festivi); avviso di «meno di 11 ore tra due turni» e «24 ore di riposo settimanale» secondo la normativa italiana. Da validare con un esperto prima di scrivere cifre.
