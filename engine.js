@@ -209,6 +209,13 @@ function block(off){
   return {c, name:d.n, start:d.s, end:d.e, rest:false, tipo};
 }
 
+// «r» riposo, «n» notte (il turno tocca il minimo corporeo), «l» lavoro: lo stesso che dice plan().b.rest / .night,
+// ma dal solo blocco del giorno, senza simulare il sonno. Per chi deve classificare molti giorni (widget).
+function tipoDelGiorno(off){
+  const b = block(off);
+  return b.rest ? "r" : spansNight(b) ? "n" : "l";
+}
+
 // Come si chiama un giorno, per elenchi e notifiche: "?" se non si sa.
 function etichetta(off){
   const c = codeAt(off);
@@ -1073,7 +1080,7 @@ function buildIcs(days){
 
   normalizza();
   return {
-    state, plan, buildIcs, buildCouple, buildEvents, buildCoupleEvents, codeAt, block, giornoA, etichetta,
+    state, plan, buildIcs, buildCouple, buildEvents, buildCoupleEvents, codeAt, block, giornoA, etichetta, tipoDelGiorno,
     sharedDays, freeOverlap, asPartner,
     setIcs(o){ Object.assign(ICS, o||{}); return ICS; },
     // Esposti anche questi: prima privati alla closure, ma index.html (che

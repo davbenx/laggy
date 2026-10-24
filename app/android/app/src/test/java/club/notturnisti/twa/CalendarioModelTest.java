@@ -39,15 +39,63 @@ public class CalendarioModelTest {
 
     @Test public void dateEMesi() throws Exception {
         CalendarioModel m = prova("2026-10-19", 0, 0);       // lunedì 19 ottobre
-        assertEquals(6, m.settimane());
+        assertEquals(6, m.settimane());   // la prova usa 42 giorni: le settimane sono quelle dei dati
         assertArrayEquals(new int[]{ 2026, 10, 19 }, m.data(0));
         assertArrayEquals("dopo il cambio d'ora del 25", new int[]{ 2026, 10, 26 }, m.data(7));
         assertArrayEquals("cambio di mese", new int[]{ 2026, 11, 1 }, m.data(13));
         assertEquals(5, m.indice(2026, 10, 24)); assertEquals(6, m.indice(2026, 10, 25)); assertEquals(-1, m.indice(2026, 10, 18)); assertEquals(-1, m.indice(2027, 1, 1));
-        assertEquals("Ottobre", m.etichettaMese(0, 1));
-        assertEquals("Ottobre – Novembre", m.etichettaMese(0, 3));
+        assertEquals("Ottobre", m.titolo(0, 2026));
+        assertEquals("settimana 26 ott – 1 nov: il giovedì 29 è di ottobre", "Ottobre", m.titolo(1, 2026));
+        assertEquals("settimana 2–8 nov", "Novembre", m.titolo(2, 2026));
+        assertEquals("un altro anno lo dice", "Novembre 2026", m.titolo(2, 2027));
         assertArrayEquals("cambio d'anno", new int[]{ 2027, 1, 1 }, prova("2026-12-28", 0, 0).data(4));
-        assertEquals("Dicembre – Gennaio", prova("2026-12-28", 0, 0).etichettaMese(0, 2));
+        assertEquals("settimana 28 dic – 3 gen: il giovedì 31 è di dicembre", "Dicembre", prova("2026-12-28", 0, 0).titolo(0, 2026));
+        assertEquals("settimana 4–10 gen", "Gennaio 2027", prova("2026-12-28", 0, 0).titolo(1, 2026));
+        assertArrayEquals(new int[]{ 2026, 10 }, m.meseDellaRiga(1));
+    }
+
+    @Test public void riposoInComune() throws Exception {
+        CalendarioModel m = CalendarioModel.leggi(new JSONObject("{\"da\":\"2026-10-19\",\"io\":[\"R:r\",\"R:r\",\"M:l\",\"Fe:r\",\"?:?\"],\"p\":[{\"n\":\"Anna\",\"g\":[\"R:r\",\"M:l\",\"R:r\",\"R:r\",\"R:r\"]}]}"));
+        assertTrue("tutti e due a riposo", m.riposoInComune(0, 0));
+        assertFalse("lei lavora", m.riposoInComune(0, 1));
+        assertFalse("io lavoro", m.riposoInComune(0, 2));
+        assertTrue("le ferie sono riposo", m.riposoInComune(0, 3));
+        assertFalse("giorno da impostare: non si sa", m.riposoInComune(0, 4));
+        assertFalse("oltre i dati", m.riposoInComune(0, 99));
+        assertFalse("persona che non c'è", m.riposoInComune(3, 0));
+    }
+
+    // 20 settimane: la quinta (indice 4) è quella di oggi, quattro prima e quindici dopo; si vedono 4 righe
+    @Test public void primaRigaEPagine() {
+        int oggi = 4, sett = 20, righe = 4;
+        assertEquals("senza spostamento: la settimana di oggi", 4, CalendarioModel.primaRiga(oggi, 0, righe, sett));
+        assertEquals(2, CalendarioModel.primaRiga(oggi, -2, righe, sett));
+        assertEquals("non prima dei dati", 0, CalendarioModel.primaRiga(oggi, -9, righe, sett));
+        assertEquals("non oltre i dati: l'ultima pagina piena", 16, CalendarioModel.primaRiga(oggi, 99, righe, sett));
+        assertEquals("dati che non contengono oggi: dalla prima", 0, CalendarioModel.primaRiga(-1, 0, righe, sett));
+        assertEquals("pochi dati: mai negativa", 0, CalendarioModel.primaRiga(0, 3, 5, 3));
+
+        // › : una pagina avanti, cioè 4 settimane → riga 8, che è +4 da oggi
+        int sp = CalendarioModel.paginaDopo(oggi, 0, righe, sett, 1);
+        assertEquals(4, sp); assertEquals(8, CalendarioModel.primaRiga(oggi, sp, righe, sett));
+        // ‹ da lì torna a oggi; un'altra indietro arriva in cima (riga 0) e si ferma
+        sp = CalendarioModel.paginaDopo(oggi, sp, righe, sett, -1);
+        assertEquals(0, sp);
+        sp = CalendarioModel.paginaDopo(oggi, sp, righe, sett, -1);
+        assertEquals(0, CalendarioModel.primaRiga(oggi, sp, righe, sett));
+        sp = CalendarioModel.paginaDopo(oggi, sp, righe, sett, -1);
+        assertEquals("in cima resta in cima", 0, CalendarioModel.primaRiga(oggi, sp, righe, sett));
+        // › fino in fondo: l'ultima pagina è piena e non va oltre
+        sp = 0; for (int k = 0; k < 10; k++) sp = CalendarioModel.paginaDopo(oggi, sp, righe, sett, 1);
+        assertEquals(16, CalendarioModel.primaRiga(oggi, sp, righe, sett));
+        assertEquals("e si torna indietro da dove si è davvero, non dal valore grezzo", 12,
+            CalendarioModel.primaRiga(oggi, CalendarioModel.paginaDopo(oggi, sp, righe, sett, -1), righe, sett));
+    }
+
+    @Test public void spostamentoVaSoloPerIlGiornoInCuiSiFa() {
+        assertEquals(4, CalendarioModel.spostamentoValido(4, "2026-10-25", "2026-10-25"));
+        assertEquals("il giorno dopo si riparte da oggi", 0, CalendarioModel.spostamentoValido(4, "2026-10-25", "2026-10-26"));
+        assertEquals("mai salvato", 0, CalendarioModel.spostamentoValido(4, "", "2026-10-25"));
     }
 
     @Test public void personaScelta() throws Exception {

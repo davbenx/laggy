@@ -7235,6 +7235,7 @@ async function impostaCoppiaNativa(on){
 // Widget Android: le prossime 48 ore del piano, già calcolate. Si aggiorna a
 // ogni cambio, a ogni apertura e a ogni ritorno nell'app; da lì il widget
 // si ridisegna da solo al prossimo cambio di attività.
+const SETT_WIDGET_PRIMA=4, SETT_WIDGET=20;   // settimane del calendario del widget: quante prima di questa, quante in tutto
 function ntWidget(){
   if(!platform.widget.available) return;
   if(!state.turniConfigurati){ platform.widget.publish([]); return; }   // niente piano di esempio sul widget
@@ -7247,25 +7248,24 @@ function ntWidget(){
   const turno=tn ? {s:+tn.start, e:+tn.end, t:tn.title} : null;
   platform.widget.publish(voci, [], {turno, diario:diarioWidget(), mese:meseWidget()});
 }
-// Il calendario del widget: da lunedì (della settimana di oggi) per 42 giorni, la mia sigla e quella di al massimo quattro
+// Il calendario del widget: da quattro lunedì fa per 20 settimane (il widget si sfoglia a pagine), la mia sigla e quella di al massimo quattro
 // persone (la stellina sempre dentro). Sigle e tipi («n» notte, «l» lavoro, «r» riposo) arrivano dal motore; il widget le mostra
 // e basta. `sel` = la stellina fra quelle pubblicate, `star` la identifica: se nell'app cambia, il widget riparte da lei.
 function meseWidget(){
   const f=state.focus;
   try{
-    const oggi=giornoVero(), lun=day(oggi, -((oggi.getDay()+6)%7)), N=42;
+    const oggi=giornoVero(), lun=day(oggi, -((oggi.getDay()+6)%7) - 7*SETT_WIDGET_PRIMA), N=7*SETT_WIDGET;
     const tutte=tuttePersone(), star=Math.min(Math.max(+state.personaGlance||0,0),tutte.length-1);
     const scelte=tutte.map((p,i)=>i).sort((x,y)=>(x===star?-1:y===star?1:x-y)).slice(0,4).sort((x,y)=>x-y);
-    const tipoDi=P=>P.b.rest?"r":P.night?"n":"l";
     const io=[], p=scelte.map(i=>({n:tutte[i].name||"Persona "+(i+1), g:[]}));
     for(let o=0;o<N;o++){
       const d=day(lun,o); state.focus=d;
       let c="?"; try{ c=NT.codeAt(0); }catch(e){}
-      const gs=state.giorni[iso(d)]||{}, P=c==="?"?null:NT_planSafe(d);
-      io.push((SIGLA_SPECIALE[gs.t]||c)+":"+(P?tipoDi(P):"?"));
+      const gs=state.giorni[iso(d)]||{};
+      io.push((SIGLA_SPECIALE[gs.t]||c)+":"+(c==="?"?"?":NT.tipoDelGiorno(0)));
       scelte.forEach((pi,k)=>{
         let s="?:?";
-        asPartner(()=>{ const pc=NT.codeAt(0); if(pc!=="?"){ const Q=NT.plan(); s=pc+":"+tipoDi(Q); } }, tutte[pi]);
+        asPartner(()=>{ const pc=NT.codeAt(0); if(pc!=="?") s=pc+":"+NT.tipoDelGiorno(0); }, tutte[pi]);
         p[k].g.push(s);
       });
     }

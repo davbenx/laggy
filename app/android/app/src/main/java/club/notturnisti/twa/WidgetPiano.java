@@ -7,7 +7,7 @@ package club.notturnisti.twa;
  * hanno peso), quindi non restano vuoti. Misure in dp ricavate dall'anteprima su computer (tools/anteprima-widget), non a occhio; senza Android: si prova sulla JVM.
  */
 final class WidgetPiano {
-    static final int MARGINI = 28, ADESSO = 46, BARRA = 10, PULSANTE = 50, PRIMA_VOCE = 30, VOCE = 24, TESTA_CAL = 50, RIGA = 44, RIGA_PERSONA = 62;
+    static final int MARGINI = 28, ADESSO = 46, BARRA = 10, PULSANTE = 50, PRIMA_VOCE = 30, VOCE = 24, TESTA_CAL = 54, RIGA = 44, RIGA_PERSONA = 62;
     /** I launcher riportano un'altezza un po' più bassa del vero (15-25% misurato): piccolo margine. */
     static final float ALTEZZA_VERA = 1.05f;
 

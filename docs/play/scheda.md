@@ -66,15 +66,12 @@ Notturnisti dà indicazioni generali di benessere e organizzazione basate sulla 
 
 Un progetto indipendente, nato da chi i turni li fa. Segnalazioni e idee: dall'app, Impostazioni → Segnala cosa non torna.
 
-## Note di versione 1.3.0 (max 500)
+## Note di versione 1.3.2 (max 500)
 Novità:
-• Widget: più è alto, più settimane mostra, con i turni di una persona accanto ai tuoi; sveglia e voto dal widget
-• Momenti migliori per pensare, muoverti e allenarti; scegli cosa vedere nel piano
-• Sveglia nell'Orologio con un tocco; voto del sonno dal widget
-• Persone: modifica senza rifare, orari propri; popup delle novità
-• Riepilogo del mese o dei 12 mesi da condividere
-• Festivi del contratto; ferie a casa con una persona
-• Su un telefono nuovo ritrovi i tuoi turni dal backup
+• Widget: ‹ › per sfogliare il calendario a pagine, il titolo riporta a oggi
+• Widget: il mese si legge meglio (titolo, numeri di un altro mese in blu, 1° del mese in grassetto), oggi con una cornice
+• Widget: un puntino segna i giorni in cui riposate tu e la persona che segui; i turni si leggono prima dei riposi
+• Turni: le linee delle ore tornano allineate quando segui una persona
 
 ## Categoria, tag e contatti
 - Categoria: Salute e fitness

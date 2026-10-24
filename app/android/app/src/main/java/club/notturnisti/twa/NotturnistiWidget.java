@@ -29,6 +29,7 @@ public class NotturnistiWidget extends AppWidgetProvider {
     static final String AZIONE_TICK = "club.notturnisti.twa.WIDGET_TICK";
     static final String AZIONE_DIARIO = "club.notturnisti.twa.WIDGET_DIARIO";
     static final String AZIONE_PERSONA = "club.notturnisti.twa.WIDGET_PERSONA";
+    static final String AZIONE_PAGINA = "club.notturnisti.twa.WIDGET_PAGINA";
     static final String KEY_RISPOSTE = "risposte";
 
     @Override
@@ -41,7 +42,7 @@ public class NotturnistiWidget extends AppWidgetProvider {
     @Override
     public void onDeleted(Context ctx, int[] ids) {
         SharedPreferences.Editor ed = prefs(ctx).edit();
-        for (int id : ids) ed.remove("pers_" + id).remove("star_" + id);
+        for (int id : ids) ed.remove("pers_" + id).remove("star_" + id).remove("off_" + id).remove("offd_" + id);
         ed.apply();
     }
 
@@ -52,6 +53,7 @@ public class NotturnistiWidget extends AppWidgetProvider {
         if (AZIONE_TICK.equals(a)) aggiornaTutti(ctx);
         if (AZIONE_DIARIO.equals(a)) { salvaRisposta(ctx, intent); aggiornaTutti(ctx); }
         if (AZIONE_PERSONA.equals(a)) { cambiaPersona(ctx, intent.getIntExtra("id", 0)); aggiornaTutti(ctx); }
+        if (AZIONE_PAGINA.equals(a)) { vaiAPagina(ctx, intent.getIntExtra("id", 0), intent.getIntExtra("off", 0)); aggiornaTutti(ctx); }
     }
 
     /** Solo per le prove sulla JVM (anteprima dei layout): senza sistema Android non si creano PendingIntent. */
@@ -103,6 +105,11 @@ public class NotturnistiWidget extends AppWidgetProvider {
         } catch (Exception ignored) { }
     }
 
+    // ‹ › e titolo del calendario: lo spostamento (in settimane da oggi) vale per questo giorno; domani si riparte da oggi.
+    static void vaiAPagina(Context ctx, int id, int spostamento) {
+        prefs(ctx).edit().putInt("off_" + id, spostamento).putString("offd_" + id, CalendarioWidget.giornoIso(System.currentTimeMillis())).apply();
+    }
+
     static int icona(String k) {
         switch (k == null ? "" : k) {
             case "sonno": return R.drawable.ic_w_sonno;
@@ -129,9 +136,9 @@ public class NotturnistiWidget extends AppWidgetProvider {
     }
 
     /** Le viste del widget per questo stato e questa altezza (in dp). Senza effetti: si può provare a parte. */
-    static RemoteViews costruisci(Context ctx, WidgetStato st, CalendarioModel cal, int altezzaDp, long ora, int persona, int idWidget) {
+    static RemoteViews costruisci(Context ctx, WidgetStato st, CalendarioModel cal, int altezzaDp, long ora, int persona, int idWidget, int spostamento) {
         RemoteViews rv = new RemoteViews(ctx.getPackageName(), R.layout.widget_piano);
-        int righeCal = CalendarioWidget.righeDisponibili(cal, ora);
+        int righeCal = CalendarioWidget.righeDisponibili(cal);
         WidgetPiano p = WidgetPiano.calcola(altezzaDp, st.progresso >= 0, st.azione != WidgetStato.Azione.NESSUNA, st.eventi.size(), persona >= 0, righeCal);
 
         // ───── adesso ─────
@@ -164,7 +171,7 @@ public class NotturnistiWidget extends AppWidgetProvider {
         }
 
         // ───── calendario ─────
-        if (p.calendario) CalendarioWidget.riempi(ctx, rv, cal, p.righe, persona, ora, idWidget);
+        if (p.calendario) CalendarioWidget.riempi(ctx, rv, cal, p.righe, persona, ora, idWidget, spostamento);
         else rv.setViewVisibility(R.id.w_cal, View.GONE);
         return rv;
     }
@@ -234,9 +241,10 @@ public class NotturnistiWidget extends AppWidgetProvider {
                 persona = cal.personaAttiva(sp.getInt("pers_" + id, CalendarioModel.SEGUI_STELLA), vista);
                 if (!cal.stella.equals(vista)) sp.edit().putString("star_" + id, cal.stella).putInt("pers_" + id, CalendarioModel.SEGUI_STELLA).apply();
             }
+            int spostamento = CalendarioModel.spostamentoValido(sp.getInt("off_" + id, 0), sp.getString("offd_" + id, ""), CalendarioWidget.giornoIso(ora));
             int h = altezza(mgr, id);
-            mgr.updateAppWidget(id, costruisci(ctx, st, cal, h, ora, persona, id));
-            if (cal != null && WidgetPiano.calcola(h, st.progresso >= 0, st.azione != WidgetStato.Azione.NESSUNA, st.eventi.size(), persona >= 0, CalendarioWidget.righeDisponibili(cal, ora)).calendario) haCalendario = true;
+            mgr.updateAppWidget(id, costruisci(ctx, st, cal, h, ora, persona, id, spostamento));
+            if (cal != null && WidgetPiano.calcola(h, st.progresso >= 0, st.azione != WidgetStato.Azione.NESSUNA, st.eventi.size(), persona >= 0, CalendarioWidget.righeDisponibili(cal)).calendario) haCalendario = true;
         }
         if (haCalendario) {   // a mezzanotte «oggi» cambia
             Calendar m = Calendar.getInstance(); m.add(Calendar.DAY_OF_YEAR, 1);

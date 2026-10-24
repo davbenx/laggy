@@ -8,7 +8,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
- * Il calendario del widget, già calcolato dalla pagina: da un lunedì per 42 giorni, la tua sigla e il tipo
+ * Il calendario del widget, già calcolato dalla pagina: da un lunedì per 20 settimane (quattro prima di quella di oggi,
+ * il resto dopo: il widget si sfoglia a pagine), la tua sigla e il tipo
  * («n» notte, «l» lavoro, «r» riposo, «?» da impostare) e quelli delle persone che segui (al massimo quattro, con
  * la stellina dell'app sempre dentro). Qui nessun calcolo di turni, solo lettura, date e scelta della persona.
  * Senza Android: si prova con test sulla JVM.
@@ -95,11 +96,43 @@ final class CalendarioModel {
         return i >= 0 && i < giorni() ? i : -1;
     }
 
-    /** «Ottobre» o «Ottobre – Novembre»: i mesi che le righe `da`…`da+righe-1` toccano. */
-    String etichettaMese(int rigaDa, int righe) {
-        int[] p = data(rigaDa * 7), u = data((rigaDa + righe) * 7 - 1);
-        String x = MESI[p[1] - 1];
-        return p[1] == u[1] ? x : x + " – " + MESI[u[1] - 1];
+    /** Mese (anno, 1-12) della settimana nella riga: quello del suo giovedì, come per le settimane ISO. */
+    int[] meseDellaRiga(int riga) { int[] d = data(riga * 7 + 3); return new int[]{ d[0], d[1] }; }
+
+    /** «Ottobre», o «Gennaio 2027» se non è l'anno di oggi: il titolo sopra il calendario. */
+    String titolo(int riga, int annoOggi) {
+        int[] m = meseDellaRiga(riga);
+        return MESI[m[1] - 1] + (m[0] != annoOggi ? " " + m[0] : "");
+    }
+
+    /** I due giorni (la tua cella e quella della persona) sono entrambi di riposo: tempo libero in comune. */
+    boolean riposoInComune(int persona, int i) {
+        Cella a = mio(i), b = di(persona, i);
+        return a != null && b != null && a.tipo == 'r' && b.tipo == 'r';
+    }
+
+    /**
+     * Prima riga mostrata: la settimana di oggi (la prima se i dati non la contengono) spostata di `spostamento`
+     * settimane, senza uscire dai dati (con `righe` righe in vista).
+     */
+    static int primaRiga(int rigaOggi, int spostamento, int righe, int settimane) {
+        int massimo = Math.max(0, settimane - righe);
+        return Math.max(0, Math.min(massimo, Math.max(rigaOggi, 0) + spostamento));
+    }
+
+    /**
+     * Lo spostamento dopo un tocco su ‹ (-1) o › (+1): una pagina intera (tante settimane quante se ne vedono) a
+     * partire da quella che si vede ora, ferma ai bordi dei dati.
+     */
+    static int paginaDopo(int rigaOggi, int spostamento, int righe, int settimane, int verso) {
+        int attuale = primaRiga(rigaOggi, spostamento, righe, settimane);
+        int nuova = Math.max(0, Math.min(Math.max(0, settimane - righe), attuale + verso * righe));
+        return nuova - Math.max(rigaOggi, 0);
+    }
+
+    /** Lo spostamento salvato vale solo per il giorno in cui è stato fatto: il giorno dopo si riparte da oggi. */
+    static int spostamentoValido(int spostamento, String giornoSalvato, String oggi) {
+        return oggi != null && oggi.equals(giornoSalvato) ? spostamento : 0;
     }
 
     /**

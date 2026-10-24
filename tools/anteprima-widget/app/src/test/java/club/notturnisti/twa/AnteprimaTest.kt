@@ -25,13 +25,14 @@ class AnteprimaTest {
     private fun calendario(persone: Boolean): JSONObject {
         val pat = "NNNRRRPPPRRMMMR"; val mie = JSONArray(); val sue = JSONArray()
         fun cella(c: Char) = "$c:" + (if (c == 'N') "n" else if (c == 'R') "r" else "l")
-        for (i in 0 until 42) { mie.put(if (i == 24) "Fe:r" else cella(pat[(i + 4) % pat.length])); sue.put(cella(pat[(i + 6) % pat.length])) }
-        val o = JSONObject().put("da", "2026-10-19").put("io", mie).put("sel", 0).put("star", "0|Anna")
+        // 20 settimane da lunedì 21 settembre (quattro prima di quella di oggi), come le pubblica la pagina
+        for (i in 0 until 140) { mie.put(if (i == 52) "Fe:r" else cella(pat[(i + 4 - 28 + 150) % pat.length])); sue.put(cella(pat[(i + 6 - 28 + 150) % pat.length])) }
+        val o = JSONObject().put("da", "2026-09-21").put("io", mie).put("sel", 0).put("star", "0|Anna")
         o.put("p", if (persone) JSONArray().put(JSONObject().put("n", "Anna").put("g", sue)) else JSONArray())
         return o
     }
 
-    private fun scena(p: Paparazzi, nome: String, hDp: Int, ora: Long, voci: List<JSONObject>, diario: JSONObject? = null, persone: Boolean = true, persona: Int = if (persone) 0 else -1) {
+    private fun scena(p: Paparazzi, nome: String, hDp: Int, ora: Long, voci: List<JSONObject>, diario: JSONObject? = null, persone: Boolean = true, persona: Int = if (persone) 0 else -1, spostamento: Int = 0) {
         TimeZone.setDefault(TimeZone.getTimeZone("Europe/Rome"))
         NotturnistiWidget.senzaIntent = true
         val v = JSONArray(); voci.forEach { v.put(it) }
@@ -42,7 +43,7 @@ class AnteprimaTest {
         val m = CalendarioModel.leggi(r.getJSONObject("mese"))
         val ctx = p.context
         val d = ctx.resources.displayMetrics.density
-        val rv = NotturnistiWidget.costruisci(ctx, st, m, hDp, ora, persona, 1)
+        val rv = NotturnistiWidget.costruisci(ctx, st, m, hDp, ora, persona, 1, spostamento)
         val w: View = rv.apply(ctx, FrameLayout(ctx))
         val box = FrameLayout(ctx); box.setBackgroundColor(0xFF2A6A7A.toInt()); box.setPadding(24, 24, 24, 24)
         box.addView(w, FrameLayout.LayoutParams((330 * d).toInt(), (hDp * d).toInt()))
@@ -67,6 +68,21 @@ class AnteprimaTest {
     @Test fun pisolino_in_corso() = tutte("c_pisolino", t(0, 19, 20), pomeriggio())
     @Test fun voto_del_sonno() = tutte("d_voto", t(0, 9, 0), sera(), diario())
     @Test fun senza_persone() = tutte("e_solo_io", t(0, 20, 43), sera(), null, false)
+
+    // ‹ › del calendario: una pagina avanti (+4 settimane da oggi), una indietro fino in cima (-4), l'ultima pagina dei dati
+    @Test fun pagine_del_calendario() {
+        for (tema in listOf("chiaro", "scuro")) {
+            paparazzi.unsafeUpdateConfig(
+                deviceConfig = if (tema == "scuro") DeviceConfig.PIXEL_5.copy(nightMode = NightMode.NIGHT) else DeviceConfig.PIXEL_5,
+                theme = if (tema == "scuro") "android:Theme.Material.NoActionBar" else "android:Theme.Material.Light.NoActionBar")
+            for (h in listOf(330, 460)) {
+                scena(paparazzi, "h_pagina_avanti_${tema}_h$h", h, t(0, 20, 43), sera(), spostamento = 4)
+                scena(paparazzi, "i_pagina_indietro_${tema}_h$h", h, t(0, 20, 43), sera(), spostamento = -4)
+                scena(paparazzi, "j_pagina_fine_${tema}_h$h", h, t(0, 20, 43), sera(), spostamento = 99)
+                scena(paparazzi, "k_pagina_avanti_solo_io_${tema}_h$h", h, t(0, 20, 43), sera(), persone = false, spostamento = 4)
+            }
+        }
+    }
 
     // persona nascosta col tasto, piano esaurito, più di una riga di voci in arrivo
     @Test fun casi_particolari() {
