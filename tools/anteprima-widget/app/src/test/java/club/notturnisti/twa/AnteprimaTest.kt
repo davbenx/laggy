@@ -8,6 +8,7 @@ import com.android.ide.common.rendering.api.SessionParams
 import com.android.resources.NightMode
 import org.json.JSONArray
 import org.json.JSONObject
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import java.util.Calendar
@@ -15,8 +16,8 @@ import java.util.TimeZone
 
 /** Il widget com'è davvero (stesse risorse, stessa costruzione delle viste), nei momenti e alle altezze che contano. */
 class AnteprimaTest {
-    @get:Rule val chiaro = Paparazzi(deviceConfig = DeviceConfig.PIXEL_5, theme = "android:Theme.Material.Light.NoActionBar", renderingMode = SessionParams.RenderingMode.SHRINK)
-    @get:Rule val scuro = Paparazzi(deviceConfig = DeviceConfig.PIXEL_5.copy(nightMode = NightMode.NIGHT), theme = "android:Theme.Material.NoActionBar", renderingMode = SessionParams.RenderingMode.SHRINK)
+    @Before fun fuso() { TimeZone.setDefault(TimeZone.getTimeZone("Europe/Rome")) }
+    @get:Rule val paparazzi = Paparazzi(deviceConfig = DeviceConfig.PIXEL_5, theme = "android:Theme.Material.Light.NoActionBar", renderingMode = SessionParams.RenderingMode.SHRINK)
 
     private fun t(g: Int, h: Int, m: Int): Long { val c = Calendar.getInstance(); c.clear(); c.set(2026, Calendar.OCTOBER, 24 + g, h, m, 0); return c.timeInMillis }
     private fun voce(s: Long, e: Long, titolo: String, k: String) = JSONObject().put("s", s).put("e", e).put("t", titolo).put("k", k)
@@ -53,8 +54,12 @@ class AnteprimaTest {
     private fun diario() = JSONObject().put("d", "2026-10-24").put("bed", "23:30").put("wake", "07:10").put("da", t(0, 7, 10)).put("a", t(0, 21, 10))
 
     private fun tutte(nome: String, ora: Long, voci: List<JSONObject>, diario: JSONObject? = null, persone: Boolean = true) {
-        for ((tema, p) in listOf("chiaro" to chiaro, "scuro" to scuro))
-            for (h in listOf(80, 130, 190, 256, 330, 460, 560)) scena(p, "${nome}_${tema}_h$h", h, ora, voci, diario, persone)
+        for (tema in listOf("chiaro", "scuro")) {
+            paparazzi.unsafeUpdateConfig(
+                deviceConfig = if (tema == "scuro") DeviceConfig.PIXEL_5.copy(nightMode = NightMode.NIGHT) else DeviceConfig.PIXEL_5,
+                theme = if (tema == "scuro") "android:Theme.Material.NoActionBar" else "android:Theme.Material.Light.NoActionBar")
+            for (h in listOf(80, 130, 190, 256, 330, 460, 560)) scena(paparazzi, "${nome}_${tema}_h$h", h, ora, voci, diario, persone)
+        }
     }
 
     @Test fun sera_prima_della_notte() = tutte("a_sera", t(0, 20, 43), sera())
@@ -62,4 +67,17 @@ class AnteprimaTest {
     @Test fun pisolino_in_corso() = tutte("c_pisolino", t(0, 19, 20), pomeriggio())
     @Test fun voto_del_sonno() = tutte("d_voto", t(0, 9, 0), sera(), diario())
     @Test fun senza_persone() = tutte("e_solo_io", t(0, 20, 43), sera(), null, false)
+
+    // persona nascosta col tasto, piano esaurito, più di una riga di voci in arrivo
+    @Test fun casi_particolari() {
+        for (tema in listOf("chiaro", "scuro")) {
+            paparazzi.unsafeUpdateConfig(
+                deviceConfig = if (tema == "scuro") DeviceConfig.PIXEL_5.copy(nightMode = NightMode.NIGHT) else DeviceConfig.PIXEL_5,
+                theme = if (tema == "scuro") "android:Theme.Material.NoActionBar" else "android:Theme.Material.Light.NoActionBar")
+            for (h in listOf(130, 330)) {
+                scena(paparazzi, "f_nascosta_${tema}_h$h", h, t(0, 20, 43), sera(), null, true, -1)
+                scena(paparazzi, "g_esaurito_${tema}_h$h", h, t(5, 12, 0), sera(), null, true)
+            }
+        }
+    }
 }
