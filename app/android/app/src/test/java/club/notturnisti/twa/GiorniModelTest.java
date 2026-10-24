@@ -47,9 +47,11 @@ public class GiorniModelTest {
 
     @Test public void righeInBaseAllAltezza() {
         assertEquals("tre righe del launcher: solo la settimana", 0, GiorniModel.righeExtra(240, false, 5));
-        assertEquals(1, GiorniModel.righeExtra(290, false, 5));
-        assertEquals(2, GiorniModel.righeExtra(340, false, 5));
-        assertEquals("con la persona le righe sono più alte", 1, GiorniModel.righeExtra(340, true, 5));
+        assertEquals(1, GiorniModel.righeExtra(270, false, 5));
+        assertEquals(2, GiorniModel.righeExtra(310, false, 5));
+        assertEquals("con la persona le righe sono più alte", 0, GiorniModel.righeExtra(300, true, 5));
+        assertEquals(1, GiorniModel.righeExtra(330, true, 5));
+        assertEquals(2, GiorniModel.righeExtra(400, true, 5));
         assertEquals("mai oltre il massimo", 5, GiorniModel.righeExtra(900, false, 5));
         assertEquals("mai negative", 0, GiorniModel.righeExtra(100, true, 5));
     }

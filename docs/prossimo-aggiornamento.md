@@ -37,7 +37,8 @@ Non so ancora: quali dei tester ha un dispositivo compatibile; quanti giorni di 
 ## Widget: settimane in più, sveglia e voto (1.2.1, da provare sul telefono)
 Un solo widget, più alto = più giorni. 3 righe: «Adesso/Prossimo», le prossime voci e la settimana di sette giorni da oggi. Da 4 righe in su si aggiungono righe di sette giorni (fino a cinque, oltre un mese), di seguito alla settimana.
 - Nella zona delle prossime voci: la mattina, per 14 ore, il voto del sonno e dell'energia; prima di dormire (da 4 ore prima a mezz'ora dopo l'inizio del sonno) «Metti la sveglia alle …» (apre l'Orologio con la sveglia pronta).
-- Con una persona (stellina in «Le tue persone»): sotto la tua sigla quella della persona, in verde; legenda «Sopra tu, sotto Anna».
+- Con una persona (stellina in «Le tue persone»): sotto la tua sigla quella della persona, in verde, anche nella prima settimana (dove c'è anche l'ora a letto); legenda «Sopra tu, sotto Anna».
+- Le due voci sotto «Adesso» sono in ordine di ora. I launcher riportano un'altezza più bassa del vero (15-25% misurato): `ALTEZZA_VERA` la corregge di poco; se un launcher taglia l'ultima riga, abbassarla.
 - Viste vere (`GiorniWidget`, `GiorniModel` con test JVM): seguono tema e testo ingrandito. La prima versione disegnava il mese come immagine e si stirava: tolta.
 - Da guardare sul telefono: righe che si aggiungono all'altezza giusta (soglie in `GiorniModel.righeExtra`), sigle e colori, tocco su un giorno, «Metti la sveglia» (l'Orologio chiede conferma: non si sa se la sveglia c'è già).
 - Tolti rispetto alla bozza: ‹ › sui mesi, cambio persona dal widget, puntino «liberi insieme». Da riprendere solo se servono.

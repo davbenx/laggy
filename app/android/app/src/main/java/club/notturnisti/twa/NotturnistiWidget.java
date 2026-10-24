@@ -72,10 +72,10 @@ public class NotturnistiWidget extends AppWidgetProvider {
     }
 
     static final int[][] CELLE = {
-        { R.id.w_g0, R.id.w_g0_d, R.id.w_g0_c, R.id.w_g0_s }, { R.id.w_g1, R.id.w_g1_d, R.id.w_g1_c, R.id.w_g1_s },
-        { R.id.w_g2, R.id.w_g2_d, R.id.w_g2_c, R.id.w_g2_s }, { R.id.w_g3, R.id.w_g3_d, R.id.w_g3_c, R.id.w_g3_s },
-        { R.id.w_g4, R.id.w_g4_d, R.id.w_g4_c, R.id.w_g4_s }, { R.id.w_g5, R.id.w_g5_d, R.id.w_g5_c, R.id.w_g5_s },
-        { R.id.w_g6, R.id.w_g6_d, R.id.w_g6_c, R.id.w_g6_s } };
+        { R.id.w_g0, R.id.w_g0_d, R.id.w_g0_c, R.id.w_g0_s, R.id.w_g0_p }, { R.id.w_g1, R.id.w_g1_d, R.id.w_g1_c, R.id.w_g1_s, R.id.w_g1_p },
+        { R.id.w_g2, R.id.w_g2_d, R.id.w_g2_c, R.id.w_g2_s, R.id.w_g2_p }, { R.id.w_g3, R.id.w_g3_d, R.id.w_g3_c, R.id.w_g3_s, R.id.w_g3_p },
+        { R.id.w_g4, R.id.w_g4_d, R.id.w_g4_c, R.id.w_g4_s, R.id.w_g4_p }, { R.id.w_g5, R.id.w_g5_d, R.id.w_g5_c, R.id.w_g5_s, R.id.w_g5_p },
+        { R.id.w_g6, R.id.w_g6_d, R.id.w_g6_c, R.id.w_g6_s, R.id.w_g6_p } };
 
     // Icona per tipo di voce (campo "k", lo stesso "tipo" degli eventi del calendario).
     static int icona(String k) {
@@ -214,21 +214,27 @@ public class NotturnistiWidget extends AppWidgetProvider {
                     adesso = "Piano da aggiornare";
                     sotto = "apri l'app per i prossimi giorni";
                 }
-                // Le righe sotto: prima il prossimo turno (sempre, anche fra giorni),
-                // poi le voci in arrivo che non sono già in alto.
+                // Le righe sotto: il prossimo turno (sempre, anche fra giorni) e le voci in arrivo che non sono già in alto,
+                // poi in ordine di ora (il turno delle 22 non sta sopra il caffè delle 19).
                 int n = 0;
+                long[] pS = new long[2];
                 boolean turnoInAlto = eroe != null && turno != null && eroe.optString("k", "").startsWith("turno") && eroe.getLong("s") == turno.getLong("s");
                 if (turno != null && !turnoInAlto) {
-                    pOra[n] = quando(turno.getLong("s"), ora); pT[n] = turno.optString("t", "Turno"); pIc[n] = R.drawable.ic_w_turno; n++;
+                    pS[n] = turno.getLong("s"); pOra[n] = quando(pS[n], ora); pT[n] = turno.optString("t", "Turno"); pIc[n] = R.drawable.ic_w_turno; n++;
                 }
                 for (int i = 0; i < v.length() && n < 2; i++) {
                     JSONObject x = v.getJSONObject(i);
                     long s = x.getLong("s"); String k = x.optString("k", "");
                     if (s <= ora || x == eroe || k.startsWith("turno")) continue;
                     if (corrente != null && corrente.optString("k", "").startsWith("turno") && k.startsWith("caffe") && s < corrente.getLong("e")) continue;
-                    pOra[n] = hhmm(s, ora);
+                    pS[n] = s; pOra[n] = hhmm(s, ora);
                     pT[n] = k.startsWith("sonno") ? x.getString("t") + " · sveglia " + hhmm(x.getLong("e"), ora) : x.getString("t");
                     pIc[n] = icona(k); n++;
+                }
+                if (n == 2 && pS[1] < pS[0]) {
+                    String o = pOra[0], t = pT[0]; int ic = pIc[0];
+                    pOra[0] = pOra[1]; pT[0] = pT[1]; pIc[0] = pIc[1];
+                    pOra[1] = o; pT[1] = t; pIc[1] = ic;
                 }
                 // Diario: dalla sveglia per 14 ore, finché non c'è risposta (nell'app o qui).
                 JSONObject d = radice.optJSONObject("diario");
@@ -333,6 +339,7 @@ public class NotturnistiWidget extends AppWidgetProvider {
             }
 
             boolean sett = giorni != null && giorni.length() > 0 && h >= 160;
+            GiorniModel persone = sett && mese != null ? GiorniModel.leggi(mese) : null;
             rv.setViewVisibility(R.id.w_settimana, sett ? View.VISIBLE : View.GONE);
             if (sett) {
                 for (int i = 0; i < CELLE.length; i++) {
@@ -344,6 +351,11 @@ public class NotturnistiWidget extends AppWidgetProvider {
                     rv.setTextViewText(CELLE[i][1], g.optString("g"));
                     rv.setTextViewText(CELLE[i][2], g.optString("c"));
                     rv.setTextViewText(CELLE[i][3], g.optString("s"));
+                    // la persona con la stellina, sotto la tua sigla: come nelle righe qui sotto
+                    GiorniModel.Cella sua = persone == null ? null : persone.sua(i);
+                    boolean conPersona = persone != null && persone.persona != null;
+                    rv.setViewVisibility(CELLE[i][4], conPersona ? View.VISIBLE : View.GONE);
+                    if (conPersona) GiorniWidget.pillolaPersona(ctx, rv, CELLE[i][4], sua);
                     String tipo = g.optString("t");
                     rv.setInt(CELLE[i][2], "setBackgroundResource", "notte".equals(tipo) ? R.drawable.widget_cella_notte
                         : "lavoro".equals(tipo) ? R.drawable.widget_cella_lavoro : R.drawable.widget_cella_riposo);
