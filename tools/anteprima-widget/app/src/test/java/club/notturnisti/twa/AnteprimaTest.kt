@@ -15,8 +15,7 @@ import java.util.TimeZone
 
 /** Il widget com'è davvero (stesse risorse, stessa costruzione delle viste), nei momenti e alle altezze che contano. */
 class AnteprimaTest {
-    @get:Rule val chiaro = Paparazzi(deviceConfig = DeviceConfig.PIXEL_5, theme = "android:Theme.Material.Light.NoActionBar", renderingMode = SessionParams.RenderingMode.SHRINK)
-    @get:Rule val scuro = Paparazzi(deviceConfig = DeviceConfig.PIXEL_5.copy(nightMode = NightMode.NIGHT), theme = "android:Theme.Material.NoActionBar", renderingMode = SessionParams.RenderingMode.SHRINK)
+    @get:Rule val paparazzi = Paparazzi(deviceConfig = DeviceConfig.PIXEL_5, theme = "android:Theme.Material.Light.NoActionBar", renderingMode = SessionParams.RenderingMode.SHRINK)
 
     private fun t(g: Int, h: Int, m: Int): Long { val c = Calendar.getInstance(); c.clear(); c.set(2026, Calendar.OCTOBER, 24 + g, h, m, 0); return c.timeInMillis }
     private fun voce(s: Long, e: Long, titolo: String, k: String) = JSONObject().put("s", s).put("e", e).put("t", titolo).put("k", k)
@@ -53,8 +52,12 @@ class AnteprimaTest {
     private fun diario() = JSONObject().put("d", "2026-10-24").put("bed", "23:30").put("wake", "07:10").put("da", t(0, 7, 10)).put("a", t(0, 21, 10))
 
     private fun tutte(nome: String, ora: Long, voci: List<JSONObject>, diario: JSONObject? = null, persone: Boolean = true) {
-        for ((tema, p) in listOf("chiaro" to chiaro, "scuro" to scuro))
-            for (h in listOf(80, 130, 190, 256, 330, 460, 560)) scena(p, "${nome}_${tema}_h$h", h, ora, voci, diario, persone)
+        for (tema in listOf("chiaro", "scuro")) {
+            paparazzi.unsafeUpdateConfig(
+                deviceConfig = if (tema == "scuro") DeviceConfig.PIXEL_5.copy(nightMode = NightMode.NIGHT) else DeviceConfig.PIXEL_5,
+                theme = if (tema == "scuro") "android:Theme.Material.NoActionBar" else "android:Theme.Material.Light.NoActionBar")
+            for (h in listOf(80, 130, 190, 256, 330, 460, 560)) scena(paparazzi, "${nome}_${tema}_h$h", h, ora, voci, diario, persone)
+        }
     }
 
     @Test fun sera_prima_della_notte() = tutte("a_sera", t(0, 20, 43), sera())
