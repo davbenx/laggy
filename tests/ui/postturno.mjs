@@ -32,6 +32,23 @@ const stato=p=>p.evaluate(()=>({titolo:document.querySelector("#dateLabel").text
 { const p=await apri("15:00"), s=await stato(p);
   ok(/^Oggi, /.test(s.titolo), "dopo il risveglio: «Oggi» sul giorno nuovo → "+s.titolo);
   await p.context().close(); }
+// 07:38, turno finito alle 06:15, sonno pianificato dalle 07:10: «Adesso» dice di dormire (non «Rientro»), la linea dell'ora
+// sta sotto «Dormi» (già cominciato) e il sonno di stamattina è «Oggi», non «Domani»
+{ const ctx=await b.newContext({locale:"it-IT",viewport:{width:360,height:740}});
+  const ieri=new Date(); ieri.setDate(ieri.getDate()-1);
+  await ctx.addInitScript(a=>{ if(sessionStorage.getItem("x")) return; sessionStorage.setItem("x","1");
+    localStorage.setItem("nt:state",JSON.stringify({turniConfigurati:true,pattern:"NNNRR",anchor:a,shifts:{N:{n:"Notte",s:1320,e:1815}},repeat:true,firstSeenAt:"2026-01-01"}));
+    localStorage.setItem("nt:turniConfigurati","true"); localStorage.setItem("nt:firstPlanBannerChiuso","true"); localStorage.setItem("nt:attivazioneNascosta","true"); }, iso(ieri));
+  const p=await ctx.newPage(); p.on("pageerror",e=>errs.push(e.message));
+  const d=new Date(); d.setHours(7,38,0,0); await p.clock.setFixedTime(d);
+  await p.goto("http://localhost:8765/index.html"); await p.waitForTimeout(1200);
+  const x=await p.evaluate(()=>{ const on=document.querySelector("#ora .ora-card"), righe=[...document.querySelectorAll(".tl, .tl-adesso")];
+    const dormi=righe.find(r=>r.classList.contains("ora"));
+    return {adesso:on?on.innerText.replace(/\s+/g," "):"", linea:righe.findIndex(r=>r.classList.contains("tl-adesso")), iDormi:righe.indexOf(dormi), quando:dormi?(dormi.querySelector(".dwhen")||{}).textContent||"":"?", oraSonno:dormi?dormi.innerText.replace(/\s+/g," ").slice(0,40):""}; });
+  ok(/Dovresti dormire/.test(x.adesso) && !/Rientro dal turno/.test(x.adesso), "07:38, sonno già cominciato: «Adesso» dice di dormire, non «Rientro» → "+x.adesso.slice(0,70));
+  ok(x.linea>=0 && x.iDormi>=0 && x.linea>x.iDormi, "la linea dell'ora sta dopo «Dormi», che è già cominciato ("+x.linea+" > "+x.iDormi+")");
+  ok(x.quando!=="Domani", "il sonno di stamattina non è «Domani» → «"+x.quando+"» "+x.oraSonno);
+  await ctx.close(); }
 // sonno che comincia dopo mezzanotte (letto all'01:00): prima che cominci sei ancora nel giorno di ieri
 { const ctx=await b.newContext({locale:"it-IT",viewport:{width:360,height:740}});
   await ctx.addInitScript(()=>{ if(sessionStorage.getItem("x")) return; sessionStorage.setItem("x","1");
