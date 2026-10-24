@@ -26,6 +26,8 @@ async function apri(st, app, tab="turni"){
   const n=await p.evaluate(()=>({righe:document.querySelectorAll("#cyc .crow").length, cp:document.querySelectorAll("#cyc .crow .cp").length, key:document.querySelector("#cyc .key-pers")?.textContent}));
   ok(n.righe>0 && n.cp===n.righe, "striscia: una sigla della persona per ogni giorno ("+n.cp+"/"+n.righe+")");
   ok(/^Anna in verde/.test(n.key||""), "legenda con il nome della persona → "+n.key);
+  const allinea=()=>p.evaluate(()=>{ const r=document.querySelector("#cyc .crow .crail").getBoundingClientRect(), g=document.querySelector("#cyc .cgrid").getBoundingClientRect(); return Math.abs(r.left-g.left); });
+  { const d=await allinea(); ok(d<1.5, "la griglia delle ore parte dove parte la rotaia, con la colonna della persona (scarto "+d.toFixed(1)+"px)"); }
   const sig=await p.evaluate(()=>[...document.querySelectorAll("#cyc .crow .cp")].map(x=>x.textContent).join(""));
   ok(/^[MPNSR·]+$/.test(sig) && /[MR]/.test(sig), "le sigle sono quelle del suo ciclo → "+sig);
   ok(await p.evaluate(()=>{ const f=document.querySelectorAll("#cyc .crow .cbar.pers").length, l=[...document.querySelectorAll("#cyc .crow .cp")].filter(x=>!x.classList.contains("r")).length; return f>0 && f===l; }), "ogni giorno di lavoro della persona ha il suo filo verde sotto la barra");
@@ -43,6 +45,7 @@ async function apri(st, app, tab="turni"){
 // senza persone nessun cambiamento
 { const p=await apri(ST({people:[]}), false);
   ok(await p.evaluate(()=>!document.querySelector("#cyc .cp") && !document.querySelector("#cyc .key-pers")), "senza persone la striscia resta com'era");
+  { const r=await p.evaluate(()=>{ const a=document.querySelector("#cyc .crow .crail").getBoundingClientRect(), g=document.querySelector("#cyc .cgrid").getBoundingClientRect(); return Math.abs(a.left-g.left); }); ok(r<1.5, "senza persone la griglia resta allineata (scarto "+r.toFixed(1)+"px)"); }
   await p.context().close(); }
 
 // app: la proposta sotto la lista delle persone; si accende con un tocco e poi sparisce
