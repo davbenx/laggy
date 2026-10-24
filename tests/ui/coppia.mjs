@@ -25,9 +25,10 @@ async function apri(st, app, tab="turni"){
 { const p=await apri(ST(), false);
   const n=await p.evaluate(()=>({righe:document.querySelectorAll("#cyc .crow").length, cp:document.querySelectorAll("#cyc .crow .cp").length, key:document.querySelector("#cyc .key-pers")?.textContent}));
   ok(n.righe>0 && n.cp===n.righe, "striscia: una sigla della persona per ogni giorno ("+n.cp+"/"+n.righe+")");
-  ok(n.key==="AAnna", "legenda con il nome della persona → "+n.key);
+  ok(/^Anna in verde/.test(n.key||""), "legenda con il nome della persona → "+n.key);
   const sig=await p.evaluate(()=>[...document.querySelectorAll("#cyc .crow .cp")].map(x=>x.textContent).join(""));
   ok(/^[MPNSR·]+$/.test(sig) && /[MR]/.test(sig), "le sigle sono quelle del suo ciclo → "+sig);
+  ok(await p.evaluate(()=>{ const f=document.querySelectorAll("#cyc .crow .cbar.pers").length, l=[...document.querySelectorAll("#cyc .crow .cp")].filter(x=>!x.classList.contains("r")).length; return f>0 && f===l; }), "ogni giorno di lavoro della persona ha il suo filo verde sotto la barra");
   const allineata=await p.evaluate(()=>{ const r=document.querySelector("#cyc .crow .crail").getBoundingClientRect(), a=document.querySelector("#cyc .caxis .crail").getBoundingClientRect(); return Math.abs(r.left-a.left)<1 && Math.abs(r.width-a.width)<1; });
   ok(allineata, "l'asse delle ore resta allineato alle barre");
   await p.click("[data-cp-toggle]"); await p.waitForTimeout(300);
@@ -37,7 +38,7 @@ async function apri(st, app, tab="turni"){
   await p.context().close(); }
 // la stellina sceglie chi si vede
 { const p=await apri(ST({personaGlance:1}), false);
-  ok(await p.evaluate(()=>document.querySelector("#cyc .key-pers")?.textContent==="BBruno"), "con la stellina su Bruno si vede Bruno");
+  ok(await p.evaluate(()=>document.querySelector("#cyc .key-pers")?.textContent.startsWith("Bruno in verde")), "con la stellina su Bruno si vede Bruno");
   await p.context().close(); }
 // senza persone nessun cambiamento
 { const p=await apri(ST({people:[]}), false);
