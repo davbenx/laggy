@@ -3096,7 +3096,7 @@ function asPartner(fn, person){
   // ecc, come sempre) — con, controlla la sovrapposizione con chiunque altro
   // in elenco, riusando lo stesso meccanismo di scambio invece di duplicarlo.
   const pp = person || {pattern:state.pPattern, shifts:state.pShifts, anchor:state.pAnchor, wake:state.pWake, bed:state.pBed};
-  const p=state.pattern, a=state.anchor, sh=state.shifts, fw=state.freeWake, fb=state.freeBed, rp=state.repeat;
+  const p=state.pattern, a=state.anchor, sh=state.shifts, fw=state.freeWake, fb=state.freeBed, rp=state.repeat, ecc=state.ecc, gg=state.giorni;
   if(!pp.pattern) return null;
   state.pattern=pp.pattern; state.anchor=pp.anchor||a;
   if(pp.shifts) state.shifts=pp.shifts;
@@ -3107,8 +3107,10 @@ function asPartner(fn, person){
   // per la tua sequenza, la sua deve comunque ripetersi, altrimenti
   // "giornata fissa lun-ven" smetterebbe di valere dopo una settimana.
   state.repeat=true;
+  // i cambi e i giorni speciali che hai segnato TU (scambi, ferie, malattia, orari di un giorno) non sono i suoi
+  state.ecc={}; state.giorni={};
   let r=null; try{ r=fn(); }catch(e){}
-  state.pattern=p; state.anchor=a; state.shifts=sh; state.freeWake=fw; state.freeBed=fb; state.repeat=rp;
+  state.pattern=p; state.anchor=a; state.shifts=sh; state.freeWake=fw; state.freeBed=fb; state.repeat=rp; state.ecc=ecc; state.giorni=gg;
   return r;
 }
 // intervalli occupati (turno + sonno) di un giorno, in [0,1440)
