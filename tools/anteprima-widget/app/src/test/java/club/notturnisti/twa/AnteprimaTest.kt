@@ -67,4 +67,17 @@ class AnteprimaTest {
     @Test fun pisolino_in_corso() = tutte("c_pisolino", t(0, 19, 20), pomeriggio())
     @Test fun voto_del_sonno() = tutte("d_voto", t(0, 9, 0), sera(), diario())
     @Test fun senza_persone() = tutte("e_solo_io", t(0, 20, 43), sera(), null, false)
+
+    // persona nascosta col tasto, piano esaurito, più di una riga di voci in arrivo
+    @Test fun casi_particolari() {
+        for (tema in listOf("chiaro", "scuro")) {
+            paparazzi.unsafeUpdateConfig(
+                deviceConfig = if (tema == "scuro") DeviceConfig.PIXEL_5.copy(nightMode = NightMode.NIGHT) else DeviceConfig.PIXEL_5,
+                theme = if (tema == "scuro") "android:Theme.Material.NoActionBar" else "android:Theme.Material.Light.NoActionBar")
+            for (h in listOf(130, 330)) {
+                scena(paparazzi, "f_nascosta_${tema}_h$h", h, t(0, 20, 43), sera(), null, true, -1)
+                scena(paparazzi, "g_esaurito_${tema}_h$h", h, t(5, 12, 0), sera(), null, true)
+            }
+        }
+    }
 }
