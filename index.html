@@ -567,7 +567,7 @@ display:flex;flex-direction:column;align-items:center;justify-content:center;gap
 .sg-g.mio{border-color:var(--blue);border-width:1.5px}
 .sg-g.oggi small{color:var(--blue);font-weight:800}
 .sg-g.rep::after{content:"";position:absolute;top:5px;right:5px;width:6px;height:6px;border-radius:50%;background:var(--orange-fill)}
-.sg-g.ore::before{content:"";position:absolute;bottom:4px;left:50%;margin-left:-6px;width:12px;height:2px;border-radius:2px;background:var(--orange-fill)}
+.sg-g.ore::before{content:"";position:absolute;bottom:4px;left:50%;margin-left:-6px;width:12px;height:2px;border-radius:2px;background:var(--ink)}   /* orari diversi: un trattino scuro, non il puntino arancione della reperibilità */
 .sg-g:disabled{opacity:0;pointer-events:none}
 .sg-legenda{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--dim);margin:10px 0 0}
 .sg-legenda i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:1px}
@@ -1602,7 +1602,7 @@ header b{font-size:23px}
           <option value="day">Giornata, lun-ven 9-18</option>
           <option value="custom">Turni diversi dai miei</option>
         </select>
-        <span class="hint" id="personaModeHint">Stessa sequenza e stessi orari dei tuoi turni — utile quando fate lo stesso tipo di rotazione ma partita in giorni diversi: dimmi solo da quando è partita la sua.</span>
+        <span class="hint" id="personaModeHint">Stessa sequenza e stessi orari dei tuoi di adesso (poi restano suoi: se cambi i tuoi, i suoi non cambiano) — utile quando fate lo stesso tipo di rotazione ma partita in giorni diversi: dimmi solo da quando è partita la sua.</span>
       </div>
       <div id="personaManualFields">
         <div class="q" id="personaSeqBox" hidden>
@@ -1622,6 +1622,7 @@ header b{font-size:23px}
         </div>
         <div class="q">
           <label for="personaBed">Il suo sonno nei giorni liberi</label>
+          <span class="hint" style="margin:0 0 6px">Serve per le ore libere in comune: nei giorni senza turno si toglie il tempo in cui dorme. Se lo lasci vuoto vale il tuo.</span>
           <div style="display:flex;gap:10px;align-items:center">
             <input type="time" id="personaBed" style="max-width:130px">
             <span class="hint" style="margin:0">→</span>
@@ -1632,18 +1633,19 @@ header b{font-size:23px}
 
     </details>
     <button class="btn pri" type="button" id="doConfirmPersona" style="margin-top:10px;width:100%;min-height:46px">Aggiungi</button>
+    <button class="lnk" type="button" id="annullaModificaPersona" hidden style="display:block;margin:8px auto 0">Annulla la modifica</button>
     </div>
   </div>
-  <div id="partnerShare"></div>
   <!-- "Calendario di coppia" era in Più (sparita): è la naturale
        continuazione di QUESTA pagina, non di un cassetto a parte —
        gli stessi riposi in comune, ma nel calendario del telefono di
        entrambi (gratis, come tutto il resto). #piuCal/#piuCalTx: id
        invariati, paid.js li cerca per nome (querySelector("#piuCal")),
-       non serve toccare quel modulo. -->
+       non serve toccare quel modulo. Sta sopra «Condividi»: è una scelta sulle persone, non un extra in fondo. -->
   <div class="piu-cal" id="piuCal" style="margin-top:var(--gap-sezione)">
     <div id="piuCalTx"></div>
   </div>
+  <div id="partnerShare"></div>
 </div>
 
 <button type="button" class="tsec" id="doAndamenti">
@@ -1855,6 +1857,7 @@ header b{font-size:23px}
     </div>
     <span class="eyebrow opz-eb">Scopri</span>
     <div class="opz-gruppo az">
+      <button class="tool tool-1line" id="doNovita" type="button"><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 17v4M17 19h4"/></svg></span><span class="tool-tx"><b>Novità</b></span></button>
       <a class="tool tool-1line" href="https://notturnisti.club/planner" target="_blank" rel="noopener"><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5zM4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg></span><span class="tool-tx"><b>Come si usa</b></span></a>
       <a class="tool tool-1line" href="https://notturnisti.club/chi-siamo/" target="_blank" rel="noopener"><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6M16 4.8a3.5 3.5 0 0 1 0 6.4M18 14c2.2.6 3.5 2.3 3.5 6"/></svg></span><span class="tool-tx"><b>Chi siamo</b></span></a>
       <a class="tool tool-1line" href="https://notturnisti.club" target="_blank" rel="noopener"><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></span><span class="tool-tx"><b>notturnisti.club</b></span></a>
@@ -1885,6 +1888,21 @@ header b{font-size:23px}
     <button type="button" class="qs-reset" id="qsReset" hidden>✕ Torna alla sequenza standard</button>
     <button type="button" class="btn g" id="qsVaiPiano" style="width:100%;min-height:44px;margin-top:6px" hidden>Vedi il piano di questo giorno</button>
     <button type="button" class="lnk" id="qsVaiScambio" style="font-size:12.5px;text-align:center;width:100%;margin-top:2px;padding:10px 0">⇄ Cambio turno: mi conviene? →</button>
+  </div>
+</div>
+
+<!-- Le novità dell'ultimo aggiornamento: una volta sola, mai al primo uso -->
+<div id="novitaModal" class="qs-backdrop" hidden aria-hidden="true">
+  <div class="qs-sheet" role="dialog" aria-modal="true" aria-labelledby="novitaTitolo">
+    <div class="qs-header">
+      <div>
+        <span class="eyebrow" style="display:block" id="novitaData"></span>
+        <b class="qs-title" id="novitaTitolo">Cosa c'è di nuovo</b>
+      </div>
+      <button type="button" class="qs-close" id="novitaClose" aria-label="Chiudi">✕</button>
+    </div>
+    <div id="novitaLista"></div>
+    <button type="button" class="btn pri" id="novitaOk" style="width:100%;min-height:46px">Ok</button>
   </div>
 </div>
 
@@ -6775,7 +6793,9 @@ function renderWizPeopleList(){
     const attiva = state.personaGlance===i;
     return '<div class="diary" style="gap:8px;margin-bottom:6px">'+
       (multi?'<button class="lnk" data-glance-persona="'+i+'" aria-label="Mostrala nella card di Oggi" title="Mostrala nella card di Oggi" style="color:'+(attiva?"var(--orange)":"var(--faint)")+';padding:4px">'+star+'</button>':'')+
-      '<span style="flex:1;font-weight:600">'+esc(nome)+'</span>'+
+      '<span style="flex:1;min-width:0"><b style="font-weight:600;display:block">'+esc(nome)+'</b>'+
+        '<span class="hint" style="display:block;margin:0;font-size:12px">'+esc(riassuntoPersona(per))+'</span></span>'+
+      '<button class="lnk" data-edit-persona="'+i+'">Modifica</button>'+
       '<button class="lnk" data-remove-persona="'+i+'" style="color:var(--faint)">Rimuovi</button></div>';
   }).join("")+(multi?'<p class="hint" style="margin:2px 0 10px">La stellina sceglie chi vedi nella card "Turni condivisi" di Oggi — le altre restano comunque visibili qui sopra.</p>':'')+
   // Solo nell'app e finché non è acceso: l'interruttore resta in fondo, ma qui, dove si è appena aggiunta la persona, si propone.
@@ -6783,6 +6803,56 @@ function renderWizPeopleList(){
     '<button type="button" class="btn g" id="doCoppiaQui" style="white-space:nowrap">Attiva</button></div>' : '');
   const q=$("#doCoppiaQui"); if(q) q.onclick=async()=>{ q.disabled=true; if(await impostaCoppiaNativa(true)) toast("Fatto: li trovi nel calendario «Notturnisti · insieme»"); else q.disabled=false; };
 }
+// «Turni MMPNR… · dorme 23:00–07:00 nei giorni liberi»: quello che l'app sa di lei/lui, a colpo d'occhio
+function riassuntoPersona(per){
+  const seq=String(per.pattern||"").replace(/[^A-Za-z]/g,"");
+  const turni = per.shifts ? "turni suoi" : "turni come i tuoi";
+  return seq.slice(0,16)+(seq.length>16?"…":"")+" · "+turni+" · "+(per.wake&&per.bed ? "dorme "+per.bed+"–"+per.wake+" nei giorni liberi" : "sonno come il tuo");
+}
+// Modifica di una persona già in elenco: lo stesso modulo dell'aggiunta, precompilato. null = si sta aggiungendo.
+let personaInModifica=null;
+function scriviPersonaAt(i, per){
+  if(state.pPattern && i===0){ state.pPattern=per.pattern; state.pAnchor=per.anchor||null; state.pShifts=per.shifts||null; state.pWake=per.wake||null; state.pBed=per.bed||null; state.pName=per.name||""; }
+  else state.people[i-(state.pPattern?1:0)]=per;
+}
+function azzeraFormPersona(){
+  const nm=$("#personaName"), lk=$("#personaLink"), pp=$("#personaPattern"), pa=$("#personaAnchor"), pw=$("#personaWake"), pb=$("#personaBed"), pm=$("#personaMode");
+  [nm,lk,pp,pa,pw,pb].forEach(el=>{ if(el) el.value=""; });
+  if(pm) pm.value="mine";
+  const mf=$("#personaManualFields"); if(mf) mf.hidden=false;
+  const seq=$("#personaSeqBox"); if(seq) seq.hidden=true;
+  const ah=$("#personaAnchorHint"); if(ah) ah.textContent="Una data in cui sai che era al primo giorno della TUA stessa sequenza — non della sua, è la stessa.";
+  const hint=$("#personaModeHint"); if(hint) hint.textContent=PERSONA_MODE_HINT.mine;
+  const psb=$("#personaShiftsBox"); if(psb) psb.hidden=true;
+  const psl=$("#personaShiftsList"); if(psl) psl.innerHTML="";
+  const btn=$("#doConfirmPersona"); if(btn){ btn.textContent="Aggiungi alla lista"; delete btn.dataset.forzato; }
+  const an=$("#annullaModificaPersona"); if(an) an.hidden=true;
+  const err=$("#personaLinkErr"); if(err) err.textContent="";
+  personaInModifica=null;
+}
+function iniziaModificaPersona(i){
+  const per=tuttePersone()[i]; if(!per) return;
+  const box=$("#opzBoxPersone"); if(box && box.hidden) apriSezionePersone();
+  const det=document.querySelector("#opzBoxPersone details.wdet"); if(det) det.open=true;
+  azzeraFormPersona();
+  personaInModifica=i;
+  $("#personaName").value=per.name||"";
+  const pm=$("#personaMode"); pm.value="custom"; pm.dispatchEvent(new Event("change"));   // sequenza e turni suoi: mostra e prepara i campi
+  $("#personaPattern").value=per.pattern||"";
+  $("#personaAnchor").value=per.anchor||"";
+  renderPersonaShifts();
+  const sh=per.shifts||state.shifts||{};   // senza orari suoi (seguiva i tuoi): si parte da quelli di adesso, e salvando diventano suoi
+  document.querySelectorAll("#personaShiftsList .psh").forEach(row=>{
+    const x=sh[row.dataset.l]; if(!x) return;
+    row.querySelector('[data-fld="s"]').value=hhmm(mod1440(x.s)); row.querySelector('[data-fld="e"]').value=hhmm(mod1440(x.e));
+  });
+  if(per.wake) $("#personaWake").value=per.wake;
+  if(per.bed) $("#personaBed").value=per.bed;
+  $("#doConfirmPersona").textContent="Salva le modifiche";
+  const an=$("#annullaModificaPersona"); if(an) an.hidden=false;
+  const f=$("#personaName"); if(f && f.scrollIntoView) f.scrollIntoView({behavior:"smooth",block:"center"});
+}
+if($("#annullaModificaPersona")) $("#annullaModificaPersona").onclick=()=>azzeraFormPersona();
 function coppiaDaProporre(){ return !!(platform.calendar.available && tuttePersone().length && !(platform.calendar.attivo() && platform.calendar.coppiaAttiva())); }
 // La finestra libera più lunga (almeno tre ore vere) di un giorno in comune —
 // stessa soglia/ordinamento già usati per la card "p" in cards(), qui
@@ -8293,6 +8363,45 @@ if($("#cycPrev"))  $("#cycPrev").onclick =()=>cycGo(cicloOff-passoCiclo());
 if($("#cycNext"))  $("#cycNext").onclick =()=>cycGo(cicloOff+passoCiclo());
 if($("#cycToday")) $("#cycToday").onclick=()=>{ if(suOggi()){ apriSelettoreData(); return; } state.focus=giornoVero(); cycGo(0); };
 
+/* ===================== NOVITÀ =====================
+   Si scrivono a mano a ogni versione con una funzione che si vede: poche righe, in italiano di tutti i giorni.
+   `id` cambia solo quando c'è qualcosa da dire; chi aggiorna la vede una volta. Chi installa adesso non la vede
+   (non è una novità per lui), ma la trova sempre in Impostazioni › Novità. «app:true» = solo nell'app Android. */
+const NOVITA={ id:"2026-10-24", data:"Ottobre 2026", righe:[
+  ["Persone: modifica e orari propri","Ora puoi correggere una persona (turni, sonno, data di partenza) senza toglierla e rifarla. Se aggiungi qualcuno «con i tuoi stessi turni», gli orari restano suoi anche quando cambi i tuoi."],
+  ["Turni: le sigle di chi segui","In Turni, accanto alla tua sigla compare quella della persona con la stellina, e il suo turno è un filo verde sotto la barra."],
+  ["Momenti migliori","Quando pensare, muoverti, allenarti: accendili in Impostazioni › Cosa vedi nel piano."],
+  ["Widget più alto, più settimane","Allargalo: ogni riga in più aggiunge una settimana. Prima di dormire propone la sveglia, la mattina il voto del sonno.",true],
+  ["Dopo il turno","Appena comincia il sonno l'app dice di dormire (non più «Rientro»), e la linea dell'ora sta nel posto giusto."]
+]};
+function novitaDaMostrare(){ return NOVITA.righe.filter(x=>!x[2] || platform.isNative); }
+function mostraNovita(su, segna){
+  const m=$("#novitaModal"); if(!m) return;
+  if(su){
+    $("#novitaData").textContent=NOVITA.data;
+    $("#novitaLista").innerHTML=novitaDaMostrare().map(x=>'<div style="margin:0 0 12px"><b style="display:block">'+esc(x[0])+'</b><span class="hint" style="display:block;margin:2px 0 0;font-size:13.5px;line-height:1.4">'+esc(x[1])+'</span></div>').join("");
+  }
+  m.hidden=!su; m.setAttribute("aria-hidden",String(!su));
+  if(su) $("#novitaOk").focus();
+  else if(segna) store.set("novitaViste", NOVITA.id);
+}
+if($("#doNovita")) $("#doNovita").onclick=()=>mostraNovita(true);
+["novitaOk","novitaClose"].forEach(i=>{ if($("#"+i)) $("#"+i).onclick=()=>mostraNovita(false,true); });
+if($("#novitaModal")) $("#novitaModal").addEventListener("click",e=>{ if(e.target===$("#novitaModal")) mostraNovita(false,true); });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape" && $("#novitaModal") && !$("#novitaModal").hidden) mostraNovita(false,true); });
+// All'apertura dopo un aggiornamento: non al primo uso, non su un altro foglio o mentre si scrive, non dentro un turno scelto a mezzo.
+function controllaNovita(){
+  try{
+    if(!state.turniConfigurati || store.get("novitaViste",null)===NOVITA.id) return;
+    if(navigator.webdriver && !store.get("novitaProva",false)) return;   // i test automatici non devono trovarsi un foglio davanti (quello sulle novità li prova con novitaProva)
+    if(!state.firstSeenAt || state.firstSeenAt>=iso(new Date())){ store.set("novitaViste", NOVITA.id); return; }   // installato oggi: niente da dire
+    const a=document.activeElement;
+    if((a && /^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName)) || document.querySelector(".qs-backdrop:not([hidden]), #pf-modal, body > [role=dialog]")) return;
+    if(!document.body.classList.contains("tab-oggi")) return;
+    mostraNovita(true);
+  }catch(e){}
+}
+addEventListener("load", ()=>setTimeout(controllaNovita, 3500));
 function mostraQR(su){
   const m=$("#qrModal"); if(!m) return;
   m.hidden=!su; m.setAttribute("aria-hidden",String(!su));
@@ -8665,7 +8774,7 @@ function renderSegna(){
       : sgPennello==="cancella" ? "Tocca i giorni da riportare come prima." : "Scegli cosa segnare, poi tocca i giorni. Un secondo tocco lo toglie.")+'</p>'+
     '<div class="sg-pennelli" role="group" aria-label="Cosa segni">'+pen.map(p=>'<button type="button" class="sg-pen" data-pen="'+esc(p.k)+'" aria-pressed="'+(p.k===sgPennello)+'">'+esc(p.t)+'</button>').join("")+'</div>'+
     '<div class="sg-griglia">'+celle+'</div>'+
-    '<p class="sg-legenda"><span><i style="background:var(--orange-fill)"></i>reperibile</span><span><i style="background:var(--blue)"></i>bordo: segnato da te</span>'+
+    '<p class="sg-legenda"><span><i style="background:var(--orange-fill)"></i>reperibile</span><span><i style="background:var(--ink);width:12px;height:2px;border-radius:2px;vertical-align:3px"></i>orari diversi</span><span><i style="background:var(--blue)"></i>bordo: segnato da te</span>'+
       (daSegnare?'<span>— da segnare: '+daSegnare+'</span>':'')+'</p>';
 }
 // Un turno scelto a mano per un giorno (dal foglio del giorno o dal pennello).
@@ -9471,7 +9580,7 @@ function bind(id,key,fn){
 // Aggiungere e rimuovere persone dall'elenco vive solo qui (wizard/Opzioni),
 // non nella tab Turni: lì si guarda, qui si gestisce.
 const PERSONA_MODE_HINT = {
-  mine: "Stessa sequenza e stessi orari dei tuoi turni — utile quando fate lo stesso tipo di rotazione ma partita in giorni diversi: dimmi solo da quando è partita la sua.",
+  mine: "Stessa sequenza e stessi orari dei tuoi di adesso (poi restano suoi: se cambi i tuoi, i suoi non cambiano) — utile quando fate lo stesso tipo di rotazione ma partita in giorni diversi: dimmi solo da quando è partita la sua.",
   day: "Il caso classico di chi non fa turni — lavora lunedì-venerdì, riposa nel weekend: con questa non serve altro.",
   custom: "Ruota, ma con orari diversi dai tuoi (anche solo un po' spostati): definisci i suoi turni qui sotto."
 };
@@ -9536,13 +9645,13 @@ if($("#doConfirmPersona")) $("#doConfirmPersona").onclick=()=>{
       per={pattern:"GGGGGRR", anchor:iso(oggi), shifts:{G:{n:"Giornata",s:540,e:1080}}, wake:"08:00", bed:"23:00"};
     } else if(modo==="mine"){
       // Il caso utile non è "identico a me" (sarei io) ma "stesso sistema
-      // di turni, partito in un giorno diverso": la sequenza e gli orari
-      // restano i tuoi (non li congelo qui — se li cambi in futuro, anche
-      // il suo li segue, giusto perché sono "i tuoi", non una fotografia),
-      // ma la data di partenza va chiesta davvero, è l'unica cosa diversa.
+      // di turni, partito in un giorno diverso": sequenza e orari sono una
+      // copia dei tuoi di adesso (se poi cambi un tuo orario, il suo non si
+      // muove: sono persone diverse), la data di partenza va chiesta davvero.
       const anc=valoreDi("#personaAnchor");
       if(anc){
-        per={pattern:state.pattern, anchor:anc};
+        // una copia dei tuoi turni di adesso: se poi cambi i tuoi, i suoi restano com'erano
+        per={pattern:state.pattern, anchor:anc, shifts:JSON.parse(JSON.stringify(state.shifts||{}))};
         if(valoreDi("#personaWake")) per.wake=$("#personaWake").value;
         if(valoreDi("#personaBed")) per.bed=$("#personaBed").value;
       }
@@ -9566,12 +9675,19 @@ if($("#doConfirmPersona")) $("#doConfirmPersona").onclick=()=>{
   // diventa un altro problema, gestire un piccolo team, non la propria vita
   // con chi si ha vicino) — ma chi ha davvero bisogno di una in più può
   // insistere con un secondo tocco, invece di restare bloccato.
-  if(tuttePersone().length>=5 && !btn.dataset.forzato){
+  if(personaInModifica===null && tuttePersone().length>=5 && !btn.dataset.forzato){
     btn.textContent="Di solito bastano 4-5 persone vicine — aggiungi comunque?";
     btn.dataset.forzato="1";
     return;
   }
   if(name) per.name=name;
+  if(personaInModifica!==null){
+    // modifica: la persona resta dov'è nell'elenco (e con la sua stellina)
+    if(!name) per.name=(tuttePersone()[personaInModifica]||{}).name||"";
+    scriviPersonaAt(personaInModifica, per);
+    salva(); azzeraFormPersona(); toast("Salvata"); renderWizPeopleList(); render();
+    return;
+  }
   // Il primo che aggiungi diventa il "principale" internamente — è quello
   // che il motore usa per la card riassuntiva e per il calendario di
   // coppia. Da fuori non si vede differenza: è sempre lo stesso identico
@@ -9585,22 +9701,14 @@ if($("#doConfirmPersona")) $("#doConfirmPersona").onclick=()=>{
   }
   salva();
   if(daLinkCondiviso) track("share_accepted");
-  const nm=$("#personaName"), lk=$("#personaLink"), pp=$("#personaPattern"),
-    pa=$("#personaAnchor"), pw=$("#personaWake"), pb=$("#personaBed"), pm=$("#personaMode");
-  [nm,lk,pp,pa,pw,pb].forEach(el=>{ if(el) el.value=""; });
-  if(pm) pm.value="mine";
-  const mf=$("#personaManualFields"); if(mf) mf.hidden=false;
-  const seq=$("#personaSeqBox"); if(seq) seq.hidden=true;
-  const ah=$("#personaAnchorHint"); if(ah) ah.textContent="Una data in cui sai che era al primo giorno della TUA stessa sequenza — non della sua, è la stessa.";
-  const psb=$("#personaShiftsBox"); if(psb) psb.hidden=true;
-  const psl=$("#personaShiftsList"); if(psl) psl.innerHTML="";
-  btn.textContent="Aggiungi alla lista"; delete btn.dataset.forzato;
-  if(err) err.textContent="";
+  azzeraFormPersona();
   toast("Aggiunta"); renderWizPeopleList();
 };
 if($("#wizPeopleList")) $("#wizPeopleList").addEventListener("click", e=>{
   const gp=e.target.closest("[data-glance-persona]");
   if(gp){ state.personaGlance=+gp.dataset.glancePersona; salva(); renderWizPeopleList(); return; }
+  const ed=e.target.closest("[data-edit-persona]");
+  if(ed){ iniziaModificaPersona(+ed.dataset.editPersona); return; }
   const rm=e.target.closest("[data-remove-persona]"); if(!rm) return;
   const i=+rm.dataset.removePersona, persone=tuttePersone();
   const nomeRimosso = (persone[i] && persone[i].name) || "Persona";
@@ -9978,6 +10086,7 @@ platform.onBackButton(()=>{
   if($("#pf-modal")){ $("#pf-modal").remove(); return true; }
   const qs=$("#quickShiftModal"); if(qs && !qs.hidden){ chiudiQuickShift(); return true; }
   if($("#qrModal") && !$("#qrModal").hidden){ mostraQR(false); return true; }
+  if($("#novitaModal") && !$("#novitaModal").hidden){ mostraNovita(false,true); return true; }
   if(document.body.classList.contains("andamenti-aperta")){ chiudiAndamenti(); return true; }
   if(document.body.classList.contains("vederci-aperta")){ chiudiVederci(); return true; }
   if(document.body.classList.contains("scambio-aperta")){ chiudiScambio(); return true; }
