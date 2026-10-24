@@ -5,5 +5,5 @@
     <string name="package_name">club.notturnisti.app</string>
     <string name="custom_url_scheme">club.notturnisti.app</string>
     <string name="widget_etichetta">Notturnisti · adesso</string>
-    <string name="widget_descrizione">Cosa fare adesso. Allargalo a 3 righe per la settimana, a 5 per il mese</string>
+    <string name="widget_descrizione">Cosa conta adesso. Più lo allarghi, più mostra: il pulsante giusto per l\'ora, le prossime voci, il calendario con le persone che segui</string>
 </resources>

@@ -34,14 +34,13 @@ Fatto quando: un telefono con orologio compila il diario da solo, il giorno pass
 
 Non so ancora: quali dei tester ha un dispositivo compatibile; quanti giorni di storico si vedono dopo il permesso (una fonte terza dice 30, da verificare nella documentazione ufficiale).
 
-## Widget: settimane in più, sveglia e voto (1.2.1, da provare sul telefono)
-Un solo widget, più alto = più giorni. 3 righe: «Adesso/Prossimo», le prossime voci e la settimana di sette giorni da oggi. Da 4 righe in su si aggiungono righe di sette giorni (fino a cinque, oltre un mese), di seguito alla settimana.
-- Nella zona delle prossime voci: la mattina, per 14 ore, il voto del sonno e dell'energia; prima di dormire (da 4 ore prima a mezz'ora dopo l'inizio del sonno) «Metti la sveglia alle …» (apre l'Orologio con la sveglia pronta).
-- Con una persona (stellina in «Le tue persone»): sotto la tua sigla quella della persona, in verde, anche nella prima settimana (dove c'è anche l'ora a letto); legenda «Sopra tu, sotto Anna».
-- Le due voci sotto «Adesso» sono in ordine di ora. I launcher riportano un'altezza più bassa del vero (15-25% misurato): `ALTEZZA_VERA` la corregge di poco; se un launcher taglia l'ultima riga, abbassarla.
-- Viste vere (`GiorniWidget`, `GiorniModel` con test JVM): seguono tema e testo ingrandito. La prima versione disegnava il mese come immagine e si stirava: tolta.
-- Da guardare sul telefono: righe che si aggiungono all'altezza giusta (soglie in `GiorniModel.righeExtra`), sigle e colori, tocco su un giorno, «Metti la sveglia» (l'Orologio chiede conferma: non si sa se la sveglia c'è già).
-- Tolti rispetto alla bozza: ‹ › sui mesi, cambio persona dal widget, puntino «liberi insieme». Da riprendere solo se servono.
+## Widget rifatto (1.3.0, da provare sul telefono)
+Parte minimale e aggiunge un pezzo alla volta con l'altezza (`WidgetPiano`): **adesso** (con la barra se è in corso) → **il pulsante del momento** → **prima voce** → **calendario, prima riga** → **seconda voce** → **altre settimane** (fino a 5). Il calendario riempie lo spazio che resta (righe con peso): niente vuoti.
+- Il pulsante (`WidgetStato`, uno alla volta): voto del sonno e poi dell'energia dalla sveglia (14 ore) › «Metti la sveglia · 09:55» da 4 ore prima del sonno, o mezz'ora prima di un pisolino › «A letto 03:10 → 09:55» fino a 12 ore prima › «Pisolino 19:05 → 19:50» fino a 3 ore prima. Le voci sotto non ripetono quella già nel pulsante.
+- Calendario (`CalendarioModel`, `CalendarioWidget`): settimane dal lunedì, passato più tenue, oggi su un tondo; la tua sigla sopra e quella della persona con la stellina sotto, in verde acqua; il nome della persona è un tasto: la successiva, poi nascosta (la scelta resta finché nell'app non sposti la stellina).
+- Pagina: `mese` = da lunedì per 42 giorni, fino a 4 persone; la striscia di 7 giorni `giorni` non serve più e non si pubblica.
+- Test: JVM per stato, piano e calendario (`WidgetStatoTest` include il cambio d'ora); UI per i dati pubblicati. **L'aspetto non è verificato da qui** (un'anteprima con Paparazzi non si è potuta scaricare: Maven Central limita le richieste). Da guardare sul telefono: soglie in `WidgetPiano` (misure in dp), colori in chiaro/scuro, righe che riempiono, tocchi.
+- Da sapere: i launcher riportano un'altezza più bassa del vero (`ALTEZZA_VERA`).
 
 ## Idee per dopo (in ordine di valore/rischio, da rivedere con i dati reali)
 1. **Foto del foglio turni → importazione** (OCR sul telefono, nessun invio): per chi riceve i turni variabili su carta o PDF. È il punto più faticoso di chi non ha un ciclo.

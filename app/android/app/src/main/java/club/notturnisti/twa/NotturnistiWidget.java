@@ -7,53 +7,60 @@ import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.AlarmClock;
 import android.view.View;
 import android.widget.RemoteViews;
 import java.util.Calendar;
-import java.util.Locale;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
- * Widget "Il tuo piano": cosa vale adesso (o la prossima cosa importante,
- * con il conto alla rovescia), il prossimo turno anche se è fra giorni, la
- * voce successiva e, se il widget è alto abbastanza, la settimana. La
- * mattina, dalla sveglia per 14 ore, al posto delle righe il diario: «Come
- * hai dormito?» e «Come ti senti?», a un tocco; le risposte restano qui
- * finché l'app non le prende (WidgetPlugin.risposte).
- *
- * La timeline arriva già calcolata dalla pagina (WidgetPlugin) come elenco
- * di voci {s: inizio ms, e: fine ms, t: titolo, k: tipo} e, per la
- * settimana, {d, g, c, t, s}. Qui si sceglie solo cosa mostrare in base
- * all'ora e alla dimensione, e si programma il prossimo ridisegno: al
- * prossimo cambio, oppure fra pochi minuti se c'è un conto alla rovescia
- * da tenere aggiornato. Se l'app non viene aperta per giorni la timeline si
- * esaurisce e il widget lo dice, invece di mostrare dati vecchi.
+ * Widget «Il tuo piano»: parte minimale (cosa conta adesso, con la barra se è in corso) e aggiunge pezzi via via che lo
+ * allarghi in altezza: il pulsante giusto per il momento (sveglia, orario del sonno o del pisolino, voto del sonno e
+ * dell'energia), le prossime voci, il calendario a settimane con la persona che segui. Cosa dire lo calcola WidgetStato,
+ * cosa mostrare WidgetPiano, il calendario CalendarioWidget; qui si assemblano le viste e si programma il prossimo ridisegno
+ * (al prossimo cambio, o fra pochi minuti se c'è un conto alla rovescia; a mezzanotte se c'è il calendario).
+ * Se l'app non viene aperta per giorni la timeline si esaurisce e il widget lo dice, invece di mostrare dati vecchi.
+ * Le risposte del diario restano qui finché l'app non le prende (WidgetPlugin.risposte).
  */
 public class NotturnistiWidget extends AppWidgetProvider {
     static final String AZIONE_TICK = "club.notturnisti.twa.WIDGET_TICK";
     static final String AZIONE_DIARIO = "club.notturnisti.twa.WIDGET_DIARIO";
+    static final String AZIONE_PERSONA = "club.notturnisti.twa.WIDGET_PERSONA";
     static final String KEY_RISPOSTE = "risposte";
 
     @Override
-    public void onUpdate(Context ctx, AppWidgetManager mgr, int[] ids) {
-        disegna(ctx, mgr, ids);
-    }
+    public void onUpdate(Context ctx, AppWidgetManager mgr, int[] ids) { disegna(ctx, mgr, ids); }
 
     // Ridimensionato dall'utente: le sezioni compaiono o spariscono.
     @Override
-    public void onAppWidgetOptionsChanged(Context ctx, AppWidgetManager mgr, int id, Bundle opzioni) {
-        disegna(ctx, mgr, new int[]{ id });
+    public void onAppWidgetOptionsChanged(Context ctx, AppWidgetManager mgr, int id, Bundle opzioni) { disegna(ctx, mgr, new int[]{ id }); }
+
+    @Override
+    public void onDeleted(Context ctx, int[] ids) {
+        SharedPreferences.Editor ed = prefs(ctx).edit();
+        for (int id : ids) ed.remove("pers_" + id).remove("star_" + id);
+        ed.apply();
     }
 
     @Override
     public void onReceive(Context ctx, Intent intent) {
         super.onReceive(ctx, intent);
-        if (AZIONE_TICK.equals(intent.getAction())) aggiornaTutti(ctx);
-        if (AZIONE_DIARIO.equals(intent.getAction())) { salvaRisposta(ctx, intent); aggiornaTutti(ctx); }
+        String a = intent.getAction();
+        if (AZIONE_TICK.equals(a)) aggiornaTutti(ctx);
+        if (AZIONE_DIARIO.equals(a)) { salvaRisposta(ctx, intent); aggiornaTutti(ctx); }
+        if (AZIONE_PERSONA.equals(a)) { cambiaPersona(ctx, intent.getIntExtra("id", 0)); aggiornaTutti(ctx); }
     }
+
+    /** Solo per le prove sulla JVM (anteprima dei layout): senza sistema Android non si creano PendingIntent. */
+    static boolean senzaIntent = false;
+    private static final int FLAG = PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT;
+    static PendingIntent attivita(Context ctx, int codice, Intent i) { return senzaIntent ? null : PendingIntent.getActivity(ctx, codice, i, FLAG); }
+    static PendingIntent trasmetti(Context ctx, int codice, Intent i) { return senzaIntent ? null : PendingIntent.getBroadcast(ctx, codice, i, FLAG); }
+
+    static SharedPreferences prefs(Context ctx) { return ctx.getSharedPreferences(WidgetPlugin.PREFS, Context.MODE_PRIVATE); }
 
     static int quanti(Context ctx) {
         return AppWidgetManager.getInstance(ctx).getAppWidgetIds(new ComponentName(ctx, NotturnistiWidget.class)).length;
@@ -71,38 +78,11 @@ public class NotturnistiWidget extends AppWidgetProvider {
         return o == null ? 110 : Math.max(o.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT), o.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT));
     }
 
-    static final int[][] CELLE = {
-        { R.id.w_g0, R.id.w_g0_d, R.id.w_g0_c, R.id.w_g0_s, R.id.w_g0_p }, { R.id.w_g1, R.id.w_g1_d, R.id.w_g1_c, R.id.w_g1_s, R.id.w_g1_p },
-        { R.id.w_g2, R.id.w_g2_d, R.id.w_g2_c, R.id.w_g2_s, R.id.w_g2_p }, { R.id.w_g3, R.id.w_g3_d, R.id.w_g3_c, R.id.w_g3_s, R.id.w_g3_p },
-        { R.id.w_g4, R.id.w_g4_d, R.id.w_g4_c, R.id.w_g4_s, R.id.w_g4_p }, { R.id.w_g5, R.id.w_g5_d, R.id.w_g5_c, R.id.w_g5_s, R.id.w_g5_p },
-        { R.id.w_g6, R.id.w_g6_d, R.id.w_g6_c, R.id.w_g6_s, R.id.w_g6_p } };
-
-    // Icona per tipo di voce (campo "k", lo stesso "tipo" degli eventi del calendario).
-    static int icona(String k) {
-        if (k == null) return R.drawable.ic_w_libero;
-        if (k.startsWith("sonno")) return R.drawable.ic_w_sonno;
-        if (k.startsWith("pisolino")) return R.drawable.ic_w_pisolino;
-        if (k.startsWith("turno")) return R.drawable.ic_w_turno;
-        if (k.startsWith("caffe")) return R.drawable.ic_w_caffe;
-        if (k.startsWith("luce")) return R.drawable.ic_w_luce;
-        if (k.startsWith("rientro")) return R.drawable.ic_w_rientro;
-        return R.drawable.ic_w_libero;
-    }
-
-    private static String hhmm(long t, long ora) {
-        Calendar c = Calendar.getInstance(); c.setTimeInMillis(t);
-        Calendar n = Calendar.getInstance(); n.setTimeInMillis(ora);
-        String h = String.format(Locale.ITALY, "%02d:%02d", c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE));
-        boolean domani = c.get(Calendar.DAY_OF_YEAR) != n.get(Calendar.DAY_OF_YEAR) || c.get(Calendar.YEAR) != n.get(Calendar.YEAR);
-        return domani ? "domani " + h : h;
-    }
-
-    // Una risposta dal widget: si tiene qui finché l'app non la prende
-    // (WidgetPlugin.risposte), così vale anche ad app chiusa.
+    // Una risposta dal widget: si tiene qui finché l'app non la prende (WidgetPlugin.risposte), così vale anche ad app chiusa.
     static void salvaRisposta(Context ctx, Intent i) {
         String d = i.getStringExtra("d"); if (d == null) return;
         try {
-            android.content.SharedPreferences sp = ctx.getSharedPreferences(WidgetPlugin.PREFS, Context.MODE_PRIVATE);
+            SharedPreferences sp = prefs(ctx);
             JSONObject tutte = new JSONObject(sp.getString(KEY_RISPOSTE, "{}"));
             JSONObject r = tutte.optJSONObject(d); if (r == null) r = new JSONObject();
             if ("sonno".equals(i.getStringExtra("cosa"))) { r.put("sonno", true); r.put("bed", i.getStringExtra("bed")); r.put("wake", i.getStringExtra("wake")); }
@@ -112,268 +92,160 @@ public class NotturnistiWidget extends AppWidgetProvider {
         } catch (Exception ignored) { }
     }
 
+    // Tocco sul nome della persona: la successiva, poi nascosta, poi la prima.
+    static void cambiaPersona(Context ctx, int id) {
+        try {
+            SharedPreferences sp = prefs(ctx);
+            CalendarioModel m = CalendarioModel.leggi(new JSONObject(sp.getString(WidgetPlugin.KEY, "{}")).optJSONObject("mese"));
+            if (m == null) return;
+            int attiva = m.personaAttiva(sp.getInt("pers_" + id, CalendarioModel.SEGUI_STELLA), sp.getString("star_" + id, ""));
+            sp.edit().putInt("pers_" + id, m.dopo(attiva)).putString("star_" + id, m.stella).apply();
+        } catch (Exception ignored) { }
+    }
+
+    static int icona(String k) {
+        switch (k == null ? "" : k) {
+            case "sonno": return R.drawable.ic_w_sonno;
+            case "pisolino": return R.drawable.ic_w_pisolino;
+            case "turno": return R.drawable.ic_w_turno;
+            case "caffe": return R.drawable.ic_w_caffe;
+            case "luce": return R.drawable.ic_w_luce;
+            case "rientro": return R.drawable.ic_w_rientro;
+            default: return R.drawable.ic_w_libero;
+        }
+    }
+
     static PendingIntent risposta(Context ctx, int codice, JSONObject dia, String cosa, int v) {
         Intent i = new Intent(ctx, NotturnistiWidget.class).setAction(AZIONE_DIARIO)
             .putExtra("d", dia.optString("d")).putExtra("cosa", cosa).putExtra("v", v)
             .putExtra("bed", dia.optString("bed")).putExtra("wake", dia.optString("wake"));
-        return PendingIntent.getBroadcast(ctx, codice, i, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+        return trasmetti(ctx, codice, i);
     }
 
-    // Le voci che contano: turno, sonno, pisolino, rientro. Luce e caffè sono
-    // promemoria brevi e non devono mai nascondere il turno o il sonno.
-    static boolean importante(String k) {
-        return k != null && (k.startsWith("turno") || k.startsWith("sonno") || k.startsWith("pisolino") || k.startsWith("rientro"));
+    static PendingIntent apriGiorno(Context ctx, int codice, String iso) {
+        Intent ap = new Intent(Intent.ACTION_VIEW, Uri.parse("notturnisti://giorno/" + iso), ctx, MainActivity.class);
+        ap.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        return attivita(ctx, codice, ap);
     }
 
-    // "21:00", "domani 21:00", "gio 23 21:00"
-    private static String quando(long t, long ora) {
-        Calendar c = Calendar.getInstance(); c.setTimeInMillis(t);
-        Calendar n = Calendar.getInstance(); n.setTimeInMillis(ora);
-        String h = String.format(Locale.ITALY, "%02d:%02d", c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE));
-        Calendar dom = (Calendar) n.clone(); dom.add(Calendar.DAY_OF_YEAR, 1);
-        if (c.get(Calendar.YEAR) == n.get(Calendar.YEAR) && c.get(Calendar.DAY_OF_YEAR) == n.get(Calendar.DAY_OF_YEAR)) return h;
-        if (c.get(Calendar.YEAR) == dom.get(Calendar.YEAR) && c.get(Calendar.DAY_OF_YEAR) == dom.get(Calendar.DAY_OF_YEAR)) return "domani " + h;
-        String[] gg = { "dom", "lun", "mar", "mer", "gio", "ven", "sab" };
-        return gg[c.get(Calendar.DAY_OF_WEEK) - 1] + " " + c.get(Calendar.DAY_OF_MONTH) + " " + h;
+    /** Le viste del widget per questo stato e questa altezza (in dp). Senza effetti: si può provare a parte. */
+    static RemoteViews costruisci(Context ctx, WidgetStato st, CalendarioModel cal, int altezzaDp, long ora, int persona, int idWidget) {
+        RemoteViews rv = new RemoteViews(ctx.getPackageName(), R.layout.widget_piano);
+        int righeCal = CalendarioWidget.righeDisponibili(cal, ora);
+        WidgetPiano p = WidgetPiano.calcola(altezzaDp, st.progresso >= 0, st.azione != WidgetStato.Azione.NESSUNA, st.eventi.size(), persona >= 0, righeCal);
+
+        // ───── adesso ─────
+        rv.setTextViewText(R.id.w_etichetta, st.etichetta);
+        rv.setTextViewText(R.id.w_adesso, st.titolo);
+        rv.setTextViewText(R.id.w_sotto, st.sotto);
+        rv.setImageViewResource(R.id.w_icona, icona(st.icona));
+        rv.setContentDescription(android.R.id.background, st.etichetta + ": " + st.titolo + ", " + st.sotto);
+        rv.setViewVisibility(R.id.w_progresso, p.barra ? View.VISIBLE : View.GONE);
+        if (p.barra) rv.setProgressBar(R.id.w_progresso, 1000, st.progresso, false);
+        PendingIntent apri = attivita(ctx, 0, new Intent(ctx, MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP));
+        rv.setOnClickPendingIntent(android.R.id.background, apri);
+
+        // ───── il pulsante del momento ─────
+        rv.setViewVisibility(R.id.w_azione, p.pulsante ? View.VISIBLE : View.GONE);
+        if (p.pulsante) azione(ctx, rv, st);
+
+        // ───── le prossime voci ─────
+        rv.setViewVisibility(R.id.w_eventi, p.voci > 0 ? View.VISIBLE : View.GONE);
+        int[][] riga = { { R.id.w_e1, R.id.w_e1_ic, R.id.w_e1_ora, R.id.w_e1_t, R.id.w_e1_chip }, { R.id.w_e2, R.id.w_e2_ic, R.id.w_e2_ora, R.id.w_e2_t, R.id.w_e2_chip } };
+        for (int i = 0; i < 2; i++) {
+            rv.setViewVisibility(riga[i][0], i < p.voci ? View.VISIBLE : View.GONE);
+            if (i >= p.voci) continue;
+            WidgetStato.Evento e = st.eventi.get(i);
+            rv.setImageViewResource(riga[i][1], icona(e.icona));
+            rv.setTextViewText(riga[i][2], e.ora);
+            rv.setTextViewText(riga[i][3], e.titolo);
+            rv.setViewVisibility(riga[i][4], e.chip.isEmpty() ? View.GONE : View.VISIBLE);
+            rv.setTextViewText(riga[i][4], e.chip);
+        }
+
+        // ───── calendario ─────
+        if (p.calendario) CalendarioWidget.riempi(ctx, rv, cal, p.righe, persona, ora, idWidget);
+        else rv.setViewVisibility(R.id.w_cal, View.GONE);
+        return rv;
     }
 
-    // "2 h 10 min", "45 min", "1 h"
-    private static String durata(long ms) {
-        long m = Math.max(1, Math.round(ms / 60000.0));
-        if (m < 60) return m + " min";
-        long h = m / 60, r = m % 60;
-        return r == 0 ? h + " h" : h + " h " + r + " min";
+    private static void azione(Context ctx, RemoteViews rv, WidgetStato st) {
+        boolean voto = st.azione == WidgetStato.Azione.VOTO_SONNO || st.azione == WidgetStato.Azione.VOTO_ENERGIA;
+        rv.setViewVisibility(R.id.w_voto, voto ? View.VISIBLE : View.GONE);
+        rv.setViewVisibility(R.id.w_az, voto ? View.GONE : View.VISIBLE);
+        if (!voto) {
+            rv.setTextViewText(R.id.w_az, st.testoAzione);
+            boolean pieno = st.azione == WidgetStato.Azione.SVEGLIA;
+            rv.setInt(R.id.w_az, "setBackgroundResource", pieno ? R.drawable.widget_bottone_pri : R.drawable.widget_bottone);
+            rv.setTextColor(R.id.w_az, ctx.getColor(pieno ? R.color.w_su_accento : R.color.w_ink));
+            if (pieno) {
+                Intent al = new Intent(AlarmClock.ACTION_SET_ALARM)
+                    .putExtra(AlarmClock.EXTRA_HOUR, st.oraSveglia).putExtra(AlarmClock.EXTRA_MINUTES, st.minSveglia)
+                    .putExtra(AlarmClock.EXTRA_MESSAGE, "Notturnisti").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                rv.setOnClickPendingIntent(R.id.w_az, attivita(ctx, 205, al));
+            } else rv.setOnClickPendingIntent(R.id.w_az, apriGiorno(ctx, 206, st.giornoAzione));
+            return;
+        }
+        JSONObject dia = st.diario;
+        int[] v = { R.id.w_v1, R.id.w_v2, R.id.w_v3 };
+        boolean sonno = st.azione == WidgetStato.Azione.VOTO_SONNO;
+        String[] testi = sonno ? new String[]{ "Sì, così", "Altri orari", "" } : new String[]{ "Poca", "Così così", "Bene" };
+        for (int i = 0; i < 3; i++) {
+            boolean c = !testi[i].isEmpty();
+            rv.setViewVisibility(v[i], c ? View.VISIBLE : View.GONE);
+            if (!c) continue;
+            rv.setTextViewText(v[i], testi[i]);
+            boolean pieno = sonno && i == 0;
+            rv.setInt(v[i], "setBackgroundResource", pieno ? R.drawable.widget_bottone_pri : R.drawable.widget_bottone);
+            rv.setTextColor(v[i], ctx.getColor(pieno ? R.color.w_su_accento : R.color.w_ink));
+        }
+        if (sonno) {
+            rv.setOnClickPendingIntent(R.id.w_v1, risposta(ctx, 200, dia, "sonno", 0));
+            rv.setOnClickPendingIntent(R.id.w_v2, apriGiorno(ctx, 201, dia.optString("d")));
+        } else {
+            rv.setOnClickPendingIntent(R.id.w_v1, risposta(ctx, 202, dia, "voto", 2));
+            rv.setOnClickPendingIntent(R.id.w_v2, risposta(ctx, 203, dia, "voto", 3));
+            rv.setOnClickPendingIntent(R.id.w_v3, risposta(ctx, 204, dia, "voto", 4));
+        }
     }
 
     static void disegna(Context ctx, AppWidgetManager mgr, int[] ids) {
         long ora = System.currentTimeMillis();
-        String etichetta = "Notturnisti", adesso = "Apri Notturnisti", sotto = "per vedere qui il tuo piano";
-        int icona = R.drawable.ic_w_libero, progresso = -1;
-        String[] pOra = { "", "" }, pT = { "", "" };
-        int[] pIc = { 0, 0 };
-        long prossimoCambio = Long.MAX_VALUE, rinfresco = Long.MAX_VALUE;
-        JSONArray giorni = null;
-        JSONObject mese = null;     // le settimane dopo la prima, per il widget alto
-        long[] sveglia = null;      // {inizio, fine} del sonno imminente: si propone la sveglia
-        JSONObject dia = null;      // la domanda del diario, se è il momento
-        String fase = null;         // "sonno" | "voto"
+        SharedPreferences sp = prefs(ctx);
+        WidgetStato st = new WidgetStato();
+        CalendarioModel cal = null;
         try {
-            android.content.SharedPreferences sp = ctx.getSharedPreferences(WidgetPlugin.PREFS, Context.MODE_PRIVATE);
             String json = sp.getString(WidgetPlugin.KEY, null);
             if (json != null) {
                 JSONObject radice = new JSONObject(json);
-                giorni = radice.optJSONArray("giorni");
-                mese = radice.optJSONObject("mese");
-                JSONArray v = radice.getJSONArray("voci");
-                JSONObject turno = radice.optJSONObject("turno");
-                if (turno != null && turno.optLong("e") <= ora) turno = null;
-                // la voce in corso (la più importante, se ce n'è più d'una) e la prossima importante
-                JSONObject corrente = null, primo = null;
-                for (int i = 0; i < v.length(); i++) {
-                    JSONObject x = v.getJSONObject(i);
-                    long s = x.getLong("s"), e = x.getLong("e");
-                    if (s > ora && s < prossimoCambio) prossimoCambio = s;
-                    if (e > ora && e < prossimoCambio) prossimoCambio = e;
-                    String k = x.optString("k", null);
-                    if (s <= ora && e > ora && (corrente == null || (!importante(corrente.optString("k", null)) && importante(k)))) corrente = x;
-                    if (s > ora && primo == null && importante(k)) primo = x;
-                }
-                // La sveglia: da 4 ore prima del sonno fino a mezz'ora dopo l'inizio
-                for (int i = 0; i < v.length() && sveglia == null; i++) {
-                    JSONObject x = v.getJSONObject(i);
-                    if (!x.optString("k", "").startsWith("sonno")) continue;
-                    long s = x.getLong("s"), e = x.getLong("e");
-                    if (e > ora && s - ora < 4 * 3600_000L && ora - s < 30 * 60_000L) sveglia = new long[]{ s, e };
-                }
-                if (corrente == null && primo == null) for (int i = 0; i < v.length(); i++) { JSONObject x = v.getJSONObject(i); if (x.getLong("s") > ora) { primo = x; break; } }
-                JSONObject eroe = corrente != null ? corrente : primo;
-                if (corrente != null) {
-                    long s = corrente.getLong("s"), e = corrente.getLong("e");
-                    etichetta = "Adesso";
-                    adesso = corrente.getString("t");
-                    sotto = "fino alle " + hhmm(e, ora) + " · ancora " + durata(e - ora);
-                    // in turno: quando smettere con il caffè, se cade prima della fine
-                    if (corrente.optString("k", "").startsWith("turno")) for (int i = 0; i < v.length(); i++) {
-                        JSONObject x = v.getJSONObject(i);
-                        if (x.optString("k", "").startsWith("caffe") && x.getLong("s") > ora && x.getLong("s") < e) { sotto = "fino alle " + hhmm(e, ora) + " · caffè entro le " + hhmm(x.getLong("s"), ora); break; }
-                    }
-                    icona = icona(corrente.optString("k", null));
-                    progresso = (int) Math.max(0, Math.min(1000, (ora - s) * 1000 / Math.max(1, e - s)));
-                    rinfresco = ora + 5 * 60_000;
-                } else if (primo != null) {
-                    long s = primo.getLong("s");
-                    // Mai "nessun impegno": la prossima cosa, con quanto manca.
-                    etichetta = "Prossimo";
-                    adesso = primo.getString("t");
-                    sotto = "alle " + hhmm(s, ora) + " · tra " + durata(s - ora);
-                    if (primo.optString("k", "").startsWith("sonno")) sotto = "alle " + hhmm(s, ora) + " · sveglia " + hhmm(primo.getLong("e"), ora);
-                    icona = icona(primo.optString("k", null));
-                    rinfresco = ora + (s - ora < 3_600_000 ? 60_000 : 5 * 60_000);
-                } else {
-                    etichetta = "Notturnisti";
-                    adesso = "Piano da aggiornare";
-                    sotto = "apri l'app per i prossimi giorni";
-                }
-                // Le righe sotto: il prossimo turno (sempre, anche fra giorni) e le voci in arrivo che non sono già in alto,
-                // poi in ordine di ora (il turno delle 22 non sta sopra il caffè delle 19).
-                int n = 0;
-                long[] pS = new long[2];
-                boolean turnoInAlto = eroe != null && turno != null && eroe.optString("k", "").startsWith("turno") && eroe.getLong("s") == turno.getLong("s");
-                if (turno != null && !turnoInAlto) {
-                    pS[n] = turno.getLong("s"); pOra[n] = quando(pS[n], ora); pT[n] = turno.optString("t", "Turno"); pIc[n] = R.drawable.ic_w_turno; n++;
-                }
-                for (int i = 0; i < v.length() && n < 2; i++) {
-                    JSONObject x = v.getJSONObject(i);
-                    long s = x.getLong("s"); String k = x.optString("k", "");
-                    if (s <= ora || x == eroe || k.startsWith("turno")) continue;
-                    if (corrente != null && corrente.optString("k", "").startsWith("turno") && k.startsWith("caffe") && s < corrente.getLong("e")) continue;
-                    pS[n] = s; pOra[n] = hhmm(s, ora);
-                    pT[n] = k.startsWith("sonno") ? x.getString("t") + " · sveglia " + hhmm(x.getLong("e"), ora) : x.getString("t");
-                    pIc[n] = icona(k); n++;
-                }
-                if (n == 2 && pS[1] < pS[0]) {
-                    String o = pOra[0], t = pT[0]; int ic = pIc[0];
-                    pOra[0] = pOra[1]; pT[0] = pT[1]; pIc[0] = pIc[1];
-                    pOra[1] = o; pT[1] = t; pIc[1] = ic;
-                }
-                // Diario: dalla sveglia per 14 ore, finché non c'è risposta (nell'app o qui).
-                JSONObject d = radice.optJSONObject("diario");
-                // la domanda compare da sola all'ora della sveglia
-                if (d != null && d.optLong("da") > ora && d.optLong("da") < prossimoCambio) prossimoCambio = d.optLong("da");
-                if (d != null && ora >= d.optLong("da") && ora < d.optLong("a")) {
-                    JSONObject r = new JSONObject(sp.getString(KEY_RISPOSTE, "{}")).optJSONObject(d.optString("d"));
-                    boolean sonno = d.optBoolean("sonno") || (r != null && r.optBoolean("sonno"));
-                    boolean voto = d.optBoolean("voto") || (r != null && r.has("voto"));
-                    if (!sonno) fase = "sonno"; else if (!voto) fase = "voto";
-                    if (fase != null) { dia = d; long a = d.optLong("a"); if (a < prossimoCambio) prossimoCambio = a; }
-                }
+                st = WidgetStato.calcola(radice, new JSONObject(sp.getString(KEY_RISPOSTE, "{}")), ora);
+                cal = CalendarioModel.leggi(radice.optJSONObject("mese"));
             }
         } catch (Exception ignored) { }
 
-        Intent apri = new Intent(ctx, MainActivity.class);
-        apri.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent pi = PendingIntent.getActivity(ctx, 0, apri, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
-        String oggiIso = String.format(Locale.ROOT, "%1$tY-%1$tm-%1$td", Calendar.getInstance());
-
+        long quando = st.rinfresco;
+        if (st.prossimoCambio != Long.MAX_VALUE) quando = Math.min(quando, st.prossimoCambio + 1000);
+        boolean haCalendario = false;
         for (int id : ids) {
+            // la persona: la scelta di questo widget regge finché la stellina nell'app non cambia
+            int persona = -1;
+            if (cal != null) {
+                String vista = sp.getString("star_" + id, "");
+                persona = cal.personaAttiva(sp.getInt("pers_" + id, CalendarioModel.SEGUI_STELLA), vista);
+                if (!cal.stella.equals(vista)) sp.edit().putString("star_" + id, cal.stella).putInt("pers_" + id, CalendarioModel.SEGUI_STELLA).apply();
+            }
             int h = altezza(mgr, id);
-            RemoteViews rv = new RemoteViews(ctx.getPackageName(), R.layout.widget_piano);
-            // (le viste aggiunte dal vecchio disegno non esistono più: tutto qui è esplicito)
-            rv.setViewVisibility(R.id.w_etichetta, View.VISIBLE); rv.setViewVisibility(R.id.w_riga_adesso, View.VISIBLE); rv.setViewVisibility(R.id.w_prossimi, View.VISIBLE);
-            rv.setTextViewText(R.id.w_etichetta, etichetta);
-            rv.setTextViewText(R.id.w_adesso, adesso);
-            rv.setTextViewText(R.id.w_sotto, sotto);
-            rv.setImageViewResource(R.id.w_icona, icona);
-            rv.setContentDescription(android.R.id.background, etichetta + ": " + adesso + ", " + sotto);
-            if (progresso >= 0) { rv.setViewVisibility(R.id.w_progresso, View.VISIBLE); rv.setProgressBar(R.id.w_progresso, 1000, progresso, false); }
-            else rv.setViewVisibility(R.id.w_progresso, View.GONE);
-
-            // Le prossime due: da 2 righe in su (sotto i 100 dp resta solo "adesso").
-            int[][] righe = { { R.id.w_p1, R.id.w_p1_ic, R.id.w_p1_ora, R.id.w_p1_t }, { R.id.w_p2, R.id.w_p2_ic, R.id.w_p2_ora, R.id.w_p2_t } };
-            for (int i = 0; i < 2; i++) {
-                boolean c = h >= 100 && !pT[i].isEmpty() && (i == 0 || h >= 130 || progresso < 0);
-                rv.setViewVisibility(righe[i][0], c ? View.VISIBLE : View.GONE);
-                if (c) {
-                    rv.setImageViewResource(righe[i][1], pIc[i]);
-                    rv.setTextViewText(righe[i][2], pOra[i]);
-                    rv.setTextViewText(righe[i][3], pT[i]);
-                }
-            }
-            rv.setOnClickPendingIntent(android.R.id.background, pi);
-
-            // Diario: sostituisce le righe sotto (stessa altezza del widget).
-            boolean diario = dia != null && h >= 100;
-            rv.setViewVisibility(R.id.w_diario, diario ? View.VISIBLE : View.GONE);
-            if (diario) {
-                rv.setViewVisibility(R.id.w_progresso, View.GONE);
-                rv.setViewVisibility(R.id.w_p1, View.GONE); rv.setViewVisibility(R.id.w_p2, View.GONE);
-                rv.setImageViewResource(R.id.w_icona, R.drawable.ic_w_sonno);
-                if ("sonno".equals(fase)) {
-                    rv.setTextViewText(R.id.w_etichetta, "Come hai dormito?");
-                    rv.setTextViewText(R.id.w_adesso, dia.optString("bed") + " → " + dia.optString("wake"));
-                    rv.setTextViewText(R.id.w_sotto, "è andata così?");
-                    rv.setTextViewText(R.id.w_db1, "Sì, così");
-                    rv.setTextViewText(R.id.w_db2, "Altri orari");
-                    rv.setViewVisibility(R.id.w_db2, View.VISIBLE); rv.setViewVisibility(R.id.w_db3, View.GONE);
-                    rv.setInt(R.id.w_db1, "setBackgroundResource", R.drawable.widget_bottone_pri);
-                    rv.setTextColor(R.id.w_db1, ctx.getResources().getColor(R.color.w_su_accento, null));
-                    rv.setOnClickPendingIntent(R.id.w_db1, risposta(ctx, 200, dia, "sonno", 0));
-                    Intent ap = new Intent(Intent.ACTION_VIEW, Uri.parse("notturnisti://giorno/" + dia.optString("d")), ctx, MainActivity.class);
-                    ap.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    rv.setOnClickPendingIntent(R.id.w_db2, PendingIntent.getActivity(ctx, 201, ap, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT));
-                    rv.setContentDescription(android.R.id.background, "Come hai dormito? " + dia.optString("bed") + " - " + dia.optString("wake"));
-                } else {
-                    rv.setTextViewText(R.id.w_etichetta, "Come ti senti?");
-                    rv.setTextViewText(R.id.w_adesso, "La tua energia oggi");
-                    rv.setTextViewText(R.id.w_sotto, "un tocco, resta nel diario");
-                    rv.setTextViewText(R.id.w_db1, "Poca");
-                    rv.setTextViewText(R.id.w_db2, "Così così");
-                    rv.setTextViewText(R.id.w_db3, "Bene");
-                    rv.setViewVisibility(R.id.w_db2, View.VISIBLE); rv.setViewVisibility(R.id.w_db3, View.VISIBLE);
-                    rv.setInt(R.id.w_db1, "setBackgroundResource", R.drawable.widget_bottone);
-                    rv.setTextColor(R.id.w_db1, ctx.getResources().getColor(R.color.w_ink, null));
-                    rv.setOnClickPendingIntent(R.id.w_db1, risposta(ctx, 202, dia, "voto", 2));
-                    rv.setOnClickPendingIntent(R.id.w_db2, risposta(ctx, 203, dia, "voto", 3));
-                    rv.setOnClickPendingIntent(R.id.w_db3, risposta(ctx, 204, dia, "voto", 4));
-                    rv.setContentDescription(android.R.id.background, "Come ti senti? Energia di oggi");
-                }
-            }
-
-            // Prima di dormire: «Metti la sveglia alle …», nello stesso posto del diario (mai insieme: il diario è la mattina).
-            if (!diario && sveglia != null && h >= 100) {
-                rv.setViewVisibility(R.id.w_diario, View.VISIBLE);
-                rv.setViewVisibility(R.id.w_progresso, View.GONE);
-                rv.setViewVisibility(R.id.w_p1, View.GONE); rv.setViewVisibility(R.id.w_p2, View.GONE);
-                Calendar fine = Calendar.getInstance(); fine.setTimeInMillis(sveglia[1]);
-                String quando = String.format(Locale.ITALY, "%02d:%02d", fine.get(Calendar.HOUR_OF_DAY), fine.get(Calendar.MINUTE));
-                rv.setTextViewText(R.id.w_db1, "Metti la sveglia alle " + quando);
-                rv.setViewVisibility(R.id.w_db2, View.GONE); rv.setViewVisibility(R.id.w_db3, View.GONE);
-                rv.setInt(R.id.w_db1, "setBackgroundResource", R.drawable.widget_bottone_pri);
-                rv.setTextColor(R.id.w_db1, ctx.getResources().getColor(R.color.w_su_accento, null));
-                Intent al = new Intent(android.provider.AlarmClock.ACTION_SET_ALARM)
-                    .putExtra(android.provider.AlarmClock.EXTRA_HOUR, fine.get(Calendar.HOUR_OF_DAY))
-                    .putExtra(android.provider.AlarmClock.EXTRA_MINUTES, fine.get(Calendar.MINUTE))
-                    .putExtra(android.provider.AlarmClock.EXTRA_MESSAGE, "Notturnisti")
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                rv.setOnClickPendingIntent(R.id.w_db1, PendingIntent.getActivity(ctx, 205, al, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT));
-            }
-
-            boolean sett = giorni != null && giorni.length() > 0 && h >= 160;
-            GiorniModel persone = sett && mese != null ? GiorniModel.leggi(mese) : null;
-            rv.setViewVisibility(R.id.w_settimana, sett ? View.VISIBLE : View.GONE);
-            if (sett) {
-                for (int i = 0; i < CELLE.length; i++) {
-                    JSONObject g = giorni.optJSONObject(i);
-                    if (g == null) { rv.setViewVisibility(CELLE[i][0], View.INVISIBLE); continue; }
-                    rv.setViewVisibility(CELLE[i][0], View.VISIBLE);
-                    boolean oggi = oggiIso.equals(g.optString("d"));
-                    rv.setInt(CELLE[i][0], "setBackgroundResource", oggi ? R.drawable.widget_cella_oggi : 0);
-                    rv.setTextViewText(CELLE[i][1], g.optString("g"));
-                    rv.setTextViewText(CELLE[i][2], g.optString("c"));
-                    rv.setTextViewText(CELLE[i][3], g.optString("s"));
-                    // la persona con la stellina, sotto la tua sigla: come nelle righe qui sotto
-                    GiorniModel.Cella sua = persone == null ? null : persone.sua(i);
-                    boolean conPersona = persone != null && persone.persona != null;
-                    rv.setViewVisibility(CELLE[i][4], conPersona ? View.VISIBLE : View.GONE);
-                    if (conPersona) GiorniWidget.pillolaPersona(ctx, rv, CELLE[i][4], sua);
-                    String tipo = g.optString("t");
-                    rv.setInt(CELLE[i][2], "setBackgroundResource", "notte".equals(tipo) ? R.drawable.widget_cella_notte
-                        : "lavoro".equals(tipo) ? R.drawable.widget_cella_lavoro : R.drawable.widget_cella_riposo);
-                    // Un tocco sul giorno apre l'app su quel giorno (notturnisti://giorno/AAAA-MM-GG).
-                    Intent gi = new Intent(Intent.ACTION_VIEW, Uri.parse("notturnisti://giorno/" + g.optString("d")), ctx, MainActivity.class);
-                    gi.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    rv.setOnClickPendingIntent(CELLE[i][0], PendingIntent.getActivity(ctx, 100 + i, gi, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT));
-                }
-            }
-            GiorniWidget.riempi(ctx, rv, sett ? mese : null, h);
-            mgr.updateAppWidget(id, rv);
+            mgr.updateAppWidget(id, costruisci(ctx, st, cal, h, ora, persona, id));
+            if (cal != null && WidgetPiano.calcola(h, st.progresso >= 0, st.azione != WidgetStato.Azione.NESSUNA, st.eventi.size(), persona >= 0, CalendarioWidget.righeDisponibili(cal, ora)).calendario) haCalendario = true;
+        }
+        if (haCalendario) {   // a mezzanotte «oggi» cambia
+            Calendar m = Calendar.getInstance(); m.add(Calendar.DAY_OF_YEAR, 1);
+            m.set(Calendar.HOUR_OF_DAY, 0); m.set(Calendar.MINUTE, 1); m.set(Calendar.SECOND, 0);
+            quando = Math.min(quando, m.getTimeInMillis());
         }
 
-        // Prossimo ridisegno: al prossimo cambio, o prima se c'è un conto alla
-        // rovescia. Allarme inesatto e senza risveglio: se il telefono dorme si
-        // aggiorna appena si accende lo schermo, che è quando il widget si
-        // guarda. Nessun permesso speciale, consumo trascurabile.
-        long quando = Math.min(prossimoCambio == Long.MAX_VALUE ? Long.MAX_VALUE : prossimoCambio + 1000, rinfresco);
+        // Prossimo ridisegno: al prossimo cambio, o prima se c'è un conto alla rovescia. Allarme inesatto e senza risveglio:
+        // se il telefono dorme si aggiorna appena si accende lo schermo, che è quando il widget si guarda.
         if (quando != Long.MAX_VALUE) {
             AlarmManager am = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
             Intent tick = new Intent(ctx, NotturnistiWidget.class).setAction(AZIONE_TICK);
