@@ -515,8 +515,11 @@ border-top:5px solid var(--ink)}
 .cgrid i{position:absolute;top:0;bottom:0;width:1px;background:var(--line);transform:translateX(-.5px)}
 .caxis{display:flex;align-items:flex-end;gap:8px;height:16px;margin-bottom:2px}
 .caxis .crail{background:none;height:16px}
+.caxis .ccode,.caxis .cp{font-size:10.5px;line-height:1;font-weight:700}
 .caxis .crail span{position:absolute;bottom:0;transform:translateX(-50%);font-size:10.5px;line-height:1;color:var(--faint);white-space:nowrap}
 .cbar.nap{opacity:.5}
+/* turno della persona: filo verde appena sotto la rotaia */
+.cbar.pers{top:auto;bottom:-6px;height:3px;background:var(--ok);border-radius:99px}
 .lnk{background:none;border:none;padding:6px 0;color:var(--blue);font-family:inherit;
 font-size:14px;cursor:pointer;text-decoration:underline;text-underline-offset:3px;min-height:44px}
 .lnk:hover{color:var(--ink)}
@@ -6279,9 +6282,16 @@ function personaStriscia(){
   const nome=p.name||"Persona";
   return {p, nome, sigla:(nome.trim()[0]||"P").toUpperCase()};
 }
-function sigPersona(pers, o){
-  const x=asPartner(()=>{ const c=NT.codeAt(o); return c==="?" ? null : {c, r:NT.block(o).rest}; }, pers.p);
+function datiPersona(pers, o){
+  return asPartner(()=>{ const c=NT.codeAt(o); if(c==="?") return null; const b=NT.block(o); return {c, r:b.rest, a:b.start, z:b.end}; }, pers.p);
+}
+function sigPersona(pers, x){
   return '<span class="cp'+(x&&x.r?' r':'')+'" title="'+esc(pers.nome)+'">'+(x?esc(x.c):'·')+'</span>';
+}
+// Il turno della persona: una barra verde sottile sotto la tua rotaia, sulla stessa scala delle ore.
+function barraPersona(x, cpx){
+  const x0=Math.max(cpx(x.a),0), x1=Math.min(cpx(x.z),100);
+  return x1>x0 ? '<span class="cbar pers" style="left:'+x0+'%;width:'+(x1-x0)+'%"></span>' : '';
 }
 function renderStrip(P, f, S){
   // Scala unica per tutte le righe, senza avvolgimenti: così ogni barra
@@ -6312,7 +6322,7 @@ function renderStrip(P, f, S){
   const pers=personaStriscia();
   // Con la colonna della persona la rotaia si stringe: su telefoni molto stretti (< 340 px) etichette ogni 12 ore invece di 6, le linee restano
   const stretta=!!pers && innerWidth<340;
-  let ch='<div class="caxis" aria-hidden="true"><span class="clab"></span><span class="ccode"></span>'+(pers?'<span class="cp"></span>':'')+'<span class="crail">'+
+  let ch='<div class="caxis" aria-hidden="true"><span class="clab"></span><span class="ccode">'+(pers?'Tu':'')+'</span>'+(pers?'<span class="cp" title="'+esc(pers.nome)+'">'+esc(pers.sigla)+'</span>':'')+'<span class="crail">'+
     // proprio sul bordo resta la linea ma non l'etichetta: si accavallerebbe
     // con la vicina o uscirebbe dal riquadro
     tk.map(m=>{ const x=cpx(m); return x<7 || x>93 || (stretta && (m/360)%2) ? '' : '<span style="left:'+x+'%">'+hhmm(m)+'</span>'; }).join("")+'</span></div><div class="crows">'+
@@ -6327,13 +6337,15 @@ function renderStrip(P, f, S){
     // (il pisolino non è nella striscia: simulate() non calcola i pisolini,
     // solo plan() lo fa — chiamarlo per ogni giorno della striscia costerebbe
     // un plan() completo x13 a ogni render, non solo una lettura leggera)
+    const px=pers ? datiPersona(pers, o) : null;
     const gs=state.giorni[iso(d)]||{}, sigla=SIGLA_SPECIALE[gs.t]||"";
     ch+='<div class="crow'+(o===0?" on":"")+(state.ecc[iso(d)]||gs.s!=null?" mod":"")+(sigla?" spec":"")+(gs.t==="reperibile"?" rep":"")+'" data-off="'+o+'" role="button" tabindex="0">'+
       '<span class="clab">'+d.toLocaleDateString(LINGUA,{weekday:"short"}).slice(0,3)+' '+d.getDate()+'</span>'+
       '<span class="ccode"'+(gs.t?' title="'+esc(GIORNI_SPECIALI[gs.t])+'"':'')+'>'+(sigla||esc(k)+(gs.t==="extra"?"+":""))+'</span>'+
-      (pers ? sigPersona(pers, o) : '')+
+      (pers ? sigPersona(pers, px) : '')+
       '<span class="crail">'+
       seg.map(([x,w,cl])=>'<span class="cbar '+cl+'" style="left:'+x+'%;width:'+w+'%"></span>').join("")+
+      (px && !px.r ? barraPersona(px, cpx) : '')+
       (o===0 && cpx(oggiM)>=0 && cpx(oggiM)<=100 ? '<span class="cnow" style="left:'+cpx(oggiM)+'%" title="adesso"></span>' : '')+
       '</span></div>';
   }
@@ -6348,7 +6360,7 @@ function renderStrip(P, f, S){
   $("#cyc").classList.toggle("con-pers", !!pers);
   $("#cyc").innerHTML=ch+
     '<div class="key">'+'<span><i style="background:var(--blue)"></i>Sonno</span>'+'<span><i style="background:var(--orange-bar)"></i>Turno</span>'+
-    (pers ? '<button type="button" class="key-pers" data-cp-toggle aria-pressed="true" title="Nascondi le sigle di '+esc(pers.nome)+'"><b>'+esc(pers.sigla)+'</b>'+esc(pers.nome)+'</button>'
+    (pers ? '<button type="button" class="key-pers" data-cp-toggle aria-pressed="true" title="Nascondi le sigle di '+esc(pers.nome)+'">'+'<b>'+esc(pers.nome)+'</b> in verde: sigla e turno (filo sotto la barra)</button>'
       : personaStrisciaNascosta() ? '<button type="button" class="key-pers" data-cp-toggle aria-pressed="false" title="Mostra le sigle di '+esc(personaStrisciaNascosta())+'">'+esc(personaStrisciaNascosta())+'</button>' : '')+'</div>';
   // L'etichetta del range: stessa finestra usata sopra per costruire la
   // striscia (finestraCiclo()), non un calcolo separato che rischierebbe
