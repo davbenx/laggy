@@ -64,9 +64,13 @@ final class GiorniModel {
         return new int[]{ c.get(Calendar.YEAR), c.get(Calendar.MONTH) + 1, c.get(Calendar.DAY_OF_MONTH) };
     }
 
-    /** Quante righe di sette giorni si possono mostrare dopo la prima settimana, dato lo spazio in dp. */
+    /**
+     * Quante righe di sette giorni si possono mostrare dopo la prima settimana, dato lo spazio in dp.
+     * Misure dal telefono: «adesso» + due voci + settimana ≈ 220 dp con il padding (+20 se sotto ogni sigla c'è quella
+     * della persona), ogni riga in più ≈ 43 dp (59 con la persona), la legenda ≈ 18 dp.
+     */
     static int righeExtra(int altezzaDp, boolean conPersona, int max) {
-        int base = 240, riga = conPersona ? 66 : 48, legenda = conPersona ? 18 : 0;
-        return Math.max(0, Math.min(max, (altezzaDp - base - legenda) / riga));
+        int base = conPersona ? 258 : 220, riga = conPersona ? 59 : 43;
+        return Math.max(0, Math.min(max, (altezzaDp - base) / riga));
     }
 }

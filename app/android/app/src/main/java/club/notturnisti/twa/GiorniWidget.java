@@ -16,6 +16,7 @@ import org.json.JSONObject;
  */
 final class GiorniWidget {
     static final int RIGHE = 5, COLONNE = 7;
+    static final float ALTEZZA_VERA = 1.05f;
     private static final String[] MESI = { "gen", "feb", "mar", "apr", "mag", "giu", "lug", "ago", "set", "ott", "nov", "dic" };
     private static final int[][][] CELLE = new int[RIGHE][COLONNE][4];   // [riga][colonna] = {cella, data, mia, sua}
     private static final int[] RIGA = { R.id.w_xr0, R.id.w_xr1, R.id.w_xr2, R.id.w_xr3, R.id.w_xr4 };
@@ -48,7 +49,8 @@ final class GiorniWidget {
     /** Mostra le righe che stanno nell'altezza `altezzaDp`; le altre restano nascoste. */
     static void riempi(Context ctx, RemoteViews rv, JSONObject pubblicato, int altezzaDp) {
         GiorniModel m = pubblicato == null ? null : GiorniModel.leggi(pubblicato);
-        int n = m == null ? 0 : Math.min(GiorniModel.righeExtra(altezzaDp, m.persona != null, RIGHE), (m.giorni() / COLONNE) - 1);
+        // i launcher riportano un'altezza un po' più bassa di quella vera (misurato su due widget: 15-25%): un piccolo margine
+        int n = m == null ? 0 : Math.min(GiorniModel.righeExtra(Math.round(altezzaDp * ALTEZZA_VERA), m.persona != null, RIGHE), (m.giorni() / COLONNE) - 1);
         rv.setViewVisibility(R.id.w_extra, n > 0 ? View.VISIBLE : View.GONE);
         if (n <= 0) return;
         boolean conPersona = m.persona != null;
@@ -63,11 +65,7 @@ final class GiorniWidget {
                 rv.setTextViewText(id[2], mia == null || mia.tipo == '?' ? "?" : mia.sigla);
                 rv.setInt(id[2], "setBackgroundResource", sfondo(mia, false));
                 rv.setViewVisibility(id[3], conPersona ? View.VISIBLE : View.GONE);
-                if (conPersona) {
-                    rv.setTextViewText(id[3], sua == null || sua.tipo == '?' ? "·" : sua.sigla);
-                    rv.setInt(id[3], "setBackgroundResource", sfondo(sua, true));
-                    rv.setTextColor(id[3], ctx.getColor(sua != null && sua.tipo == 'n' ? R.color.w_p_notte_t : R.color.w_ink));
-                }
+                if (conPersona) pillolaPersona(ctx, rv, id[3], sua);
                 String iso = String.format(Locale.ROOT, "%04d-%02d-%02d", dt[0], dt[1], dt[2]);
                 Intent gi = new Intent(Intent.ACTION_VIEW, Uri.parse("notturnisti://giorno/" + iso), ctx, MainActivity.class);
                 gi.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -77,6 +75,13 @@ final class GiorniWidget {
         }
         rv.setViewVisibility(R.id.w_x_leg, conPersona ? View.VISIBLE : View.GONE);
         if (conPersona) rv.setTextViewText(R.id.w_x_leg, "Sopra tu, sotto " + m.persona);
+    }
+
+    /** Sigla della persona in una pillola già nel layout (settimana in alto o righe sotto). */
+    static void pillolaPersona(Context ctx, RemoteViews rv, int id, GiorniModel.Cella sua) {
+        rv.setTextViewText(id, sua == null || sua.tipo == '?' ? "·" : sua.sigla);
+        rv.setInt(id, "setBackgroundResource", sfondo(sua, true));
+        rv.setTextColor(id, ctx.getColor(sua != null && sua.tipo == 'n' ? R.color.w_p_notte_t : R.color.w_ink));
     }
 
     private static int sfondo(GiorniModel.Cella c, boolean persona) {
