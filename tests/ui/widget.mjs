@@ -32,6 +32,14 @@ ok(W.giorni[1].c==="Fe" && /•$/.test(W.giorni[2].c) && W.giorni[4].c==="N", "s
 ok(W.diario && W.diario.d===tra(0) && /^\d\d:\d\d$/.test(W.diario.bed) && W.diario.a-W.diario.da===14*3600e3 && !W.diario.sonno && !W.diario.voto, "domanda del diario: orari del piano, per 8 ore dalla sveglia → "+JSON.stringify(W.diario));
 await p.context().close();
 
+// i miei cambi di un giorno (scambio, ferie) non si applicano alla persona seguita
+{ const gi=n=>{ const d=new Date(); d.setHours(12,0,0,0); d.setDate(d.getDate()+n); return iso(d); };
+  const q=await apri({turniConfigurati:true,pattern:"MMNRR",anchor:tra(0),shifts:SH,repeat:true,firstSeenAt:tra(-30),
+    people:[{name:"Anna",pattern:"MMRR",anchor:gi(0)}], ecc:{[tra(3)]:"N"}, giorni:{[tra(1)]:{t:"ferie"}}});
+  const M=(await q.evaluate(()=>window.__widget)).mese;
+  ok(M.io[1].startsWith("Fe:") && M.io[3].startsWith("N:"), "le mie ferie (giorno 1) e il mio cambio in N (giorno 3) ci sono per me → "+M.io.slice(0,5).join(" "));
+  ok(M.p.g.slice(0,6).join(" ")==="M:l M:l R:r R:r M:l M:l", "per Anna contano solo i suoi turni, non i miei cambi → "+M.p.g.slice(0,6).join(" "));
+  await q.context().close(); }
 // le settimane dopo la prima: da oggi per 42 giorni, la mia sigla e quella della persona con la stellina
 { const gi=n=>{ const d=new Date(); d.setHours(12,0,0,0); d.setDate(d.getDate()+n); return iso(d); };
   const pers=[0,1,2].map(i=>({name:"P"+i, pattern:["MMRR","NNRR","MPRR"][i], anchor:gi(i)}));
