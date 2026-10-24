@@ -474,6 +474,13 @@ body.primo-avvio #firstPlanBanner,body.primo-avvio #setupChecklist,body.primo-av
    rosso=rischio), non "questo è il terzo tipo di turno che hai
    configurato". Lettera neutra, come il resto dei testi secondari. */
 .ccode{font-size:12px;font-weight:600;width:18px;flex:none;text-align:center;color:var(--faint);position:relative}
+/* la persona scelta con la stellina: la sua sigla accanto alla tua, in verde (come nel widget) */
+.cp{font-size:12px;font-weight:600;width:14px;flex:none;text-align:center;color:var(--ok)}
+.cp.r{color:var(--faint);font-weight:500}
+.key-pers{font:inherit;color:inherit;background:none;border:0;padding:0;min-height:24px;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+.key-pers[aria-pressed="false"]{opacity:.7;text-decoration:line-through}
+.cyc.con-pers .caxis .crail span{font-size:10px}
+.key-pers b{color:var(--ok);font-weight:700}
 .crow.spec .ccode{font-size:10.5px;color:var(--dim)}
 .crow.rep .ccode::after{content:"";position:absolute;top:-1px;right:-3px;width:5px;height:5px;border-radius:50%;background:var(--orange-fill)}
 /* Striscia del ciclo: pillola sottile, come nel mockup approvato — prima
@@ -6263,6 +6270,19 @@ if($("#meseBox")) $("#meseBox").addEventListener("click", e=>{
 // Senza, una barra di sonno o di turno non si legge: non si sa dove cade la
 // mezzanotte, né se il sonno è di notte o di giorno.
 function tacche(clo, chi){ const out=[]; for(let m=Math.ceil(clo/360)*360; m<=chi; m+=360) out.push(m); return out; }
+// La persona scelta con la stellina in «Le tue persone»: la sua sigla di turno accanto alla tua, giorno per giorno.
+// Si può nascondere dalla legenda (state.piano.persona === false). Il sonno di lei/lui non c'è: è un'altra rotaia.
+function personaDellaStellina(){ const t=tuttePersone(); return t[state.personaGlance] || t[0] || null; }
+function personaStrisciaNascosta(){ const p=personaDellaStellina(); return p && (state.piano||{}).persona===false ? (p.name||"Persona") : ""; }
+function personaStriscia(){
+  const p=personaDellaStellina(); if(!p || (state.piano||{}).persona===false) return null;
+  const nome=p.name||"Persona";
+  return {p, nome, sigla:(nome.trim()[0]||"P").toUpperCase()};
+}
+function sigPersona(pers, o){
+  const x=asPartner(()=>{ const c=NT.codeAt(o); return c==="?" ? null : {c, r:NT.block(o).rest}; }, pers.p);
+  return '<span class="cp'+(x&&x.r?' r':'')+'" title="'+esc(pers.nome)+'">'+(x?esc(x.c):'·')+'</span>';
+}
 function renderStrip(P, f, S){
   // Scala unica per tutte le righe, senza avvolgimenti: così ogni barra
   // resta sul giorno a cui appartiene e non se ne va a finire su quello dopo.
@@ -6289,10 +6309,13 @@ function renderStrip(P, f, S){
   clo=Math.floor((clo-30)/60)*60; chi=Math.ceil((chi+30)/60)*60;
   const cspan=Math.max(chi-clo,60), cpx=m=>(m-clo)/cspan*100;
   const tk=tacche(clo,chi);
-  let ch='<div class="caxis" aria-hidden="true"><span class="clab"></span><span class="ccode"></span><span class="crail">'+
+  const pers=personaStriscia();
+  // Con la colonna della persona la rotaia si stringe: su telefoni molto stretti (< 340 px) etichette ogni 12 ore invece di 6, le linee restano
+  const stretta=!!pers && innerWidth<340;
+  let ch='<div class="caxis" aria-hidden="true"><span class="clab"></span><span class="ccode"></span>'+(pers?'<span class="cp"></span>':'')+'<span class="crail">'+
     // proprio sul bordo resta la linea ma non l'etichetta: si accavallerebbe
     // con la vicina o uscirebbe dal riquadro
-    tk.map(m=>{ const x=cpx(m); return x<7 || x>93 ? '' : '<span style="left:'+x+'%">'+hhmm(m)+'</span>'; }).join("")+'</span></div><div class="crows">'+
+    tk.map(m=>{ const x=cpx(m); return x<7 || x>93 || (stretta && (m/360)%2) ? '' : '<span style="left:'+x+'%">'+hhmm(m)+'</span>'; }).join("")+'</span></div><div class="crows">'+
     '<div class="cgrid" aria-hidden="true">'+tk.map(m=>'<i style="left:'+cpx(m)+'%"></i>').join("")+'</div>';
   for(let o=finLo;o<=finHi;o++){
     const d=day(f,o), k=NT.codeAt(o), sd=NT.at(S,o), bb=NT.block(o), seg=[];
@@ -6308,6 +6331,7 @@ function renderStrip(P, f, S){
     ch+='<div class="crow'+(o===0?" on":"")+(state.ecc[iso(d)]||gs.s!=null?" mod":"")+(sigla?" spec":"")+(gs.t==="reperibile"?" rep":"")+'" data-off="'+o+'" role="button" tabindex="0">'+
       '<span class="clab">'+d.toLocaleDateString(LINGUA,{weekday:"short"}).slice(0,3)+' '+d.getDate()+'</span>'+
       '<span class="ccode"'+(gs.t?' title="'+esc(GIORNI_SPECIALI[gs.t])+'"':'')+'>'+(sigla||esc(k)+(gs.t==="extra"?"+":""))+'</span>'+
+      (pers ? sigPersona(pers, o) : '')+
       '<span class="crail">'+
       seg.map(([x,w,cl])=>'<span class="cbar '+cl+'" style="left:'+x+'%;width:'+w+'%"></span>').join("")+
       (o===0 && cpx(oggiM)>=0 && cpx(oggiM)<=100 ? '<span class="cnow" style="left:'+cpx(oggiM)+'%" title="adesso"></span>' : '')+
@@ -6321,8 +6345,11 @@ function renderStrip(P, f, S){
   // riposo del partner (vive in "Quando sono disponibile"), l'avviso di
   // rischio (notti di fila, turno rientrante, minimo circadiano: è una riga
   // in Oggi, rischioDelGiorno) e il pallino dell'umore dal diario.
+  $("#cyc").classList.toggle("con-pers", !!pers);
   $("#cyc").innerHTML=ch+
-    '<div class="key">'+'<span><i style="background:var(--blue)"></i>Sonno</span>'+'<span><i style="background:var(--orange-bar)"></i>Turno</span>'+'</div>';
+    '<div class="key">'+'<span><i style="background:var(--blue)"></i>Sonno</span>'+'<span><i style="background:var(--orange-bar)"></i>Turno</span>'+
+    (pers ? '<button type="button" class="key-pers" data-cp-toggle aria-pressed="true" title="Nascondi le sigle di '+esc(pers.nome)+'"><b>'+esc(pers.sigla)+'</b>'+esc(pers.nome)+'</button>'
+      : personaStrisciaNascosta() ? '<button type="button" class="key-pers" data-cp-toggle aria-pressed="false" title="Mostra le sigle di '+esc(personaStrisciaNascosta())+'">'+esc(personaStrisciaNascosta())+'</button>' : '')+'</div>';
   // L'etichetta del range: stessa finestra usata sopra per costruire la
   // striscia (finestraCiclo()), non un calcolo separato che rischierebbe
   // di disallinearsi da quello che si vede davvero.
@@ -6730,8 +6757,13 @@ function renderWizPeopleList(){
       (multi?'<button class="lnk" data-glance-persona="'+i+'" aria-label="Mostrala nella card di Oggi" title="Mostrala nella card di Oggi" style="color:'+(attiva?"var(--orange)":"var(--faint)")+';padding:4px">'+star+'</button>':'')+
       '<span style="flex:1;font-weight:600">'+esc(nome)+'</span>'+
       '<button class="lnk" data-remove-persona="'+i+'" style="color:var(--faint)">Rimuovi</button></div>';
-  }).join("")+(multi?'<p class="hint" style="margin:2px 0 10px">La stellina sceglie chi vedi nella card "Turni condivisi" di Oggi — le altre restano comunque visibili qui sopra.</p>':'');
+  }).join("")+(multi?'<p class="hint" style="margin:2px 0 10px">La stellina sceglie chi vedi nella card "Turni condivisi" di Oggi — le altre restano comunque visibili qui sopra.</p>':'')+
+  // Solo nell'app e finché non è acceso: l'interruttore resta in fondo, ma qui, dove si è appena aggiunta la persona, si propone.
+  (coppiaDaProporre() ? '<div class="diary" style="gap:10px;margin:4px 0 10px;align-items:center"><span style="flex:1;font-size:13.5px;line-height:1.35">Vuoi i <b>riposi in comune con '+esc(persone[Math.min(Math.max(+state.personaGlance||0,0),persone.length-1)].name||"questa persona")+'</b> nel calendario del telefono?</span>'+
+    '<button type="button" class="btn g" id="doCoppiaQui" style="white-space:nowrap">Attiva</button></div>' : '');
+  const q=$("#doCoppiaQui"); if(q) q.onclick=async()=>{ q.disabled=true; if(await impostaCoppiaNativa(true)) toast("Fatto: li trovi nel calendario «Notturnisti · insieme»"); else q.disabled=false; };
 }
+function coppiaDaProporre(){ return !!(platform.calendar.available && tuttePersone().length && !(platform.calendar.attivo() && platform.calendar.coppiaAttiva())); }
 // La finestra libera più lunga (almeno tre ore vere) di un giorno in comune —
 // stessa soglia/ordinamento già usati per la card "p" in cards(), qui
 // richiamati direttamente perché la pagina ha bisogno degli orari, non solo
@@ -7090,12 +7122,17 @@ function renderCoppiaNativa(el, hasPartner, pName){
   const t=$("#coupleCalToggle");
   t.onchange=async()=>{
     if(!hasPartner){ t.checked=false; apriPartner(); return; }
-    if(t.checked){
-      const r = platform.calendar.attivo() ? (await platform.calendar.impostaCoppia(true), "ok") : await platform.calendar.attiva({coppia:true});
-      if(r!=="ok"){ t.checked=false; toast("Serve il permesso al calendario"); return; }
-    } else await platform.calendar.impostaCoppia(false);
-    ntCalendarioNativo(true); renderPiuCal();
+    if(!(await impostaCoppiaNativa(t.checked))) t.checked=false;
   };
+}
+// Accende o spegne i riposi in comune nel calendario del telefono (solo app). false se manca il permesso.
+async function impostaCoppiaNativa(on){
+  if(on){
+    const r = platform.calendar.attivo() ? (await platform.calendar.impostaCoppia(true), "ok") : await platform.calendar.attiva({coppia:true});
+    if(r!=="ok"){ toast("Serve il permesso al calendario"); return false; }
+  } else await platform.calendar.impostaCoppia(false);
+  ntCalendarioNativo(true); renderPiuCal(); renderWizPeopleList();
+  return true;
 }
 // Widget Android: le prossime 48 ore del piano, già calcolate. Si aggiorna a
 // ogni cambio, a ogni apertura e a ogni ritorno nell'app; da lì il widget
@@ -7332,7 +7369,10 @@ function jump(e){ const el=e.target.closest(".crow"); if(!el) return;
   e.preventDefault();
   const off=+el.dataset.off;
   haptic(8); apriQuickShift(day(state.focus,off)); }
-$("#cyc").addEventListener("click",jump);
+$("#cyc").addEventListener("click",e=>{
+  if(e.target.closest("[data-cp-toggle]")){ state.piano=Object.assign({}, state.piano, {persona:(state.piano||{}).persona===false}); salva(); render(); return; }
+  jump(e);
+});
 $("#cyc").addEventListener("keydown",jump);
 
 // ── Quick Shift Switcher (Pillola / cambio turno a 1 tocco) ──
@@ -8002,6 +8042,8 @@ const CONSIGLI_FUNZIONE=[
   // Solo nell'app Android: la sveglia nell'Orologio e il voto dal widget
   {k:"sveglia", quando:()=>platform.alarm.available, t:()=>"Sotto «Dormi» c'è «Metti la sveglia»: la mette nell'Orologio del telefono, all'ora in cui finisce il sonno."},
   {k:"votowidget", quando:()=>platform.widget.available && platform.widget.presenti()>0, t:()=>"Dal widget puoi dire come hai dormito con un tocco, senza aprire l'app: il voto arriva nel diario."},
+  {k:"coppia", quando:()=>coppiaDaProporre(), t:()=>"Hai una persona in elenco: puoi mettere i vostri riposi in comune nel calendario del telefono, in un calendario a parte che accendi e spegni quando vuoi.",
+    cta:()=>"Attiva", a:()=>{ impostaCoppiaNativa(true).then(ok=>{ if(ok) toast("Fatto: li trovi nel calendario «Notturnisti · insieme»"); }); }},
   {k:"widgetmese", quando:()=>platform.widget.available && platform.widget.presenti()>0, t:()=>"Allarga il widget in altezza: diventa il mese, con i tuoi turni e quelli di una persona di «Le tue persone». Il puntino segna i giorni liberi insieme."},
   {k:"momenti", quando:()=>!["testa","leggera","intensa"].some(pianoVoce),
     t:()=>"Vuoi sapere quando pensare, muoverti o allenarti meglio? I momenti migliori si accendono in Impostazioni › Cosa vedi nel piano.",
