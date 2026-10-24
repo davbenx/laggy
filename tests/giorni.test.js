@@ -52,10 +52,11 @@ test("notifiche: pisolino preventivo e settimana con i nomi dei giorni speciali"
   const iso = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
   const f = new Date(); f.setHours(12, 0, 0, 0);
   const tra = n => { const d = new Date(f); d.setDate(d.getDate() + n); return d; };
-  // la prossima domenica porta il riepilogo della settimana
-  const dom = (7 - f.getDay()) % 7 || 7;
-  const cfg = { turniConfigurati: true, pattern: "R", repeat: true, anchor: iso(f), focus: f, shifts: { M: { n: "Mattino", s: 420, e: 840 } },
-    giorni: { [iso(tra(1))]: { t: "reperibile" }, [iso(tra(dom + 1))]: { t: "ferie" } } };   // dom ≥ 1: mai lo stesso giorno
+  // la domenica porta il riepilogo della settimana dopo; con l'ora vera può essere
+  // quella di stasera o quella tra sette giorni, quindi le ferie coprono entrambe
+  const giorni = { [iso(tra(1))]: { t: "reperibile" } };
+  for (let n = 2; n <= 14; n++) giorni[iso(tra(n))] = { t: "ferie" };
+  const cfg = { turniConfigurati: true, pattern: "R", repeat: true, anchor: iso(f), focus: f, shifts: { M: { n: "Mattino", s: 420, e: 840 } }, giorni };
   const L = buildSchedule(cfg, { days: 10, types: ["nap", "settimana"] });
   assert.ok(L.some(n => n.title === "Pisolino preventivo"), JSON.stringify(L.map(n => n.title)));
   const sett = L.find(n => n.title === "La tua settimana");
