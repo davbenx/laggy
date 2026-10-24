@@ -39,7 +39,8 @@ Parte minimale e aggiunge un pezzo alla volta con l'altezza (`WidgetPiano`): **a
 - Il pulsante (`WidgetStato`, uno alla volta): voto del sonno e poi dell'energia dalla sveglia (14 ore) › «Metti la sveglia · 09:55» da 4 ore prima del sonno, o mezz'ora prima di un pisolino › «A letto 03:10 → 09:55» fino a 12 ore prima › «Pisolino 19:05 → 19:50» fino a 3 ore prima. Le voci sotto non ripetono quella già nel pulsante.
 - Calendario (`CalendarioModel`, `CalendarioWidget`): settimane dal lunedì, passato più tenue, oggi su un tondo; la tua sigla sopra e quella della persona con la stellina sotto, in verde acqua; il nome della persona è un tasto: la successiva, poi nascosta (la scelta resta finché nell'app non sposti la stellina).
 - Pagina: `mese` = da lunedì per 42 giorni, fino a 4 persone; la striscia di 7 giorni `giorni` non serve più e non si pubblica.
-- Test: JVM per stato, piano e calendario (`WidgetStatoTest` include il cambio d'ora); UI per i dati pubblicati. **L'aspetto non è verificato da qui** (un'anteprima con Paparazzi non si è potuta scaricare: Maven Central limita le richieste). Da guardare sul telefono: soglie in `WidgetPiano` (misure in dp), colori in chiaro/scuro, righe che riempiono, tocchi.
+- **Anteprima su computer**: GitHub › Actions › «Anteprima widget» disegna il widget vero (Paparazzi) in chiaro e scuro a 7 altezze e in 7 momenti (sera, sveglia, pisolino in corso, voto, senza persone, persona nascosta, piano esaurito); le immagini sono nell'artefatto. Le misure di `WidgetPiano` sono tarate lì. Da rilanciare a ogni modifica del layout.
+- Test: JVM per stato, piano e calendario (`WidgetStatoTest` include il cambio d'ora); UI per i dati pubblicati. Da guardare sul telefono: quanto i launcher riportano l'altezza (`ALTEZZA_VERA`), tocchi, la sveglia nell'Orologio.
 - Da sapere: i launcher riportano un'altezza più bassa del vero (`ALTEZZA_VERA`).
 
 ## Idee per dopo (in ordine di valore/rischio, da rivedere con i dati reali)
