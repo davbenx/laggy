@@ -1,0 +1,45 @@
+# Anteprima del widget: lo disegna su un computer (Paparazzi) in chiaro e scuro, a varie altezze e nei momenti che contano.
+# Si lancia a mano: GitHub → Actions → "Anteprima widget" → Run workflow; le immagini sono nell'artefatto "anteprima-widget".
+# Non tocca la release né l'app: vedi tools/anteprima-widget/README.md.
+name: Anteprima widget
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  anteprima:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Prepara il progetto con le risorse e le classi del widget
+        run: |
+          P=tools/anteprima-widget; M=app/android/app/src/main
+          cp -r app/android/gradle "$P/gradle"; cp app/android/gradlew "$P/gradlew"
+          cp -r "$M/res" "$P/app/src/main/res"
+          for f in WidgetStato WidgetPiano CalendarioModel CalendarioWidget NotturnistiWidget; do cp "$M/java/club/notturnisti/twa/$f.java" "$P/app/src/main/java/club/notturnisti/twa/"; done
+      - name: Disegna
+        working-directory: tools/anteprima-widget
+        run: ./gradlew recordPaparazziDebug --no-daemon
+      - name: Una tavola per momento e tema
+        run: |
+          sudo apt-get install -y imagemagick >/dev/null
+          cd tools/anteprima-widget/app/src/test/snapshots/images
+          mkdir -p /tmp/tavole
+          for g in $(ls *.png | sed -E 's/.*_(a_sera|b_sveglia|c_pisolino|d_voto|e_solo_io)_(chiaro|scuro)_h[0-9]+.*/\1_\2/' | sort -u); do
+            files=$(ls *_${g}_h*.png | sort -t h -k2 -n | sort -V)
+            montage $files -tile 7x1 -geometry +8+8 -background '#1b1b1b' "/tmp/tavole/$g.png"
+          done
+          cp *.png /tmp/tavole/ 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: anteprima-widget
+          path: /tmp/tavole
+          retention-days: 14
