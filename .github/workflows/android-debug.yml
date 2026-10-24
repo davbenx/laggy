@@ -1,0 +1,45 @@
+# APK di prova (debug) da installare sul telefono, con le prove Java prima di compilare.
+# Si lancia a mano: GitHub → Actions → "Android debug" → Run workflow. Il file è nell'artefatto "notturnisti-apk".
+# Non va su Play: è firmato con la chiave di debug (se hai già installato la versione di Play, va tolta prima).
+name: Android debug
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_name:
+        description: "Versione mostrata (es. 1.3.0-prova)"
+        required: true
+        default: "prova"
+
+permissions:
+  contents: read
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - name: File web e plugin nativi
+        working-directory: app
+        run: |
+          npm ci
+          npm run build:web
+          npx cap sync android
+      - name: Prove Java e APK
+        working-directory: app/android
+        run: ./gradlew testDebugUnitTest assembleDebug --no-daemon -PntVersionName=${{ inputs.version_name }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: notturnisti-apk
+          path: app/android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 14

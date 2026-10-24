@@ -52,6 +52,10 @@ jobs:
           npm run build:web
           npx cap sync android
 
+      - name: Prove Java (widget)
+        working-directory: app/android
+        run: ./gradlew testDebugUnitTest --no-daemon
+
       - name: Chiave di upload (dai secrets)
         working-directory: app/android
         env:

@@ -17,8 +17,8 @@
     <color name="w_cella_notte">#DCE6F1</color>
     <color name="w_cella_riposo">#EDF1F5</color>
     <color name="w_su_accento">#FFFFFF</color>
-    <color name="w_p_lavoro">#D8F0EA</color>
-    <color name="w_p_lavoro_t">#0F6B60</color>
-    <color name="w_p_notte">#1F6F6A</color>
-    <color name="w_p_notte_t">#FFFFFF</color>
+    <color name="w_pl_lavoro">#D8F0EA</color>
+    <color name="w_pl_lavoro_t">#0F6B60</color>
+    <color name="w_pl_notte">#A9DDD3</color>
+    <color name="w_pl_notte_t">#0A4F47</color>
 </resources>

@@ -7243,42 +7243,31 @@ function ntWidget(){
   // Il prossimo turno, anche fra giorni: la prima cosa che si guarda.
   const tn=ev.filter(e=>e.tipo==="turno" && +e.end>ora).sort((a,b)=>a.start-b.start)[0];
   const turno=tn ? {s:+tn.start, e:+tn.end, t:tn.title} : null;
-  // La settimana per il widget allargato: sigla del turno (o del giorno
-  // speciale), colore per tipo, ora in cui andare a letto, reperibilità.
-  const GG=["dom","lun","mar","mer","gio","ven","sab"], giorni=[];
-  const oggi=giornoVero();
-  for(let o=0;o<7;o++){
-    const d=day(oggi,o), f=state.focus; state.focus=d;
-    let c="?"; try{ c=NT.codeAt(0); }catch(e){}
-    state.focus=f;
-    const g=state.giorni[iso(d)]||{};
-    const P=c==="?"?null:NT_planSafe(d);
-    const tipo = !P || P.b.rest ? "riposo" : P.night ? "notte" : "lavoro";
-    const sigla=(SIGLA_SPECIALE[g.t]||(c==="?"?"?":c))+(g.t==="reperibile"?"•":g.t==="extra"?"+":"");
-    giorni.push({d:iso(d), g:o===0?"oggi":GG[d.getDay()]+"\u00a0"+d.getDate(), c:sigla, t:tipo, s:P?hhmm(P.s.onset):""});
-  }
-  platform.widget.publish(voci, giorni, {turno, diario:diarioWidget(), mese:meseWidget()});
+  platform.widget.publish(voci, [], {turno, diario:diarioWidget(), mese:meseWidget()});
 }
-// Le settimane dopo la prima, per il widget alto: da oggi per 42 giorni, la mia sigla e quella della persona
-// con la stellina (se c'è). Sigle e tipi («n» notte, «l» lavoro, «r» riposo) arrivano dal motore; il widget le mostra e basta.
+// Il calendario del widget: da lunedì (della settimana di oggi) per 42 giorni, la mia sigla e quella di al massimo quattro
+// persone (la stellina sempre dentro). Sigle e tipi («n» notte, «l» lavoro, «r» riposo) arrivano dal motore; il widget le mostra
+// e basta. `sel` = la stellina fra quelle pubblicate, `star` la identifica: se nell'app cambia, il widget riparte da lei.
 function meseWidget(){
   const f=state.focus;
   try{
-    const oggi=giornoVero(), tutte=tuttePersone(), per=tutte[state.personaGlance] || tutte[0] || null;
+    const oggi=giornoVero(), lun=day(oggi, -((oggi.getDay()+6)%7)), N=42;
+    const tutte=tuttePersone(), star=Math.min(Math.max(+state.personaGlance||0,0),tutte.length-1);
+    const scelte=tutte.map((p,i)=>i).sort((x,y)=>(x===star?-1:y===star?1:x-y)).slice(0,4).sort((x,y)=>x-y);
     const tipoDi=P=>P.b.rest?"r":P.night?"n":"l";
-    const io=[], g=[];
-    for(let o=0;o<42;o++){
-      const d=day(oggi,o); state.focus=d;
+    const io=[], p=scelte.map(i=>({n:tutte[i].name||"Persona "+(i+1), g:[]}));
+    for(let o=0;o<N;o++){
+      const d=day(lun,o); state.focus=d;
       let c="?"; try{ c=NT.codeAt(0); }catch(e){}
       const gs=state.giorni[iso(d)]||{}, P=c==="?"?null:NT_planSafe(d);
       io.push((SIGLA_SPECIALE[gs.t]||c)+":"+(P?tipoDi(P):"?"));
-      if(per){
+      scelte.forEach((pi,k)=>{
         let s="?:?";
-        if(P) asPartner(()=>{ const pc=NT.codeAt(0); if(pc!=="?") s=pc+":"+tipoDi(NT.plan()); }, per);
-        g.push(s);
-      }
+        asPartner(()=>{ const pc=NT.codeAt(0); if(pc!=="?"){ const Q=NT.plan(); s=pc+":"+tipoDi(Q); } }, tutte[pi]);
+        p[k].g.push(s);
+      });
     }
-    return {da:iso(oggi), io, p:per?{n:per.name||"Persona", g}:undefined};
+    return {da:iso(lun), io, p, sel:Math.max(0,scelte.indexOf(star)), star:tutte.length?star+"|"+(tutte[star].name||""):""};
   }catch(e){ return null; }
   finally{ state.focus=f; }
 }
@@ -8128,7 +8117,7 @@ const CONSIGLI_FUNZIONE=[
   {k:"votowidget", quando:()=>platform.widget.available && platform.widget.presenti()>0, t:()=>"Dal widget puoi dire come hai dormito con un tocco, senza aprire l'app: il voto arriva nel diario."},
   {k:"coppia", quando:()=>coppiaDaProporre(), t:()=>"Hai una persona in elenco: puoi mettere i vostri riposi in comune nel calendario del telefono, in un calendario a parte che accendi e spegni quando vuoi.",
     cta:()=>"Attiva", a:()=>{ impostaCoppiaNativa(true).then(ok=>{ if(ok) toast("Fatto: li trovi nel calendario «Notturnisti · insieme»"); }); }},
-  {k:"widgetmese", quando:()=>platform.widget.available && platform.widget.presenti()>0, t:()=>"Allarga il widget in altezza: ogni riga in più aggiunge una settimana, fino a oltre un mese. Con una persona in «Le tue persone» vedi anche i suoi turni, sotto i tuoi."},
+  {k:"widgetmese", quando:()=>platform.widget.available && platform.widget.presenti()>0, t:()=>"Allarga il widget in altezza: più è alto, più mostra. Il pulsante cambia con l'ora (sveglia, orario del sonno o del pisolino, voto del sonno), poi arrivano le prossime voci e il calendario, con i turni della persona che segui sotto i tuoi."},
   {k:"momenti", quando:()=>!["testa","leggera","intensa"].some(pianoVoce),
     t:()=>"Vuoi sapere quando pensare, muoverti o allenarti meglio? I momenti migliori si accendono in Impostazioni › Cosa vedi nel piano.",
     cta:()=>"Vedi", a:()=>{ apriOpzioni(); setTimeout(()=>{ const x=$("#opzPianoVoci"); if(x&&x.scrollIntoView) try{ x.scrollIntoView({block:"center"}); }catch(e){} }, 250); }},
@@ -8373,7 +8362,7 @@ const NOVITA={ id:"2026-10-24", data:"Ottobre 2026", righe:[
   ["Persone: modifica e orari propri","Ora puoi correggere una persona (turni, sonno, data di partenza) senza toglierla e rifarla. Se aggiungi qualcuno «con i tuoi stessi turni», gli orari restano suoi anche quando cambi i tuoi."],
   ["Turni: le sigle di chi segui","In Turni, accanto alla tua sigla compare quella della persona con la stellina, e il suo turno è un filo verde sotto la barra."],
   ["Momenti migliori","Quando pensare, muoverti, allenarti: accendili in Impostazioni › Cosa vedi nel piano."],
-  ["Widget più alto, più settimane","Allargalo: ogni riga in più aggiunge una settimana. Prima di dormire propone la sveglia, la mattina il voto del sonno.",true],
+  ["Widget rifatto","Più lo allarghi, più mostra: adesso, il pulsante giusto per l'ora (sveglia, orario del sonno o del pisolino, voto del sonno), le prossime voci e il calendario a settimane con i turni di chi segui.",true],
   ["Dopo il turno","Appena comincia il sonno l'app dice di dormire (non più «Rientro»), e la linea dell'ora sta nel posto giusto."]
 ]};
 function novitaDaMostrare(){ return NOVITA.righe.filter(x=>!x[2] || platform.isNative); }
