@@ -15,7 +15,7 @@ for (const scheme of ["dark","light"]) {
     return {n:righe.length, nomi:righe.map(x=>x.innerText.trim()), minH:Math.min(...bx.map(x=>x.height)), over, legali:leg.map(a=>a.textContent), overflow:Math.max(...bx.map(x=>x.right))>innerWidth,
       gruppi:document.querySelectorAll(".opz-info .opz-gruppo.az").length};
   });
-  const ok=r.n===7 && r.gruppi===2 && r.minH>=44 && r.over===0 && !r.overflow && r.legali.join()==="Privacy,Termini d'uso,Licenze";
+  const ok=r.n===8 && r.gruppi===2 && r.minH>=44 && r.over===0 && !r.overflow && r.legali.join()==="Privacy,Termini d'uso,Licenze";
   console.log((ok?"✔":"✘")+` ${scheme}: ${r.n} righe (${r.nomi.join(" · ")}), altezza min ${r.minH}px, sovrapposte ${r.over}, legali ${r.legali.join("/")}`);
   await p.locator(".opz-info .foot-legal").scrollIntoViewIfNeeded();
   if (process.env.SHOT) await p.screenshot({path:`${process.env.SHOT}/foot-${scheme}.png`});
