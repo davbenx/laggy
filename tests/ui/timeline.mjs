@@ -37,7 +37,7 @@ const base={turniConfigurati:true,pattern:"MPNSR",anchor:iso(new Date()),repeat:
   const pos=await p.evaluate(()=>{ const a=document.querySelector(".tl-adesso"); if(!a) return null;
     const prima=[...document.querySelectorAll("#essenziale .tl")].filter(x=>x.getBoundingClientRect().bottom<=a.getBoundingClientRect().top+1).map(x=>x.querySelector(".el").textContent);
     return {ora:a.querySelector(".en").textContent, prima}; });
-  ok(pos && pos.ora==="10:00" && pos.prima.join()==="Luce", "il segno «ora» (10:00) sta fra le voci passate e le altre → "+JSON.stringify(pos));
+  ok(pos && pos.ora==="10:00" && pos.prima.join()==="Luce,Turno", "il segno «ora» (10:00) sta dopo ogni voce già cominciata (anche il turno in corso), prima delle altre → "+JSON.stringify(pos));
   const poi=await p.evaluate(()=>{ const e=document.querySelector("#ora .ora-poi"); return e ? e.textContent : null; });
   ok(poi==="Poi · ultimo caffè entro le 14:20", "sotto «Adesso»: il passo dopo → "+poi);
   ok(await p.evaluate(()=>document.querySelector(".tl-first .el").textContent==="Luce" && document.querySelector(".tl-last .el").textContent==="Dormi"), "la linea comincia sulla prima voce e finisce sull'ultima");

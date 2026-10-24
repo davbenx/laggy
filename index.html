@@ -4265,7 +4265,9 @@ function renderOra(Pfocus){
 
   const kssSleepy = votoOraRecente();
   const inNadir = !b.rest && P.night && isFinite(P.cbt) && inWin(m, P.cbt - 60, P.cbt + 60);
-  const inSmonto = !b.rest && (P.night || P.lateStart) && m >= b.end && m < b.end + 90;
+  // il rientro dura 90 minuti dopo il turno, ma non oltre l'inizio del sonno pianificato (che già conta il tragitto): da lì «dormi»
+  const inizioSonno = P.s && P.s.dur>0 && isFinite(P.s.onset) && P.s.onset>b.end ? P.s.onset : Infinity;
+  const inSmonto = !b.rest && (P.night || P.lateStart) && m >= b.end && m < Math.min(b.end + 90, inizioSonno);
   const inDuty = !b.rest && inWin(m, b.start, b.end);
   const risk = r && r.risk;
   const riskDiffMs = (risk && risk.at) ? (risk.at.getTime() - now.getTime()) : null;
@@ -5500,7 +5502,11 @@ function sonnoWin(P){
   // fra due turni attaccati il piano non trova tempo per dormire: lo si dice
   if(!(P.s.dur > 0)) return '<b>Nessun tempo per dormire</b>';
   const dOn=Math.floor(P.s.onset/1440), dEnd=Math.floor(P.end/1440);
-  const ancora = dOn>=1 ? "Domani" : (dEnd>dOn ? "Stanotte" : "Oggi");
+  // «Domani» rispetto al giorno che si guarda; ma nel giorno che si sta vivendo (anche «Ancora venerdì» alle 07:38 di sabato)
+  // conta la data vera: il sonno delle 07:10 di sabato, di sabato mattina, è «Oggi»
+  const vivo = dnum(state.focus)===dnum(giornoVero()), adesso = new Date();
+  const scarto = dnum(state.focus) + dOn - (vivo ? dnum(adesso) : dnum(state.focus));
+  const ancora = scarto>=1 ? (vivo && scarto===1 && mod1440(P.s.onset)<360 && adesso.getHours()>=17 ? "Stanotte" : "Domani") : (dEnd>dOn ? "Stanotte" : "Oggi");
   return '<span class="dwhen">'+ancora+'</span>'+hhmm(P.s.onset)+' → <b>'+hhmm(P.end)+'</b>';
 }
 
@@ -5893,8 +5899,10 @@ function renderEssenziale(P, CARDS){
     voci[idxR[idxR.length-1]].html=voci[idxR[idxR.length-1]].html.replace('<div class="tl','<div class="tl tl-last');
   }
   if(nowT!=null){
-    const passate=idxR.filter(i=>/^<div class="tl[^"]*\bpast\b/.test(voci[i].html));
-    const dopo=passate.length ? idxR.find(i=>i>passate[passate.length-1]) : undefined;
+    // la linea sta dopo ogni voce già cominciata (passata o in corso), prima della prima ancora da venire
+    const passate=idxR.filter(i=>/^<div class="tl[^"]*\b(past|ora)\b/.test(voci[i].html));
+    const ultima=passate.length ? passate[passate.length-1] : undefined;
+    const dopo=ultima===undefined ? undefined : (idxR.find(i=>i>ultima) ?? ultima+1);   // se non c'è niente dopo, in fondo
     if(dopo!==undefined){
       const mm=mod1440(Math.round(nowT));
       voci.splice(dopo, 0, {t:0, html:'<div class="tl-adesso" aria-hidden="true"><span class="en">'+
