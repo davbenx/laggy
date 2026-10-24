@@ -1582,8 +1582,8 @@ header b{font-size:23px}
     <div id="crossBox">
     <div id="wizPeopleList"></div>
     <p class="persone-modo">Usa Notturnisti</p>
-    <button type="button" class="btn g" id="doChiediLink" style="width:100%;min-height:44px">Chiedi il suo link →</button>
-    <span class="hint" style="display:block;margin:6px 0 4px">Le arriva il tuo link e cosa toccare per mandarti il suo. Quando te lo manda, incollalo qui sotto.</span>
+    <button type="button" class="btn g" id="doChiediLink" style="width:100%;min-height:44px">Manda il tuo link e chiedi il suo →</button>
+    <span class="hint" style="display:block;margin:6px 0 4px">Si apre un messaggio (WhatsApp, SMS…) con il tuo link e le istruzioni per risponderti. Lei lo apre, ti manda il suo link e tu lo incolli qui sotto.</span>
     <div class="q">
       <label for="personaLink">Il suo link</label>
       <textarea id="personaLink" rows="2" placeholder="Incolla qui il link che ti ha mandato"></textarea>
@@ -7069,11 +7069,15 @@ function renderPiuCal(){
    locale) e lo riscrive a ogni cambio di turni. Stessi eventi del feed ICS
    (NT.buildEvents), stessi 42 giorni; la coppia, 60 giorni come il feed. */
 function eventiCalendario(){
-  const f=state.focus; state.focus=new Date();
+  const f=state.focus, oggi=new Date(); oggi.setHours(0,0,0,0);
   let ev=[], cp=[];
   try{
     NT.setIcs({turni:true,sonno:true,pisolini:true,caffe:true,luce:true,rientro:true,pasti:false,avviso:0});
-    ev=NT.buildEvents(42);
+    // Si parte da ieri: il sonno e il rientro dopo una notte stanno nel piano del giorno prima, e alle 06:38
+    // sono ancora da venire. Gli eventi già finiti prima di oggi non servono.
+    state.focus=day(oggi,-1);
+    ev=NT.buildEvents(43).filter(e=>+e.end>=+oggi);
+    state.focus=new Date();
     if(state.pPattern) cp=NT.buildCoupleEvents(60);
   }catch(e){}
   state.focus=f;
@@ -7175,38 +7179,26 @@ function ntWidget(){
   }
   platform.widget.publish(voci, giorni, {turno, diario:diarioWidget(), mese:meseWidget()});
 }
-// Il mese del widget grande: dal lunedì della settimana del primo di questo mese a fine del terzo mese dopo,
-// la mia sigla giorno per giorno e quella di al massimo quattro persone (la stellina sempre dentro), con i giorni in cui siamo liberi insieme.
-// Sigle e tipi («n» notte, «l» lavoro, «r» riposo) arrivano dal motore; il widget li disegna e basta.
-let _meseMemo={k:null, v:null};
+// Le settimane dopo la prima, per il widget alto: da oggi per 42 giorni, la mia sigla e quella della persona
+// con la stellina (se c'è). Sigle e tipi («n» notte, «l» lavoro, «r» riposo) arrivano dal motore; il widget le mostra e basta.
 function meseWidget(){
-  // Con quattro persone sono centinaia di piani (oltre mezzo secondo): si rifanno solo se cambia la
-  // configurazione (stessa firma che avvisa notifiche e calendario) o il giorno.
-  const f=state.focus, oggi=giornoVero(), k=_cfgSig&&_cfgSig+"|"+iso(oggi);
-  if(k && _meseMemo.k===k) return _meseMemo.v;
+  const f=state.focus;
   try{
-    const uno=new Date(oggi.getFullYear(), oggi.getMonth(), 1, 12), lun=day(uno, -((uno.getDay()+6)%7));
-    const N=Math.ceil((Math.round((new Date(oggi.getFullYear(), oggi.getMonth()+4, 0, 12)-lun)/864e5)+1)/7)*7;
-    const tutte=tuttePersone(), star=Math.min(Math.max(+state.personaGlance||0,0),tutte.length-1);
-    const scelte=tutte.map((p,i)=>i).sort((x,y)=>(x===star?-1:y===star?1:x-y)).slice(0,4).sort((x,y)=>x-y);
+    const oggi=giornoVero(), tutte=tuttePersone(), per=tutte[state.personaGlance] || tutte[0] || null;
     const tipoDi=P=>P.b.rest?"r":P.night?"n":"l";
-    const io=[], p=scelte.map(i=>({n:tutte[i].name||"Persona "+(i+1), g:[], i:""}));
-    for(let o=0;o<N;o++){
-      const d=day(lun,o); state.focus=d;
+    const io=[], g=[];
+    for(let o=0;o<42;o++){
+      const d=day(oggi,o); state.focus=d;
       let c="?"; try{ c=NT.codeAt(0); }catch(e){}
-      const g=state.giorni[iso(d)]||{}, P=c==="?"?null:NT_planSafe(d);
-      io.push((SIGLA_SPECIALE[g.t]||c)+":"+(P?tipoDi(P):"?"));
-      scelte.forEach((pi,k)=>{
+      const gs=state.giorni[iso(d)]||{}, P=c==="?"?null:NT_planSafe(d);
+      io.push((SIGLA_SPECIALE[gs.t]||c)+":"+(P?tipoDi(P):"?"));
+      if(per){
         let s="?:?";
-        if(P) asPartner(()=>{ const pc=NT.codeAt(0); if(pc!=="?") s=pc+":"+tipoDi(NT.plan()); }, tutte[pi]);
-        p[k].g.push(s);
-      });
+        if(P) asPartner(()=>{ const pc=NT.codeAt(0); if(pc!=="?") s=pc+":"+tipoDi(NT.plan()); }, per);
+        g.push(s);
+      }
     }
-    state.focus=lun;
-    scelte.forEach((pi,k)=>{ let z=""; for(let o=0;o<N;o++){ const l=io[o].endsWith(":?")?null:finestreCondivise(o, tutte[pi]); z+=l&&l.some(([a,b])=>b-a>=180)?"1":"0"; } p[k].i=z; });
-    const v={da:iso(lun), io, p, sel:Math.max(0,scelte.indexOf(star)), star:tutte.length?star+"|"+(tutte[star].name||""):""};
-    if(k) _meseMemo={k, v};
-    return v;
+    return {da:iso(oggi), io, p:per?{n:per.name||"Persona", g}:undefined};
   }catch(e){ return null; }
   finally{ state.focus=f; }
 }
@@ -8056,7 +8048,7 @@ const CONSIGLI_FUNZIONE=[
   {k:"votowidget", quando:()=>platform.widget.available && platform.widget.presenti()>0, t:()=>"Dal widget puoi dire come hai dormito con un tocco, senza aprire l'app: il voto arriva nel diario."},
   {k:"coppia", quando:()=>coppiaDaProporre(), t:()=>"Hai una persona in elenco: puoi mettere i vostri riposi in comune nel calendario del telefono, in un calendario a parte che accendi e spegni quando vuoi.",
     cta:()=>"Attiva", a:()=>{ impostaCoppiaNativa(true).then(ok=>{ if(ok) toast("Fatto: li trovi nel calendario «Notturnisti · insieme»"); }); }},
-  {k:"widgetmese", quando:()=>platform.widget.available && platform.widget.presenti()>0, t:()=>"Allarga il widget in altezza: diventa il mese, con i tuoi turni e quelli di una persona di «Le tue persone». Il puntino segna i giorni liberi insieme."},
+  {k:"widgetmese", quando:()=>platform.widget.available && platform.widget.presenti()>0, t:()=>"Allarga il widget in altezza: ogni riga in più aggiunge una settimana, fino a oltre un mese. Con una persona in «Le tue persone» vedi anche i suoi turni, sotto i tuoi."},
   {k:"momenti", quando:()=>!["testa","leggera","intensa"].some(pianoVoce),
     t:()=>"Vuoi sapere quando pensare, muoverti o allenarti meglio? I momenti migliori si accendono in Impostazioni › Cosa vedi nel piano.",
     cta:()=>"Vedi", a:()=>{ apriOpzioni(); setTimeout(()=>{ const x=$("#opzPianoVoci"); if(x&&x.scrollIntoView) try{ x.scrollIntoView({block:"center"}); }catch(e){} }, 250); }},

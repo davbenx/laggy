@@ -32,26 +32,19 @@ ok(W.giorni[1].c==="Fe" && /•$/.test(W.giorni[2].c) && W.giorni[4].c==="N", "s
 ok(W.diario && W.diario.d===tra(0) && /^\d\d:\d\d$/.test(W.diario.bed) && W.diario.a-W.diario.da===14*3600e3 && !W.diario.sonno && !W.diario.voto, "domanda del diario: orari del piano, per 8 ore dalla sveglia → "+JSON.stringify(W.diario));
 await p.context().close();
 
-// il mese: 15 settimane dal lunedì, la mia sigla, le persone (la stellina sempre dentro, al massimo 4)
+// le settimane dopo la prima: da oggi per 42 giorni, la mia sigla e quella della persona con la stellina
 { const gi=n=>{ const d=new Date(); d.setHours(12,0,0,0); d.setDate(d.getDate()+n); return iso(d); };
-  const pers=[0,1,2,3,4,5].map(i=>({name:"P"+i, pattern:["MMRR","NNRR","MPRR","RRMM","PPNR","MRMR"][i], anchor:gi(i)}));
-  const q=await apri({turniConfigurati:true,pattern:"MMNRR",anchor:tra(0),shifts:SH,repeat:true,firstSeenAt:tra(-30),people:pers,personaGlance:5,giorni:{[tra(1)]:{t:"ferie"}}});
+  const pers=[0,1,2].map(i=>({name:"P"+i, pattern:["MMRR","NNRR","MPRR"][i], anchor:gi(i)}));
+  const q=await apri({turniConfigurati:true,pattern:"MMNRR",anchor:tra(0),shifts:SH,repeat:true,firstSeenAt:tra(-30),people:pers,personaGlance:2,giorni:{[tra(1)]:{t:"ferie"}}});
   const M=(await q.evaluate(()=>window.__widget)).mese;
-  const uno=new Date(); uno.setHours(12,0,0,0); uno.setDate(1); const lun=new Date(uno); lun.setDate(1-((uno.getDay()+6)%7));
-  const fine=new Date(); fine.setHours(12,0,0,0); fine.setMonth(fine.getMonth()+4,0);
-  const N=Math.ceil((Math.round((fine-lun)/864e5)+1)/7)*7;
-  ok(M && M.da===iso(lun) && M.io.length===N && N%7===0 && N>=119, "mese: dal lunedì della settimana del primo, fino a fine del terzo mese dopo ("+N+" giorni)");
-  ok(M.io.every(x=>/^[^:]+:[nlr?]$/.test(x)), "mese: ogni giorno è «sigla:tipo» → "+M.io.slice(0,7).join(" "));
-  const ioff=Math.round((new Date(tra(1)+"T12:00:00")-lun)/864e5);
-  ok(/^Fe:/.test(M.io[ioff]), "mese: le mie ferie compaiono con la sigla Fe");
-  ok(M.p.length===4 && M.p.some(x=>x.n==="P5"), "mese: al massimo 4 persone e la stellina (P5) c'è sempre → "+M.p.map(x=>x.n));
-  ok(M.p[M.sel].n==="P5" && M.star==="5|P5", "mese: sel punta alla stellina e la chiave la riconosce → "+M.sel+" "+M.star);
-  ok(M.p.every(x=>x.g.length===N && x.i.length===N && /^[01]+$/.test(x.i)), "mese: ogni persona ha tutti i giorni e i giorni «insieme»");
-  ok(M.p.some(x=>x.i.includes("1")), "mese: ci sono giorni liberi insieme");
+  ok(M && M.da===tra(0) && M.io.length===42, "settimane: da oggi, 42 giorni");
+  ok(M.io.every(x=>/^[^:]+:[nlr?]$/.test(x)), "settimane: ogni giorno è «sigla:tipo» → "+M.io.slice(0,7).join(" "));
+  ok(/^Fe:/.test(M.io[1]), "settimane: le mie ferie compaiono con la sigla Fe");
+  ok(M.p && M.p.n==="P2" && M.p.g.length===42 && M.p.g.every(x=>/^[^:]+:[nlr?]$/.test(x)), "settimane: la persona con la stellina (P2) e le sue sigle → "+(M.p&&M.p.g.slice(0,6).join(" ")));
   await q.context().close();
   const r=await apri({turniConfigurati:true,pattern:"MMNRR",anchor:tra(0),shifts:SH,repeat:true,firstSeenAt:tra(-30)});
   const M2=(await r.evaluate(()=>window.__widget)).mese;
-  ok(M2 && M2.p.length===0 && M2.star==="" && M2.io.length===N, "mese senza persone: solo le mie sigle");
+  ok(M2 && M2.p===undefined && M2.io.length===42, "settimane senza persone: solo le mie sigle");
   await r.context().close();
 }
 // risposte dal widget: sonno e energia arrivano nel diario
@@ -66,5 +59,17 @@ p=await apri({turniConfigurati:true,pattern:"MPNSR",anchor:tra(-2),shifts:SH,rep
 st=await p.evaluate(k=>({w:JSON.parse(localStorage.getItem("nt:wakes"))[k], v:JSON.parse(localStorage.getItem("nt:diary"))[k]}), k);
 ok(st.w==="07:15" && st.v===2, "quello annotato nell'app vince su quello del widget");
 await p.context().close();
+// alle 06:38 dopo una notte: il sonno che sta per cominciare (nel piano del giorno prima) è fra le voci del widget
+{ const ctx=await b.newContext({locale:"it-IT",viewport:{width:360,height:740}});
+  await ctx.addInitScript(nativo);
+  await ctx.addInitScript(([st])=>{ if(sessionStorage.getItem("x")) return; sessionStorage.setItem("x","1");
+    localStorage.setItem("nt:state",JSON.stringify(st)); localStorage.setItem("nt:turniConfigurati","true"); localStorage.setItem("nt:firstPlanBannerChiuso","true"); },
+    [{turniConfigurati:true,pattern:"NNRRRPP",anchor:tra(-1),shifts:{N:{n:"Notte",s:1320,e:1860},P:{n:"Pomeriggio",s:840,e:1320}},repeat:true,firstSeenAt:tra(-30),freeBed:"00:30",freeWake:"08:30"}]);
+  const q=await ctx.newPage(); q.on("pageerror",e=>errs.push(e.message));
+  const t=new Date(); t.setHours(6,38,0,0); await q.clock.setFixedTime(t);
+  await q.goto("http://localhost:8766/index.html"); await q.waitForTimeout(2600);
+  const sonno=await q.evaluate(()=>{ const v=window.__widget.voci.find(v=>/^sonno/.test(v.k) && v.s>Date.now() && v.s<Date.now()+4*3600e3); return v ? new Date(v.s).toTimeString().slice(0,5) : null; });
+  ok(!!sonno, "alle 06:38 dopo la notte il widget ha il sonno che sta per cominciare → "+(sonno||"manca"));
+  await ctx.close(); }
 ok(!errs.length, "nessun errore di pagina "+JSON.stringify(errs));
 await b.close();

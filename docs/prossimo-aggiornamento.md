@@ -34,13 +34,13 @@ Fatto quando: un telefono con orologio compila il diario da solo, il giorno pass
 
 Non so ancora: quali dei tester ha un dispositivo compatibile; quanti giorni di storico si vedono dopo il permesso (una fonte terza dice 30, da verificare nella documentazione ufficiale).
 
-## Widget con il mese, anche con la compagna/il compagno (fatto nella 1.2.0, da provare sul telefono)
-Un solo widget: piccolo = «adesso», medio = la settimana, **alto almeno ~280 dp (5 righe) = il mese**.
-- La pagina pubblica `mese` (`meseWidget()` in `ntWidget()`): dal lunedì della settimana del primo del mese a fine del terzo mese dopo, `sigla:tipo` mio e di al massimo 4 persone (la stellina sempre dentro), giorni «liberi insieme» (≥ 3 ore) per persona. Si ricalcola solo se cambia la configurazione o il giorno (con 4 persone sono ~0,5 s).
-- `MeseModel` (dati, mesi, scelta persona; test JVM in `MeseModelTest`), `MeseWidget` (disegno Canvas → bitmap, ‹ ›, tocco sul titolo = prossima persona, tocco su un giorno = app su quel giorno, descrizioni per TalkBack).
-- La persona scelta dal widget resta finché non la cambi; se nell'app sposti la stellina, il widget riparte da lei.
-- **Da guardare sul telefono** (l'aspetto non si vede da qui): colori chiaro/scuro, leggibilità delle sigle a 4 e a 6 righe, soglia dei 280 dp su launcher diversi (Pixel, Samsung), tocchi ‹ › titolo giorno, font ingranditi (la griglia è un'immagine: non segue la dimensione del testo).
-- Idee rimaste: passaggio a mano «Adesso/Mese» se qualche launcher non riporta bene l'altezza; legenda del puntino «liberi insieme» nel widget; più di una persona sovrapposta.
+## Widget: settimane in più, sveglia e voto (1.2.1, da provare sul telefono)
+Un solo widget, più alto = più giorni. 3 righe: «Adesso/Prossimo», le prossime voci e la settimana di sette giorni da oggi. Da 4 righe in su si aggiungono righe di sette giorni (fino a cinque, oltre un mese), di seguito alla settimana.
+- Nella zona delle prossime voci: la mattina, per 14 ore, il voto del sonno e dell'energia; prima di dormire (da 4 ore prima a mezz'ora dopo l'inizio del sonno) «Metti la sveglia alle …» (apre l'Orologio con la sveglia pronta).
+- Con una persona (stellina in «Le tue persone»): sotto la tua sigla quella della persona, in verde; legenda «Sopra tu, sotto Anna».
+- Viste vere (`GiorniWidget`, `GiorniModel` con test JVM): seguono tema e testo ingrandito. La prima versione disegnava il mese come immagine e si stirava: tolta.
+- Da guardare sul telefono: righe che si aggiungono all'altezza giusta (soglie in `GiorniModel.righeExtra`), sigle e colori, tocco su un giorno, «Metti la sveglia» (l'Orologio chiede conferma: non si sa se la sveglia c'è già).
+- Tolti rispetto alla bozza: ‹ › sui mesi, cambio persona dal widget, puntino «liberi insieme». Da riprendere solo se servono.
 
 ## Idee per dopo (in ordine di valore/rischio, da rivedere con i dati reali)
 1. **Foto del foglio turni → importazione** (OCR sul telefono, nessun invio): per chi riceve i turni variabili su carta o PDF. È il punto più faticoso di chi non ha un ciclo.

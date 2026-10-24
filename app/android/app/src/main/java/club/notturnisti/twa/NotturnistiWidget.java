@@ -53,7 +53,6 @@ public class NotturnistiWidget extends AppWidgetProvider {
         super.onReceive(ctx, intent);
         if (AZIONE_TICK.equals(intent.getAction())) aggiornaTutti(ctx);
         if (AZIONE_DIARIO.equals(intent.getAction())) { salvaRisposta(ctx, intent); aggiornaTutti(ctx); }
-        if (MeseWidget.AZIONE.equals(intent.getAction())) { MeseWidget.azione(ctx, intent); aggiornaTutti(ctx); }
     }
 
     static int quanti(Context ctx) {
@@ -64,16 +63,6 @@ public class NotturnistiWidget extends AppWidgetProvider {
         AppWidgetManager mgr = AppWidgetManager.getInstance(ctx);
         int[] ids = mgr.getAppWidgetIds(new ComponentName(ctx, NotturnistiWidget.class));
         if (ids.length > 0) disegna(ctx, mgr, ids);
-    }
-
-    // Larghezza e altezza disponibili in dp, nell'orientamento attuale del telefono.
-    static int[] dimensioni(Context ctx, AppWidgetManager mgr, int id) {
-        Bundle o = mgr.getAppWidgetOptions(id);
-        if (o == null) return new int[]{ 250, 110 };
-        boolean orizzontale = ctx.getResources().getConfiguration().orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE;
-        return orizzontale
-            ? new int[]{ o.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH), o.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT) }
-            : new int[]{ o.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH), o.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT) };
     }
 
     // Altezza disponibile in dp (in verticale conta la massima).
@@ -164,7 +153,8 @@ public class NotturnistiWidget extends AppWidgetProvider {
         int[] pIc = { 0, 0 };
         long prossimoCambio = Long.MAX_VALUE, rinfresco = Long.MAX_VALUE;
         JSONArray giorni = null;
-        JSONObject mese = null;     // i dati del mese, per il widget grande
+        JSONObject mese = null;     // le settimane dopo la prima, per il widget alto
+        long[] sveglia = null;      // {inizio, fine} del sonno imminente: si propone la sveglia
         JSONObject dia = null;      // la domanda del diario, se è il momento
         String fase = null;         // "sonno" | "voto"
         try {
@@ -187,6 +177,13 @@ public class NotturnistiWidget extends AppWidgetProvider {
                     String k = x.optString("k", null);
                     if (s <= ora && e > ora && (corrente == null || (!importante(corrente.optString("k", null)) && importante(k)))) corrente = x;
                     if (s > ora && primo == null && importante(k)) primo = x;
+                }
+                // La sveglia: da 4 ore prima del sonno fino a mezz'ora dopo l'inizio
+                for (int i = 0; i < v.length() && sveglia == null; i++) {
+                    JSONObject x = v.getJSONObject(i);
+                    if (!x.optString("k", "").startsWith("sonno")) continue;
+                    long s = x.getLong("s"), e = x.getLong("e");
+                    if (e > ora && s - ora < 4 * 3600_000L && ora - s < 30 * 60_000L) sveglia = new long[]{ s, e };
                 }
                 if (corrente == null && primo == null) for (int i = 0; i < v.length(); i++) { JSONObject x = v.getJSONObject(i); if (x.getLong("s") > ora) { primo = x; break; } }
                 JSONObject eroe = corrente != null ? corrente : primo;
@@ -255,21 +252,8 @@ public class NotturnistiWidget extends AppWidgetProvider {
         for (int id : ids) {
             int h = altezza(mgr, id);
             RemoteViews rv = new RemoteViews(ctx.getPackageName(), R.layout.widget_piano);
-            int[] dim = dimensioni(ctx, mgr, id);
-            // Abbastanza grande: il mese al posto di tutto il resto (si rinfresca anche a mezzanotte, per «oggi»).
-            if (mese != null && MeseWidget.abbastanzaGrande(dim[0], dim[1]) && MeseWidget.mostra(ctx, rv, mese, id, dim[0], dim[1], ora, pi)) {
-                for (int v : new int[]{ R.id.w_etichetta, R.id.w_riga_adesso, R.id.w_progresso, R.id.w_diario, R.id.w_prossimi, R.id.w_settimana }) rv.setViewVisibility(v, View.GONE);
-                rv.setViewVisibility(R.id.w_mese, View.VISIBLE);
-                mgr.updateAppWidget(id, rv);
-                Calendar mezzanotte = Calendar.getInstance(); mezzanotte.add(Calendar.DAY_OF_YEAR, 1);
-                mezzanotte.set(Calendar.HOUR_OF_DAY, 0); mezzanotte.set(Calendar.MINUTE, 1); mezzanotte.set(Calendar.SECOND, 0);
-                rinfresco = Math.min(rinfresco, mezzanotte.getTimeInMillis());
-                continue;
-            }
-            rv.setViewVisibility(R.id.w_mese, View.GONE);
+            // (le viste aggiunte dal vecchio disegno non esistono più: tutto qui è esplicito)
             rv.setViewVisibility(R.id.w_etichetta, View.VISIBLE); rv.setViewVisibility(R.id.w_riga_adesso, View.VISIBLE); rv.setViewVisibility(R.id.w_prossimi, View.VISIBLE);
-            int pad = (int) (16 * ctx.getResources().getDisplayMetrics().density);
-            rv.setViewPadding(android.R.id.background, pad, pad, pad, pad);
             rv.setTextViewText(R.id.w_etichetta, etichetta);
             rv.setTextViewText(R.id.w_adesso, adesso);
             rv.setTextViewText(R.id.w_sotto, sotto);
@@ -304,7 +288,7 @@ public class NotturnistiWidget extends AppWidgetProvider {
                     rv.setTextViewText(R.id.w_sotto, "è andata così?");
                     rv.setTextViewText(R.id.w_db1, "Sì, così");
                     rv.setTextViewText(R.id.w_db2, "Altri orari");
-                    rv.setViewVisibility(R.id.w_db3, View.GONE);
+                    rv.setViewVisibility(R.id.w_db2, View.VISIBLE); rv.setViewVisibility(R.id.w_db3, View.GONE);
                     rv.setInt(R.id.w_db1, "setBackgroundResource", R.drawable.widget_bottone_pri);
                     rv.setTextColor(R.id.w_db1, ctx.getResources().getColor(R.color.w_su_accento, null));
                     rv.setOnClickPendingIntent(R.id.w_db1, risposta(ctx, 200, dia, "sonno", 0));
@@ -319,7 +303,7 @@ public class NotturnistiWidget extends AppWidgetProvider {
                     rv.setTextViewText(R.id.w_db1, "Poca");
                     rv.setTextViewText(R.id.w_db2, "Così così");
                     rv.setTextViewText(R.id.w_db3, "Bene");
-                    rv.setViewVisibility(R.id.w_db3, View.VISIBLE);
+                    rv.setViewVisibility(R.id.w_db2, View.VISIBLE); rv.setViewVisibility(R.id.w_db3, View.VISIBLE);
                     rv.setInt(R.id.w_db1, "setBackgroundResource", R.drawable.widget_bottone);
                     rv.setTextColor(R.id.w_db1, ctx.getResources().getColor(R.color.w_ink, null));
                     rv.setOnClickPendingIntent(R.id.w_db1, risposta(ctx, 202, dia, "voto", 2));
@@ -327,6 +311,25 @@ public class NotturnistiWidget extends AppWidgetProvider {
                     rv.setOnClickPendingIntent(R.id.w_db3, risposta(ctx, 204, dia, "voto", 4));
                     rv.setContentDescription(android.R.id.background, "Come ti senti? Energia di oggi");
                 }
+            }
+
+            // Prima di dormire: «Metti la sveglia alle …», nello stesso posto del diario (mai insieme: il diario è la mattina).
+            if (!diario && sveglia != null && h >= 100) {
+                rv.setViewVisibility(R.id.w_diario, View.VISIBLE);
+                rv.setViewVisibility(R.id.w_progresso, View.GONE);
+                rv.setViewVisibility(R.id.w_p1, View.GONE); rv.setViewVisibility(R.id.w_p2, View.GONE);
+                Calendar fine = Calendar.getInstance(); fine.setTimeInMillis(sveglia[1]);
+                String quando = String.format(Locale.ITALY, "%02d:%02d", fine.get(Calendar.HOUR_OF_DAY), fine.get(Calendar.MINUTE));
+                rv.setTextViewText(R.id.w_db1, "Metti la sveglia alle " + quando);
+                rv.setViewVisibility(R.id.w_db2, View.GONE); rv.setViewVisibility(R.id.w_db3, View.GONE);
+                rv.setInt(R.id.w_db1, "setBackgroundResource", R.drawable.widget_bottone_pri);
+                rv.setTextColor(R.id.w_db1, ctx.getResources().getColor(R.color.w_su_accento, null));
+                Intent al = new Intent(android.provider.AlarmClock.ACTION_SET_ALARM)
+                    .putExtra(android.provider.AlarmClock.EXTRA_HOUR, fine.get(Calendar.HOUR_OF_DAY))
+                    .putExtra(android.provider.AlarmClock.EXTRA_MINUTES, fine.get(Calendar.MINUTE))
+                    .putExtra(android.provider.AlarmClock.EXTRA_MESSAGE, "Notturnisti")
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                rv.setOnClickPendingIntent(R.id.w_db1, PendingIntent.getActivity(ctx, 205, al, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT));
             }
 
             boolean sett = giorni != null && giorni.length() > 0 && h >= 160;
@@ -350,6 +353,7 @@ public class NotturnistiWidget extends AppWidgetProvider {
                     rv.setOnClickPendingIntent(CELLE[i][0], PendingIntent.getActivity(ctx, 100 + i, gi, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT));
                 }
             }
+            GiorniWidget.riempi(ctx, rv, sett ? mese : null, h);
             mgr.updateAppWidget(id, rv);
         }
 
