@@ -8,6 +8,7 @@ import com.android.ide.common.rendering.api.SessionParams
 import com.android.resources.NightMode
 import org.json.JSONArray
 import org.json.JSONObject
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import java.util.Calendar
@@ -15,6 +16,7 @@ import java.util.TimeZone
 
 /** Il widget com'è davvero (stesse risorse, stessa costruzione delle viste), nei momenti e alle altezze che contano. */
 class AnteprimaTest {
+    @Before fun fuso() { TimeZone.setDefault(TimeZone.getTimeZone("Europe/Rome")) }
     @get:Rule val paparazzi = Paparazzi(deviceConfig = DeviceConfig.PIXEL_5, theme = "android:Theme.Material.Light.NoActionBar", renderingMode = SessionParams.RenderingMode.SHRINK)
 
     private fun t(g: Int, h: Int, m: Int): Long { val c = Calendar.getInstance(); c.clear(); c.set(2026, Calendar.OCTOBER, 24 + g, h, m, 0); return c.timeInMillis }

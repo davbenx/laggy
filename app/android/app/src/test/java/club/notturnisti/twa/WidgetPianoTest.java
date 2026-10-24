@@ -6,7 +6,7 @@ import org.junit.Test;
 
 public class WidgetPianoTest {
     @Test public void piccoloSoloAdesso() {
-        WidgetPiano p = WidgetPiano.calcola(100, false, true, 2, false, 5);
+        WidgetPiano p = WidgetPiano.calcola(90, false, true, 2, false, 5);
         assertFalse(p.pulsante); assertEquals(0, p.voci); assertFalse(p.calendario);
     }
 
@@ -26,7 +26,8 @@ public class WidgetPianoTest {
 
     @Test public void altoRiempieConLeSettimane() {
         WidgetPiano p = WidgetPiano.calcola(460, false, false, 2, true, 5);
-        assertTrue(p.calendario); assertEquals(5, p.righe); assertEquals(2, p.voci);
+        assertTrue(p.calendario); assertEquals(4, p.righe); assertEquals(2, p.voci);
+        assertEquals(5, WidgetPiano.calcola(560, false, false, 2, true, 5).righe);
         assertEquals("mai oltre le righe che ci sono", 3, WidgetPiano.calcola(900, false, false, 2, true, 3).righe);
     }
 
