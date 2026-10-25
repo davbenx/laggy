@@ -114,13 +114,29 @@ final class CalendarioModel {
         return Math.max(0, Math.min(massimo, Math.max(rigaOggi, 0) + spostamento));
     }
 
+    /** La riga è la prima settimana di un mese (il suo giovedì cade in un mese diverso da quello della riga prima). */
+    boolean inizioMese(int riga) {
+        if (riga <= 0) return false;
+        int[] a = meseDellaRiga(riga - 1), b = meseDellaRiga(riga);
+        return a[0] != b[0] || a[1] != b[1];
+    }
+
     /**
-     * Lo spostamento dopo un tocco su ‹ (-1) o › (+1): una pagina intera (tante settimane quante se ne vedono) a
-     * partire da quella che si vede ora, ferma ai bordi dei dati.
+     * Lo spostamento dopo un tocco su ‹ (-1) o › (+1), a partire dalla prima riga che si vede ora. Il passo è il
+     * più corto fra una pagina intera (tante settimane quante se ne vedono: non se ne salta mai nessuna) e l'inizio del
+     * mese vicino in quel verso: nei widget alti ‹ › sono il mese prima e dopo, in quelli bassi si procede a pagine
+     * e ci si aggancia all'inizio del mese quando è a meno di una pagina. Mai oltre i dati.
      */
-    static int paginaDopo(int rigaOggi, int spostamento, int righe, int settimane, int verso) {
-        int attuale = primaRiga(rigaOggi, spostamento, righe, settimane);
-        int nuova = Math.max(0, Math.min(Math.max(0, settimane - righe), attuale + verso * righe));
+    int paginaDopo(int rigaOggi, int spostamento, int righe, int verso) {
+        int massimo = Math.max(0, settimane() - righe);
+        int attuale = primaRiga(rigaOggi, spostamento, righe, settimane());
+        int passo = righe;
+        if (verso > 0) {
+            for (int r = attuale + 1; r < attuale + righe; r++) if (inizioMese(r)) { passo = r - attuale; break; }
+        } else {
+            for (int r = attuale - 1; r > attuale - righe && r > 0; r--) if (inizioMese(r)) { passo = attuale - r; break; }
+        }
+        int nuova = Math.max(0, Math.min(massimo, attuale + (verso > 0 ? passo : -passo)));
         return nuova - Math.max(rigaOggi, 0);
     }
 

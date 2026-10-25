@@ -138,7 +138,7 @@ public class NotturnistiWidget extends AppWidgetProvider {
     /** Le viste del widget per questo stato e questa altezza (in dp). Senza effetti: si può provare a parte. */
     static RemoteViews costruisci(Context ctx, WidgetStato st, CalendarioModel cal, int altezzaDp, long ora, int persona, int idWidget, int spostamento) {
         RemoteViews rv = new RemoteViews(ctx.getPackageName(), R.layout.widget_piano);
-        int righeCal = CalendarioWidget.righeDisponibili(cal);
+        int righeCal = CalendarioWidget.righeDisponibili(cal, ora);
         WidgetPiano p = WidgetPiano.calcola(altezzaDp, st.progresso >= 0, st.azione != WidgetStato.Azione.NESSUNA, st.eventi.size(), persona >= 0, righeCal);
 
         // ───── adesso ─────
@@ -244,7 +244,7 @@ public class NotturnistiWidget extends AppWidgetProvider {
             int spostamento = CalendarioModel.spostamentoValido(sp.getInt("off_" + id, 0), sp.getString("offd_" + id, ""), CalendarioWidget.giornoIso(ora));
             int h = altezza(mgr, id);
             mgr.updateAppWidget(id, costruisci(ctx, st, cal, h, ora, persona, id, spostamento));
-            if (cal != null && WidgetPiano.calcola(h, st.progresso >= 0, st.azione != WidgetStato.Azione.NESSUNA, st.eventi.size(), persona >= 0, CalendarioWidget.righeDisponibili(cal)).calendario) haCalendario = true;
+            if (cal != null && WidgetPiano.calcola(h, st.progresso >= 0, st.azione != WidgetStato.Azione.NESSUNA, st.eventi.size(), persona >= 0, CalendarioWidget.righeDisponibili(cal, ora)).calendario) haCalendario = true;
         }
         if (haCalendario) {   // a mezzanotte «oggi» cambia
             Calendar m = Calendar.getInstance(); m.add(Calendar.DAY_OF_YEAR, 1);

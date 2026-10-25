@@ -69,17 +69,17 @@ class AnteprimaTest {
     @Test fun voto_del_sonno() = tutte("d_voto", t(0, 9, 0), sera(), diario())
     @Test fun senza_persone() = tutte("e_solo_io", t(0, 20, 43), sera(), null, false)
 
-    // ‹ › del calendario: una pagina avanti (+4 settimane da oggi), una indietro fino in cima (-4), l'ultima pagina dei dati
+    // ‹ › del calendario: › da oggi si aggancia all'inizio di novembre (+2 settimane), ‹ a quello di ottobre (-3), dicembre (+6), l'ultima pagina dei dati
     @Test fun pagine_del_calendario() {
         for (tema in listOf("chiaro", "scuro")) {
             paparazzi.unsafeUpdateConfig(
                 deviceConfig = if (tema == "scuro") DeviceConfig.PIXEL_5.copy(nightMode = NightMode.NIGHT) else DeviceConfig.PIXEL_5,
                 theme = if (tema == "scuro") "android:Theme.Material.NoActionBar" else "android:Theme.Material.Light.NoActionBar")
             for (h in listOf(330, 460)) {
-                scena(paparazzi, "h_pagina_avanti_${tema}_h$h", h, t(0, 20, 43), sera(), spostamento = 4)
-                scena(paparazzi, "i_pagina_indietro_${tema}_h$h", h, t(0, 20, 43), sera(), spostamento = -4)
+                scena(paparazzi, "h_pagina_avanti_${tema}_h$h", h, t(0, 20, 43), sera(), spostamento = 2)
+                scena(paparazzi, "i_pagina_indietro_${tema}_h$h", h, t(0, 20, 43), sera(), spostamento = -3)
                 scena(paparazzi, "j_pagina_fine_${tema}_h$h", h, t(0, 20, 43), sera(), spostamento = 99)
-                scena(paparazzi, "k_pagina_avanti_solo_io_${tema}_h$h", h, t(0, 20, 43), sera(), persone = false, spostamento = 4)
+                scena(paparazzi, "k_pagina_avanti_solo_io_${tema}_h$h", h, t(0, 20, 43), sera(), persone = false, spostamento = 6)
             }
         }
     }

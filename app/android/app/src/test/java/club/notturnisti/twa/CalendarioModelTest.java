@@ -54,8 +54,24 @@ public class CalendarioModelTest {
         assertArrayEquals(new int[]{ 2026, 10 }, m.meseDellaRiga(1));
     }
 
-    // 20 settimane: la quinta (indice 4) è quella di oggi, quattro prima e quindici dopo; si vedono 4 righe
-    @Test public void primaRigaEPagine() {
+    // Come la pagina: 20 settimane da lunedì 21 settembre 2026. Righe: 0 = 21 set, 1 = 28 set (1ª di ottobre: il giovedì è l'1),
+    // 4 = 19 ott (oggi), 6 = 2 nov (1ª di novembre), 10 = 30 nov (1ª di dicembre), 15 = 4 gen, 19 = 1 feb.
+    private static CalendarioModel venti() throws Exception {
+        return CalendarioModel.leggi(new JSONObject("{\"da\":\"2026-09-21\",\"io\":[" + lista(140, "R:r") + "]}"));
+    }
+
+    @Test public void inizioDeiMesi() throws Exception {
+        CalendarioModel m = venti();
+        for (int r : new int[]{ 1, 6, 10, 15, 19 }) assertTrue("riga " + r, m.inizioMese(r));
+        for (int r : new int[]{ 0, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13, 14, 16, 17, 18 }) assertFalse("riga " + r, m.inizioMese(r));
+        assertEquals("19 ott", "Ottobre", m.titolo(4, 2026));
+        assertEquals("26 ott – 1 nov: il giovedì è il 29", "Ottobre", m.titolo(5, 2026));
+        assertEquals("16 nov", "Novembre", m.titolo(8, 2026));
+        assertEquals("30 nov – 6 dic: il giovedì è il 3", "Dicembre", m.titolo(10, 2026));
+        assertEquals("28 dic – 3 gen: il giovedì è il 31", "Dicembre", m.titolo(14, 2026));
+    }
+
+    @Test public void primaRigaFermaAiBordi() {
         int oggi = 4, sett = 20, righe = 4;
         assertEquals("senza spostamento: la settimana di oggi", 4, CalendarioModel.primaRiga(oggi, 0, righe, sett));
         assertEquals(2, CalendarioModel.primaRiga(oggi, -2, righe, sett));
@@ -63,22 +79,40 @@ public class CalendarioModelTest {
         assertEquals("non oltre i dati: l'ultima pagina piena", 16, CalendarioModel.primaRiga(oggi, 99, righe, sett));
         assertEquals("dati che non contengono oggi: dalla prima", 0, CalendarioModel.primaRiga(-1, 0, righe, sett));
         assertEquals("pochi dati: mai negativa", 0, CalendarioModel.primaRiga(0, 3, 5, 3));
+    }
 
-        // › : una pagina avanti, cioè 4 settimane → riga 8, che è +4 da oggi
-        int sp = CalendarioModel.paginaDopo(oggi, 0, righe, sett, 1);
-        assertEquals(4, sp); assertEquals(8, CalendarioModel.primaRiga(oggi, sp, righe, sett));
-        // ‹ da lì torna a oggi; un'altra indietro arriva in cima (riga 0) e si ferma
-        sp = CalendarioModel.paginaDopo(oggi, sp, righe, sett, -1);
-        assertEquals(0, sp);
-        sp = CalendarioModel.paginaDopo(oggi, sp, righe, sett, -1);
-        assertEquals(0, CalendarioModel.primaRiga(oggi, sp, righe, sett));
-        sp = CalendarioModel.paginaDopo(oggi, sp, righe, sett, -1);
-        assertEquals("in cima resta in cima", 0, CalendarioModel.primaRiga(oggi, sp, righe, sett));
-        // › fino in fondo: l'ultima pagina è piena e non va oltre
-        sp = 0; for (int k = 0; k < 10; k++) sp = CalendarioModel.paginaDopo(oggi, sp, righe, sett, 1);
-        assertEquals(16, CalendarioModel.primaRiga(oggi, sp, righe, sett));
-        assertEquals("e si torna indietro da dove si è davvero, non dal valore grezzo", 12,
-            CalendarioModel.primaRiga(oggi, CalendarioModel.paginaDopo(oggi, sp, righe, sett, -1), righe, sett));
+    @Test public void frecceSiAgganciaAlMeseOFannoUnaPagina() throws Exception {
+        CalendarioModel m = venti();
+        int oggi = 4, righe = 4, sp = 0;
+        // › : da oggi (19 ott) l'inizio di novembre è a 2 righe → si aggancia; poi dicembre è a 4 → una pagina intera
+        sp = m.paginaDopo(oggi, sp, righe, 1); assertEquals(6, CalendarioModel.primaRiga(oggi, sp, righe, 20));
+        sp = m.paginaDopo(oggi, sp, righe, 1); assertEquals(10, CalendarioModel.primaRiga(oggi, sp, righe, 20));
+        sp = m.paginaDopo(oggi, sp, righe, 1); assertEquals("gennaio è a 5 righe: pagina intera", 14, CalendarioModel.primaRiga(oggi, sp, righe, 20));
+        sp = m.paginaDopo(oggi, sp, righe, 1); assertEquals("poi gennaio è a 1 riga: ci si aggancia", 15, CalendarioModel.primaRiga(oggi, sp, righe, 20));
+        sp = m.paginaDopo(oggi, sp, righe, 1); assertEquals("in fondo ai dati si ferma", 16, CalendarioModel.primaRiga(oggi, sp, righe, 20));
+        sp = m.paginaDopo(oggi, sp, righe, 1); assertEquals("e resta lì", 16, CalendarioModel.primaRiga(oggi, sp, righe, 20));
+        // ‹ dall'ultima pagina
+        sp = m.paginaDopo(oggi, sp, righe, -1); assertEquals(15, CalendarioModel.primaRiga(oggi, sp, righe, 20));
+        sp = m.paginaDopo(oggi, sp, righe, -1); assertEquals("dicembre è a 5 righe: pagina intera", 11, CalendarioModel.primaRiga(oggi, sp, righe, 20));
+        sp = m.paginaDopo(oggi, sp, righe, -1); assertEquals("inizio di dicembre", 10, CalendarioModel.primaRiga(oggi, sp, righe, 20));
+        // da oggi indietro: l'inizio di ottobre è a 3 righe → si aggancia; poi in cima e si ferma
+        sp = m.paginaDopo(oggi, 0, righe, -1); assertEquals(1, CalendarioModel.primaRiga(oggi, sp, righe, 20));
+        sp = m.paginaDopo(oggi, sp, righe, -1); assertEquals(0, CalendarioModel.primaRiga(oggi, sp, righe, 20));
+        sp = m.paginaDopo(oggi, sp, righe, -1); assertEquals("in cima resta in cima", 0, CalendarioModel.primaRiga(oggi, sp, righe, 20));
+    }
+
+    // qualunque sia la pagina e quante righe si vedono: un tocco non salta mai una settimana (la riga prima/dopo resta in vista)
+    @Test public void nessunaSettimanaSaltata() throws Exception {
+        CalendarioModel m = venti();
+        for (int righe = 1; righe <= 5; righe++) for (int sp = -4; sp <= 15; sp++) for (int verso = -1; verso <= 1; verso += 2) {
+            int da = CalendarioModel.primaRiga(4, sp, righe, 20);
+            int a = CalendarioModel.primaRiga(4, m.paginaDopo(4, sp, righe, verso), righe, 20);
+            String qui = " righe " + righe + ", da riga " + da + ", verso " + verso + " → " + a;
+            if (verso > 0) assertTrue("avanti" + qui, a >= da && a <= da + righe);
+            else assertTrue("indietro" + qui, a <= da && a >= da - righe);
+            if (verso > 0 && da < 20 - righe) assertTrue("avanti si muove" + qui, a > da);
+            if (verso < 0 && da > 0) assertTrue("indietro si muove" + qui, a < da);
+        }
     }
 
     @Test public void spostamentoVaSoloPerIlGiornoInCuiSiFa() {

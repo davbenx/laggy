@@ -48,9 +48,12 @@ final class CalendarioWidget {
         riga = r;
     }
 
-    /** Righe di calendario possibili con questi dati (con ‹ › si sfoglia, quindi non dipende da dove si parte). */
-    static int righeDisponibili(CalendarioModel m) {
-        return m == null ? 0 : Math.min(RIGHE, m.settimane());
+    /**
+     * Righe di calendario possibili con questi dati (con ‹ › si sfoglia, quindi non dipende da dove si parte). Se oggi
+     * non è nei dati (l'app non è stata aperta per mesi) niente calendario: meglio nessuno che uno vecchio senza dirlo.
+     */
+    static int righeDisponibili(CalendarioModel m, long ora) {
+        return m == null || indiceOggi(m, ora) < 0 ? 0 : Math.min(RIGHE, m.settimane());
     }
 
     /** «2026-10-25»: il giorno a cui si lega lo spostamento fatto con ‹ ›. */
@@ -84,7 +87,7 @@ final class CalendarioWidget {
     /** Riempie le righe. `righe` = quante mostrare (0: il calendario sparisce); `spostamento` = settimane da oggi (‹ ›). */
     static void riempi(Context ctx, RemoteViews rv, CalendarioModel m, int righe, int persona, long ora, int idWidget, int spostamento) {
         carica(ctx);
-        int disp = righeDisponibili(m);
+        int disp = righeDisponibili(m, ora);
         righe = Math.min(righe, disp);
         rv.setViewVisibility(R.id.w_cal, righe > 0 ? View.VISIBLE : View.GONE);
         if (righe <= 0) return;
@@ -97,8 +100,8 @@ final class CalendarioWidget {
         rv.setTextViewText(R.id.w_cal_mese, titolo);
         rv.setContentDescription(R.id.w_cal_mese, titolo + ". Tocca per tornare a oggi");
         rv.setOnClickPendingIntent(R.id.w_cal_mese, pagina(ctx, idWidget, 2, 0));
-        freccia(rv, R.id.w_cal_prec, r0 > 0, pagina(ctx, idWidget, 0, CalendarioModel.paginaDopo(rigaOggi, spostamento, righe, m.settimane(), -1)), "Settimane precedenti");
-        freccia(rv, R.id.w_cal_succ, r0 < m.settimane() - righe, pagina(ctx, idWidget, 1, CalendarioModel.paginaDopo(rigaOggi, spostamento, righe, m.settimane(), 1)), "Settimane successive");
+        freccia(rv, R.id.w_cal_prec, r0 > 0, pagina(ctx, idWidget, 0, m.paginaDopo(rigaOggi, spostamento, righe, -1)), "Settimane precedenti");
+        freccia(rv, R.id.w_cal_succ, r0 < m.settimane() - righe, pagina(ctx, idWidget, 1, m.paginaDopo(rigaOggi, spostamento, righe, 1)), "Settimane successive");
         boolean conPersone = !m.persone.isEmpty();
         // il nome: persona mostrata (verde) oppure «+ Anna» se nascosta; un tocco passa alla successiva
         String nome = persona >= 0 ? m.persone.get(persona).nome : m.persone.isEmpty() ? "" : m.persone.get(m.sel).nome;
