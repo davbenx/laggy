@@ -67,6 +67,8 @@ class AnteprimaTest {
     @Test fun sveglia_prima_di_dormire() = tutte("b_sveglia", t(1, 0, 30), sera())
     @Test fun pisolino_in_corso() = tutte("c_pisolino", t(0, 19, 20), pomeriggio())
     @Test fun voto_del_sonno() = tutte("d_voto", t(0, 9, 0), sera(), diario())
+    // dopo il sì al sonno: le cinque facce dell'energia
+    @Test fun voto_energia() = tutte("d2_energia", t(0, 9, 0), sera(), diario().put("sonno", true))
     @Test fun senza_persone() = tutte("e_solo_io", t(0, 20, 43), sera(), null, false)
 
     // ‹ › del calendario: › da oggi si aggancia all'inizio di novembre (+2 settimane), ‹ a quello di ottobre (-3), dicembre (+6), l'ultima pagina dei dati

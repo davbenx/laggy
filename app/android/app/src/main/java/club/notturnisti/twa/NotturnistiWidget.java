@@ -176,11 +176,14 @@ public class NotturnistiWidget extends AppWidgetProvider {
         return rv;
     }
 
+    private static final String[] ENERGIA = { "Senza energie", "Poca energia", "Così così", "Bene", "Al meglio" };
+
     private static void azione(Context ctx, RemoteViews rv, WidgetStato st) {
-        boolean voto = st.azione == WidgetStato.Azione.VOTO_SONNO || st.azione == WidgetStato.Azione.VOTO_ENERGIA;
-        rv.setViewVisibility(R.id.w_voto, voto ? View.VISIBLE : View.GONE);
-        rv.setViewVisibility(R.id.w_az, voto ? View.GONE : View.VISIBLE);
-        if (!voto) {
+        boolean sonno = st.azione == WidgetStato.Azione.VOTO_SONNO, energia = st.azione == WidgetStato.Azione.VOTO_ENERGIA;
+        rv.setViewVisibility(R.id.w_voto, sonno ? View.VISIBLE : View.GONE);
+        rv.setViewVisibility(R.id.w_facce, energia ? View.VISIBLE : View.GONE);
+        rv.setViewVisibility(R.id.w_az, sonno || energia ? View.GONE : View.VISIBLE);
+        if (!sonno && !energia) {
             rv.setTextViewText(R.id.w_az, st.testoAzione);
             boolean pieno = st.azione == WidgetStato.Azione.SVEGLIA;
             rv.setInt(R.id.w_az, "setBackgroundResource", pieno ? R.drawable.widget_bottone_pri : R.drawable.widget_bottone);
@@ -194,26 +197,23 @@ public class NotturnistiWidget extends AppWidgetProvider {
             return;
         }
         JSONObject dia = st.diario;
-        int[] v = { R.id.w_v1, R.id.w_v2, R.id.w_v3 };
-        boolean sonno = st.azione == WidgetStato.Azione.VOTO_SONNO;
-        String[] testi = sonno ? new String[]{ "Sì, così", "Altri orari", "" } : new String[]{ "Poca", "Così così", "Bene" };
-        for (int i = 0; i < 3; i++) {
-            boolean c = !testi[i].isEmpty();
-            rv.setViewVisibility(v[i], c ? View.VISIBLE : View.GONE);
-            if (!c) continue;
-            rv.setTextViewText(v[i], testi[i]);
-            boolean pieno = sonno && i == 0;
-            rv.setInt(v[i], "setBackgroundResource", pieno ? R.drawable.widget_bottone_pri : R.drawable.widget_bottone);
-            rv.setTextColor(v[i], ctx.getColor(pieno ? R.color.w_su_accento : R.color.w_ink));
+        if (energia) {
+            // le stesse cinque facce dell'app: dal widget si può dare anche il voto più basso e il più alto
+            int[] f = { R.id.w_f1, R.id.w_f2, R.id.w_f3, R.id.w_f4, R.id.w_f5 };
+            for (int i = 0; i < f.length; i++) {
+                rv.setContentDescription(f[i], "Energie: " + ENERGIA[i]);
+                rv.setOnClickPendingIntent(f[i], risposta(ctx, 210 + i, dia, "voto", i + 1));
+            }
+            return;
         }
-        if (sonno) {
-            rv.setOnClickPendingIntent(R.id.w_v1, risposta(ctx, 200, dia, "sonno", 0));
-            rv.setOnClickPendingIntent(R.id.w_v2, apriGiorno(ctx, 201, dia.optString("d")));
-        } else {
-            rv.setOnClickPendingIntent(R.id.w_v1, risposta(ctx, 202, dia, "voto", 2));
-            rv.setOnClickPendingIntent(R.id.w_v2, risposta(ctx, 203, dia, "voto", 3));
-            rv.setOnClickPendingIntent(R.id.w_v3, risposta(ctx, 204, dia, "voto", 4));
-        }
+        rv.setTextViewText(R.id.w_v1, "Sì, così");
+        rv.setInt(R.id.w_v1, "setBackgroundResource", R.drawable.widget_bottone_pri);
+        rv.setTextColor(R.id.w_v1, ctx.getColor(R.color.w_su_accento));
+        rv.setOnClickPendingIntent(R.id.w_v1, risposta(ctx, 200, dia, "sonno", 0));
+        rv.setTextViewText(R.id.w_v2, "Altri orari");
+        rv.setInt(R.id.w_v2, "setBackgroundResource", R.drawable.widget_bottone);
+        rv.setTextColor(R.id.w_v2, ctx.getColor(R.color.w_ink));
+        rv.setOnClickPendingIntent(R.id.w_v2, apriGiorno(ctx, 201, dia.optString("d")));
     }
 
     static void disegna(Context ctx, AppWidgetManager mgr, int[] ids) {

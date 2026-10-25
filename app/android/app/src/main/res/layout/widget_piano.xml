@@ -60,8 +60,14 @@
         <LinearLayout android:id="@+id/w_voto" android:layout_width="match_parent" android:layout_height="40dp" android:orientation="horizontal" android:visibility="gone">
         <TextView android:id="@+id/w_v1" android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:layout_marginStart="0dp" android:gravity="center" android:background="@drawable/widget_bottone" android:textColor="@color/w_ink" android:textSize="13sp" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" />
         <TextView android:id="@+id/w_v2" android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:layout_marginStart="6dp" android:gravity="center" android:background="@drawable/widget_bottone" android:textColor="@color/w_ink" android:textSize="13sp" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" />
-        <TextView android:id="@+id/w_v3" android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:layout_marginStart="6dp" android:gravity="center" android:background="@drawable/widget_bottone" android:textColor="@color/w_ink" android:textSize="13sp" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" />
         </LinearLayout>
+    <LinearLayout android:id="@+id/w_facce" android:layout_width="match_parent" android:layout_height="40dp" android:orientation="horizontal" android:visibility="gone">
+        <ImageView android:id="@+id/w_f1" android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:layout_marginStart="0dp" android:padding="8dp" android:scaleType="centerInside" android:background="@drawable/widget_bottone" android:src="@drawable/ic_w_faccia_1" android:tint="@color/w_t_rientro" />
+        <ImageView android:id="@+id/w_f2" android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:layout_marginStart="6dp" android:padding="8dp" android:scaleType="centerInside" android:background="@drawable/widget_bottone" android:src="@drawable/ic_w_faccia_2" android:tint="@color/w_t_turno" />
+        <ImageView android:id="@+id/w_f3" android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:layout_marginStart="6dp" android:padding="8dp" android:scaleType="centerInside" android:background="@drawable/widget_bottone" android:src="@drawable/ic_w_faccia_3" android:tint="@color/w_dim" />
+        <ImageView android:id="@+id/w_f4" android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:layout_marginStart="6dp" android:padding="8dp" android:scaleType="centerInside" android:background="@drawable/widget_bottone" android:src="@drawable/ic_w_faccia_4" android:tint="@color/w_accento" />
+        <ImageView android:id="@+id/w_f5" android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:layout_marginStart="6dp" android:padding="8dp" android:scaleType="centerInside" android:background="@drawable/widget_bottone" android:src="@drawable/ic_w_faccia_5" android:tint="@color/w_ok" />
+    </LinearLayout>
     </LinearLayout>
 
     <LinearLayout
