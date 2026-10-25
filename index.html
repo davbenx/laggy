@@ -8490,12 +8490,12 @@ if($("#cycToday")) $("#cycToday").onclick=()=>{ if(suOggi()){ apriSelettoreData(
    Si scrivono a mano a ogni versione con una funzione che si vede: poche righe, in italiano di tutti i giorni.
    `id` cambia solo quando c'è qualcosa da dire; chi aggiorna la vede una volta. Chi installa adesso non la vede
    (non è una novità per lui), ma la trova sempre in Impostazioni › Novità. «app:true» = solo nell'app Android. */
-const NOVITA={ id:"2026-10-24", data:"Ottobre 2026", righe:[
-  ["Persone: modifica e orari propri","Ora puoi correggere una persona (turni, sonno, data di partenza) senza toglierla e rifarla. Se aggiungi qualcuno «con i tuoi stessi turni», gli orari restano suoi anche quando cambi i tuoi."],
-  ["Turni: le sigle di chi segui","In Turni, accanto alla tua sigla compare quella della persona con la stellina, e il suo turno è un filo verde sotto la barra."],
-  ["Momenti migliori","Quando pensare, muoverti, allenarti: accendili in Impostazioni › Cosa vedi nel piano."],
-  ["Widget rifatto","Più lo allarghi, più mostra: adesso, il pulsante giusto per l'ora (sveglia, orario del sonno o del pisolino, voto del sonno), le prossime voci e il calendario a settimane con i turni di chi segui.",true],
-  ["Dopo il turno","Appena comincia il sonno l'app dice di dormire (non più «Rientro»), e la linea dell'ora sta nel posto giusto."]
+const NOVITA={ id:"2026-10-25", data:"Ottobre 2026", righe:[
+  ["Sonno e carico con i grafici","Una barra per ogni notte (arancio dove dormi meno del previsto), la fascia delle 24 ore del tuo orologio, 60 giorni di turni con i riposi sotto le 11 ore e la quarta notte di fila, e i tuoi orari notte per notte."],
+  ["Orari più onesti","Le notti registrate «come previsto» non contano per la regolarità: per misurarti servono i tuoi orari veri. Il sonno che ti manca le conta ancora tutte."],
+  ["Pulsanti e colori più chiari","I percorsi dell'avvio, la condivisione e le persone hanno pulsanti veri. La persona che segui ha il suo colore e la notte è indaco: il blu resta del sonno."],
+  ["Calendario di coppia, una scheda sola","Si accende da un solo punto, sotto le tue persone. Se manca il permesso al calendario te lo dice e ti porta alle impostazioni.",true],
+  ["Widget: mesi, facce e orari","‹ › sfogliano il calendario, il voto dell'energia ha cinque facce e «Altri orari» si corregge in una finestra, senza aprire l'app.",true]
 ]};
 function novitaDaMostrare(){ return NOVITA.righe.filter(x=>!x[2] || platform.isNative); }
 function mostraNovita(su, segna){
