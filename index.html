@@ -136,7 +136,7 @@ try{
   --orange:#FF9068; --orange-fill:#FF6B35; --orange-soft:#3A2119;
   --risk:#FF6B5C; --risk-soft:#3A1C18; --risk-line:#7A342C;
   --picco:#D98CF0;   /* picco di sonnolenza nei grafici: il rosso di --risk qui si confonde con l'arancio del turno */
-  --sleep-fill:#2D5A8C; --ok:#5FBF85; --ok-soft:#173222; --ok-line:#2F6B45; --persona:#7FD9C9; --on-warm:#15171A;
+  --sleep-fill:#2D5A8C; --ok:#5FBF85; --ok-soft:#173222; --ok-line:#2F6B45; --persona:#7FD9C9; --notte:#9CA3F5; --on-warm:#15171A;
   --bg-blur:rgba(20,22,26,0.85);
   --warm-tint:#241C15; --cool-tint:#1E2142;
   --violet:var(--blue); --violetd:var(--blue-soft);
@@ -156,7 +156,7 @@ try{
     --orange:#B24B25; --orange-fill:#FF6B35; --orange-bar:#D9541F; --orange-soft:#FCE9E1;
     --risk:#C0392B; --risk-soft:#FBE9E7; --risk-line:#E57368;
     --picco:#8E2A6B;
-    --sleep-fill:#24496F; --ok:#2E7D4F; --ok-soft:#E6F4EC; --ok-line:#8CC9A5; --persona:#0F6B60; --on-warm:#15171A;
+    --sleep-fill:#24496F; --ok:#2E7D4F; --ok-soft:#E6F4EC; --ok-line:#8CC9A5; --persona:#0F6B60; --notte:#3B3F9E; --on-warm:#15171A;
     --bg-blur:rgba(255,255,255,.82);
     --warm-tint:#FBF1E9; --cool-tint:#E6E8F8;
     --shadow-card:0 2px 8px -2px rgba(21,23,26,.22);
@@ -179,7 +179,7 @@ try{
   --orange:#FF9068; --orange-fill:#FF6B35; --orange-soft:#3A2119;
   --risk:#FF6B5C; --risk-soft:#3A1C18; --risk-line:#7A342C;
   --picco:#D98CF0;   /* picco di sonnolenza nei grafici: il rosso di --risk qui si confonde con l'arancio del turno */
-  --sleep-fill:#2D5A8C; --ok:#5FBF85; --ok-soft:#173222; --ok-line:#2F6B45; --persona:#7FD9C9; --on-warm:#15171A;
+  --sleep-fill:#2D5A8C; --ok:#5FBF85; --ok-soft:#173222; --ok-line:#2F6B45; --persona:#7FD9C9; --notte:#9CA3F5; --on-warm:#15171A;
   --bg-blur:rgba(20,22,26,0.85);
   --warm-tint:#241C15; --cool-tint:#1E2142;
   --shadow-card:0 2px 10px -3px rgba(0,0,0,.4);
@@ -192,7 +192,7 @@ try{
   --orange:#B24B25; --orange-fill:#FF6B35; --orange-bar:#D9541F; --orange-soft:#FCE9E1;
   --risk:#C0392B; --risk-soft:#FBE9E7; --risk-line:#E57368;
   --picco:#8E2A6B;
-  --sleep-fill:#24496F; --ok:#2E7D4F; --ok-soft:#E6F4EC; --ok-line:#8CC9A5; --persona:#0F6B60; --on-warm:#15171A;
+  --sleep-fill:#24496F; --ok:#2E7D4F; --ok-soft:#E6F4EC; --ok-line:#8CC9A5; --persona:#0F6B60; --notte:#3B3F9E; --on-warm:#15171A;
   --bg-blur:rgba(255,255,255,.82);
   --warm-tint:#FBF1E9; --cool-tint:#E6E8F8;
   --shadow-card:0 2px 8px -2px rgba(21,23,26,.22);
@@ -602,7 +602,9 @@ display:flex;flex-direction:column;align-items:center;justify-content:center;gap
 
 .vrow{display:grid;grid-template-columns:minmax(84px,auto) 1fr 30px;align-items:center;gap:10px;padding:5px 0}
 .vlab{font-size:13.5px;color:var(--ink);white-space:nowrap}
-.vbar{height:8px;border-radius:0 4px 4px 0;background:var(--s2);overflow:hidden}
+.vbar{position:relative;height:8px;border-radius:0 4px 4px 0;background:var(--s2)}
+.vdot{position:absolute;width:6px;height:6px;margin:-1px 0 0 -3px;border-radius:50%;background:var(--ink);opacity:.5;border:1px solid var(--s1)}
+.vrow.giu .vdot{opacity:.8}
 .vbar i{display:block;height:100%;border-radius:0 4px 4px 0;background:var(--faint);opacity:.55}
 .vrow.giu .vbar i{background:var(--orange);opacity:1}
 .vrow.giu .vlab{font-weight:700}
@@ -901,6 +903,14 @@ padding:12px 6px 12px 14px;margin:-6px 0 var(--gap-sezione);font-size:13.5px;lin
 .ed-sveglia{display:flex;width:100%;align-items:center;justify-content:center;text-align:center;margin-bottom:8px}
 #ora[hidden]{display:none}
 .oro .oro-tipo{font-family:var(--serif);font-size:22px;font-weight:600;margin:0 0 6px}
+.grf{display:block;width:100%;margin-top:8px}
+.grf-leg{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--dim);margin:6px 0 10px}
+.grf-leg i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.car-striscia{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:flex-start;margin:2px 0 14px}
+.car-striscia svg{flex:none;max-width:100%;height:auto}
+.car-leg{flex:1 1 128px;display:grid;gap:7px;font-size:12px;line-height:1.3;color:var(--dim);padding-top:14px}
+.car-leg span{display:flex;align-items:flex-start}
+.car-leg i{flex:none;width:11px;height:11px;border-radius:3px;margin:2px 7px 0 0;box-sizing:border-box}
 .oro-riga{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid var(--line)}
 .oro-riga b{display:block;font-size:14.5px}
 .oro-riga div span{display:block;font-size:12.5px;color:var(--dim);margin-top:1px}
@@ -3763,7 +3773,7 @@ function cycleSummary(){
   const voti=per.reduce((a,x)=>a+x.length,0);
   if(conDati < Math.ceil(p.length/2) || voti < p.length) return null;
   const media=x=>x.reduce((a,b)=>a+b,0)/x.length;
-  const righe=per.map((v,i)=>({i, c:p[i], n:v.length, avg:v.length?media(v):null}));
+  const righe=per.map((v,i)=>({i, c:p[i], n:v.length, avg:v.length?media(v):null, v}));
   const validi=righe.filter(r=>r.avg!==null && r.n>=2);
   if(validi.length<3) return null;
   const peggio=validi.reduce((a,b)=>b.avg<a.avg?b:a);
@@ -3925,7 +3935,8 @@ function regolaritaSonno(){
   const wakeM=chiavi.map(k=>t(state.wakes[k])).filter(isFinite);
   const sdBed=circMinSD(bedM), sdWake=circMinSD(wakeM);
   if(sdBed==null && sdWake==null) return null;
-  return {n:chiavi.length, sdBed, sdWake};
+  const mediaCirc=minuti=>{ if(!minuti.length) return null; let sc=0, ss=0; for(const m of minuti){ const a=2*Math.PI*m/1440; sc+=Math.cos(a); ss+=Math.sin(a); } return mod1440(Math.round(Math.atan2(ss,sc)*1440/(2*Math.PI))); };
+  return {n:chiavi.length, sdBed, sdWake, bedM, wakeM, mBed:mediaCirc(bedM), mWake:mediaCirc(wakeM)};
 }
 
 function summaryText(){
@@ -6552,23 +6563,119 @@ function insightSettimana(cs, ws, sm, corr){
 function caricoTurni(da, n){
   const f0=state.focus, oggi=giornoVero();
   const notte=(s,e)=>{ const ov=(a,b)=>Math.max(0, Math.min(e,b)-Math.max(s,a)); return ov(-120,360)+ov(1320,1800); };
-  const r={notti:0, serieMax:0, brevi:0, festivi:0, ore:0, turni:0, ignoti:0};
+  const r={notti:0, serieMax:0, brevi:0, festivi:0, ore:0, turni:0, ignoti:0, giorni:[]};   // giorni: per la striscia, un elemento per giorno contato
   let serie=0, fineIeri=null;
   try{
     for(let o=da-1;o<da+n;o++){
       const d=day(oggi,o), conta=o>=da; state.focus=d;
       let c="?", b=null; try{ c=NT.codeAt(0); b=NT.block(0); }catch(e){}
-      if(c==="?" || !b){ if(conta) r.ignoti++; serie=0; fineIeri=null; continue; }
-      if(b.rest){ serie=0; continue; }
+      if(c==="?" || !b){ if(conta){ r.ignoti++; r.giorni.push({tipo:"?"}); } serie=0; fineIeri=null; continue; }
+      if(b.rest){ serie=0; if(conta) r.giorni.push({tipo:"r"}); continue; }
       const base=dnum(d)*1440;
-      if(notte(b.start,b.end)>=180){ serie++; if(conta){ r.notti++; r.serieMax=Math.max(r.serieMax, serie); } } else serie=0;
+      const eNotte=notte(b.start,b.end)>=180;
+      if(eNotte){ serie++; if(conta){ r.notti++; r.serieMax=Math.max(r.serieMax, serie); } } else serie=0;
       if(conta){ r.turni++; r.ore+=(b.end-b.start)/60;
         if(festivo(d)) r.festivi++;
-        if(fineIeri!==null && base+b.start-fineIeri<660) r.brevi++; }
+        const breve=fineIeri!==null && base+b.start-fineIeri<660;
+        if(breve) r.brevi++;
+        r.giorni.push({tipo:eNotte?"n":"l", rischio:breve || serie>=4}); }
       fineIeri=base+b.end;
     }
   } finally { state.focus=f0; }
   return r;
+}
+/* --- grafici di «Sonno e carico» (SVG semplici: i numeri sotto restano, il grafico fa vedere la forma) --- */
+const SVGT=(x,y,txt,extra)=>'<text x="'+x+'" y="'+y+'" font-size="10" fill="var(--faint)"'+(extra||"")+'>'+txt+'</text>';
+// tipo del giorno (r riposo, n notte, l lavoro, ? da impostare) per una data
+function tipoGiornoIso(k){
+  const f=state.focus;
+  try{ state.focus=new Date(k+"T12:00:00"); return NT.codeAt(0)==="?" ? "?" : NT.tipoDelGiorno(0); }catch(e){ return "?"; }
+  finally{ state.focus=f; }
+}
+// Una barra per notte: le ore dormite (arancio se meno del previsto), il tratto è l'obiettivo di quella notte,
+// il puntino sotto dice se quel giorno c'era un turno (indaco = notte). Così si vede PERCHÉ manca sonno.
+function graficoNotti(trend){
+  const S=trend.series, n=S.length; if(n<3) return "";
+  const W=300, Hb=66, top=6, pad=6, H=Hb+30;
+  const massimo=Math.max(600, ...S.map(x=>Math.max(x.actual, x.planned||0)));
+  const step=(W-pad*2)/n, bw=Math.max(3, Math.min(14, step*0.68));
+  const yOf=m=>top+(Hb-top)*(1-m/massimo);
+  let g='', sotto=0;
+  S.forEach((x,i)=>{
+    const cx=pad+i*step+step/2, bx=cx-bw/2, y=yOf(x.actual), manca=x.planned!=null && x.actual<x.planned-15;
+    if(manca) sotto++;
+    g+='<rect class="g-notte'+(manca?' g-manca':'')+'" x="'+bx.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+(Hb-y).toFixed(1)+'" rx="2" fill="'+(manca?'var(--orange)':'var(--blue)')+'"/>';
+    if(x.planned!=null){ const yp=yOf(x.planned).toFixed(1); g+='<line x1="'+(bx-1.5).toFixed(1)+'" x2="'+(bx+bw+1.5).toFixed(1)+'" y1="'+yp+'" y2="'+yp+'" stroke="var(--ink)" stroke-width="1.5" opacity=".8"/>'; }
+    const tp=tipoGiornoIso(x.date);
+    if(tp==="n"||tp==="l") g+='<circle class="g-turno" cx="'+cx.toFixed(1)+'" cy="'+(Hb+9)+'" r="2.6" fill="'+(tp==="n"?'var(--notte)':'var(--dim)')+'"/>';
+  });
+  g+='<line x1="'+pad+'" x2="'+(W-pad)+'" y1="'+Hb+'" y2="'+Hb+'" stroke="var(--line)" stroke-width="1"/>'+
+     SVGT(pad,H-3,n+' notti fa')+SVGT(W-pad,H-3,'oggi',' text-anchor="end"');
+  const label='Ore dormite nelle ultime '+n+' notti: in media '+hm(trend.avgActual)+(trend.avgPlanned?' contro '+hm(trend.avgPlanned)+' previste':'')+'; '+sotto+' notti sotto il previsto';
+  return '<svg class="grf" viewBox="0 0 '+W+' '+H+'" style="height:'+H+'px" role="img" aria-label="'+label+'">'+g+'</svg>'+
+    '<div class="grf-leg"><span><i style="background:var(--blue)"></i>ore dormite</span><span><i style="background:var(--orange)"></i>meno del previsto</span><span><i style="background:var(--ink);height:2px;vertical-align:3px"></i>previste</span><span><i style="background:var(--notte);border-radius:50%"></i>notte di turno</span></div>';
+}
+// Le 24 ore (dalle 18 alle 18, così la notte sta in mezzo): sonno, melatonina, minimo corporeo, momento più lucido.
+function fasciaOrologio(o){
+  const W=300, pad=8, y0=14, bh=16, H=y0+bh+22;
+  const X=m=>pad+((((m-1080)%1440)+1440)%1440)/1440*(W-pad*2), cy=y0+bh/2;
+  const bed=t(state.freeBed), wake=NT.freeWakeUsata(), dur=((wake-bed)%1440+1440)%1440;
+  let g='<rect x="'+pad+'" y="'+y0+'" width="'+(W-pad*2)+'" height="'+bh+'" rx="5" fill="var(--s2)"/>';
+  const x1=X(bed), x2=X(bed+dur);
+  if(x2>=x1) g+='<rect x="'+x1.toFixed(1)+'" y="'+y0+'" width="'+(x2-x1).toFixed(1)+'" height="'+bh+'" rx="5" fill="var(--blue)" opacity=".85"/>';
+  else g+='<rect x="'+x1.toFixed(1)+'" y="'+y0+'" width="'+(W-pad-x1).toFixed(1)+'" height="'+bh+'" rx="5" fill="var(--blue)" opacity=".85"/><rect x="'+pad+'" y="'+y0+'" width="'+(x2-pad).toFixed(1)+'" height="'+bh+'" rx="5" fill="var(--blue)" opacity=".85"/>';
+  g+='<line x1="'+X(o.mel).toFixed(1)+'" x2="'+x1.toFixed(1)+'" y1="'+(y0-6)+'" y2="'+(y0-6)+'" stroke="var(--faint)" stroke-width="2.5" stroke-linecap="round"/>';
+  g+='<circle cx="'+X(o.cbt).toFixed(1)+'" cy="'+cy+'" r="5.5" fill="var(--picco)" stroke="var(--s1)" stroke-width="2"/>';
+  if(o.lucido){ const lm=t(o.lucido); if(isFinite(lm)) g+='<circle cx="'+X(lm).toFixed(1)+'" cy="'+cy+'" r="5" fill="none" stroke="var(--ink)" stroke-width="2"/>'; }
+  g+='<line x1="'+X(o.mid).toFixed(1)+'" x2="'+X(o.mid).toFixed(1)+'" y1="'+(y0+bh)+'" y2="'+(y0+bh+5)+'" stroke="var(--ink)" stroke-width="2"/>';
+  [[1080,"18:00"],[1440,"00:00"],[1800,"06:00"],[2160,"12:00"],[2520,"18:00"]].forEach(([m,l],i)=>{
+    const x=i===0?pad:i===4?W-pad:X(m); g+=SVGT(x.toFixed(1),H-3,l,' text-anchor="'+(i===0?"start":i===4?"end":"middle")+'"'); });
+  const label='Le 24 ore nei giorni liberi: sonno '+state.freeBed+' → '+state.freeWake+', melatonina dalle '+hhmm(o.mel)+', minimo corporeo alle '+hhmm(o.cbt)+(o.lucido?', più lucido verso le '+o.lucido:'');
+  return '<svg class="grf" viewBox="0 0 '+W+' '+H+'" style="height:'+H+'px" role="img" aria-label="'+label+'">'+g+'</svg>'+
+    '<div class="grf-leg"><span><i style="background:var(--blue)"></i>sonno</span><span><i style="background:var(--faint);height:2px;vertical-align:3px"></i>melatonina</span><span><i style="background:var(--picco);border-radius:50%"></i>minimo corporeo</span><span><i style="border:2px solid var(--ink);border-radius:50%;background:none;width:9px;height:9px;box-sizing:border-box"></i>più lucido</span></div>';
+}
+// 60 giorni (30 passati, 30 in arrivo), una colonna per settimana: turno, notte, riposo; il contorno rosso segna
+// meno di 11 ore fra due turni o la quarta notte di fila. Oggi è cerchiato.
+function strisciaCarico(P,F){
+  const g=[...P.giorni, ...F.giorni];
+  if(g.filter(x=>x.tipo!=="?").length<10) return "";
+  const oggi=giornoVero(), passati=P.giorni.length, d0=day(oggi,-passati), off=(d0.getDay()+6)%7;
+  const C=13, G=3, lx=12, ty=14, cols=Math.ceil((off+g.length)/7), W=lx+cols*(C+G), H=ty+7*(C+G);
+  let svg='';
+  ["L","M","M","G","V","S","D"].forEach((l,r)=>{ svg+=SVGT(0,ty+r*(C+G)+C-3,l,' font-size="9"'); });
+  const MESI=["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"]; let ultimoMese=-1;
+  g.forEach((x,i)=>{
+    const idx=off+i, c=Math.floor(idx/7), r=idx%7, px=lx+c*(C+G), py=ty+r*(C+G), d=day(d0,i);
+    if(d.getDate()<=7 && r===0 || (i===0 && r===0)){ if(d.getMonth()!==ultimoMese){ svg+=SVGT(px,10,MESI[d.getMonth()]); ultimoMese=d.getMonth(); } }
+    const fill=x.tipo==="n"?"var(--notte)":x.tipo==="l"?"var(--orange-bar)":x.tipo==="r"?"var(--s2)":"none";
+    const tenue=i<passati ? ' opacity=".62"' : '';
+    svg+='<rect class="g-gg g-'+x.tipo+(x.rischio?' g-rischio':'')+(i===passati?' g-oggi':'')+'" x="'+px+'" y="'+py+'" width="'+C+'" height="'+C+'" rx="3" fill="'+fill+'"'+(x.tipo==="?"?' stroke="var(--line)" stroke-dasharray="2 2"':'')+tenue+'/>';
+    if(x.rischio) svg+='<rect x="'+(px-1)+'" y="'+(py-1)+'" width="'+(C+2)+'" height="'+(C+2)+'" rx="4" fill="none" stroke="var(--risk)" stroke-width="2"/>';
+    if(i===passati) svg+='<rect x="'+(px-1.5)+'" y="'+(py-1.5)+'" width="'+(C+3)+'" height="'+(C+3)+'" rx="4.5" fill="none" stroke="var(--ink)" stroke-width="1.5"/>';
+  });
+  const nR=g.filter(x=>x.rischio).length;
+  const label='Turni dei 30 giorni passati e dei 30 in arrivo: '+g.filter(x=>x.tipo==="n").length+' notti, '+g.filter(x=>x.tipo==="l").length+' altri turni, '+nR+(nR===1?' giorno a rischio':' giorni a rischio');
+  const sw=(c,extra)=>'<i style="background:'+c+';'+(extra||"")+'"></i>';
+  return '<div class="car-striscia"><svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img" aria-label="'+label+'">'+svg+'</svg>'+
+    '<div class="car-leg"><span>'+sw("var(--orange-bar)")+'Turno</span><span>'+sw("var(--notte)")+'Notte</span><span>'+sw("var(--s2)","border:1px solid var(--line)")+'Riposo</span>'+
+    '<span>'+sw("none","border:2px solid var(--ink)")+'Oggi</span><span>'+sw("none","border:2px solid var(--risk)")+'Meno di 11 ore di riposo, o 4ª notte</span></div></div>';
+}
+// Gli orari veri delle ultime notti: un punto per notte su due righe (letto, sveglia), la fascia è ±1 deviazione, il tratto la media.
+function graficoRegolarita(reg){
+  if(!reg || !reg.bedM || reg.bedM.length<5) return "";
+  const W=300, pad=8, H=96, X=m=>pad+((((m-1080)%1440)+1440)%1440)/1440*(W-pad*2);
+  const riga=(y,minuti,media,sd,etichetta)=>{
+    let r=SVGT(pad,y-12,etichetta);
+    if(media!=null && sd!=null){ const a=X(media-sd), b=X(media+sd); if(b>a) r+='<rect x="'+a.toFixed(1)+'" y="'+(y-8)+'" width="'+(b-a).toFixed(1)+'" height="16" rx="5" fill="var(--blue-soft)"/>'; }
+    minuti.forEach(m=>{ r+='<circle class="g-punto" cx="'+X(m).toFixed(1)+'" cy="'+y+'" r="3.3" fill="var(--blue)" opacity=".5"/>'; });
+    if(media!=null) r+='<line x1="'+X(media).toFixed(1)+'" x2="'+X(media).toFixed(1)+'" y1="'+(y-9)+'" y2="'+(y+9)+'" stroke="var(--ink)" stroke-width="2"/>';
+    return r; };
+  let g=riga(30,reg.bedM,reg.mBed,reg.sdBed,"Vai a letto")+riga(66,reg.wakeM,reg.mWake,reg.sdWake,"Ti svegli");
+  [[1080,"18:00"],[1440,"00:00"],[1800,"06:00"],[2160,"12:00"],[2520,"18:00"]].forEach(([m,l],i)=>{
+    const x=i===0?pad:i===4?W-pad:X(m); g+=SVGT(x.toFixed(1),H-3,l,' text-anchor="'+(i===0?"start":i===4?"end":"middle")+'"'); });
+  const label='Orari delle ultime '+reg.n+' notti: letto in media alle '+hhmm(reg.mBed)+(reg.sdBed!=null?' (±'+hm(reg.sdBed)+')':'')+', sveglia alle '+hhmm(reg.mWake)+(reg.sdWake!=null?' (±'+hm(reg.sdWake)+')':'');
+  return '<svg class="grf" viewBox="0 0 '+W+' '+H+'" style="height:'+H+'px" role="img" aria-label="'+label+'">'+g+'</svg>'+
+    '<div class="grf-leg"><span><i style="background:var(--blue);border-radius:50%"></i>una notte</span><span><i style="background:var(--blue-soft);border:1px solid var(--line)"></i>± una deviazione</span><span><i style="background:var(--ink);width:2px"></i>media</span></div>';
 }
 function caricoHtml(){
   const P=caricoTurni(-30,30), F=caricoTurni(0,30);
@@ -6585,6 +6692,7 @@ function caricoHtml(){
   else frase="Segna i turni in «I turni del mese» per vedere il carico.";
   return '<div><span class="eyebrow andamento-eyebrow">Il carico dei turni · 30 giorni</span>'+
     '<div class="andamento-sezione carico">'+
+      strisciaCarico(P,F)+
       '<div class="car-r car-testa"><span></span><b>Passati</b><b>In arrivo</b></div>'+
       riga("Notti","notti")+riga("Notti di fila, al massimo","serieMax")+riga("Riposi sotto le 11 ore","brevi")+
       riga("Domeniche e festivi","festivi")+riga("Ore di turno","ore")+
@@ -6615,6 +6723,7 @@ function orologioHtml(){
   return '<div id="orologio"><span class="eyebrow andamento-eyebrow">Il tuo orologio</span>'+
     '<div class="andamento-sezione oro">'+
       '<p class="oro-tipo">'+esc(o.tipo)+'</p><p class="hint" style="margin:0 0 6px">Nei giorni liberi, quando niente ti sveglia.</p>'+
+      fasciaOrologio(o)+
       riga("Metà del sonno", hhmm(o.mid), "il centro del sonno: dice se sei allodola o gufo")+
       riga("Melatonina", "dalle "+hhmm(o.mel), "il corpo comincia a preparare il sonno: luci basse")+
       riga("Minimo corporeo", hhmm(o.cbt), "la sonnolenza più forte: la luce prima ti sposta indietro, dopo in avanti")+
@@ -6657,28 +6766,13 @@ function renderAndamenti(){
       if(trend && trend.n>=3){
         const d=trend.debtNow;
         const vals=trend.series.map(s=>s.debt);
-        const W=280,H=58,pad=5,Hp=44;   // Hp: il grafico; sotto, le date
-        const mn=Math.min(0,...vals), mx=Math.max(0,...vals), span=Math.max(mx-mn,30);
-        const xAt=i=> vals.length>1 ? (i/(vals.length-1))*(W-pad*2)+pad : W/2;
-        const yAt=v=> Hp-pad-((v-mn)/span)*(Hp-pad*2);
-        const pts=vals.map((v,i)=>xAt(i).toFixed(1)+","+yAt(v).toFixed(1)).join(" ");
-        const lx=xAt(vals.length-1).toFixed(1), ly=yAt(vals[vals.length-1]).toFixed(1);
-        // Il numero nel colore del testo e senza segno (l'etichetta dice già se
-        // manca o avanza); il colore sta sul punto di oggi. La linea è grigia,
-        // con lo zero (in pari) come riferimento sottile: più su, più sonno da recuperare.
-        const tinta = d>0 ? "var(--orange)" : "var(--ok)", y0=yAt(0).toFixed(1);
+        const tinta = d>0 ? "var(--orange)" : "var(--ok)";   // (il colore sta nelle barre: arancio dove manca sonno)
         heroHtml='<div class="andamento-hero">'+
           '<span class="hint" style="display:block">'+(d>0?"Sonno che ti manca":"Sonno in più del necessario")+' · ultime '+trend.series.length+' notti</span>'+
           '<div class="andamento-num">'+hm(Math.abs(d))+'</div>'+
           '<span class="hint" style="display:block">Dormi in media '+hm(trend.avgActual)+
             (trend.avgPlanned?' contro '+hm(trend.avgPlanned)+' pianificate':'')+'</span>'+
-          '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:'+H+'px;display:block;margin-top:10px" role="img" aria-label="Andamento del sonno da recuperare nelle ultime '+trend.series.length+' notti: oggi '+hm(Math.abs(d))+(d>0?' da recuperare':' in più')+'">'+
-            '<line x1="'+pad+'" x2="'+(W-pad)+'" y1="'+y0+'" y2="'+y0+'" stroke="var(--line)" stroke-width="1"/>'+
-            '<polyline points="'+pts+'" fill="none" stroke="var(--faint)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'+
-            '<circle cx="'+lx+'" cy="'+ly+'" r="4.5" fill="'+tinta+'" stroke="var(--s1)" stroke-width="2"/>'+
-            '<text x="'+pad+'" y="'+(H-2)+'" font-size="10" fill="var(--faint)">'+trend.series.length+' notti fa</text>'+
-            '<text x="'+(W-pad)+'" y="'+(H-2)+'" font-size="10" fill="var(--faint)" text-anchor="end">oggi</text>'+
-          '</svg>'+
+          graficoNotti(trend)+
         '</div>';
       }
       // La card descrittiva resta solo se la correlazione non è già il
@@ -6702,7 +6796,7 @@ function renderAndamenti(){
       if(reg.sdBed!=null) righe+='<div class="row"><b style="min-width:118px">Vai a letto</b><span>'+parola(reg.sdBed)+' <span class="hint">· ±'+hm(reg.sdBed)+'</span></span></div>';
       if(reg.sdWake!=null) righe+='<div class="row"><b style="min-width:118px">Ti svegli</b><span>'+parola(reg.sdWake)+' <span class="hint">· ±'+hm(reg.sdWake)+'</span></span></div>';
       if(righe) sezioni.push('<div><span class="eyebrow andamento-eyebrow">Orari del sonno, da '+reg.n+' notti</span>'+
-        '<div class="andamento-sezione"><div class="rows">'+righe+'</div></div></div>');
+        '<div class="andamento-sezione">'+graficoRegolarita(reg)+'<div class="rows">'+righe+'</div></div></div>');
     }
   }catch(e){}
 
@@ -6720,12 +6814,12 @@ function renderAndamenti(){
     let righe='';
     cs.righe.forEach(r=>{ const largh = r.avg===null ? 0 : Math.max(2, Math.round((r.avg-1)/4*100));
       righe+='<div class="vrow'+(r.i===segnato?" giu":"")+'"><span class="vlab">'+esc(nome(r))+'</span>'+
-        '<span class="vbar"><i style="width:'+largh+'%"></i></span>'+
+        '<span class="vbar"><i style="width:'+largh+'%"></i>'+(r.v||[]).map((v,k)=>'<b class="vdot" style="left:'+((v-1)/4*100)+'%;top:'+(k%3*3-1)+'px"></b>').join("")+'</span>'+
         '<span class="vval">'+(r.avg===null?"—":r.avg.toFixed(1).replace(".",","))+'</span></div>'; });
     // La frase resta qui SOLO se non è già stata promossa in cima.
     if(cs.frase && !(capo && capo.fonte==="cs")) righe+='<p class="vnota">'+cs.frase.replace(/(\d)\.(\d)/g,"$1,$2")+'</p>';
     sezioni.push('<div><span class="eyebrow andamento-eyebrow">Come stai, giorno per giorno</span>'+
-      '<div class="andamento-sezione"><p class="hint" style="margin:0 0 6px">Voto medio da 1 a 5, da '+cs.voti+' voti</p>'+righe+'</div></div>');
+      '<div class="andamento-sezione"><p class="hint" style="margin:0 0 6px">Da 1 a 5 · un puntino per ogni voto ('+cs.voti+')</p>'+righe+'</div></div>');
   }
 
   const rowsHtml = sezioni.join("");
