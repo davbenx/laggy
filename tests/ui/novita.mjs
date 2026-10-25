@@ -36,7 +36,7 @@ const aperto=p=>p.evaluate(()=>!document.querySelector("#novitaModal").hidden);
   ok(await p.evaluate(()=>/Widget/.test(document.querySelector("#novitaLista").textContent)), "nell'app c'è anche la riga del widget");
   await p.context().close(); }
 // sempre raggiungibile da Impostazioni
-{ const p=await apri(ST(), {novitaViste:"2026-10-25"});
+{ const p=await apri(ST(), {novitaViste:"2026-10-26"});
   ok(!(await aperto(p)), "già vista: non compare da sola");
   await p.evaluate(()=>document.querySelector("#doNovita").click()); await p.waitForTimeout(300);
   ok(await aperto(p), "Impostazioni › Novità la riapre");
@@ -45,7 +45,7 @@ const aperto=p=>p.evaluate(()=>!document.querySelector("#novitaModal").hidden);
   await p.context().close(); }
 
 // persone: modifica, orari che restano suoi, sonno visibile
-{ const p=await apri(ST({people:[{name:"Anna",pattern:"MPNSR",anchor:fa(1),wake:"07:00",bed:"23:00"}]}), {novitaViste:"2026-10-25"});
+{ const p=await apri(ST({people:[{name:"Anna",pattern:"MPNSR",anchor:fa(1),wake:"07:00",bed:"23:00"}]}), {novitaViste:"2026-10-26"});
   await p.evaluate(()=>document.querySelector('[data-tab="turni"]').click()); await p.waitForTimeout(300);
   await p.evaluate(()=>document.querySelector("#doPartner").click()); await p.waitForTimeout(400);
   await p.evaluate(()=>document.querySelector("[data-partner-edit]").click()); await p.waitForTimeout(400);
@@ -65,7 +65,7 @@ const aperto=p=>p.evaluate(()=>!document.querySelector("#novitaModal").hidden);
   ok(await p.evaluate(()=>JSON.parse(localStorage.getItem("nt:state")).people[0].shifts.N.s===1260), "il suo turno N resta com'è (21:00) se cambi il tuo");
   await p.context().close(); }
 // aggiungere «i tuoi stessi turni» copia gli orari
-{ const p=await apri(ST(), {novitaViste:"2026-10-25"});
+{ const p=await apri(ST(), {novitaViste:"2026-10-26"});
   await p.evaluate(()=>document.querySelector('[data-tab="turni"]').click()); await p.waitForTimeout(300);
   await p.evaluate(()=>document.querySelector("#doPartner").click()); await p.waitForTimeout(400);
   await p.evaluate(()=>document.querySelector("[data-partner-edit]").click()); await p.waitForTimeout(400);
@@ -74,7 +74,7 @@ const aperto=p=>p.evaluate(()=>!document.querySelector("#novitaModal").hidden);
   ok(await p.evaluate(()=>{ const s=JSON.parse(localStorage.getItem("nt:state")); const per=s.pPattern ? {shifts:s.pShifts} : s.people[0]; return !!(per.shifts && per.shifts.N && per.shifts.N.s===1320); }), "«I tuoi stessi turni» copia i tuoi orari: non li segue");
   await p.context().close(); }
 // calendario di coppia sopra «Condividi»
-{ const p=await apri(ST({people:[{name:"Anna",pattern:"MPNSR",anchor:fa(1)}]}), {novitaViste:"2026-10-25"});
+{ const p=await apri(ST({people:[{name:"Anna",pattern:"MPNSR",anchor:fa(1)}]}), {novitaViste:"2026-10-26"});
   ok(await p.evaluate(()=>{ const a=document.querySelector("#piuCal"), b=document.querySelector("#partnerShare"); return !!a && !!b && (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING)!==0; }), "il calendario di coppia sta sopra «Condividi»");
   await p.context().close(); }
 

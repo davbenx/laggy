@@ -230,7 +230,7 @@ L'anteprima mostra layout, colori e stati come progettati. Un solo difetto trova
 2. **Icona dell'app** (richiesta in corso):
    - Gli ho dato due bozze SVG (A piatta su crema, B viso su blu; in `/tmp/claude-0/…/scratchpad/logo/`, effimere) e un prompt per un'IA di immagini.
    - L'utente ci caricherà i file generati.
-   - Sostituire in: launcher Android (`res/mipmap-*`, `ic_launcher_foreground`, `drawable/ic_launcher_monochrome.xml`, `values/ic_launcher_background.xml` crema `#F7F3EA`), icone web (`icon-180/192/512/maskable`, `owl-mark.png`), `docs/play/img/icona-app-512.png`.
+   - Sostituire in: launcher Android (`res/mipmap-*`, `ic_launcher_foreground`, `drawable/ic_launcher_monochrome.xml`, `values/ic_launcher_background.xml` crema `#FBEFE3`), icone web (`icon-180/192/512/maskable`, `owl-mark.png`), `docs/play/img/icona-app-512.png`.
    - Regola Android: l'icona adattiva ha una zona sicura di circa il 66% centrale.
 3. **Popup «Novità»:** implementato. A ogni versione con novità visibili aggiornare `NOVITA` (id, data, righe) in `index.html`.
 
