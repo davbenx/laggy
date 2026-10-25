@@ -68,10 +68,10 @@ Un progetto indipendente, nato da chi i turni li fa. Segnalazioni e idee: dall'a
 
 ## Note di versione 1.3.2 (max 500)
 Novità:
-• Widget: ‹ › per sfogliare il calendario (a pagine, agganciate all'inizio del mese); il titolo riporta a oggi
-• Widget: il mese si legge meglio (titolo, numeri di un altro mese in blu, 1° del mese in grassetto), oggi con una cornice
-• Widget: colori dei turni più pieni (e più leggibili), lettere dei turni più grandi dei riposi; sparisce il pallino verde dei «liberi insieme»
-• Turni: le linee delle ore tornano allineate quando segui una persona
+• Widget: voto dell'energia con le cinque facce; «Altri orari» apre una finestra per correggere letto e sveglia senza entrare nell'app
+• Widget: ‹ › per sfogliare i mesi, titolo che torna a oggi, colori dei turni più pieni
+• Regolarità del sonno: le notti registrate «come previsto» non contano, solo i tuoi orari veri
+• Sonno e carico con grafici; pulsanti più chiari; un solo calendario di coppia
 
 ## Categoria, tag e contatti
 - Categoria: Salute e fitness

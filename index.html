@@ -3094,6 +3094,11 @@ let diary = store.mappa("diary");
 // check-in a parte, ora trasferita qui). La scala 1-5 di per sé non sa
 // "quando": è legata al giorno del sonno, non al momento in cui la scrivi.
 let diaryAt = store.mappa("diaryAt");
+// Notti il cui sonno è stato registrato «come da piano» (un tocco, o gli stessi orari del piano), non digitato: sono stime,
+// non misure. Contano per il debito (l'utente ha detto che è andata così), ma non per la regolarità: gli orari del piano sono
+// regolari per costruzione. Una notte senza segno è un dato inserito a mano.
+let sonnoPiano = store.mappa("sonnoPiano");
+function segnaSonnoPiano(k, comePiano){ if(comePiano) sonnoPiano[k]=1; else delete sonnoPiano[k]; store.set("sonnoPiano", sonnoPiano); }
 state.wakes = store.mappa("wakes");
 state.beds  = store.mappa("beds");
 state.pisolini = store.mappa("pisolini");
@@ -3930,13 +3935,15 @@ function regolaritaSonno(){
     if(R<=0) return null;
     return Math.sqrt(-2*Math.log(R))*(1440/(2*Math.PI));
   };
-  const chiavi=Object.keys(state.beds||{}).filter(k=>state.wakes&&state.wakes[k]).sort().slice(-60);
+  const tutte=Object.keys(state.beds||{}).filter(k=>state.wakes&&state.wakes[k]).sort().slice(-60);
+  const nPiano=tutte.filter(k=>sonnoPiano[k]).length;
+  const chiavi=tutte.filter(k=>!sonnoPiano[k]);   // gli orari «come da piano» sono regolari per costruzione: non misurano la regolarità
   const bedM=chiavi.map(k=>t(state.beds[k])).filter(isFinite);
   const wakeM=chiavi.map(k=>t(state.wakes[k])).filter(isFinite);
   const sdBed=circMinSD(bedM), sdWake=circMinSD(wakeM);
-  if(sdBed==null && sdWake==null) return null;
+  if(sdBed==null && sdWake==null) return nPiano>0 ? {n:chiavi.length, nPiano, sdBed:null, sdWake:null, bedM:[], wakeM:[], mBed:null, mWake:null} : null;
   const mediaCirc=minuti=>{ if(!minuti.length) return null; let sc=0, ss=0; for(const m of minuti){ const a=2*Math.PI*m/1440; sc+=Math.cos(a); ss+=Math.sin(a); } return mod1440(Math.round(Math.atan2(ss,sc)*1440/(2*Math.PI))); };
-  return {n:chiavi.length, sdBed, sdWake, bedM, wakeM, mBed:mediaCirc(bedM), mWake:mediaCirc(wakeM)};
+  return {n:chiavi.length, nPiano, sdBed, sdWake, bedM, wakeM, mBed:mediaCirc(bedM), mWake:mediaCirc(wakeM)};
 }
 
 function summaryText(){
@@ -6795,8 +6802,11 @@ function renderAndamenti(){
       let righe='';
       if(reg.sdBed!=null) righe+='<div class="row"><b style="min-width:118px">Vai a letto</b><span>'+parola(reg.sdBed)+' <span class="hint">· ±'+hm(reg.sdBed)+'</span></span></div>';
       if(reg.sdWake!=null) righe+='<div class="row"><b style="min-width:118px">Ti svegli</b><span>'+parola(reg.sdWake)+' <span class="hint">· ±'+hm(reg.sdWake)+'</span></span></div>';
-      if(righe) sezioni.push('<div><span class="eyebrow andamento-eyebrow">Orari del sonno, da '+reg.n+' notti</span>'+
-        '<div class="andamento-sezione">'+graficoRegolarita(reg)+'<div class="rows">'+righe+'</div></div></div>');
+      // le notti registrate «come da piano» non misurano la regolarità: si dice quante sono e perché
+      const nota = reg.nPiano>0 ? '<p class="hint" style="margin:10px 0 0">'+(reg.nPiano===1?'1 notte registrata «come previsto» non conta':reg.nPiano+' notti registrate «come previsto» non contano')+
+        ': gli orari del piano sono regolari per costruzione.'+(righe?'':' Servono almeno cinque notti con i tuoi orari veri.')+'</p>' : '';
+      if(righe || nota) sezioni.push('<div><span class="eyebrow andamento-eyebrow">Orari del sonno'+(reg.n?', da '+reg.n+' notti':'')+'</span>'+
+        '<div class="andamento-sezione">'+graficoRegolarita(reg)+(righe?'<div class="rows">'+righe+'</div>':'')+nota+'</div></div>');
     }
   }catch(e){}
 
@@ -7414,7 +7424,7 @@ async function risposteWidget(){
   if(!platform.widget.available) return;
   const R=await platform.widget.risposte(); let n=0;
   for(const k in R){ if(!/^\d{4}-\d{2}-\d{2}$/.test(k)) continue; const r=R[k]||{};
-    if(r.sonno && !wakes[k] && /^\d\d:\d\d$/.test(r.bed||"") && /^\d\d:\d\d$/.test(r.wake||"")){ state.beds[k]=r.bed; wakes[k]=r.wake; n++; }
+    if(r.sonno && !wakes[k] && /^\d\d:\d\d$/.test(r.bed||"") && /^\d\d:\d\d$/.test(r.wake||"")){ state.beds[k]=r.bed; wakes[k]=r.wake; segnaSonnoPiano(k, r.fonte!=="m"); n++; }
     if(r.voto>=1 && r.voto<=5 && diary[k]==null){ diary[k]=+r.voto; diaryAt[k]=+r.at||Date.now(); n++; } }
   if(!n) return;
   store.set("beds",state.beds); store.set("wakes",wakes); store.set("diaryAt",diaryAt); store.set("diary",diary);
@@ -7780,12 +7790,12 @@ function diaryChange(e){
   const bd=e.target.closest("[data-bed]");
   if(bd){ const k=iso(state.focus);
     if(bd.value) state.beds[k]=bd.value; else delete state.beds[k];
-    store.set("beds",state.beds); render(); return; }
+    segnaSonnoPiano(k,false); store.set("beds",state.beds); render(); return; }
   const w=e.target.closest("[data-wake]");
   if(!w) return;
   const k=iso(state.focus);
   if(w.value) wakes[k]=w.value; else delete wakes[k];
-  store.set("wakes",wakes); render();
+  segnaSonnoPiano(k,false); store.set("wakes",wakes); render();
 }
 function diaryClick(e){
   if(e.target.closest("[data-open-bifasico]")){ apriBifasico(); return; }
@@ -7812,7 +7822,7 @@ function diaryClick(e){
      || e.target.closest("[data-nap-in-a]") || e.target.closest("[data-nap-in-b]")) return;   // i campi orario si gestiscono da soli
   const ap=e.target.closest("[data-asplan]");
   if(ap){ const k=iso(state.focus), c=cards(NT.plan()).find(x=>x.k==="d");
-    if(c){ state.beds[k]=c.bedPiano; state.wakes[k]=c.wakePiano;
+    if(c){ state.beds[k]=c.bedPiano; state.wakes[k]=c.wakePiano; segnaSonnoPiano(k,true);
       state.diaryEditing.delete("sleep:"+k);
       store.set("beds",state.beds); store.set("wakes",state.wakes);
       toast("Sonno registrato come da piano");
@@ -7833,6 +7843,7 @@ function diaryClick(e){
     const wakeVal=(wIn && wIn.value) ? wIn.value : (cs.dataset.defWake || wakes[k] || (c ? c.wakePiano : ""));
     if(bedVal) state.beds[k]=bedVal;
     if(wakeVal) wakes[k]=wakeVal;
+    segnaSonnoPiano(k, !!(c && bedVal===c.bedPiano && wakeVal===c.wakePiano));
     store.set("beds",state.beds);
     store.set("wakes",wakes);
     state.diaryEditing.delete("sleep:"+k);
@@ -10258,12 +10269,12 @@ function registraComePrevisto(){
     state.focus=giornoVero(); cicloOff=0; setTab("oggi");
     const k=iso(state.focus), c=cards(NT.plan()).find(x=>x.k==="d");
     if(!c || !c.wakeAsk || state.beds[k] || state.wakes[k]){ apriDestinazione("diario"); return; }
-    state.beds[k]=c.bedPiano; state.wakes[k]=c.wakePiano;
+    state.beds[k]=c.bedPiano; state.wakes[k]=c.wakePiano; segnaSonnoPiano(k,true);
     store.set("beds",state.beds); store.set("wakes",state.wakes);
     track("diario_rapido");
     render(); apriDestinazione("diario");
     toastUndo("Registrato: "+c.bedPiano+" → "+c.wakePiano, ()=>{
-      delete state.beds[k]; delete state.wakes[k];
+      delete state.beds[k]; delete state.wakes[k]; segnaSonnoPiano(k,false);
       store.set("beds",state.beds); store.set("wakes",state.wakes); render();
     });
   }catch(e){}

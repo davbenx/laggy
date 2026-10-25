@@ -24,7 +24,7 @@ jobs:
           P=tools/anteprima-widget; M=app/android/app/src/main
           cp -r app/android/gradle "$P/gradle"; cp app/android/gradlew "$P/gradlew"
           cp -r "$M/res" "$P/app/src/main/res"
-          for f in WidgetStato WidgetPiano CalendarioModel CalendarioWidget NotturnistiWidget; do cp "$M/java/club/notturnisti/twa/$f.java" "$P/app/src/main/java/club/notturnisti/twa/"; done
+          for f in WidgetStato WidgetPiano CalendarioModel CalendarioWidget NotturnistiWidget OrariSonno OrariSonnoActivity; do cp "$M/java/club/notturnisti/twa/$f.java" "$P/app/src/main/java/club/notturnisti/twa/"; done
       - name: Disegna
         working-directory: tools/anteprima-widget
         run: ./gradlew recordPaparazziDebug --no-daemon
@@ -34,7 +34,7 @@ jobs:
           mkdir -p /tmp/tavole
           cp *.png /tmp/tavole/ 2>/dev/null || true
           sudo apt-get update -qq && sudo apt-get install -y imagemagick >/dev/null || exit 0
-          for g in $(ls *.png | sed -E 's/.*_(a_sera|b_sveglia|c_pisolino|d_voto|d2_energia|e_solo_io|f_nascosta|g_esaurito|h_pagina_avanti|i_pagina_indietro|j_pagina_fine|k_pagina_avanti_solo_io)_(chiaro|scuro)_h[0-9]+.*/\1_\2/' | sort -u); do
+          for g in $(ls *.png | sed -E 's/.*_(a_sera|b_sveglia|c_pisolino|d_voto|d2_energia|m_finestra_piano|m_finestra_corretti|m_finestra_impossibili|e_solo_io|f_nascosta|g_esaurito|h_pagina_avanti|i_pagina_indietro|j_pagina_fine|k_pagina_avanti_solo_io)_(chiaro|scuro)_h[0-9]+.*/\1_\2/' | sort -u); do
             files=$(ls *_${g}_h*.png | sort -t h -k2 -n | sort -V)
             montage $files -tile 7x1 -geometry +8+8 -background '#1b1b1b' "/tmp/tavole/$g.png"
           done

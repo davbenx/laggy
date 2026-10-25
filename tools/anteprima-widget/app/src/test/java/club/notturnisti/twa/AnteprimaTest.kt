@@ -86,6 +86,66 @@ class AnteprimaTest {
         }
     }
 
+    // Geometria vera delle viste (non l'aspetto): le frecce ‹ › stanno sulla stessa linea del titolo e il bordo sinistro della prima
+    // sta allineato alle celle. Prova alle altezze in cui il calendario c'è, con e senza persona, in chiaro e scuro.
+    @Test fun freccette_allineate() {
+        fun posizione(v: View, radice: View): IntArray { var x = 0; var y = 0; var c: View? = v
+            while (c != null && c !== radice) { x += c.left; y += c.top; c = c.parent as? View }
+            return intArrayOf(x, y) }
+        for (tema in listOf("chiaro", "scuro")) {
+            paparazzi.unsafeUpdateConfig(
+                deviceConfig = if (tema == "scuro") DeviceConfig.PIXEL_5.copy(nightMode = NightMode.NIGHT) else DeviceConfig.PIXEL_5,
+                theme = if (tema == "scuro") "android:Theme.Material.NoActionBar" else "android:Theme.Material.Light.NoActionBar")
+            for (persone in listOf(true, false)) for (h in listOf(330, 460, 560)) {
+                TimeZone.setDefault(TimeZone.getTimeZone("Europe/Rome")); NotturnistiWidget.senzaIntent = true
+                val ora = t(0, 20, 43); val v = JSONArray(); sera().forEach { v.put(it) }
+                val r = JSONObject().put("voci", v).put("mese", calendario(persone))
+                val st = WidgetStato.calcola(r, JSONObject(), ora); val m = CalendarioModel.leggi(r.getJSONObject("mese"))
+                val ctx = paparazzi.context; val d = ctx.resources.displayMetrics.density
+                val w = NotturnistiWidget.costruisci(ctx, st, m, h, ora, if (persone) 0 else -1, 1, 0).apply(ctx, FrameLayout(ctx))
+                val larg = (330 * d).toInt(); val alt = (h * d).toInt()
+                w.measure(View.MeasureSpec.makeMeasureSpec(larg, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(alt, View.MeasureSpec.EXACTLY)); w.layout(0, 0, larg, alt)
+                val prec = w.findViewById<View>(R.id.w_cal_prec); val mese = w.findViewById<View>(R.id.w_cal_mese); val succ = w.findViewById<View>(R.id.w_cal_succ)
+                val cella = w.findViewById<View>(R.id.w_c0_0_m)
+                val nome = "$tema persone=$persone h=$h"
+                val pp = posizione(prec, w); val pm = posizione(mese, w); val ps = posizione(succ, w); val pc = posizione(cella, w)
+                val cPrec = pp[1] + prec.height / 2.0; val cMese = pm[1] + mese.height / 2.0; val cSucc = ps[1] + succ.height / 2.0
+                println("MISURA $nome | centro ‹ ${"%.1f".format(cPrec / d)} dp, titolo ${"%.1f".format(cMese / d)} dp, › ${"%.1f".format(cSucc / d)} dp | tratto ‹ a ${"%.1f".format((pp[0] + 16 * d - pc[0]) / d)} dp dal bordo celle | ‹→titolo ${"%.1f".format((pm[0] - (pp[0] + prec.width)) / d)} dp, titolo→› ${"%.1f".format((ps[0] - (pm[0] + mese.width)) / d)} dp")
+                org.junit.Assert.assertTrue("$nome: ‹ e titolo sulla stessa linea ($cPrec vs $cMese)", Math.abs(cPrec - cMese) <= 1.0)
+                org.junit.Assert.assertTrue("$nome: › e titolo sulla stessa linea ($cSucc vs $cMese)", Math.abs(cSucc - cMese) <= 1.0)
+                // il disegno della freccia comincia a 16 dp dal bordo sinistro della sua vista (8 di margine interno + 8 di vuoto nell'icona)
+                val sporgenza = (pp[0] + 16 * d - pc[0]) / d
+                org.junit.Assert.assertTrue("$nome: il tratto della freccia sta a ${"%.1f".format(sporgenza)} dp dal bordo delle celle (voglio 0-4)", sporgenza >= -0.5 && sporgenza <= 4.0)
+                org.junit.Assert.assertTrue("$nome: ‹ titolo › sono vicini (titolo a ${(pm[0] - (pp[0] + prec.width)) / d} dp dalla freccia)", pm[0] - (pp[0] + prec.width) <= 6 * d && ps[0] - (pm[0] + mese.width) <= 6 * d)
+                org.junit.Assert.assertTrue("$nome: le frecce hanno un'area di tocco di almeno 32 dp di altezza e 40 di larghezza", prec.height >= 32 * d - 1 && prec.width >= 40 * d - 1 && succ.width >= 40 * d - 1)
+            }
+        }
+    }
+
+    // la finestra «Come hai dormito?» aperta da «Altri orari»: orari del piano e orari corretti, e uno non plausibile
+    @Test fun finestra_orari() {
+        for (tema in listOf("chiaro", "scuro")) {
+            paparazzi.unsafeUpdateConfig(
+                deviceConfig = if (tema == "scuro") DeviceConfig.PIXEL_5.copy(nightMode = NightMode.NIGHT) else DeviceConfig.PIXEL_5,
+                theme = if (tema == "scuro") "android:Theme.Material.NoActionBar" else "android:Theme.Material.Light.NoActionBar")
+            val ctx = paparazzi.context
+            for ((nome, letto, sveglia, somma, valido) in listOf(
+                Quintupla("piano", "23:30", "07:10", "Dormito 7h40 · previsto 7h40", true),
+                Quintupla("corretti", "00:30", "06:40", "Dormito 6h10 · previsto 7h40", true),
+                Quintupla("impossibili", "07:00", "07:30", "Fra l'andare a letto e la sveglia devono passare da 1 a 16 ore", false))) {
+                val v = android.view.LayoutInflater.from(ctx).inflate(R.layout.orari_sonno, null)
+                (v.findViewById<android.widget.TextView>(R.id.o_letto)).text = letto
+                (v.findViewById<android.widget.TextView>(R.id.o_sveglia)).text = sveglia
+                val t = v.findViewById<android.widget.TextView>(R.id.o_sommario); t.text = somma
+                if (!valido) { t.setTextColor(ctx.getColor(R.color.w_t_rientro)); v.findViewById<View>(R.id.o_salva).alpha = 0.4f }
+                val box = FrameLayout(ctx); box.setBackgroundColor(0xFF2A6A7A.toInt()); box.setPadding(24, 24, 24, 24)
+                box.addView(v, FrameLayout.LayoutParams((330 * ctx.resources.displayMetrics.density).toInt(), FrameLayout.LayoutParams.WRAP_CONTENT))
+                paparazzi.snapshot(box, "m_finestra_${nome}_$tema")
+            }
+        }
+    }
+    private data class Quintupla(val nome: String, val letto: String, val sveglia: String, val somma: String, val valido: Boolean)
+
     // persona nascosta col tasto, piano esaurito, più di una riga di voci in arrivo
     @Test fun casi_particolari() {
         for (tema in listOf("chiaro", "scuro")) {

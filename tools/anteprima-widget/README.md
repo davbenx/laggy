@@ -12,7 +12,7 @@ Serve un JDK 21 e l'Android SDK (platform 35/36 e build-tools; con `ANDROID_HOME
 P=/tmp/anteprima; cp -r tools/anteprima-widget $P; M=app/android/app/src/main
 cp -r app/android/gradle $P/gradle; cp app/android/gradlew $P/gradlew
 cp -r $M/res $P/app/src/main/res; mkdir -p $P/app/src/main/java/club/notturnisti/twa
-for f in WidgetStato WidgetPiano CalendarioModel CalendarioWidget NotturnistiWidget; do cp $M/java/club/notturnisti/twa/$f.java $P/app/src/main/java/club/notturnisti/twa/; done
+for f in WidgetStato WidgetPiano CalendarioModel CalendarioWidget NotturnistiWidget OrariSonno OrariSonnoActivity; do cp $M/java/club/notturnisti/twa/$f.java $P/app/src/main/java/club/notturnisti/twa/; done
 cd $P && ./gradlew recordPaparazziDebug --no-daemon   # circa 1-2 minuti
 ```
 Le immagini sono in `app/src/test/snapshots/images/`.

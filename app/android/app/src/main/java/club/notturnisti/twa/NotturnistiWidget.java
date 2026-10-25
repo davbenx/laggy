@@ -87,8 +87,23 @@ public class NotturnistiWidget extends AppWidgetProvider {
             SharedPreferences sp = prefs(ctx);
             JSONObject tutte = new JSONObject(sp.getString(KEY_RISPOSTE, "{}"));
             JSONObject r = tutte.optJSONObject(d); if (r == null) r = new JSONObject();
-            if ("sonno".equals(i.getStringExtra("cosa"))) { r.put("sonno", true); r.put("bed", i.getStringExtra("bed")); r.put("wake", i.getStringExtra("wake")); }
-            else { r.put("voto", i.getIntExtra("v", 3)); r.put("at", System.currentTimeMillis()); }
+            if ("sonno".equals(i.getStringExtra("cosa"))) { salvaSonno(ctx, d, i.getStringExtra("bed"), i.getStringExtra("wake"), "p"); return; }   // «Sì, così»: gli orari del piano
+            r.put("voto", i.getIntExtra("v", 3)); r.put("at", System.currentTimeMillis());
+            tutte.put(d, r);
+            sp.edit().putString(KEY_RISPOSTE, tutte.toString()).apply();
+        } catch (Exception ignored) { }
+    }
+
+    /**
+     * Gli orari del sonno di una notte. `fonte`: «p» sono quelli del piano (una conferma), «m» sono stati corretti dalla
+     * persona; la pagina non conta le notti «p» nella regolarità.
+     */
+    static void salvaSonno(Context ctx, String d, String bed, String wake, String fonte) {
+        try {
+            SharedPreferences sp = prefs(ctx);
+            JSONObject tutte = new JSONObject(sp.getString(KEY_RISPOSTE, "{}"));
+            JSONObject r = tutte.optJSONObject(d); if (r == null) r = new JSONObject();
+            r.put("sonno", true); r.put("bed", bed); r.put("wake", wake); r.put("fonte", fonte);
             tutte.put(d, r);
             sp.edit().putString(KEY_RISPOSTE, tutte.toString()).apply();
         } catch (Exception ignored) { }
@@ -213,7 +228,10 @@ public class NotturnistiWidget extends AppWidgetProvider {
         rv.setTextViewText(R.id.w_v2, "Altri orari");
         rv.setInt(R.id.w_v2, "setBackgroundResource", R.drawable.widget_bottone);
         rv.setTextColor(R.id.w_v2, ctx.getColor(R.color.w_ink));
-        rv.setOnClickPendingIntent(R.id.w_v2, apriGiorno(ctx, 201, dia.optString("d")));
+        // «Altri orari»: la finestra per correggerli, senza entrare nell'app
+        Intent orari = new Intent(ctx, OrariSonnoActivity.class).putExtra("d", dia.optString("d")).putExtra("bed", dia.optString("bed")).putExtra("wake", dia.optString("wake"))
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        rv.setOnClickPendingIntent(R.id.w_v2, attivita(ctx, 201, orari));
     }
 
     static void disegna(Context ctx, AppWidgetManager mgr, int[] ids) {

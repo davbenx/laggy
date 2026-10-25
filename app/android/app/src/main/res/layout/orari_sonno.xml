@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- La finestra «Come hai dormito?» aperta dal widget (OrariSonnoActivity). Colori e pulsanti sono quelli del widget. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minWidth="300dp"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:background="@drawable/widget_sfondo">
+
+    <TextView android:id="@+id/o_titolo" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Come hai dormito?"
+        android:textColor="@color/w_ink" android:textSize="20sp" android:textStyle="bold" />
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="2dp"
+        android:text="Correggi gli orari veri: contano per il sonno che ti manca."
+        android:textColor="@color/w_dim" android:textSize="13sp" />
+
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="A LETTO"
+        android:textColor="@color/w_dim" android:textSize="12sp" android:textStyle="bold" android:letterSpacing="0.08" />
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:gravity="center_vertical" android:orientation="horizontal">
+        <TextView android:id="@+id/o_letto" android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1" android:gravity="center" android:background="@drawable/widget_bottone"
+            android:clickable="true" android:focusable="true" android:contentDescription="A letto: scegli l'ora" android:textColor="@color/w_ink" android:textSize="24sp" android:textStyle="bold" />
+        <TextView android:id="@+id/o_letto_m" android:layout_width="64dp" android:layout_height="52dp" android:layout_marginStart="8dp" android:gravity="center" android:background="@drawable/widget_bottone"
+            android:clickable="true" android:focusable="true" android:contentDescription="A letto: mezz'ora prima" android:text="−30" android:textColor="@color/w_ink" android:textSize="15sp" android:textStyle="bold" />
+        <TextView android:id="@+id/o_letto_p" android:layout_width="64dp" android:layout_height="52dp" android:layout_marginStart="8dp" android:gravity="center" android:background="@drawable/widget_bottone"
+            android:clickable="true" android:focusable="true" android:contentDescription="A letto: mezz'ora dopo" android:text="+30" android:textColor="@color/w_ink" android:textSize="15sp" android:textStyle="bold" />
+    </LinearLayout>
+
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="14dp" android:text="SVEGLIA"
+        android:textColor="@color/w_dim" android:textSize="12sp" android:textStyle="bold" android:letterSpacing="0.08" />
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:gravity="center_vertical" android:orientation="horizontal">
+        <TextView android:id="@+id/o_sveglia" android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1" android:gravity="center" android:background="@drawable/widget_bottone"
+            android:clickable="true" android:focusable="true" android:contentDescription="Sveglia: scegli l'ora" android:textColor="@color/w_ink" android:textSize="24sp" android:textStyle="bold" />
+        <TextView android:id="@+id/o_sveglia_m" android:layout_width="64dp" android:layout_height="52dp" android:layout_marginStart="8dp" android:gravity="center" android:background="@drawable/widget_bottone"
+            android:clickable="true" android:focusable="true" android:contentDescription="Sveglia: mezz'ora prima" android:text="−30" android:textColor="@color/w_ink" android:textSize="15sp" android:textStyle="bold" />
+        <TextView android:id="@+id/o_sveglia_p" android:layout_width="64dp" android:layout_height="52dp" android:layout_marginStart="8dp" android:gravity="center" android:background="@drawable/widget_bottone"
+            android:clickable="true" android:focusable="true" android:contentDescription="Sveglia: mezz'ora dopo" android:text="+30" android:textColor="@color/w_ink" android:textSize="15sp" android:textStyle="bold" />
+    </LinearLayout>
+
+    <TextView android:id="@+id/o_sommario" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="14dp"
+        android:text="Dormito 7h40 · previsto 7h40" android:textColor="@color/w_ink" android:textSize="14sp" />
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:orientation="horizontal">
+        <TextView android:id="@+id/o_prev" android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1" android:gravity="center" android:background="@drawable/widget_bottone"
+            android:clickable="true" android:focusable="true" android:text="Come previsto" android:textColor="@color/w_ink" android:textSize="14sp" android:textStyle="bold" />
+        <TextView android:id="@+id/o_salva" android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1" android:layout_marginStart="8dp" android:gravity="center" android:background="@drawable/widget_bottone_pri"
+            android:clickable="true" android:focusable="true" android:text="Salva" android:textColor="@color/w_su_accento" android:textSize="14sp" android:textStyle="bold" />
+    </LinearLayout>
+    <TextView android:id="@+id/o_annulla" android:layout_width="match_parent" android:layout_height="44dp" android:layout_marginTop="4dp" android:gravity="center"
+        android:clickable="true" android:focusable="true" android:text="Annulla" android:textColor="@color/w_dim" android:textSize="14sp" />
+</LinearLayout>

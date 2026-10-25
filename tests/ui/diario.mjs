@@ -32,6 +32,8 @@ ok(await n(p,"input")===0 && /Hai dormito/.test(await box(p)), "Annulla: si torn
 await tap(p,"[data-confirm-sleep]");
 t=await box(p);
 ok(/✓ Sonno \d\d:\d\d–\d\d:\d\d · /.test(t) && /Modifica/.test(t) && await n(p,"[data-confirm-sleep]")===0, "«Sì, così»: una riga con gli orari e Modifica → "+t.slice(0,70));
+const piano=()=>p.evaluate(()=>Object.keys(JSON.parse(localStorage.getItem("nt:sonnoPiano")||"{}")).length);
+ok(await piano()===1, "«Sì, così»: la notte è segnata «come da piano» (non conta per la regolarità)");
 ok(await n(p,"[data-diary]")===5 && /Come ti senti\?/.test(t), "poi «Come ti senti?», cinque scelte");
 await tap(p,'[data-diary="4"]');
 t=await box(p);
@@ -43,6 +45,7 @@ ok(/Energia: Poca energia/.test(await box(p)) && await p.evaluate(()=>Object.val
 await tap(p,"[data-open]");
 await p.fill("#essenziale .drem [data-sleep-wake]","08:15"); await tap(p,"[data-confirm-sleep]");
 ok(/–08:15 ·/.test(await box(p)) && await n(p,"input")===0, "Modifica → campi → Salva: la riga si aggiorna e si richiude");
+ok(await piano()===0, "orari corretti a mano: la notte non è più «come da piano», è una misura");
 await p.context().close();
 // pomeriggio: il pisolino è cominciato
 p=await apri(18,40);
