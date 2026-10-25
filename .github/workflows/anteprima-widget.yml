@@ -34,7 +34,7 @@ jobs:
           mkdir -p /tmp/tavole
           cp *.png /tmp/tavole/ 2>/dev/null || true
           sudo apt-get update -qq && sudo apt-get install -y imagemagick >/dev/null || exit 0
-          for g in $(ls *.png | sed -E 's/.*_(a_sera|b_sveglia|c_pisolino|d_voto|d2_energia|m_finestra_piano|m_finestra_corretti|m_finestra_impossibili|e_solo_io|f_nascosta|g_esaurito|h_pagina_avanti|i_pagina_indietro|j_pagina_fine|k_pagina_avanti_solo_io)_(chiaro|scuro)_h[0-9]+.*/\1_\2/' | sort -u); do
+          for g in $(ls *.png | sed -E 's/.*_(a_sera|b_sveglia|c_pisolino|d_voto|d2_energia|n_domenica|n_lunedi|m_finestra_piano|m_finestra_corretti|m_finestra_impossibili|e_solo_io|f_nascosta|g_esaurito|h_pagina_avanti|i_pagina_indietro|j_pagina_fine|k_pagina_avanti_solo_io)_(chiaro|scuro)_h[0-9]+.*/\1_\2/' | sort -u); do
             files=$(ls *_${g}_h*.png | sort -t h -k2 -n | sort -V)
             montage $files -tile 7x1 -geometry +8+8 -background '#1b1b1b' "/tmp/tavole/$g.png"
           done

@@ -17,7 +17,7 @@ test("i token di colore ci sono in tutti e quattro i blocchi dei temi", () => {
 });
 
 test("la persona seguita ha un colore suo, non quello di «tutto bene»", () => {
-  for (const sel of [".cp{", ".key-pers b{", ".cbar.pers{"]) {
+  for (const sel of [".cp{", ".key-pers .filo{", ".cbar.pers{"]) {
     const riga = html.split("\n").find(l => l.startsWith(sel));
     assert.ok(riga && riga.includes("var(--persona)") && !riga.includes("var(--ok)"), sel + " usa --persona");
   }

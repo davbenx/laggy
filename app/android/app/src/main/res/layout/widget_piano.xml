@@ -10,6 +10,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:clipChildren="false"
+    android:clipToPadding="false"
     android:gravity="top"
     android:padding="14dp"
     android:background="@drawable/widget_sfondo">
@@ -97,6 +99,8 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         android:layout_marginTop="10dp"
         android:orientation="vertical"
         android:visibility="gone">

@@ -42,7 +42,7 @@ public class NotturnistiWidget extends AppWidgetProvider {
     @Override
     public void onDeleted(Context ctx, int[] ids) {
         SharedPreferences.Editor ed = prefs(ctx).edit();
-        for (int id : ids) ed.remove("pers_" + id).remove("star_" + id).remove("off_" + id).remove("offd_" + id);
+        for (int id : ids) ed.remove("pers_" + id).remove("star_" + id).remove("off_" + id).remove("offd_" + id).remove("offr_" + id).remove("offt_" + id);
         ed.apply();
     }
 
@@ -53,7 +53,7 @@ public class NotturnistiWidget extends AppWidgetProvider {
         if (AZIONE_TICK.equals(a)) aggiornaTutti(ctx);
         if (AZIONE_DIARIO.equals(a)) { salvaRisposta(ctx, intent); aggiornaTutti(ctx); }
         if (AZIONE_PERSONA.equals(a)) { cambiaPersona(ctx, intent.getIntExtra("id", 0)); aggiornaTutti(ctx); }
-        if (AZIONE_PAGINA.equals(a)) { vaiAPagina(ctx, intent.getIntExtra("id", 0), intent.getIntExtra("off", 0)); aggiornaTutti(ctx); }
+        if (AZIONE_PAGINA.equals(a)) { vaiAPagina(ctx, intent.getIntExtra("id", 0), intent.getIntExtra("off", 0), intent.getIntExtra("righe", 0)); aggiornaTutti(ctx); }
     }
 
     /** Solo per le prove sulla JVM (anteprima dei layout): senza sistema Android non si creano PendingIntent. */
@@ -121,8 +121,9 @@ public class NotturnistiWidget extends AppWidgetProvider {
     }
 
     // ‹ › e titolo del calendario: lo spostamento (in settimane da oggi) vale per questo giorno; domani si riparte da oggi.
-    static void vaiAPagina(Context ctx, int id, int spostamento) {
-        prefs(ctx).edit().putInt("off_" + id, spostamento).putString("offd_" + id, CalendarioWidget.giornoIso(System.currentTimeMillis())).apply();
+    static void vaiAPagina(Context ctx, int id, int spostamento, int righe) {
+        long ora = System.currentTimeMillis();
+        prefs(ctx).edit().putInt("off_" + id, spostamento).putString("offd_" + id, CalendarioWidget.giornoIso(ora)).putInt("offr_" + id, righe).putLong("offt_" + id, ora).apply();
     }
 
     static int icona(String k) {
@@ -251,6 +252,7 @@ public class NotturnistiWidget extends AppWidgetProvider {
         long quando = st.rinfresco;
         if (st.prossimoCambio != Long.MAX_VALUE) quando = Math.min(quando, st.prossimoCambio + 1000);
         boolean haCalendario = false;
+        long scade = Long.MAX_VALUE;
         for (int id : ids) {
             // la persona: la scelta di questo widget regge finché la stellina nell'app non cambia
             int persona = -1;
@@ -259,11 +261,16 @@ public class NotturnistiWidget extends AppWidgetProvider {
                 persona = cal.personaAttiva(sp.getInt("pers_" + id, CalendarioModel.SEGUI_STELLA), vista);
                 if (!cal.stella.equals(vista)) sp.edit().putString("star_" + id, cal.stella).putInt("pers_" + id, CalendarioModel.SEGUI_STELLA).apply();
             }
-            int spostamento = CalendarioModel.spostamentoValido(sp.getInt("off_" + id, 0), sp.getString("offd_" + id, ""), CalendarioWidget.giornoIso(ora));
             int h = altezza(mgr, id);
+            WidgetPiano pz = WidgetPiano.calcola(h, st.progresso >= 0, st.azione != WidgetStato.Azione.NESSUNA, st.eventi.size(), persona >= 0, CalendarioWidget.righeDisponibili(cal, ora));
+            int righeOra = cal != null && pz.calendario ? pz.righe : 0;
+            long salvatoAlle = sp.getLong("offt_" + id, 0);
+            int spostamento = CalendarioModel.spostamentoValido(sp.getInt("off_" + id, 0), sp.getString("offd_" + id, ""), CalendarioWidget.giornoIso(ora), sp.getInt("offr_" + id, 0), righeOra, salvatoAlle, ora);
+            if (spostamento != 0) scade = Math.min(scade, salvatoAlle + CalendarioModel.SCADENZA_SPOSTAMENTO + 1000);   // allo scadere si torna a oggi
             mgr.updateAppWidget(id, costruisci(ctx, st, cal, h, ora, persona, id, spostamento));
-            if (cal != null && WidgetPiano.calcola(h, st.progresso >= 0, st.azione != WidgetStato.Azione.NESSUNA, st.eventi.size(), persona >= 0, CalendarioWidget.righeDisponibili(cal, ora)).calendario) haCalendario = true;
+            if (cal != null && pz.calendario) haCalendario = true;
         }
+        quando = Math.min(quando, scade);
         if (haCalendario) {   // a mezzanotte «oggi» cambia
             Calendar m = Calendar.getInstance(); m.add(Calendar.DAY_OF_YEAR, 1);
             m.set(Calendar.HOUR_OF_DAY, 0); m.set(Calendar.MINUTE, 1); m.set(Calendar.SECOND, 0);
