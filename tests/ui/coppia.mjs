@@ -26,6 +26,7 @@ async function apri(st, app, tab="turni"){
   const n=await p.evaluate(()=>({righe:document.querySelectorAll("#cyc .crow").length, cp:document.querySelectorAll("#cyc .crow .cp").length, key:document.querySelector("#cyc .key-pers")?.textContent}));
   ok(n.righe>0 && n.cp===n.righe, "striscia: una sigla della persona per ogni giorno ("+n.cp+"/"+n.righe+")");
   ok(/^Anna in verde/.test(n.key||""), "legenda con il nome della persona → "+n.key);
+  ok(await p.evaluate(()=>{ const k=document.querySelector("#cyc .key-pers"); return k && k.getAttribute("aria-pressed")==="true" && !!k.querySelector("svg") && k.getBoundingClientRect().height>=30; }), "legenda: è un chip con l'occhio e lo stato (acceso/spento), non un testo da indovinare");
   const allinea=()=>p.evaluate(()=>{ const r=document.querySelector("#cyc .crow .crail").getBoundingClientRect(), g=document.querySelector("#cyc .cgrid").getBoundingClientRect(); return Math.abs(r.left-g.left); });
   { const d=await allinea(); ok(d<1.5, "la griglia delle ore parte dove parte la rotaia, con la colonna della persona (scarto "+d.toFixed(1)+"px)"); }
   const sig=await p.evaluate(()=>[...document.querySelectorAll("#cyc .crow .cp")].map(x=>x.textContent).join(""));
@@ -53,6 +54,7 @@ async function apri(st, app, tab="turni"){
   await p.click("#doPartner"); await p.waitForTimeout(400); await p.click("[data-partner-edit]");
   await p.waitForTimeout(400);
   ok(await p.evaluate(()=>!document.querySelector("#doCoppiaQui") && document.querySelectorAll("#coupleCalToggle").length===1), "app: niente proposta doppia, un solo interruttore");
+  ok(await p.evaluate(()=>{ const m=document.querySelector("[data-edit-persona]"), r=document.querySelector("[data-remove-persona]"); return m && r && /^Modifica /.test(m.getAttribute("aria-label")||"") && /^Rimuovi /.test(r.getAttribute("aria-label")||"") && m.getBoundingClientRect().width>=44 && r.getBoundingClientRect().height>=44 && !!m.querySelector("svg"); }), "persone: Modifica e Rimuovi sono icone da 44 px con etichetta per chi legge lo schermo");
   ok(await p.evaluate(()=>document.querySelector("#wizPeopleList").nextElementSibling.id==="piuCal" && !document.querySelector("#piuCal").hidden), "app: la scheda sta subito sotto «Le tue persone»");
   await p.evaluate(()=>document.querySelector("#coupleCalToggle").click()); await p.waitForTimeout(800);
   ok(await p.evaluate(()=>JSON.parse(localStorage.getItem("nt:calNativo")||"{}").coppia===true && document.querySelector("#coupleCalToggle").checked && /nel calendario «Notturnisti · insieme»/.test(document.querySelector("#coupleCalSub").textContent)), "app: l'interruttore accende il calendario di coppia e lo dice");
