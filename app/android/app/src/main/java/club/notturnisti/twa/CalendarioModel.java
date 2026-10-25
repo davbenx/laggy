@@ -105,12 +105,6 @@ final class CalendarioModel {
         return MESI[m[1] - 1] + (m[0] != annoOggi ? " " + m[0] : "");
     }
 
-    /** I due giorni (la tua cella e quella della persona) sono entrambi di riposo: tempo libero in comune. */
-    boolean riposoInComune(int persona, int i) {
-        Cella a = mio(i), b = di(persona, i);
-        return a != null && b != null && a.tipo == 'r' && b.tipo == 'r';
-    }
-
     /**
      * Prima riga mostrata: la settimana di oggi (la prima se i dati non la contengono) spostata di `spostamento`
      * settimane, senza uscire dai dati (con `righe` righe in vista).

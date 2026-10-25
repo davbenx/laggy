@@ -11,12 +11,16 @@
     <color name="w_t_luce">#F2C14E</color>
     <color name="w_t_pisolino">#A9BED6</color>
     <color name="w_t_rientro">#FF6B5C</color>
-    <color name="w_cella_lavoro">#4A2A1C</color>
-    <color name="w_cella_notte">#22344A</color>
+    <color name="w_cella_lavoro">#7A3414</color>
+    <color name="w_cella_lavoro_t">#FFD9C4</color>
+    <color name="w_cella_notte">#2F5A94</color>
+    <color name="w_cella_notte_t">#E3EEFC</color>
+    <color name="w_cella_p_lavoro">#1D6B5E</color>
+    <color name="w_cella_p_lavoro_t">#D4F7F0</color>
+    <color name="w_cella_p_notte">#237A70</color>
+    <color name="w_cella_p_notte_t">#F2FFFD</color>
     <color name="w_cella_riposo">#2A2F37</color>
     <color name="w_su_accento">#0E1116</color>
     <color name="w_pl_lavoro">#173B36</color>
     <color name="w_pl_lavoro_t">#7FD9C9</color>
-    <color name="w_pl_notte">#1F5A52</color>
-    <color name="w_pl_notte_t">#A6F0E3</color>
 </resources>

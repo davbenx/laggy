@@ -54,17 +54,6 @@ public class CalendarioModelTest {
         assertArrayEquals(new int[]{ 2026, 10 }, m.meseDellaRiga(1));
     }
 
-    @Test public void riposoInComune() throws Exception {
-        CalendarioModel m = CalendarioModel.leggi(new JSONObject("{\"da\":\"2026-10-19\",\"io\":[\"R:r\",\"R:r\",\"M:l\",\"Fe:r\",\"?:?\"],\"p\":[{\"n\":\"Anna\",\"g\":[\"R:r\",\"M:l\",\"R:r\",\"R:r\",\"R:r\"]}]}"));
-        assertTrue("tutti e due a riposo", m.riposoInComune(0, 0));
-        assertFalse("lei lavora", m.riposoInComune(0, 1));
-        assertFalse("io lavoro", m.riposoInComune(0, 2));
-        assertTrue("le ferie sono riposo", m.riposoInComune(0, 3));
-        assertFalse("giorno da impostare: non si sa", m.riposoInComune(0, 4));
-        assertFalse("oltre i dati", m.riposoInComune(0, 99));
-        assertFalse("persona che non c'è", m.riposoInComune(3, 0));
-    }
-
     // 20 settimane: la quinta (indice 4) è quella di oggi, quattro prima e quindici dopo; si vedono 4 righe
     @Test public void primaRigaEPagine() {
         int oggi = 4, sett = 20, righe = 4;

@@ -21,15 +21,14 @@ import java.util.Locale;
  * persona passa alla successiva, poi la nasconde (la scelta resta finché nell'app non sposti la stellina).
  * ‹ › sfogliano a pagine (tante settimane quante se ne vedono) e il titolo riporta a oggi; lo spostamento vale per il
  * giorno in cui è fatto. Il mese si legge dal titolo (quello del giovedì della prima riga) e dal colore dei numeri:
- * quelli di un altro mese sono in blu, il primo del mese è «1 NOV» in grassetto. Un puntino sulla cella della persona
- * dice che quel giorno riposate entrambi.
+ * quelli di un altro mese sono in blu, il primo del mese è «1 NOV» in grassetto.
  */
 final class CalendarioWidget {
     static final int RIGHE = 5, COLONNE = 7;
     private static final String[] MESI_BREVI = { "gen", "feb", "mar", "apr", "mag", "giu", "lug", "ago", "set", "ott", "nov", "dic" };
     private static final String[] GIORNI = { "lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato", "domenica" };
 
-    private static final int[][][] ID = new int[RIGHE][COLONNE][6];   // cella, data, mia, riquadro della sua, sua, puntino
+    private static final int[][][] ID = new int[RIGHE][COLONNE][4];   // cella, data, mia, sua
     private static int[] riga;
 
     private static void carica(Context ctx) {
@@ -43,9 +42,7 @@ final class CalendarioWidget {
                 ID[i][c][0] = ctx.getResources().getIdentifier(k, "id", pkg);
                 ID[i][c][1] = ctx.getResources().getIdentifier(k + "_d", "id", pkg);
                 ID[i][c][2] = ctx.getResources().getIdentifier(k + "_m", "id", pkg);
-                ID[i][c][3] = ctx.getResources().getIdentifier(k + "_f", "id", pkg);
-                ID[i][c][4] = ctx.getResources().getIdentifier(k + "_p", "id", pkg);
-                ID[i][c][5] = ctx.getResources().getIdentifier(k + "_x", "id", pkg);
+                ID[i][c][3] = ctx.getResources().getIdentifier(k + "_p", "id", pkg);
             }
         }
         riga = r;
@@ -137,16 +134,14 @@ final class CalendarioWidget {
                 rv.setInt(id[0], "setBackgroundResource", eOggi ? R.drawable.widget_oggi_cornice : 0);
                 rv.setFloat(id[0], "setAlpha", passato ? 0.45f : 1f);
                 pillola(ctx, rv, id[2], m.mio(i), false);
-                boolean comune = persona >= 0 && m.riposoInComune(persona, i);
                 rv.setViewVisibility(id[3], persona >= 0 ? View.VISIBLE : View.GONE);
-                rv.setViewVisibility(id[5], comune ? View.VISIBLE : View.GONE);
-                if (persona >= 0) pillola(ctx, rv, id[4], m.di(persona, i), true);
+                if (persona >= 0) pillola(ctx, rv, id[3], m.di(persona, i), true);
 
                 String iso = String.format(Locale.ROOT, "%04d-%02d-%02d", dt[0], dt[1], dt[2]);
                 Intent gi = new Intent(Intent.ACTION_VIEW, Uri.parse("notturnisti://giorno/" + iso), ctx, MainActivity.class);
                 gi.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 rv.setOnClickPendingIntent(id[0], NotturnistiWidget.attivita(ctx, 400 + r * COLONNE + c, gi));
-                rv.setContentDescription(id[0], GIORNI[c] + " " + dt[2] + ": " + etichetta(m.mio(i)) + (persona >= 0 ? ", " + m.persone.get(persona).nome + ": " + etichetta(m.di(persona, i)) : "") + (comune ? ". Riposo in comune" : ""));
+                rv.setContentDescription(id[0], GIORNI[c] + " " + dt[2] + ": " + etichetta(m.mio(i)) + (persona >= 0 ? ", " + m.persone.get(persona).nome + ": " + etichetta(m.di(persona, i)) : ""));
             }
         }
     }
@@ -157,8 +152,8 @@ final class CalendarioWidget {
         rv.setTextViewText(id, ignoto ? "·" : c.sigla);
         int sfondo = R.drawable.widget_cella_riposo, testo = R.color.w_dim;
         if (!ignoto) switch (c.tipo) {
-            case 'n': sfondo = persona ? R.drawable.widget_cella_p_notte : R.drawable.widget_cella_notte; testo = persona ? R.color.w_pl_notte_t : R.color.w_t_sonno; break;
-            case 'l': sfondo = persona ? R.drawable.widget_cella_p_lavoro : R.drawable.widget_cella_lavoro; testo = persona ? R.color.w_pl_lavoro_t : R.color.w_t_turno; break;
+            case 'n': sfondo = persona ? R.drawable.widget_cella_p_notte : R.drawable.widget_cella_notte; testo = persona ? R.color.w_cella_p_notte_t : R.color.w_cella_notte_t; break;
+            case 'l': sfondo = persona ? R.drawable.widget_cella_p_lavoro : R.drawable.widget_cella_lavoro; testo = persona ? R.color.w_cella_p_lavoro_t : R.color.w_cella_lavoro_t; break;
             default: sfondo = persona ? R.drawable.widget_cella_p_riposo : R.drawable.widget_cella_riposo;
         }
         rv.setInt(id, "setBackgroundResource", sfondo);

@@ -70,7 +70,7 @@ Un progetto indipendente, nato da chi i turni li fa. Segnalazioni e idee: dall'a
 Novità:
 • Widget: ‹ › per sfogliare il calendario a pagine, il titolo riporta a oggi
 • Widget: il mese si legge meglio (titolo, numeri di un altro mese in blu, 1° del mese in grassetto), oggi con una cornice
-• Widget: un puntino segna i giorni in cui riposate tu e la persona che segui; i turni si leggono prima dei riposi
+• Widget: colori dei turni più pieni (e più leggibili), lettere dei turni più grandi dei riposi; sparisce il pallino verde dei «liberi insieme»
 • Turni: le linee delle ore tornano allineate quando segui una persona
 
 ## Categoria, tag e contatti
