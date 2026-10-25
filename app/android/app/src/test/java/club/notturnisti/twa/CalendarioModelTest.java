@@ -116,9 +116,14 @@ public class CalendarioModelTest {
     }
 
     @Test public void spostamentoVaSoloPerIlGiornoInCuiSiFa() {
-        assertEquals(4, CalendarioModel.spostamentoValido(4, "2026-10-25", "2026-10-25"));
-        assertEquals("il giorno dopo si riparte da oggi", 0, CalendarioModel.spostamentoValido(4, "2026-10-25", "2026-10-26"));
-        assertEquals("mai salvato", 0, CalendarioModel.spostamentoValido(4, "", "2026-10-25"));
+        long t0 = 1_000_000_000L, ora = t0 + 10 * 60_000L;
+        assertEquals("stesso giorno, stesse righe, da 10 minuti", 4, CalendarioModel.spostamentoValido(4, "2026-10-25", "2026-10-25", 5, 5, t0, ora));
+        assertEquals("il giorno dopo si riparte da oggi", 0, CalendarioModel.spostamentoValido(4, "2026-10-25", "2026-10-26", 5, 5, t0, ora));
+        assertEquals("mai salvato", 0, CalendarioModel.spostamentoValido(4, "", "2026-10-25", 5, 5, t0, ora));
+        assertEquals("le righe sono cambiate (widget ridimensionato): un passo per un'altra altezza non vale", 0, CalendarioModel.spostamentoValido(-1, "2026-10-25", "2026-10-25", 1, 5, t0, ora));
+        assertEquals("quasi un'ora", 4, CalendarioModel.spostamentoValido(4, "2026-10-25", "2026-10-25", 5, 5, t0, t0 + CalendarioModel.SCADENZA_SPOSTAMENTO - 1));
+        assertEquals("un'ora dopo si torna a oggi", 0, CalendarioModel.spostamentoValido(4, "2026-10-25", "2026-10-25", 5, 5, t0, t0 + CalendarioModel.SCADENZA_SPOSTAMENTO));
+        assertEquals("orologio indietro (cambio d'ora o impostazioni): non vale", 0, CalendarioModel.spostamentoValido(4, "2026-10-25", "2026-10-25", 5, 5, t0, t0 - 1));
     }
 
     @Test public void personaScelta() throws Exception {

@@ -140,9 +140,17 @@ final class CalendarioModel {
         return nuova - Math.max(rigaOggi, 0);
     }
 
-    /** Lo spostamento salvato vale solo per il giorno in cui è stato fatto: il giorno dopo si riparte da oggi. */
-    static int spostamentoValido(int spostamento, String giornoSalvato, String oggi) {
-        return oggi != null && oggi.equals(giornoSalvato) ? spostamento : 0;
+    static final long SCADENZA_SPOSTAMENTO = 60 * 60_000L;
+
+    /**
+     * Lo spostamento fatto con ‹ › vale per lo stesso giorno, con lo stesso numero di righe in vista e per un'ora: poi
+     * si torna a oggi. (Un widget è uno sguardo veloce, non un'app da lasciare su un'altra pagina; e se le righe
+     * cambiano, un passo calcolato per un'altra altezza lascerebbe la prima riga a una settimana qualunque.)
+     */
+    static int spostamentoValido(int spostamento, String giornoSalvato, String oggi, int righeSalvate, int righeOra, long salvatoAlle, long ora) {
+        boolean valido = oggi != null && oggi.equals(giornoSalvato) && righeSalvate == righeOra
+            && ora >= salvatoAlle && ora - salvatoAlle < SCADENZA_SPOSTAMENTO;
+        return valido ? spostamento : 0;
     }
 
     /**

@@ -122,6 +122,17 @@ class AnteprimaTest {
         }
     }
 
+    // oggi è domenica (ultima colonna) o lunedì (prima): la cornice di oggi arriva al bordo del calendario e non deve essere tagliata
+    @Test fun oggi_ai_bordi() {
+        for (tema in listOf("chiaro", "scuro")) {
+            paparazzi.unsafeUpdateConfig(
+                deviceConfig = if (tema == "scuro") DeviceConfig.PIXEL_5.copy(nightMode = NightMode.NIGHT) else DeviceConfig.PIXEL_5,
+                theme = if (tema == "scuro") "android:Theme.Material.NoActionBar" else "android:Theme.Material.Light.NoActionBar")
+            scena(paparazzi, "n_domenica_${tema}_h460", 460, t(1, 14, 8), sera(), null, true)
+            scena(paparazzi, "n_lunedi_${tema}_h460", 460, t(2, 14, 8), sera(), null, true)
+        }
+    }
+
     // la finestra «Come hai dormito?» aperta da «Altri orari»: orari del piano e orari corretti, e uno non plausibile
     @Test fun finestra_orari() {
         for (tema in listOf("chiaro", "scuro")) {

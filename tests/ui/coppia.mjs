@@ -25,7 +25,7 @@ async function apri(st, app, tab="turni"){
 { const p=await apri(ST(), false);
   const n=await p.evaluate(()=>({righe:document.querySelectorAll("#cyc .crow").length, cp:document.querySelectorAll("#cyc .crow .cp").length, key:document.querySelector("#cyc .key-pers")?.textContent}));
   ok(n.righe>0 && n.cp===n.righe, "striscia: una sigla della persona per ogni giorno ("+n.cp+"/"+n.righe+")");
-  ok(/^Anna in verde/.test(n.key||""), "legenda con il nome della persona → "+n.key);
+  ok(/^Anna/.test(n.key||"") && !/in verde/.test(n.key||""), "legenda: la voce porta il nome della persona, non il colore → "+n.key);
   ok(await p.evaluate(()=>{ const k=document.querySelector("#cyc .key-pers"); return k && k.getAttribute("aria-pressed")==="true" && !!k.querySelector("svg") && k.getBoundingClientRect().height>=30; }), "legenda: è un chip con l'occhio e lo stato (acceso/spento), non un testo da indovinare");
   const allinea=()=>p.evaluate(()=>{ const r=document.querySelector("#cyc .crow .crail").getBoundingClientRect(), g=document.querySelector("#cyc .cgrid").getBoundingClientRect(); return Math.abs(r.left-g.left); });
   { const d=await allinea(); ok(d<1.5, "la griglia delle ore parte dove parte la rotaia, con la colonna della persona (scarto "+d.toFixed(1)+"px)"); }
@@ -39,9 +39,17 @@ async function apri(st, app, tab="turni"){
   await p.click("[data-cp-toggle]"); await p.waitForTimeout(300);
   ok(await p.evaluate(()=>!!document.querySelector("#cyc .cp")), "legenda: mostra → tornano");
   await p.context().close(); }
+// giorno modificato (uno scambio): un puntino e la voce in legenda, non una sottolineatura che sembra un link
+{ const p=await apri(ST({ecc:{[fa(-1)]:"N"}}), false);
+  const r=await p.evaluate(()=>{ const m=document.querySelector("#cyc .crow.mod .ccode"); return m ? {u:getComputedStyle(m).textDecorationLine, dot:getComputedStyle(m,"::before").content, leg:/giorno modificato/.test(document.querySelector("#cyc .key").textContent)} : null; });
+  ok(r && r.u==="none" && r.dot!=="none" && r.leg, "giorno modificato: puntino (non sottolineato) e voce «giorno modificato» in legenda → "+JSON.stringify(r));
+  await p.context().close(); }
+{ const p=await apri(ST(), false);
+  ok(await p.evaluate(()=>!document.querySelector("#cyc .crow.mod") && !/giorno modificato/.test(document.querySelector("#cyc .key").textContent)), "senza giorni modificati la legenda non lo cita");
+  await p.context().close(); }
 // la stellina sceglie chi si vede
 { const p=await apri(ST({personaGlance:1}), false);
-  ok(await p.evaluate(()=>document.querySelector("#cyc .key-pers")?.textContent.startsWith("Bruno in verde")), "con la stellina su Bruno si vede Bruno");
+  ok(await p.evaluate(()=>document.querySelector("#cyc .key-pers")?.textContent.startsWith("Bruno")), "con la stellina su Bruno si vede Bruno");
   await p.context().close(); }
 // senza persone nessun cambiamento
 { const p=await apri(ST({people:[]}), false);

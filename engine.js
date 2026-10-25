@@ -209,11 +209,20 @@ function block(off){
   return {c, name:d.n, start:d.s, end:d.e, rest:false, tipo};
 }
 
-// «r» riposo, «n» notte (il turno tocca il minimo corporeo), «l» lavoro: lo stesso che dice plan().b.rest / .night,
-// ma dal solo blocco del giorno, senza simulare il sonno. Per chi deve classificare molti giorni (widget).
+// Minuti di lavoro fra le 22 e le 6 di un turno (b = block()). È la «notte» dei conti e dei colori: una notte è un turno con
+// almeno tre ore lì dentro (22:00-02:15 sono 4h15: una notte). NON è spansNight(), la notte «circadiana» del piano del
+// sonno (il turno deve toccare il minimo corporeo, che dipende dai tuoi orari): quella serve a pianificare, non a etichettare.
+function oreNotturne(b){
+  if(!b || b.rest) return 0;
+  const ov = (a, z) => Math.max(0, Math.min(b.end, z) - Math.max(b.start, a));
+  return ov(-120, 360) + ov(1320, 1800);
+}
+const eNotte = b => oreNotturne(b) >= 180;
+// «r» riposo, «n» notte (eNotte), «l» lavoro: dal solo blocco del giorno, senza simulare il sonno.
+// Per chi deve classificare molti giorni (widget, grafici).
 function tipoDelGiorno(off){
   const b = block(off);
-  return b.rest ? "r" : spansNight(b) ? "n" : "l";
+  return b.rest ? "r" : eNotte(b) ? "n" : "l";
 }
 
 // Come si chiama un giorno, per elenchi e notifiche: "?" se non si sa.
@@ -1080,7 +1089,7 @@ function buildIcs(days){
 
   normalizza();
   return {
-    state, plan, buildIcs, buildCouple, buildEvents, buildCoupleEvents, codeAt, block, giornoA, etichetta, tipoDelGiorno,
+    state, plan, buildIcs, buildCouple, buildEvents, buildCoupleEvents, codeAt, block, giornoA, etichetta, tipoDelGiorno, oreNotturne, eNotte,
     sharedDays, freeOverlap, asPartner,
     setIcs(o){ Object.assign(ICS, o||{}); return ICS; },
     // Esposti anche questi: prima privati alla closure, ma index.html (che

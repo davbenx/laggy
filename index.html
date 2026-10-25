@@ -136,7 +136,7 @@ try{
   --orange:#FF9068; --orange-fill:#FF6B35; --orange-soft:#3A2119;
   --risk:#FF6B5C; --risk-soft:#3A1C18; --risk-line:#7A342C;
   --picco:#D98CF0;   /* picco di sonnolenza nei grafici: il rosso di --risk qui si confonde con l'arancio del turno */
-  --sleep-fill:#2D5A8C; --ok:#5FBF85; --ok-soft:#173222; --ok-line:#2F6B45; --persona:#7FD9C9; --notte:#9CA3F5; --on-warm:#15171A;
+  --sleep-fill:#2D5A8C; --ok:#5FBF85; --ok-soft:#173222; --ok-line:#2F6B45; --persona:#7FD9C9; --persona-soft:#173B36; --notte:#9CA3F5; --on-warm:#15171A;
   --bg-blur:rgba(20,22,26,0.85);
   --warm-tint:#241C15; --cool-tint:#1E2142;
   --violet:var(--blue); --violetd:var(--blue-soft);
@@ -156,7 +156,7 @@ try{
     --orange:#B24B25; --orange-fill:#FF6B35; --orange-bar:#D9541F; --orange-soft:#FCE9E1;
     --risk:#C0392B; --risk-soft:#FBE9E7; --risk-line:#E57368;
     --picco:#8E2A6B;
-    --sleep-fill:#24496F; --ok:#2E7D4F; --ok-soft:#E6F4EC; --ok-line:#8CC9A5; --persona:#0F6B60; --notte:#3B3F9E; --on-warm:#15171A;
+    --sleep-fill:#24496F; --ok:#2E7D4F; --ok-soft:#E6F4EC; --ok-line:#8CC9A5; --persona:#0F6B60; --persona-soft:#D8F0EA; --notte:#3B3F9E; --on-warm:#15171A;
     --bg-blur:rgba(255,255,255,.82);
     --warm-tint:#FBF1E9; --cool-tint:#E6E8F8;
     --shadow-card:0 2px 8px -2px rgba(21,23,26,.22);
@@ -179,7 +179,7 @@ try{
   --orange:#FF9068; --orange-fill:#FF6B35; --orange-soft:#3A2119;
   --risk:#FF6B5C; --risk-soft:#3A1C18; --risk-line:#7A342C;
   --picco:#D98CF0;   /* picco di sonnolenza nei grafici: il rosso di --risk qui si confonde con l'arancio del turno */
-  --sleep-fill:#2D5A8C; --ok:#5FBF85; --ok-soft:#173222; --ok-line:#2F6B45; --persona:#7FD9C9; --notte:#9CA3F5; --on-warm:#15171A;
+  --sleep-fill:#2D5A8C; --ok:#5FBF85; --ok-soft:#173222; --ok-line:#2F6B45; --persona:#7FD9C9; --persona-soft:#173B36; --notte:#9CA3F5; --on-warm:#15171A;
   --bg-blur:rgba(20,22,26,0.85);
   --warm-tint:#241C15; --cool-tint:#1E2142;
   --shadow-card:0 2px 10px -3px rgba(0,0,0,.4);
@@ -192,7 +192,7 @@ try{
   --orange:#B24B25; --orange-fill:#FF6B35; --orange-bar:#D9541F; --orange-soft:#FCE9E1;
   --risk:#C0392B; --risk-soft:#FBE9E7; --risk-line:#E57368;
   --picco:#8E2A6B;
-  --sleep-fill:#24496F; --ok:#2E7D4F; --ok-soft:#E6F4EC; --ok-line:#8CC9A5; --persona:#0F6B60; --notte:#3B3F9E; --on-warm:#15171A;
+  --sleep-fill:#24496F; --ok:#2E7D4F; --ok-soft:#E6F4EC; --ok-line:#8CC9A5; --persona:#0F6B60; --persona-soft:#D8F0EA; --notte:#3B3F9E; --on-warm:#15171A;
   --bg-blur:rgba(255,255,255,.82);
   --warm-tint:#FBF1E9; --cool-tint:#E6E8F8;
   --shadow-card:0 2px 8px -2px rgba(21,23,26,.22);
@@ -477,13 +477,39 @@ body.primo-avvio #firstPlanBanner,body.primo-avvio #setupChecklist,body.primo-av
 /* la persona scelta con la stellina: la sua sigla accanto alla tua, in verde (come nel widget) */
 .cp{font-size:12px;font-weight:600;width:14px;flex:none;text-align:center;color:var(--persona)}
 .cp.r{color:var(--faint);font-weight:500}
-.key-pers{font:inherit;font-size:13px;color:var(--ink);background:none;border:1px solid var(--persona);border-radius:999px;padding:5px 12px 5px 9px;min-height:34px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+/* La persona nella legenda: una voce come Sonno e Turno, ma da toccare (mostra/nasconde la sua sigla e il suo filo) */
+.key-pers{font:inherit;font-size:12px;color:var(--ink);background:none;border:1px solid var(--line);border-radius:999px;padding:3px 9px 3px 8px;min-height:32px;margin:-6px 0;cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+.key-pers .filo{display:inline-block;width:14px;height:3px;border-radius:2px;background:var(--persona)}
 .key-pers svg{width:16px;height:16px;color:var(--persona)}
-.key-hint{font-size:12px;color:var(--dim);margin-left:8px}
-.key-pers[aria-pressed="false"]{border-style:dashed;border-color:var(--line);color:var(--dim)}
+.key-pers[aria-pressed="false"]{border-style:dashed;color:var(--dim)}
+.key-pers[aria-pressed="false"] .filo{background:var(--faint)}
 .key-pers[aria-pressed="false"] svg{color:var(--dim)}
-.cyc.con-pers .caxis .crail span{font-size:10px}
-.key-pers b{color:var(--persona);font-weight:700}
+.key-hint{font-size:12px;color:var(--dim)}
+.cbar.pers.son{background:repeating-linear-gradient(90deg,var(--persona) 0 4px,transparent 4px 7px)}   /* sonno della persona: tratteggiato, il turno è pieno */
+/* Il ciclo a calendario (come il widget) e il selettore Ore | Calendario */
+.vsw{display:inline-flex;gap:2px;padding:2px;margin:0 0 12px;border:1px solid var(--line);border-radius:999px;background:var(--bg)}
+.vsw button{border:0;background:none;color:var(--dim);font:inherit;font-size:13px;font-weight:600;min-height:32px;padding:0 14px;border-radius:999px;cursor:pointer}
+.vsw button[aria-pressed="true"]{background:var(--blue-fill);color:#fff}
+body.cic-cal .cycbar{display:none}
+.cal-testa{display:flex;align-items:center;gap:2px;margin:0 0 6px}
+.cal-testa .ibtn{width:40px;height:40px}
+.cal-testa .ibtn[disabled]{opacity:.3;cursor:default}
+.cal-titolo{background:none;border:0;font:inherit;font-family:var(--serif);font-size:18px;font-weight:600;color:var(--ink);padding:0 6px;min-height:40px;cursor:pointer}
+.cal-sett{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.cal-gs{font-size:11px;font-weight:700;color:var(--faint);text-align:center;padding:2px 0}
+.ccell{display:flex;flex-direction:column;align-items:stretch;gap:2px;background:none;border:0;padding:3px 2px 4px;font:inherit;cursor:pointer;border-radius:10px;min-width:0;color:var(--ink)}
+.ccell.passato{opacity:.6}
+.ccell.oggi{box-shadow:inset 0 0 0 1.5px var(--ink)}
+.cnum{font-size:11px;text-align:center;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.cnum.altro{color:var(--blue)}
+.cnum.uno{font-weight:800}
+.ctile{display:flex;align-items:center;justify-content:center;height:26px;border-radius:8px;font-size:13px;font-weight:700;background:var(--s2);color:var(--dim);overflow:hidden}
+.ctile.t-l{background:var(--orange-soft);color:var(--orange)}
+.ctile.t-n{background:var(--cool-tint);color:var(--notte)}
+.ctile.t-q{background:none;border:1px dashed var(--line)}
+.ctile.p{height:19px;font-size:11px;border-radius:999px}
+.ctile.p.t-l,.ctile.p.t-n{background:var(--persona-soft);color:var(--persona)}
+.cyc.con-pers .caxis .crail span{font-size:10px}   /* con la colonna della persona la rotaia si stringe: ore più piccole */
 .crow.spec .ccode{font-size:10.5px;color:var(--dim)}
 .crow.rep .ccode::after{content:"";position:absolute;top:-1px;right:-3px;width:5px;height:5px;border-radius:50%;background:var(--orange-fill)}
 /* Striscia del ciclo: pillola sottile, come nel mockup approvato — prima
@@ -526,8 +552,13 @@ border-top:5px solid var(--ink)}
 /* turno della persona: filo verde appena sotto la rotaia */
 .cbar.pers{top:auto;bottom:-6px;height:3px;background:var(--persona);border-radius:99px}
 .lnk{background:none;border:none;padding:6px 0;color:var(--blue);font-family:inherit;
-font-size:14px;cursor:pointer;text-decoration:underline;text-underline-offset:3px;min-height:44px}
+font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;min-height:44px}   /* sottolineati restano solo i veri collegamenti (Termini, Privacy…): un'azione dentro l'app non è un link */
 .lnk:hover{color:var(--ink)}
+.lnk:active{opacity:.65}
+.lnk.dim{color:var(--dim);font-weight:500}   /* chiudere, rimandare, annullare: testo semplice, mai in evidenza */
+a.btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+.btn .ei{margin-right:6px}
+.drem-done .ibtn,.dq-riga .ibtn{width:40px;height:40px;margin:-12px 0 -12px 2px;vertical-align:middle}
 .tools{gap:16px}
 
 .jsoff{background:var(--orange-soft);border:1px solid var(--orange-fill);border-radius:var(--r);
@@ -542,7 +573,7 @@ html.js-lento .jsoff{display:block}
 .jsoff p:last-child{margin-bottom:0}
 .ecc{background:var(--blue-soft);border:1px solid var(--blue-lt);border-radius:var(--r);padding:14px 15px;margin:10px 0 4px}
 .ecc>b{display:block;font-size:16px;margin-bottom:3px}
-.crow.mod .ccode{text-decoration:underline;text-underline-offset:2px}
+.crow.mod .ccode::before{content:"";position:absolute;top:3px;left:-2px;width:5px;height:5px;border-radius:50%;background:var(--ink)}   /* giorno modificato (scambio, orari diversi): un puntino, non una sottolineatura che sembra un link */
 .cbar.sh{background:var(--orange-bar)}
 .key{display:flex;gap:14px;margin-top:8px;font-size:12px;color:var(--faint);flex-wrap:wrap}
 .mese{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;margin-top:12px}
@@ -599,6 +630,7 @@ display:flex;flex-direction:column;align-items:center;justify-content:center;gap
 .mese-num span{font-size:12px;color:var(--dim)}
 .mese .hint{margin:8px 0 0}
 .key i{display:inline-block;width:10px;height:7px;border-radius:3px;margin-right:5px;vertical-align:1px}
+.key i.key-mod{width:6px;height:6px;border-radius:50%;background:var(--ink);margin:0 7px 0 2px;vertical-align:0}
 
 .vrow{display:grid;grid-template-columns:minmax(84px,auto) 1fr 30px;align-items:center;gap:10px;padding:5px 0}
 .vlab{font-size:13.5px;color:var(--ink);white-space:nowrap}
@@ -725,7 +757,7 @@ overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .q>label{display:block;font-size:16px;font-weight:600;margin-bottom:7px;line-height:1.4}
 .q .hint{display:block;margin-top:5px}
 .skip{display:block;margin-top:12px;min-height:44px;font-size:14px;color:var(--faint);text-align:center;
-background:none;border:none;width:100%;cursor:pointer;font-family:inherit;text-decoration:underline}
+background:none;border:none;width:100%;cursor:pointer;font-family:inherit}
 .skip:hover{color:var(--blue)}
 .onboard b{font-family:var(--serif);font-size:19px;display:block;margin-bottom:6px}
 .onboard>p{font-size:14px;color:var(--dim);line-height:1.55;margin-bottom:18px}
@@ -742,8 +774,8 @@ background:none;border:none;width:100%;cursor:pointer;font-family:inherit;text-d
 color:var(--bg);padding:11px 16px;border-radius:var(--r);
 font-size:14px;z-index:99;opacity:0;pointer-events:none;transition:opacity .2s}
 .toast.on{opacity:1;pointer-events:auto}
-.toast-undo{background:none;border:none;color:var(--bg);text-decoration:underline;
-font:inherit;font-weight:700;padding:0 0 0 10px;cursor:pointer}
+.toast-undo{background:none;border:none;color:var(--bg);text-decoration:none;
+font:inherit;font-weight:700;letter-spacing:.02em;min-height:44px;padding:0 0 0 14px;margin:-12px 0;cursor:pointer}
 .pday{display:flex;justify-content:space-between;font-size:14px;padding:5px 0;border-bottom:1px solid var(--line)}
 .pday:last-child{border:none}
 .pday b{font-weight:600;text-transform:capitalize}
@@ -889,7 +921,6 @@ padding:12px 6px 12px 14px;margin:-6px 0 var(--gap-sezione);font-size:13.5px;lin
 .sapevi[hidden]{display:none}
 .sapevi>div{flex:1;min-width:0}
 .sapevi b{color:var(--ink)}
-.sapevi .lnk{display:inline-block;margin-top:4px;font-size:13.5px;padding:6px 0}
 .sapevi-az{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:6px}
 .sapevi-az .btn{min-height:40px;padding:0 14px}
 .sapevi .x{flex:none;width:44px;height:44px;margin:-10px 0 -10px;border:0;background:none;color:var(--faint);font-size:20px;cursor:pointer;border-radius:50%}
@@ -935,8 +966,6 @@ body.tab-turni.turni-aperta #ttFlusso #demoEsempio:not([hidden]){display:block!i
 .qh-marca b{display:block;font-family:var(--serif);font-size:19px;line-height:1.15;color:var(--ink)}
 .qh-marca span{display:block;font-size:13px;color:var(--dim);margin-top:2px}
 .qh-fiducia{font-size:12.5px;color:var(--dim);margin:-8px 0 14px}
-.essnudge button{background:none;border:none;color:var(--blue);font:inherit;cursor:pointer;
-text-decoration:underline;text-underline-offset:2px;padding:12px 2px;margin:-12px -2px}
 body.essenziale:not(.tabs) .cap,body.essenziale:not(.tabs) #cyc,body.essenziale:not(.tabs) #meseBox,
 body.essenziale:not(.tabs) #icsBox,body.essenziale:not(.tabs) #scambioBox,
 body.essenziale:not(.tabs) .tools{display:none}
@@ -1505,7 +1534,7 @@ header b{font-size:23px}
      di pagina — stava sopra il range/le frecce, lontana dalla striscia
      a cui si riferisce. -->
 <div class="cap ciclo"><span class="eyebrow">Il tuo ciclo<span id="ciclNome"></span></span>
-  <button class="lnk" id="tEdit">Modifica →</button></div>
+  <button type="button" class="btn g sm" id="tEdit"><svg class="ei" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>Modifica</button></div>
 <div class="cyc" id="cyc"></div>
 <!-- Il mese in numeri: ore, turni, notti, domeniche e festivi. È la cosa che
      quasi ogni app di turni fa e che i turnisti chiedono (per controllare la
@@ -1659,7 +1688,7 @@ header b{font-size:23px}
 
     </details>
     <button class="btn pri" type="button" id="doConfirmPersona" style="margin-top:10px;width:100%;min-height:46px">Aggiungi</button>
-    <button class="lnk" type="button" id="annullaModificaPersona" hidden style="display:block;margin:8px auto 0">Annulla</button>
+    <button class="lnk dim" type="button" id="annullaModificaPersona" hidden style="display:block;margin:8px auto 0">Annulla</button>
     </div>
   </div>
   <div id="partnerShare"></div>
@@ -2753,7 +2782,8 @@ var qrcodegen;
 // stessa garanzia di ordine che un normalizzatore await avrebbe dato, senza
 // bisogno di riscrivere tutto in async. I moduli sono già strict di default.
 import { createEngine, encEcc, decEcc, encGiorni, decGiorni, GIORNI_SPECIALI } from "./engine.js";
-import { LINGUA, giorniBrevi, mesiBrevi } from "./lingua.js";   // formato di date e giorni: un solo punto
+import { LINGUA, giorniBrevi, mesiBrevi } from "./lingua.js";
+import * as CAL from "./calendario.js";   // il calendario a settimane del ciclo: stesse regole del widget   // formato di date e giorni: un solo punto
 import platform from "./platform.js";
 /* MOTORE NOTTURNISTI v4 — turni arbitrari.
    Nessuna regola guarda più la lettera del turno. Tutto si decide dalla
@@ -4141,7 +4171,7 @@ function diaryReminder(P, CARDS){
   if(sleepEditing){
     x+=campiOra(['data-sleep-bed="1" aria-label="A letto"','data-sleep-wake="1" aria-label="Sveglia"'], defBed, defWake,
       '<button class="dbtn pri" data-confirm-sleep="1">Salva</button>',
-      '<button class="lnk" data-annulla-sleep="1">Annulla</button>');
+      '<button class="lnk dim" data-annulla-sleep="1">Annulla</button>');
   } else if(!logged){
     x+='<p class="dq">Hai dormito <b>'+esc(defBed)+' → '+esc(defWake)+'</b>?</p>'+
       '<div class="dq-az"><button class="dbtn pri" data-confirm-sleep="1" data-def-bed="'+esc(defBed)+'" data-def-wake="'+esc(defWake)+'">Sì, così</button>'+
@@ -4149,7 +4179,7 @@ function diaryReminder(P, CARDS){
   } else {
     x+='<div class="drem-done"><span class="drem-ok">✓</span> Sonno <b>'+esc(bd)+'–'+esc(wk)+'</b> · '+durTxt+
        (cmp?' <span class="drem-cmp">'+cmp+'</span>':'')+
-       ' <button class="lnk drem-edit" data-open="1" aria-label="Modifica gli orari del sonno">Modifica</button></div>'+
+       ' <button type="button" class="ibtn drem-edit" data-open="1" aria-label="Modifica gli orari del sonno" title="Modifica">'+ICON.pencil+'</button></div>'+
        (recupero?'<div class="drem-rec">Hai dormito meno del previsto: il piano ha aggiunto un pisolino di recupero qui sotto.</div>':'');
   }
   // Come ti senti: una scelta, si salva al tocco. Solo dopo il sonno, e poi
@@ -4159,7 +4189,7 @@ function diaryReminder(P, CARDS){
   if(logged && !sleepEditing){
     const v=VOTI.find(o=>o[0]===+val), votoEditing=state.diaryEditing.has("voto:"+key0);
     if(v && !votoEditing)
-      x+='<div class="dq-riga"><i class="kic" style="color:'+v[3]+'">'+v[2]+'</i> Energia: <b>'+v[1]+'</b> <button class="lnk drem-edit" data-voto-edit="1">Cambia</button></div>';
+      x+='<div class="dq-riga"><i class="kic" style="color:'+v[3]+'">'+v[2]+'</i> Energia: <b>'+v[1]+'</b> <button type="button" class="ibtn drem-edit" data-voto-edit="1" aria-label="Cambia il voto dell\'energia" title="Cambia">'+ICON.pencil+'</button></div>';
     else
       x+='<div class="dq-sez">Come ti senti? <span>(facoltativo)</span></div><div class="ora-kss" style="margin-top:0">'+
         VOTI.map(o=>'<button class="dbtn kface'+(+val===o[0]?" on":"")+'" data-diary="'+o[0]+'" aria-label="'+o[1]+'" aria-pressed="'+(+val===o[0])+'" style="--tone:'+o[3]+'">'+
@@ -4176,10 +4206,10 @@ function diaryReminder(P, CARDS){
     if(napEditing){
       x+='<div class="dq-campi"><label>Inizio<input type="time" class="ora-in" data-nap-in-a="1" aria-label="Inizio del pisolino" value="'+esc(seg.a||c.nap.k)+'"></label>'+
         '<label>Fine<input type="time" class="ora-in" data-nap-in-b="1" aria-label="Fine del pisolino" value="'+esc(seg.b||fine)+'"></label></div>'+
-        '<div class="dq-az"><button class="dbtn pri" data-nap-salva="'+esc(c.nap.k)+'" data-min="'+c.nap.min+'">Salva</button><button class="lnk" data-nap-annulla="'+esc(c.nap.k)+'">Annulla</button></div>';
+        '<div class="dq-az"><button class="dbtn pri" data-nap-salva="'+esc(c.nap.k)+'" data-min="'+c.nap.min+'">Salva</button><button class="lnk dim" data-nap-annulla="'+esc(c.nap.k)+'">Annulla</button></div>';
     } else if(seg.si){
       x+='<div class="drem-done"><span class="drem-ok">✓</span> Pisolino <b>'+esc(seg.a||c.nap.k)+'–'+esc(seg.b||fine)+'</b> '+
-        '<button class="lnk drem-edit" data-edit-nap="'+esc(c.nap.k)+'" aria-label="Modifica gli orari del pisolino">Modifica</button></div>';
+        '<button type="button" class="ibtn drem-edit" data-edit-nap="'+esc(c.nap.k)+'" aria-label="Modifica gli orari del pisolino" title="Modifica">'+ICON.pencil+'</button></div>';
       // Se il pisolino registrato è durato molto più del previsto, un avviso
       // subito — non solo un conto che si aggiusta domani in silenzio.
       const aReale=NT.oraDi(seg.a||c.nap.k), bReale=NT.oraDi(seg.b||fine);
@@ -4189,7 +4219,7 @@ function diaryReminder(P, CARDS){
           x+='<div class="drem-rec">Più lungo del previsto ('+dur(dReale)+'): oltre una certa durata un pisolino rischia di scivolare in sonno profondo, con più intontimento al risveglio invece di meno.</div>';
       }
     } else if(seg.no){
-      x+='<div class="drem-done">Pisolino saltato <button class="lnk drem-edit" data-nap-riapri="'+esc(c.nap.k)+'">Modifica</button></div>';
+      x+='<div class="drem-done">Pisolino saltato <button type="button" class="ibtn drem-edit" data-nap-riapri="'+esc(c.nap.k)+'" aria-label="Riapri il pisolino" title="Modifica">'+ICON.pencil+'</button></div>';
     } else {
       x+='<p class="dq">Hai fatto il pisolino <b>'+esc(c.nap.k)+' → '+esc(fine)+'</b>?</p>'+
         '<div class="dq-az"><button class="dbtn pri" data-nap="si" data-k="'+esc(c.nap.k)+'" data-fine="'+esc(fine)+'" data-min="'+c.nap.min+'">Sì, così</button>'+
@@ -4527,9 +4557,9 @@ function renderDemoEsempio(){
   const tile=(k,ic,nome,ore)=>'<button type="button" class="qh-btn" data-pick="'+k+'"><span class="qh-ic">'+ic+'</span><b>'+nome+'</b><small>'+ore+'</small></button>';
   const opt=(attr,ic,nome,sotto)=>'<button type="button" class="qh-opt-btn" '+attr+'><span class="qh-opt-ic">'+ic+'</span><div class="qh-opt-tx"><b>'+esc(nome)+'</b>'+(sotto?'<small>'+esc(sotto)+'</small>':'')+'</div><span class="qh-opt-arrow">→</span></button>';
   const indietro=(dest,txt)=> (flussoInPagina && demoEsempioSubflow===ingressoFlusso)
-    ? '<button type="button" class="lnk" data-chiudi-schema style="margin-bottom:10px;font-size:13px">Annulla</button>'
+    ? '<button type="button" class="lnk dim" data-chiudi-schema style="margin-bottom:10px;font-size:13px">Annulla</button>'
     : '<button type="button" class="lnk" data-subflow="'+dest+'" style="margin-bottom:10px;font-size:13px">← '+txt+'</button>';
-  const chiudi = (sceltaSchemaAperta && state.turniConfigurati) ? '<button type="button" class="lnk" data-chiudi-schema style="margin-bottom:10px;font-size:13px">Annulla</button>' : "";
+  const chiudi = (sceltaSchemaAperta && state.turniConfigurati) ? '<button type="button" class="lnk dim" data-chiudi-schema style="margin-bottom:10px;font-size:13px">Annulla</button>' : "";
   const f = demoEsempioSubflow;
 
   if(f === "home" && !sceltaSchemaAperta){
@@ -4838,7 +4868,7 @@ function renderFirstPlanBanner(){
         '<div style="display:flex;gap:8px;flex-wrap:wrap">'+
           (soloOggi
             ? btn("doProssimiCiclo","A ciclo")+btn("doProssimiFisso","Sempre questo turno")+btn("doProssimiSegna","Cambiano: li segno")+
-              '<button type="button" class="lnk" id="doChiudiPrimoPiano" style="font-size:12.5px;padding:6px 4px">Dopo</button>'
+              '<button type="button" class="lnk dim" id="doChiudiPrimoPiano" style="font-size:12.5px;padding:6px 4px">Dopo</button>'
             : btn("doPersonalizzaPrimoPiano","Adatta sonno e viaggio →")+btn("doChiudiPrimoPiano","Va bene così",true))+
         '</div>'+
       '</div>'+
@@ -5078,10 +5108,10 @@ function renderOpzFunzioni(voci){
     const v2=voci.filter(x=>x.id!=="turni");
     const prove=[];
     if(promemoriaAttivi()) prove.push('<button type="button" class="btn g sm" data-prova-notifica>Prova una notifica</button>');
-    if(promemoriaAttivi()) prove.push('<button type="button" class="lnk" data-prossimi-promemoria style="padding:8px 0">Vedi i prossimi promemoria</button>');
+    if(promemoriaAttivi()) prove.push('<button type="button" class="btn g sm" data-prossimi-promemoria>Vedi i prossimi promemoria</button>');
     if(platform.calendar.available && platform.calendar.attivo()){
-      prove.push('<button type="button" class="lnk" data-cal-apri style="padding:8px 0">Apri il calendario</button>');
-      prove.push('<button type="button" class="lnk" data-cal-controlla style="padding:8px 0">Controlla</button>'); }
+      prove.push('<button type="button" class="btn g sm" data-cal-apri>Apri il calendario</button>');
+      prove.push('<button type="button" class="btn g sm" data-cal-controlla>Controlla</button>'); }
     op.innerHTML=htmlVociGestione(v2)+(promemoriaAttivi()?htmlTipiNotifiche():'')+(prove.length?'<div style="display:flex;gap:16px;flex-wrap:wrap;padding:2px 15px 8px;border-top:1px solid var(--line)">'+prove.join("")+'</div><p class="hint" id="opzCalStato" hidden style="margin:0;padding:0 15px 10px"></p><div class="hint" id="opzProssimi" hidden style="margin:0;padding:0 15px 10px"></div>':'');
   }
 }
@@ -5223,7 +5253,7 @@ function renderAdatta(){
     '<p style="margin:4px 0 0;font-size:14.5px;line-height:1.45">'+esc(sg.breve)+'</p>'+
     '<p class="hint" style="margin:4px 0 0">Lo dicono le notti che hai annotato. Puoi sempre cambiarlo in Impostazioni.</p>'+
     '<div class="adatta-azioni"><button type="button" class="btn azione" id="adattaSi" data-f="'+esc(sg.action.field)+'" data-v="'+esc(String(sg.action.value))+'">'+esc(testoAzione(sg))+'</button>'+
-    '<button type="button" class="lnk" id="adattaNo">Lascia così</button></div>';
+    '<button type="button" class="lnk dim" id="adattaNo">Lascia così</button></div>';
 }
 document.addEventListener("click", e=>{
   const si=e.target.closest("#adattaSi"); if(si){ haptic(10); applicaAdatta(si.dataset.f, si.dataset.v, true); return; }
@@ -5834,7 +5864,7 @@ function renderEssenziale(P, CARDS){
     if(cd.nap){
       // Quello che si decide PRIMA del pisolino sta qui, nella sua riga; la
       // domanda «l'hai fatto?» arriva nel diario quando è cominciato.
-      const liv=cd.nap.livello, prima = (isFinite(liv) && liv<2 ? '<button type="button" class="lnk" data-skip-recupero="'+(liv+1)+'" style="margin-top:6px">Non riesco a farlo: proponimi un\'alternativa</button>' : '')+
+      const liv=cd.nap.livello, prima = (isFinite(liv) && liv<2 ? '<button type="button" class="lnk dim" data-skip-recupero="'+(liv+1)+'" style="margin-top:6px">Non riesco a farlo: proponimi un\'alternativa</button>' : '')+
         (cd.nap.min<=30 ? '<p class="ed-sub" style="margin-top:8px">Se vuoi più lucidità, un caffè appena prima: l\'effetto arriva mentre dormi.'+(isFinite(P.cut)?' Dopo le '+hhmm(P.cut)+' meglio di no: disturba il sonno di stanotte.':'')+'</p>' : '');
       voci.push({t, html:riga("nap"+cd.nap.k,"Pisolino",cd.val,cd.small||"",false,ICON.bed,dett(cd)+prima+
         '<button type="button" class="lnk ed-cambia" data-cambia="4">Pisolini sul lavoro e altre impostazioni →</button>',
@@ -5988,7 +6018,7 @@ function renderEssenziale(P, CARDS){
   // Affina la finestra di sonno: si chiede DOPO aver mostrato il piano
   if(state.freeBed==="23:30" && state.freeWake==="07:30")
     h += '<div class="essnudge">Il piano parte da un sonno tipico, 23:30 → 07:30. '+
-      'Nei giorni liberi dormi in altri orari? <button data-act="finestra">Dimmi i tuoi</button> e il piano si adatta a te.</div>';
+      'Nei giorni liberi dormi in altri orari? Dimmi i tuoi e il piano si adatta a te.<button type="button" class="btn g sm" data-act="finestra" style="display:block;margin-top:8px">Dimmi i tuoi orari</button></div>';
 
   el.innerHTML=h;
 }
@@ -6298,7 +6328,7 @@ function nomeGiornoMese(k){ const [m,g]=k.split("-").map(Number); return new Dat
 function festiviHtml(){
   const c=festiviCfg(), fisso=tipoTurni()==="fisso";
   const conta="Conto "+(c.dom?"le domeniche e ":"")+"i festivi nazionali"+(c.extra.length?" e "+c.extra.map(nomeGiornoMese).join(", "):"")+".";
-  if(!festiviAperto) return '<p class="hint mese-fest">'+esc(conta)+' <button type="button" class="lnk" data-fest-apri>Aggiungi i tuoi →</button></p>';
+  if(!festiviAperto) return '<p class="hint mese-fest">'+esc(conta)+' <button type="button" class="btn g sm" data-fest-apri>Aggiungi i tuoi</button></p>';
   return '<div class="ecc mese-fest-box">'+
     '<b style="display:block;margin-bottom:4px">I festivi del tuo contratto</b>'+
     '<p class="hint" style="margin:0 0 8px">Oltre ai festivi nazionali: il santo patrono o altre feste che per te contano. Si ripetono ogni anno.</p>'+
@@ -6307,7 +6337,7 @@ function festiviHtml(){
     '<button type="button" class="btn g" data-fest-add>Aggiungi</button></div>'+
     '<label class="chk" style="display:flex;gap:10px;align-items:center;margin-top:12px;min-height:44px"><input type="checkbox" data-fest-dom'+(c.dom?' checked':'')+'> La domenica conta come festivo</label>'+
     (fisso ? '<label class="chk" style="display:flex;gap:10px;align-items:center;min-height:44px"><input type="checkbox" data-fest-riposo'+(state.festiviRiposo?' checked':'')+'> Nei festivi non lavoro</label>' : '')+
-    '<button type="button" class="lnk" data-fest-chiudi style="margin-top:6px">Fatto</button></div>';
+    '<button type="button" class="lnk dim" data-fest-chiudi style="margin-top:6px">Fatto</button></div>';
 }
 function festiviCambiati(){ salva(); try{ NT.setFestivo(festivo); }catch(e){} render(); }
 function durataBreve(m){ m=Math.round(m/15)*15; const h=Math.floor(m/60), r=m%60; return h ? h+"h"+(r?String(r).padStart(2,"0"):"") : r+" min"; }
@@ -6353,11 +6383,70 @@ function sigPersona(pers, x){
   return '<span class="cp'+(x&&x.r?' r':'')+'" title="'+esc(pers.nome)+'">'+(x?esc(x.c):'·')+'</span>';
 }
 // Il turno della persona: una barra verde sottile sotto la tua rotaia, sulla stessa scala delle ore.
+// Il chip della persona nella legenda (mostra/nasconde la sua sigla e il suo turno): lo stesso nel ciclo a ore e a calendario
+function chipPersona(pers){
+  return pers ? '<button type="button" class="key-pers" data-cp-toggle aria-pressed="true" aria-label="Nascondi '+esc(pers.nome)+' dal ciclo" title="Nascondi la sigla e il turno di '+esc(pers.nome)+'"><i class="filo"></i>'+esc(pers.nome)+ICON.eye+'</button>'
+    : personaStrisciaNascosta() ? '<button type="button" class="key-pers" data-cp-toggle aria-pressed="false" aria-label="Mostra '+esc(personaStrisciaNascosta())+' nel ciclo" title="Mostra la sigla e il turno di '+esc(personaStrisciaNascosta())+'"><i class="filo"></i>'+esc(personaStrisciaNascosta())+ICON.eyeOff+'</button>' : '';
+}
+// Il sonno della persona, sulla stessa linea del suo turno (non si sovrappongono mai): tratteggiato, solo se è un dato suo
+function sonnoPersona(sd, cpx){
+  const x0=Math.max(cpx(sd.onset),0), x1=Math.min(cpx(sd.onset+sd.dur),100);
+  return x1>x0 ? '<span class="cbar pers son" style="left:'+x0+'%;width:'+(x1-x0)+'%"></span>' : '';
+}
 function barraPersona(x, cpx){
   const x0=Math.max(cpx(x.a),0), x1=Math.min(cpx(x.z),100);
   return x1>x0 ? '<span class="cbar pers" style="left:'+x0+'%;width:'+(x1-x0)+'%"></span>' : '';
 }
+// ── Il ciclo a calendario ──────────────────────────────────────────────────────────────────────────────────────
+// La stessa griglia del widget Android per chi non ce l'ha (web, iPhone): settimane dal lunedì, turno e persona
+// impilati, mese dal giovedì, frecce che si agganciano al mese. Le regole stanno in calendario.js; i dati
+// (sigla:tipo per giorno) sono quelli del widget, da meseWidget().
+const CAL_PRIMA=13, CAL_TOT=53, CAL_RIGHE=5;
+let calSpost=0, calCtx=null;   // settimane da oggi (le frecce); non si salva: ogni volta si riparte da oggi
+const vistaCiclo=()=> (state.piano||{}).vistaCiclo==="calendario" ? "calendario" : "ore";
+function selettoreVista(v){
+  return '<div class="vsw" role="group" aria-label="Come vedere il ciclo">'+
+    [["ore","Ore"],["calendario","Calendario"]].map(([k,t])=>'<button type="button" data-vista="'+k+'" aria-pressed="'+(v===k)+'">'+t+'</button>').join("")+'</div>';
+}
+const SVG_FRECCIA=d=>'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="'+d+'"/></svg>';
+function renderCalendarioCiclo(){
+  const el=$("#cyc"), pers=personaStriscia();
+  el.classList.remove("con-pers");
+  const m=meseWidget(CAL_PRIMA, CAL_TOT);
+  if(!m){ el.innerHTML=selettoreVista("calendario")+'<p class="hint">Il calendario non è disponibile: controlla i turni in «Modifica».</p>'; return; }
+  const oggi=giornoVero(), iOggi=CAL.indiceDi(m.da, 7*CAL_TOT, iso(oggi)), rigaOggi=iOggi<0 ? -1 : Math.floor(iOggi/7);
+  calCtx={da:m.da, rigaOggi};
+  const r0=CAL.primaRiga(rigaOggi, calSpost, CAL_RIGHE, CAL_TOT), mt=CAL.meseDellaRiga(m.da, r0), tit=CAL.titolo(m.da, r0, oggi.getFullYear());
+  const persona = pers && m.p.length ? m.p[Math.min(m.sel, m.p.length-1)] : null;
+  const leggi=s=>{ s=s||"?:?"; const k=s.lastIndexOf(":"); return {sig:k>0 ? s.slice(0,k) : s, t:k>=0 ? s.charAt(k+1) : "?"}; };
+  const TIPO={n:"notte", l:"lavoro", r:"riposo"}, descr=c=>c.t==="?" ? "da impostare" : (c.sig===(TIPO[c.t]||"")||c.sig.length<=1 ? TIPO[c.t] : c.sig+", "+TIPO[c.t]);
+  let griglia='<div class="cal-sett cal-gs-riga" aria-hidden="true">'+["L","M","M","G","V","S","D"].map(l=>'<span class="cal-gs">'+l+'</span>').join("")+'</div>';
+  for(let r=0;r<CAL_RIGHE;r++){
+    griglia+='<div class="cal-sett" role="row">';
+    for(let c=0;c<7;c++){
+      const i=(r0+r)*7+c, d=CAL.dataDi(m.da,i), x=leggi(m.io[i]), pc=persona ? leggi(persona.g[i]) : null;
+      const altro=d.anno!==mt[0]||d.mese!==mt[1], num=d.giorno===1 ? "1 "+CAL.MESI[d.mese-1].slice(0,3).toUpperCase() : d.giorno;
+      const etic=new Date(d.iso+"T12:00:00").toLocaleDateString(LINGUA,{weekday:"long",day:"numeric",month:"long"})+": "+descr(x)+(pc ? ", "+(pers.nome)+": "+descr(pc) : "");
+      griglia+='<button type="button" class="ccell'+(i<iOggi?" passato":"")+(i===iOggi?" oggi":"")+'" data-cal-giorno="'+d.iso+'" aria-label="'+esc(etic)+'">'+
+        '<span class="cnum'+(altro?" altro":"")+(d.giorno===1?" uno":"")+'">'+num+'</span>'+
+        '<span class="ctile t-'+(x.t==="?"?"q":x.t)+'">'+(x.t==="?" ? "·" : esc(x.sig))+'</span>'+
+        (pc ? '<span class="ctile p t-'+(pc.t==="?"?"q":pc.t)+'">'+(pc.t==="?" ? "·" : esc(pc.sig))+'</span>' : '')+'</button>';
+    }
+    griglia+='</div>';
+  }
+  const ultima=CAL_TOT-CAL_RIGHE, sw=(c,x)=>'<span><i style="background:'+c+';'+(x||"")+'"></i>';
+  el.innerHTML=selettoreVista("calendario")+
+    '<div class="cal-testa"><button type="button" class="ibtn" data-cal-nav="-1" aria-label="Settimane precedenti"'+(r0>0?'':' disabled')+'>'+SVG_FRECCIA("M15 6l-6 6 6 6")+'</button>'+
+    '<button type="button" class="cal-titolo" data-cal-oggi aria-label="'+esc(tit)+'. Tocca per tornare a oggi">'+esc(tit)+'</button>'+
+    '<button type="button" class="ibtn" data-cal-nav="1" aria-label="Settimane successive"'+(r0<ultima?'':' disabled')+'>'+SVG_FRECCIA("M9 6l6 6-6 6")+'</button></div>'+
+    griglia+
+    '<div class="key">'+sw("var(--orange)")+'Turno</span>'+sw("var(--notte)")+'Notte</span>'+sw("var(--s2)","border:1px solid var(--line)")+'Riposo</span>'+chipPersona(pers)+'</div>';
+}
+
 function renderStrip(P, f, S){
+  const vista=vistaCiclo();
+  document.body.classList.toggle("cic-cal", vista==="calendario");
+  if(vista==="calendario"){ renderCalendarioCiclo(); const re=$("#cycRange"); if(re) re.textContent="Turni"; return; }
   // Scala unica per tutte le righe, senza avvolgimenti: così ogni barra
   // resta sul giorno a cui appartiene e non se ne va a finire su quello dopo.
   let clo=Infinity, chi=-Infinity;
@@ -6384,6 +6473,8 @@ function renderStrip(P, f, S){
   const cspan=Math.max(chi-clo,60), cpx=m=>(m-clo)/cspan*100;
   const tk=tacche(clo,chi);
   const pers=personaStriscia();
+  // il sonno della persona solo se è un dato suo (ha mandato gli orari): altrimenti «sonno come il tuo» sarebbe una copia del tuo
+  const SP = pers && pers.p.wake && pers.p.bed ? asPartner(()=>NT.simulate(), pers.p) : null;
   // Con la colonna della persona la rotaia si stringe: su telefoni molto stretti (< 340 px) etichette ogni 12 ore invece di 6, le linee restano
   const stretta=!!pers && innerWidth<340;
   let ch='<div class="caxis" aria-hidden="true"><span class="clab"></span><span class="ccode">'+(pers?'Tu':'')+'</span>'+(pers?'<span class="cp" title="'+esc(pers.nome)+'">'+esc(pers.sigla)+'</span>':'')+'<span class="crail">'+
@@ -6391,6 +6482,7 @@ function renderStrip(P, f, S){
     // con la vicina o uscirebbe dal riquadro
     tk.map(m=>{ const x=cpx(m); return x<7 || x>93 || (stretta && (m/360)%2) ? '' : '<span style="left:'+x+'%">'+hhmm(m)+'</span>'; }).join("")+'</span></div><div class="crows">'+
     '<div class="cgrid" aria-hidden="true">'+tk.map(m=>'<i style="left:'+cpx(m)+'%"></i>').join("")+'</div>';
+  let haMod=false;   // c'è almeno un giorno modificato: la legenda lo spiega
   for(let o=finLo;o<=finHi;o++){
     const d=day(f,o), k=NT.codeAt(o), sd=NT.at(S,o), bb=NT.block(o), seg=[];
     if(!sd||!bb) continue;
@@ -6402,14 +6494,17 @@ function renderStrip(P, f, S){
     // solo plan() lo fa — chiamarlo per ogni giorno della striscia costerebbe
     // un plan() completo x13 a ogni render, non solo una lettura leggera)
     const px=pers ? datiPersona(pers, o) : null;
+    const sdp=SP ? NT.at(SP,o) : null;
     const gs=state.giorni[iso(d)]||{}, sigla=SIGLA_SPECIALE[gs.t]||"";
-    ch+='<div class="crow'+(o===0?" on":"")+(state.ecc[iso(d)]||gs.s!=null?" mod":"")+(sigla?" spec":"")+(gs.t==="reperibile"?" rep":"")+'" data-off="'+o+'" role="button" tabindex="0">'+
+    const modificato=!!(state.ecc[iso(d)]||gs.s!=null); if(modificato) haMod=true;
+    ch+='<div class="crow'+(o===0?" on":"")+(modificato?" mod":"")+(sigla?" spec":"")+(gs.t==="reperibile"?" rep":"")+'" data-off="'+o+'" role="button" tabindex="0">'+
       '<span class="clab">'+d.toLocaleDateString(LINGUA,{weekday:"short"}).slice(0,3)+' '+d.getDate()+'</span>'+
       '<span class="ccode"'+(gs.t?' title="'+esc(GIORNI_SPECIALI[gs.t])+'"':'')+'>'+(sigla||esc(k)+(gs.t==="extra"?"+":""))+'</span>'+
       (pers ? sigPersona(pers, px) : '')+
       '<span class="crail">'+
       seg.map(([x,w,cl])=>'<span class="cbar '+cl+'" style="left:'+x+'%;width:'+w+'%"></span>').join("")+
       (px && !px.r ? barraPersona(px, cpx) : '')+
+      (sdp ? sonnoPersona(sdp, cpx) : '')+
       (o===0 && cpx(oggiM)>=0 && cpx(oggiM)<=100 ? '<span class="cnow" style="left:'+cpx(oggiM)+'%" title="adesso"></span>' : '')+
       '</span></div>';
   }
@@ -6422,10 +6517,10 @@ function renderStrip(P, f, S){
   // rischio (notti di fila, turno rientrante, minimo circadiano: è una riga
   // in Oggi, rischioDelGiorno) e il pallino dell'umore dal diario.
   $("#cyc").classList.toggle("con-pers", !!pers);
-  $("#cyc").innerHTML=ch+
+  $("#cyc").innerHTML=selettoreVista("ore")+ch+
     '<div class="key">'+'<span><i style="background:var(--blue)"></i>Sonno</span>'+'<span><i style="background:var(--orange-bar)"></i>Turno</span>'+
-    (pers ? '<button type="button" class="key-pers" data-cp-toggle aria-pressed="true" title="Nascondi le sigle di '+esc(pers.nome)+'">'+ICON.eye+'<span><b>'+esc(pers.nome)+'</b> in verde</span></button><span class="key-hint">sigla e turno (filo sotto la barra)</span>'
-      : personaStrisciaNascosta() ? '<button type="button" class="key-pers" data-cp-toggle aria-pressed="false" title="Mostra le sigle di '+esc(personaStrisciaNascosta())+'">'+ICON.eyeOff+'<span>'+esc(personaStrisciaNascosta())+'</span></button>' : '')+'</div>';
+    (haMod ? '<span><i class="key-mod"></i>giorno modificato</span>' : '')+
+    chipPersona(pers)+(SP ? '<span class="key-hint">pieno: turno · tratteggiato: sonno</span>' : '')+'</div>';
   // L'etichetta del range: stessa finestra usata sopra per costruire la
   // striscia (finestraCiclo()), non un calcolo separato che rischierebbe
   // di disallinearsi da quello che si vede davvero.
@@ -6569,7 +6664,6 @@ function insightSettimana(cs, ws, sm, corr){
 // domeniche e festivi, ore. Ferie, malattia e orari veri compresi.
 function caricoTurni(da, n){
   const f0=state.focus, oggi=giornoVero();
-  const notte=(s,e)=>{ const ov=(a,b)=>Math.max(0, Math.min(e,b)-Math.max(s,a)); return ov(-120,360)+ov(1320,1800); };
   const r={notti:0, serieMax:0, brevi:0, festivi:0, ore:0, turni:0, ignoti:0, giorni:[]};   // giorni: per la striscia, un elemento per giorno contato
   let serie=0, fineIeri=null;
   try{
@@ -6579,7 +6673,7 @@ function caricoTurni(da, n){
       if(c==="?" || !b){ if(conta){ r.ignoti++; r.giorni.push({tipo:"?"}); } serie=0; fineIeri=null; continue; }
       if(b.rest){ serie=0; if(conta) r.giorni.push({tipo:"r"}); continue; }
       const base=dnum(d)*1440;
-      const eNotte=notte(b.start,b.end)>=180;
+      const eNotte=NT.eNotte(b);   // la stessa regola del widget e dei grafici
       if(eNotte){ serie++; if(conta){ r.notti++; r.serieMax=Math.max(r.serieMax, serie); } } else serie=0;
       if(conta){ r.turni++; r.ore+=(b.end-b.start)/60;
         if(festivo(d)) r.festivi++;
@@ -6840,7 +6934,7 @@ function renderAndamenti(){
   const fondo='<div class="andamento-fondo">'+
       '<button type="button" class="btn g" data-riepilogo-medico style="width:100%;min-height:46px">Riepilogo per il medico competente</button>'+
       '<p class="hint" style="margin:6px 2px 0">Un PDF con turni, notti e riposi degli ultimi 12 mesi'+(sm?' e il sonno che hai annotato':'')+': da portare alla visita.</p>'+
-      (sm?'<button class="lnk" id="doSum" style="margin-top:8px">Copia il riepilogo del diario</button>':'')+
+      (sm?'<button type="button" class="btn g sm" id="doSum" style="margin-top:8px">Copia il riepilogo del diario</button>':'')+
       (url && (heroHtml||capoHtml) ? '<p class="hint" style="margin-top:14px">Questa pagina, come tutta l\'app, resta gratis. Se ti è utile, <a href="'+esc(url)+'" target="_blank" rel="noopener">un contributo libero</a> è benvenuto, mai necessario.</p>' : '')+
     '</div>';
   el.innerHTML = capoHtml + (heroHtml || invito) + rowsHtml + fondo;
@@ -7380,10 +7474,10 @@ function ntWidget(){
 // Il calendario del widget: da quattro lunedì fa per 20 settimane (il widget si sfoglia a pagine), la mia sigla e quella di al massimo quattro
 // persone (la stellina sempre dentro). Sigle e tipi («n» notte, «l» lavoro, «r» riposo) arrivano dal motore; il widget le mostra
 // e basta. `sel` = la stellina fra quelle pubblicate, `star` la identifica: se nell'app cambia, il widget riparte da lei.
-function meseWidget(){
+function meseWidget(prima=SETT_WIDGET_PRIMA, tot=SETT_WIDGET){   // settimane prima di questa e in tutto: il widget ne tiene 20, il calendario del ciclo di più
   const f=state.focus;
   try{
-    const oggi=giornoVero(), lun=day(oggi, -((oggi.getDay()+6)%7) - 7*SETT_WIDGET_PRIMA), N=7*SETT_WIDGET;
+    const oggi=giornoVero(), lun=day(oggi, -((oggi.getDay()+6)%7) - 7*prima), N=7*tot;
     const tutte=tuttePersone(), star=Math.min(Math.max(+state.personaGlance||0,0),tutte.length-1);
     const scelte=tutte.map((p,i)=>i).sort((x,y)=>(x===star?-1:y===star?1:x-y)).slice(0,4).sort((x,y)=>x-y);
     const io=[], p=scelte.map(i=>({n:tutte[i].name||"Persona "+(i+1), g:[]}));
@@ -7574,6 +7668,13 @@ function jump(e){ const el=e.target.closest(".crow"); if(!el) return;
   const off=+el.dataset.off;
   haptic(8); apriQuickShift(day(state.focus,off)); }
 $("#cyc").addEventListener("click",e=>{
+  const vs=e.target.closest("[data-vista]");
+  if(vs){ state.piano=Object.assign({}, state.piano, {vistaCiclo:vs.dataset.vista}); salva(); render(); return; }
+  const nv=e.target.closest("[data-cal-nav]");
+  if(nv && calCtx){ calSpost=CAL.paginaDopo(calCtx.da, CAL_TOT, calCtx.rigaOggi, calSpost, CAL_RIGHE, +nv.dataset.calNav); renderCalendarioCiclo(); return; }
+  if(e.target.closest("[data-cal-oggi]")){ calSpost=0; renderCalendarioCiclo(); return; }
+  const cg=e.target.closest("[data-cal-giorno]");
+  if(cg){ haptic(8); apriQuickShift(new Date(cg.dataset.calGiorno+"T12:00:00")); return; }
   if(e.target.closest("[data-cp-toggle]")){ state.piano=Object.assign({}, state.piano, {persona:(state.piano||{}).persona===false}); salva(); render(); return; }
   jump(e);
 });
@@ -8007,7 +8108,6 @@ function riepilogoAnno(){
   // giorno di calendario, non giornoVero(): il foglio porta la data in cui lo si prepara
   const oggi=new Date(), fPrima=state.focus; oggi.setHours(12,0,0,0);
   const inizio=new Date(oggi.getFullYear(), oggi.getMonth()-11, 1, 12);
-  const notte=(s,e)=>{ const ov=(a,b)=>Math.max(0, Math.min(e,b)-Math.max(s,a)); return ov(-120,360)+ov(1320,1800); };
   const mesi=[], tot={turni:0, ore:0, notti:0, oreNotte:0, festivi:0, brevi:0, lunghi:0, serieMax:0};
   let fineIeri=null, serie=0;
   try{
@@ -8021,7 +8121,7 @@ function riepilogoAnno(){
       let b=null; if(c!=="?"){ try{ b=NT.block(0); }catch(e){} }
       const sh = b && !b.rest ? {s:b.start, e:b.end} : null;
       if(!sh){ serie=0; if(c==="?") fineIeri=null; continue; }
-      const base=dnum(d)*1440, oreN=notte(sh.s, sh.e)/60;
+      const base=dnum(d)*1440, oreN=NT.oreNotturne({start:sh.s, end:sh.e})/60;   // la stessa regola del Carico
       m.turni++; m.ore+=(sh.e-sh.s)/60; m.oreNotte+=oreN;
       if(oreN>=3){ m.notti++; serie++; tot.serieMax=Math.max(tot.serieMax, serie); } else serie=0;
       if(festivo(d)) m.festivi++;
@@ -8304,8 +8404,8 @@ function renderLoSapevi(){
   const azioni = c.scelta
       ? '<span class="sapevi-az"><button type="button" class="btn g" data-sapevi-si>Sì, va bene</button><button type="button" class="btn g" data-sapevi-no>No, grazie</button></span>'
     : c.link
-      ? '<span class="sapevi-az">'+c.link().map(([h,t])=>'<a class="lnk" href="'+esc(h)+'" target="_blank" rel="noopener" data-sapevi-link>'+esc(t)+' →</a>').join("")+'</span>'
-    : (cta && c.a ? '<button type="button" class="lnk" data-sapevi-prova>'+esc(cta)+' →</button>' : '');
+      ? '<span class="sapevi-az">'+c.link().map(([h,t])=>'<a class="btn sm" href="'+esc(h)+'" target="_blank" rel="noopener" data-sapevi-link>'+esc(t)+'</a>').join("")+'</span>'
+    : (cta && c.a ? '<button type="button" class="btn sm" data-sapevi-prova>'+esc(cta)+'</button>' : '');
   // statistiche: sì e no sono entrambe risposte, niente ×
   el.innerHTML='<div><b>Lo sapevi?</b> '+esc(c.t())+(azioni?'<br>'+azioni:'')+'</div>'+
     (c.scelta ? '' : '<button type="button" class="x" data-sapevi-chiudi aria-label="Chiudi, non lo mostro più">×</button>');
@@ -8804,7 +8904,7 @@ function renderFerie(){
       '<p class="ferie-quando">'+esc(periodoTesto(giorni[0].d, giorni[giorni.length-1].d))+'</p>'+
       '<div class="ferie-giorni" aria-hidden="true">'+chip+'</div>'+
       '<p class="ferie-cosa">Ferie: <b>'+esc(quali)+'</b>'+(giorni[0].smonto?'. Il primo giorno è lo smonto: a casa dal mattino':'')+'.</p>'+
-      '<button type="button" class="lnk" data-ferie-segna="'+i+'">Segna queste ferie nel calendario →</button>'+
+      '<button type="button" class="btn g sm" data-ferie-segna="'+i+'">Segna queste ferie nel calendario</button>'+
     '</section>';
   });
   h+='<p class="hint" style="margin-top:4px">Dal tuo ciclo e dai cambi che hai segnato. Controlla le regole del tuo contratto: in alcuni lo smonto non è riposo e le ferie si contano in modo diverso.</p>';
@@ -9578,7 +9678,7 @@ if(window.NT_APP.nativo){
   // Android 12+: senza "Sveglie e promemoria" la sveglia può arrivare con
   // qualche minuto di ritardo. Si propone solo a chi ha già le notifiche.
   const riga=document.createElement("p"); riga.className="hint"; riga.hidden=true; riga.style.margin="6px 2px 0";
-  riga.innerHTML='Possono arrivare con qualche minuto di ritardo. <button class="lnk" type="button" style="display:inline">Falli arrivare all\'ora esatta →</button>';
+  riga.innerHTML='Possono arrivare con qualche minuto di ritardo. <button class="btn g sm" type="button" style="display:block;margin-top:6px">Falli arrivare all\'ora esatta</button>';
   if($("#notifHint")) $("#notifHint").after(riga);
   const aggiornaEsatta=()=>Promise.all([platform.notify.permission(),platform.notify.exactStatus()])
     .then(([p,x])=>{ riga.hidden=!(p==="granted" && x!=="granted"); }).catch(()=>{});

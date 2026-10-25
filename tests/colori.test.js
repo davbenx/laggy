@@ -12,12 +12,12 @@ test("nessun colore fuori palette (verde, rosso e ambra a mano)", () => {
 });
 
 test("i token di colore ci sono in tutti e quattro i blocchi dei temi", () => {
-  for (const t of ["--ok-soft", "--ok-line", "--persona", "--notte", "--cool-tint"])
+  for (const t of ["--ok-soft", "--ok-line", "--persona", "--persona-soft", "--notte", "--cool-tint"])
     assert.equal(html.split(t + ":").length - 1, 4, t + " definito nel tema scuro e chiaro, sia automatico sia forzato");
 });
 
 test("la persona seguita ha un colore suo, non quello di «tutto bene»", () => {
-  for (const sel of [".cp{", ".key-pers b{", ".cbar.pers{"]) {
+  for (const sel of [".cp{", ".key-pers .filo{", ".cbar.pers{"]) {
     const riga = html.split("\n").find(l => l.startsWith(sel));
     assert.ok(riga && riga.includes("var(--persona)") && !riga.includes("var(--ok)"), sel + " usa --persona");
   }

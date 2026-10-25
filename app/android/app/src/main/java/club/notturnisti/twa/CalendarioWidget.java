@@ -73,8 +73,8 @@ final class CalendarioWidget {
     }
 
     /** Un tocco su ‹ (k 0), › (k 1) o sul titolo (k 2): il widget passa a questo spostamento, in settimane da oggi. */
-    static PendingIntent pagina(Context ctx, int id, int k, int spostamento) {
-        Intent i = new Intent(ctx, NotturnistiWidget.class).setAction(NotturnistiWidget.AZIONE_PAGINA).putExtra("id", id).putExtra("off", spostamento);
+    static PendingIntent pagina(Context ctx, int id, int k, int spostamento, int righe) {
+        Intent i = new Intent(ctx, NotturnistiWidget.class).setAction(NotturnistiWidget.AZIONE_PAGINA).putExtra("id", id).putExtra("off", spostamento).putExtra("righe", righe);
         return NotturnistiWidget.trasmetti(ctx, 10000 + id * 4 + k, i);
     }
 
@@ -99,9 +99,9 @@ final class CalendarioWidget {
 
         rv.setTextViewText(R.id.w_cal_mese, titolo);
         rv.setContentDescription(R.id.w_cal_mese, titolo + ". Tocca per tornare a oggi");
-        rv.setOnClickPendingIntent(R.id.w_cal_mese, pagina(ctx, idWidget, 2, 0));
-        freccia(rv, R.id.w_cal_prec, r0 > 0, pagina(ctx, idWidget, 0, m.paginaDopo(rigaOggi, spostamento, righe, -1)), "Settimane precedenti");
-        freccia(rv, R.id.w_cal_succ, r0 < m.settimane() - righe, pagina(ctx, idWidget, 1, m.paginaDopo(rigaOggi, spostamento, righe, 1)), "Settimane successive");
+        rv.setOnClickPendingIntent(R.id.w_cal_mese, pagina(ctx, idWidget, 2, 0, righe));
+        freccia(rv, R.id.w_cal_prec, r0 > 0, pagina(ctx, idWidget, 0, m.paginaDopo(rigaOggi, spostamento, righe, -1), righe), "Settimane precedenti");
+        freccia(rv, R.id.w_cal_succ, r0 < m.settimane() - righe, pagina(ctx, idWidget, 1, m.paginaDopo(rigaOggi, spostamento, righe, 1), righe), "Settimane successive");
         boolean conPersone = !m.persone.isEmpty();
         // il nome: persona mostrata (verde) oppure «+ Anna» se nascosta; un tocco passa alla successiva
         String nome = persona >= 0 ? m.persone.get(persona).nome : m.persone.isEmpty() ? "" : m.persone.get(m.sel).nome;
