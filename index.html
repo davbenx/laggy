@@ -136,9 +136,9 @@ try{
   --orange:#FF9068; --orange-fill:#FF6B35; --orange-soft:#3A2119;
   --risk:#FF6B5C; --risk-soft:#3A1C18; --risk-line:#7A342C;
   --picco:#D98CF0;   /* picco di sonnolenza nei grafici: il rosso di --risk qui si confonde con l'arancio del turno */
-  --sleep-fill:#2D5A8C; --ok:#5FBF85; --on-warm:#15171A;
+  --sleep-fill:#2D5A8C; --ok:#5FBF85; --ok-soft:#173222; --ok-line:#2F6B45; --persona:#7FD9C9; --on-warm:#15171A;
   --bg-blur:rgba(20,22,26,0.85);
-  --warm-tint:#241C15; --cool-tint:#182029;
+  --warm-tint:#241C15; --cool-tint:#1E2142;
   --violet:var(--blue); --violetd:var(--blue-soft);
   --amber:var(--orange);
   --r:16px;
@@ -156,9 +156,9 @@ try{
     --orange:#B24B25; --orange-fill:#FF6B35; --orange-bar:#D9541F; --orange-soft:#FCE9E1;
     --risk:#C0392B; --risk-soft:#FBE9E7; --risk-line:#E57368;
     --picco:#8E2A6B;
-    --sleep-fill:#24496F; --ok:#2E7D4F; --on-warm:#15171A;
+    --sleep-fill:#24496F; --ok:#2E7D4F; --ok-soft:#E6F4EC; --ok-line:#8CC9A5; --persona:#0F6B60; --on-warm:#15171A;
     --bg-blur:rgba(255,255,255,.82);
-    --warm-tint:#FBF1E9; --cool-tint:#EAF0F6;
+    --warm-tint:#FBF1E9; --cool-tint:#E6E8F8;
     --shadow-card:0 2px 8px -2px rgba(21,23,26,.22);
     --shadow-btn:0 8px 18px -6px rgba(45,90,140,.3);
   }
@@ -179,9 +179,9 @@ try{
   --orange:#FF9068; --orange-fill:#FF6B35; --orange-soft:#3A2119;
   --risk:#FF6B5C; --risk-soft:#3A1C18; --risk-line:#7A342C;
   --picco:#D98CF0;   /* picco di sonnolenza nei grafici: il rosso di --risk qui si confonde con l'arancio del turno */
-  --sleep-fill:#2D5A8C; --ok:#5FBF85; --on-warm:#15171A;
+  --sleep-fill:#2D5A8C; --ok:#5FBF85; --ok-soft:#173222; --ok-line:#2F6B45; --persona:#7FD9C9; --on-warm:#15171A;
   --bg-blur:rgba(20,22,26,0.85);
-  --warm-tint:#241C15; --cool-tint:#182029;
+  --warm-tint:#241C15; --cool-tint:#1E2142;
   --shadow-card:0 2px 10px -3px rgba(0,0,0,.4);
   --shadow-btn:0 8px 20px -6px rgba(45,90,140,.35);
 }
@@ -192,9 +192,9 @@ try{
   --orange:#B24B25; --orange-fill:#FF6B35; --orange-bar:#D9541F; --orange-soft:#FCE9E1;
   --risk:#C0392B; --risk-soft:#FBE9E7; --risk-line:#E57368;
   --picco:#8E2A6B;
-  --sleep-fill:#24496F; --ok:#2E7D4F; --on-warm:#15171A;
+  --sleep-fill:#24496F; --ok:#2E7D4F; --ok-soft:#E6F4EC; --ok-line:#8CC9A5; --persona:#0F6B60; --on-warm:#15171A;
   --bg-blur:rgba(255,255,255,.82);
-  --warm-tint:#FBF1E9; --cool-tint:#EAF0F6;
+  --warm-tint:#FBF1E9; --cool-tint:#E6E8F8;
   --shadow-card:0 2px 8px -2px rgba(21,23,26,.22);
   --shadow-btn:0 8px 18px -6px rgba(45,90,140,.3);
 }
@@ -347,9 +347,9 @@ font-weight:600;cursor:pointer;transition:all .15s ease;font-family:inherit}
 
 /* Traffic light pill per Simulatore Scambio */
 .traffic-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700}
-.traffic-pill.green{background:rgba(16,185,129,0.15);color:#10b981;border:1px solid rgba(16,185,129,0.3)}
-.traffic-pill.yellow{background:rgba(245,158,11,0.15);color:#f59e0b;border:1px solid rgba(245,158,11,0.3)}
-.traffic-pill.red{background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.3)}
+.traffic-pill.green{background:var(--ok-soft);color:var(--ok);border:1px solid var(--ok-line)}
+.traffic-pill.yellow{background:var(--orange-soft);color:var(--orange);border:1px solid var(--orange)}
+.traffic-pill.red{background:var(--risk-soft);color:var(--risk);border:1px solid var(--risk-line)}
 .status{background:var(--s1);border-left:3px solid var(--blue);border-radius:var(--r);padding:13px 15px;margin-bottom:var(--gap-sezione)}
 .status p{font-size:16px;line-height:1.55}
 .status.warn{border-left-color:var(--risk);background:var(--risk-soft)}
@@ -475,12 +475,12 @@ body.primo-avvio #firstPlanBanner,body.primo-avvio #setupChecklist,body.primo-av
    configurato". Lettera neutra, come il resto dei testi secondari. */
 .ccode{font-size:12px;font-weight:600;width:18px;flex:none;text-align:center;color:var(--faint);position:relative}
 /* la persona scelta con la stellina: la sua sigla accanto alla tua, in verde (come nel widget) */
-.cp{font-size:12px;font-weight:600;width:14px;flex:none;text-align:center;color:var(--ok)}
+.cp{font-size:12px;font-weight:600;width:14px;flex:none;text-align:center;color:var(--persona)}
 .cp.r{color:var(--faint);font-weight:500}
 .key-pers{font:inherit;color:inherit;background:none;border:0;padding:0;min-height:24px;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
 .key-pers[aria-pressed="false"]{opacity:.7;text-decoration:line-through}
 .cyc.con-pers .caxis .crail span{font-size:10px}
-.key-pers b{color:var(--ok);font-weight:700}
+.key-pers b{color:var(--persona);font-weight:700}
 .crow.spec .ccode{font-size:10.5px;color:var(--dim)}
 .crow.rep .ccode::after{content:"";position:absolute;top:-1px;right:-3px;width:5px;height:5px;border-radius:50%;background:var(--orange-fill)}
 /* Striscia del ciclo: pillola sottile, come nel mockup approvato — prima
@@ -521,7 +521,7 @@ border-top:5px solid var(--ink)}
 .caxis .crail span{position:absolute;bottom:0;transform:translateX(-50%);font-size:10.5px;line-height:1;color:var(--faint);white-space:nowrap}
 .cbar.nap{opacity:.5}
 /* turno della persona: filo verde appena sotto la rotaia */
-.cbar.pers{top:auto;bottom:-6px;height:3px;background:var(--ok);border-radius:99px}
+.cbar.pers{top:auto;bottom:-6px;height:3px;background:var(--persona);border-radius:99px}
 .lnk{background:none;border:none;padding:6px 0;color:var(--blue);font-family:inherit;
 font-size:14px;cursor:pointer;text-decoration:underline;text-underline-offset:3px;min-height:44px}
 .lnk:hover{color:var(--ink)}
@@ -563,7 +563,7 @@ display:flex;flex-direction:column;align-items:center;justify-content:center;gap
 .sg-g small{font-size:11px;color:var(--faint);font-variant-numeric:tabular-nums}
 .sg-g b{font-size:12.5px;line-height:1.1;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sg-g.lav{background:var(--warm-tint)}
-.sg-g.notte{background:var(--cool-tint)}
+.sg-g.notte{background:var(--cool-tint)}   /* la notte è indaco: il blu è del sonno */
 .sg-g.ass b{color:var(--blue)}
 .sg-g.vuoto b{color:var(--faint);font-weight:400}
 .sg-g.mio{border-color:var(--blue);border-width:1.5px}
@@ -7084,8 +7084,8 @@ function renderPiuCal(){
   } else {
     detailsHtml =
       '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px">' +
-        '<span style="color:#2ecc71;font-weight:600;display:flex;align-items:center;gap:6px">' +
-          '<span style="width:7px;height:7px;border-radius:50%;background:#2ecc71;display:inline-block"></span>' +
+        '<span style="color:var(--ok);font-weight:600;display:flex;align-items:center;gap:6px">' +
+          '<span style="width:7px;height:7px;border-radius:50%;background:var(--ok);display:inline-block"></span>' +
           'Riposi in comune con '+esc(pName)+' in calendario' +
         '</span>' +
         '<button type="button" id="coupleCalManageBtn" style="color:var(--blue);font-size:13px;font-weight:600;padding:0;background:none;border:none;cursor:pointer">Gestisci →</button>' +
@@ -8520,17 +8520,17 @@ function aggiornaScambio(){
   const riga=(t,p,d,badge)=>'<div class="row"><b style="min-width:130px">'+t+
     '</b><span>'+p+' → '+d+(badge?' '+badge:'')+'</span></div>';
 
-  const deltaSonnoTxt=Math.abs(dS)<15?"":(dS>0?'<span style="color:#10b981;font-weight:600">+'+dur(dS)+'</span>':'<span style="color:#ef4444;font-weight:600">−'+dur(-dS)+'</span>');
-  const deltaVegliaTxt=Math.abs(dV)<15?"":(dV>0?'<span style="color:#ef4444;font-weight:600">peggiora (+ '+dur(dV)+')</span>':'<span style="color:#10b981;font-weight:600">migliora</span>');
+  const deltaSonnoTxt=Math.abs(dS)<15?"":(dS>0?'<span style="color:var(--ok);font-weight:600">+'+dur(dS)+'</span>':'<span style="color:var(--risk);font-weight:600">−'+dur(-dS)+'</span>');
+  const deltaVegliaTxt=Math.abs(dV)<15?"":(dV>0?'<span style="color:var(--risk);font-weight:600">peggiora (+ '+dur(dV)+')</span>':'<span style="color:var(--ok);font-weight:600">migliora</span>');
   const ritorniTxt=(ritorniDopo>ritorniPrima)
-    ?'<span style="color:#ef4444;font-weight:600">+'+dR+' rapido (&lt;11h)!</span>'
-    :(ritorniDopo===0?'<span style="color:#10b981">Nessuno</span>':'');
+    ?'<span style="color:var(--risk);font-weight:600">+'+dR+' rapido (&lt;11h)!</span>'
+    :(ritorniDopo===0?'<span style="color:var(--ok)">Nessuno</span>':'');
 
   if(dOut){
     dOut.innerHTML='<div class="rows">'+
       riga("Sonno in 2 settimane", dur(r.prima.sonno), dur(r.dopo.sonno), deltaSonnoTxt)+
       riga("Ore di fila da sveglio (max)", dur(r.prima.vegliaMax), dur(r.dopo.vegliaMax), deltaVegliaTxt)+
-      riga("Pisolini che servono", r.prima.pisolini, r.dopo.pisolini, dP>0?'<span style="color:#f59e0b">+'+dP+'</span>':'')+
+      riga("Pisolini che servono", r.prima.pisolini, r.dopo.pisolini, dP>0?'<span style="color:var(--orange)">+'+dP+'</span>':'')+
       riga("Riposi sotto le 11 ore", ritorniPrima, ritorniDopo, ritorniTxt)+
       '</div>';
   }
@@ -9178,7 +9178,7 @@ if($("#swapApplica")) $("#swapApplica").onclick=()=>{
   aggiornaScambio();
   const vOut=$("#swapVerdict");
   if(vOut){
-    vOut.insertAdjacentHTML("afterbegin",'<div style="background:rgba(16,185,129,0.15);color:#10b981;border:1px solid rgba(16,185,129,0.3);padding:8px 12px;border-radius:var(--r);font-size:13px;font-weight:600;text-align:center;margin-bottom:8px">✓ Scambio applicato nel piano!</div>');
+    vOut.insertAdjacentHTML("afterbegin",'<div style="background:var(--ok-soft);color:var(--ok);border:1px solid var(--ok-line);padding:8px 12px;border-radius:var(--r);font-size:13px;font-weight:600;text-align:center;margin-bottom:8px">✓ Scambio applicato nel piano!</div>');
   }
 };
 

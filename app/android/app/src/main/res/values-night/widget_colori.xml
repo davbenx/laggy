@@ -13,8 +13,8 @@
     <color name="w_t_rientro">#FF6B5C</color>
     <color name="w_cella_lavoro">#7A3414</color>
     <color name="w_cella_lavoro_t">#FFD9C4</color>
-    <color name="w_cella_notte">#2F5A94</color>
-    <color name="w_cella_notte_t">#E3EEFC</color>
+    <color name="w_cella_notte">#3B3F9E</color>
+    <color name="w_cella_notte_t">#E4E6FF</color>
     <color name="w_cella_p_lavoro">#1D6B5E</color>
     <color name="w_cella_p_lavoro_t">#D4F7F0</color>
     <color name="w_cella_p_notte">#237A70</color>
