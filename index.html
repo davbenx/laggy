@@ -136,7 +136,7 @@ try{
   --orange:#FF9068; --orange-fill:#FF6B35; --orange-soft:#3A2119;
   --risk:#FF6B5C; --risk-soft:#3A1C18; --risk-line:#7A342C;
   --picco:#D98CF0;   /* picco di sonnolenza nei grafici: il rosso di --risk qui si confonde con l'arancio del turno */
-  --sleep-fill:#2D5A8C; --ok:#5FBF85; --ok-soft:#173222; --ok-line:#2F6B45; --persona:#7FD9C9; --notte:#9CA3F5; --on-warm:#15171A;
+  --sleep-fill:#2D5A8C; --ok:#5FBF85; --ok-soft:#173222; --ok-line:#2F6B45; --persona:#7FD9C9; --persona-soft:#173B36; --notte:#9CA3F5; --on-warm:#15171A;
   --bg-blur:rgba(20,22,26,0.85);
   --warm-tint:#241C15; --cool-tint:#1E2142;
   --violet:var(--blue); --violetd:var(--blue-soft);
@@ -156,7 +156,7 @@ try{
     --orange:#B24B25; --orange-fill:#FF6B35; --orange-bar:#D9541F; --orange-soft:#FCE9E1;
     --risk:#C0392B; --risk-soft:#FBE9E7; --risk-line:#E57368;
     --picco:#8E2A6B;
-    --sleep-fill:#24496F; --ok:#2E7D4F; --ok-soft:#E6F4EC; --ok-line:#8CC9A5; --persona:#0F6B60; --notte:#3B3F9E; --on-warm:#15171A;
+    --sleep-fill:#24496F; --ok:#2E7D4F; --ok-soft:#E6F4EC; --ok-line:#8CC9A5; --persona:#0F6B60; --persona-soft:#D8F0EA; --notte:#3B3F9E; --on-warm:#15171A;
     --bg-blur:rgba(255,255,255,.82);
     --warm-tint:#FBF1E9; --cool-tint:#E6E8F8;
     --shadow-card:0 2px 8px -2px rgba(21,23,26,.22);
@@ -179,7 +179,7 @@ try{
   --orange:#FF9068; --orange-fill:#FF6B35; --orange-soft:#3A2119;
   --risk:#FF6B5C; --risk-soft:#3A1C18; --risk-line:#7A342C;
   --picco:#D98CF0;   /* picco di sonnolenza nei grafici: il rosso di --risk qui si confonde con l'arancio del turno */
-  --sleep-fill:#2D5A8C; --ok:#5FBF85; --ok-soft:#173222; --ok-line:#2F6B45; --persona:#7FD9C9; --notte:#9CA3F5; --on-warm:#15171A;
+  --sleep-fill:#2D5A8C; --ok:#5FBF85; --ok-soft:#173222; --ok-line:#2F6B45; --persona:#7FD9C9; --persona-soft:#173B36; --notte:#9CA3F5; --on-warm:#15171A;
   --bg-blur:rgba(20,22,26,0.85);
   --warm-tint:#241C15; --cool-tint:#1E2142;
   --shadow-card:0 2px 10px -3px rgba(0,0,0,.4);
@@ -192,7 +192,7 @@ try{
   --orange:#B24B25; --orange-fill:#FF6B35; --orange-bar:#D9541F; --orange-soft:#FCE9E1;
   --risk:#C0392B; --risk-soft:#FBE9E7; --risk-line:#E57368;
   --picco:#8E2A6B;
-  --sleep-fill:#24496F; --ok:#2E7D4F; --ok-soft:#E6F4EC; --ok-line:#8CC9A5; --persona:#0F6B60; --notte:#3B3F9E; --on-warm:#15171A;
+  --sleep-fill:#24496F; --ok:#2E7D4F; --ok-soft:#E6F4EC; --ok-line:#8CC9A5; --persona:#0F6B60; --persona-soft:#D8F0EA; --notte:#3B3F9E; --on-warm:#15171A;
   --bg-blur:rgba(255,255,255,.82);
   --warm-tint:#FBF1E9; --cool-tint:#E6E8F8;
   --shadow-card:0 2px 8px -2px rgba(21,23,26,.22);
@@ -484,6 +484,31 @@ body.primo-avvio #firstPlanBanner,body.primo-avvio #setupChecklist,body.primo-av
 .key-pers[aria-pressed="false"]{border-style:dashed;color:var(--dim)}
 .key-pers[aria-pressed="false"] .filo{background:var(--faint)}
 .key-pers[aria-pressed="false"] svg{color:var(--dim)}
+.key-hint{font-size:12px;color:var(--dim)}
+.cbar.pers.son{background:repeating-linear-gradient(90deg,var(--persona) 0 4px,transparent 4px 7px)}   /* sonno della persona: tratteggiato, il turno è pieno */
+/* Il ciclo a calendario (come il widget) e il selettore Ore | Calendario */
+.vsw{display:inline-flex;gap:2px;padding:2px;margin:0 0 12px;border:1px solid var(--line);border-radius:999px;background:var(--bg)}
+.vsw button{border:0;background:none;color:var(--dim);font:inherit;font-size:13px;font-weight:600;min-height:32px;padding:0 14px;border-radius:999px;cursor:pointer}
+.vsw button[aria-pressed="true"]{background:var(--blue-fill);color:#fff}
+body.cic-cal .cycbar{display:none}
+.cal-testa{display:flex;align-items:center;gap:2px;margin:0 0 6px}
+.cal-testa .ibtn{width:40px;height:40px}
+.cal-testa .ibtn[disabled]{opacity:.3;cursor:default}
+.cal-titolo{background:none;border:0;font:inherit;font-family:var(--serif);font-size:18px;font-weight:600;color:var(--ink);padding:0 6px;min-height:40px;cursor:pointer}
+.cal-sett{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.cal-gs{font-size:11px;font-weight:700;color:var(--faint);text-align:center;padding:2px 0}
+.ccell{display:flex;flex-direction:column;align-items:stretch;gap:2px;background:none;border:0;padding:3px 2px 4px;font:inherit;cursor:pointer;border-radius:10px;min-width:0;color:var(--ink)}
+.ccell.passato{opacity:.6}
+.ccell.oggi{box-shadow:inset 0 0 0 1.5px var(--ink)}
+.cnum{font-size:11px;text-align:center;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.cnum.altro{color:var(--blue)}
+.cnum.uno{font-weight:800}
+.ctile{display:flex;align-items:center;justify-content:center;height:26px;border-radius:8px;font-size:13px;font-weight:700;background:var(--s2);color:var(--dim);overflow:hidden}
+.ctile.t-l{background:var(--orange-soft);color:var(--orange)}
+.ctile.t-n{background:var(--cool-tint);color:var(--notte)}
+.ctile.t-q{background:none;border:1px dashed var(--line)}
+.ctile.p{height:19px;font-size:11px;border-radius:999px}
+.ctile.p.t-l,.ctile.p.t-n{background:var(--persona-soft);color:var(--persona)}
 .cyc.con-pers .caxis .crail span{font-size:10px}   /* con la colonna della persona la rotaia si stringe: ore più piccole */
 .crow.spec .ccode{font-size:10.5px;color:var(--dim)}
 .crow.rep .ccode::after{content:"";position:absolute;top:-1px;right:-3px;width:5px;height:5px;border-radius:50%;background:var(--orange-fill)}
@@ -2757,7 +2782,8 @@ var qrcodegen;
 // stessa garanzia di ordine che un normalizzatore await avrebbe dato, senza
 // bisogno di riscrivere tutto in async. I moduli sono già strict di default.
 import { createEngine, encEcc, decEcc, encGiorni, decGiorni, GIORNI_SPECIALI } from "./engine.js";
-import { LINGUA, giorniBrevi, mesiBrevi } from "./lingua.js";   // formato di date e giorni: un solo punto
+import { LINGUA, giorniBrevi, mesiBrevi } from "./lingua.js";
+import * as CAL from "./calendario.js";   // il calendario a settimane del ciclo: stesse regole del widget   // formato di date e giorni: un solo punto
 import platform from "./platform.js";
 /* MOTORE NOTTURNISTI v4 — turni arbitrari.
    Nessuna regola guarda più la lettera del turno. Tutto si decide dalla
@@ -6357,11 +6383,70 @@ function sigPersona(pers, x){
   return '<span class="cp'+(x&&x.r?' r':'')+'" title="'+esc(pers.nome)+'">'+(x?esc(x.c):'·')+'</span>';
 }
 // Il turno della persona: una barra verde sottile sotto la tua rotaia, sulla stessa scala delle ore.
+// Il chip della persona nella legenda (mostra/nasconde la sua sigla e il suo turno): lo stesso nel ciclo a ore e a calendario
+function chipPersona(pers){
+  return pers ? '<button type="button" class="key-pers" data-cp-toggle aria-pressed="true" aria-label="Nascondi '+esc(pers.nome)+' dal ciclo" title="Nascondi la sigla e il turno di '+esc(pers.nome)+'"><i class="filo"></i>'+esc(pers.nome)+ICON.eye+'</button>'
+    : personaStrisciaNascosta() ? '<button type="button" class="key-pers" data-cp-toggle aria-pressed="false" aria-label="Mostra '+esc(personaStrisciaNascosta())+' nel ciclo" title="Mostra la sigla e il turno di '+esc(personaStrisciaNascosta())+'"><i class="filo"></i>'+esc(personaStrisciaNascosta())+ICON.eyeOff+'</button>' : '';
+}
+// Il sonno della persona, sulla stessa linea del suo turno (non si sovrappongono mai): tratteggiato, solo se è un dato suo
+function sonnoPersona(sd, cpx){
+  const x0=Math.max(cpx(sd.onset),0), x1=Math.min(cpx(sd.onset+sd.dur),100);
+  return x1>x0 ? '<span class="cbar pers son" style="left:'+x0+'%;width:'+(x1-x0)+'%"></span>' : '';
+}
 function barraPersona(x, cpx){
   const x0=Math.max(cpx(x.a),0), x1=Math.min(cpx(x.z),100);
   return x1>x0 ? '<span class="cbar pers" style="left:'+x0+'%;width:'+(x1-x0)+'%"></span>' : '';
 }
+// ── Il ciclo a calendario ──────────────────────────────────────────────────────────────────────────────────────
+// La stessa griglia del widget Android per chi non ce l'ha (web, iPhone): settimane dal lunedì, turno e persona
+// impilati, mese dal giovedì, frecce che si agganciano al mese. Le regole stanno in calendario.js; i dati
+// (sigla:tipo per giorno) sono quelli del widget, da meseWidget().
+const CAL_PRIMA=13, CAL_TOT=53, CAL_RIGHE=5;
+let calSpost=0, calCtx=null;   // settimane da oggi (le frecce); non si salva: ogni volta si riparte da oggi
+const vistaCiclo=()=> (state.piano||{}).vistaCiclo==="calendario" ? "calendario" : "ore";
+function selettoreVista(v){
+  return '<div class="vsw" role="group" aria-label="Come vedere il ciclo">'+
+    [["ore","Ore"],["calendario","Calendario"]].map(([k,t])=>'<button type="button" data-vista="'+k+'" aria-pressed="'+(v===k)+'">'+t+'</button>').join("")+'</div>';
+}
+const SVG_FRECCIA=d=>'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="'+d+'"/></svg>';
+function renderCalendarioCiclo(){
+  const el=$("#cyc"), pers=personaStriscia();
+  el.classList.remove("con-pers");
+  const m=meseWidget(CAL_PRIMA, CAL_TOT);
+  if(!m){ el.innerHTML=selettoreVista("calendario")+'<p class="hint">Il calendario non è disponibile: controlla i turni in «Modifica».</p>'; return; }
+  const oggi=giornoVero(), iOggi=CAL.indiceDi(m.da, 7*CAL_TOT, iso(oggi)), rigaOggi=iOggi<0 ? -1 : Math.floor(iOggi/7);
+  calCtx={da:m.da, rigaOggi};
+  const r0=CAL.primaRiga(rigaOggi, calSpost, CAL_RIGHE, CAL_TOT), mt=CAL.meseDellaRiga(m.da, r0), tit=CAL.titolo(m.da, r0, oggi.getFullYear());
+  const persona = pers && m.p.length ? m.p[Math.min(m.sel, m.p.length-1)] : null;
+  const leggi=s=>{ s=s||"?:?"; const k=s.lastIndexOf(":"); return {sig:k>0 ? s.slice(0,k) : s, t:k>=0 ? s.charAt(k+1) : "?"}; };
+  const TIPO={n:"notte", l:"lavoro", r:"riposo"}, descr=c=>c.t==="?" ? "da impostare" : (c.sig===(TIPO[c.t]||"")||c.sig.length<=1 ? TIPO[c.t] : c.sig+", "+TIPO[c.t]);
+  let griglia='<div class="cal-sett cal-gs-riga" aria-hidden="true">'+["L","M","M","G","V","S","D"].map(l=>'<span class="cal-gs">'+l+'</span>').join("")+'</div>';
+  for(let r=0;r<CAL_RIGHE;r++){
+    griglia+='<div class="cal-sett" role="row">';
+    for(let c=0;c<7;c++){
+      const i=(r0+r)*7+c, d=CAL.dataDi(m.da,i), x=leggi(m.io[i]), pc=persona ? leggi(persona.g[i]) : null;
+      const altro=d.anno!==mt[0]||d.mese!==mt[1], num=d.giorno===1 ? "1 "+CAL.MESI[d.mese-1].slice(0,3).toUpperCase() : d.giorno;
+      const etic=new Date(d.iso+"T12:00:00").toLocaleDateString(LINGUA,{weekday:"long",day:"numeric",month:"long"})+": "+descr(x)+(pc ? ", "+(pers.nome)+": "+descr(pc) : "");
+      griglia+='<button type="button" class="ccell'+(i<iOggi?" passato":"")+(i===iOggi?" oggi":"")+'" data-cal-giorno="'+d.iso+'" aria-label="'+esc(etic)+'">'+
+        '<span class="cnum'+(altro?" altro":"")+(d.giorno===1?" uno":"")+'">'+num+'</span>'+
+        '<span class="ctile t-'+(x.t==="?"?"q":x.t)+'">'+(x.t==="?" ? "·" : esc(x.sig))+'</span>'+
+        (pc ? '<span class="ctile p t-'+(pc.t==="?"?"q":pc.t)+'">'+(pc.t==="?" ? "·" : esc(pc.sig))+'</span>' : '')+'</button>';
+    }
+    griglia+='</div>';
+  }
+  const ultima=CAL_TOT-CAL_RIGHE, sw=(c,x)=>'<span><i style="background:'+c+';'+(x||"")+'"></i>';
+  el.innerHTML=selettoreVista("calendario")+
+    '<div class="cal-testa"><button type="button" class="ibtn" data-cal-nav="-1" aria-label="Settimane precedenti"'+(r0>0?'':' disabled')+'>'+SVG_FRECCIA("M15 6l-6 6 6 6")+'</button>'+
+    '<button type="button" class="cal-titolo" data-cal-oggi aria-label="'+esc(tit)+'. Tocca per tornare a oggi">'+esc(tit)+'</button>'+
+    '<button type="button" class="ibtn" data-cal-nav="1" aria-label="Settimane successive"'+(r0<ultima?'':' disabled')+'>'+SVG_FRECCIA("M9 6l6 6-6 6")+'</button></div>'+
+    griglia+
+    '<div class="key">'+sw("var(--orange)")+'Turno</span>'+sw("var(--notte)")+'Notte</span>'+sw("var(--s2)","border:1px solid var(--line)")+'Riposo</span>'+chipPersona(pers)+'</div>';
+}
+
 function renderStrip(P, f, S){
+  const vista=vistaCiclo();
+  document.body.classList.toggle("cic-cal", vista==="calendario");
+  if(vista==="calendario"){ renderCalendarioCiclo(); const re=$("#cycRange"); if(re) re.textContent="Turni"; return; }
   // Scala unica per tutte le righe, senza avvolgimenti: così ogni barra
   // resta sul giorno a cui appartiene e non se ne va a finire su quello dopo.
   let clo=Infinity, chi=-Infinity;
@@ -6388,6 +6473,8 @@ function renderStrip(P, f, S){
   const cspan=Math.max(chi-clo,60), cpx=m=>(m-clo)/cspan*100;
   const tk=tacche(clo,chi);
   const pers=personaStriscia();
+  // il sonno della persona solo se è un dato suo (ha mandato gli orari): altrimenti «sonno come il tuo» sarebbe una copia del tuo
+  const SP = pers && pers.p.wake && pers.p.bed ? asPartner(()=>NT.simulate(), pers.p) : null;
   // Con la colonna della persona la rotaia si stringe: su telefoni molto stretti (< 340 px) etichette ogni 12 ore invece di 6, le linee restano
   const stretta=!!pers && innerWidth<340;
   let ch='<div class="caxis" aria-hidden="true"><span class="clab"></span><span class="ccode">'+(pers?'Tu':'')+'</span>'+(pers?'<span class="cp" title="'+esc(pers.nome)+'">'+esc(pers.sigla)+'</span>':'')+'<span class="crail">'+
@@ -6407,6 +6494,7 @@ function renderStrip(P, f, S){
     // solo plan() lo fa — chiamarlo per ogni giorno della striscia costerebbe
     // un plan() completo x13 a ogni render, non solo una lettura leggera)
     const px=pers ? datiPersona(pers, o) : null;
+    const sdp=SP ? NT.at(SP,o) : null;
     const gs=state.giorni[iso(d)]||{}, sigla=SIGLA_SPECIALE[gs.t]||"";
     const modificato=!!(state.ecc[iso(d)]||gs.s!=null); if(modificato) haMod=true;
     ch+='<div class="crow'+(o===0?" on":"")+(modificato?" mod":"")+(sigla?" spec":"")+(gs.t==="reperibile"?" rep":"")+'" data-off="'+o+'" role="button" tabindex="0">'+
@@ -6416,6 +6504,7 @@ function renderStrip(P, f, S){
       '<span class="crail">'+
       seg.map(([x,w,cl])=>'<span class="cbar '+cl+'" style="left:'+x+'%;width:'+w+'%"></span>').join("")+
       (px && !px.r ? barraPersona(px, cpx) : '')+
+      (sdp ? sonnoPersona(sdp, cpx) : '')+
       (o===0 && cpx(oggiM)>=0 && cpx(oggiM)<=100 ? '<span class="cnow" style="left:'+cpx(oggiM)+'%" title="adesso"></span>' : '')+
       '</span></div>';
   }
@@ -6428,11 +6517,10 @@ function renderStrip(P, f, S){
   // rischio (notti di fila, turno rientrante, minimo circadiano: è una riga
   // in Oggi, rischioDelGiorno) e il pallino dell'umore dal diario.
   $("#cyc").classList.toggle("con-pers", !!pers);
-  $("#cyc").innerHTML=ch+
+  $("#cyc").innerHTML=selettoreVista("ore")+ch+
     '<div class="key">'+'<span><i style="background:var(--blue)"></i>Sonno</span>'+'<span><i style="background:var(--orange-bar)"></i>Turno</span>'+
     (haMod ? '<span><i class="key-mod"></i>giorno modificato</span>' : '')+
-    (pers ? '<button type="button" class="key-pers" data-cp-toggle aria-pressed="true" aria-label="Nascondi '+esc(pers.nome)+' dal ciclo" title="Nascondi la sigla e il turno di '+esc(pers.nome)+'"><i class="filo"></i>'+esc(pers.nome)+ICON.eye+'</button>'
-      : personaStrisciaNascosta() ? '<button type="button" class="key-pers" data-cp-toggle aria-pressed="false" aria-label="Mostra '+esc(personaStrisciaNascosta())+' nel ciclo" title="Mostra la sigla e il turno di '+esc(personaStrisciaNascosta())+'"><i class="filo"></i>'+esc(personaStrisciaNascosta())+ICON.eyeOff+'</button>' : '')+'</div>';
+    chipPersona(pers)+(SP ? '<span class="key-hint">pieno: turno · tratteggiato: sonno</span>' : '')+'</div>';
   // L'etichetta del range: stessa finestra usata sopra per costruire la
   // striscia (finestraCiclo()), non un calcolo separato che rischierebbe
   // di disallinearsi da quello che si vede davvero.
@@ -7386,10 +7474,10 @@ function ntWidget(){
 // Il calendario del widget: da quattro lunedì fa per 20 settimane (il widget si sfoglia a pagine), la mia sigla e quella di al massimo quattro
 // persone (la stellina sempre dentro). Sigle e tipi («n» notte, «l» lavoro, «r» riposo) arrivano dal motore; il widget le mostra
 // e basta. `sel` = la stellina fra quelle pubblicate, `star` la identifica: se nell'app cambia, il widget riparte da lei.
-function meseWidget(){
+function meseWidget(prima=SETT_WIDGET_PRIMA, tot=SETT_WIDGET){   // settimane prima di questa e in tutto: il widget ne tiene 20, il calendario del ciclo di più
   const f=state.focus;
   try{
-    const oggi=giornoVero(), lun=day(oggi, -((oggi.getDay()+6)%7) - 7*SETT_WIDGET_PRIMA), N=7*SETT_WIDGET;
+    const oggi=giornoVero(), lun=day(oggi, -((oggi.getDay()+6)%7) - 7*prima), N=7*tot;
     const tutte=tuttePersone(), star=Math.min(Math.max(+state.personaGlance||0,0),tutte.length-1);
     const scelte=tutte.map((p,i)=>i).sort((x,y)=>(x===star?-1:y===star?1:x-y)).slice(0,4).sort((x,y)=>x-y);
     const io=[], p=scelte.map(i=>({n:tutte[i].name||"Persona "+(i+1), g:[]}));
@@ -7580,6 +7668,13 @@ function jump(e){ const el=e.target.closest(".crow"); if(!el) return;
   const off=+el.dataset.off;
   haptic(8); apriQuickShift(day(state.focus,off)); }
 $("#cyc").addEventListener("click",e=>{
+  const vs=e.target.closest("[data-vista]");
+  if(vs){ state.piano=Object.assign({}, state.piano, {vistaCiclo:vs.dataset.vista}); salva(); render(); return; }
+  const nv=e.target.closest("[data-cal-nav]");
+  if(nv && calCtx){ calSpost=CAL.paginaDopo(calCtx.da, CAL_TOT, calCtx.rigaOggi, calSpost, CAL_RIGHE, +nv.dataset.calNav); renderCalendarioCiclo(); return; }
+  if(e.target.closest("[data-cal-oggi]")){ calSpost=0; renderCalendarioCiclo(); return; }
+  const cg=e.target.closest("[data-cal-giorno]");
+  if(cg){ haptic(8); apriQuickShift(new Date(cg.dataset.calGiorno+"T12:00:00")); return; }
   if(e.target.closest("[data-cp-toggle]")){ state.piano=Object.assign({}, state.piano, {persona:(state.piano||{}).persona===false}); salva(); render(); return; }
   jump(e);
 });
