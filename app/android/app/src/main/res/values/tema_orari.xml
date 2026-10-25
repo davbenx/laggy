@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- La finestra degli orari del sonno aperta dal widget: tonda e trasparente fuori, sopra la Home. -->
+    <style name="OrariSonnoTema" parent="@android:style/Theme.Material.Light.Dialog.NoActionBar">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:colorAccent">@color/w_accento</item>
+    </style>
+</resources>

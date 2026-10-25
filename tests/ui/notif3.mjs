@@ -32,9 +32,9 @@ ok(await p.evaluate(()=>/spento dalle impostazioni del telefono/.test(document.q
 await p.click('[data-ntipo="coffee"]'); await p.waitForTimeout(600);
 ok(await p.evaluate(()=>window.__pend.some(n=>n.extra.kind==="coffee")), "accendo 'Ultimo caffè' → entra in coda");
 await p.locator("#opzFunzioni").screenshot({path:SP+"/n-opz.png"});
-// widget: settimana nel payload
+// widget: il calendario nel payload (la striscia di 7 giorni `giorni` resta vuota dalla 1.3.0)
 const pub=await p.evaluate(()=>window.__pub);
-ok(pub && pub.v===3 && pub.giorni.length===7 && pub.giorni[0].g==="oggi", "widget: 7 giorni nel payload "+JSON.stringify(pub&&pub.giorni.slice(0,3)));
+ok(pub && pub.v===3 && pub.mese && pub.mese.io.length===140 && (pub.giorni||[]).length===0, "widget: calendario di 20 settimane nel payload "+JSON.stringify(pub&&{v:pub.v,k:Object.keys(pub),n:pub.mese&&pub.mese.io.length}));
 // tocco su "Che turno fai domani?" → pannello di domani
 await p.evaluate(()=>window.__fire("LN:localNotificationActionPerformed",{notification:{extra:{tab:"domani"}}})); await p.waitForTimeout(800);
 ok(await p.evaluate(()=>!document.querySelector("#quickShiftModal").hidden && /Domani/i.test(document.querySelector("#qsDateTitle").innerText)), "tocco su 'Che turno fai domani?' apre il pannello di domani");

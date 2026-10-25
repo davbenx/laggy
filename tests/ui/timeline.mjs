@@ -58,8 +58,8 @@ const base={turniConfigurati:true,pattern:"MPNSR",anchor:iso(new Date()),repeat:
 
 // le scelte sul sonno stanno attaccate a Dormi (riposo prima di un mattino alle 06:00)
 { const p=await apri({turniConfigurati:true,pattern:"RM",anchor:iso(new Date()),shifts:{M:{n:"Mattino",s:360,e:840}},repeat:true,firstSeenAt:"2026-01-01"}, 10);
-  const dentro=await p.evaluate(()=>{ const s=document.querySelector('[data-row="sonno"]').closest(".tl"); const x=s.querySelector(".tl-extra .dopo-notte"); return !!x && x.querySelectorAll("[data-mattinobif]").length===2; });
-  ok(dentro, "«Tutto stanotte / Più tardi + pisolino» sta dentro la voce Dormi, sempre visibile");
+  const dentro=await p.evaluate(()=>{ const s=document.querySelector('[data-row="sonno"]').closest(".tl"); let e=s.nextElementSibling; while(e && !e.classList.contains("tl-extra") && !e.classList.contains("tl")) e=e.nextElementSibling; const x=e && e.classList.contains("tl-extra") && e.querySelector(".dopo-notte"); return !!x && x.querySelectorAll("[data-mattinobif]").length===2; });
+  ok(dentro, "«Tutto stanotte / Più tardi + pisolino» sta subito sotto la voce Dormi, sempre visibile");
   await p.context().close(); }
 
 // telefono stretto: niente scorrimento orizzontale, testo non tagliato

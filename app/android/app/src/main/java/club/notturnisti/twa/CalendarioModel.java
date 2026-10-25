@@ -8,7 +8,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
- * Il calendario del widget, già calcolato dalla pagina: da un lunedì per 42 giorni, la tua sigla e il tipo
+ * Il calendario del widget, già calcolato dalla pagina: da un lunedì per 20 settimane (quattro prima di quella di oggi,
+ * il resto dopo: il widget si sfoglia a pagine), la tua sigla e il tipo
  * («n» notte, «l» lavoro, «r» riposo, «?» da impostare) e quelli delle persone che segui (al massimo quattro, con
  * la stellina dell'app sempre dentro). Qui nessun calcolo di turni, solo lettura, date e scelta della persona.
  * Senza Android: si prova con test sulla JVM.
@@ -95,11 +96,53 @@ final class CalendarioModel {
         return i >= 0 && i < giorni() ? i : -1;
     }
 
-    /** «Ottobre» o «Ottobre – Novembre»: i mesi che le righe `da`…`da+righe-1` toccano. */
-    String etichettaMese(int rigaDa, int righe) {
-        int[] p = data(rigaDa * 7), u = data((rigaDa + righe) * 7 - 1);
-        String x = MESI[p[1] - 1];
-        return p[1] == u[1] ? x : x + " – " + MESI[u[1] - 1];
+    /** Mese (anno, 1-12) della settimana nella riga: quello del suo giovedì, come per le settimane ISO. */
+    int[] meseDellaRiga(int riga) { int[] d = data(riga * 7 + 3); return new int[]{ d[0], d[1] }; }
+
+    /** «Ottobre», o «Gennaio 2027» se non è l'anno di oggi: il titolo sopra il calendario. */
+    String titolo(int riga, int annoOggi) {
+        int[] m = meseDellaRiga(riga);
+        return MESI[m[1] - 1] + (m[0] != annoOggi ? " " + m[0] : "");
+    }
+
+    /**
+     * Prima riga mostrata: la settimana di oggi (la prima se i dati non la contengono) spostata di `spostamento`
+     * settimane, senza uscire dai dati (con `righe` righe in vista).
+     */
+    static int primaRiga(int rigaOggi, int spostamento, int righe, int settimane) {
+        int massimo = Math.max(0, settimane - righe);
+        return Math.max(0, Math.min(massimo, Math.max(rigaOggi, 0) + spostamento));
+    }
+
+    /** La riga è la prima settimana di un mese (il suo giovedì cade in un mese diverso da quello della riga prima). */
+    boolean inizioMese(int riga) {
+        if (riga <= 0) return false;
+        int[] a = meseDellaRiga(riga - 1), b = meseDellaRiga(riga);
+        return a[0] != b[0] || a[1] != b[1];
+    }
+
+    /**
+     * Lo spostamento dopo un tocco su ‹ (-1) o › (+1), a partire dalla prima riga che si vede ora. Il passo è il
+     * più corto fra una pagina intera (tante settimane quante se ne vedono: non se ne salta mai nessuna) e l'inizio del
+     * mese vicino in quel verso: nei widget alti ‹ › sono il mese prima e dopo, in quelli bassi si procede a pagine
+     * e ci si aggancia all'inizio del mese quando è a meno di una pagina. Mai oltre i dati.
+     */
+    int paginaDopo(int rigaOggi, int spostamento, int righe, int verso) {
+        int massimo = Math.max(0, settimane() - righe);
+        int attuale = primaRiga(rigaOggi, spostamento, righe, settimane());
+        int passo = righe;
+        if (verso > 0) {
+            for (int r = attuale + 1; r < attuale + righe; r++) if (inizioMese(r)) { passo = r - attuale; break; }
+        } else {
+            for (int r = attuale - 1; r > attuale - righe && r > 0; r--) if (inizioMese(r)) { passo = attuale - r; break; }
+        }
+        int nuova = Math.max(0, Math.min(massimo, attuale + (verso > 0 ? passo : -passo)));
+        return nuova - Math.max(rigaOggi, 0);
+    }
+
+    /** Lo spostamento salvato vale solo per il giorno in cui è stato fatto: il giorno dopo si riparte da oggi. */
+    static int spostamentoValido(int spostamento, String giornoSalvato, String oggi) {
+        return oggi != null && oggi.equals(giornoSalvato) ? spostamento : 0;
     }
 
     /**

@@ -38,6 +38,14 @@
 
         </activity>
 
+        <!-- La finestra «Come hai dormito?» del widget: si apre sopra la Home, non dentro l'app (OrariSonnoActivity.java). -->
+        <activity
+            android:name=".OrariSonnoActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
+            android:theme="@style/OrariSonnoTema" />
+
         <!-- Widget "Il tuo piano" (NotturnistiWidget.java). -->
         <receiver
             android:name=".NotturnistiWidget"

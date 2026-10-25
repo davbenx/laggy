@@ -315,6 +315,8 @@ export const calendar = {
     const st = calState(); st.on = true; if (coppia !== undefined) st.coppia = !!coppia; st.sig = null; calSave(st);
     return "ok";
   },
+  // Il permesso c'è già? (senza chiederlo)
+  async permesso() { return this.available ? calPermesso(false) : false; },
   async impostaCoppia(on) { const st = calState(); st.coppia = !!on; st.sig = null; calSave(st); },
   // Spegne e cancella i calendari creati dall'app (solo quelli).
   async disattiva() {
@@ -517,7 +519,9 @@ export const review = {
 export const dispositivo = {
   available: isNative && name === "android" && !!plugin("NTDispositivo"),
   async id() { const D = plugin("NTDispositivo"); if (!D) return ""; try { const r = await D.id(); return (r && r.id) || ""; } catch (e) { return ""; } },
-  dimentica() { try { localStorage.removeItem(CAL_KEY); localStorage.removeItem("nt:widgetN"); } catch (e) {} }
+  dimentica() { try { localStorage.removeItem(CAL_KEY); localStorage.removeItem("nt:widgetN"); } catch (e) {} },
+  // Le impostazioni dell'app (permessi): dopo un rifiuto Android non rifà la domanda.
+  async apriImpostazioni() { const D = plugin("NTDispositivo"); if (!D || !D.apriImpostazioni) return false; try { await D.apriImpostazioni(); return true; } catch (e) { return false; } }
 };
 
 export const alarm = {

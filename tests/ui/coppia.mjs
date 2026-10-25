@@ -26,6 +26,9 @@ async function apri(st, app, tab="turni"){
   const n=await p.evaluate(()=>({righe:document.querySelectorAll("#cyc .crow").length, cp:document.querySelectorAll("#cyc .crow .cp").length, key:document.querySelector("#cyc .key-pers")?.textContent}));
   ok(n.righe>0 && n.cp===n.righe, "striscia: una sigla della persona per ogni giorno ("+n.cp+"/"+n.righe+")");
   ok(/^Anna in verde/.test(n.key||""), "legenda con il nome della persona → "+n.key);
+  ok(await p.evaluate(()=>{ const k=document.querySelector("#cyc .key-pers"); return k && k.getAttribute("aria-pressed")==="true" && !!k.querySelector("svg") && k.getBoundingClientRect().height>=30; }), "legenda: è un chip con l'occhio e lo stato (acceso/spento), non un testo da indovinare");
+  const allinea=()=>p.evaluate(()=>{ const r=document.querySelector("#cyc .crow .crail").getBoundingClientRect(), g=document.querySelector("#cyc .cgrid").getBoundingClientRect(); return Math.abs(r.left-g.left); });
+  { const d=await allinea(); ok(d<1.5, "la griglia delle ore parte dove parte la rotaia, con la colonna della persona (scarto "+d.toFixed(1)+"px)"); }
   const sig=await p.evaluate(()=>[...document.querySelectorAll("#cyc .crow .cp")].map(x=>x.textContent).join(""));
   ok(/^[MPNSR·]+$/.test(sig) && /[MR]/.test(sig), "le sigle sono quelle del suo ciclo → "+sig);
   ok(await p.evaluate(()=>{ const f=document.querySelectorAll("#cyc .crow .cbar.pers").length, l=[...document.querySelectorAll("#cyc .crow .cp")].filter(x=>!x.classList.contains("r")).length; return f>0 && f===l; }), "ogni giorno di lavoro della persona ha il suo filo verde sotto la barra");
@@ -43,17 +46,40 @@ async function apri(st, app, tab="turni"){
 // senza persone nessun cambiamento
 { const p=await apri(ST({people:[]}), false);
   ok(await p.evaluate(()=>!document.querySelector("#cyc .cp") && !document.querySelector("#cyc .key-pers")), "senza persone la striscia resta com'era");
+  { const r=await p.evaluate(()=>{ const a=document.querySelector("#cyc .crow .crail").getBoundingClientRect(), g=document.querySelector("#cyc .cgrid").getBoundingClientRect(); return Math.abs(a.left-g.left); }); ok(r<1.5, "senza persone la griglia resta allineata (scarto "+r.toFixed(1)+"px)"); }
   await p.context().close(); }
 
-// app: la proposta sotto la lista delle persone; si accende con un tocco e poi sparisce
+// app: un solo controllo, la scheda «Calendario di coppia» subito sotto la lista delle persone
 { const p=await apri(ST(), true);
   await p.click("#doPartner"); await p.waitForTimeout(400); await p.click("[data-partner-edit]");
   await p.waitForTimeout(400);
-  const vis=await p.evaluate(()=>{ const q=document.querySelector("#doCoppiaQui"); return q ? q.closest(".diary").textContent : ""; });
-  ok(/riposi in comune con Anna/.test(vis), "app: sotto «Le tue persone» propone il calendario di coppia → "+vis.slice(0,60));
-  await p.click("#doCoppiaQui"); await p.waitForTimeout(800);
-  ok(await p.evaluate(()=>JSON.parse(localStorage.getItem("nt:calNativo")||"{}").coppia===true && !document.querySelector("#doCoppiaQui")), "app: dopo il tocco è acceso e la proposta sparisce");
+  ok(await p.evaluate(()=>!document.querySelector("#doCoppiaQui") && document.querySelectorAll("#coupleCalToggle").length===1), "app: niente proposta doppia, un solo interruttore");
+  ok(await p.evaluate(()=>{ const m=document.querySelector("[data-edit-persona]"), r=document.querySelector("[data-remove-persona]"); return m && r && /^Modifica /.test(m.getAttribute("aria-label")||"") && /^Rimuovi /.test(r.getAttribute("aria-label")||"") && m.getBoundingClientRect().width>=44 && r.getBoundingClientRect().height>=44 && !!m.querySelector("svg"); }), "persone: Modifica e Rimuovi sono icone da 44 px con etichetta per chi legge lo schermo");
+  ok(await p.evaluate(()=>document.querySelector("#wizPeopleList").nextElementSibling.id==="piuCal" && !document.querySelector("#piuCal").hidden), "app: la scheda sta subito sotto «Le tue persone»");
+  await p.evaluate(()=>document.querySelector("#coupleCalToggle").click()); await p.waitForTimeout(800);
+  ok(await p.evaluate(()=>JSON.parse(localStorage.getItem("nt:calNativo")||"{}").coppia===true && document.querySelector("#coupleCalToggle").checked && /nel calendario «Notturnisti · insieme»/.test(document.querySelector("#coupleCalSub").textContent)), "app: l'interruttore accende il calendario di coppia e lo dice");
   await p.context().close(); }
+// app, permesso al calendario negato: la scheda lo dice e porta alle impostazioni; al ritorno col permesso torna normale
+{ const ctx=await b.newContext({locale:"it-IT",viewport:{width:360,height:740}});
+  await ctx.addInitScript(nativo);
+  await ctx.addInitScript(()=>{ const C=window.Capacitor.Plugins.CapacitorCalendar; window.__ok=false; window.__imp=0;
+    C.checkAllPermissions=async()=>({result:{readCalendar:window.__ok?"granted":"prompt",writeCalendar:window.__ok?"granted":"prompt"}});
+    C.requestAllPermissions=async()=>({result:{readCalendar:"denied",writeCalendar:"denied"}});
+    C.createCalendar=async()=>({id:"1"}); C.createEvent=async()=>({id:"e"}); C.deleteEventsById=async()=>({result:{}}); C.deleteCalendar=async()=>({}); C.listCalendars=async()=>({result:[{id:"1"}]});
+    window.Capacitor.Plugins.NTDispositivo={id:async()=>({id:"prova"}),apriImpostazioni:async()=>{ window.__imp++; return {}; }};
+    window.__rs=[]; window.Capacitor.Plugins.App.addListener=(ev,cb)=>{ window.__rs.push([ev,cb]); return Promise.resolve({remove(){}}); }; });
+  await ctx.addInitScript(st=>{ if(sessionStorage.getItem("x")) return; sessionStorage.setItem("x","1"); localStorage.setItem("nt:state",JSON.stringify(st)); localStorage.setItem("nt:turniConfigurati","true"); localStorage.setItem("nt:backupDone","true"); localStorage.setItem("nt:attivazioneNascosta","true"); localStorage.setItem("nt:firstPlanBannerChiuso","true"); },ST());
+  const p=await ctx.newPage(); p.on("pageerror",e=>errs.push(e.message));
+  await p.goto("http://localhost:8766/index.html"); await p.waitForTimeout(1000);
+  await p.evaluate(()=>document.querySelector('[data-tab="turni"]')?.click()); await p.waitForTimeout(400);
+  await p.click("#doPartner"); await p.waitForTimeout(400); await p.click("[data-partner-edit]"); await p.waitForTimeout(400);
+  await p.evaluate(()=>document.querySelector("#coupleCalToggle").click()); await p.waitForTimeout(600);
+  ok(await p.evaluate(()=>!document.querySelector("#coupleCalToggle").checked && !!document.querySelector("#coupleCalImpostazioni") && /permesso/.test(document.querySelector("#coupleCalSub").textContent)), "permesso negato: l'interruttore resta spento e la scheda spiega con «Apri le impostazioni»");
+  await p.evaluate(()=>document.querySelector("#coupleCalImpostazioni").click()); await p.waitForTimeout(300);
+  ok(await p.evaluate(()=>window.__imp===1), "«Apri le impostazioni» apre le impostazioni dell'app");
+  await p.evaluate(()=>{ window.__ok=true; window.__rs.filter(x=>x[0]==="resume").forEach(x=>x[1]()); }); await p.waitForTimeout(800);
+  ok(await p.evaluate(()=>!document.querySelector("#coupleCalImpostazioni") || !/permesso/.test(document.querySelector("#coupleCalSub").textContent)), "col permesso concesso al ritorno nell'app lo stato «negato» sparisce");
+  await ctx.close(); }
 // sito: nessuna proposta
 { const p=await apri(ST(), false);
   ok(await p.evaluate(()=>!document.querySelector("#doCoppiaQui")), "sito: nessuna proposta del calendario del telefono");

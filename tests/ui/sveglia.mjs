@@ -8,22 +8,24 @@ const b=await pw.chromium.launch(); const errs=[];
 const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 const ST={turniConfigurati:true,pattern:"MPNSR",anchor:iso(new Date()),repeat:true,firstSeenAt:"2026-01-01",
   shifts:{M:{n:"Mattino",s:420,e:840},P:{n:"Pomeriggio",s:840,e:1260},N:{n:"Notte",s:1260,e:1860}}};
-async function apri(porta, app, alarm){
+async function apri(porta, app, alarm, ora=[10,0], stato=ST){
   const ctx=await b.newContext({locale:"it-IT",viewport:{width:360,height:740}});
   if(app) await ctx.addInitScript(nativo);
   if(alarm) await ctx.addInitScript(rifiuta=>{ window.__sveglie=[];
     window.Capacitor.Plugins.NTAlarm={set:async x=>{ if(rifiuta) throw new Error("no"); window.__sveglie.push(x); return {}; }}; }, alarm==="rifiuta");
   await ctx.addInitScript(st=>{ if(sessionStorage.getItem("x")) return; sessionStorage.setItem("x","1");
     localStorage.setItem("nt:state",JSON.stringify(st)); localStorage.setItem("nt:turniConfigurati","true");
-    localStorage.setItem("nt:firstPlanBannerChiuso","true"); localStorage.setItem("nt:attivazioneNascosta","true"); }, ST);
+    localStorage.setItem("nt:firstPlanBannerChiuso","true"); localStorage.setItem("nt:attivazioneNascosta","true"); }, stato);
   const p=await ctx.newPage(); p.on("pageerror",e=>errs.push(e.message));
-  const dieci=new Date(); dieci.setHours(10,0,0,0); await p.clock.setFixedTime(dieci);
+  const dieci=new Date(); dieci.setHours(ora[0],ora[1],0,0); await p.clock.setFixedTime(dieci);
   await p.goto("http://localhost:"+porta+"/index.html"); await p.waitForTimeout(1500);
   return p;
 }
 // il pulsante sta sotto «Dormi», sempre visibile (non nel dettaglio a scomparsa)
+// (le azioni di «Dormi» sono il blocco .tl-extra che segue la riga, oppure la linea dell'ora e poi il blocco)
 const bottone=p=>p.evaluate(()=>{ const t=document.querySelector('#essenziale [data-row="sonno"]'); if(!t) return null; const v=t.closest(".tl");
-  const s=v.querySelector(".tl-extra [data-sveglia]"); if(!s) return null; const r=s.getBoundingClientRect(), q=s.parentElement.getBoundingClientRect();
+  let x=v.nextElementSibling; while(x && !x.classList.contains("tl-extra") && !x.classList.contains("tl")) x=x.nextElementSibling;
+  const s=x && x.classList.contains("tl-extra") && x.querySelector("[data-sveglia]"); if(!s) return null; const r=s.getBoundingClientRect(), q=s.parentElement.getBoundingClientRect();
   return {ora:s.dataset.sveglia, testo:s.textContent, fine:v.querySelector(".essrow").textContent, visibile:r.height>0&&!t.open, largo:Math.abs((r.left+r.right)-(q.left+q.right))<=2}; });
 
 { const p=await apri(8766, true, true);
@@ -44,6 +46,21 @@ const bottone=p=>p.evaluate(()=>{ const t=document.querySelector('#essenziale [d
 
 { const p=await apri(8765, false, false);
   ok(!(await bottone(p)), "sito: niente pulsante (la sveglia c'è solo nell'app)");
+  await p.context().close(); }
+
+// la linea dell'ora sta fra «Dormi» (già cominciato) e il pulsante della sveglia, non sotto il pulsante
+{ const ieri=new Date(); ieri.setDate(ieri.getDate()-1);
+  const p=await apri(8766, true, true, [3,43], {turniConfigurati:true,pattern:"NR",anchor:iso(ieri),repeat:true,firstSeenAt:"2026-01-01",shifts:{N:{n:"Notte",s:1320,e:1575}}});
+  const o=await p.evaluate(()=>{ const t=document.querySelector('#essenziale [data-row="sonno"]'); if(!t) return null; const v=t.closest(".tl");
+    const a=v.nextElementSibling, c=a&&a.nextElementSibling;
+    return {riga:v.className, dopo:a&&a.className, poi:c&&c.className, sveglia:!!(c&&c.querySelector("[data-sveglia]")), ora:a&&a.querySelector(".en")&&a.querySelector(".en").textContent}; });
+  ok(o && /tl-adesso/.test(o.dopo||"") && /tl-extra/.test(o.poi||"") && o.sveglia && o.ora==="03:43", "sonno in corso (03:43): «Dormi» → linea dell'ora → «Metti la sveglia» → "+JSON.stringify(o));
+  await p.context().close(); }
+// prima del sonno la linea sta prima di «Dormi» e il pulsante resta attaccato alla riga
+{ const p=await apri(8766, true, true, [10,0]);
+  const o=await p.evaluate(()=>{ const t=document.querySelector('#essenziale [data-row="sonno"]'); const v=t.closest(".tl"), a=v.nextElementSibling, prima=v.previousElementSibling;
+    return {extra:a&&a.className, sveglia:!!(a&&a.querySelector("[data-sveglia]")), lineaPrima:!!(prima&&/tl-adesso/.test(prima.className))}; });
+  ok(/tl-extra/.test(o.extra||"") && o.sveglia, "sonno ancora da venire: il pulsante segue subito la riga «Dormi» → "+JSON.stringify(o));
   await p.context().close(); }
 
 console.log("errori", errs); await b.close();

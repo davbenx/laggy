@@ -56,4 +56,31 @@ ok(an.num && /^\d/.test(an.num), "Debito di sonno: il numero senza segno (l'etic
 ok(an.righe.length===5 && an.righe.every(r=>r.n.length>2) && an.righe.every(r=>/^\d,\d$/.test(r.v)), "Voto per giorno: nomi interi e valori con la virgola → "+an.righe.map(r=>r.n+" "+r.v).join(", "));
 ok(an.righe.filter(r=>r.giu).length===1 && an.righe.find(r=>r.giu).n==="Notte", "Voto per giorno: evidenziato solo il giorno che pesa di più (Notte)");
 
+// i grafici di «Sonno e carico»: la forma dei dati, non solo il numero
+const gr=await p.evaluate(()=>({
+  barre:document.querySelectorAll(".andamento-hero svg.grf rect.g-notte").length, manca:document.querySelectorAll(".andamento-hero svg.grf rect.g-manca").length,
+  turni:document.querySelectorAll(".andamento-hero svg.grf circle.g-turno").length, etBarre:document.querySelector(".andamento-hero svg.grf").getAttribute("aria-label"),
+  oro:(document.querySelector("#orologio svg.grf")||{getAttribute:()=>""}).getAttribute("aria-label"), oroTesti:document.querySelectorAll("#orologio svg.grf text").length,
+  celle:document.querySelectorAll(".car-striscia svg rect.g-gg").length, oggi:document.querySelectorAll(".car-striscia svg rect.g-oggi").length, etCar:(document.querySelector(".car-striscia svg")||{getAttribute:()=>""}).getAttribute("aria-label"),
+  punti:document.querySelectorAll("svg.grf circle.g-punto").length, voti:document.querySelectorAll(".vrow .vdot").length }));
+ok(gr.barre===30 && gr.manca>0 && gr.manca<gr.barre && gr.turni>0, "Sonno che ti manca: una barra per notte ("+gr.barre+"), alcune sotto il previsto ("+gr.manca+"), i puntini dei turni ("+gr.turni+")");
+ok(/Ore dormite nelle ultime 30 notti: in media .* contro .* previste; \d+ notti sotto il previsto/.test(gr.etBarre||""), "Sonno che ti manca: il grafico ha un testo per chi legge lo schermo → "+gr.etBarre);
+ok(/melatonina dalle \d\d:\d\d, minimo corporeo alle \d\d:\d\d/.test(gr.oro||"") && gr.oroTesti===5, "Il tuo orologio: la fascia delle 24 ore con le 5 ore di riferimento e il testo → "+gr.oro);
+ok(gr.celle===60 && gr.oggi===1 && /notti, \d+ altri turni/.test(gr.etCar||""), "Carico: 60 giorni (30 passati, 30 in arrivo), oggi cerchiato → "+gr.etCar);
+ok(gr.punti===60, "Orari del sonno: un punto per notte, letto e sveglia ("+gr.punti+")");
+ok(gr.voti===30, "Come stai: un puntino per ogni voto ("+gr.voti+")");
+
+
+// la striscia del carico segna i giorni a rischio: meno di 11 ore fra due turni, e la quarta notte di fila
+for(const [pat,shifts,nome,min] of [["PMR",{M:{n:"Mattino",s:360,e:840},P:{n:"Pomeriggio",s:840,e:1320}},"meno di 11 ore",15],["NNNNRR",{N:{n:"Notte",s:1320,e:1800}},"quarta notte di fila",8]]){
+  const c2=await b.newContext({locale:"it-IT",viewport:{width:360,height:740}});
+  await c2.addInitScript(st=>{ if(sessionStorage.getItem("x")) return; sessionStorage.setItem("x","1"); localStorage.setItem("nt:state",JSON.stringify(st)); localStorage.setItem("nt:turniConfigurati","true"); localStorage.setItem("nt:firstPlanBannerChiuso","true"); localStorage.setItem("nt:attivazioneNascosta","true"); },
+    {turniConfigurati:true,pattern:pat,anchor:fa(0),repeat:true,firstSeenAt:fa(40),freeBed:"00:30",freeWake:"08:30",shifts});
+  const q=await c2.newPage(); q.on("pageerror",e=>errs.push(e.message)); await q.clock.setFixedTime(dieci);
+  await q.goto("http://localhost:8765/index.html"); await q.waitForTimeout(1000);
+  await q.evaluate(()=>document.querySelector('[data-tab="turni"]').click()); await q.waitForTimeout(300); await q.evaluate(()=>document.querySelector("#doAndamenti").click()); await q.waitForTimeout(500);
+  const rs=await q.evaluate(()=>({r:document.querySelectorAll(".car-striscia svg rect.g-rischio").length, riga:[...document.querySelectorAll(".car-r")].find(x=>/Riposi sotto/.test(x.textContent))?.textContent}));
+  ok(rs.r>=min, "Carico, "+nome+": i giorni a rischio hanno il contorno rosso ("+rs.r+" nei 60 giorni)");
+  await c2.close(); }
+
 console.log("errori", errs); await b.close();
