@@ -1583,6 +1583,11 @@ header b{font-size:23px}
     <input type="checkbox" id="wantCross" checked hidden>
     <div id="crossBox">
     <div id="wizPeopleList"></div>
+    <!-- "Calendario di coppia": una scelta sulle persone, quindi subito sotto la loro lista (era in Più, sparita). #piuCal/#piuCalTx:
+         id invariati, paid.js li cerca per nome (querySelector("#piuCal")). Nell'app è l'unico punto in cui si accende. -->
+    <div class="piu-cal" id="piuCal" style="margin:var(--gap-sezione) 0">
+      <div id="piuCalTx"></div>
+    </div>
     <p class="persone-modo">Usa Notturnisti</p>
     <button type="button" class="btn g" id="doChiediLink" style="width:100%;min-height:44px">Manda il tuo link e chiedi il suo →</button>
     <span class="hint" style="display:block;margin:6px 0 4px">Si apre un messaggio (WhatsApp, SMS…) con il tuo link e le istruzioni per risponderti. Lei lo apre, ti manda il suo link e tu lo incolli qui sotto.</span>
@@ -1637,15 +1642,6 @@ header b{font-size:23px}
     <button class="btn pri" type="button" id="doConfirmPersona" style="margin-top:10px;width:100%;min-height:46px">Aggiungi</button>
     <button class="lnk" type="button" id="annullaModificaPersona" hidden style="display:block;margin:8px auto 0">Annulla la modifica</button>
     </div>
-  </div>
-  <!-- "Calendario di coppia" era in Più (sparita): è la naturale
-       continuazione di QUESTA pagina, non di un cassetto a parte —
-       gli stessi riposi in comune, ma nel calendario del telefono di
-       entrambi (gratis, come tutto il resto). #piuCal/#piuCalTx: id
-       invariati, paid.js li cerca per nome (querySelector("#piuCal")),
-       non serve toccare quel modulo. Sta sopra «Condividi»: è una scelta sulle persone, non un extra in fondo. -->
-  <div class="piu-cal" id="piuCal" style="margin-top:var(--gap-sezione)">
-    <div id="piuCalTx"></div>
   </div>
   <div id="partnerShare"></div>
 </div>
@@ -5779,7 +5775,8 @@ function renderEssenziale(P, CARDS){
   // "pre-turno-bifasico", non "pre-turno"), c'è un modo di risolverlo che
   // l'utente potrebbe non aver ancora trovato da solo.
   const lp=sceltaLettoPresto(P);
-  if(sveglia || dn || lp) vSonno.html=vSonno.html.replace(/<\/div>$/, '<div class="tl-extra">'+sveglia+(dn||"")+(lp||"")+'</div></div>');
+  // Le azioni di «Dormi» (la sveglia, le scelte dopo la notte) non stanno dentro la riga: vedi più sotto, dove si decide da che parte della linea dell'ora vanno.
+  if(sveglia || dn || lp) vSonno.extra='<div class="tl-extra">'+sveglia+(dn||"")+(lp||"")+'</div>';
 
   // Tempo libero: le ore da sveglio fuori da turno, viaggio, sonno e pisolini.
   // Risponde a «e la palestra quando la faccio?» (e figli, spesa…) senza un
@@ -5947,6 +5944,13 @@ function renderEssenziale(P, CARDS){
   // ripeterlo qui sotto come etichetta su una riga creava due segnali
   // "adesso" sullo stesso schermo, in competizione. Questa resta la
   // lista cronologica semplice, senza separatori.
+  // Le azioni di una voce stanno subito sotto di lei; ma se la linea dell'ora cade fra la voce (già cominciata) e il resto,
+  // vanno sotto la linea: «da adesso puoi…», non fra «Dormi» e il segno dell'ora.
+  for(let i=voci.length-1;i>=0;i--){
+    if(!voci[i].extra) continue;
+    const sottoLinea=voci[i+1] && /^<div class="tl-adesso"/.test(voci[i+1].html);
+    voci.splice(i+1+(sottoLinea?1:0), 0, {t:voci[i].t, html:voci[i].extra});
+  }
   let h=voci.map(v=>v.html).join("");
   // Ogni voce si apre e spiega il suo perché, ma l'unico indizio era la
   // freccina: al primo piano lo si dice una volta, finché non se ne apre una.
@@ -6801,11 +6805,7 @@ function renderWizPeopleList(){
         '<span class="hint" style="display:block;margin:0;font-size:12px">'+esc(riassuntoPersona(per))+'</span></span>'+
       '<button class="lnk" data-edit-persona="'+i+'">Modifica</button>'+
       '<button class="lnk" data-remove-persona="'+i+'" style="color:var(--faint)">Rimuovi</button></div>';
-  }).join("")+(multi?'<p class="hint" style="margin:2px 0 10px">La stellina sceglie chi vedi nella card "Turni condivisi" di Oggi — le altre restano comunque visibili qui sopra.</p>':'')+
-  // Solo nell'app e finché non è acceso: l'interruttore resta in fondo, ma qui, dove si è appena aggiunta la persona, si propone.
-  (coppiaDaProporre() ? '<div class="diary" style="gap:10px;margin:4px 0 10px;align-items:center"><span style="flex:1;font-size:13.5px;line-height:1.35">Vuoi i <b>riposi in comune con '+esc(persone[Math.min(Math.max(+state.personaGlance||0,0),persone.length-1)].name||"questa persona")+'</b> nel calendario del telefono?</span>'+
-    '<button type="button" class="btn g" id="doCoppiaQui" style="white-space:nowrap">Attiva</button></div>' : '');
-  const q=$("#doCoppiaQui"); if(q) q.onclick=async()=>{ q.disabled=true; if(await impostaCoppiaNativa(true)) toast("Fatto: li trovi nel calendario «Notturnisti · insieme»"); else q.disabled=false; };
+  }).join("")+(multi?'<p class="hint" style="margin:2px 0 10px">La stellina sceglie chi vedi nella card "Turni condivisi" di Oggi — le altre restano comunque visibili qui sopra.</p>':'');
 }
 // «Turni MMPNR… · dorme 23:00–07:00 nei giorni liberi»: quello che l'app sa di lei/lui, a colpo d'occhio
 function riassuntoPersona(per){
@@ -7207,31 +7207,44 @@ document.addEventListener("click", e=>{
   if(e.target.closest("[data-cal-apri]")){ platform.calendar.apri(); return; }
   if(e.target.closest("[data-cal-controlla]")){ const el=$("#opzCalStato"); if(el){ el.hidden=false; el.textContent="Controllo…"; statoCalendario(el); } }
 });
+// Il permesso al calendario è stato negato: Android non lo richiede più, la scheda lo dice e porta alle impostazioni.
+let _coppiaNegata=false;
 function renderCoppiaNativa(el, hasPartner, pName){
   const on = platform.calendar.attivo() && platform.calendar.coppiaAttiva();
+  const negata = !on && _coppiaNegata;
+  const sotto = !hasPartner ? 'Aggiungi prima una persona qui sopra.'
+    : negata ? 'Serve il permesso al calendario: Android non lo richiede più, consentilo dalle impostazioni.'
+    : on ? 'I riposi in comune con <b>'+esc(pName)+'</b> sono nel calendario «Notturnisti · insieme».'
+    : 'I riposi in comune con <b>'+esc(pName)+'</b> nel calendario del telefono.';
   el.innerHTML =
     '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px">'+
       '<div style="min-width:0"><b style="display:block;font-size:15px;color:var(--ink);line-height:1.25">Calendario di coppia</b>'+
-      '<span style="display:block;font-size:12.5px;color:var(--dim);margin-top:2px">'+(hasPartner
-        ? (on ? 'I riposi in comune con <b>'+esc(pName)+'</b> sono nel calendario «Notturnisti · insieme».' : 'I riposi in comune con <b>'+esc(pName)+'</b> nel calendario del telefono.')
-        : 'Aggiungi prima una persona qui sopra.')+'</span></div>'+
-      '<label class="switch" title="Calendario di coppia"><input type="checkbox" id="coupleCalToggle"'+(on?' checked':'')+'><span class="slider"></span></label>'+
-    '</div>';
+      '<span id="coupleCalSub" style="display:block;font-size:12.5px;color:'+(negata?'var(--risk)':'var(--dim)')+';margin-top:2px">'+sotto+'</span></div>'+
+      '<label class="switch" title="Calendario di coppia"><input type="checkbox" id="coupleCalToggle"'+(on?' checked':'')+' aria-label="Calendario di coppia"><span class="slider"></span></label>'+
+    '</div>'+
+    (negata ? '<button type="button" class="btn g" id="coupleCalImpostazioni" style="width:100%;min-height:44px;margin-top:10px">Apri le impostazioni</button>' : '');
   const t=$("#coupleCalToggle");
   t.onchange=async()=>{
     if(!hasPartner){ t.checked=false; apriPartner(); return; }
-    if(!(await impostaCoppiaNativa(t.checked))) t.checked=false;
+    const voglio=t.checked;
+    if(await impostaCoppiaNativa(voglio)){ if(voglio) toast("Fatto: li trovi nel calendario «Notturnisti · insieme»"); }
+    else t.checked=false;
   };
+  const imp=$("#coupleCalImpostazioni");
+  if(imp) imp.onclick=()=>{ platform.dispositivo.apriImpostazioni().then(ok=>{ if(!ok) toast("Apri Impostazioni › App › Notturnisti › Permessi › Calendario"); }); };
 }
 // Accende o spegne i riposi in comune nel calendario del telefono (solo app). false se manca il permesso.
 async function impostaCoppiaNativa(on){
   if(on){
     const r = platform.calendar.attivo() ? (await platform.calendar.impostaCoppia(true), "ok") : await platform.calendar.attiva({coppia:true});
-    if(r!=="ok"){ toast("Serve il permesso al calendario"); return false; }
+    if(r!=="ok"){ _coppiaNegata=true; toast("Serve il permesso al calendario"); renderPiuCal(); return false; }
   } else await platform.calendar.impostaCoppia(false);
+  _coppiaNegata=false;
   ntCalendarioNativo(true); renderPiuCal(); renderWizPeopleList();
   return true;
 }
+// Tornando nell'app dalle impostazioni: se il permesso è arrivato, lo stato «negato» sparisce.
+platform.onResume(()=>{ if(_coppiaNegata) platform.calendar.permesso().then(ok=>{ if(ok){ _coppiaNegata=false; renderPiuCal(); } }).catch(()=>{}); });
 // Widget Android: le prossime 48 ore del piano, già calcolate. Si aggiorna a
 // ogni cambio, a ogni apertura e a ogni ritorno nell'app; da lì il widget
 // si ridisegna da solo al prossimo cambio di attività.
