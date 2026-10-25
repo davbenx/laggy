@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Voto dell'energia, 4 su 5 (bene): lo stesso disegno dell'app (colore dato da android:tint nel layout). -->
+<!-- Voto dell'energia, 4 su 5 (bene): lo stesso disegno dell'app (il colore è nell'icona, dalle risorse: segue il tema chiaro/scuro; android:tint dà un errore di lint e app:tint non vale nei widget). -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
-    <path android:strokeColor="#FFFFFF" android:strokeWidth="1.8" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M12,3a9,9 0 1,0 0,18a9,9 0 1,0 0,-18" />
-    <path android:strokeColor="#FFFFFF" android:strokeWidth="1.8" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M8.5,14.5a4.5,4.5 0 0,0 7,0" />
-    <path android:strokeColor="#FFFFFF" android:strokeWidth="1.8" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M9,9.5v0.5M15,9.5v0.5" />
+    <path android:strokeColor="@color/w_accento" android:strokeWidth="1.8" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M12,3a9,9 0 1,0 0,18a9,9 0 1,0 0,-18" />
+    <path android:strokeColor="@color/w_accento" android:strokeWidth="1.8" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M8.5,14.5a4.5,4.5 0 0,0 7,0" />
+    <path android:strokeColor="@color/w_accento" android:strokeWidth="1.8" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M9,9.5v0.5M15,9.5v0.5" />
 </vector>
