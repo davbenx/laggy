@@ -1480,7 +1480,6 @@ header b{font-size:23px}
 <div id="demoEsempio" class="card" hidden></div>
 <span id="demoCasa" hidden></span>
 <div id="firstPlanBanner" class="card" hidden></div>
-<div id="setupChecklist" class="card" hidden></div>
 <!-- Il piano si adatta: proposta con un tocco quando il diario mostra che le
      tue abitudini sono diverse da quelle impostate (vedi renderAdatta). -->
 <div id="adattaCard" class="card invito" hidden></div>
@@ -1508,6 +1507,8 @@ header b{font-size:23px}
 
 <div id="formaGiorno"></div>
 <div class="ess" id="essenziale"></div>
+<!-- Rendi automatico il tuo piano: sotto il giorno, non sopra. In alto spingeva «Adesso» e la domanda sul sonno fuori dalla prima schermata. -->
+<div id="setupChecklist" class="card" hidden></div>
 <!-- Il giorno in un messaggio per chi sta a casa: quando dormi e quando ci sei.
      Sotto la lista della giornata, perché ne è il riassunto. -->
 <button type="button" class="acasa solo-oggi" id="aCasa" hidden>
@@ -8358,7 +8359,6 @@ const CONSIGLI_FUNZIONE=[
   {k:"riepilogo", t:()=>"Puoi mandare il riepilogo del tuo mese o degli ultimi 12 mesi: lo trovi in Turni, nella scheda del mese.",
     cta:()=>"Vedi", a:()=>{ setTab("turni"); setTimeout(()=>{ const x=$("#meseBox"); if(x&&x.scrollIntoView) try{ x.scrollIntoView({block:"center"}); }catch(e){} }, 250); }},
   {k:"dormi", t:()=>"Tocca «Dormi» nel piano: dopo una notte scegli sonno breve o lungo, prima di un mattino presto puoi dormire in due tempi."},
-  {k:"acasa", t:()=>"Chi vive con te non sa quando dormi? «Condividi i tuoi orari di oggi» manda in un messaggio quando dormi e quando sei libero."},
   // Il grazie: dopo due settimane, in un momento buono (mai dopo notti pessime).
   // Sul web il contributo libero; nell'app (regole di Play) solo il Club.
   {k:"grazie", dopo:14, quando:()=>{ const ult=Object.keys(diary).sort().slice(-3).map(x=>+diary[x]);
@@ -8593,22 +8593,26 @@ if($("#cycToday")) $("#cycToday").onclick=()=>{ if(suOggi()){ apriSelettoreData(
    `id` cambia solo quando c'è qualcosa da dire; chi aggiorna la vede una volta. Chi installa adesso non la vede
    (non è una novità per lui), ma la trova sempre in Impostazioni › Novità. «app:true» = solo nell'app Android. */
 const NOVITA={ id:"2026-10-26", data:"Ottobre 2026", righe:[
-  ["Nuovo logo","La civetta con il berretto a righe azzurre e blu e l'orologio sulla pancia: si riconosce meglio anche piccola, sulla schermata iniziale e nelle notifiche."],
-  ["Sonno e carico con i grafici","Una barra per ogni notte (arancio dove dormi meno del previsto), la fascia delle 24 ore del tuo orologio, 60 giorni di turni con i riposi sotto le 11 ore e la quarta notte di fila, e i tuoi orari notte per notte."],
-  ["Orari più onesti","Le notti registrate «come previsto» non contano per la regolarità: per misurarti servono i tuoi orari veri. Il sonno che ti manca le conta ancora tutte."],
-  ["Pulsanti e colori più chiari","I percorsi dell'avvio, la condivisione e le persone hanno pulsanti veri. La persona che segui ha il suo colore e la notte è indaco: il blu resta del sonno."],
-  ["Calendario di coppia, una scheda sola","Si accende da un solo punto, sotto le tue persone. Se manca il permesso al calendario te lo dice e ti porta alle impostazioni.",true],
-  ["Widget: mesi, facce e orari","‹ › sfogliano il calendario, il voto dell'energia ha cinque facce e «Altri orari» si corregge in una finestra, senza aprire l'app.",true]
+  ["Nuovo logo","La civetta con il berretto a righe azzurre e blu e l'orologio sulla pancia: si riconosce meglio anche piccola, sulla schermata iniziale e nelle notifiche.",false,"2026-10-26"],
+  ["Sonno e carico con i grafici","Una barra per ogni notte (arancio dove dormi meno del previsto), la fascia delle 24 ore del tuo orologio, 60 giorni di turni con i riposi sotto le 11 ore e la quarta notte di fila, e i tuoi orari notte per notte.",false,"2026-10-25"],
+  ["Orari più onesti","Le notti registrate «come previsto» non contano per la regolarità: per misurarti servono i tuoi orari veri. Il sonno che ti manca le conta ancora tutte.",false,"2026-10-25"],
+  ["Pulsanti e colori più chiari","I percorsi dell'avvio, la condivisione e le persone hanno pulsanti veri. La persona che segui ha il suo colore e la notte è indaco: il blu resta del sonno.",false,"2026-10-25"],
+  ["Calendario di coppia, una scheda sola","Si accende da un solo punto, sotto le tue persone. Se manca il permesso al calendario te lo dice e ti porta alle impostazioni.",true,"2026-10-25"],
+  ["Widget: mesi, facce e orari","‹ › sfogliano il calendario, il voto dell'energia ha cinque facce e «Altri orari» si corregge in una finestra, senza aprire l'app.",true,"2026-10-25"]
 ]};
-function novitaDaMostrare(){ return NOVITA.righe.filter(x=>!x[2] || platform.isNative); }
-function mostraNovita(su, segna){
+// x[3] = la versione in cui la riga è nata: dopo un aggiornamento si vede solo quello che non si è già letto (al massimo 4 righe);
+// «Cosa c'è di nuovo» in Impostazioni le mostra tutte.
+function novitaDaMostrare(soloNuove){ const viste=store.get("novitaViste","")||"";
+  const r=NOVITA.righe.filter(x=>!x[2] || platform.isNative);
+  return soloNuove ? r.filter(x=>x[3]>viste).slice(0,4) : r; }
+function mostraNovita(su, segna, soloNuove){
   const m=$("#novitaModal"); if(!m) return;
   if(su){
     $("#novitaData").textContent=NOVITA.data;
-    $("#novitaLista").innerHTML=novitaDaMostrare().map(x=>'<div style="margin:0 0 12px"><b style="display:block">'+esc(x[0])+'</b><span class="hint" style="display:block;margin:2px 0 0;font-size:13.5px;line-height:1.4">'+esc(x[1])+'</span></div>').join("");
+    $("#novitaLista").innerHTML=novitaDaMostrare(soloNuove).map(x=>'<div style="margin:0 0 12px"><b style="display:block">'+esc(x[0])+'</b><span class="hint" style="display:block;margin:2px 0 0;font-size:13.5px;line-height:1.4">'+esc(x[1])+'</span></div>').join("");
   }
   m.hidden=!su; m.setAttribute("aria-hidden",String(!su));
-  if(su) $("#novitaOk").focus();
+  if(su){ $("#novitaOk").focus({preventScroll:true}); $("#novitaLista").scrollTop=0; const sh=m.querySelector(".qs-sheet"); if(sh) sh.scrollTop=0; }
   else if(segna) store.set("novitaViste", NOVITA.id);
 }
 if($("#doNovita")) $("#doNovita").onclick=()=>mostraNovita(true);
@@ -8624,7 +8628,7 @@ function controllaNovita(){
     const a=document.activeElement;
     if((a && /^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName)) || document.querySelector(".qs-backdrop:not([hidden]), #pf-modal, body > [role=dialog]")) return;
     if(!document.body.classList.contains("tab-oggi")) return;
-    mostraNovita(true);
+    mostraNovita(true, false, true);
   }catch(e){}
 }
 addEventListener("load", ()=>setTimeout(controllaNovita, 3500));

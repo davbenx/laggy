@@ -29,11 +29,18 @@ const aperto=p=>p.evaluate(()=>!document.querySelector("#novitaModal").hidden);
   ok(!(await aperto(p)), "alla riapertura non ricompare");
   await p.evaluate(()=>document.querySelector('[data-tab="oggi"]'))
   await p.context().close(); }
+{ const p=await apri(ST(), {novitaViste:"2026-10-25"});
+  ok(await aperto(p) && await p.evaluate(()=>document.querySelectorAll("#novitaLista b").length===1 && /logo/.test(document.querySelector("#novitaLista").textContent)), "chi ha già letto la versione prima vede solo le righe nuove");
+  ok(await p.evaluate(()=>{ const s=document.querySelector("#novitaModal .qs-sheet"); return s.getBoundingClientRect().height<500 && s.scrollTop===0; }), "e il foglio è corto e parte dall'inizio");
+  await p.context().close(); }
 { const p=await apri(ST({firstSeenAt:iso(new Date())}));
   ok(!(await aperto(p)), "chi ha installato oggi non lo vede");
   await p.context().close(); }
 { const p=await apri(ST(), {}, true);
-  ok(await p.evaluate(()=>/Widget/.test(document.querySelector("#novitaLista").textContent)), "nell'app c'è anche la riga del widget");
+  ok(await p.evaluate(()=>document.querySelectorAll("#novitaLista b").length<=4), "dopo molte versioni: al massimo quattro righe, le più recenti");
+  await p.click("#novitaOk"); await p.waitForTimeout(200);
+  await p.evaluate(()=>document.querySelector("#doNovita").click()); await p.waitForTimeout(300);
+  ok(await p.evaluate(()=>/Widget/.test(document.querySelector("#novitaLista").textContent)), "nell'app (da Impostazioni) c'è anche la riga del widget, e tutte le altre");
   await p.context().close(); }
 // sempre raggiungibile da Impostazioni
 { const p=await apri(ST(), {novitaViste:"2026-10-26"});

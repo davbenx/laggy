@@ -1,4 +1,4 @@
-// Consigli d'uso delle funzioni nuove (festivi, scelte sul sonno, orari a casa)
+// Consigli d'uso delle funzioni nuove (festivi, scelte sul sonno)
 // e le statistiche che li misurano: voce del piano aperta (una volta al giorno)
 // e orari di sonno personalizzati (una volta sola).
 import pw from "./_pw.mjs";
@@ -44,8 +44,6 @@ const coda=async p=>{ await p.waitForTimeout(400); return (globalThis.__inv||[])
   ok((await coda(p)).includes("orologio_tuo"), "statistica: orari di sonno personalizzati, una volta");
   await p.context().close(); }
 
-{ const p=await apri(ST,"acasa"); ok(/^acasa: .*Condividi i tuoi orari/.test(await tip(p)), "consiglio sugli orari a casa");
-  await p.context().close(); }
 
 { const p=await apri(ST,"ferie"); ok(/insieme/.test(await tip(p)), "ferie: ricorda la scelta «a casa con»");
   await p.context().close(); }
