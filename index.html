@@ -7469,7 +7469,9 @@ function ntWidget(){
   // Il prossimo turno, anche fra giorni: la prima cosa che si guarda.
   const tn=ev.filter(e=>e.tipo==="turno" && +e.end>ora).sort((a,b)=>a.start-b.start)[0];
   const turno=tn ? {s:+tn.start, e:+tn.end, t:tn.title} : null;
-  platform.widget.publish(voci, [], {turno, diario:diarioWidget(), mese:meseWidget()});
+  // Le domande di oggi e di domani: se l'app non si apre, il widget le chiede lo stesso quando arriva la sveglia.
+  const diari=[diarioWidget(0), diarioWidget(1)].filter(Boolean);
+  platform.widget.publish(voci, [], {turno, diario:diari[0]||null, diari, mese:meseWidget()});
 }
 // Il calendario del widget: da quattro lunedì fa per 20 settimane (il widget si sfoglia a pagine), la mia sigla e quella di al massimo quattro
 // persone (la stellina sempre dentro). Sigle e tipi («n» notte, «l» lavoro, «r» riposo) arrivano dal motore; il widget le mostra
@@ -7499,15 +7501,15 @@ function meseWidget(prima=SETT_WIDGET_PRIMA, tot=SETT_WIDGET){   // settimane pr
 // Il diario dal widget: dalla sveglia del sonno di stanotte per 14 ore, quasi fino a sera, la
 // domanda sul sonno (con gli orari del piano) e poi quella sull'energia.
 // Le risposte le salva il widget; l'app le prende alla prossima apertura.
-function diarioWidget(){
+function diarioWidget(off=0){
   const f=state.focus;
   try{
-    const g=giornoVero(); state.focus=g;
+    const g=day(giornoVero(), off); state.focus=g;
     const P=NT.plan(), c=cards(P).find(x=>x.k==="d");
     const k=iso(g), bed=state.beds[k]||(c&&c.bedPiano)||"", wake=wakes[k]||(c&&c.wakePiano)||"";
     if(!/^\d\d:\d\d$/.test(bed) || !/^\d\d:\d\d$/.test(wake)) return null;
     const da=new Date(g); da.setHours(+wake.slice(0,2), +wake.slice(3,5), 0, 0);
-    if(da.getTime()>Date.now()+12*3600e3) da.setDate(da.getDate()-1);
+    if(!off && da.getTime()>Date.now()+12*3600e3) da.setDate(da.getDate()-1);
     return {d:k, bed, wake, da:da.getTime(), a:da.getTime()+14*3600e3, sonno:!!wakes[k], voto:diary[k]!=null};
   }catch(e){ return null; }
   finally{ state.focus=f; }

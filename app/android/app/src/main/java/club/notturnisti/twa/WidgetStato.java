@@ -128,6 +128,12 @@ final class WidgetStato {
         // ───── il pulsante del momento ─────
         JSONObject usata = null;                                   // la voce che il pulsante già racconta
         JSONObject d = radice.optJSONObject("diario");
+        JSONArray diari = radice.optJSONArray("diari");   // oggi e domani: la prima finestra in corso, o la più vicina
+        if (diari != null) for (int i = 0; i < diari.length(); i++) {
+            JSONObject x = diari.optJSONObject(i);
+            if (x == null) continue;
+            if (ora < x.optLong("a") && (d == null || ora >= x.optLong("da") || ora >= d.optLong("a"))) { d = x; if (ora >= x.optLong("da")) break; }
+        }
         if (d != null) {
             cambio(d.optLong("da"), ora);
             if (ora >= d.optLong("da") && ora < d.optLong("a")) {

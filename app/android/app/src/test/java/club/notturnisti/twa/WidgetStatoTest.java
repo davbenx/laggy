@@ -64,6 +64,16 @@ public class WidgetStatoTest {
         assertEquals("e la sveglia c'è ancora", WidgetStato.Azione.SVEGLIA, s.azione);
     }
 
+    @Test public void votoDiDomaniSenzaAprireLApp() throws Exception {
+        JSONObject oggi = new JSONObject().put("d", "2026-10-24").put("bed", "23:30").put("wake", "07:10").put("da", t(0, 7, 10)).put("a", t(0, 21, 10));
+        JSONObject domani = new JSONObject().put("d", "2026-10-25").put("bed", "23:30").put("wake", "07:30").put("da", t(1, 7, 30)).put("a", t(1, 21, 30));
+        JSONObject p = piano(oggi, voce(t(1, 22, 0), t(2, 6, 15), "Turno Notte", "turno")).put("diari", new JSONArray().put(oggi).put(domani));
+        assertEquals("oggi", "2026-10-24", WidgetStato.calcola(p, VUOTO, t(0, 9, 0)).diario.getString("d"));
+        WidgetStato s = WidgetStato.calcola(p, VUOTO, t(1, 8, 0));
+        assertEquals("il giorno dopo la domanda arriva da sola", WidgetStato.Azione.VOTO_SONNO, s.azione); assertEquals("2026-10-25", s.diario.getString("d")); assertEquals("23:30 → 07:30", s.titolo);
+        assertNotEquals("prima della sveglia di domani niente", WidgetStato.Azione.VOTO_SONNO, WidgetStato.calcola(p, VUOTO, t(1, 7, 0)).azione);
+    }
+
     @Test public void voto() throws Exception {
         JSONObject dia = new JSONObject().put("d", "2026-10-24").put("bed", "23:30").put("wake", "07:10").put("da", t(0, 7, 10)).put("a", t(0, 21, 10)).put("sonno", false).put("voto", false);
         JSONObject p = piano(dia, voce(t(0, 22, 0), t(1, 6, 15), "Turno Notte", "turno"));
