@@ -132,7 +132,7 @@ await p.evaluate(()=>document.querySelector('[data-tab="turni"]').click()); awai
 const testi=await p.evaluate(()=>document.body.innerText);
 await p.evaluate(()=>document.querySelector('[data-tab="oggi"]').click()); await p.waitForTimeout(300);
 const testiOggi=await p.evaluate(()=>document.body.innerText);
-ok(/Cambio turno: mi conviene\?/.test(testi) && !/Mi conviene lo scambio/.test(testi) && /Condividi i tuoi orari/.test(testiOggi) && !/Manda a casa/.test(testiOggi), "testi: «Cambio turno: mi conviene?», niente «Manda a casa»");
+ok(/Cambio turno/.test(testi) && /Sonno e riposo, prima di accettare/.test(testi) && !/mi conviene\?/.test(testi) && !/Mi conviene lo scambio/.test(testi) && /Condividi i tuoi orari/.test(testiOggi) && !/Manda a casa/.test(testiOggi), "testi: «Cambio turno» con «Sonno e riposo, prima di accettare», niente «Manda a casa»");
 await p.context().close();
 ok(!errs.length, "nessun errore di pagina "+JSON.stringify(errs));
 await b.close();
