@@ -7,7 +7,7 @@ package club.notturnisti.twa;
  * hanno peso), quindi non restano vuoti. Misure in dp ricavate dall'anteprima su computer (tools/anteprima-widget), non a occhio; senza Android: si prova sulla JVM.
  */
 final class WidgetPiano {
-    static final int MARGINI = 28, ADESSO = 46, BARRA = 10, PULSANTE = 50, PRIMA_VOCE = 30, VOCE = 24, TESTA_CAL = 58, RIGA = 44, RIGA_PERSONA = 62;
+    static final int MARGINI = 28, ADESSO = 46, BARRA = 10, PULSANTE = 50, PRIMA_VOCE = 30, VOCE = 24, TESTA_CAL = 58, RIGA = 44, RIGA_PERSONA = 54;
     /** I launcher riportano un'altezza un po' più bassa del vero (15-28% misurato, fino a 28% su un OnePlus): prudente 5%, generosa 12% (vedi calcola). */
     static final float ALTEZZA_VERA = 1.05f, ALTEZZA_GENEROSA = 1.12f;
 
@@ -35,8 +35,9 @@ final class WidgetPiano {
         if (vociDisponibili >= 1 && resto >= PRIMA_VOCE) { p.voci = 1; resto -= PRIMA_VOCE; }
         int riga = (conPersona ? RIGA_PERSONA : RIGA) - riduzioneRiga;
         if (righeMax >= 1 && resto >= TESTA_CAL + riga) { p.calendario = true; p.righe = 1; resto -= TESTA_CAL + riga; }
-        if (vociDisponibili >= 2 && p.voci == 1 && resto >= VOCE) { p.voci = 2; resto -= VOCE; }
+        // il mese intero (anche con la persona) viene prima della seconda voce
         while (p.calendario && p.righe < righeMax && resto >= riga) { p.righe++; resto -= riga; }
+        if (vociDisponibili >= 2 && p.voci == 1 && resto >= VOCE) { p.voci = 2; resto -= VOCE; }
         return p;
     }
 }
