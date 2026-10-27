@@ -20,8 +20,9 @@ public class WidgetPianoTest {
     }
 
     @Test public void conPersonaLeRigheSonoPiuAlte() {
-        WidgetPiano p = WidgetPiano.calcola(245, false, true, 2, true, 5);
-        assertTrue(p.calendario); assertEquals(1, p.righe); assertEquals("la seconda voce cede il posto", 1, p.voci);
+        WidgetPiano p = WidgetPiano.calcola(265, false, true, 2, true, 5);
+        assertTrue(p.calendario); assertEquals("con la persona una sola settimana", 1, p.righe);
+        assertFalse("e il calendario non si apre su una stima ottimistica", WidgetPiano.calcola(240, false, true, 2, true, 5).calendario);
     }
 
     @Test public void altoRiempieConLeSettimane() {

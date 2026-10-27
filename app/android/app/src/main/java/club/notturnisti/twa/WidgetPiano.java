@@ -16,12 +16,11 @@ final class WidgetPiano {
 
     static WidgetPiano calcola(int altezzaDp, boolean inCorso, boolean haPulsante, int vociDisponibili, boolean conPersona, int righeMax) {
         // Due stime. La prudente decide se il calendario c'è: una riga schiacciata non si perdona. La generosa (i launcher dichiarano
-        // fino al 28% in meno del vero, misurato) decide il resto: barra, pulsante, voci e, se la prudente non ne ha trovate, il
-        // calendario con la riga più bassa; altrimenti restano buchi in fondo. Se il launcher è esatto, al peggio si accorciano un po' le righe.
+        // fino al 28% in meno del vero, misurato) decide il resto: barra, pulsante, voci e le settimane dopo la prima; altrimenti
+        // restano buchi in fondo. Se il launcher è esatto, al peggio si accorcia un po' l'ultima riga.
         WidgetPiano p = calcolaCon(ALTEZZA_VERA, altezzaDp, inCorso, haPulsante, vociDisponibili, conPersona, righeMax, 0);
+        if (!p.calendario) return calcolaCon(ALTEZZA_GENEROSA, altezzaDp, inCorso, haPulsante, vociDisponibili, conPersona, 0, 0);
         WidgetPiano g = calcolaCon(ALTEZZA_GENEROSA, altezzaDp, inCorso, haPulsante, vociDisponibili, conPersona, righeMax, 4);
-        if (!p.calendario && !g.calendario) return g;
-        if (!p.calendario) return g;
         p.voci = Math.max(p.voci, g.voci);
         p.righe = Math.max(p.righe, g.righe);
         return p;
