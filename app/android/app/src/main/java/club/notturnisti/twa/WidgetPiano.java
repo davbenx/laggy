@@ -15,21 +15,25 @@ final class WidgetPiano {
     int voci, righe;
 
     static WidgetPiano calcola(int altezzaDp, boolean inCorso, boolean haPulsante, int vociDisponibili, boolean conPersona, int righeMax) {
-        // Con il calendario conta la stima prudente: una riga schiacciata non si perdona. Senza, il launcher che dichiara meno del vero
-        // (fino al 28% misurato) lascerebbe un buco in fondo: allora barra, pulsante e voci si decidono con la stima generosa, perché
-        // al peggio, se il launcher è esatto, si taglia di poco l'ultima riga di testo.
-        WidgetPiano p = calcolaCon(ALTEZZA_VERA, altezzaDp, inCorso, haPulsante, vociDisponibili, conPersona, righeMax);
-        if (p.calendario) return p;
-        return calcolaCon(ALTEZZA_GENEROSA, altezzaDp, inCorso, haPulsante, vociDisponibili, conPersona, 0);
+        // Due stime. La prudente decide se il calendario c'è: una riga schiacciata non si perdona. La generosa (i launcher dichiarano
+        // fino al 28% in meno del vero, misurato) decide il resto: barra, pulsante, voci e, se la prudente non ne ha trovate, il
+        // calendario con la riga più bassa; altrimenti restano buchi in fondo. Se il launcher è esatto, al peggio si accorciano un po' le righe.
+        WidgetPiano p = calcolaCon(ALTEZZA_VERA, altezzaDp, inCorso, haPulsante, vociDisponibili, conPersona, righeMax, 0);
+        WidgetPiano g = calcolaCon(ALTEZZA_GENEROSA, altezzaDp, inCorso, haPulsante, vociDisponibili, conPersona, righeMax, 4);
+        if (!p.calendario && !g.calendario) return g;
+        if (!p.calendario) return g;
+        p.voci = Math.max(p.voci, g.voci);
+        p.righe = Math.max(p.righe, g.righe);
+        return p;
     }
 
-    private static WidgetPiano calcolaCon(float fattore, int altezzaDp, boolean inCorso, boolean haPulsante, int vociDisponibili, boolean conPersona, int righeMax) {
+    private static WidgetPiano calcolaCon(float fattore, int altezzaDp, boolean inCorso, boolean haPulsante, int vociDisponibili, boolean conPersona, int righeMax, int riduzioneRiga) {
         WidgetPiano p = new WidgetPiano();
         int resto = Math.round(altezzaDp * fattore) - MARGINI - ADESSO;
         if (inCorso && resto >= BARRA) { p.barra = true; resto -= BARRA; }
         if (haPulsante && resto >= PULSANTE) { p.pulsante = true; resto -= PULSANTE; }
         if (vociDisponibili >= 1 && resto >= PRIMA_VOCE) { p.voci = 1; resto -= PRIMA_VOCE; }
-        int riga = conPersona ? RIGA_PERSONA : RIGA;
+        int riga = (conPersona ? RIGA_PERSONA : RIGA) - riduzioneRiga;
         if (righeMax >= 1 && resto >= TESTA_CAL + riga) { p.calendario = true; p.righe = 1; resto -= TESTA_CAL + riga; }
         if (vociDisponibili >= 2 && p.voci == 1 && resto >= VOCE) { p.voci = 2; resto -= VOCE; }
         while (p.calendario && p.righe < righeMax && resto >= riga) { p.righe++; resto -= riga; }

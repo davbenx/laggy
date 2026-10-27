@@ -20,7 +20,7 @@ public class WidgetPianoTest {
     }
 
     @Test public void conPersonaLeRigheSonoPiuAlte() {
-        WidgetPiano p = WidgetPiano.calcola(270, false, true, 2, true, 5);
+        WidgetPiano p = WidgetPiano.calcola(255, false, true, 2, true, 5);
         assertTrue(p.calendario); assertEquals(1, p.righe); assertEquals("la seconda voce cede il posto", 1, p.voci);
     }
 
