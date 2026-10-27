@@ -20,7 +20,11 @@ final class WidgetPiano {
         // del vero (fino al 28%, misurato) lascerebbe un buco in fondo: allora barra, pulsante e voci si decidono con la stima generosa;
         // se il launcher è esatto, al peggio si accorcia l'ultima riga di testo.
         WidgetPiano p = calcolaCon(ALTEZZA_VERA, altezzaDp, inCorso, haPulsante, vociDisponibili, conPersona, righeMax);
-        if (p.calendario) return p;
+        if (p.calendario) {
+            // il mese intero vale più delle voci: se togliendole entra tutto, si tolgono
+            WidgetPiano m = calcolaCon(ALTEZZA_VERA, altezzaDp, inCorso, haPulsante, 0, conPersona, righeMax);
+            return m.calendario && m.righe == righeMax && p.righe < righeMax ? m : p;
+        }
         return calcolaCon(ALTEZZA_GENEROSA, altezzaDp, inCorso, haPulsante, vociDisponibili, conPersona, 0);
     }
 

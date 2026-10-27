@@ -26,8 +26,8 @@ public class WidgetPianoTest {
     }
 
     @Test public void altoRiempieConLeSettimane() {
-        WidgetPiano p = WidgetPiano.calcola(400, false, false, 2, true, 5);
-        assertTrue(p.calendario); assertEquals(4, p.righe); assertEquals(2, p.voci);
+        WidgetPiano p = WidgetPiano.calcola(385, false, false, 2, true, 5);
+        assertTrue(p.calendario); assertEquals(4, p.righe);
         assertEquals(5, WidgetPiano.calcola(560, false, false, 2, true, 5).righe);
         assertEquals("mai oltre le righe che ci sono", 3, WidgetPiano.calcola(900, false, false, 2, true, 3).righe);
     }
@@ -44,10 +44,17 @@ public class WidgetPianoTest {
         assertFalse(WidgetPiano.calcola(220, false, true, 2, false, 5).calendario);
     }
 
-    @Test public void loSpazioCheAvanzaSiRiempieConAltreVoci() {
-        assertEquals("fino a quattro voci, una riga alla volta", 3, WidgetPiano.calcola(190, false, true, 4, false, 5).voci);
-        assertEquals("mai più di quelle che ci sono", 2, WidgetPiano.calcola(190, false, true, 2, false, 5).voci);
-        assertEquals(4, WidgetPiano.calcola(225, false, true, 4, true, 5).voci);
+    @Test public void alMassimoDueVoci() {
+        assertEquals("l'evento attuale e uno o due successivi, mai di più", 2, WidgetPiano.calcola(190, false, true, 4, false, 5).voci);
+        assertEquals(2, WidgetPiano.calcola(225, false, true, 4, true, 5).voci);
+    }
+
+    @Test public void ilMeseInteroSeiSettimaneAncheConLaPersona() {
+        WidgetPiano p = WidgetPiano.calcola(555, false, true, 2, true, 6);
+        assertTrue(p.calendario); assertEquals("sei settimane con due sigle per giorno", 6, p.righe);
+        // se per il mese intero bisogna togliere le voci, si tolgono
+        WidgetPiano q = WidgetPiano.calcola(520, false, true, 2, true, 6);
+        assertEquals(6, q.righe); assertEquals(0, q.voci);
     }
 
     @Test public void laBarraSoloSeInCorso() {

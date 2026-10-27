@@ -29,7 +29,7 @@ final class WidgetStato {
 
     String etichetta = "Notturnisti", titolo = "Apri Notturnisti", sotto = "per vedere qui il tuo piano", icona = "libero";
     int progresso = -1;                                  // 0..1000, -1 = nessuna barra
-    static final int MAX_VOCI = 4;
+    static final int MAX_VOCI = 2;
     final List<Evento> eventi = new ArrayList<>();       // già in ordine di ora, al più MAX_VOCI
     Azione azione = Azione.NESSUNA;
     String testoAzione = "";
