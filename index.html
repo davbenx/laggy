@@ -923,6 +923,11 @@ padding:12px 6px 12px 14px;margin:-6px 0 var(--gap-sezione);font-size:13.5px;lin
 .sapevi b{color:var(--ink)}
 .sapevi-az{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:6px}
 .sapevi-az .btn{min-height:40px;padding:0 14px}
+.sapevi-az.sapevi-facce{flex-wrap:nowrap;gap:8px}
+.sapevi-facce .kface{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:56px;padding:6px 4px;font-size:13px}
+.sapevi-facce .kic{display:inline-flex;width:20px;height:20px}
+.perche{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-size:13.5px;color:var(--dim)}
+.perche-az{display:flex;flex-wrap:wrap;gap:6px 10px;margin-top:6px;align-items:center}
 .sapevi .x{flex:none;width:44px;height:44px;margin:-10px 0 -10px;border:0;background:none;color:var(--faint);font-size:20px;cursor:pointer;border-radius:50%}
 .acasa:hover{border-color:var(--blue-lt)}
 .acasa svg{flex:none;color:var(--blue)}
@@ -4181,7 +4186,10 @@ function diaryReminder(P, CARDS){
     x+='<div class="drem-done"><span class="drem-ok">✓</span> Sonno <b>'+esc(bd)+'–'+esc(wk)+'</b> · '+durTxt+
        (cmp?' <span class="drem-cmp">'+cmp+'</span>':'')+
        ' <button type="button" class="ibtn drem-edit" data-open="1" aria-label="Modifica gli orari del sonno" title="Modifica">'+ICON.pencil+'</button></div>'+
-       (recupero?'<div class="drem-rec">Hai dormito meno del previsto: il piano ha aggiunto un pisolino di recupero qui sotto.</div>':'');
+       (recupero?'<div class="drem-rec">Hai dormito meno del previsto: il piano ha aggiunto un pisolino di recupero qui sotto.</div>':'')+
+       (_perchePer===key0?'<div class="perche" role="group" aria-label="Cosa ha cambiato il piano?"><span>Cosa ha cambiato il piano?</span><span class="perche-az">'+
+         '<button type="button" class="btn g sm" data-perche="turno">Il turno era diverso</button><button type="button" class="btn g sm" data-perche="abitudine">Dormo così di solito</button>'+
+         '<button type="button" class="btn g sm" data-perche="altro">Altro</button><button type="button" class="lnk dim" data-perche="no">No, grazie</button></span></div>':'');
   }
   // Come ti senti: una scelta, si salva al tocco. Solo dopo il sonno, e poi
   // resta la riga con la scelta fatta (i grafici di «Come sto dormendo» la usano).
@@ -5257,6 +5265,15 @@ function renderAdatta(){
     '<button type="button" class="lnk dim" id="adattaNo">Lascia così</button></div>';
 }
 document.addEventListener("click", e=>{
+  const pe=e.target.closest("[data-perche]");
+  if(pe){ const m=pe.dataset.perche; _perchePer="";
+    if(m!=="no") track("piano_motivo",{motivo:m});
+    if(m==="abitudine") toast("Grazie: se succede ancora, il piano si adatta da solo");
+    else if(m==="turno") toast("Grazie: controlla il turno di quel giorno in Turni");
+    else if(m==="altro") apriFeedback("orari");
+    render(); return; }
+});
+document.addEventListener("click", e=>{
   const si=e.target.closest("#adattaSi"); if(si){ haptic(10); applicaAdatta(si.dataset.f, si.dataset.v, true); return; }
   if(e.target.closest("#adattaNo")){ const sg=suggerimentoAdatta(); if(sg){ track("adatta", {esito: tipoAdatta(sg.action.field)+"_rifiutato"}); const no=store.lista("adattaNo"); no.push(chiaveAdatta(sg)); store.set("adattaNo", no.slice(-20)); } render(); return; }
   if(e.target.closest("#adattaAnnulla")){ annullaAdatta(); return; }
@@ -5452,6 +5469,48 @@ function serieBuona(){
   const ultime=k.sort().slice(-3).map(x=>+diary[x]);
   return ultime.filter(x=>x>=4).length>=2 && !ultime.some(x=>x<=2);
 }
+// ── Partecipazione: poche richieste, mai invadenti ──────────────────────────
+// Un budget solo per tutto ciò che chiede qualcosa (statistiche, facce di
+// soddisfazione, «perché», recensione): al più una richiesta ogni 7 giorni,
+// non nei primi 3 giorni d'uso, non di notte, non il giorno di un errore.
+function partecipaOk(){
+  try{
+    if(giorniDalPrimoUso()<3) return false;
+    const h=new Date().getHours(); if(h<7 || h>=22) return false;
+    if(Object.values(store.mappa("errVisti")).includes(new Date().toISOString().slice(0,10))) return false;
+    const ult=store.get("partecipaAl","");
+    return !ult || (new Date()-new Date(ult+"T12:00:00"))/864e5>=7;
+  }catch(e){ return false; }
+}
+function partecipaSegna(){ store.set("partecipaAl", iso(new Date())); }
+// Quanto il piano ha indovinato una notte: lo scarto più grande fra letto e sveglia annotati e quelli del piano di quel giorno.
+// Va nelle statistiche anonime solo come fascia (in linea, fino a 30, oltre 30 minuti), mai gli orari.
+var _perchePer="";   // la notte per cui si chiede «cosa ha cambiato il piano?» (solo in questa sessione)
+function scartoNotte(k, bed, wake){
+  const f=state.focus;
+  try{
+    state.focus=new Date(k+"T12:00:00");
+    const c=cards(NT.plan()).find(x=>x.k==="d");
+    if(!c || !c.bedPiano || !c.wakePiano || !bed || !wake) return null;
+    const d=(a,b)=>{ const x=Math.abs(t(a)-t(b))%1440; return Math.min(x,1440-x); };
+    return Math.max(d(bed,c.bedPiano), d(wake,c.wakePiano));
+  }catch(e){ return null; }
+  finally{ state.focus=f; }
+}
+function esitoNotte(k, bed, wake){
+  const sc=scartoNotte(k,bed,wake); if(sc==null) return null;
+  track("piano_esito", {esito: sc<=10 ? "in_linea" : sc<=30 ? "fino_30" : "oltre_30"});
+  return sc;
+}
+// Se lo scarto è grande, sotto la scheda compare una riga con la scelta del motivo: una volta ogni 14 giorni, dentro il budget.
+function chiediPerche(k, sc){
+  try{
+    if(sc==null || sc<=60 || !partecipaOk()) return;
+    const ult=store.get("percheAl","");
+    if(ult && (new Date()-new Date(ult+"T12:00:00"))/864e5<14) return;
+    _perchePer=k; store.set("percheAl", iso(new Date())); partecipaSegna();
+  }catch(e){}
+}
 function giorniDalPrimoUso(){ return state.firstSeenAt ? (new Date()-new Date(state.firstSeenAt+"T00:00:00"))/86400000 : 0; }
 
 // Recensione su Google Play — solo nell'app, solo con il riquadro di Play
@@ -5467,6 +5526,7 @@ function proponiRecensione(){
   try{
     if(!platform.review.available) return;
     if(giorniDalPrimoUso() < 7) return;   // le prime recensioni contano: una settimana basta
+    if(!partecipaOk()) return;            // il budget delle richieste è uno solo
     // Non una notte buona isolata ma una serie (serieBuona), e niente segnali
     // di frustrazione: un errore oggi, notifiche negate dal telefono.
     if(!serieBuona()) return;
@@ -5475,7 +5535,7 @@ function proponiRecensione(){
     if(attivazioneVisibile() || adattaVisibile()) return;
     const ultima = store.get("recensioneChiesta", 0);
     if(ultima && Date.now()-ultima < 120*86400000) return;
-    store.set("recensioneChiesta", Date.now());
+    store.set("recensioneChiesta", Date.now()); partecipaSegna();
     _invitoOggi = iso(new Date()); store.set("invitoVisto", _invitoOggi);   // niente altri inviti oggi
     track("recensione_chiesta");
     // Dopo il tocco, non sopra: prima si vede la faccina scelta.
@@ -6891,6 +6951,12 @@ function renderAndamenti(){
   // riposi brevi). Prima i dati del passato, accanto quelli in arrivo.
   try{ sezioni.push(caricoHtml()); }catch(e){}
   try{
+    const da=iso(day(giornoVero(),-30)), annotate=Object.keys(state.wakes).filter(k=>k>=da && state.beds[k]), ok=annotate.filter(k=>sonnoPiano[k]).length;
+    if(annotate.length>=5) sezioni.push('<div><span class="eyebrow andamento-eyebrow">Il piano e le tue notti</span><div class="andamento-sezione"><div class="rows">'+
+      '<div class="row"><b style="min-width:118px">Come previsto</b><span>'+ok+' su '+annotate.length+' <span class="hint">· ultimi 30 giorni</span></span></div></div>'+
+      '<p class="hint" style="margin:10px 0 0">'+(ok<annotate.length?'Le altre le hai corrette tu: è così che il piano impara come dormi davvero.':'Il piano ti conosce bene.')+'</p></div></div>');
+  }catch(e){}
+  try{
     const reg=regolaritaSonno();
     if(reg){
       const parola=sd=> sd<=30 ? "molto regolare" : sd<=60 ? "abbastanza regolare" : sd<=90 ? "variabile" : "molto variabile";
@@ -7521,7 +7587,7 @@ async function risposteWidget(){
   if(!platform.widget.available) return;
   const R=await platform.widget.risposte(); let n=0;
   for(const k in R){ if(!/^\d{4}-\d{2}-\d{2}$/.test(k)) continue; const r=R[k]||{};
-    if(r.sonno && !wakes[k] && /^\d\d:\d\d$/.test(r.bed||"") && /^\d\d:\d\d$/.test(r.wake||"")){ state.beds[k]=r.bed; wakes[k]=r.wake; segnaSonnoPiano(k, r.fonte!=="m"); n++; }
+    if(r.sonno && !wakes[k] && /^\d\d:\d\d$/.test(r.bed||"") && /^\d\d:\d\d$/.test(r.wake||"")){ state.beds[k]=r.bed; wakes[k]=r.wake; segnaSonnoPiano(k, r.fonte!=="m"); esitoNotte(k, r.bed, r.wake); n++; }
     if(r.voto>=1 && r.voto<=5 && diary[k]==null){ diary[k]=+r.voto; diaryAt[k]=+r.at||Date.now(); n++; } }
   if(!n) return;
   store.set("beds",state.beds); store.set("wakes",wakes); store.set("diaryAt",diaryAt); store.set("diary",diary);
@@ -7926,7 +7992,7 @@ function diaryClick(e){
      || e.target.closest("[data-nap-in-a]") || e.target.closest("[data-nap-in-b]")) return;   // i campi orario si gestiscono da soli
   const ap=e.target.closest("[data-asplan]");
   if(ap){ const k=iso(state.focus), c=cards(NT.plan()).find(x=>x.k==="d");
-    if(c){ state.beds[k]=c.bedPiano; state.wakes[k]=c.wakePiano; segnaSonnoPiano(k,true);
+    if(c){ state.beds[k]=c.bedPiano; state.wakes[k]=c.wakePiano; segnaSonnoPiano(k,true); track("piano_esito",{esito:"in_linea"});
       state.diaryEditing.delete("sleep:"+k);
       store.set("beds",state.beds); store.set("wakes",state.wakes);
       toast("Sonno registrato come da piano");
@@ -7948,6 +8014,7 @@ function diaryClick(e){
     if(bedVal) state.beds[k]=bedVal;
     if(wakeVal) wakes[k]=wakeVal;
     segnaSonnoPiano(k, !!(c && bedVal===c.bedPiano && wakeVal===c.wakePiano));
+    chiediPerche(k, esitoNotte(k, bedVal, wakeVal));
     store.set("beds",state.beds);
     store.set("wakes",wakes);
     state.diaryEditing.delete("sleep:"+k);
@@ -8309,6 +8376,10 @@ function renderACasa(){
 function usata(k){ const u=store.mappa("funzioniUsate"); if(!u[k]){ u[k]=iso(new Date()); store.set("funzioniUsate", u); } }
 const conCicloDaMandare=()=>state.repeat!==false && !!state.pattern;
 const CONSIGLI_FUNZIONE=[
+  // Come ti trovi: tre facce, una volta al giorno 14 e poi ogni 90 giorni. Dentro il budget delle richieste; una faccia triste apre il feedback.
+  {k:"soddisfazione", dopo:14, ripeti:true, partecipa:true, facce:true, titolo:"Una domanda",
+    quando:()=>{ const u=store.get("soddisfazioneAl",""); return !u || (new Date()-new Date(u+"T12:00:00"))/864e5>=90; },
+    t:()=>"Come ti trovi con Notturnisti?"},
   {k:"installa", quando:()=>!giaInstallata() && !inLista("installa") && (playDaWeb() || isIOSPerInstall() || !!installPromptEvento),
     t:()=> playDaWeb() ? "C'è l'app Android su Google Play: promemoria anche ad app chiusa, widget e calendario del telefono. I turni li porti con un tocco."
       : isIOSPerInstall() ? "Aggiungila alla schermata Home: in Safari tocca Condividi, poi «Aggiungi a schermata Home». Si apre come un'app e tiene al sicuro i turni."
@@ -8322,7 +8393,7 @@ const CONSIGLI_FUNZIONE=[
   {k:"tester", quando:()=>!window.NT_APP.nativo && !window.NT_APP.play && /Android/i.test(navigator.userAgent||""),
     t:()=>"L'app Android di Notturnisti è in prova su Google Play: promemoria ad app chiusa, widget e calendario del telefono. Per pubblicarla servono tester per 14 giorni: ti va di aiutare? Prima entra nel gruppo, poi tocca «Diventa un tester».",
     passi:true, link:()=>[["https://groups.google.com/g/tester-notturnisti","1. Entra nel gruppo"],["https://play.google.com/apps/testing/club.notturnisti.app","2. Diventa un tester"]]},
-  {k:"statistiche", quando:()=>!!window.NTAnalytics && !window.NTAnalytics.answered(), scelta:true,
+  {k:"statistiche", quando:()=>!!window.NTAnalytics && !window.NTAnalytics.answered(), scelta:true, partecipa:true, titolo:"Una domanda",
     t:()=>"Ci aiuti a migliorare l'app? Conta in forma anonima cosa si usa (niente turni, orari o diario, niente che dica chi sei). Puoi cambiare idea in Impostazioni."},
   {k:"colleghi", quando:()=>!((state.people||[]).length || state.pPattern),
     t:()=> conCicloDaMandare() ? "Manda il tuo ciclo a chi lavora con te: trova l'app già pronta, e vedete subito quando siete liberi insieme."
@@ -8391,8 +8462,9 @@ function consiglioFunzione(){
   if(giorni<3 || invitiInPausa(true)) return null;
   if(S.oggi && (new Date(oggi)-new Date(S.oggi.d))/864e5<3) return null;
   const lista=CONSIGLI_FUNZIONE.slice().sort((a,b)=> state.repeat===false ? (a.k==="mese"?-1:b.k==="mese"?1:0) : 0);
-  const c=lista.find(x=>!visti.includes(x.k) && giorni>=(x.dopo||0) && disponibile(x));
+  const c=lista.find(x=>(!visti.includes(x.k) || (x.ripeti && !!store.get("soddisfazioneAl",""))) && giorni>=(x.dopo||0) && disponibile(x) && (!x.partecipa || partecipaOk()));
   if(!c) return null;
+  if(c.partecipa) partecipaSegna();
   store.set("loSapevi", Object.assign(S, {visti:visti.concat(c.k), oggi:{k:c.k, d:oggi}}));
   return c;
 }
@@ -8403,19 +8475,27 @@ function renderLoSapevi(){
   el.hidden=!c; if(!c) return;
   el.dataset.k=c.k;
   const cta=c.cta ? c.cta() : "Prova";
-  const azioni = c.scelta
+  const FACCE=[["su","Bene",ICON.faceOk,"var(--ok)"],["meh","Così così",ICON.faceMid,"var(--faint)"],["giu","Non bene",ICON.faceLow,"var(--orange)"]];
+  const azioni = c.facce
+      ? '<span class="sapevi-az sapevi-facce">'+FACCE.map(f=>'<button type="button" class="btn g kface" data-sapevi-faccia="'+f[0]+'" aria-label="'+f[1]+'" style="--tone:'+f[3]+'"><i class="kic" style="color:'+f[3]+'">'+f[2]+'</i><span>'+f[1]+'</span></button>').join("")+'</span>'
+    : c.scelta
       ? '<span class="sapevi-az"><button type="button" class="btn g" data-sapevi-si>Sì, va bene</button><button type="button" class="btn g" data-sapevi-no>No, grazie</button></span>'
     : c.link
       ? '<span class="sapevi-az">'+c.link().map(([h,t])=>'<a class="btn sm" href="'+esc(h)+'" target="_blank" rel="noopener" data-sapevi-link>'+esc(t)+'</a>').join("")+'</span>'
     : (cta && c.a ? '<button type="button" class="btn sm" data-sapevi-prova>'+esc(cta)+'</button>' : '');
   // statistiche: sì e no sono entrambe risposte, niente ×
-  el.innerHTML='<div><b>Lo sapevi?</b> '+esc(c.t())+(azioni?'<br>'+azioni:'')+'</div>'+
+  el.innerHTML='<div><b>'+esc(c.titolo||"Lo sapevi?")+'</b> '+esc(c.t())+(azioni?'<br>'+azioni:'')+'</div>'+
     (c.scelta ? '' : '<button type="button" class="x" data-sapevi-chiudi aria-label="Chiudi, non lo mostro più">×</button>');
 }
 if($("#loSapevi")) $("#loSapevi").addEventListener("click", e=>{
   const el=$("#loSapevi"), k=el.dataset.k, c=CONSIGLI_FUNZIONE.find(x=>x.k===k);
   const fatto=()=>{ usata(k); el.hidden=true; };
-  if(e.target.closest("[data-sapevi-chiudi]")){ const S=store.mappa("loSapevi"); S.chiuso=iso(new Date()); store.set("loSapevi", S); el.hidden=true; track("setup_item", {item:"sapevi_no_"+k}); return; }
+  const fc=e.target.closest("[data-sapevi-faccia]");
+  if(fc){ const v=fc.dataset.sapeviFaccia; track("soddisfazione",{voto:v}); store.set("soddisfazioneAl", iso(new Date())); el.hidden=true;
+    if(v==="giu") apriFeedback("soddisfazione"); else toast("Grazie!"); return; }
+  if(e.target.closest("[data-sapevi-chiudi]")){ const S=store.mappa("loSapevi"); S.chiuso=iso(new Date()); store.set("loSapevi", S); el.hidden=true;
+    if(k==="soddisfazione") store.set("soddisfazioneAl", iso(day(new Date(),-60)));   // non ora: riprova fra un mese
+    track("setup_item", {item:"sapevi_no_"+k}); return; }
   const si=e.target.closest("[data-sapevi-si]"), no=e.target.closest("[data-sapevi-no]");
   if(si || no){ try{ window.NTAnalytics && window.NTAnalytics.setEnabled(!!si); }catch(err){} fatto(); render(); return; }
   const lk=e.target.closest("[data-sapevi-link]");
@@ -8609,7 +8689,7 @@ function mostraNovita(su, segna, soloNuove){
   const m=$("#novitaModal"); if(!m) return;
   if(su){
     $("#novitaData").textContent=NOVITA.data;
-    $("#novitaLista").innerHTML=novitaDaMostrare(soloNuove).map(x=>'<div style="margin:0 0 12px"><b style="display:block">'+esc(x[0])+'</b><span class="hint" style="display:block;margin:2px 0 0;font-size:13.5px;line-height:1.4">'+esc(x[1])+'</span></div>').join("");
+    $("#novitaLista").innerHTML=novitaDaMostrare(soloNuove).map(x=>'<div style="margin:0 0 12px">'+(x[4]?'<span class="eyebrow" style="display:block;color:var(--ok)">Richiesto da voi</span>':'')+'<b style="display:block">'+esc(x[0])+'</b><span class="hint" style="display:block;margin:2px 0 0;font-size:13.5px;line-height:1.4">'+esc(x[1])+'</span></div>').join("");
   }
   m.hidden=!su; m.setAttribute("aria-hidden",String(!su));
   if(su){ $("#novitaOk").focus({preventScroll:true}); $("#novitaLista").scrollTop=0; const sh=m.querySelector(".qs-sheet"); if(sh) sh.scrollTop=0; }
@@ -9474,16 +9554,16 @@ $("#icsVai").onclick=()=>{
     toast("Errore nell'esportazione: "+(e&&e.message||e));
   }
 };
-$("#doFeed").onclick=()=>{
-  const url=window.NT_APP.base+"#"+toHash();
-  const body=["Non cancellare la riga qui sotto: mi serve per vedere esattamente il tuo ciclo.",
-    url,"",
-    "1. Che cosa ha sbagliato?","","",
-    "2. Che cosa non era chiaro?","","",
-    "3. Cosa manca?","",""].join("\n");
-  location.href="mailto:"+FEEDBACK.replace(/\+/g,"%2B")+"?subject="+encodeURIComponent("Riscontro pianificatore")+
+// Una riga basta. Versione, piattaforma e da dove arrivi si aggiungono da soli; il tuo ciclo no: se serve per capire, lo chiedo io.
+function apriFeedback(da){
+  const v=(($("#versioneApp")||{}).textContent||"").trim();
+  const body=["Scrivi qui cosa non ha funzionato, cosa non era chiaro o cosa manca. Anche una riga sola.","","","",
+    "— Non cancellare: "+(v||"versione web")+" · "+(window.NT_APP.nativo?"app Android":"web")+(da?" · da: "+da:""),
+    "Il tuo ciclo non è allegato: se per capire serve, te lo chiedo io."].join("\n");
+  location.href="mailto:"+FEEDBACK.replace(/\+/g,"%2B")+"?subject="+encodeURIComponent("Riscontro Notturnisti")+
     "&body="+encodeURIComponent(body);
-};
+}
+$("#doFeed").onclick=()=>apriFeedback("impostazioni");
 // Estratta a funzione a sé: sia il bottone in Opzioni sia il promemoria che
 // compare in Oggi la richiamano allo stesso modo — un tocco solo che fa
 // davvero qualcosa, non un cambio di tab che ne richiede un secondo.
@@ -10378,7 +10458,7 @@ function registraComePrevisto(){
     if(!c || !c.wakeAsk || state.beds[k] || state.wakes[k]){ apriDestinazione("diario"); return; }
     state.beds[k]=c.bedPiano; state.wakes[k]=c.wakePiano; segnaSonnoPiano(k,true);
     store.set("beds",state.beds); store.set("wakes",state.wakes);
-    track("diario_rapido");
+    track("diario_rapido"); track("piano_esito",{esito:"in_linea"});
     render(); apriDestinazione("diario");
     toastUndo("Registrato: "+c.bedPiano+" → "+c.wakePiano, ()=>{
       delete state.beds[k]; delete state.wakes[k]; segnaSonnoPiano(k,false);

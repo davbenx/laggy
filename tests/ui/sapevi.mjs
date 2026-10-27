@@ -61,7 +61,7 @@ p=await apri(Object.assign({firstSeenAt:fa(5)}, ST), {backupDone:false});
 ok(!/^copia:/.test(await tip(p)), "non prima di una settimana");
 await p.context().close();
 // il riepilogo per il medico solo dopo 2 mesi d'uso
-p=await apri(Object.assign({firstSeenAt:fa(20)}, ST), {funzioniUsate:{mese:1,festivi:1,momenti:1,riepilogo:1,calendario:1,colleghi:1,ferie:1,scambio:1,sonno:1,dormi:1,acasa:1}});
+p=await apri(Object.assign({firstSeenAt:fa(20)}, ST), {funzioniUsate:{soddisfazione:1,mese:1,festivi:1,momenti:1,riepilogo:1,calendario:1,colleghi:1,ferie:1,scambio:1,sonno:1,dormi:1,acasa:1}});
 ok(await tip(p)==="", "riepilogo per il medico: non prima di due mesi d'uso");
 await p.context().close();
 // Android dal browser, app non ancora su Play: l'invito al test, in due passi
