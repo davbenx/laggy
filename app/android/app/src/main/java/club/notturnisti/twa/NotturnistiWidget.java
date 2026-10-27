@@ -169,6 +169,10 @@ public class NotturnistiWidget extends AppWidgetProvider {
         rv.setOnClickPendingIntent(android.R.id.background, apri);
 
         // ───── il pulsante del momento ─────
+        // senza calendario che assorba l'altezza in più, la si divide fra gli spazi delle sezioni (con tutto compresso non cambia niente)
+        rv.setViewVisibility(R.id.w_gap1, !p.calendario && p.pulsante ? View.VISIBLE : View.GONE);
+        rv.setViewVisibility(R.id.w_gap2, !p.calendario && p.pulsante && p.voci > 0 ? View.VISIBLE : View.GONE);
+        rv.setViewVisibility(R.id.w_gap3, !p.calendario ? View.VISIBLE : View.GONE);
         rv.setViewVisibility(R.id.w_azione, p.pulsante ? View.VISIBLE : View.GONE);
         if (p.pulsante) azione(ctx, rv, st);
 

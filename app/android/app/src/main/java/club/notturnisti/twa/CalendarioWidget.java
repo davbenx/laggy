@@ -91,7 +91,7 @@ final class CalendarioWidget {
         righe = Math.min(righe, disp);
         rv.setViewVisibility(R.id.w_cal, righe > 0 ? View.VISIBLE : View.GONE);
         if (righe <= 0) return;
-        rv.setViewVisibility(R.id.w_cal_vuoto, righe <= 2 ? View.VISIBLE : View.GONE);   // con poche settimane il vuoto non le allarga troppo; con molte le righe riempiono fino in fondo
+        rv.setViewVisibility(R.id.w_cal_vuoto, righe <= 1 ? View.VISIBLE : View.GONE);   // con una sola settimana il vuoto non la allarga troppo; da due in su le righe riempiono fino in fondo, come prima
         int oggi = indiceOggi(m, ora), rigaOggi = oggi < 0 ? -1 : oggi / COLONNE;
         int r0 = CalendarioModel.primaRiga(rigaOggi, spostamento, righe, m.settimane());
         Calendar adesso = Calendar.getInstance(); adesso.setTimeInMillis(ora);

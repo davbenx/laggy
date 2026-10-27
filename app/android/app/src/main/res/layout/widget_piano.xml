@@ -48,6 +48,7 @@
         android:progressBackgroundTint="@color/w_chip"
         android:visibility="gone" />
 
+    <FrameLayout android:id="@+id/w_gap1" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:visibility="gone" android:importantForAccessibility="no" />
     <!-- Il pulsante del momento: sveglia, orario del sonno/pisolino, oppure le risposte del diario -->
     <LinearLayout
         android:id="@+id/w_azione"
@@ -72,6 +73,7 @@
     </LinearLayout>
     </LinearLayout>
 
+    <FrameLayout android:id="@+id/w_gap2" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:visibility="gone" android:importantForAccessibility="no" />
     <LinearLayout
         android:id="@+id/w_eventi"
         android:layout_width="match_parent"
@@ -105,6 +107,7 @@
         </LinearLayout>
     </LinearLayout>
 
+    <FrameLayout android:id="@+id/w_gap3" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:visibility="gone" android:importantForAccessibility="no" />
     <!-- Calendario: settimane dal lunedì; la tua sigla sopra, quella della persona che segui sotto -->
     <LinearLayout
         android:id="@+id/w_cal"
@@ -318,7 +321,7 @@
                 <TextView android:id="@+id/w_c4_6_p" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="7" android:layout_marginTop="2dp" android:gravity="center" android:textColor="@color/w_dim" android:textSize="11sp" android:textStyle="bold" android:maxLines="1" android:background="@drawable/widget_cella_p_riposo" android:visibility="gone" />
             </LinearLayout>
         </LinearLayout>
-        <!-- con una o due settimane il vuoto che avanza si divide con le righe (mezza parte a lui, una a ogni riga), così un giorno non diventa alto il doppio degli altri; da tre in su le righe riempiono tutto -->
+        <!-- con una sola settimana il vuoto che avanza si divide con le righe (mezza parte a lui, una a ogni riga), così un giorno non diventa alto il doppio degli altri; da due in su le righe riempiono tutto -->
         <FrameLayout android:id="@+id/w_cal_vuoto" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="0.5" android:importantForAccessibility="no" />
     </LinearLayout>
 </LinearLayout>
