@@ -109,7 +109,7 @@ public class WidgetStatoTest {
         JSONObject p = piano(null, voce(t(0, 19, 10), t(0, 19, 25), "Ultimo caffè", "caffe"), voce(t(0, 19, 5), t(0, 19, 50), "Pisolino", "pisolino-recupero"), voce(t(0, 22, 0), t(1, 6, 15), "Turno Notte", "turno"), voce(t(0, 23, 10), t(0, 23, 25), "Caffè", "caffe"));
         WidgetStato s = WidgetStato.calcola(p, VUOTO, t(0, 18, 0));
         assertEquals("Pisolino", s.titolo);
-        assertEquals(2, s.eventi.size());
+        assertEquals(2, s.eventi.size());   // l'attuale è nel titolo: al più due voci
         assertEquals("19:10", s.eventi.get(0).ora); assertEquals("22:00", s.eventi.get(1).ora);   // il turno c'è sempre, in ordine di ora
     }
 

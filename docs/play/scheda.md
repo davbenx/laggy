@@ -66,13 +66,12 @@ Notturnisti dà indicazioni generali di benessere e organizzazione basate sulla 
 
 Un progetto indipendente, nato da chi i turni li fa. Segnalazioni e idee: dall'app, Impostazioni → Segnala cosa non torna.
 
-## Note di versione 1.3.5 (max 500)
+## Note di versione 1.3.6 (max 500)
 Novità:
-• Un colore per ogni turno (mattina, pomeriggio, sera, notte) nel calendario e nel widget
-• «Sonno e carico»: come dormi prima di ogni tipo di turno
-• Ciclo a calendario, con il mese nel titolo
-• Le domande sul sonno arrivano anche dal widget e dalle notifiche senza aprire l'app
-• Meno inviti sopra «Oggi»; widget con i mesi e il voto a cinque facce
+• «＋ Un altro turno» per sostituire il turno di un giorno (una giornata al posto del pomeriggio)
+• Widget: mese intero fino a sei settimane, anche con la persona; al massimo due voci
+• Ferie: cosa è già nel conto e dove si segna
+• «Cambio turno»: testi più brevi
 
 ## Categoria, tag e contatti
 - Categoria: Salute e fitness

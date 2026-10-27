@@ -24,7 +24,7 @@ import java.util.Locale;
  * quelli di un altro mese sono in blu, il primo del mese è «1 NOV» in grassetto.
  */
 final class CalendarioWidget {
-    static final int RIGHE = 5, COLONNE = 7;
+    static final int RIGHE = 6, COLONNE = 7;
     private static final String[] MESI_BREVI = { "gen", "feb", "mar", "apr", "mag", "giu", "lug", "ago", "set", "ott", "nov", "dic" };
     private static final String[] GIORNI = { "lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato", "domenica" };
 
@@ -91,6 +91,7 @@ final class CalendarioWidget {
         righe = Math.min(righe, disp);
         rv.setViewVisibility(R.id.w_cal, righe > 0 ? View.VISIBLE : View.GONE);
         if (righe <= 0) return;
+        rv.setViewVisibility(R.id.w_cal_vuoto, righe <= 1 ? View.VISIBLE : View.GONE);   // con una sola settimana il vuoto non la allarga troppo; da due in su le righe riempiono fino in fondo, come prima
         int oggi = indiceOggi(m, ora), rigaOggi = oggi < 0 ? -1 : oggi / COLONNE;
         int r0 = CalendarioModel.primaRiga(rigaOggi, spostamento, righe, m.settimane());
         Calendar adesso = Calendar.getInstance(); adesso.setTimeInMillis(ora);

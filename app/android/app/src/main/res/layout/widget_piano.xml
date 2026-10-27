@@ -48,6 +48,7 @@
         android:progressBackgroundTint="@color/w_chip"
         android:visibility="gone" />
 
+    <FrameLayout android:id="@+id/w_gap1" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:visibility="gone" android:importantForAccessibility="no" />
     <!-- Il pulsante del momento: sveglia, orario del sonno/pisolino, oppure le risposte del diario -->
     <LinearLayout
         android:id="@+id/w_azione"
@@ -72,6 +73,7 @@
     </LinearLayout>
     </LinearLayout>
 
+    <FrameLayout android:id="@+id/w_gap2" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:visibility="gone" android:importantForAccessibility="no" />
     <LinearLayout
         android:id="@+id/w_eventi"
         android:layout_width="match_parent"
@@ -91,8 +93,21 @@
             <TextView android:id="@+id/w_e2_t" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="8dp" android:textColor="@color/w_dim" android:textSize="13sp" android:maxLines="1" android:ellipsize="end" />
             <TextView android:id="@+id/w_e2_chip" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="6dp" android:background="@drawable/widget_chip" android:paddingStart="8dp" android:paddingEnd="8dp" android:paddingTop="2dp" android:paddingBottom="2dp" android:textColor="@color/w_ink" android:textSize="11sp" android:textStyle="bold" android:maxLines="1" android:visibility="gone" />
         </LinearLayout>
+        <LinearLayout android:id="@+id/w_e3" android:layout_width="match_parent" android:layout_height="24dp" android:gravity="center_vertical" android:orientation="horizontal" android:visibility="gone">
+            <ImageView android:id="@+id/w_e3_ic" android:layout_width="16dp" android:layout_height="16dp" android:importantForAccessibility="no" />
+            <TextView android:id="@+id/w_e3_ora" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:minWidth="44dp" android:textColor="@color/w_ink" android:textSize="13sp" android:textStyle="bold" android:maxLines="1" />
+            <TextView android:id="@+id/w_e3_t" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="8dp" android:textColor="@color/w_dim" android:textSize="13sp" android:maxLines="1" android:ellipsize="end" />
+            <TextView android:id="@+id/w_e3_chip" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="6dp" android:background="@drawable/widget_chip" android:paddingStart="8dp" android:paddingEnd="8dp" android:paddingTop="2dp" android:paddingBottom="2dp" android:textColor="@color/w_ink" android:textSize="11sp" android:textStyle="bold" android:maxLines="1" android:visibility="gone" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/w_e4" android:layout_width="match_parent" android:layout_height="24dp" android:gravity="center_vertical" android:orientation="horizontal" android:visibility="gone">
+            <ImageView android:id="@+id/w_e4_ic" android:layout_width="16dp" android:layout_height="16dp" android:importantForAccessibility="no" />
+            <TextView android:id="@+id/w_e4_ora" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:minWidth="44dp" android:textColor="@color/w_ink" android:textSize="13sp" android:textStyle="bold" android:maxLines="1" />
+            <TextView android:id="@+id/w_e4_t" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="8dp" android:textColor="@color/w_dim" android:textSize="13sp" android:maxLines="1" android:ellipsize="end" />
+            <TextView android:id="@+id/w_e4_chip" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="6dp" android:background="@drawable/widget_chip" android:paddingStart="8dp" android:paddingEnd="8dp" android:paddingTop="2dp" android:paddingBottom="2dp" android:textColor="@color/w_ink" android:textSize="11sp" android:textStyle="bold" android:maxLines="1" android:visibility="gone" />
+        </LinearLayout>
     </LinearLayout>
 
+    <FrameLayout android:id="@+id/w_gap3" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:visibility="gone" android:importantForAccessibility="no" />
     <!-- Calendario: settimane dal lunedì; la tua sigla sopra, quella della persona che segui sotto -->
     <LinearLayout
         android:id="@+id/w_cal"
@@ -306,5 +321,44 @@
                 <TextView android:id="@+id/w_c4_6_p" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="7" android:layout_marginTop="2dp" android:gravity="center" android:textColor="@color/w_dim" android:textSize="11sp" android:textStyle="bold" android:maxLines="1" android:background="@drawable/widget_cella_p_riposo" android:visibility="gone" />
             </LinearLayout>
         </LinearLayout>
+        <LinearLayout android:id="@+id/w_cr5" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginTop="2dp" android:layout_marginStart="-2dp" android:layout_marginEnd="-2dp" android:orientation="horizontal" android:visibility="gone">
+            <LinearLayout android:id="@+id/w_c5_0" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginStart="0dp" android:paddingStart="2dp" android:paddingEnd="2dp" android:paddingBottom="2dp" android:orientation="vertical">
+                <TextView android:id="@+id/w_c5_0_d" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center_horizontal" android:gravity="center" android:minWidth="16dp" android:textColor="@color/w_dim" android:textSize="10sp" android:maxLines="1" />
+                <TextView android:id="@+id/w_c5_0_m" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="10" android:layout_marginTop="1dp" android:gravity="center" android:textColor="@color/w_dim" android:textSize="12sp" android:textStyle="bold" android:maxLines="1" android:background="@drawable/widget_cella_riposo" />
+                <TextView android:id="@+id/w_c5_0_p" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="7" android:layout_marginTop="2dp" android:gravity="center" android:textColor="@color/w_dim" android:textSize="11sp" android:textStyle="bold" android:maxLines="1" android:background="@drawable/widget_cella_p_riposo" android:visibility="gone" />
+            </LinearLayout>
+            <LinearLayout android:id="@+id/w_c5_1" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginStart="0dp" android:paddingStart="2dp" android:paddingEnd="2dp" android:paddingBottom="2dp" android:orientation="vertical">
+                <TextView android:id="@+id/w_c5_1_d" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center_horizontal" android:gravity="center" android:minWidth="16dp" android:textColor="@color/w_dim" android:textSize="10sp" android:maxLines="1" />
+                <TextView android:id="@+id/w_c5_1_m" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="10" android:layout_marginTop="1dp" android:gravity="center" android:textColor="@color/w_dim" android:textSize="12sp" android:textStyle="bold" android:maxLines="1" android:background="@drawable/widget_cella_riposo" />
+                <TextView android:id="@+id/w_c5_1_p" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="7" android:layout_marginTop="2dp" android:gravity="center" android:textColor="@color/w_dim" android:textSize="11sp" android:textStyle="bold" android:maxLines="1" android:background="@drawable/widget_cella_p_riposo" android:visibility="gone" />
+            </LinearLayout>
+            <LinearLayout android:id="@+id/w_c5_2" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginStart="0dp" android:paddingStart="2dp" android:paddingEnd="2dp" android:paddingBottom="2dp" android:orientation="vertical">
+                <TextView android:id="@+id/w_c5_2_d" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center_horizontal" android:gravity="center" android:minWidth="16dp" android:textColor="@color/w_dim" android:textSize="10sp" android:maxLines="1" />
+                <TextView android:id="@+id/w_c5_2_m" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="10" android:layout_marginTop="1dp" android:gravity="center" android:textColor="@color/w_dim" android:textSize="12sp" android:textStyle="bold" android:maxLines="1" android:background="@drawable/widget_cella_riposo" />
+                <TextView android:id="@+id/w_c5_2_p" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="7" android:layout_marginTop="2dp" android:gravity="center" android:textColor="@color/w_dim" android:textSize="11sp" android:textStyle="bold" android:maxLines="1" android:background="@drawable/widget_cella_p_riposo" android:visibility="gone" />
+            </LinearLayout>
+            <LinearLayout android:id="@+id/w_c5_3" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginStart="0dp" android:paddingStart="2dp" android:paddingEnd="2dp" android:paddingBottom="2dp" android:orientation="vertical">
+                <TextView android:id="@+id/w_c5_3_d" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center_horizontal" android:gravity="center" android:minWidth="16dp" android:textColor="@color/w_dim" android:textSize="10sp" android:maxLines="1" />
+                <TextView android:id="@+id/w_c5_3_m" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="10" android:layout_marginTop="1dp" android:gravity="center" android:textColor="@color/w_dim" android:textSize="12sp" android:textStyle="bold" android:maxLines="1" android:background="@drawable/widget_cella_riposo" />
+                <TextView android:id="@+id/w_c5_3_p" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="7" android:layout_marginTop="2dp" android:gravity="center" android:textColor="@color/w_dim" android:textSize="11sp" android:textStyle="bold" android:maxLines="1" android:background="@drawable/widget_cella_p_riposo" android:visibility="gone" />
+            </LinearLayout>
+            <LinearLayout android:id="@+id/w_c5_4" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginStart="0dp" android:paddingStart="2dp" android:paddingEnd="2dp" android:paddingBottom="2dp" android:orientation="vertical">
+                <TextView android:id="@+id/w_c5_4_d" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center_horizontal" android:gravity="center" android:minWidth="16dp" android:textColor="@color/w_dim" android:textSize="10sp" android:maxLines="1" />
+                <TextView android:id="@+id/w_c5_4_m" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="10" android:layout_marginTop="1dp" android:gravity="center" android:textColor="@color/w_dim" android:textSize="12sp" android:textStyle="bold" android:maxLines="1" android:background="@drawable/widget_cella_riposo" />
+                <TextView android:id="@+id/w_c5_4_p" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="7" android:layout_marginTop="2dp" android:gravity="center" android:textColor="@color/w_dim" android:textSize="11sp" android:textStyle="bold" android:maxLines="1" android:background="@drawable/widget_cella_p_riposo" android:visibility="gone" />
+            </LinearLayout>
+            <LinearLayout android:id="@+id/w_c5_5" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginStart="0dp" android:paddingStart="2dp" android:paddingEnd="2dp" android:paddingBottom="2dp" android:orientation="vertical">
+                <TextView android:id="@+id/w_c5_5_d" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center_horizontal" android:gravity="center" android:minWidth="16dp" android:textColor="@color/w_dim" android:textSize="10sp" android:maxLines="1" />
+                <TextView android:id="@+id/w_c5_5_m" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="10" android:layout_marginTop="1dp" android:gravity="center" android:textColor="@color/w_dim" android:textSize="12sp" android:textStyle="bold" android:maxLines="1" android:background="@drawable/widget_cella_riposo" />
+                <TextView android:id="@+id/w_c5_5_p" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="7" android:layout_marginTop="2dp" android:gravity="center" android:textColor="@color/w_dim" android:textSize="11sp" android:textStyle="bold" android:maxLines="1" android:background="@drawable/widget_cella_p_riposo" android:visibility="gone" />
+            </LinearLayout>
+            <LinearLayout android:id="@+id/w_c5_6" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginStart="0dp" android:paddingStart="2dp" android:paddingEnd="2dp" android:paddingBottom="2dp" android:orientation="vertical">
+                <TextView android:id="@+id/w_c5_6_d" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center_horizontal" android:gravity="center" android:minWidth="16dp" android:textColor="@color/w_dim" android:textSize="10sp" android:maxLines="1" />
+                <TextView android:id="@+id/w_c5_6_m" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="10" android:layout_marginTop="1dp" android:gravity="center" android:textColor="@color/w_dim" android:textSize="12sp" android:textStyle="bold" android:maxLines="1" android:background="@drawable/widget_cella_riposo" />
+                <TextView android:id="@+id/w_c5_6_p" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="7" android:layout_marginTop="2dp" android:gravity="center" android:textColor="@color/w_dim" android:textSize="11sp" android:textStyle="bold" android:maxLines="1" android:background="@drawable/widget_cella_p_riposo" android:visibility="gone" />
+            </LinearLayout>
+        </LinearLayout>
+        <!-- con una sola settimana il vuoto che avanza si divide con le righe (mezza parte a lui, una a ogni riga), così un giorno non diventa alto il doppio degli altri; da due in su le righe riempiono tutto -->
+        <FrameLayout android:id="@+id/w_cal_vuoto" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="0.5" android:importantForAccessibility="no" />
     </LinearLayout>
 </LinearLayout>
