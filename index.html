@@ -318,6 +318,10 @@ max-height:calc(100vh - 88px - var(--sab));max-height:calc(100dvh - 88px - var(-
 .qs-close{background:var(--s2);border:none;color:var(--dim);width:30px;height:30px;border-radius:50%;font-size:14px;
 display:flex;align-items:center;justify-content:center;cursor:pointer}
 .qs-close:hover{color:var(--ink);background:var(--line)}
+.qs-nuovo{margin:8px 0 2px}
+.qs-nuovo #qsNuovoForm{margin-top:8px;display:grid;gap:8px}
+.qs-nome{display:flex;align-items:center;gap:10px;font-size:13.5px;color:var(--dim)}
+.qs-nome input{flex:1;min-height:40px;padding:0 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit}
 .qs-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
 .qs-btn{background:var(--bg);border:1.5px solid var(--line);border-radius:var(--r);padding:11px 13px;font-family:inherit;
 font-size:14.5px;font-weight:600;color:var(--ink);cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;
@@ -534,7 +538,8 @@ border-top:5px solid var(--ink)}
    che la striscia usava per conto suo (--sleep-fill/--orange-bar) —
    quei token restano dove servivano altrove (#band), qui la tinta è la
    stessa che l'utente vede già ovunque per "sonno" e "turno". */
-.fg.fest::after{content:"";position:absolute;top:3px;right:3px;width:5px;height:5px;border-radius:50%;background:var(--faint)}
+.fg.fest::after{content:"";position:absolute;top:3px;right:3px;width:5px;height:5px;border-radius:50%;background:var(--risk)}
+.fg.gia{background:none;box-shadow:inset 0 0 0 1.5px var(--blue);color:var(--blue)}
 .cbar{position:absolute;top:0;bottom:0;border-radius:99px;background:var(--blue);z-index:2}
 .crows{position:relative}
 .cgrid{position:absolute;top:0;bottom:0;left:86px;right:0;z-index:1;pointer-events:none}
@@ -1951,6 +1956,15 @@ header b{font-size:23px}
       <button type="button" class="qs-close" id="qsClose" aria-label="Chiudi">✕</button>
     </div>
     <div class="qs-grid" id="qsGrid"></div>
+    <div class="qs-nuovo">
+      <button type="button" class="qs-chip" id="qsNuovoApri" aria-expanded="false" aria-controls="qsNuovoForm">＋ Un altro turno</button>
+      <div id="qsNuovoForm" hidden>
+        <label class="qs-nome"><span>Nome</span><input type="text" id="qsNuovoNome" maxlength="14" autocomplete="off" placeholder="Giornata"></label>
+        <div class="qs-ore"><span>Orari</span><input type="time" id="qsNuovoS" value="08:00" aria-label="Inizio"><span>→</span><input type="time" id="qsNuovoE" value="16:00" aria-label="Fine"></div>
+        <button type="button" class="btn pri" id="qsNuovoOk" style="width:100%;min-height:44px">Usa per questo giorno</button>
+        <small class="hint" style="display:block;margin-top:6px">Il turno resta tra i tuoi: la prossima volta lo trovi qui sopra, un tocco.</small>
+      </div>
+    </div>
     <div class="qs-spec" id="qsSpec"></div>
     <button type="button" class="qs-reset" id="qsReset" hidden>✕ Torna alla sequenza standard</button>
     <button type="button" class="btn g" id="qsVaiPiano" style="width:100%;min-height:44px;margin-top:6px" hidden>Vedi il piano di questo giorno</button>
@@ -3393,6 +3407,8 @@ function toastUndo(msg, azione){
 const esc = x => String(x==null?"":x).replace(/[&<>"']/g,
   c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const nameOf=c=>c==="?"?"Da inserire":(state.shifts[c]?state.shifts[c].n:"Riposo");
+// il nome del turno in un certo giorno: con orari diversi dal solito può cambiare fascia («Giornata» al posto di «Pomeriggio»)
+const nameDay=(c,k)=>state.shifts[c] ? NT.nomeTurno(state.shifts[c], state.giorni[k]) : nameOf(c);
 // un codice turno è "notturno" se attraversa o parte nel cuore della notte
 function isNightCode(c){ const sh=state.shifts&&state.shifts[c]; if(!sh) return false;
   try{ const b={rest:false,start:sh.s,end:sh.e}; return NT.spansNight(b)||NT.startsInNight(b); }catch(e){ return false; } }
@@ -3684,7 +3700,7 @@ function cards(P){
   if(!b.rest){
     out.push({k:"turno", lab:"Il tuo turno",
       val: hhmm(b.start)+" → "+hhmm(b.end),
-      small: "<b>"+esc(nameOf(b.c))+"</b>",
+      small: "<b>"+esc(b.name||nameOf(b.c))+"</b>",
       at: b.start});
   } else if(b.c==="?"){
     out.push({k:"turno_mancante", lab:"Turno non impostato",
@@ -6166,8 +6182,8 @@ function renderHeader(P, f){
       // giorno speciale: il suo nome (Ferie, Formazione…) o il turno con l'aggiunta
       const gs=state.giorni[iso(state.focus)]||{};
       const nomeG = gs.t==="ferie"||gs.t==="malattia"||gs.t==="formazione" ? GIORNI_SPECIALI[gs.t]
-        : nameOf(c)+(gs.t==="reperibile"?" · reperibile":gs.t==="extra"?" · extra":"");
-      pillEl.textContent = serie && !gs.t ? nameOf(c)+" "+serie.posizione+"/"+serie.totale : nomeG;
+        : nameDay(c,iso(state.focus))+(gs.t==="reperibile"?" · reperibile":gs.t==="extra"?" · extra":"");
+      pillEl.textContent = serie && !gs.t && gs.s==null ? nameOf(c)+" "+serie.posizione+"/"+serie.totale : nomeG;
       pillEl.className = "shiftpill" + (haEcc || gs.t || gs.s!=null ? " modificato" : "");
     }
     pillEl.style.cursor = "pointer";
@@ -7892,6 +7908,35 @@ if($("#qsGrid")) $("#qsGrid").addEventListener("click",e=>{
   render();
 });
 
+// Un turno che non è fra i tuoi (una «giornata» al posto del pomeriggio): nome e orari, e da lì è un turno come gli altri.
+if($("#qsNuovoApri")) $("#qsNuovoApri").addEventListener("click",()=>{
+  const f=$("#qsNuovoForm"), apri=f.hidden; f.hidden=!apri; $("#qsNuovoApri").setAttribute("aria-expanded",String(apri));
+  if(apri){ const nm=$("#qsNuovoNome"); const aggiorna=()=>{ const a=t($("#qsNuovoS").value), z=t($("#qsNuovoE").value); if(isFinite(a)&&isFinite(z)) nm.placeholder=NT.nomeOre(a, z>a?z:z+1440); }; aggiorna();
+    ["#qsNuovoS","#qsNuovoE"].forEach(i=>$(i).onchange=aggiorna); nm.focus(); }
+});
+if($("#qsNuovoOk")) $("#qsNuovoOk").addEventListener("click",()=>{
+  if(!quickShiftTarget) return;
+  const a=t($("#qsNuovoS").value); let z=t($("#qsNuovoE").value);
+  if(!isFinite(a)||!isFinite(z)){ toast("Scrivi inizio e fine"); return; }
+  while(z<=a) z+=1440;
+  if(z-a>960){ toast("Un turno di più di 16 ore? Controlla gli orari"); return; }
+  const nome=($("#qsNuovoNome").value.trim()||NT.nomeOre(a,z)).slice(0,14);
+  // se c'è già un turno con questi orari si usa quello; se no se ne aggiunge uno, con una sigla libera
+  let k=Object.keys(state.shifts).find(x=>state.shifts[x] && state.shifts[x].s===a && state.shifts[x].e===z);
+  if(!k){
+    const usate=new Set(Object.keys(state.shifts).concat(["R","S"]));
+    const prima=nome.normalize("NFD").replace(/[^A-Za-z]/g,"").charAt(0).toUpperCase();
+    k=[prima].concat("ABCDEFGHIJKLMNOPQTUVWXYZ".split("")).find(c=>c && !usate.has(c));
+    if(!k){ toast("Hai già troppi turni: toglierne uno in «I tuoi turni»"); return; }
+    state.shifts[k]={n:nome, s:a, e:z};
+  }
+  haptic(10);
+  scegliTurno(iso(quickShiftTarget), k);
+  const dove=iso(quickShiftTarget), quando=dove===iso(giornoVero())?"oggi":dove===iso(day(giornoVero(),1))?"domani":parseIso(dove).toLocaleDateString(LINGUA,{weekday:"short",day:"numeric",month:"short"});
+  salva(); chiudiQuickShift(); render();
+  toast(state.shifts[k].n+" "+hhmm(a)+"–"+hhmm(z)+" per "+quando);
+  $("#qsNuovoForm").hidden=true; $("#qsNuovoApri").setAttribute("aria-expanded","false"); $("#qsNuovoNome").value="";
+});
 if($("#qsReset")) $("#qsReset").addEventListener("click",()=>{
   if(!quickShiftTarget) return;
   haptic(10);
@@ -8827,7 +8872,7 @@ function popolaSelettoriScambio(selA, selB){
     const isToday=iso(d)===iso(giornoVero());
     const dayName=isToday?"Oggi":d.toLocaleDateString(LINGUA,{weekday:"short",day:"numeric"});
     const shiftCode=NT.codeAt(i);
-    const shiftName=nameOf(shiftCode);
+    const shiftName=nameDay(shiftCode, iso(d));
     const text=dayName+" ("+shiftName+")";
     oA+='<option value="'+i+'"'+(i===selAVal?' selected':'')+'>'+esc(text)+'</option>';
 
@@ -8945,7 +8990,8 @@ function giorniCiclo(giorni, persona){
       // il turno di quel giorno, per dire quali turni lasci con le ferie
       // a casa con la persona scelta: il suo giorno è di riposo (non lavora, non smonta dalla notte)
       const insieme = persona ? !!(asPartner(()=>{ const pb=NT.block(o); return pb.rest; }, persona)) : false;
-      out.push({d, lavoro:!b.rest, smonto: b.rest && !ieri.rest && ieri.end>1440, c, nome:NT.etichetta(o), festivo:festivo(d), insieme});
+      out.push({d, lavoro:!b.rest, smonto: b.rest && !ieri.rest && ieri.end>1440, c, nome:NT.etichetta(o), festivo:festivo(d), insieme,
+        ferieGia: !!(state.giorni[iso(d)] && state.giorni[iso(d)].t==="ferie"), cambio: !!state.ecc[iso(d)]});
     }
   } finally { state.focus=fPrima; }
   return out;
@@ -9048,8 +9094,8 @@ function renderFerie(){
   P.forEach((p,i)=>{
     const giorni=G.slice(p.a,p.r+1);
     const ferie=giorni.filter(g=>g.lavoro);
-    const sigla=g=>g.lavoro ? g.c : g.smonto ? "S" : "R";
-    const chip=giorni.map((g,k)=>'<span class="fg'+(g.lavoro?' ferie':(k===0&&g.smonto?' smonto':''))+(g.festivo?' fest':'')+'"'+(g.festivo?' title="Festivo"':'')+'>'+GIORNI_DOM[g.d.getDay()]+'<b>'+g.d.getDate()+'</b><i>'+esc(sigla(g))+'</i></span>').join("");
+    const sigla=g=>g.lavoro ? g.c : g.ferieGia ? "Fe" : g.smonto ? "S" : "R";
+    const chip=giorni.map((g,k)=>'<span class="fg'+(g.lavoro?' ferie':(k===0&&g.smonto?' smonto':''))+(g.ferieGia?' gia':'')+(g.festivo?' fest':'')+'"'+(g.festivo?' title="Festivo"':'')+'>'+GIORNI_DOM[g.d.getDay()]+'<b>'+g.d.getDate()+'</b><i>'+esc(sigla(g))+'</i></span>').join("");
     const quali=ferie.map(g=>g.d.toLocaleDateString(LINGUA,{weekday:"short", day:"numeric", ...(g.d.getMonth()!==giorni[0].d.getMonth()?{month:"short"}:{})})+" "+g.nome).join(" · ");
     h+='<section class="ferie-prop'+(p.migliore?' migliore':'')+'" aria-label="Proposta '+(i+1)+': '+gg(p.lung)+' a casa con '+gg(p.usate)+' di ferie">'+
       '<div class="ferie-testa"><b>'+gg(p.lung)+' a casa</b><span>'+(p.migliore?'la più lunga · ':'')+'con '+(p.usate===1?"1 giorno":p.usate+" giorni")+' di ferie'+
@@ -9060,7 +9106,11 @@ function renderFerie(){
       '<button type="button" class="btn g sm" data-ferie-segna="'+i+'">Segna queste ferie nel calendario</button>'+
     '</section>';
   });
-  h+='<p class="hint" style="margin-top:4px">Dal tuo ciclo e dai cambi che hai segnato. Controlla le regole del tuo contratto: in alcuni lo smonto non è riposo e le ferie si contano in modo diverso.</p>';
+  // cosa è già dentro il conto, e dove si aggiunge il resto
+  const nFer=G.filter(g=>g.ferieGia).length, nCam=G.filter(g=>g.cambio).length, nFest=G.filter(g=>g.festivo).length;
+  const gia=[nFer?(nFer===1?"1 giorno di ferie già segnato":nFer+" giorni di ferie già segnati"):"", nCam?(nCam===1?"1 cambio turno":nCam+" cambi turno"):"", nFest?nFest+" festivi (col puntino rosso)":""].filter(Boolean);
+  h+='<p class="hint" style="margin-top:4px"><b>Già nel conto:</b> '+(gia.length?esc(gia.join(", ")):"nessuna ferie o cambio segnati")+'. Le ferie e i cambi li segni in Turni › «Segna o importa i turni»; i festivi sono quelli nazionali, e il santo patrono o altri li aggiungi in Turni › Festivi. '+
+    'Un festivo in cui lavori resta un giorno di lavoro: se lo lavori puoi metterlo in ferie. Controlla le regole del tuo contratto: in alcuni lo smonto non è riposo e le ferie si contano in modo diverso.</p>';
   out.innerHTML=h;
 }
 function segnaFerie(i){
@@ -9738,7 +9788,7 @@ async function condividiCicloWhatsApp(){
     const dd = day(start, i);
     const isoStr = iso(dd);
     const code = (state.ecc && state.ecc[isoStr]) ? state.ecc[isoStr] : NT.codeAt(dnum(dd) - dnum(state.focus));
-    let nome = nameOf(code);
+    let nome = nameDay(code, isoStr);
     if(code === "S" && (!state.shifts || !state.shifts["S"])) nome = "Smonto";
 
     let orario = "";

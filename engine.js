@@ -199,13 +199,30 @@ function giornoA(off){
 
 // Il turno di un giorno con le sue eccezioni: ferie e malattia sono riposo,
 // la formazione e gli orari veri (straordinario) sostituiscono quelli del turno.
+// Il nome di un turno con orari diversi dal solito per un giorno: resta il suo se la fascia è la stessa (14:30-22:30 è ancora «Pomeriggio»),
+// altrimenti si legge dagli orari. Un pomeriggio sostituito con 08:00-16:00 è una «Giornata», non un «Pomeriggio» con altre ore.
+function fasciaOre(s, e){
+  const b = {start:s, end:e, rest:false};
+  if(eNotte(b)) return "n";
+  const m = ((s % 1440) + 1440) % 1440;
+  if(m >= 360 && m < 600 && e - s >= 420 && m + (e - s) >= 930) return "g";
+  return m < 660 ? "m" : m < 1020 ? "p" : "s";
+}
+const NOME_FASCIA = {n:"Notte", g:"Giornata", m:"Mattina", p:"Pomeriggio", s:"Sera"};
+function nomeOre(s, e){ return NOME_FASCIA[fasciaOre(s, e)]; }
+function nomeTurno(d, g){
+  if(g && g.n) return g.n;
+  if(g && g.s != null && g.t !== "formazione" && fasciaOre(g.s, g.e) !== fasciaOre(d.s, d.e)) return NOME_FASCIA[fasciaOre(g.s, g.e)];
+  return d.n;
+}
+
 function block(off){
   const g = giornoA(off), tipo = g && g.t || null;
   if(tipo && ASSENZE[tipo]) return {c:"R", rest:true, tipo};
   const c = codeAt(off), d = state.shifts[c];
   if(tipo==="formazione") return {c, name:GIORNI_SPECIALI.formazione, start:g.s, end:g.e, rest:false, tipo};
   if(!d) return {c, rest:true, tipo};
-  if(g && g.s!=null) return {c, name:d.n, start:g.s, end:g.e, rest:false, tipo, oreVere:true, previsto:d.e-d.s};
+  if(g && g.s!=null) return {c, name:nomeTurno(d, g), start:g.s, end:g.e, rest:false, tipo, oreVere:true, previsto:d.e-d.s};
   return {c, name:d.n, start:d.s, end:d.e, rest:false, tipo};
 }
 
@@ -242,7 +259,7 @@ function etichetta(off){
   if(tipo && (ASSENZE[tipo] || tipo==="formazione")) return GIORNI_SPECIALI[tipo];
   if(c === "?") return "?";
   const d = state.shifts[c];
-  return d ? d.n : "Riposo";
+  return d ? nomeTurno(d, g) : "Riposo";
 }
 
 const WAKE_LO = 240, WAKE_HI = 720;
@@ -1099,7 +1116,7 @@ function buildIcs(days){
 
   normalizza();
   return {
-    state, plan, buildIcs, buildCouple, buildEvents, buildCoupleEvents, codeAt, block, giornoA, etichetta, tipoDelGiorno, fasciaDelGiorno, oreNotturne, eNotte,
+    state, plan, buildIcs, buildCouple, buildEvents, buildCoupleEvents, codeAt, block, giornoA, etichetta, tipoDelGiorno, fasciaDelGiorno, nomeTurno, nomeOre, oreNotturne, eNotte,
     sharedDays, freeOverlap, asPartner,
     setIcs(o){ Object.assign(ICS, o||{}); return ICS; },
     // Esposti anche questi: prima privati alla closure, ma index.html (che
