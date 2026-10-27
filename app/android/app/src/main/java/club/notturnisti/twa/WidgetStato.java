@@ -29,7 +29,8 @@ final class WidgetStato {
 
     String etichetta = "Notturnisti", titolo = "Apri Notturnisti", sotto = "per vedere qui il tuo piano", icona = "libero";
     int progresso = -1;                                  // 0..1000, -1 = nessuna barra
-    final List<Evento> eventi = new ArrayList<>();       // già in ordine di ora, al più due
+    static final int MAX_VOCI = 4;
+    final List<Evento> eventi = new ArrayList<>();       // già in ordine di ora, al più MAX_VOCI
     Azione azione = Azione.NESSUNA;
     String testoAzione = "";
     int oraSveglia = -1, minSveglia = -1;                // per SVEGLIA
@@ -185,7 +186,7 @@ final class WidgetStato {
 
         // ───── le prossime voci: il prossimo turno (sempre, anche fra giorni) e le altre in arrivo, in ordine di ora ─────
         List<JSONObject> altre = new ArrayList<>();
-        for (int i = 0; i < v.length() && altre.size() < 2; i++) {
+        for (int i = 0; i < v.length() && altre.size() < MAX_VOCI; i++) {
             JSONObject x = v.getJSONObject(i);
             long s = x.getLong("s");
             if (s <= ora || x == eroe || x == usata || e(x, "turno")) continue;
@@ -195,7 +196,7 @@ final class WidgetStato {
         boolean turnoInAlto = eroe != null && turno != null && e(eroe, "turno") && eroe.getLong("s") == turno.getLong("s");
         List<Evento> tutti = new ArrayList<>();
         if (turno != null && !turnoInAlto) tutti.add(new Evento(quando(turno.getLong("s"), ora), turno.optString("t", "Turno"), "", "turno", turno.getLong("s")));
-        for (int i = 0; i < altre.size() && tutti.size() < 2; i++) {
+        for (int i = 0; i < altre.size() && tutti.size() < MAX_VOCI; i++) {
             JSONObject x = altre.get(i); long s = x.getLong("s");
             boolean letto = e(x, "sonno");
             tutti.add(new Evento(quando(s, ora), x.getString("t"), letto ? "→ " + hhmm(x.getLong("e")) : "", tipoIcona(x.optString("k", null)), s));

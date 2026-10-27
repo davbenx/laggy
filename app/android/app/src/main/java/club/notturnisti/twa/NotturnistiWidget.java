@@ -174,8 +174,9 @@ public class NotturnistiWidget extends AppWidgetProvider {
 
         // ───── le prossime voci ─────
         rv.setViewVisibility(R.id.w_eventi, p.voci > 0 ? View.VISIBLE : View.GONE);
-        int[][] riga = { { R.id.w_e1, R.id.w_e1_ic, R.id.w_e1_ora, R.id.w_e1_t, R.id.w_e1_chip }, { R.id.w_e2, R.id.w_e2_ic, R.id.w_e2_ora, R.id.w_e2_t, R.id.w_e2_chip } };
-        for (int i = 0; i < 2; i++) {
+        int[][] riga = { { R.id.w_e1, R.id.w_e1_ic, R.id.w_e1_ora, R.id.w_e1_t, R.id.w_e1_chip }, { R.id.w_e2, R.id.w_e2_ic, R.id.w_e2_ora, R.id.w_e2_t, R.id.w_e2_chip },
+            { R.id.w_e3, R.id.w_e3_ic, R.id.w_e3_ora, R.id.w_e3_t, R.id.w_e3_chip }, { R.id.w_e4, R.id.w_e4_ic, R.id.w_e4_ora, R.id.w_e4_t, R.id.w_e4_chip } };
+        for (int i = 0; i < riga.length; i++) {
             rv.setViewVisibility(riga[i][0], i < p.voci ? View.VISIBLE : View.GONE);
             if (i >= p.voci) continue;
             WidgetStato.Evento e = st.eventi.get(i);

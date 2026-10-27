@@ -37,7 +37,8 @@ final class WidgetPiano {
         if (righeMax >= 1 && resto >= TESTA_CAL + riga) { p.calendario = true; p.righe = 1; resto -= TESTA_CAL + riga; }
         // il mese intero (anche con la persona) viene prima della seconda voce
         while (p.calendario && p.righe < righeMax && resto >= riga) { p.righe++; resto -= riga; }
-        if (vociDisponibili >= 2 && p.voci == 1 && resto >= VOCE) { p.voci = 2; resto -= VOCE; }
+        // lo spazio che avanza si riempie con altre voci, una riga alla volta (fino a quattro)
+        while (p.voci >= 1 && p.voci < vociDisponibili && p.voci < WidgetStato.MAX_VOCI && resto >= VOCE) { p.voci++; resto -= VOCE; }
         return p;
     }
 }

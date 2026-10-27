@@ -43,6 +43,12 @@ public class WidgetPianoTest {
         assertFalse(WidgetPiano.calcola(220, false, true, 2, false, 5).calendario);
     }
 
+    @Test public void loSpazioCheAvanzaSiRiempieConAltreVoci() {
+        assertEquals("fino a quattro voci, una riga alla volta", 3, WidgetPiano.calcola(190, false, true, 4, false, 5).voci);
+        assertEquals("mai più di quelle che ci sono", 2, WidgetPiano.calcola(190, false, true, 2, false, 5).voci);
+        assertEquals(4, WidgetPiano.calcola(225, false, true, 4, true, 5).voci);
+    }
+
     @Test public void laBarraSoloSeInCorso() {
         assertTrue(WidgetPiano.calcola(130, true, false, 2, false, 5).barra);
         assertFalse(WidgetPiano.calcola(130, false, false, 2, false, 5).barra);
