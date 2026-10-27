@@ -68,7 +68,6 @@ Un progetto indipendente, nato da chi i turni li fa. Segnalazioni e idee: dall'a
 
 ## Note di versione 1.3.5 (max 500)
 Novità:
-• Nuovo logo
 • Un colore per ogni turno (mattina, pomeriggio, sera, notte) nel calendario e nel widget
 • «Sonno e carico»: come dormi prima di ogni tipo di turno
 • Ciclo a calendario, con il mese nel titolo
