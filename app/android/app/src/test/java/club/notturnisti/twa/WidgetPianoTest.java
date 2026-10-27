@@ -25,10 +25,17 @@ public class WidgetPianoTest {
     }
 
     @Test public void altoRiempieConLeSettimane() {
-        WidgetPiano p = WidgetPiano.calcola(460, false, false, 2, true, 5);
+        WidgetPiano p = WidgetPiano.calcola(420, false, false, 2, true, 5);
         assertTrue(p.calendario); assertEquals(4, p.righe); assertEquals(2, p.voci);
         assertEquals(5, WidgetPiano.calcola(560, false, false, 2, true, 5).righe);
         assertEquals("mai oltre le righe che ci sono", 3, WidgetPiano.calcola(900, false, false, 2, true, 3).righe);
+    }
+
+    @Test public void unLauncherCheDiceMenoDelVeroNonLasciaIlBuco() {
+        // 140 dp dichiarati (ne ha ~185): dopo il pulsante c'è posto per la prima voce
+        assertEquals(1, WidgetPiano.calcola(140, false, true, 2, false, 5).voci);
+        // il calendario invece non si apre su una stima ottimistica
+        assertFalse(WidgetPiano.calcola(220, false, true, 2, false, 5).calendario);
     }
 
     @Test public void laBarraSoloSeInCorso() {

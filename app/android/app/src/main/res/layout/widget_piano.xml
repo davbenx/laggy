@@ -306,5 +306,7 @@
                 <TextView android:id="@+id/w_c4_6_p" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="7" android:layout_marginTop="2dp" android:gravity="center" android:textColor="@color/w_dim" android:textSize="11sp" android:textStyle="bold" android:maxLines="1" android:background="@drawable/widget_cella_p_riposo" android:visibility="gone" />
             </LinearLayout>
         </LinearLayout>
+        <!-- il vuoto che avanza si divide con le righe (due parti a lui, una a loro): un giorno non diventa mai alto il doppio degli altri -->
+        <FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="2" android:importantForAccessibility="no" />
     </LinearLayout>
 </LinearLayout>
