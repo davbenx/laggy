@@ -7,7 +7,7 @@ package club.notturnisti.twa;
  * hanno peso), quindi non restano vuoti. Misure in dp ricavate dall'anteprima su computer (tools/anteprima-widget), non a occhio; senza Android: si prova sulla JVM.
  */
 final class WidgetPiano {
-    static final int MARGINI = 28, ADESSO = 46, BARRA = 10, PULSANTE = 50, PRIMA_VOCE = 30, VOCE = 24, TESTA_CAL = 58, RIGA = 44, RIGA_PERSONA = 54;
+    static final int MARGINI = 28, ADESSO = 46, BARRA = 10, PULSANTE = 50, PRIMA_VOCE = 30, VOCE = 24, TESTA_CAL = 72, RIGA = 44, RIGA_PERSONA = 54;
     /** I launcher riportano un'altezza un po' più bassa del vero (15-28% misurato, fino a 28% su un OnePlus): prudente 5%, generosa 12% (vedi calcola). */
     static final float ALTEZZA_VERA = 1.05f, ALTEZZA_GENEROSA = 1.12f;
 
@@ -15,24 +15,22 @@ final class WidgetPiano {
     int voci, righe;
 
     static WidgetPiano calcola(int altezzaDp, boolean inCorso, boolean haPulsante, int vociDisponibili, boolean conPersona, int righeMax) {
-        // Due stime. La prudente decide se il calendario c'è: una riga schiacciata non si perdona. La generosa (i launcher dichiarano
-        // fino al 28% in meno del vero, misurato) decide il resto: barra, pulsante, voci e le settimane dopo la prima; altrimenti
-        // restano buchi in fondo. Se il launcher è esatto, al peggio si accorcia un po' l'ultima riga.
-        WidgetPiano p = calcolaCon(ALTEZZA_VERA, altezzaDp, inCorso, haPulsante, vociDisponibili, conPersona, righeMax, 0);
-        if (!p.calendario) return calcolaCon(ALTEZZA_GENEROSA, altezzaDp, inCorso, haPulsante, vociDisponibili, conPersona, 0, 0);
-        WidgetPiano g = calcolaCon(ALTEZZA_GENEROSA, altezzaDp, inCorso, haPulsante, vociDisponibili, conPersona, righeMax, 4);
-        p.voci = Math.max(p.voci, g.voci);
-        p.righe = Math.max(p.righe, g.righe);
-        return p;
+        // Due stime. Con il calendario conta solo la prudente: le righe si allargano da sole per riempire lo spazio che avanza, ma se ne
+        // mettessimo troppe si schiaccerebbero fino a perdere la lettera del turno. Senza calendario, un launcher che dichiara meno
+        // del vero (fino al 28%, misurato) lascerebbe un buco in fondo: allora barra, pulsante e voci si decidono con la stima generosa;
+        // se il launcher è esatto, al peggio si accorcia l'ultima riga di testo.
+        WidgetPiano p = calcolaCon(ALTEZZA_VERA, altezzaDp, inCorso, haPulsante, vociDisponibili, conPersona, righeMax);
+        if (p.calendario) return p;
+        return calcolaCon(ALTEZZA_GENEROSA, altezzaDp, inCorso, haPulsante, vociDisponibili, conPersona, 0);
     }
 
-    private static WidgetPiano calcolaCon(float fattore, int altezzaDp, boolean inCorso, boolean haPulsante, int vociDisponibili, boolean conPersona, int righeMax, int riduzioneRiga) {
+    private static WidgetPiano calcolaCon(float fattore, int altezzaDp, boolean inCorso, boolean haPulsante, int vociDisponibili, boolean conPersona, int righeMax) {
         WidgetPiano p = new WidgetPiano();
         int resto = Math.round(altezzaDp * fattore) - MARGINI - ADESSO;
         if (inCorso && resto >= BARRA) { p.barra = true; resto -= BARRA; }
         if (haPulsante && resto >= PULSANTE) { p.pulsante = true; resto -= PULSANTE; }
         if (vociDisponibili >= 1 && resto >= PRIMA_VOCE) { p.voci = 1; resto -= PRIMA_VOCE; }
-        int riga = (conPersona ? RIGA_PERSONA : RIGA) - riduzioneRiga;
+        int riga = conPersona ? RIGA_PERSONA : RIGA;
         if (righeMax >= 1 && resto >= TESTA_CAL + riga) { p.calendario = true; p.righe = 1; resto -= TESTA_CAL + riga; }
         // il mese intero (anche con la persona) viene prima della seconda voce
         while (p.calendario && p.righe < righeMax && resto >= riga) { p.righe++; resto -= riga; }

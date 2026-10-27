@@ -15,25 +15,25 @@ public class WidgetPianoTest {
         assertTrue("col pulsante prima di tutto il resto", p.pulsante); assertEquals(0, p.voci); assertFalse(p.calendario);
         p = WidgetPiano.calcola(180, false, true, 2, false, 5);
         assertTrue(p.pulsante); assertEquals(2, p.voci); assertFalse(p.calendario);
-        p = WidgetPiano.calcola(250, false, true, 2, false, 5);
+        p = WidgetPiano.calcola(285, false, true, 2, false, 5);
         assertTrue(p.pulsante); assertTrue(p.calendario); assertEquals(1, p.righe); assertEquals(2, p.voci);
     }
 
     @Test public void conPersonaLeRigheSonoPiuAlte() {
-        WidgetPiano p = WidgetPiano.calcola(265, false, true, 2, true, 5);
+        WidgetPiano p = WidgetPiano.calcola(285, false, true, 2, true, 5);
         assertTrue(p.calendario); assertEquals("con la persona una sola settimana", 1, p.righe);
         assertFalse("e il calendario non si apre su una stima ottimistica", WidgetPiano.calcola(240, false, true, 2, true, 5).calendario);
     }
 
     @Test public void altoRiempieConLeSettimane() {
-        WidgetPiano p = WidgetPiano.calcola(340, false, false, 2, true, 5);
+        WidgetPiano p = WidgetPiano.calcola(400, false, false, 2, true, 5);
         assertTrue(p.calendario); assertEquals(4, p.righe); assertEquals(2, p.voci);
         assertEquals(5, WidgetPiano.calcola(560, false, false, 2, true, 5).righe);
         assertEquals("mai oltre le righe che ci sono", 3, WidgetPiano.calcola(900, false, false, 2, true, 3).righe);
     }
 
     @Test public void ilMeseInteroAncheConLaPersona() {
-        WidgetPiano p = WidgetPiano.calcola(470, false, true, 2, true, 5);
+        WidgetPiano p = WidgetPiano.calcola(485, false, true, 2, true, 5);
         assertTrue(p.calendario); assertEquals("cinque settimane, con due sigle per giorno", 5, p.righe);
     }
 
