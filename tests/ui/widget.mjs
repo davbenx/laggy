@@ -37,7 +37,7 @@ await p.context().close();
   const lun=new Date(); lun.setHours(12,0,0,0); lun.setDate(lun.getDate()-((lun.getDay()+6)%7)-28);
   const o=Math.round((new Date(tra(0)+"T12:00:00")-lun)/864e5);   // dov'è oggi nei dati
   ok(M.io[o+1].startsWith("Fe:") && M.io[o+3].startsWith("N:"), "le mie ferie (giorno 1) e il mio cambio in N (giorno 3) ci sono per me → "+M.io.slice(o,o+5).join(" "));
-  ok(M.p[0].g.slice(o,o+6).join(" ")==="M:l M:l R:r R:r M:l M:l", "per Anna contano solo i suoi turni, non i miei cambi → "+M.p[0].g.slice(o,o+6).join(" "));
+  ok(M.p[0].g.slice(o,o+6).join(" ")==="M:m M:m R:r R:r M:m M:m", "per Anna contano solo i suoi turni, non i miei cambi → "+M.p[0].g.slice(o,o+6).join(" "));
   await q.context().close(); }
 
 // il calendario: da quattro lunedì fa per 20 settimane (140 giorni), la mia sigla e quella delle persone (la stellina sempre dentro, al massimo 4)
@@ -48,12 +48,12 @@ await p.context().close();
   const lun=new Date(); lun.setHours(12,0,0,0); lun.setDate(lun.getDate()-((lun.getDay()+6)%7)-28);
   ok(M && M.da===iso(lun) && M.io.length===140, "calendario: da quattro lunedì fa, 20 settimane (140 giorni)");
   ok(Math.round((new Date(tra(0)+"T12:00:00")-lun)/864e5)===28+((new Date().getDay()+6)%7), "calendario: oggi cade nella quinta settimana (quattro prima, quindici dopo)");
-  ok(M.io.every(x=>/^[^:]+:[nlr?]$/.test(x)), "calendario: ogni giorno è «sigla:tipo» → "+M.io.slice(0,7).join(" "));
+  ok(M.io.every(x=>/^[^:]+:[nlrmps?]$/.test(x)), "calendario: ogni giorno è «sigla:tipo» → "+M.io.slice(0,7).join(" "));
   const i1=Math.round((new Date(tra(1)+"T12:00:00")-lun)/864e5);
   ok(/^Fe:/.test(M.io[i1]), "calendario: le mie ferie compaiono con la sigla Fe");
   ok(M.p.length===4 && M.p.some(x=>x.n==="P5"), "calendario: al massimo 4 persone e la stellina (P5) c'è sempre → "+M.p.map(x=>x.n));
   ok(M.p[M.sel].n==="P5" && M.star==="5|P5", "calendario: sel punta alla stellina e la chiave la riconosce → "+M.sel+" "+M.star);
-  ok(M.p.every(x=>x.g.length===140 && x.g.every(y=>/^[^:]+:[nlr?]$/.test(y))), "calendario: ogni persona ha 140 giorni");
+  ok(M.p.every(x=>x.g.length===140 && x.g.every(y=>/^[^:]+:[nlrmps?]$/.test(y))), "calendario: ogni persona ha 140 giorni");
   await q.context().close();
   const r=await apri({turniConfigurati:true,pattern:"MMNRR",anchor:tra(0),shifts:SH,repeat:true,firstSeenAt:tra(-30)});
   const M2=(await r.evaluate(()=>window.__widget)).mese;

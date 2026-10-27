@@ -136,7 +136,7 @@ try{
   --orange:#FF9068; --orange-fill:#FF6B35; --orange-soft:#3A2119;
   --risk:#FF6B5C; --risk-soft:#3A1C18; --risk-line:#7A342C;
   --picco:#D98CF0;   /* picco di sonnolenza nei grafici: il rosso di --risk qui si confonde con l'arancio del turno */
-  --sleep-fill:#2D5A8C; --ok:#5FBF85; --ok-soft:#173222; --ok-line:#2F6B45; --persona:#7FD9C9; --persona-soft:#173B36; --notte:#9CA3F5; --on-warm:#15171A;
+  --sleep-fill:#2D5A8C; --ok:#5FBF85; --ok-soft:#173222; --ok-line:#2F6B45; --persona:#7FD9C9; --persona-soft:#173B36; --notte:#9CA3F5; --mattina:#F2C66D; --mattina-soft:#3A3118; --sera:#F08CBA; --sera-soft:#3A1B2B; --on-warm:#15171A;
   --bg-blur:rgba(20,22,26,0.85);
   --warm-tint:#241C15; --cool-tint:#1E2142;
   --violet:var(--blue); --violetd:var(--blue-soft);
@@ -156,7 +156,7 @@ try{
     --orange:#B24B25; --orange-fill:#FF6B35; --orange-bar:#D9541F; --orange-soft:#FCE9E1;
     --risk:#C0392B; --risk-soft:#FBE9E7; --risk-line:#E57368;
     --picco:#8E2A6B;
-    --sleep-fill:#24496F; --ok:#2E7D4F; --ok-soft:#E6F4EC; --ok-line:#8CC9A5; --persona:#0F6B60; --persona-soft:#D8F0EA; --notte:#3B3F9E; --on-warm:#15171A;
+    --sleep-fill:#24496F; --ok:#2E7D4F; --ok-soft:#E6F4EC; --ok-line:#8CC9A5; --persona:#0F6B60; --persona-soft:#D8F0EA; --notte:#3B3F9E; --mattina:#8A5A00; --mattina-soft:#FBEFC8; --sera:#A3215F; --sera-soft:#FBE3EE; --on-warm:#15171A;
     --bg-blur:rgba(255,255,255,.82);
     --warm-tint:#FBF1E9; --cool-tint:#E6E8F8;
     --shadow-card:0 2px 8px -2px rgba(21,23,26,.22);
@@ -179,7 +179,7 @@ try{
   --orange:#FF9068; --orange-fill:#FF6B35; --orange-soft:#3A2119;
   --risk:#FF6B5C; --risk-soft:#3A1C18; --risk-line:#7A342C;
   --picco:#D98CF0;   /* picco di sonnolenza nei grafici: il rosso di --risk qui si confonde con l'arancio del turno */
-  --sleep-fill:#2D5A8C; --ok:#5FBF85; --ok-soft:#173222; --ok-line:#2F6B45; --persona:#7FD9C9; --persona-soft:#173B36; --notte:#9CA3F5; --on-warm:#15171A;
+  --sleep-fill:#2D5A8C; --ok:#5FBF85; --ok-soft:#173222; --ok-line:#2F6B45; --persona:#7FD9C9; --persona-soft:#173B36; --notte:#9CA3F5; --mattina:#F2C66D; --mattina-soft:#3A3118; --sera:#F08CBA; --sera-soft:#3A1B2B; --on-warm:#15171A;
   --bg-blur:rgba(20,22,26,0.85);
   --warm-tint:#241C15; --cool-tint:#1E2142;
   --shadow-card:0 2px 10px -3px rgba(0,0,0,.4);
@@ -192,7 +192,7 @@ try{
   --orange:#B24B25; --orange-fill:#FF6B35; --orange-bar:#D9541F; --orange-soft:#FCE9E1;
   --risk:#C0392B; --risk-soft:#FBE9E7; --risk-line:#E57368;
   --picco:#8E2A6B;
-  --sleep-fill:#24496F; --ok:#2E7D4F; --ok-soft:#E6F4EC; --ok-line:#8CC9A5; --persona:#0F6B60; --persona-soft:#D8F0EA; --notte:#3B3F9E; --on-warm:#15171A;
+  --sleep-fill:#24496F; --ok:#2E7D4F; --ok-soft:#E6F4EC; --ok-line:#8CC9A5; --persona:#0F6B60; --persona-soft:#D8F0EA; --notte:#3B3F9E; --mattina:#8A5A00; --mattina-soft:#FBEFC8; --sera:#A3215F; --sera-soft:#FBE3EE; --on-warm:#15171A;
   --bg-blur:rgba(255,255,255,.82);
   --warm-tint:#FBF1E9; --cool-tint:#E6E8F8;
   --shadow-card:0 2px 8px -2px rgba(21,23,26,.22);
@@ -490,11 +490,6 @@ body.primo-avvio #firstPlanBanner,body.primo-avvio #setupChecklist,body.primo-av
 .vsw{display:inline-flex;gap:2px;padding:2px;margin:0 0 12px;border:1px solid var(--line);border-radius:999px;background:var(--bg)}
 .vsw button{border:0;background:none;color:var(--dim);font:inherit;font-size:13px;font-weight:600;min-height:32px;padding:0 14px;border-radius:999px;cursor:pointer}
 .vsw button[aria-pressed="true"]{background:var(--blue-fill);color:#fff}
-body.cic-cal .cycbar{display:none}
-.cal-testa{display:flex;align-items:center;gap:2px;margin:0 0 6px}
-.cal-testa .ibtn{width:40px;height:40px}
-.cal-testa .ibtn[disabled]{opacity:.3;cursor:default}
-.cal-titolo{background:none;border:0;font:inherit;font-family:var(--serif);font-size:18px;font-weight:600;color:var(--ink);padding:0 6px;min-height:40px;cursor:pointer}
 .cal-sett{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
 .cal-gs{font-size:11px;font-weight:700;color:var(--faint);text-align:center;padding:2px 0}
 .ccell{display:flex;flex-direction:column;align-items:stretch;gap:2px;background:none;border:0;padding:3px 2px 4px;font:inherit;cursor:pointer;border-radius:10px;min-width:0;color:var(--ink)}
@@ -504,11 +499,13 @@ body.cic-cal .cycbar{display:none}
 .cnum.altro{color:var(--blue)}
 .cnum.uno{font-weight:800}
 .ctile{display:flex;align-items:center;justify-content:center;height:26px;border-radius:8px;font-size:13px;font-weight:700;background:var(--s2);color:var(--dim);overflow:hidden}
-.ctile.t-l{background:var(--orange-soft);color:var(--orange)}
+.ctile.t-l,.ctile.t-p{background:var(--orange-soft);color:var(--orange)}
+.ctile.t-m{background:var(--mattina-soft);color:var(--mattina)}
+.ctile.t-s{background:var(--sera-soft);color:var(--sera)}
 .ctile.t-n{background:var(--cool-tint);color:var(--notte)}
 .ctile.t-q{background:none;border:1px dashed var(--line)}
 .ctile.p{height:19px;font-size:11px;border-radius:999px}
-.ctile.p.t-l,.ctile.p.t-n{background:var(--persona-soft);color:var(--persona)}
+.ctile.p.t-l,.ctile.p.t-n,.ctile.p.t-m,.ctile.p.t-p,.ctile.p.t-s{background:var(--persona-soft);color:var(--persona)}
 .cyc.con-pers .caxis .crail span{font-size:10px}   /* con la colonna della persona la rotaia si stringe: ore più piccole */
 .crow.spec .ccode{font-size:10.5px;color:var(--dim)}
 .crow.rep .ccode::after{content:"";position:absolute;top:-1px;right:-3px;width:5px;height:5px;border-radius:50%;background:var(--orange-fill)}
@@ -622,10 +619,21 @@ display:flex;flex-direction:column;align-items:center;justify-content:center;gap
 .mese-num{display:grid;grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:8px;margin-top:10px}
 .mese-num div{background:var(--bg);border-radius:10px;padding:8px 10px}
 .mese-num b{display:block;font-size:20px;color:var(--ink)}
-.mese-segna{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;min-height:46px;margin-top:10px;font-weight:600}
+.mese-segna{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;min-height:46px;margin-top:14px;font-weight:600}
 .mese-segna small{font-size:12px;font-weight:400;color:var(--dim);margin-top:1px}
 .mese-vuoto{margin:10px 0 0;font-size:14px;color:var(--dim)}
-.mese-manda{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 6px}
+.mese-manda{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mese-manda .btn{min-height:44px}
+.mese-nota{margin:10px 0 0;font-size:12.5px}
+.az-desc{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;min-height:46px;margin-top:8px;font-weight:600;text-align:center}
+.az-desc small{font-size:12px;font-weight:400;color:var(--dim);margin-top:2px;line-height:1.35;max-width:30em}
+.mese-sez{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.mese-eb{display:block;font-size:12.5px;font-weight:600;color:var(--dim);margin:0 0 8px}
+.mese-fest{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.mese-fest>div{flex:1;min-width:0}
+.mese-fest b{display:block;font-size:14.5px;color:var(--ink)}
+.mese-fest .hint{display:block;margin:2px 0 0;font-size:12.5px;line-height:1.4}
+.mese-fest .btn{flex:none}
 .mese-spec{margin:10px 0 0;font-size:13px;color:var(--dim);line-height:1.45}
 .mese-num span{font-size:12px;color:var(--dim)}
 .mese .hint{margin:8px 0 0}
@@ -641,6 +649,13 @@ display:flex;flex-direction:column;align-items:center;justify-content:center;gap
 .vrow.giu .vbar i{background:var(--orange);opacity:1}
 .vrow.giu .vlab{font-weight:700}
 .vval{font-size:13.5px;font-weight:600;color:var(--ink);text-align:right}
+.frow{display:grid;grid-template-columns:minmax(84px,auto) 1fr auto;align-items:center;gap:10px;padding:5px 0}
+.flab{font-size:13.5px;color:var(--ink);white-space:nowrap}
+.fbar{position:relative;height:8px;border-radius:0 4px 4px 0;background:var(--s2)}
+.fbar i{display:block;height:100%;border-radius:0 4px 4px 0}
+.frow.giu .flab{font-weight:700}
+.fval{font-size:13.5px;font-weight:600;color:var(--ink);text-align:right}
+.fnota{margin:8px 0 0;font-size:13px;line-height:1.45;color:var(--dim)}
 .vnota{font-size:13.5px;line-height:1.5;color:var(--ink);margin:10px 0 0}
 
 .card{background:var(--s1);border:1px solid var(--line);border-left-width:3px;border-radius:var(--r);padding:14px 15px;margin-bottom:10px;box-shadow:var(--shadow-card)}
@@ -1812,7 +1827,7 @@ header b{font-size:23px}
     <button type="button" id="doShareWhatsApp" class="share3-az"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg><b>Manda i turni</b><span>un messaggio con i prossimi giorni</span></button>
     <button type="button" id="doPrint" class="share3-az"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8V3h12v5"/><rect x="4" y="8" width="16" height="8" rx="1.5"/><path d="M8 13h8v7H8z"/></svg><b>Stampa o PDF</b><span>il calendario da appendere</span></button>
   </div>
-  <button type="button" class="btn g sm" id="doCycQR" style="align-self:center">Mostra il QR da inquadrare</button>
+  <button type="button" class="btn g az-desc" id="doCycQR" style="margin-top:0">Di persona: mostra il QR<small>Il collega lo inquadra con la fotocamera e trova il tuo ciclo.</small></button>
 </div>
 
 <div id="luciditaGiornoWrap"></div>
@@ -5117,7 +5132,7 @@ function renderOpzFunzioni(voci){
     const v2=voci.filter(x=>x.id!=="turni");
     const prove=[];
     if(promemoriaAttivi()) prove.push('<button type="button" class="btn g sm" data-prova-notifica>Prova una notifica</button>');
-    if(promemoriaAttivi()) prove.push('<button type="button" class="btn g sm" data-prossimi-promemoria>Vedi i prossimi promemoria</button>');
+    if(promemoriaAttivi()) prove.push('<button type="button" class="btn g sm" data-prossimi-promemoria>Vedi i prossimi</button>');
     if(platform.calendar.available && platform.calendar.attivo()){
       prove.push('<button type="button" class="btn g sm" data-cal-apri>Apri il calendario</button>');
       prove.push('<button type="button" class="btn g sm" data-cal-controlla>Controlla</button>'); }
@@ -6377,11 +6392,12 @@ function renderMese(){
       '<div><b>'+r.liberi+'</b><span>giorni senza turno</span></div>'+
     '</div>')+
     (()=>{ const v=specialiMese(r); return v.length ? '<p class="mese-spec">'+esc(v.join(" · "))+'</p>' : ''; })()+
-    (vuoto ? '' : '<p class="hint">Ore dall\'inizio alla fine di ogni turno, pause comprese: per controllare, non è un conteggio ufficiale.</p>'+
-      '<p class="mese-manda"><button type="button" class="btn g sm" data-mese-manda>Manda il mese</button><button type="button" class="btn g sm" data-anno-manda>Manda gli ultimi 12 mesi</button></p>')+
-    festiviHtml()+
+    (vuoto ? '' : '<p class="hint mese-nota">Ore dall\'inizio alla fine di ogni turno, pause comprese: per controllare, non è un conteggio ufficiale.</p>')+
     '<button type="button" class="btn g mese-segna" data-mese-segna>Segna o importa i turni'+
-      (r.ignoti && !vuoto ? '<small>'+r.ignoti+(r.ignoti===1?' giorno ancora da segnare':' giorni ancora da segnare')+'</small>' : '')+'</button>';
+      (r.ignoti && !vuoto ? '<small>'+r.ignoti+(r.ignoti===1?' giorno ancora da segnare':' giorni ancora da segnare')+'</small>' : '')+'</button>'+
+    (vuoto ? '' : '<div class="mese-sez"><span class="mese-eb">Manda un riepilogo in un messaggio</span>'+
+      '<div class="mese-manda"><button type="button" class="btn g" data-mese-manda>Questo mese</button><button type="button" class="btn g" data-anno-manda>Ultimi 12 mesi</button></div></div>')+
+    festiviHtml();
 }
 // Festivi del contratto: una riga che dice cosa si conta, e un piccolo editor.
 var festiviAperto=false;   // var: letto da renderMese durante l'avvio
@@ -6389,8 +6405,8 @@ function nomeGiornoMese(k){ const [m,g]=k.split("-").map(Number); return new Dat
 function festiviHtml(){
   const c=festiviCfg(), fisso=tipoTurni()==="fisso";
   const conta="Conto "+(c.dom?"le domeniche e ":"")+"i festivi nazionali"+(c.extra.length?" e "+c.extra.map(nomeGiornoMese).join(", "):"")+".";
-  if(!festiviAperto) return '<p class="hint mese-fest">'+esc(conta)+' <button type="button" class="btn g sm" data-fest-apri>Aggiungi i tuoi</button></p>';
-  return '<div class="ecc mese-fest-box">'+
+  if(!festiviAperto) return '<div class="mese-sez mese-fest"><div><b>Festivi</b><span class="hint">'+esc(conta)+'</span></div><button type="button" class="btn g sm" data-fest-apri>'+(c.extra.length?'Modifica':'Aggiungi i tuoi')+'</button></div>';
+  return '<div class="ecc mese-fest-box mese-sez">'+
     '<b style="display:block;margin-bottom:4px">I festivi del tuo contratto</b>'+
     '<p class="hint" style="margin:0 0 8px">Oltre ai festivi nazionali: il santo patrono o altre feste che per te contano. Si ripetono ogni anno.</p>'+
     (c.extra.length ? '<div class="qh-chips" style="margin:0 0 10px">'+c.extra.map(k=>'<button type="button" class="btn g" data-fest-del="'+k+'" aria-label="Togli '+esc(nomeGiornoMese(k))+'">'+esc(nomeGiornoMese(k))+' ×</button>').join("")+'</div>' : '')+
@@ -6463,7 +6479,7 @@ function barraPersona(x, cpx){
 // impilati, mese dal giovedì, frecce che si agganciano al mese. Le regole stanno in calendario.js; i dati
 // (sigla:tipo per giorno) sono quelli del widget, da meseWidget().
 const CAL_PRIMA=13, CAL_TOT=53, CAL_RIGHE=5;
-let calSpost=0, calCtx=null;   // settimane da oggi (le frecce); non si salva: ogni volta si riparte da oggi
+let calSpost=0, calCtx=null, calStato=null;   // settimane da oggi (le frecce); non si salva: ogni volta si riparte da oggi
 const vistaCiclo=()=> (state.piano||{}).vistaCiclo==="calendario" ? "calendario" : "ore";
 function selettoreVista(v){
   return '<div class="vsw" role="group" aria-label="Come vedere il ciclo">'+
@@ -6480,7 +6496,7 @@ function renderCalendarioCiclo(){
   const r0=CAL.primaRiga(rigaOggi, calSpost, CAL_RIGHE, CAL_TOT), mt=CAL.meseDellaRiga(m.da, r0), tit=CAL.titolo(m.da, r0, oggi.getFullYear());
   const persona = pers && m.p.length ? m.p[Math.min(m.sel, m.p.length-1)] : null;
   const leggi=s=>{ s=s||"?:?"; const k=s.lastIndexOf(":"); return {sig:k>0 ? s.slice(0,k) : s, t:k>=0 ? s.charAt(k+1) : "?"}; };
-  const TIPO={n:"notte", l:"lavoro", r:"riposo"}, descr=c=>c.t==="?" ? "da impostare" : (c.sig===(TIPO[c.t]||"")||c.sig.length<=1 ? TIPO[c.t] : c.sig+", "+TIPO[c.t]);
+  const TIPO={n:"notte", l:"lavoro", r:"riposo", m:"mattina", p:"pomeriggio", s:"sera"}, descr=c=>c.t==="?" ? "da impostare" : (c.sig===(TIPO[c.t]||"")||c.sig.length<=1 ? TIPO[c.t] : c.sig+", "+TIPO[c.t]);
   let griglia='<div class="cal-sett cal-gs-riga" aria-hidden="true">'+["L","M","M","G","V","S","D"].map(l=>'<span class="cal-gs">'+l+'</span>').join("")+'</div>';
   for(let r=0;r<CAL_RIGHE;r++){
     griglia+='<div class="cal-sett" role="row">';
@@ -6496,18 +6512,30 @@ function renderCalendarioCiclo(){
     griglia+='</div>';
   }
   const ultima=CAL_TOT-CAL_RIGHE, sw=(c,x)=>'<span><i style="background:'+c+';'+(x||"")+'"></i>';
-  el.innerHTML=selettoreVista("calendario")+
-    '<div class="cal-testa"><button type="button" class="ibtn" data-cal-nav="-1" aria-label="Settimane precedenti"'+(r0>0?'':' disabled')+'>'+SVG_FRECCIA("M15 6l-6 6 6 6")+'</button>'+
-    '<button type="button" class="cal-titolo" data-cal-oggi aria-label="'+esc(tit)+'. Tocca per tornare a oggi">'+esc(tit)+'</button>'+
-    '<button type="button" class="ibtn" data-cal-nav="1" aria-label="Settimane successive"'+(r0<ultima?'':' disabled')+'>'+SVG_FRECCIA("M9 6l6 6-6 6")+'</button></div>'+
-    griglia+
-    '<div class="key">'+sw("var(--orange)")+'Turno</span>'+sw("var(--notte)")+'Notte</span>'+sw("var(--s2)","border:1px solid var(--line)")+'Riposo</span>'+chipPersona(pers)+'</div>';
+  // la legenda dice solo le fasce che si vedono in queste settimane: chi fa solo mattine e pomeriggi non legge «Sera» e «Notte»
+  const viste=new Set(); for(let r=0;r<CAL_RIGHE;r++) for(let c=0;c<7;c++) viste.add(leggi(m.io[(r0+r)*7+c]).t);
+  const LEG=[["m","Mattina","var(--mattina)"],["p","Pomeriggio","var(--orange)"],["l","Turno","var(--orange)"],["s","Sera","var(--sera)"],["n","Notte","var(--notte)"],["r","Riposo","var(--s2);border:1px solid var(--line)"]];
+  // il mese sta nel titolo della pagina («Turni ottobre»), le frecce e «Scegli giorno» sono quelle di sempre sotto il titolo
+  const re=$("#cycRange"); if(re) re.textContent="Turni "+tit.charAt(0).toLowerCase()+tit.slice(1);
+  calStato={r0, ultima, tit, rigaOggi};
+  const bt=$("#cycToday"); if(bt){ const altrove=calSpost!==0; bt.textContent=altrove?"Torna a oggi":"Scegli giorno"; bt.classList.toggle("full", altrove); }
+  const pv=$("#cycPrev"), nx=$("#cycNext"); if(pv) pv.disabled=r0<=0; if(nx) nx.disabled=r0>=ultima;
+  el.innerHTML=selettoreVista("calendario")+griglia+
+    '<div class="key">'+LEG.filter(l=>viste.has(l[0])).map(l=>sw(l[2])+l[1]+'</span>').join("")+chipPersona(pers)+'</div>';
+}
+// Le frecce e «Scegli giorno» di Turni, quando il ciclo è a calendario: pagine di settimane, e un giorno scelto porta alla sua settimana.
+function calVaiA(d){
+  if(!calCtx) return; const i=CAL.indiceDi(calCtx.da, 7*CAL_TOT, iso(d)); if(i<0){ toast("Quel giorno è fuori dal calendario"); return; }
+  calSpost=Math.floor(i/7)-Math.max(calCtx.rigaOggi,0); renderCalendarioCiclo();
 }
 
 function renderStrip(P, f, S){
   const vista=vistaCiclo();
   document.body.classList.toggle("cic-cal", vista==="calendario");
-  if(vista==="calendario"){ renderCalendarioCiclo(); const re=$("#cycRange"); if(re) re.textContent="Turni"; return; }
+  if(vista==="calendario"){ renderCalendarioCiclo(); return; }
+  { const bt=$("#cycToday"), pv=$("#cycPrev"), nx=$("#cycNext"), diverso=cicloOff!==0 || dnum(state.focus)!==dnum(giornoVero());   // tornando alle ore, i comandi di Turni rifanno il loro stato
+    if(bt){ bt.textContent=diverso?"Torna a oggi":"Scegli giorno"; bt.classList.toggle("full", diverso); }
+    if(pv) pv.disabled=state.repeat!==false ? false : cicloOff<=cicloMin(); if(nx) nx.disabled=state.repeat!==false ? false : cicloOff>=cicloMax(); }
   // Scala unica per tutte le righe, senza avvolgimenti: così ogni barra
   // resta sul giorno a cui appartiene e non se ne va a finire su quello dopo.
   let clo=Infinity, chi=-Infinity;
@@ -6732,7 +6760,7 @@ function caricoTurni(da, n){
       const d=day(oggi,o), conta=o>=da; state.focus=d;
       let c="?", b=null; try{ c=NT.codeAt(0); b=NT.block(0); }catch(e){}
       if(c==="?" || !b){ if(conta){ r.ignoti++; r.giorni.push({tipo:"?"}); } serie=0; fineIeri=null; continue; }
-      if(b.rest){ serie=0; if(conta) r.giorni.push({tipo:"r"}); continue; }
+      if(b.rest){ serie=0; if(conta) r.giorni.push({tipo:"r", fascia:"r"}); continue; }
       const base=dnum(d)*1440;
       const eNotte=NT.eNotte(b);   // la stessa regola del widget e dei grafici
       if(eNotte){ serie++; if(conta){ r.notti++; r.serieMax=Math.max(r.serieMax, serie); } } else serie=0;
@@ -6740,7 +6768,7 @@ function caricoTurni(da, n){
         if(festivo(d)) r.festivi++;
         const breve=fineIeri!==null && base+b.start-fineIeri<660;
         if(breve) r.brevi++;
-        r.giorni.push({tipo:eNotte?"n":"l", rischio:breve || serie>=4}); }
+        r.giorni.push({tipo:eNotte?"n":"l", fascia:NT.fasciaDelGiorno(0), rischio:breve || serie>=4}); }
       fineIeri=base+b.end;
     }
   } finally { state.focus=f0; }
@@ -6754,6 +6782,13 @@ function tipoGiornoIso(k){
   try{ state.focus=new Date(k+"T12:00:00"); return NT.codeAt(0)==="?" ? "?" : NT.tipoDelGiorno(0); }catch(e){ return "?"; }
   finally{ state.focus=f; }
 }
+// fascia del turno del giorno (m mattina, p pomeriggio, s sera, n notte, r riposo, ? da impostare) per una data
+function fasciaGiornoIso(k){
+  const f=state.focus;
+  try{ state.focus=new Date(k+"T12:00:00"); return NT.codeAt(0)==="?" ? "?" : NT.fasciaDelGiorno(0); }catch(e){ return "?"; }
+  finally{ state.focus=f; }
+}
+const FASCE={m:["Mattina","var(--mattina)"], p:["Pomeriggio","var(--orange)"], s:["Sera","var(--sera)"], n:["Notte","var(--notte)"], r:["Libero","var(--faint)"], l:["Turno","var(--orange)"]};
 // Una barra per notte: le ore dormite (arancio se meno del previsto), il tratto è l'obiettivo di quella notte,
 // il puntino sotto dice se quel giorno c'era un turno (indaco = notte). Così si vede PERCHÉ manca sonno.
 function graficoNotti(trend){
@@ -6762,20 +6797,20 @@ function graficoNotti(trend){
   const massimo=Math.max(600, ...S.map(x=>Math.max(x.actual, x.planned||0)));
   const step=(W-pad*2)/n, bw=Math.max(3, Math.min(14, step*0.68));
   const yOf=m=>top+(Hb-top)*(1-m/massimo);
-  let g='', sotto=0;
+  let g='', sotto=0; const fasceViste=new Set();
   S.forEach((x,i)=>{
     const cx=pad+i*step+step/2, bx=cx-bw/2, y=yOf(x.actual), manca=x.planned!=null && x.actual<x.planned-15;
     if(manca) sotto++;
     g+='<rect class="g-notte'+(manca?' g-manca':'')+'" x="'+bx.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+(Hb-y).toFixed(1)+'" rx="2" fill="'+(manca?'var(--orange)':'var(--blue)')+'"/>';
     if(x.planned!=null){ const yp=yOf(x.planned).toFixed(1); g+='<line x1="'+(bx-1.5).toFixed(1)+'" x2="'+(bx+bw+1.5).toFixed(1)+'" y1="'+yp+'" y2="'+yp+'" stroke="var(--ink)" stroke-width="1.5" opacity=".8"/>'; }
-    const tp=tipoGiornoIso(x.date);
-    if(tp==="n"||tp==="l") g+='<circle class="g-turno" cx="'+cx.toFixed(1)+'" cy="'+(Hb+9)+'" r="2.6" fill="'+(tp==="n"?'var(--notte)':'var(--dim)')+'"/>';
+    const tp=fasciaGiornoIso(x.date);
+    if(FASCE[tp] && tp!=="r"){ fasceViste.add(tp); g+='<circle class="g-turno" cx="'+cx.toFixed(1)+'" cy="'+(Hb+9)+'" r="2.6" fill="'+FASCE[tp][1]+'"/>'; }
   });
   g+='<line x1="'+pad+'" x2="'+(W-pad)+'" y1="'+Hb+'" y2="'+Hb+'" stroke="var(--line)" stroke-width="1"/>'+
      SVGT(pad,H-3,n+' notti fa')+SVGT(W-pad,H-3,'oggi',' text-anchor="end"');
   const label='Ore dormite nelle ultime '+n+' notti: in media '+hm(trend.avgActual)+(trend.avgPlanned?' contro '+hm(trend.avgPlanned)+' previste':'')+'; '+sotto+' notti sotto il previsto';
   return '<svg class="grf" viewBox="0 0 '+W+' '+H+'" style="height:'+H+'px" role="img" aria-label="'+label+'">'+g+'</svg>'+
-    '<div class="grf-leg"><span><i style="background:var(--blue)"></i>ore dormite</span><span><i style="background:var(--orange)"></i>meno del previsto</span><span><i style="background:var(--ink);height:2px;vertical-align:3px"></i>previste</span><span><i style="background:var(--notte);border-radius:50%"></i>notte di turno</span></div>';
+    '<div class="grf-leg"><span><i style="background:var(--blue)"></i>ore dormite</span><span><i style="background:var(--orange)"></i>meno del previsto</span><span><i style="background:var(--ink);height:2px;vertical-align:3px"></i>previste</span>'+["m","p","s","n"].filter(f=>fasceViste.has(f)).map(f=>'<span><i style="background:'+FASCE[f][1]+';border-radius:50%"></i>'+FASCE[f][0].toLowerCase()+'</span>').join("")+'</div>';
 }
 // Le 24 ore (dalle 18 alle 18, così la notte sta in mezzo): sonno, melatonina, minimo corporeo, momento più lucido.
 function fasciaOrologio(o){
@@ -6803,13 +6838,14 @@ function strisciaCarico(P,F){
   if(g.filter(x=>x.tipo!=="?").length<10) return "";
   const oggi=giornoVero(), passati=P.giorni.length, d0=day(oggi,-passati), off=(d0.getDay()+6)%7;
   const C=13, G=3, lx=12, ty=14, cols=Math.ceil((off+g.length)/7), W=lx+cols*(C+G), H=ty+7*(C+G);
-  let svg='';
+  let svg=''; const fasceCarico=new Set();
   ["L","M","M","G","V","S","D"].forEach((l,r)=>{ svg+=SVGT(0,ty+r*(C+G)+C-3,l,' font-size="9"'); });
   const MESI=["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"]; let ultimoMese=-1;
   g.forEach((x,i)=>{
     const idx=off+i, c=Math.floor(idx/7), r=idx%7, px=lx+c*(C+G), py=ty+r*(C+G), d=day(d0,i);
     if(d.getDate()<=7 && r===0 || (i===0 && r===0)){ if(d.getMonth()!==ultimoMese){ svg+=SVGT(px,10,MESI[d.getMonth()]); ultimoMese=d.getMonth(); } }
-    const fill=x.tipo==="n"?"var(--notte)":x.tipo==="l"?"var(--orange-bar)":x.tipo==="r"?"var(--s2)":"none";
+    const fill=x.tipo==="?"?"none":x.tipo==="r"?"var(--s2)":(x.fascia==="m"?"var(--mattina)":x.fascia==="s"?"var(--sera)":x.fascia==="n"?"var(--notte)":"var(--orange-bar)");
+    if(x.fascia) fasceCarico.add(x.fascia);
     const tenue=i<passati ? ' opacity=".62"' : '';
     svg+='<rect class="g-gg g-'+x.tipo+(x.rischio?' g-rischio':'')+(i===passati?' g-oggi':'')+'" x="'+px+'" y="'+py+'" width="'+C+'" height="'+C+'" rx="3" fill="'+fill+'"'+(x.tipo==="?"?' stroke="var(--line)" stroke-dasharray="2 2"':'')+tenue+'/>';
     if(x.rischio) svg+='<rect x="'+(px-1)+'" y="'+(py-1)+'" width="'+(C+2)+'" height="'+(C+2)+'" rx="4" fill="none" stroke="var(--risk)" stroke-width="2"/>';
@@ -6819,7 +6855,7 @@ function strisciaCarico(P,F){
   const label='Turni dei 30 giorni passati e dei 30 in arrivo: '+g.filter(x=>x.tipo==="n").length+' notti, '+g.filter(x=>x.tipo==="l").length+' altri turni, '+nR+(nR===1?' giorno a rischio':' giorni a rischio');
   const sw=(c,extra)=>'<i style="background:'+c+';'+(extra||"")+'"></i>';
   return '<div class="car-striscia"><svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img" aria-label="'+label+'">'+svg+'</svg>'+
-    '<div class="car-leg"><span>'+sw("var(--orange-bar)")+'Turno</span><span>'+sw("var(--notte)")+'Notte</span><span>'+sw("var(--s2)","border:1px solid var(--line)")+'Riposo</span>'+
+    '<div class="car-leg">'+[["m","Mattina","var(--mattina)"],["p","Pomeriggio","var(--orange-bar)"],["s","Sera","var(--sera)"],["n","Notte","var(--notte)"]].filter(l=>fasceCarico.has(l[0])).map(l=>'<span>'+sw(l[2])+l[1]+'</span>').join("")+'<span>'+sw("var(--s2)","border:1px solid var(--line)")+'Riposo</span>'+
     '<span>'+sw("none","border:2px solid var(--ink)")+'Oggi</span><span>'+sw("none","border:2px solid var(--risk)")+'Meno di 11 ore di riposo, o 4ª notte</span></div></div>';
 }
 // Gli orari veri delle ultime notti: un punto per notte su due righe (letto, sveglia), la fascia è ±1 deviazione, il tratto la media.
@@ -6838,6 +6874,28 @@ function graficoRegolarita(reg){
   const label='Orari delle ultime '+reg.n+' notti: letto in media alle '+hhmm(reg.mBed)+(reg.sdBed!=null?' (±'+hm(reg.sdBed)+')':'')+', sveglia alle '+hhmm(reg.mWake)+(reg.sdWake!=null?' (±'+hm(reg.sdWake)+')':'');
   return '<svg class="grf" viewBox="0 0 '+W+' '+H+'" style="height:'+H+'px" role="img" aria-label="'+label+'">'+g+'</svg>'+
     '<div class="grf-leg"><span><i style="background:var(--blue);border-radius:50%"></i>una notte</span><span><i style="background:var(--blue-soft);border:1px solid var(--line)"></i>± una deviazione</span><span><i style="background:var(--ink);width:2px"></i>media</span></div>';
+}
+// Quanto si dorme in media, turno per turno (mattina, pomeriggio, sera, notte, giorni liberi): per qualunque ciclo,
+// solo le fasce che ci sono. Dalle notti annotate; il confronto è con quanto prevedeva il piano per le stesse notti.
+function sonnoPerFascia(trend){
+  const g={};
+  (trend.series||[]).forEach(x=>{ if(x.actual==null) return; const f=fasciaGiornoIso(x.date); if(!FASCE[f]) return;
+    const a=g[f]=g[f]||{n:0,a:0,p:0,np:0}; a.n++; a.a+=x.actual; if(x.planned!=null){ a.p+=x.planned; a.np++; } });
+  return ["m","p","s","n","r"].filter(f=>g[f] && g[f].n>=2).map(f=>({f, n:g[f].n, a:g[f].a/g[f].n, p:g[f].np ? g[f].p/g[f].np : null}));
+}
+function sonnoPerFasciaHtml(trend){
+  const R=sonnoPerFascia(trend); if(R.length<2) return "";
+  const max=Math.max(540, ...R.map(x=>x.a));
+  const peggio=R.filter(x=>x.f!=="r" && x.n>=3 && x.p!=null && x.p-x.a>=30).sort((a,b)=>(b.p-b.a)-(a.p-a.a))[0];
+  const righe=R.map(x=>{ const d=x.p!=null ? Math.round(x.a-x.p) : null, manca=d!=null && d<=-30;
+    return '<div class="frow'+(manca?" giu":"")+'"><span class="flab">'+esc(FASCE[x.f][0])+'<span class="hint" style="display:block;font-size:11.5px">'+x.n+(x.n===1?' notte':' notti')+'</span></span>'+
+      '<span class="fbar"><i style="width:'+Math.max(3,Math.round(x.a/max*100))+'%;background:'+FASCE[x.f][1]+';opacity:'+(manca?1:.75)+'"></i></span>'+
+      '<span class="fval" style="min-width:64px">'+hm(Math.round(x.a))+(d!=null && Math.abs(d)>=15 ? '<span class="hint" style="display:block;font-size:11.5px;font-weight:400">'+(d>0?'+':'–')+hm(Math.abs(d))+'</span>' : '')+'</span></div>'; }).join("");
+  const frase = peggio ? 'Sui turni di '+FASCE[peggio.f][0].toLowerCase()+' dormi in media '+hm(Math.round(peggio.p-peggio.a))+' meno del previsto ('+peggio.n+' notti): è lì che il sonno va protetto di più.'
+    : 'In ogni tipo di turno stai vicino al sonno previsto.';
+  return '<div><span class="eyebrow andamento-eyebrow">Come dormi, turno per turno</span><div class="andamento-sezione">'+
+    '<p class="hint" style="margin:0 0 8px">Sonno medio della notte che precede il giorno di ciascun turno, da quelle che hai annotato. Sotto, quanto in meno o in più rispetto al piano.</p>'+
+    righe+'<p class="fnota">'+esc(frase)+'</p></div></div>';
 }
 function caricoHtml(){
   const P=caricoTurni(-30,30), F=caricoTurni(0,30);
@@ -6949,6 +7007,7 @@ function renderAndamenti(){
   // Il carico dei turni: dai turni soli, senza diario — la pagina non è mai
   // vuota, ed è il rischio di stanchezza più documentato (notti di fila,
   // riposi brevi). Prima i dati del passato, accanto quelli in arrivo.
+  try{ const tr=window.NTHistory && window.NTHistory.sleepTrend({beds:state.beds,wakes:state.wakes}, NT_planSafe, {days:60}); if(tr && tr.n>=4){ const h=sonnoPerFasciaHtml(tr); if(h) sezioni.push(h); } }catch(e){}
   try{ sezioni.push(caricoHtml()); }catch(e){}
   try{
     const da=iso(day(giornoVero(),-30)), annotate=Object.keys(state.wakes).filter(k=>k>=da && state.beds[k]), ok=annotate.filter(k=>sonnoPiano[k]).length;
@@ -6999,9 +7058,9 @@ function renderAndamenti(){
   const invito = heroHtml ? "" : '<div class="andamento-sezione"><p style="margin:0"><b>Quanto sonno ti manca</b></p>'+
     '<p class="hint" style="margin:4px 0 0">Annota come hai dormito dal riquadro di Oggi, un tocco al mattino: dopo tre notti lo vedi qui.</p></div>';
   const fondo='<div class="andamento-fondo">'+
-      '<button type="button" class="btn g" data-riepilogo-medico style="width:100%;min-height:46px">Riepilogo per il medico competente</button>'+
-      '<p class="hint" style="margin:6px 2px 0">Un PDF con turni, notti e riposi degli ultimi 12 mesi'+(sm?' e il sonno che hai annotato':'')+': da portare alla visita.</p>'+
-      (sm?'<button type="button" class="btn g sm" id="doSum" style="margin-top:8px">Copia il riepilogo del diario</button>':'')+
+      '<span class="eyebrow andamento-eyebrow">Per la visita dal medico</span>'+
+      '<button type="button" class="btn g az-desc" data-riepilogo-medico>Riepilogo per il medico competente<small>PDF con turni, notti e riposi degli ultimi 12 mesi'+(sm?' e il sonno che hai annotato':'')+'.</small></button>'+
+      (sm?'<button type="button" class="btn g az-desc" id="doSum">Copia il riepilogo del diario<small>Il testo del sonno annotato, da incollare dove vuoi.</small></button>':'')+
       (url && (heroHtml||capoHtml) ? '<p class="hint" style="margin-top:14px">Questa pagina, come tutta l\'app, resta gratis. Se ti è utile, <a href="'+esc(url)+'" target="_blank" rel="noopener">un contributo libero</a> è benvenuto, mai necessario.</p>' : '')+
     '</div>';
   el.innerHTML = capoHtml + (heroHtml || invito) + rowsHtml + fondo;
@@ -7554,10 +7613,10 @@ function meseWidget(prima=SETT_WIDGET_PRIMA, tot=SETT_WIDGET){   // settimane pr
       const d=day(lun,o); state.focus=d;
       let c="?"; try{ c=NT.codeAt(0); }catch(e){}
       const gs=state.giorni[iso(d)]||{};
-      io.push((SIGLA_SPECIALE[gs.t]||c)+":"+(c==="?"?"?":NT.tipoDelGiorno(0)));
+      io.push((SIGLA_SPECIALE[gs.t]||c)+":"+(c==="?"?"?":NT.fasciaDelGiorno(0)));
       scelte.forEach((pi,k)=>{
         let s="?:?";
-        asPartner(()=>{ const pc=NT.codeAt(0); if(pc!=="?") s=pc+":"+NT.tipoDelGiorno(0); }, tutte[pi]);
+        asPartner(()=>{ const pc=NT.codeAt(0); if(pc!=="?") s=pc+":"+NT.fasciaDelGiorno(0); }, tutte[pi]);
         p[k].g.push(s);
       });
     }
@@ -7718,6 +7777,7 @@ if($("#jumpDate")){
       const v=e.target.value;
       if(!/^\d{4}-\d{2}-\d{2}$/.test(v||"")) return;
       const d=new Date(v+"T12:00:00"); if(isNaN(+d)) return;
+      if(inp.closest(".cycbar") && sulCalendario()){ calVaiA(d); return; }
       state.focus=d; cicloOff=0;
       if(inp.closest(".cycbar")) cycGo(0); else render();
     });
@@ -7726,6 +7786,7 @@ if($("#jumpDate")){
     const v=e.target.value;
     if(!/^\d{4}-\d{2}-\d{2}$/.test(v||"")) return;
     const d=new Date(v+"T12:00:00"); if(isNaN(+d)) return;
+    if(document.body.classList.contains("tab-turni") && sulCalendario()){ calVaiA(d); return; }
     state.focus=d; cicloOff=0;
     // in Turni il bottone "Torna a oggi" si aggiorna solo passando da cycGo
     if(document.body.classList.contains("tab-turni")) cycGo(0); else render();
@@ -8664,15 +8725,21 @@ function finestraCiclo(){
   const largh = Math.max(13, passoCiclo());
   return [cicloOff-2, cicloOff+largh-3];
 }
-if($("#cycPrev"))  $("#cycPrev").onclick =()=>cycGo(cicloOff-passoCiclo());
-if($("#cycNext"))  $("#cycNext").onclick =()=>cycGo(cicloOff+passoCiclo());
-if($("#cycToday")) $("#cycToday").onclick=()=>{ if(suOggi()){ apriSelettoreData(); return; } state.focus=giornoVero(); cycGo(0); };
+const sulCalendario=()=>document.body.classList.contains("cic-cal");
+const calPagina=v=>{ if(!calCtx) return; calSpost=CAL.paginaDopo(calCtx.da, CAL_TOT, calCtx.rigaOggi, calSpost, CAL_RIGHE, v); renderCalendarioCiclo(); };
+if($("#cycPrev"))  $("#cycPrev").onclick =()=>{ if(sulCalendario()) return calPagina(-1); cycGo(cicloOff-passoCiclo()); };
+if($("#cycNext"))  $("#cycNext").onclick =()=>{ if(sulCalendario()) return calPagina(1); cycGo(cicloOff+passoCiclo()); };
+if($("#cycToday")) $("#cycToday").onclick=()=>{
+  if(sulCalendario()){ if(calSpost!==0){ calSpost=0; renderCalendarioCiclo(); } else apriSelettoreData(); return; }
+  if(suOggi()){ apriSelettoreData(); return; } state.focus=giornoVero(); cycGo(0); };
 
 /* ===================== NOVITÀ =====================
    Si scrivono a mano a ogni versione con una funzione che si vede: poche righe, in italiano di tutti i giorni.
    `id` cambia solo quando c'è qualcosa da dire; chi aggiorna la vede una volta. Chi installa adesso non la vede
    (non è una novità per lui), ma la trova sempre in Impostazioni › Novità. «app:true» = solo nell'app Android. */
-const NOVITA={ id:"2026-10-26", data:"Ottobre 2026", righe:[
+const NOVITA={ id:"2026-10-27", data:"Ottobre 2026", righe:[
+  ["Un colore per ogni turno","Mattina, pomeriggio, sera e notte hanno ciascuno il suo colore, nel calendario del ciclo e nel widget. In Turni, con «Calendario», il mese è nel titolo e le frecce sfogliano le settimane.",false,"2026-10-27"],
+  ["Come dormi, turno per turno","In «Sonno e carico» vedi quanto dormi prima di ogni tipo di turno e dove ti manca più sonno, qualunque sia il tuo ciclo.",false,"2026-10-27"],
   ["Nuovo logo","La civetta con il berretto a righe azzurre e blu e l'orologio sulla pancia: si riconosce meglio anche piccola, sulla schermata iniziale e nelle notifiche.",false,"2026-10-26"],
   ["Sonno e carico con i grafici","Una barra per ogni notte (arancio dove dormi meno del previsto), la fascia delle 24 ore del tuo orologio, 60 giorni di turni con i riposi sotto le 11 ore e la quarta notte di fila, e i tuoi orari notte per notte.",false,"2026-10-25"],
   ["Orari più onesti","Le notti registrate «come previsto» non contano per la regolarità: per misurarti servono i tuoi orari veri. Il sonno che ti manca le conta ancora tutte.",false,"2026-10-25"],
@@ -9761,11 +9828,11 @@ if(store.get("sub") && $("#privacyNotaAbbonato")) $("#privacyNotaAbbonato").hidd
 if(!window.NT_APP.nativo && platform.notify.pushStato && platform.notify.pushStato()!=="no" && $("#notifHint"))
   $("#notifHint").textContent="Arrivano anche ad app chiusa: per svegliarla all'ora giusta il nostro server conserva solo gli orari dei promemoria (non cosa dicono), finché li tieni accesi. Non sostituiscono la sveglia.";
 if(window.NT_APP.nativo){
-  if($("#notifHint")) $("#notifHint").textContent="I promemoria arrivano anche con l'app chiusa. Non sono una sveglia: per quella, «Metti la sveglia» in «Dormi». Non ti arrivano? Controlla che il risparmio batteria non limiti Notturnisti.";
+  if($("#notifHint")) $("#notifHint").textContent="Arrivano anche con l'app chiusa. Non sono una sveglia: per quella usa «Metti la sveglia» in «Dormi». Se non ti arrivano, controlla che il risparmio batteria non limiti Notturnisti.";
   // Android 12+: senza "Sveglie e promemoria" la sveglia può arrivare con
   // qualche minuto di ritardo. Si propone solo a chi ha già le notifiche.
   const riga=document.createElement("p"); riga.className="hint"; riga.hidden=true; riga.style.margin="6px 2px 0";
-  riga.innerHTML='Possono arrivare con qualche minuto di ritardo. <button class="btn g sm" type="button" style="display:block;margin-top:6px">Falli arrivare all\'ora esatta</button>';
+  riga.innerHTML='Possono arrivare con qualche minuto di ritardo. <button class="btn g sm" type="button" style="display:block;margin-top:8px">Falli arrivare all\'ora esatta</button>';
   if($("#notifHint")) $("#notifHint").after(riga);
   const aggiornaEsatta=()=>Promise.all([platform.notify.permission(),platform.notify.exactStatus()])
     .then(([p,x])=>{ riga.hidden=!(p==="granted" && x!=="granted"); }).catch(()=>{});

@@ -17,6 +17,12 @@ public class CalendarioModelTest {
         return CalendarioModel.leggi(new JSONObject("{\"da\":\"" + da + "\",\"io\":[" + lista(42, "R:r") + "],\"p\":[" + p + "],\"sel\":" + sel + ",\"star\":\"s" + sel + "\"}"));
     }
 
+    @Test public void leggeLeFasceDelTurno() throws Exception {
+        CalendarioModel m = CalendarioModel.leggi(new JSONObject("{\"da\":\"2026-10-19\",\"io\":[\"M:m\",\"P:p\",\"S:s\",\"N:n\",\"R:r\",\"X:z\"],\"p\":[]}"));
+        assertEquals('m', m.mio(0).tipo); assertEquals('p', m.mio(1).tipo); assertEquals('s', m.mio(2).tipo);
+        assertEquals('n', m.mio(3).tipo); assertEquals('r', m.mio(4).tipo); assertEquals("fascia sconosciuta", '?', m.mio(5).tipo);
+    }
+
     @Test public void leggeSigleETipi() throws Exception {
         CalendarioModel m = CalendarioModel.leggi(new JSONObject("{\"da\":\"2026-10-19\",\"io\":[\"N:n\",\"Fe:r\",\"M•:l\",\"x\"],\"p\":[{\"n\":\"Anna\",\"g\":[\"M:l\",\"R:r\"]}]}"));
         assertEquals("N", m.mio(0).sigla); assertEquals('n', m.mio(0).tipo);

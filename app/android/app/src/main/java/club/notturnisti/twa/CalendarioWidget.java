@@ -149,14 +149,16 @@ final class CalendarioWidget {
         }
     }
 
-    /** Sigla in una pillola: tinta e testo per tipo (notte, lavoro, riposo); la persona in verde acqua. */
+    /** Sigla in una pillola: tinta e testo per fascia (mattina, pomeriggio, sera, notte, riposo); la persona in verde acqua. */
     private static void pillola(Context ctx, RemoteViews rv, int id, CalendarioModel.Cella c, boolean persona) {
         boolean ignoto = c == null || c.tipo == '?';
         rv.setTextViewText(id, ignoto ? "·" : c.sigla);
         int sfondo = R.drawable.widget_cella_riposo, testo = R.color.w_dim;
         if (!ignoto) switch (c.tipo) {
             case 'n': sfondo = persona ? R.drawable.widget_cella_p_notte : R.drawable.widget_cella_notte; testo = persona ? R.color.w_cella_p_notte_t : R.color.w_cella_notte_t; break;
-            case 'l': sfondo = persona ? R.drawable.widget_cella_p_lavoro : R.drawable.widget_cella_lavoro; testo = persona ? R.color.w_cella_p_lavoro_t : R.color.w_cella_lavoro_t; break;
+            case 'm': sfondo = persona ? R.drawable.widget_cella_p_lavoro : R.drawable.widget_cella_mattina; testo = persona ? R.color.w_cella_p_lavoro_t : R.color.w_cella_mattina_t; break;
+            case 's': sfondo = persona ? R.drawable.widget_cella_p_lavoro : R.drawable.widget_cella_sera; testo = persona ? R.color.w_cella_p_lavoro_t : R.color.w_cella_sera_t; break;
+            case 'l': case 'p': sfondo = persona ? R.drawable.widget_cella_p_lavoro : R.drawable.widget_cella_lavoro; testo = persona ? R.color.w_cella_p_lavoro_t : R.color.w_cella_lavoro_t; break;
             default: sfondo = persona ? R.drawable.widget_cella_p_riposo : R.drawable.widget_cella_riposo;
         }
         rv.setInt(id, "setBackgroundResource", sfondo);
@@ -168,7 +170,7 @@ final class CalendarioWidget {
 
     private static String etichetta(CalendarioModel.Cella c) {
         if (c == null || c.tipo == '?') return "da impostare";
-        String t = c.tipo == 'n' ? "notte" : c.tipo == 'r' ? "riposo" : "lavoro";
+        String t = c.tipo == 'n' ? "notte" : c.tipo == 'r' ? "riposo" : c.tipo == 'm' ? "mattina" : c.tipo == 'p' ? "pomeriggio" : c.tipo == 's' ? "sera" : "lavoro";
         return c.sigla.equals("R") || c.sigla.equals("N") || c.sigla.equals(t) ? t : c.sigla + ", " + t;
     }
 }

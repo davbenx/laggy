@@ -225,6 +225,16 @@ function tipoDelGiorno(off){
   return b.rest ? "r" : eNotte(b) ? "n" : "l";
 }
 
+// La fascia del turno del giorno, per i colori e per leggere come si dorme: «r» riposo, «n» notte (eNotte), «m» mattina
+// (comincia prima delle 11), «p» pomeriggio (prima delle 17), «s» sera (dopo). Dall'orario in cui comincia, qualunque sia il ciclo.
+function fasciaDelGiorno(off){
+  const b = block(off);
+  if(b.rest) return "r";
+  if(eNotte(b)) return "n";
+  const s = ((b.start % 1440) + 1440) % 1440;
+  return s < 660 ? "m" : s < 1020 ? "p" : "s";
+}
+
 // Come si chiama un giorno, per elenchi e notifiche: "?" se non si sa.
 function etichetta(off){
   const c = codeAt(off);
@@ -1089,7 +1099,7 @@ function buildIcs(days){
 
   normalizza();
   return {
-    state, plan, buildIcs, buildCouple, buildEvents, buildCoupleEvents, codeAt, block, giornoA, etichetta, tipoDelGiorno, oreNotturne, eNotte,
+    state, plan, buildIcs, buildCouple, buildEvents, buildCoupleEvents, codeAt, block, giornoA, etichetta, tipoDelGiorno, fasciaDelGiorno, oreNotturne, eNotte,
     sharedDays, freeOverlap, asPartner,
     setIcs(o){ Object.assign(ICS, o||{}); return ICS; },
     // Esposti anche questi: prima privati alla closure, ma index.html (che

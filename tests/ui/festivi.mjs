@@ -20,7 +20,7 @@ const TURNO={M:{n:"Mattino",s:420,e:840}};
 
 { const p=await apri({turniConfigurati:true,pattern:"MMMMMRR",anchor:lunedi(),repeat:true,firstSeenAt:"2026-01-01",shifts:TURNO});
   const riga=await p.evaluate(()=>document.querySelector("#meseBox .mese-fest").textContent.trim());
-  ok(/^Conto le domeniche e i festivi nazionali\./.test(riga), "una riga dice cosa si conta → "+riga);
+  ok(/^FestiviConto le domeniche e i festivi nazionali\./.test(riga), "una riga dice cosa si conta → "+riga);
   const prima=await numFestivi(p);
   await p.evaluate(()=>document.querySelector("[data-fest-apri]").click()); await p.waitForTimeout(150);
   const d=new Date(); d.setHours(12,0,0,0); d.setDate(15); if(d.getDay()===0) d.setDate(16);

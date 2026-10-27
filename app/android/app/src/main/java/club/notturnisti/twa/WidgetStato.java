@@ -172,7 +172,8 @@ final class WidgetStato {
                 // il primo che comincia fra sonno e pisolino
                 if (sonnoInfo != null && (pisolinoInfo == null || sonnoInfo.getLong("s") <= pisolinoInfo.getLong("s"))) { usata = sonnoInfo; azione = Azione.SONNO; testoAzione = "A letto " + hhmm(usata.getLong("s")) + " → " + hhmm(usata.getLong("e")); }
                 else if (pisolinoInfo != null) { usata = pisolinoInfo; azione = Azione.PISOLINO; testoAzione = "Pisolino " + hhmm(usata.getLong("s")) + " → " + hhmm(usata.getLong("e")); }
-                if (usata != null) giornoAzione = iso(usata.getLong("s"));
+                // il giorno dell'app: un sonno che comincia dopo la mezzanotte (fino alle 04:30) è ancora la notte del giorno prima
+                if (usata != null) giornoAzione = iso(usata.getLong("s") - 270 * MIN);
             }
             // quando cambia il pulsante: 4 ore prima del sonno (o mezz'ora prima del pisolino) e quando comincia
             for (int i = 0; i < v.length(); i++) {

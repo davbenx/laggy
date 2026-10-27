@@ -68,11 +68,12 @@ Un progetto indipendente, nato da chi i turni li fa. Segnalazioni e idee: dall'a
 
 ## Note di versione 1.3.5 (max 500)
 Novità:
-• Nuovo logo: la civetta con il berretto a righe e l'orologio sulla pancia
-• Domande del sonno anche dal widget e dalle notifiche senza aprire l'app; meno inviti sopra «Oggi»; «Cosa ha cambiato il piano?» quando correggi gli orari
-• Ciclo a calendario: nuova scelta «Calendario» accanto a «Ore»; il sonno della persona che segui sul ciclo, se lo conosci
-• Widget: ‹ › per sfogliare i mesi, voto dell'energia a cinque facce, orari del sonno corretti senza aprire l'app
-• Una sola «notte» ovunque; pulsanti al posto dei link; regolarità del sonno dai tuoi orari veri
+• Nuovo logo
+• Un colore per ogni turno (mattina, pomeriggio, sera, notte) nel calendario e nel widget
+• «Sonno e carico»: come dormi prima di ogni tipo di turno
+• Ciclo a calendario, con il mese nel titolo
+• Le domande sul sonno arrivano anche dal widget e dalle notifiche senza aprire l'app
+• Meno inviti sopra «Oggi»; widget con i mesi e il voto a cinque facce
 
 ## Categoria, tag e contatti
 - Categoria: Salute e fitness

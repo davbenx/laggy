@@ -41,7 +41,7 @@ public class WidgetStatoTest {
         assertEquals("il sonno è già nel pulsante: non si ripete fra le voci", 1, s.eventi.size());
         assertEquals("Luce", s.eventi.get(0).titolo);
         assertEquals("dom 09:55", s.eventi.get(0).ora);
-        assertEquals("2026-10-25", s.giornoAzione);
+        assertEquals("a letto alle 03:10: per l'app è ancora la notte di sabato", "2026-10-24", s.giornoAzione);
     }
 
     @Test public void daQuattroOrePrimaDelSonnoLaSveglia() throws Exception {
@@ -72,6 +72,16 @@ public class WidgetStatoTest {
         WidgetStato s = WidgetStato.calcola(p, VUOTO, t(1, 8, 0));
         assertEquals("il giorno dopo la domanda arriva da sola", WidgetStato.Azione.VOTO_SONNO, s.azione); assertEquals("2026-10-25", s.diario.getString("d")); assertEquals("23:30 → 07:30", s.titolo);
         assertNotEquals("prima della sveglia di domani niente", WidgetStato.Azione.VOTO_SONNO, WidgetStato.calcola(p, VUOTO, t(1, 7, 0)).azione);
+    }
+
+    @Test public void sonnoDopoMezzanotteApreIlGiornoGiusto() throws Exception {
+        // a letto alle 00:30 di domenica 25: per l'app è la notte di sabato 24
+        JSONObject p = piano(null, voce(t(1, 0, 30), t(1, 9, 0), "Sonno", "sonno"));
+        WidgetStato s = WidgetStato.calcola(p, VUOTO, t(0, 20, 0));
+        assertEquals(WidgetStato.Azione.SONNO, s.azione); assertEquals("2026-10-24", s.giornoAzione);
+        // a letto alle 09:00 dopo una notte: è il giorno stesso
+        p = piano(null, voce(t(1, 9, 0), t(1, 16, 0), "Sonno", "sonno"));
+        assertEquals("2026-10-25", WidgetStato.calcola(p, VUOTO, t(1, 1, 30)).giornoAzione);
     }
 
     @Test public void voto() throws Exception {
