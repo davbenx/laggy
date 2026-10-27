@@ -46,6 +46,10 @@
             android:taskAffinity=""
             android:theme="@style/OrariSonnoTema" />
 
+        <!-- Aggiornare l'app cancella gli allarmi: il plugin delle notifiche li rimette dal suo archivio, come dopo un riavvio -->
+        <receiver android:name="com.capacitorjs.plugins.localnotifications.LocalNotificationRestoreReceiver" android:directBootAware="true" android:exported="false">
+            <intent-filter><action android:name="android.intent.action.MY_PACKAGE_REPLACED" /></intent-filter>
+        </receiver>
         <!-- Widget "Il tuo piano" (NotturnistiWidget.java). -->
         <receiver
             android:name=".NotturnistiWidget"

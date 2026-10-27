@@ -66,7 +66,7 @@ final class CalendarioModel {
             String s = a.optString(i, "?:?"); int k = s.lastIndexOf(':');
             String sigla = k > 0 ? s.substring(0, k) : s;
             char tipo = k >= 0 && k + 1 < s.length() ? s.charAt(k + 1) : '?';
-            if (tipo != 'n' && tipo != 'l' && tipo != 'r') tipo = '?';
+            if ("nlrmps".indexOf(tipo) < 0) tipo = '?';   // n notte, m mattina, p pomeriggio, s sera, l altro turno, r riposo
             out.add(new Cella(sigla, tipo));
         }
         return out;

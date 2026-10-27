@@ -159,6 +159,11 @@ details summary{cursor:pointer;font-weight:600}
         <div class="rows" id="adatta"></div>
       </section>
       <section class="card">
+        <h2>Quanto indovina il piano</h2>
+        <p class="sub">Per ogni notte annotata: in linea con il piano, fino a 30 minuti di scarto, oltre 30. Poi, quando lo scarto è grande, il motivo scelto, e le tre facce di soddisfazione.</p>
+        <div class="rows" id="pianoEsito"></div>
+      </section>
+      <section class="card">
         <h2>Dalla vecchia app e stabilità</h2>
         <p class="sub">Passaggio dei dati dalla vecchia app (sito → app) ed errori JavaScript per file (una volta al giorno per dispositivo).</p>
         <div class="rows" id="migrazione"></div>
@@ -422,6 +427,10 @@ function render(){
   var ESI={liberi_proposto:"Giorni liberi: proposte",liberi_applicato:"Giorni liberi: applicate",liberi_annullato:"Giorni liberi: annullate",liberi_rifiutato:"Giorni liberi: «lascia così»",
     anticipo_proposto:"Anticipo: proposte",anticipo_applicato:"Anticipo: applicate",anticipo_annullato:"Anticipo: annullate",anticipo_rifiutato:"Anticipo: «lascia così»"};
   $("#adatta").innerHTML=rowsHtml(byProp(rows,"adatta").map(function(x){ return {k:ESI[x.k]||x.k, n:x.n}; }));
+  var PES={in_linea:"Notte in linea col piano",fino_30:"Scarto fino a 30 minuti",oltre_30:"Scarto oltre 30 minuti"}, PMO={turno:"Motivo: il turno era diverso",abitudine:"Motivo: dormo così di solito",altro:"Motivo: altro"}, SOD={su:"Soddisfatto",meh:"Così così",giu:"Insoddisfatto"};
+  $("#pianoEsito").innerHTML=rowsHtml(byProp(rows,"piano_esito").map(function(x){ return {k:PES[x.k]||x.k, n:x.n}; })
+    .concat(byProp(rows,"piano_motivo").map(function(x){ return {k:PMO[x.k]||x.k, n:x.n}; }))
+    .concat(byProp(rows,"soddisfazione").map(function(x){ return {k:"Facce: "+(SOD[x.k]||x.k), n:x.n}; })));
   $("#migrazione").innerHTML=rowsHtml(byProp(rows,"migrazione").map(function(x){ return {k:x.k==="export_web"?"Avviate dal sito":x.k==="import_app"?"Arrivate nell'app":x.k, n:x.n}; }));
   $("#errori").innerHTML=rowsHtml(byProp(rows,"errore").map(function(x){ return {k:"Errore in "+x.k, n:x.n}; }));
   var PRESET={essenziali:"Scelta: essenziali",tutte:"Scelta: tutti",mie:"Scelta: personalizzata"};

@@ -52,6 +52,9 @@ export const ALLOWED = {
   migrazione: ["fase"],             // dalla vecchia app: export_web | import_app
   recensione_chiesta: [],          // aperto il riquadro stelle di Play (non dice se è comparso)
   diario_rapido: [],               // sonno registrato con «Come previsto» dalla notifica
+  piano_esito: ["esito"],           // dopo ogni notte annotata: in_linea | fino_30 | oltre_30 minuti dal piano (mai gli orari)
+  piano_motivo: ["motivo"],         // perché il piano non tornava: turno | abitudine | altro (risposta a un tocco)
+  soddisfazione: ["voto"],           // le tre facce: su | meh | giu
   sveglia_messa: [],               // sveglia chiesta all'Orologio del telefono (app Android)
   errore: ["dove"]                  // errore JavaScript: solo il file (index, engine…), mai il messaggio
 };

@@ -34,3 +34,13 @@ test("un turno corto di notte (22:00-02:15) è una notte, anche se non tocca il 
   const l = createEngine({ pattern: "M", anchor: "2026-10-19", focus: "2026-10-19T12:00:00", repeat: true, shifts: { M: { n: "Mattino", s: 420, e: 840 } } });
   assert.equal(l.tipoDelGiorno(0), "l"); assert.equal(l.oreNotturne(l.block(0)), 0);
 });
+
+test("fasciaDelGiorno: mattina, pomeriggio, sera, notte e riposo, dall'orario in cui comincia il turno", () => {
+  const e = createEngine({ pattern: "MPSNR", anchor: "2026-10-19", focus: "2026-10-19T12:00:00", repeat: true,
+    shifts: { M: { n: "Mattina", s: 360, e: 840 }, P: { n: "Pomeriggio", s: 840, e: 1320 }, S: { n: "Sera", s: 1080, e: 1380 }, N: { n: "Notte", s: 1320, e: 1800 } } });
+  const f = o => { e.state.focus = new Date(2026, 9, 19 + o, 12, 0); return e.fasciaDelGiorno(0); };
+  assert.deepEqual([0, 1, 2, 3, 4].map(f), ["m", "p", "s", "n", "r"]);
+  // un turno 7-19 è di mattina, uno 19-07 di notte: vale per qualunque ciclo
+  const lungo = createEngine({ pattern: "DN", anchor: "2026-10-19", focus: "2026-10-19T12:00:00", repeat: true, shifts: { D: { n: "Giorno", s: 420, e: 1140 }, N: { n: "Notte", s: 1140, e: 1860 } } });
+  assert.equal(lungo.fasciaDelGiorno(0), "m"); assert.equal(lungo.fasciaDelGiorno(1), "n");
+});

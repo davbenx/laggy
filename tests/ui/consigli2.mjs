@@ -1,4 +1,4 @@
-// Consigli d'uso delle funzioni nuove (festivi, scelte sul sonno, orari a casa)
+// Consigli d'uso delle funzioni nuove (festivi, scelte sul sonno)
 // e le statistiche che li misurano: voce del piano aperta (una volta al giorno)
 // e orari di sonno personalizzati (una volta sola).
 import pw from "./_pw.mjs";
@@ -9,7 +9,7 @@ globalThis.__inv=[];
 const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 const fa=n=>{ const d=new Date(); d.setDate(d.getDate()-n); return iso(d); };
 const SH={M:{n:"Mattino",s:420,e:840},P:{n:"Pomeriggio",s:840,e:1260},N:{n:"Notte",s:1260,e:1860}};
-const TUTTI=["installa","tester","statistiche","colleghi","copia","orologio","mese","festivi","calendario","ferie","scambio","sonno","grazie","medico","dormi","acasa","sveglia","votowidget","widgetmese","coppia","momenti","riepilogo"];
+const TUTTI=["installa","tester","statistiche","soddisfazione","colleghi","copia","orologio","mese","festivi","calendario","ferie","scambio","sonno","grazie","medico","dormi","acasa","sveglia","votowidget","widgetmese","coppia","momenti","riepilogo"];
 async function apri(st, quale, app){
   const ctx=await b.newContext({locale:"it-IT",viewport:{width:360,height:740}});
   if(app){ await ctx.addInitScript(nativo); await ctx.addInitScript(()=>{ window.Capacitor.Plugins.NTAlarm={set:async()=>({})}; localStorage.setItem("nt:widgetN","1"); }); }
@@ -44,8 +44,6 @@ const coda=async p=>{ await p.waitForTimeout(400); return (globalThis.__inv||[])
   ok((await coda(p)).includes("orologio_tuo"), "statistica: orari di sonno personalizzati, una volta");
   await p.context().close(); }
 
-{ const p=await apri(ST,"acasa"); ok(/^acasa: .*Condividi i tuoi orari/.test(await tip(p)), "consiglio sugli orari a casa");
-  await p.context().close(); }
 
 { const p=await apri(ST,"ferie"); ok(/insieme/.test(await tip(p)), "ferie: ricorda la scelta «a casa con»");
   await p.context().close(); }
