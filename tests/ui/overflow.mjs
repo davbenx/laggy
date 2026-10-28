@@ -27,5 +27,5 @@ await p.click("#doChiudiPrimoPiano").catch(()=>{}); await check("Oggi con lista"
 await p.click('[data-tab="turni"]'); await check("Turni");
 await p.click('.crow[data-off="2"]'); await check("Pannello giorno"); await p.evaluate(()=>document.querySelector("#qsClose").click());
 await p.evaluate(()=>document.querySelector("#doOpzioni").click()); await check("Impostazioni");
-await p.click('[data-opz="4"]'); await check("Tragitto caffe pisolini");
+await p.click('[data-opzg-vai="abitudini"]'); await p.click('[data-opz="4"]'); await check("Tragitto caffe pisolini");
 await b.close();

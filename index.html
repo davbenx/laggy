@@ -983,6 +983,9 @@ padding:12px 6px 12px 14px;margin:-6px 0 var(--gap-sezione);font-size:13.5px;lin
 .tt-seq{display:flex;flex-wrap:wrap;gap:4px;margin-top:10px}
 .tt-seq i{font-style:normal;min-width:26px;padding:4px 6px;border-radius:7px;background:var(--bg);border:1px solid var(--line);font-size:12.5px;font-weight:700;text-align:center;color:var(--dim)}
 .tt-seq i.oggi{background:var(--blue-fill);border-color:var(--blue-fill);color:var(--su-blu)}
+.tt-g{min-width:34px;min-height:40px;padding:4px 6px;border-radius:9px;background:var(--bg);border:1px solid var(--line);font:inherit;font-size:13px;font-weight:700;text-align:center;color:var(--dim);cursor:pointer}
+.tt-g.oggi{background:var(--blue-fill);border-color:var(--blue-fill);color:var(--su-blu)}
+.tt-orari .qh-ore-riga{margin-bottom:8px}
 #tuoiTurniPagina [hidden]{display:none!important}
 body.tab-turni.turni-aperta #ttFlusso #demoEsempio:not([hidden]){display:block!important}
 #ttMese:empty{display:none}
@@ -1189,6 +1192,18 @@ border:1px solid var(--blue-lt);border-radius:var(--r);color:var(--blue);font:in
 .pv-testo{margin:6px 0 0}
 .pv-testo summary{cursor:pointer;color:var(--blue);font-size:13.5px;font-weight:600;padding:6px 0}
 .pv-sonno{margin:8px 0 0}
+.pv-momenti{border-top:1px solid var(--line)}
+.pv-momenti summary{display:flex;align-items:center;gap:10px;min-height:58px;padding:10px 15px;cursor:pointer;list-style:none}
+.pv-momenti summary::-webkit-details-marker{display:none}
+.pv-momenti summary>span:first-child{flex:1;min-width:0}
+.pv-momenti summary b{display:block;font-size:15px;color:var(--ink);letter-spacing:normal;text-transform:none}
+.pv-momenti summary{color:var(--ink)}
+.pv-momenti summary small{display:block;font-size:12.5px;color:var(--dim);margin-top:2px}
+.pv-momenti[open] summary .tchev{transform:rotate(90deg)}
+.pv-stp{flex:none;width:40px;height:40px;border:1.5px solid var(--line);border-radius:50%;background:var(--bg);color:var(--ink);font-size:20px;line-height:1;cursor:pointer}
+.opz-seg{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 6px}
+.opz-seg button{flex:1 1 30%;min-height:44px;padding:6px 10px;border:1.5px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);font:inherit;font-size:13.5px;cursor:pointer}
+.opz-seg button[aria-checked="true"]{border-color:var(--blue-fill);background:var(--blue-soft);font-weight:600}
 .pv-sonno summary{cursor:pointer;color:var(--blue);font-size:14px;font-weight:600;padding:8px 0}
 .persone-modo{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin:14px 0 6px}
 .piu-cal{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;box-shadow:var(--shadow-card)}
@@ -1292,6 +1307,19 @@ body.tab-opzioni #andamentiPagina,body.tab-opzioni #vederciPagina,body.tab-opzio
 body.tab-opzioni #partner,body.tab-opzioni #luciditaGiornoWrap,body.tab-opzioni .piu-cal,
 /* la sezione Opzioni vive solo nella sua destinazione */
 body:not(.tab-opzioni) #opzioni{display:none}
+/* Impostazioni: prima un elenco di voci con il valore; ognuna apre il suo gruppo, uno alla volta */
+#opzioni .opz-g{display:none}
+body.opz-g-promemoria #opzioni [data-opzg="promemoria"],body.opz-g-abitudini #opzioni [data-opzg="abitudini"],body.opz-g-voci #opzioni [data-opzg="voci"],
+body.opz-g-dati #opzioni [data-opzg="dati"],body.opz-g-aiuto #opzioni [data-opzg="aiuto"]{display:block}
+body[class*="opz-g-"] #opzHub,body[class*="opz-g-"] #opzAspetto{display:none}
+.opz-hub-r{display:flex;align-items:center;gap:12px;width:100%;min-height:58px;padding:10px 14px;background:var(--s1);border:0;border-top:1px solid var(--line);color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+.opz-hub-r:first-child{border-top:0}
+.opz-hub-r .tool-ic{flex:none}
+.opz-hub-r .opz-tx{flex:1;min-width:0}
+.opz-hub-r b{display:block;font-size:15px}
+.opz-hub-r .opz-val{display:block;font-size:12.5px;color:var(--dim);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.opz-hub-r .tchev{flex:none;color:var(--faint)}
+#opzHub{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
 #opzioni .tool{margin-bottom:10px}
 /* La freccia per uscire resta a portata di dito mentre si scorre: la pagina
    è lunga, e sul web su iPhone non c'è un tasto indietro. Sotto la barra in
@@ -1628,12 +1656,14 @@ header b{font-size:23px}
     <h1 class="tab-title">I tuoi turni</h1>
   </div>
   <div class="tt-riepilogo" id="ttRiepilogo"></div>
+  <p class="hint" id="ttOggiNota" style="margin:2px 2px 8px" hidden>Il ciclo non torna con oggi? Tocca il giorno in cui sei davvero.</p>
+  <div class="tt-orari" id="ttOrari" hidden></div>
   <div id="ttMese"></div>
   <div class="opz-gruppo" id="ttRighe">
     <button type="button" class="tool tool-1line va" data-tt="orari"><span class="tool-ic" data-ic="alarm"></span><span class="tool-tx"><b>Orari dei turni</b><span><span id="ttValOrari"></span></span></span></button>
-    <button type="button" class="tool tool-1line va" data-tt="posizione"><span class="tool-ic" data-ic="calendar"></span><span class="tool-tx"><b>Oggi dove sei nel ciclo</b><span>Se il ciclo risulta sfasato di qualche giorno</span></span></button>
+    <button type="button" class="tool tool-1line va" data-tt="posizione" hidden><span class="tool-ic" data-ic="calendar"></span><span class="tool-tx"><b>Oggi dove sei nel ciclo</b><span>Se il ciclo risulta sfasato di qualche giorno</span></span></button>
     <button type="button" class="tool tool-1line va" data-tt="riposi"><span class="tool-ic" data-ic="bed"></span><span class="tool-tx"><b>Giorni di riposo</b><span><span id="ttValRiposi"></span></span></span></button>
-    <button type="button" class="tool tool-1line va" data-tt="schema"><span class="tool-ic" data-ic="cycle"></span><span class="tool-tx"><b>Cambia schema</b><span>In quinta, 12 ore, sempre lo stesso turno, turni che cambiano…</span></span></button>
+    <button type="button" class="tool tool-1line va" data-tt="schema"><span class="tool-ic" data-ic="cycle"></span><span class="tool-tx"><b>Cambia tipo di turni</b><span>In quinta, 12 ore, sempre lo stesso turno, turni che cambiano…</span></span></button>
   </div>
   <div id="ttFlusso"></div>
   <button type="button" class="btn pri" id="ttFatto" hidden style="width:100%;min-height:46px;margin-top:14px;font-weight:700">Fatto</button>
@@ -1900,6 +1930,8 @@ header b{font-size:23px}
        calendario ripetuti in due posti e "Turni" in due righe che aprivano
        la stessa cosa): cosa funziona da solo, il tuo piano, salvare. Righe
        raggruppate in un riquadro solo, come le impostazioni di sistema. -->
+  <div id="opzHub" role="list"></div>
+  <section class="opz-g" data-opzg="promemoria" aria-label="Promemoria e collegamenti">
   <span class="eyebrow opz-eb" style="margin-top:0">Funziona da solo</span>
   <div id="opzFunzioni"></div>
   <div class="ecc" id="icsBox" hidden>
@@ -1926,9 +1958,11 @@ header b{font-size:23px}
   </div>
 
   <p class="hint" id="notifHint" style="margin:8px 2px 0">I promemoria arrivano finché il browser li tiene attivi: riapri l'app ogni giorno o due. Non sostituiscono la sveglia.</p>
-  <span class="eyebrow opz-eb">Il tuo piano</span>
+  </section>
+  <section class="opz-g" data-opzg="abitudini" aria-label="Le tue abitudini">
+  <span class="eyebrow opz-eb" style="margin-top:0">Le tue abitudini</span>
   <div class="opz-gruppo">
-  <button class="tool tool-1line va" data-opz="1"><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg></span>
+  <button class="tool tool-1line va" data-opz="1" id="opzTurniOrigine" hidden><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg></span>
     <span class="tool-tx"><b>I tuoi turni</b><span>Schema, orari, giorni di riposo</span><span class="tool-val" id="opzValTurni"></span></span></button>
   <button class="tool tool-1line" data-opz="3"><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg></span>
     <span class="tool-tx"><b>Sonno nei giorni liberi</b><span>Quando dormi senza sveglia: il piano parte da qui</span><span class="tool-val" id="opzValSonno"></span></span></button>
@@ -1937,9 +1971,13 @@ header b{font-size:23px}
     <span class="tool-tx"><b>Tragitto, caffè e pisolini</b><span>Tempi di viaggio, effetto del caffè, se puoi dormire al lavoro</span></span></button>
   <div class="ecc" id="opzBox4" hidden></div>
   </div>
-  <span class="eyebrow opz-eb">Cosa vedi nel piano</span>
+  </section>
+  <section class="opz-g" data-opzg="voci" aria-label="Cosa vedi nel piano">
+  <span class="eyebrow opz-eb" style="margin-top:0">Cosa vedi nel piano</span>
   <div class="opz-gruppo" id="opzPianoVoci"></div>
   <p class="hint" style="margin:6px 2px 0">Dormi, Turno, Pisolino, Ultimo caffè e Rientro ci sono sempre. Il resto lo scegli tu.</p>
+  </section>
+  <section class="opz-aspetto" id="opzAspetto" aria-label="Aspetto">
   <span class="eyebrow opz-eb">Aspetto</span>
   <div class="aspetto" id="aspetto" role="radiogroup" aria-label="Aspetto">
     <button type="button" role="radio" aria-checked="true" data-tema="auto">Automatico</button>
@@ -1947,7 +1985,9 @@ header b{font-size:23px}
     <button type="button" role="radio" aria-checked="false" data-tema="dark">Scuro</button>
   </div>
   <p class="hint" style="margin:6px 2px 0">Automatico segue il tema del telefono.</p>
-  <span class="eyebrow opz-eb">Salva</span>
+  </section>
+  <section class="opz-g" data-opzg="dati" aria-label="Dati e privacy">
+  <span class="eyebrow opz-eb" style="margin-top:0">Salva</span>
   <div class="opz-gruppo">
     <button class="tool azione" id="doLink">
       <span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg></span>
@@ -1972,7 +2012,12 @@ header b{font-size:23px}
       <span class="switch"><input type="checkbox" id="optStats" aria-label="Statistiche d'uso anonime" aria-describedby="optStatsHint"><span class="slider"></span></span>
     </label>
     <p class="hint" id="optStatsHint" style="margin:2px 0 0">Ci aiutano a migliorare l'app: contano in forma anonima cosa si usa, per esempio quanti accendono i promemoria o su che tipo di telefono. Niente turni, orari o diario, e niente che dica chi sei. Spente finché non le accendi.</p>
-    <span class="eyebrow opz-eb">Aiutaci</span>
+    <p class="hint" style="margin:14px 0 0"><button class="btn danger" type="button" id="doCancellaTutto" style="width:100%;min-height:46px">Cancella tutti i dati</button></p>
+    </div>
+  </section>
+  <section class="opz-g" data-opzg="aiuto" aria-label="Aiuto e novità">
+  <div class="opz-info" style="margin-top:0">
+    <span class="eyebrow opz-eb" style="margin-top:0">Aiutaci</span>
     <div class="opz-gruppo az">
       <button class="tool tool-1line" id="doShare" type="button"><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></span><span class="tool-tx"><b>Consiglia Notturnisti</b></span></button>
       <a class="tool tool-1line" id="doReviewLnk" href="#" target="_blank" rel="noopener" hidden><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2"/></svg></span><span class="tool-tx"><b>Valuta su Google Play</b></span></a>
@@ -1991,11 +2036,9 @@ header b{font-size:23px}
       <a href="https://app.notturnisti.club/termini/" target="_blank" rel="noopener">Termini d'uso</a>
       <a href="https://app.notturnisti.club/licenze/" target="_blank" rel="noopener">Licenze</a>
     </nav>
-    <p class="hint" style="margin:14px 0 0;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center">
-      <span id="versioneApp">Versione web</span>
-      <button class="btn danger" type="button" id="doCancellaTutto" style="width:100%;min-height:46px">Cancella tutti i dati</button>
-    </p>
+    <p class="hint" style="margin:14px 0 0"><span id="versioneApp">Versione web</span></p>
   </div>
+  </section>
 </div>
 <!-- Quick Shift Switcher modal / sheet a 1 tocco -->
 <div id="quickShiftModal" class="qs-backdrop" hidden aria-hidden="true">
@@ -5047,7 +5090,7 @@ function proponiSceltaNotifiche(){
     const v=b ? b.dataset.scelta : "essenziali";
     d.remove();
     if(v==="tutte") impostaTipiNotifiche(N.TIPI_TUTTI||tipiNotifiche(), "Promemoria: tutti");
-    else if(v==="mie"){ impostaTipiNotifiche(tipiNotifiche()); _notifBoxAperto=true; apriOpzioni(); setTimeout(()=>{ const x=$("#opzNotifTipi"); if(x&&x.scrollIntoView) x.scrollIntoView({block:"center"}); }, 200); }
+    else if(v==="mie"){ impostaTipiNotifiche(tipiNotifiche()); _notifBoxAperto=true; apriOpzioni("promemoria"); setTimeout(()=>{ const x=$("#opzNotifTipi"); if(x&&x.scrollIntoView) x.scrollIntoView({block:"center"}); }, 200); }
     else impostaTipiNotifiche(N.TIPI_ESSENZIALI||tipiNotifiche(), "Promemoria: essenziali");
   });
 }
@@ -5347,7 +5390,7 @@ function renderAdatta(){
   if(_adattaFatto){
     el.hidden=false;
     el.innerHTML='<b style="font-size:15px">Fatto: il piano ora segue le tue abitudini</b>'+
-      '<p class="hint" style="margin:4px 0 0">Lo trovi anche in Impostazioni → Il tuo piano.</p>'+
+      '<p class="hint" style="margin:4px 0 0">Lo trovi anche in Impostazioni → Le tue abitudini.</p>'+
       '<div class="adatta-azioni"><button type="button" class="btn g" id="adattaAnnulla">Annulla</button><button type="button" class="btn g" id="adattaOk">Ok</button></div>';
     return;
   }
@@ -7861,8 +7904,14 @@ function NT_planSafe(d){
 // Impostazioni › Cosa vedi nel piano: un interruttore per ogni voce facoltativa.
 function renderPianoVoci(){
   const el=$("#opzPianoVoci"); if(!el) return;
-  el.innerHTML=PIANO_VOCI.map(([k,nome,desc])=>'<label class="riga-sw" for="pv-'+k+'"><span><b>'+esc(nome)+'</b><small>'+esc(desc)+'</small></span>'+
-    '<span class="switch"><input type="checkbox" id="pv-'+k+'" data-pv="'+k+'"'+(pianoVoce(k)?" checked":"")+'><span class="slider"></span></span></label>').join("");
+  const riga=([k,nome,desc])=>'<label class="riga-sw" for="pv-'+k+'"><span><b>'+esc(nome)+'</b><small>'+esc(desc)+'</small></span>'+
+    '<span class="switch"><input type="checkbox" id="pv-'+k+'" data-pv="'+k+'"'+(pianoVoce(k)?" checked":"")+'><span class="slider"></span></span></label>';
+  // quattro voci di uso comune; testa, movimento e allenamento stanno insieme in «Momenti migliori»
+  const MOMENTI=["testa","leggera","intensa"], comuni=PIANO_VOCI.filter(v=>!MOMENTI.includes(v[0])), momenti=PIANO_VOCI.filter(v=>MOMENTI.includes(v[0]));
+  const accesi=momenti.filter(v=>pianoVoce(v[0])).map(v=>({testa:"testa",leggera:"muoverti",intensa:"allenarti"})[v[0]]);
+  el.innerHTML=comuni.map(riga).join("")+
+    '<details class="pv-momenti"'+(accesi.length?" open":"")+'><summary><span><b>Momenti migliori</b><small>'+(accesi.length?esc(accesi.join(", ")):"Quando pensare, muoverti o allenarti: spenti")+'</small></span></summary>'+
+    momenti.map(riga).join("")+'</details>';
 }
 if($("#opzPianoVoci")) $("#opzPianoVoci").addEventListener("change", e=>{
   const k=e.target.dataset && e.target.dataset.pv; if(!k) return;
@@ -7870,9 +7919,40 @@ if($("#opzPianoVoci")) $("#opzPianoVoci").addEventListener("change", e=>{
   if(e.target.checked){ track("setup_item", {item:"piano_"+k}); if(["testa","leggera","intensa"].includes(k)) usata("momenti"); }
   render(); ntNotifiche();
 });
+// Le tue abitudini: i minuti si cambiano con − e + (a passi di 5), le scelte a tre voci sono tasti, non tendine.
+function potenziaCampiOpz(){
+  document.querySelectorAll("#opzioni .inline > input[type=number]").forEach(inp=>{
+    if(inp.dataset.stp) return; inp.dataset.stp="1";
+    const m=document.createElement("button"), pl=document.createElement("button");
+    m.type=pl.type="button"; m.className=pl.className="pv-stp"; m.textContent="−"; pl.textContent="+";
+    m.setAttribute("aria-label","Meno 5 minuti"); pl.setAttribute("aria-label","Più 5 minuti"); m.dataset.pvStp="-1"; pl.dataset.pvStp="1";
+    inp.parentNode.insertBefore(m, inp); inp.parentNode.insertBefore(pl, inp.nextSibling);
+  });
+  ["napT","sonnoD","caffS"].forEach(id=>{
+    const sel=document.getElementById(id); if(!sel || sel.dataset.seg) return; sel.dataset.seg="1";
+    const g=document.createElement("div"); g.className="opz-seg"; g.setAttribute("role","radiogroup"); g.id=id+"Seg";
+    sel.parentNode.insertBefore(g, sel); sel.hidden=true;
+  });
+  aggiornaSegOpz();
+}
+function aggiornaSegOpz(){
+  ["napT","sonnoD","caffS"].forEach(id=>{
+    const sel=document.getElementById(id), g=document.getElementById(id+"Seg"); if(!sel||!g) return;
+    g.innerHTML=[...sel.options].map(o=>'<button type="button" role="radio" aria-checked="'+(o.value===sel.value)+'" data-seg-v="'+esc(o.value)+'">'+esc(o.textContent)+'</button>').join("");
+  });
+}
+document.addEventListener("click",e=>{
+  const st=e.target.closest("[data-pv-stp]");
+  if(st){ const inp=st.parentNode.querySelector("input[type=number]"); if(!inp) return; haptic(6);
+    const mn=inp.min!==""?+inp.min:0, mx=inp.max!==""?+inp.max:999, passo=+inp.step>1?+inp.step:5;
+    inp.value=Math.max(mn,Math.min(mx,(+inp.value||0)+ +st.dataset.pvStp*passo)); inp.dispatchEvent(new Event("input",{bubbles:true})); inp.dispatchEvent(new Event("change",{bubbles:true})); return; }
+  const sg=e.target.closest("[data-seg-v]");
+  if(sg){ const g=sg.parentNode, sel=document.getElementById(g.id.replace(/Seg$/,"")); if(!sel) return; haptic(6);
+    sel.value=sg.dataset.segV; sel.dispatchEvent(new Event("input",{bubbles:true})); sel.dispatchEvent(new Event("change",{bubbles:true})); aggiornaSegOpz(); }
+});
 function renderOpzSummaries(){
   if(!document.body.classList.contains("tab-opzioni")) return;
-  renderPianoVoci();
+  renderPianoVoci(); renderOpzHub(); potenziaCampiOpz();
   const t=$("#opzValTurni");
   if(t){
     const pi=presetIndex();
@@ -7902,7 +7982,7 @@ function apriPartner(){
 }
 // affina la finestra di sonno: apre la sezione Sonno
 function apriFinestraSonno(){
-  apriOpzioni();
+  apriOpzioni("abitudini");
   apriSezioneInline(3);
   const q=$("#oBed"); if(q && q.scrollIntoView) setTimeout(()=>q.scrollIntoView({behavior:"smooth",block:"center"}),80);
 }
@@ -7917,13 +7997,13 @@ function apriCalendarioDaWizard(){
     window.NTPaid.open(window.NTPaid.paid() ? "account" : "attiva");
     return;
   }
-  apriOpzioni();
+  apriOpzioni("promemoria");
   const el=$('#opzFunzioni [data-gestisci="calendario"]');
   if(el && el.scrollIntoView) setTimeout(()=>el.scrollIntoView({behavior:"smooth",block:"center"}),80);
 }
 // dall'avviso "letto troppo presto": apre Dettagli del piano sulla spunta bifasica
 function apriBifasico(){
-  apriOpzioni();
+  apriOpzioni("abitudini");
   apriSezioneInline(4);
   const q=$("#mattinoBif"); if(q && q.scrollIntoView) setTimeout(()=>q.scrollIntoView({behavior:"smooth",block:"center"}),80);
 }
@@ -8397,11 +8477,11 @@ if($("#essenziale")) $("#essenziale").addEventListener("toggle", e=>{
 // Dalle righe «Dormi» e «Pisolino» al pannello dove si cambiano davvero.
 if($("#essenziale")) $("#essenziale").addEventListener("click", e=>{
   const b=e.target.closest("[data-cambia]"); if(!b) return;
-  apriOpzioni(); apriSezioneInline(+b.dataset.cambia);
+  apriOpzioni("abitudini"); apriSezioneInline(+b.dataset.cambia);
 });
 if($("#andamenti")) $("#andamenti").addEventListener("click", e=>{
   if(!e.target.closest("[data-oro-cambia]")) return;
-  apriOpzioni(); apriSezioneInline(3);
+  apriOpzioni("abitudini"); apriSezioneInline(3);
 });
 if($("#essenziale")) $("#essenziale").addEventListener("click", e=>{
   const b=e.target.closest("[data-sveglia]"); if(!b) return;
@@ -8739,7 +8819,7 @@ const CONSIGLI_FUNZIONE=[
   {k:"widgetmese", quando:()=>platform.widget.available && platform.widget.presenti()>0, t:()=>"Allarga il widget in altezza: più è alto, più mostra. Il pulsante cambia con l'ora (sveglia, orario del sonno o del pisolino, voto del sonno), poi arrivano le prossime voci e il calendario, con i turni della persona che segui sotto i tuoi."},
   {k:"momenti", quando:()=>!["testa","leggera","intensa"].some(pianoVoce),
     t:()=>"Vuoi sapere quando pensare, muoverti o allenarti meglio? I momenti migliori si accendono in Impostazioni › Cosa vedi nel piano.",
-    cta:()=>"Vedi", a:()=>{ apriOpzioni(); setTimeout(()=>{ const x=$("#opzPianoVoci"); if(x&&x.scrollIntoView) try{ x.scrollIntoView({block:"center"}); }catch(e){} }, 250); }},
+    cta:()=>"Vedi", a:()=>{ apriOpzioni("voci"); setTimeout(()=>{ const x=$("#opzPianoVoci"); if(x&&x.scrollIntoView) try{ x.scrollIntoView({block:"center"}); }catch(e){} }, 250); }},
   {k:"riepilogo", t:()=>"Puoi mandare il riepilogo del tuo mese o degli ultimi 12 mesi: lo trovi in Turni, nella scheda del mese.",
     cta:()=>"Vedi", a:()=>{ setTab("turni"); setTimeout(()=>{ const x=$("#meseBox"); if(x&&x.scrollIntoView) try{ x.scrollIntoView({block:"center"}); }catch(e){} }, 250); }},
   {k:"dormi", t:()=>"Tocca «Dormi» nel piano: dopo una notte scegli sonno breve o lungo, prima di un mattino presto puoi dormire in due tempi."},
@@ -8905,6 +8985,7 @@ function selImposta(sel, val, dopoMezzanotte){
   sel.value=val; return true;
 }
 function sincronizzaCampiPiano(){
+  setTimeout(()=>{ try{ aggiornaSegOpz(); }catch(e){} }, 0);
   if(selWake){
     const val=NT.freeWakeOk()? state.freeWake : hhmm(Math.round(NT.freeWakeUsata()/15)*15);
     if(!selImposta(selWake, val, false)) selWake.value="07:30";
@@ -8989,7 +9070,8 @@ if($("#cycToday")) $("#cycToday").onclick=()=>{
    Si scrivono a mano a ogni versione con una funzione che si vede: poche righe, in italiano di tutti i giorni.
    `id` cambia solo quando c'è qualcosa da dire; chi aggiorna la vede una volta. Chi installa adesso non la vede
    (non è una novità per lui), ma la trova sempre in Impostazioni › Novità. «app:true» = solo nell'app Android. */
-const NOVITA={ id:"2026-10-29", data:"Ottobre 2026", righe:[
+const NOVITA={ id:"2026-10-30", data:"Ottobre 2026", righe:[
+  ["Impostazioni e persone più semplici","Impostazioni è un elenco di sei voci con il valore di ciascuna; gli orari dei turni si cambiano sulla pagina, con «Annulla». Aggiungere una persona: un nome, una scelta (ha l'app, fa i tuoi turni, lun–ven, turni diversi) e solo quello che serve.",false,"2026-10-30"],
   ["Il voto sull'energia, al momento giusto","Appena svegli c'è l'inerzia del sonno e il voto verrebbe più basso del vero: «Come ti senti?» arriva 90 minuti dopo la sveglia. E subito dopo il risveglio non compare più «Rischio fatica alto».",false,"2026-10-29"],
   ["Un altro turno per un giorno","Devi fare una giornata al posto del pomeriggio? Dal foglio del giorno: «＋ Un altro turno», nome e orari. Poi lo ritrovi fra i tuoi turni. Con orari diversi il giorno prende il nome giusto (Giornata, Mattina, Sera…).",false,"2026-10-28"],
   ["Widget: il mese intero","Allungalo e vedi fino a sei settimane, anche con la persona che segui. Pulsante, voti e barra restano; le voci sono al massimo due.",true,"2026-10-28"],
@@ -9504,14 +9586,16 @@ function renderTuoiTurni(){
   const pg=$("#tuoiTurniPagina"); if(!pg || pg.hidden) return;
   const tipo=tipoTurni(), sh=state.shifts||{};
   const vis=(sel,on)=>{ const b=pg.querySelector(sel); if(b) b.hidden=!on; };
-  vis('[data-tt="posizione"]', tipo==="ciclo");
+  vis('[data-tt="posizione"]', false);          // la posizione si fissa toccando la striscia
+  vis('[data-tt="orari"]', tipo==="variabili"); // gli orari dei turni sono righe sulla pagina (per i turni variabili resta la riga)
   vis('[data-tt="riposi"]', tipo==="fisso");
   { const f=$("#ttFatto"); if(f) f.hidden = tipo!=="variabili" || flussoInPagina; }
   const usati=new Set(String(state.pattern||"").split(""));
   const turni=Object.keys(sh).filter(k=>sh[k] && !sh[k].rest && (tipo==="variabili" || usati.has(k)));
-  const vo=$("#ttValOrari"); if(vo) vo.textContent=turni.map(k=>sh[k].n+" "+hhmm(sh[k].s)+"–"+hhmm(sh[k].e)).join(" · ");
+  const voOld=$("#ttValOrari"); const vo=voOld; if(vo) vo.textContent=turni.map(k=>sh[k].n+" "+hhmm(sh[k].s)+"–"+hhmm(sh[k].e)).join(" · ");
   const rie=$("#ttRiepilogo");
   if(tipo==="variabili"){
+    { const o=$("#ttOrari"); if(o){ o.hidden=true; o.innerHTML=""; } const on=$("#ttOggiNota"); if(on) on.hidden=true; }
     rie.innerHTML='<b>Turni che cambiano ogni volta</b><span>Segna quelli che conosci già: il resto lo aggiungi quando te li danno.</span>';
     if(!flussoInPagina){ meseIn($("#ttMese")); renderSegna(); renderImport(); preparaImport(); }
   } else {
@@ -9523,10 +9607,40 @@ function renderTuoiTurni(){
     const nome = tipo==="fisso" ? "Sempre "+((sh[lav]&&sh[lav].n)||lav) : pi>=0 ? nomePreset(PRESETS[pi]) : "Il tuo ciclo";
     const oggiN=NT.etichetta(dnum(giornoVero())-dnum(state.focus));
     rie.innerHTML='<b>'+esc(nome)+'</b><span>'+(tipo==="fisso" ? "Riposi: "+riposiAttuali().map(i=>GIORNI_SETT[i]).join(", ") : p.length+" giorni")+' · oggi: '+esc(oggiN==="Riposo"?"riposo":oggiN)+'</span>'+
-      (tipo==="ciclo" ? '<div class="tt-seq" aria-hidden="true">'+p.split("").map((c,i)=>'<i'+(i===idx?' class="oggi"':'')+'>'+esc(c)+'</i>').join("")+'</div>' : '');
+      (tipo==="ciclo" ? '<div class="tt-seq" role="group" aria-label="Il tuo ciclo: tocca il giorno in cui sei oggi">'+p.split("").map((c,i)=>'<button type="button" class="tt-g'+(i===idx?' oggi':'')+'" data-tt-oggi="'+i+'" aria-pressed="'+(i===idx)+'" aria-label="Giorno '+(i+1)+': '+esc(c)+(i===idx?", oggi":"")+'">'+esc(c)+'</button>').join("")+'</div>' : '');
+    const on=$("#ttOggiNota"); if(on) on.hidden = tipo!=="ciclo" || flussoInPagina;
+    renderTtOrari(turni);
     const vr=$("#ttValRiposi"); if(vr) vr.textContent=riposiAttuali().map(i=>GIORNI_SETT[i]).join(", ");
   }
 }
+// Gli orari dei turni, sulla pagina: cambi un'ora e vale subito, con «Annulla». «Oggi è qui»: un tocco sulla striscia.
+function renderTtOrari(turni){
+  const el=$("#ttOrari"); if(!el) return;
+  const sh=state.shifts||{};
+  if(!turni.length || flussoInPagina){ el.hidden=true; el.innerHTML=""; return; }
+  el.hidden=false;
+  el.innerHTML='<span class="eyebrow" style="display:block;margin:var(--gap-sezione) 0 8px">Orari dei turni</span>'+
+    turni.map(k=>'<div class="qh-ore-riga"><b>'+esc(sh[k].n)+'</b>'+
+      '<input type="time" data-tt-da="'+esc(k)+'" value="'+hhmm(mod1440(sh[k].s))+'" aria-label="Inizio '+esc(sh[k].n)+'">'+
+      '<span>→</span><input type="time" data-tt-a="'+esc(k)+'" value="'+hhmm(mod1440(sh[k].e))+'" aria-label="Fine '+esc(sh[k].n)+'"></div>').join("");
+}
+if($("#ttOrari")) $("#ttOrari").addEventListener("change", e=>{
+  const inp=e.target.closest("[data-tt-da],[data-tt-a]"); if(!inp) return;
+  const k=inp.dataset.ttDa||inp.dataset.ttA, da=document.querySelector('[data-tt-da="'+k+'"]'), a=document.querySelector('[data-tt-a="'+k+'"]');
+  if(!state.shifts[k] || !da.value || !a.value) return;
+  const prima=JSON.parse(JSON.stringify(state.shifts[k]));
+  const nuovo=turnoDaOrari(k, state.shifts[k].n, da.value, a.value);
+  if(!orarioPlausibile(nuovo)){ da.value=hhmm(mod1440(prima.s)); a.value=hhmm(mod1440(prima.e)); return; }
+  state.shifts[k]=nuovo; salva(); render();
+  toastUndo(nuovo.n+" "+hhmm(mod1440(nuovo.s))+"–"+hhmm(mod1440(nuovo.e)), ()=>{ state.shifts[k]=prima; salva(); render(); renderTuoiTurni(); });
+});
+document.addEventListener("click", e=>{
+  const g=e.target.closest("[data-tt-oggi]"); if(!g) return;
+  const i=+g.dataset.ttOggi, p=String(state.pattern||""); if(!p.length) return;
+  const prima=state.anchor; haptic(8);
+  state.anchor=iso(day(giornoVero(), -i)); salva(); render(); renderTuoiTurni();
+  toastUndo("Oggi è il giorno "+(i+1)+" del ciclo", ()=>{ state.anchor=prima; salva(); render(); renderTuoiTurni(); });
+});
 function apriFlussoPagina(sub, ritocco){
   const box=$("#ttFlusso"), el=$("#demoEsempio"); if(!box || !el) return;
   flussoInPagina=true; ingressoFlusso=sub; soloRitocco=ritocco||"";
@@ -9853,7 +9967,7 @@ if($("#doCancellaTutto")) $("#doCancellaTutto").onclick=async()=>{
   location.replace(location.pathname);
 };
 window.NTApriFileCalendario=()=>{
-  apriOpzioni();
+  apriOpzioni("promemoria");
   const b=$("#icsBox"); if(!b) return;
   soloUno("#icsBox"); b.hidden=false;
   setTimeout(()=>{ if(b.scrollIntoView) b.scrollIntoView({behavior:"smooth",block:"center"}); }, 80);
@@ -10769,7 +10883,7 @@ function apriDestinazione(tab){
     if(t==="domani"){ setTab("oggi"); setTimeout(()=>apriQuickShift(day(giornoVero(),1)), 300); return; }
     if(t.startsWith("consiglio:")){ const k=t.slice(10);
       if(k==="calendario" || k==="widget"){ setTab("oggi"); setTimeout(()=>eseguiAttivazione(k), 300); return; }
-      apriOpzioni(); setTimeout(()=>{ const b=$('[data-opz="'+(k==="viaggio"?4:3)+'"]'); if(b){ if(b.getAttribute("aria-expanded")!=="true") b.click(); b.scrollIntoView({block:"start",behavior:"smooth"}); } }, 300); return; }
+      apriOpzioni("abitudini"); setTimeout(()=>{ const b=$('[data-opz="'+(k==="viaggio"?4:3)+'"]'); if(b){ if(b.getAttribute("aria-expanded")!=="true") b.click(); b.scrollIntoView({block:"start",behavior:"smooth"}); } }, 300); return; }
     setTab("oggi");
     if(t==="diario" || t==="pisolino") setTimeout(()=>{
       const drem=$("#essenziale .drem");
@@ -10873,11 +10987,56 @@ if($("#tabbar")) $("#tabbar").addEventListener("click", e=>{
 // Opzioni: icona in header, non più una tab — "torna indietro" riporta
 // alla tab da cui si è aperta (Oggi o Turni), non sempre a Oggi.
 let tabPrimaDiOpzioni="oggi";
-function apriOpzioni(){
+function apriOpzioni(gruppo){
   tabPrimaDiOpzioni = (state.tab==="turni") ? "turni" : "oggi";
-  setTab("opzioni");
+  _opzGruppo=(gruppo && OPZ_GRUPPI[gruppo] && gruppo!=="turni") ? gruppo : null; setTab("opzioni"); applicaGruppoOpz();
 }
-function chiudiOpzioniPagina(){ setTab(tabPrimaDiOpzioni); }
+// Impostazioni: un elenco di voci con il valore; ognuna apre il suo gruppo (uno alla volta, niente sezioni che si aprono in pagina).
+var _opzGruppo=null;   // var: letta da setTab/render prima di queste righe
+const OPZ_GRUPPI={
+  turni:{t:"Turni e ciclo"},
+  abitudini:{t:"Le tue abitudini"},
+  promemoria:{t:"Promemoria e collegamenti"},
+  voci:{t:"Cosa vedi nel piano"},
+  dati:{t:"Dati e privacy"},
+  aiuto:{t:"Aiuto e novità"}
+};
+function applicaGruppoOpz(){
+  const cl=document.body.classList; [...cl].filter(c=>c.startsWith("opz-g-")).forEach(c=>cl.remove(c));
+  if(_opzGruppo && OPZ_GRUPPI[_opzGruppo] && _opzGruppo!=="turni") cl.add("opz-g-"+_opzGruppo);
+  const h=document.querySelector("#opzioni .tab-title"); if(h) h.textContent=_opzGruppo&&OPZ_GRUPPI[_opzGruppo] ? OPZ_GRUPPI[_opzGruppo].t : "Impostazioni";
+  renderOpzHub(); try{ window.scrollTo(0,0); }catch(e){}
+}
+function apriGruppoOpz(g){
+  if(g==="turni"){ apriTuoiTurni("opzioni"); return; }
+  _opzGruppo=g; applicaGruppoOpz();
+  if(g==="abitudini"){ const b=document.querySelector('[data-opz="3"]'); if(b && b.getAttribute("aria-expanded")!=="true") b.click(); }
+  if(g==="voci") renderPianoVoci();
+}
+function renderOpzHub(){
+  const el=$("#opzHub"); if(!el) return;
+  const pi=presetIndex();
+  const turni = !state.pattern ? "Da impostare" : (pi>=0 ? nomePreset(PRESETS[pi]) : "Personalizzato · "+String(state.pattern).length+" giorni");
+  let oggiN=""; try{ oggiN=NT.etichetta(dnum(giornoVero())-dnum(state.focus)); }catch(e){}
+  const ab=[ (state.freeBed&&state.freeWake) ? "Sonno "+state.freeBed+" → "+state.freeWake : "", "tragitto "+(state.cTo||25)+" min" ].filter(Boolean).join(" · ");
+  const attivi=(typeof promemoriaAttivi==="function" && promemoriaAttivi());
+  const nVoci=PIANO_VOCI.filter(([k])=>pianoVoce(k)).length;
+  const R=[
+    ["turni","calendar","Turni e ciclo", turni+(oggiN?" · oggi "+(oggiN==="Riposo"?"riposo":oggiN):"")],
+    ["abitudini","moon","Le tue abitudini", ab||"Sonno, tragitto, caffè, pisolini"],
+    ["promemoria","alarm","Promemoria e collegamenti", attivi?"Promemoria attivi":"Promemoria spenti"],
+    ["voci","eye","Cosa vedi nel piano", nVoci+" "+(nVoci===1?"voce in più":"voci in più")+" accese su "+PIANO_VOCI.length],
+    ["dati","cycle","Dati e privacy", "Copia di sicurezza, statistiche, cancella tutto"],
+    ["aiuto","sparkles","Aiuto e novità", "Suggerisci, valuta, cosa c'è di nuovo"]
+  ];
+  const ic=n=>(ICON&&ICON[n])||"";
+  el.innerHTML=R.map(([g,i,t,v])=>'<button type="button" class="opz-hub-r" role="listitem" data-opzg-vai="'+g+'"><span class="tool-ic">'+ic(i)+'</span><span class="opz-tx"><b>'+esc(t)+'</b><span class="opz-val">'+esc(v)+'</span></span><span class="tchev" aria-hidden="true">›</span></button>').join("");
+}
+document.addEventListener("click",e=>{ const b=e.target.closest("[data-opzg-vai]"); if(b){ haptic(6); apriGruppoOpz(b.dataset.opzgVai); } });
+function chiudiOpzioniPagina(){
+  if(_opzGruppo){ _opzGruppo=null; applicaGruppoOpz(); return; }
+  setTab(tabPrimaDiOpzioni);
+}
 if($("#doOpzioni")) $("#doOpzioni").onclick=apriOpzioni;
 if($("#chiudiOpzioni")) $("#chiudiOpzioni").onclick=chiudiOpzioniPagina;
 { const ab=document.querySelector(".appbar");

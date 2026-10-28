@@ -24,10 +24,11 @@ ok((await voci(p)).includes("✓I turni dei prossimi giorni"), "web: dopo aver i
 // Opzioni (dopo il flusso si resta in «I tuoi turni»: prima si torna a Oggi)
 await p.click('[data-tab="oggi"]'); await p.waitForTimeout(300);
 await p.click("#doOpzioni"); await p.waitForTimeout(300);
-const gruppi=await p.evaluate(()=>[...document.querySelectorAll("#opzioni > .eyebrow")].map(e=>e.textContent));
-ok(gruppi.slice(0,6).join(",")==="Funziona da solo,Il tuo piano,Cosa vedi nel piano,Aspetto,Salva,Informazioni e privacy", "Opzioni per argomento: "+gruppi.join(" · "));
+const gruppi=await p.evaluate(()=>[...document.querySelectorAll("#opzHub .opz-hub-r b")].map(e=>e.textContent));
+ok(gruppi.join(",")==="Turni e ciclo,Le tue abitudini,Promemoria e collegamenti,Cosa vedi nel piano,Dati e privacy,Aiuto e novità", "Impostazioni in sei voci: "+gruppi.join(" · "));
+await p.click('[data-opzg-vai="promemoria"]'); await p.waitForTimeout(200);
 const opzV=await p.evaluate(()=>[...document.querySelectorAll("#opzFunzioni .attiva-voce[data-gestisci]")].map(v=>(v.classList.contains("ok")?"✓":"·")+v.querySelector("b").textContent));
-ok(opzV.length===2, "Opzioni → 'Funziona da solo' con promemoria e calendario (i turni stanno in 'Il tuo piano'): "+opzV.join(" | "));
+ok(opzV.length===2, "Impostazioni › Promemoria e collegamenti: promemoria e calendario (i turni stanno in «Turni e ciclo»): "+opzV.join(" | "));
 await p.screenshot({path:"/tmp/a-2-opzioni.png", fullPage:true});
 await p.evaluate(()=>document.querySelector("#chiudiOpzioni").click());
 await p.click("#nascondiAttivazione").catch(()=>{}); await p.waitForTimeout(200);

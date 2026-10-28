@@ -22,6 +22,7 @@ await p.click("#shiftPill"); await p.waitForTimeout(200);
 ok(await p.evaluate(()=>!document.querySelector("[data-qs-impegno]")), "impegno: nella scheda di oggi non si può segnare");
 await p.click("#qsClose"); await p.click("#next"); await p.waitForTimeout(200);
 await p.click("#shiftPill"); await p.waitForTimeout(200);
+await p.click("[data-qs-altro]"); await p.waitForTimeout(100);
 await p.click("[data-qs-impegno]"); await p.waitForTimeout(250);
 await p.evaluate(()=>{ const i=document.querySelector("[data-qs-impegno-h]"); i.value="08:30"; i.dispatchEvent(new Event("change",{bubbles:true})); });
 await p.waitForTimeout(200);
@@ -36,6 +37,7 @@ await p.evaluate(()=>{ const b=document.querySelector("#goToday"); if(b && !b.hi
 await p.click('[data-attiva="calendario"]'); await p.waitForTimeout(3000);
 // lo stato del calendario ora vive solo in Impostazioni (tolto il doppione in Turni)
 await p.evaluate(()=>document.querySelector("#doOpzioni").click()); await p.waitForTimeout(300);
+await p.click('[data-opzg-vai="promemoria"]'); await p.waitForTimeout(200);
 await p.click("[data-cal-controlla]"); await p.waitForTimeout(1200);
 const st=await p.evaluate(()=>document.querySelector("#opzCalStato")&&document.querySelector("#opzCalStato").innerText);
 ok(/Nel telefono: \d+ eventi/.test(st||""), "calendario: Impostazioni dice quanti eventi ci sono davvero nel telefono → "+st);
@@ -47,6 +49,7 @@ await p.click("[data-cal-riscrivi]"); await p.waitForTimeout(4500);
 ok(await p.evaluate(()=>Object.keys(window.__cal.ev).length)>0, "calendario: 'Riscrivili ora' li rimette");
 // notifica di prova
 if(!await p.evaluate(()=>document.body.classList.contains("tab-opzioni"))){ await p.evaluate(()=>document.querySelector("#doOpzioni").click()); await p.waitForTimeout(300); }
+await p.evaluate(()=>{ const g=document.querySelector('[data-opzg-vai="promemoria"]'); if(g && g.offsetParent) g.click(); }); await p.waitForTimeout(200);
 await p.click("[data-prova-notifica]"); await p.waitForTimeout(300);
 ok(await p.evaluate(()=>window.__pend.some(n=>n.id===999990)), "Impostazioni: 'Prova una notifica' la manda subito");
 // diario: 30 notti a letto 00:30 sveglia 09:00
@@ -70,7 +73,7 @@ ok(ann.bed==="23:30" && ann.wake==="07:30" && !ann.vis, "Annulla torna agli orar
 await p.evaluate(()=>{ localStorage.removeItem("nt:adattaNo"); });
 await p.reload(); await p.waitForTimeout(1500);
 await p.evaluate(()=>document.querySelector("#doOpzioni").click()); await p.waitForTimeout(300);
-await p.click('[data-opz="3"]'); await p.waitForTimeout(300);
+await p.click('[data-opzg-vai="abitudini"]'); await p.waitForTimeout(300);
 const sl=await p.evaluate(()=>{ const e=document.querySelector("#suggLiberi"); return e && !e.hidden ? e.innerText.replace(/\n/g," | ") : null; });
 ok(!!sl, "Impostazioni → Sonno nei giorni liberi: suggerimento con un tocco → "+sl);
 await p.locator("#opzBox3").screenshot({path:SP+"/ad-opz.png"});

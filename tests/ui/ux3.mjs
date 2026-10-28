@@ -21,7 +21,7 @@ ok(await p.evaluate(()=>!document.querySelector("#scambioPagina").hidden && getC
 await p.evaluate(()=>document.querySelector("#chiudiScambio").click()); await p.waitForTimeout(150);
 ok(await p.evaluate(()=>document.querySelector("#scambioPagina").hidden && getComputedStyle(document.querySelector("#doScambioTurno")).display!=="none"), "scambio: la freccia indietro torna a Turni");
 await p.evaluate(()=>document.querySelector("#doOpzioni").click()); await p.waitForTimeout(200);
-await p.click('[data-opz="3"]'); await p.waitForTimeout(100);
-ok(await p.evaluate(()=>document.querySelector('[data-opz="3"]').getAttribute("aria-expanded"))==="true", "Impostazioni: riga aperta = aria-expanded, freccia girata");
 ok(await p.evaluate(()=>document.querySelector("#opzioni h1").innerText)==="Impostazioni", "titolo 'Impostazioni'");
+await p.click('[data-opzg-vai="abitudini"]'); await p.waitForTimeout(150);
+ok(await p.evaluate(()=>document.querySelector('[data-opz="3"]').getAttribute("aria-expanded"))==="true", "Le tue abitudini: riga aperta = aria-expanded, freccia girata");
 console.log("errori", errs); await b.close();
