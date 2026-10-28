@@ -84,6 +84,14 @@ public class WidgetStatoTest {
         assertEquals("2026-10-25", WidgetStato.calcola(p, VUOTO, t(1, 1, 30)).giornoAzione);
     }
 
+    @Test public void lEnergiaSiChiedeDopoLInerziaDelSonno() throws Exception {
+        JSONObject dia = new JSONObject().put("d", "2026-10-24").put("bed", "23:30").put("wake", "07:10").put("da", t(0, 7, 10)).put("en", t(0, 8, 40)).put("a", t(0, 21, 10)).put("sonno", true).put("voto", false);
+        JSONObject p = piano(dia, voce(t(0, 22, 0), t(1, 6, 15), "Turno Notte", "turno"));
+        assertNotEquals("a 30 minuti dalla sveglia le facce non ci sono", WidgetStato.Azione.VOTO_ENERGIA, WidgetStato.calcola(p, VUOTO, t(0, 7, 40)).azione);
+        assertEquals("dopo 90 minuti sì", WidgetStato.Azione.VOTO_ENERGIA, WidgetStato.calcola(p, VUOTO, t(0, 8, 41)).azione);
+        assertEquals("il sonno si conferma subito", WidgetStato.Azione.VOTO_SONNO, WidgetStato.calcola(piano(dia.put("sonno", false), voce(t(0, 22, 0), t(1, 6, 15), "Turno Notte", "turno")), VUOTO, t(0, 7, 15)).azione);
+    }
+
     @Test public void voto() throws Exception {
         JSONObject dia = new JSONObject().put("d", "2026-10-24").put("bed", "23:30").put("wake", "07:10").put("da", t(0, 7, 10)).put("a", t(0, 21, 10)).put("sonno", false).put("voto", false);
         JSONObject p = piano(dia, voce(t(0, 22, 0), t(1, 6, 15), "Turno Notte", "turno"));

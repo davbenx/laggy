@@ -141,7 +141,9 @@ final class WidgetStato {
                 JSONObject r = risposte.optJSONObject(d.optString("d"));
                 boolean sonno = d.optBoolean("sonno") || (r != null && r.optBoolean("sonno"));
                 boolean voto = d.optBoolean("voto") || (r != null && r.has("voto"));
-                if (!sonno) azione = Azione.VOTO_SONNO; else if (!voto) azione = Azione.VOTO_ENERGIA;
+                long en = d.optLong("en", d.optLong("da"));   // l'energia si chiede da 90 minuti dopo la sveglia: prima c'è l'inerzia del sonno
+                if (!sonno) azione = Azione.VOTO_SONNO; else if (!voto && ora >= en) azione = Azione.VOTO_ENERGIA;
+                if (sonno && !voto && ora < en) cambio(en, ora);
                 if (azione != Azione.NESSUNA) { diario = d; cambio(d.optLong("a"), ora); }
             }
         }

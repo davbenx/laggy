@@ -34,6 +34,10 @@ t=await box(p);
 ok(/✓ Sonno \d\d:\d\d–\d\d:\d\d · /.test(t) && await n(p,'.drem-done [data-open][aria-label^="Modifica"]')===1 && await n(p,"[data-confirm-sleep]")===0, "«Sì, così»: una riga con gli orari e la matita per modificarli → "+t.slice(0,70));
 const piano=()=>p.evaluate(()=>Object.keys(JSON.parse(localStorage.getItem("nt:sonnoPiano")||"{}")).length);
 ok(await piano()===1, "«Sì, così»: la notte è segnata «come da piano» (non conta per la regolarità)");
+// 40 minuti dopo la sveglia c'è ancora l'inerzia del sonno: le facce si chiedono da 90 minuti
+ok(await n(p,"[data-diary]")===0 && /Come ti senti\?/.test(t) && await n(p,"[data-voto-presto]")===1, "40 minuti dopo la sveglia: «Come ti senti?» aspetta, e dice perché");
+await p.clock.runFor(70*60e3); await p.evaluate(()=>window.dispatchEvent(new Event("nt:refresh"))); await p.clock.runFor(800);
+t=await box(p);
 ok(await n(p,"[data-diary]")===5 && /Come ti senti\?/.test(t), "poi «Come ti senti?», cinque scelte");
 await tap(p,'[data-diary="4"]');
 t=await box(p);
