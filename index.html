@@ -592,6 +592,9 @@ html.js-lento .jsoff{display:block}
 .sg-testa button:disabled{opacity:.35;cursor:default}
 .sg-pennelli{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 12px}
 .sg-pen{border:1.5px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;min-height:40px;padding:0 13px;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer}
+.sg-azioni{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 12px}
+.sg-pen:disabled{opacity:.4;cursor:default}
+.sg-g.da{outline:2px solid var(--blue);outline-offset:-2px}
 .sg-pen[aria-pressed="true"]{background:var(--blue-fill);border-color:var(--blue-fill);color:var(--su-blu)}
 .sg-griglia{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
 .sg-gs{font-size:11px;font-weight:700;color:var(--faint);text-align:center;padding:2px 0;text-transform:uppercase}
@@ -9099,7 +9102,7 @@ if($("#cycToday")) $("#cycToday").onclick=()=>{
    `id` cambia solo quando c'è qualcosa da dire; chi aggiorna la vede una volta. Chi installa adesso non la vede
    (non è una novità per lui), ma la trova sempre in Impostazioni › Novità. «app:true» = solo nell'app Android. */
 const NOVITA={ id:"2026-10-31", data:"Ottobre 2026", righe:[
-  ["Turni più ordinati","Gli strumenti stanno in una griglia, ognuno con il suo stato. «Modifica turni» apre un foglio: ciclo e orari, segna i giorni, importa, festivi. «Condividi» raccoglie invio, QR e stampa. Il mese è una riga che si apre.",false,"2026-10-31"],
+  ["Turni più ordinati","Gli strumenti stanno in una griglia, ognuno con il suo stato. «Modifica turni» apre un foglio: ciclo e orari, segna i giorni, importa, festivi. «Condividi» raccoglie invio, QR e stampa. Il mese è una riga che si apre. In «Segna»: intervallo con due tocchi, «Come 7 giorni prima», «Annulla» e «Prossimo da segnare».",false,"2026-10-31"],
   ["Impostazioni e persone più semplici","Impostazioni è un elenco di sei voci con il valore di ciascuna; gli orari dei turni si cambiano sulla pagina, con «Annulla». Aggiungere una persona: un nome, una scelta (ha l'app, fa i tuoi turni, lun–ven, turni diversi) e solo quello che serve.",false,"2026-10-30"],
   ["Il voto sull'energia, al momento giusto","Appena svegli c'è l'inerzia del sonno e il voto verrebbe più basso del vero: «Come ti senti?» arriva 90 minuti dopo la sveglia. E subito dopo il risveglio non compare più «Rischio fatica alto».",false,"2026-10-29"],
   ["Un altro turno per un giorno","Devi fare una giornata al posto del pomeriggio? Dal foglio del giorno: «＋ Un altro turno», nome e orari. Poi lo ritrovi fra i tuoi turni. Con orari diversi il giorno prende il nome giusto (Giornata, Mattina, Sera…).",false,"2026-10-28"],
@@ -9482,6 +9485,7 @@ if($("#feriePagina")){
    (orari veri, formazione, turno extra). Sotto, l'importazione: file,
    calendario del telefono, foto o PDF; ogni volta si conferma cosa vuol
    dire ogni sigla prima di segnare, e si può annullare. */
+let sgIntervallo=false, sgDa=null, sgStorico=[];   // intervallo: due tocchi (primo e ultimo giorno); storico: per «Annulla»
 let sgOff=0, sgPennello=null, _imp=null, _importa=null, _aiOn=null;
 const caricaImporta=()=> _importa || (_importa=import("./importa.js"));
 function pennelliSegna(){
@@ -9489,7 +9493,7 @@ function pennelliSegna(){
   const lav=Object.keys(sh).filter(k=>sh[k] && !sh[k].rest);
   // Malattia, formazione, turno extra e orari veri sono rari: stanno in «Altro…»
   return lav.map(k=>({k, t:sh[k].n})).concat([{k:"R",t:"Riposo"},{k:"ferie",t:"Ferie"},{k:"reperibile",t:"Reperibile"},
-    {k:"dettagli",t:"Altro…"},{k:"cancella",t:"Cancella"}]);
+    {k:"copia",t:"Come 7 giorni prima"},{k:"dettagli",t:"Altro…"},{k:"cancella",t:"Cancella"}]);
 }
 function siglaCella(nome){ return nome.length<=5 ? nome : nome.slice(0,3)+"."; }
 function renderSegna(){
@@ -9511,15 +9515,19 @@ function renderSegna(){
     else if(b && !b.rest) cl=(NT.spansNight(b)||NT.startsInNight(b))?" notte":" lav";
     const extra=[g.t==="reperibile"?"reperibile":"", g.t==="extra"?"turno extra":"", g.s!=null&&g.t!=="formazione"?"orari "+hhmm(g.s)+"–"+hhmm(g.e):""].filter(Boolean);
     const lab=d.toLocaleDateString(LINGUA,{weekday:"long",day:"numeric",month:"long"})+": "+(nomeG==="—"?"da segnare":nomeG)+(extra.length?", "+extra.join(", "):"");
-    celle+='<button type="button" class="sg-g'+cl+(state.ecc[k]||state.giorni[k]?" mio":"")+(g.t==="reperibile"?" rep":"")+(g.s!=null&&g.t!=="formazione"?" ore":"")+(dnum(d)===dnum(oggi)?" oggi":"")+'" data-sg="'+k+'" aria-label="'+esc(lab)+'">'+
+    celle+='<button type="button" class="sg-g'+cl+(state.ecc[k]||state.giorni[k]?" mio":"")+(g.t==="reperibile"?" rep":"")+(g.s!=null&&g.t!=="formazione"?" ore":"")+(dnum(d)===dnum(oggi)?" oggi":"")+(k===sgDa?" da":"")+'" data-sg="'+k+'" aria-label="'+esc(lab)+'">'+
       '<small>'+d.getDate()+'</small><b>'+esc(siglaCella(nomeG)+(g.t==="extra"?"+":""))+'</b></button>';
   }
   el.innerHTML='<div class="sg-testa"><button type="button" data-sg-mese="-1" aria-label="Mese precedente"'+(sgOff<=-6?' disabled':'')+'>‹</button>'+
       '<b aria-live="polite">'+esc(nome.charAt(0).toUpperCase()+nome.slice(1))+'</b>'+
       '<button type="button" data-sg-mese="1" aria-label="Mese successivo"'+(sgOff>=12?' disabled':'')+'>›</button></div>'+
     '<p class="hint" style="margin:0 0 8px" aria-live="polite">'+(sgPennello==="dettagli" ? "Tocca un giorno per malattia, formazione, turno extra o orari diversi."
-      : sgPennello==="cancella" ? "Tocca i giorni da riportare come prima." : "Scegli cosa segnare, poi tocca i giorni. Un secondo tocco lo toglie.")+'</p>'+
+      : sgIntervallo ? (sgDa ? "Ora tocca l'ultimo giorno dell'intervallo." : "Tocca il primo e l'ultimo giorno: li segno tutti insieme.")
+      : sgPennello==="cancella" ? "Tocca i giorni da riportare come prima." : sgPennello==="copia" ? "Tocca un giorno: prende il turno di 7 giorni prima." : "Scegli cosa segnare, poi tocca i giorni. Un secondo tocco lo toglie.")+'</p>'+
     '<div class="sg-pennelli" role="group" aria-label="Cosa segni">'+pen.map(p=>'<button type="button" class="sg-pen" data-pen="'+esc(p.k)+'" aria-pressed="'+(p.k===sgPennello)+'">'+esc(p.t)+'</button>').join("")+'</div>'+
+    '<div class="sg-azioni"><button type="button" class="sg-pen" data-sg-intervallo aria-pressed="'+sgIntervallo+'">Intervallo</button>'+
+      (daSegnare ? '<button type="button" class="sg-pen" data-sg-prossimo>Prossimo da segnare ('+daSegnare+')</button>' : '')+
+      '<button type="button" class="sg-pen" data-sg-annulla'+(sgStorico.length?'':' disabled')+'>Annulla</button></div>'+
     '<div class="sg-griglia">'+celle+'</div>'+
     '<p class="sg-legenda"><span><i style="background:var(--orange-fill)"></i>reperibile</span><span><i style="background:var(--ink);width:12px;height:2px;border-radius:2px;vertical-align:3px"></i>orari diversi</span><span><i style="background:var(--blue)"></i>bordo: segnato da te</span>'+
       (daSegnare?'<span>— da segnare: '+daSegnare+'</span>':'')+'</p>';
@@ -9534,16 +9542,44 @@ function scegliTurno(d, k){
 }
 let _segnaRender=0;
 function dopoSegna(){ salva(); renderSegna(); clearTimeout(_segnaRender); _segnaRender=setTimeout(()=>{ try{ render(); }catch(e){} }, 400); }
-function pennella(dIso){
+// Un giorno col pennello scelto. «unico»: il secondo tocco toglie (un giorno solo); in un intervallo si imposta sempre.
+function pennellaGiorno(dIso, unico){
   const pen=sgPennello, g=state.giorni[dIso]||{};
-  if(pen==="dettagli"){ apriQuickShift(new Date(dIso+"T12:00:00")); return; }
-  haptic(6);
   if(pen==="cancella"){ delete state.ecc[dIso]; delete state.giorni[dIso]; }
-  else if(pen==="ferie"||pen==="reperibile") segnaSpeciale(dIso, pen);
-  else if(state.ecc[dIso]===pen && !GIORNO_BASE[g.t]){ delete state.ecc[dIso];
+  else if(pen==="copia"){ const o=dnum(new Date(dIso+"T12:00:00"))-dnum(state.focus); let c="?"; try{ c=NT.codeAt(o-7); }catch(e){}
+    if(c!=="?" && c!==NT.codeAt(o)) scegliTurno(dIso, c); }
+  else if(pen==="ferie"||pen==="reperibile"){ if(unico || g.t!==pen) segnaSpeciale(dIso, pen); }
+  else if(unico && state.ecc[dIso]===pen && !GIORNO_BASE[g.t]){ delete state.ecc[dIso];
     if(g.s!=null){ const n=Object.assign({},g); delete n.s; delete n.e; if(n.t) state.giorni[dIso]=n; else delete state.giorni[dIso]; } }
   else scegliTurno(dIso, pen);
-  dopoSegna();
+}
+function sgSalvaStorico(){ sgStorico.push(JSON.stringify([state.ecc, state.giorni])); if(sgStorico.length>30) sgStorico.shift(); }
+function sgAnnulla(){
+  const u=sgStorico.pop(); if(!u) return;
+  const [e,g]=JSON.parse(u); state.ecc=e; state.giorni=g; NT.state.ecc=e; NT.state.giorni=g; haptic(4); dopoSegna();
+}
+function pennella(dIso){
+  const pen=sgPennello;
+  if(pen==="dettagli"){ apriQuickShift(new Date(dIso+"T12:00:00")); return; }
+  haptic(6);
+  if(sgIntervallo){
+    if(!sgDa){ sgDa=dIso; renderSegna(); return; }
+    let a=sgDa, b=dIso; if(a>b) [a,b]=[b,a]; sgDa=null;
+    sgSalvaStorico();
+    let n=0; for(let d=new Date(a+"T12:00:00"); iso(d)<=b; d.setDate(d.getDate()+1)){ pennellaGiorno(iso(d), false); n++; }
+    dopoSegna(); toast(n+(n===1?" giorno":" giorni")+" segnati");
+    return;
+  }
+  sgSalvaStorico(); pennellaGiorno(dIso, true); dopoSegna();
+}
+// Il primo giorno ancora da segnare da oggi in poi (fino a un anno): apre quel mese.
+function sgProssimoDaSegnare(){
+  const oggi=giornoVero();
+  for(let i=0;i<366;i++){ const d=new Date(oggi.getFullYear(), oggi.getMonth(), oggi.getDate()+i, 12);
+    let c="?"; try{ c=NT.codeAt(dnum(d)-dnum(state.focus)); }catch(e){}
+    if(c==="?"){ sgOff=Math.max(-6, Math.min(12,(d.getFullYear()-oggi.getFullYear())*12+d.getMonth()-oggi.getMonth())); renderSegna();
+      const cella=document.querySelector('[data-sg="'+iso(d)+'"]'); if(cella && cella.scrollIntoView) cella.scrollIntoView({block:"center",behavior:"smooth"}); return; } }
+  toast("Non c'è nessun giorno da segnare");
 }
 function apriSegna(modo){
   const pg=$("#segnaPagina"); if(!pg) return;
@@ -9715,6 +9751,7 @@ if($("#ttRighe")) $("#ttRighe").addEventListener("click", e=>{
     apriFlussoPagina("posizione", "posizione"); return; }
 });
 function chiudiSegna(){
+  sgIntervallo=false; sgDa=null; sgStorico=[];
   document.body.classList.remove("segna-aperta","sg-importa-sola","sg-segna-solo"); segnaSottopagina();
   const pg=$("#segnaPagina"); if(pg) pg.hidden=true; _imp=null;
 }
@@ -9723,7 +9760,10 @@ if($("#segnaOut")) $("#segnaOut").addEventListener("click", e=>{
   const m=e.target.closest("[data-sg-mese]");
   if(m && !m.disabled){ sgOff=Math.max(-6, Math.min(12, sgOff + +m.dataset.sgMese)); renderSegna(); return; }
   const p=e.target.closest("[data-pen]");
-  if(p){ sgPennello=p.dataset.pen; haptic(4); renderSegna(); return; }
+  if(p){ sgPennello=p.dataset.pen; sgDa=null; haptic(4); renderSegna(); return; }
+  if(e.target.closest("[data-sg-intervallo]")){ sgIntervallo=!sgIntervallo; sgDa=null; haptic(4); renderSegna(); return; }
+  if(e.target.closest("[data-sg-annulla]")){ sgAnnulla(); return; }
+  if(e.target.closest("[data-sg-prossimo]")){ sgProssimoDaSegnare(); return; }
   const c=e.target.closest("[data-sg]"); if(c) pennella(c.dataset.sg);
 });
 
@@ -9855,7 +9895,8 @@ function applicaImport(){
     if(ciclo && state.repeat===false) _imp={stato:"ciclo", ciclo};
     renderImport(); salva(); render(); renderSegna();
     try{ window.scrollTo({top:0, behavior:"smooth"}); }catch(e){}
-    toastUndo((P.length===1?"1 giorno segnato":P.length+" giorni segnati")+" dal foglio turni", ()=>{
+    const dal=P.map(x=>x.data).sort(), fmt=k=>new Date(k+"T12:00:00").toLocaleDateString(LINGUA,{day:"numeric",month:"short"});
+    toastUndo((P.length===1?"1 giorno segnato":P.length+" giorni segnati")+" · "+(dal[0]===dal[dal.length-1]?fmt(dal[0]):fmt(dal[0])+" – "+fmt(dal[dal.length-1])), ()=>{
       state.ecc=primaE; state.giorni=primaG; NT.state.ecc=primaE; NT.state.giorni=primaG; salva(); render(); renderSegna();
     });
   });

@@ -34,7 +34,7 @@ const tmp=mkdtempSync(join(tmpdir(),"nt-"));
 // 1. web: pennelli
 let p=await nuova("http://localhost:8765/index.html");
 ok(await p.evaluate(()=>document.body.classList.contains("turni-aperta") && !!document.querySelector("#ttMese #segnaOut") && document.body.classList.contains("sottopagina") && getComputedStyle(document.querySelector("#cyc")).display==="none"), "turni variabili: il mese si apre in «I tuoi turni» e nasconde il resto");
-ok(await p.evaluate(()=>document.querySelectorAll("[data-pen]").length===8 && document.querySelector('[data-pen="M"]').getAttribute("aria-pressed")==="true"), "8 pennelli, il primo turno scelto");
+ok(await p.evaluate(()=>document.querySelectorAll("[data-pen]").length===9 && document.querySelector('[data-pen="M"]').getAttribute("aria-pressed")==="true"), "9 pennelli, il primo turno scelto");
 ok(await p.evaluate(()=>document.querySelector("#sgDaCalendario").hidden && document.querySelector("#sgDaFoto").hidden), "sul web senza AI: niente calendario del telefono né foto");
 await p.click('[data-pen="N"]');
 await p.click('[data-sg="'+giorno(10)+'"]'); await p.click('[data-sg="'+giorno(11)+'"]');

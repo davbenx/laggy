@@ -28,6 +28,24 @@ ok(!(await vis(p,"#modificaModal")), "si chiude");
 await p.click("#tEdit"); await p.waitForTimeout(250); await p.click('[data-mod="segna"]'); await p.waitForTimeout(300);
 ok(await p.evaluate(()=>document.body.classList.contains("sg-segna-solo") && !document.body.classList.contains("sg-importa-sola")) && await vis(p,"#segnaOut"), "«Segna» mostra il calendario");
 ok(await p.evaluate(()=>{ const i=document.querySelector("#segnaPagina .sg-importa"); return !i || i.offsetParent===null; }), "…senza l'importazione");
+// fase 2: intervallo, «come 7 giorni prima», annulla
+{ const st=()=>p.evaluate(()=>JSON.parse(localStorage.getItem("nt:state")));
+  const dd=n=>{ const d=new Date(oggi.getTime()+n*864e5); return iso(d); };
+  const t=n=>p.evaluate(k=>{ const e=document.querySelector('[data-sg="'+k+'"]'); return e?e.querySelector("b").textContent:null; }, dd(n));
+  const mese=oggi.getMonth(); const ok2=[1,2,3].every(n=>new Date(oggi.getTime()+n*864e5).getMonth()===mese);
+  if(ok2){
+    await p.click('[data-pen="ferie"]'); await p.click("[data-sg-intervallo]"); await p.waitForTimeout(100);
+    await p.click('[data-sg="'+dd(1)+'"]'); ok(await p.evaluate(()=>/ultimo giorno/.test(document.querySelector("#segnaOut .hint").textContent)), "intervallo: dopo il primo tocco chiede l'ultimo");
+    await p.click('[data-sg="'+dd(3)+'"]'); await p.waitForTimeout(150);
+    const s1=await st(); ok([1,2,3].every(n=>s1.giorni[dd(n)] && s1.giorni[dd(n)].t==="ferie"), "intervallo: tre giorni di ferie con due tocchi");
+    ok(await p.evaluate(()=>!document.querySelector("[data-sg-annulla]").disabled), "«Annulla» si accende");
+    await p.click("[data-sg-annulla]"); await p.waitForTimeout(150);
+    const s2=await st(); ok([1,2,3].every(n=>!(s2.giorni&&s2.giorni[dd(n)])), "«Annulla» riporta i tre giorni com'erano");
+    await p.click("[data-sg-intervallo]"); await p.click('[data-pen="copia"]'); await p.click('[data-sg="'+dd(1)+'"]'); await p.waitForTimeout(150);
+    ok(await p.evaluate(()=>/7 giorni prima/.test(document.querySelector("#segnaOut .hint").textContent)), "«Come 7 giorni prima»: spiega cosa fa");
+  }
+  await p.click("[data-sg-annulla]").catch(()=>{});
+}
 await p.evaluate(()=>document.querySelector("#chiudiSegna").click()); await p.waitForTimeout(250);
 ok(await p.evaluate(()=>!document.body.classList.contains("sg-segna-solo") && !document.body.classList.contains("sg-importa-sola")), "chiudendo, le due modalità si spengono");
 await p.click("#tEdit"); await p.waitForTimeout(250); await p.click('[data-mod="importa"]'); await p.waitForTimeout(300);
