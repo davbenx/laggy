@@ -318,10 +318,11 @@ max-height:calc(100vh - 88px - var(--sab));max-height:calc(100dvh - 88px - var(-
 .qs-close{background:var(--s2);border:none;color:var(--dim);width:30px;height:30px;border-radius:50%;font-size:14px;
 display:flex;align-items:center;justify-content:center;cursor:pointer}
 .qs-close:hover{color:var(--ink);background:var(--line)}
-.qs-nuovo{margin:8px 0 2px}
-.qs-nuovo #qsNuovoForm{margin-top:8px;display:grid;gap:8px}
-.qs-nome{display:flex;align-items:center;gap:10px;font-size:13.5px;color:var(--dim)}
-.qs-nome input{flex:1;min-height:40px;padding:0 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit}
+.qs-hd-az{display:flex;align-items:center;gap:10px}
+.qs-orari{display:flex;flex-direction:column;gap:8px;align-items:flex-start;margin:10px 0 0}
+.qs-orari .qs-ore{width:100%}
+.qs-piede{display:flex;justify-content:space-between;gap:12px;margin:12px 0 0}
+.qs-piede .lnk{font-size:13px;padding:8px 0}
 .qs-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
 .qs-btn{background:var(--bg);border:1.5px solid var(--line);border-radius:var(--r);padding:11px 13px;font-family:inherit;
 font-size:14.5px;font-weight:600;color:var(--ink);cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;
@@ -792,7 +793,7 @@ background:none;border:none;width:100%;cursor:pointer;font-family:inherit}
 .tools{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 22px}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);
 color:var(--bg);padding:11px 16px;border-radius:var(--r);
-font-size:14px;z-index:99;opacity:0;pointer-events:none;transition:opacity .2s}
+font-size:14px;z-index:1000;opacity:0;pointer-events:none;transition:opacity .2s}
 .toast.on{opacity:1;pointer-events:auto}
 .toast-undo{background:none;border:none;color:var(--bg);text-decoration:none;
 font:inherit;font-weight:700;letter-spacing:.02em;min-height:44px;padding:0 0 0 14px;margin:-12px 0;cursor:pointer}
@@ -1953,22 +1954,18 @@ header b{font-size:23px}
         <span class="eyebrow" id="qsDateSub" style="display:block">Cosa fai davvero</span>
         <b class="qs-title" id="qsDateTitle">Oggi</b>
       </div>
-      <button type="button" class="qs-close" id="qsClose" aria-label="Chiudi">✕</button>
-    </div>
-    <div class="qs-grid" id="qsGrid"></div>
-    <div class="qs-nuovo">
-      <button type="button" class="qs-chip" id="qsNuovoApri" aria-expanded="false" aria-controls="qsNuovoForm">＋ Un altro turno</button>
-      <div id="qsNuovoForm" hidden>
-        <label class="qs-nome"><span>Nome</span><input type="text" id="qsNuovoNome" maxlength="14" autocomplete="off" placeholder="Giornata"></label>
-        <div class="qs-ore"><span>Orari</span><input type="time" id="qsNuovoS" value="08:00" aria-label="Inizio"><span>→</span><input type="time" id="qsNuovoE" value="16:00" aria-label="Fine"></div>
-        <button type="button" class="btn pri" id="qsNuovoOk" style="width:100%;min-height:44px">Usa per questo giorno</button>
-        <small class="hint" style="display:block;margin-top:6px">Il turno resta tra i tuoi: la prossima volta lo trovi qui sopra, un tocco.</small>
+      <div class="qs-hd-az">
+        <button type="button" class="lnk dim" id="qsReset" hidden>Ripristina</button>
+        <button type="button" class="qs-close" id="qsClose" aria-label="Chiudi">✕</button>
       </div>
     </div>
+    <div class="qs-grid" id="qsGrid"></div>
+    <div class="qs-orari" id="qsOrari"></div>
     <div class="qs-spec" id="qsSpec"></div>
-    <button type="button" class="qs-reset" id="qsReset" hidden>✕ Torna alla sequenza standard</button>
-    <button type="button" class="btn g" id="qsVaiPiano" style="width:100%;min-height:44px;margin-top:6px" hidden>Vedi il piano di questo giorno</button>
-    <button type="button" class="lnk" id="qsVaiScambio" style="font-size:12.5px;text-align:center;width:100%;margin-top:2px;padding:10px 0">⇄ Valuta un cambio turno →</button>
+    <div class="qs-piede">
+      <button type="button" class="lnk" id="qsVaiPiano" hidden>Piano del giorno</button>
+      <button type="button" class="lnk" id="qsVaiScambio">Cambio turno</button>
+    </div>
   </div>
 </div>
 
@@ -7882,7 +7879,8 @@ function apriQuickShift(d){
       '</button>';
   }
   $("#qsGrid").innerHTML=html;
-  renderQsSpeciale();
+  _qsAltro=false; _qsOrariApri=false;
+  renderQsOrari(); renderQsSpeciale();
 
   const resetBtn=$("#qsReset");
   if(resetBtn){
@@ -7926,35 +7924,6 @@ if($("#qsGrid")) $("#qsGrid").addEventListener("click",e=>{
   render();
 });
 
-// Un turno che non è fra i tuoi (una «giornata» al posto del pomeriggio): nome e orari, e da lì è un turno come gli altri.
-if($("#qsNuovoApri")) $("#qsNuovoApri").addEventListener("click",()=>{
-  const f=$("#qsNuovoForm"), apri=f.hidden; f.hidden=!apri; $("#qsNuovoApri").setAttribute("aria-expanded",String(apri));
-  if(apri){ const nm=$("#qsNuovoNome"); const aggiorna=()=>{ const a=t($("#qsNuovoS").value), z=t($("#qsNuovoE").value); if(isFinite(a)&&isFinite(z)) nm.placeholder=NT.nomeOre(a, z>a?z:z+1440); }; aggiorna();
-    ["#qsNuovoS","#qsNuovoE"].forEach(i=>$(i).onchange=aggiorna); nm.focus(); }
-});
-if($("#qsNuovoOk")) $("#qsNuovoOk").addEventListener("click",()=>{
-  if(!quickShiftTarget) return;
-  const a=t($("#qsNuovoS").value); let z=t($("#qsNuovoE").value);
-  if(!isFinite(a)||!isFinite(z)){ toast("Scrivi inizio e fine"); return; }
-  while(z<=a) z+=1440;
-  if(z-a>960){ toast("Un turno di più di 16 ore? Controlla gli orari"); return; }
-  const nome=($("#qsNuovoNome").value.trim()||NT.nomeOre(a,z)).slice(0,14);
-  // se c'è già un turno con questi orari si usa quello; se no se ne aggiunge uno, con una sigla libera
-  let k=Object.keys(state.shifts).find(x=>state.shifts[x] && state.shifts[x].s===a && state.shifts[x].e===z);
-  if(!k){
-    const usate=new Set(Object.keys(state.shifts).concat(["R","S"]));
-    const prima=nome.normalize("NFD").replace(/[^A-Za-z]/g,"").charAt(0).toUpperCase();
-    k=[prima].concat("ABCDEFGHIJKLMNOPQTUVWXYZ".split("")).find(c=>c && !usate.has(c));
-    if(!k){ toast("Hai già troppi turni: toglierne uno in «I tuoi turni»"); return; }
-    state.shifts[k]={n:nome, s:a, e:z};
-  }
-  haptic(10);
-  scegliTurno(iso(quickShiftTarget), k);
-  const dove=iso(quickShiftTarget), quando=dove===iso(giornoVero())?"oggi":dove===iso(day(giornoVero(),1))?"domani":parseIso(dove).toLocaleDateString(LINGUA,{weekday:"short",day:"numeric",month:"short"});
-  salva(); chiudiQuickShift(); render();
-  toast(state.shifts[k].n+" "+hhmm(a)+"–"+hhmm(z)+" per "+quando);
-  $("#qsNuovoForm").hidden=true; $("#qsNuovoApri").setAttribute("aria-expanded","false"); $("#qsNuovoNome").value="";
-});
 if($("#qsReset")) $("#qsReset").addEventListener("click",()=>{
   if(!quickShiftTarget) return;
   haptic(10);
@@ -7978,19 +7947,74 @@ function renderQsSpeciale(){
   // L'impegno importante (esame, visita…) regola il sonno della notte PRIMA:
   // ha senso solo dai giorni futuri; su oggi resta visibile se c'era già.
   const ev=state.evento, evQui=!!(ev && ev.d===d && ev.h), futuro=dnum(quickShiftTarget)>dnum(giornoVero());
-  el.innerHTML='<span class="eyebrow">Giorno speciale</span>'+
-    '<div class="qs-chips">'+["ferie","malattia","reperibile","formazione","extra"].map(chip).join("")+
-      (futuro||evQui ? '<button type="button" class="qs-chip" data-qs-impegno aria-pressed="'+evQui+'">Impegno importante</button>' : '')+'</div>'+
+  // «Ferie» e «Malattia» sempre in vista; il resto dietro «Altro» (si apre da solo se uno è già segnato)
+  const altri=["reperibile","formazione","extra"].map(chip).join("")+(futuro||evQui ? '<button type="button" class="qs-chip" data-qs-impegno aria-pressed="'+evQui+'">Impegno importante</button>' : '');
+  const aperto=_qsAltro || ["reperibile","formazione","extra"].includes(g.t) || evQui;
+  el.innerHTML='<div class="qs-chips">'+chip("ferie")+chip("malattia")+'<button type="button" class="qs-chip" data-qs-altro aria-expanded="'+aperto+'">Altro '+(aperto?'▴':'▾')+'</button></div>'+
+    (aperto ? '<div class="qs-chips">'+altri+'</div>' : '')+
     (evQui ? '<div class="qs-ore"><span>Mente lucida alle</span><input type="time" data-qs-impegno-h value="'+esc(ev.h)+'" aria-label="Ora dell\'impegno">'+
       '<small>Esame, visita, colloquio: il sonno dei giorni prima si regola per arrivarci in forma. Un impegno alla volta.</small></div>' : '')+
     (g.t==="extra" && !lavoro ? '<p class="hint" style="margin:0;font-size:12.5px">Scegli qui sopra quale turno fai.</p>' : '')+
-    (g.t==="reperibile" ? '<p class="hint" style="margin:0;font-size:12.5px">Nel piano trovi un pisolino nel pomeriggio: una riserva di sonno se ti chiamano.</p>' : '')+
-    (lavoro ? '<div class="qs-ore"><span>'+(g.t==="formazione"?"Orari":"Orari veri")+'</span>'+
-      '<input type="time" data-qs-ora="s" value="'+hhmm(b.start)+'" aria-label="Inizio">'+
-      '<span>→</span><input type="time" data-qs-ora="e" value="'+hhmm(b.end)+'" aria-label="Fine">'+
-      (g.t==="formazione" ? '' : '<small>'+(g.s!=null ? 'Diversi dal solito per questo giorno (es. straordinario).' : 'Cambiali solo se oggi esci prima o resti di più.')+'</small>')+
-      '</div>' : '');
+    (g.t==="reperibile" ? '<p class="hint" style="margin:0;font-size:12.5px">Nel piano trovi un pisolino nel pomeriggio: una riserva di sonno se ti chiamano.</p>' : '');
 }
+var _qsAltro=false, _qsOrariApri=false;   // var: il foglio si disegna da apriQuickShift, mai prima di queste righe
+// Gli orari del giorno, in una riga: cambi un'ora e vale subito (con «Annulla»); il nome segue gli orari. Se ne esce un turno
+// che non hai («Giornata» al posto del pomeriggio), un solo tocco lo salva fra i tuoi. In un giorno di riposo: «＋ Orari diversi».
+function renderQsOrari(){
+  const el=$("#qsOrari"); if(!el || !quickShiftTarget) return;
+  const d=iso(quickShiftTarget), g=state.giorni[d]||{}, off=(dnum(quickShiftTarget)-dnum(state.focus));
+  let b=null; try{ b=NT.block(off); }catch(e){}
+  const riga=(a,z,tit)=>'<div class="qs-ore"><span>'+tit+'</span><input type="time" data-qs-ora="s" value="'+hhmm(a)+'" aria-label="Inizio"><span>→</span><input type="time" data-qs-ora="e" value="'+hhmm(z)+'" aria-label="Fine"></div>';
+  if(!b || b.rest){
+    if(g.t && GIORNO_BASE[g.t] && g.t!=="formazione"){ el.innerHTML=""; return; }   // ferie o malattia: niente orari
+    el.innerHTML = _qsOrariApri
+      ? riga(480,960,"Orari")+'<button type="button" class="btn pri" data-qs-orari-ok style="width:100%;min-height:44px">Usa per questo giorno</button>'
+      : '<button type="button" class="qs-chip" data-qs-orari-apri>＋ Orari diversi</button>';
+    return;
+  }
+  const sh=state.shifts[NT.codeAt(off)];
+  let salva="";
+  if(g.s!=null && sh && g.t!=="formazione"){
+    const nome=NT.nomeTurno(sh, g), esiste=Object.keys(state.shifts).some(k=>state.shifts[k] && state.shifts[k].s===g.s && state.shifts[k].e===g.e);
+    if(nome!==sh.n && !esiste) salva='<button type="button" class="qs-chip" data-qs-salva>Salva «'+esc(nome)+'» fra i tuoi turni</button>';
+  }
+  el.innerHTML=riga(b.start,b.end,g.t==="formazione"?"Orari":"Orari")+
+    (g.s!=null && g.t!=="formazione" ? '<small class="hint" style="display:block;margin:2px 0 0">Diversi dal solito per questo giorno.</small>' : '')+salva;
+}
+// Un turno con questi orari fra i tuoi: se c'è già lo stesso, quello; se no se ne aggiunge uno con una sigla libera.
+function turnoPerOrari(nome, a, z){
+  let k=Object.keys(state.shifts).find(x=>state.shifts[x] && state.shifts[x].s===a && state.shifts[x].e===z);
+  if(k) return k;
+  const usate=new Set(Object.keys(state.shifts).concat(["R","S"]));
+  const prima=nome.normalize("NFD").replace(/[^A-Za-z]/g,"").charAt(0).toUpperCase();
+  k=[prima].concat("ABCDEFGHIJKLMNOPQTUVWXYZ".split("")).find(c=>c && !usate.has(c));
+  if(!k) return null;
+  state.shifts[k]={n:nome.slice(0,14), s:a, e:z}; return k;
+}
+if($("#qsOrari")) $("#qsOrari").addEventListener("click",e=>{
+  if(!quickShiftTarget) return;
+  if(e.target.closest("[data-qs-orari-apri]")){ _qsOrariApri=true; renderQsOrari(); return; }
+  const dove=iso(quickShiftTarget), off=(dnum(quickShiftTarget)-dnum(state.focus));
+  const quando=dove===iso(giornoVero())?"oggi":dove===iso(day(giornoVero(),1))?"domani":parseIso(dove).toLocaleDateString(LINGUA,{weekday:"short",day:"numeric",month:"short"});
+  if(e.target.closest("[data-qs-orari-ok]")){
+    const inp=[...document.querySelectorAll("#qsOrari [data-qs-ora]")];
+    const a=t(inp[0].value); let z=t(inp[1].value);
+    if(!isFinite(a)||!isFinite(z)){ toast("Scrivi inizio e fine"); return; }
+    while(z<=a) z+=1440;
+    if(z-a>960){ toast("Un turno di più di 16 ore? Controlla gli orari"); return; }
+    const k=turnoPerOrari(NT.nomeOre(a,z), a, z);
+    if(!k){ toast("Hai già troppi turni: toglierne uno in «I tuoi turni»"); return; }
+    haptic(10); scegliTurno(dove, k); _qsOrariApri=false; salva(); chiudiQuickShift(); render();
+    toast(state.shifts[k].n+" "+hhmm(a)+"–"+hhmm(z)+" per "+quando); return;
+  }
+  if(e.target.closest("[data-qs-salva]")){
+    const g=state.giorni[dove]||{}, sh=state.shifts[NT.codeAt(off)]; if(!sh||g.s==null) return;
+    const nome=NT.nomeTurno(sh,g), k=turnoPerOrari(nome, g.s, g.e);
+    if(!k){ toast("Hai già troppi turni: toglierne uno in «I tuoi turni»"); return; }
+    haptic(10); scegliTurno(dove, k); salva(); render(); apriQuickShift(quickShiftTarget);
+    toast("«"+state.shifts[k].n+"» è fra i tuoi turni");
+  }
+});
 const GIORNO_BASE={ferie:1, malattia:1, formazione:1};
 function segnaSpeciale(d, t){
   const g=Object.assign({}, state.giorni[d]||{}), prima=g.t;
@@ -8017,6 +8041,7 @@ if($("#qsSpec")) $("#qsSpec").addEventListener("click",e=>{
     salva(); render(); apriQuickShift(quickShiftTarget);
     return;
   }
+  if(e.target.closest("[data-qs-altro]")){ _qsAltro=!_qsAltro; renderQsSpeciale(); return; }
   const c=e.target.closest("[data-qs-spec]"); if(!c || !quickShiftTarget) return;
   haptic(10);
   segnaSpeciale(iso(quickShiftTarget), c.dataset.qsSpec);
@@ -8025,7 +8050,11 @@ if($("#qsSpec")) $("#qsSpec").addEventListener("click",e=>{
 if($("#qsSpec")) $("#qsSpec").addEventListener("change",e=>{
   const imh=e.target.closest("[data-qs-impegno-h]");
   if(imh && quickShiftTarget && /^\d\d:\d\d$/.test(imh.value)){ state.evento={d:iso(quickShiftTarget), h:imh.value}; salva(); render(); return; }
+});
+if($("#qsOrari")) $("#qsOrari").addEventListener("change",e=>{
   const inp=e.target.closest("[data-qs-ora]"); if(!inp || !quickShiftTarget || !inp.value) return;
+  if($("#qsOrari [data-qs-orari-ok]")) return;   // giorno di riposo: gli orari si danno con «Usa per questo giorno»
+  const prima=JSON.parse(JSON.stringify(state.giorni[iso(quickShiftTarget)]||null));
   const d=iso(quickShiftTarget), off=(dnum(quickShiftTarget)-dnum(state.focus));
   let b; try{ b=NT.block(off); }catch(err){ return; }
   const g=Object.assign({}, state.giorni[d]||{});
@@ -8034,15 +8063,29 @@ if($("#qsSpec")) $("#qsSpec").addEventListener("change",e=>{
   if(inp.dataset.qsOra==="s") s0=v; else { e0=v; while(e0<=s0) e0+=1440; }
   // l'inizio resta nello stesso giorno; la fine dopo l'inizio, entro 16 ore
   while(e0<=s0) e0+=1440;
-  if(e0-s0>960){ toast("Un turno di più di 16 ore? Controlla gli orari"); renderQsSpeciale(); return; }
+  if(e0-s0>960){ toast("Un turno di più di 16 ore? Controlla gli orari"); renderQsOrari(); return; }
   const sh=state.shifts[NT.codeAt(off)];
   if(g.t!=="formazione" && sh && sh.s===s0 && sh.e===e0){ delete g.s; delete g.e; }
   else { g.s=s0; g.e=e0; }
   if(g.t || g.s!=null) state.giorni[d]=g; else delete state.giorni[d];
-  // niente ridisegno del foglio: chi scrive l'ora a mano perderebbe il campo
+  // il campo resta com'è (chi scrive l'ora a mano lo perderebbe); si ridisegna il resto e si può annullare
   salva(); render();
   if($("#qsReset")) $("#qsReset").hidden=false;
+  const nome=NT.etichetta(off);
+  toastUndo(nome+" "+hhmm(s0)+"–"+hhmm(e0), ()=>{ if(prima) state.giorni[d]=prima; else delete state.giorni[d]; salva(); render(); if(quickShiftTarget) apriQuickShift(quickShiftTarget); });
+  renderQsOrariSalva();
 });
+// dopo un cambio di ora: il chip «Salva…» si aggiorna senza ridisegnare i campi
+function renderQsOrariSalva(){
+  const el=$("#qsOrari"); if(!el||!quickShiftTarget) return;
+  const d=iso(quickShiftTarget), g=state.giorni[d]||{}, off=(dnum(quickShiftTarget)-dnum(state.focus)), sh=state.shifts[NT.codeAt(off)];
+  const vecchio=el.querySelector("[data-qs-salva]"); if(vecchio) vecchio.remove();
+  const nota=el.querySelector("small.hint"); if(nota) nota.remove();
+  if(g.s==null || !sh || g.t==="formazione") return;
+  el.insertAdjacentHTML("beforeend",'<small class="hint" style="display:block;margin:2px 0 0">Diversi dal solito per questo giorno.</small>');
+  const nome=NT.nomeTurno(sh,g), esiste=Object.keys(state.shifts).some(k=>state.shifts[k] && state.shifts[k].s===g.s && state.shifts[k].e===g.e);
+  if(nome!==sh.n && !esiste) el.insertAdjacentHTML("beforeend",'<button type="button" class="qs-chip" data-qs-salva>Salva «'+esc(nome)+'» fra i tuoi turni</button>');
+}
 if($("#qsClose")) $("#qsClose").addEventListener("click",chiudiQuickShift);
 if($("#quickShiftModal")) $("#quickShiftModal").addEventListener("click",e=>{
   if(e.target===$("#quickShiftModal")) chiudiQuickShift();

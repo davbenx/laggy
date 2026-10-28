@@ -56,6 +56,11 @@ Parte minimale e aggiunge un pezzo alla volta con l'altezza (`WidgetPiano`): **a
 - Test: JVM per stato, piano e calendario (`WidgetStatoTest` include il cambio d'ora); UI per i dati pubblicati. Da guardare sul telefono: quanto i launcher riportano l'altezza (`ALTEZZA_VERA`), tocchi, la sveglia nell'Orologio.
 - Da sapere: i launcher riportano un'altezza più bassa del vero (`ALTEZZA_VERA`).
 
+## To-do (approvato)
+- [x] **Foglio «Cosa fai davvero»** più intuitivo e senza attriti: una sola riga di orari che vale subito (con «Annulla» e «Ripristina» in alto), il nome che segue gli orari, un tocco per «Salva «Giornata» fra i tuoi turni», «＋ Orari diversi» nei giorni di riposo, giorni speciali compatti («Ferie», «Malattia», «Altro»), in fondo solo «Piano del giorno» e «Cambio turno». Test `turnodiverso`. Il toast ora sta sopra i fogli (prima era coperto).
+- [ ] **App Android 1.3.7** (quando si decide): widget con le facce dell'energia da 90 minuti dopo la sveglia (`WidgetStato`, campo `en`), mese a sei settimane e le altre modifiche del widget già nel ramo `main`.
+- [ ] **Idea dai feedback, da valutare come progetto a parte**: un foglio di squadra stile Excel (chi è in ferie, una data per riunioni o corsi fra squadre diverse) e l'integrazione con l'ecosistema iOS. Richiede dati condivisi fra persone: oggi tutto resta sul telefono, e la privacy dell'app si regge su questo.
+
 ## Idee per dopo (in ordine di valore/rischio, da rivedere con i dati reali)
 1. **Foto del foglio turni → importazione** (OCR sul telefono, nessun invio): per chi riceve i turni variabili su carta o PDF. È il punto più faticoso di chi non ha un ciclo.
 2. **Conti per la busta paga e controlli sui riposi**: ore notturne, festive e domeniche del mese (c'è già il mese e i festivi); avviso di «meno di 11 ore tra due turni» e «24 ore di riposo settimanale» secondo la normativa italiana. Da validare con un esperto prima di scrivere cifre.
