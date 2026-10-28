@@ -1009,7 +1009,13 @@ padding:12px 6px 12px 14px;margin:-6px 0 var(--gap-sezione);font-size:13.5px;lin
 .tt-seq i.oggi{background:var(--blue-fill);border-color:var(--blue-fill);color:var(--su-blu)}
 .tt-g{min-width:34px;min-height:40px;padding:4px 6px;border-radius:9px;background:var(--bg);border:1px solid var(--line);font:inherit;font-size:13px;font-weight:700;text-align:center;color:var(--dim);cursor:pointer}
 .tt-g.oggi{background:var(--blue-fill);border-color:var(--blue-fill);color:var(--su-blu)}
-.tt-orari .qh-ore-riga{margin-bottom:8px}
+.tt-orari-lista{margin-bottom:var(--sp-3);background:var(--s1);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.tt-orari .qh-ore-riga{grid-template-columns:minmax(78px,92px) minmax(0,1fr) auto minmax(0,1fr);gap:var(--sp-2);margin:0;padding:var(--sp-2) var(--sp-3);border-top:1px solid var(--line)}
+.tt-orari .qh-ore-riga:first-child{border-top:0}
+.tt-orari .qh-ore-riga>:first-child{grid-column:auto;font-size:15px}
+.tt-orari .qh-ore-riga input{background:var(--bg)}
+#tuoiTurniPagina.tt-flusso #ttOrari,#tuoiTurniPagina.tt-flusso #ttOggiNota{display:none}
+#ttFlusso #demoEsempio{border:0;background:none;box-shadow:none;padding:0;margin:0}
 #tuoiTurniPagina [hidden]{display:none!important}
 body.tab-turni.turni-aperta #ttFlusso #demoEsempio:not([hidden]){display:block!important}
 #ttMese:empty{display:none}
@@ -9766,10 +9772,10 @@ function renderTtOrari(turni){
   const sh=state.shifts||{};
   if(!turni.length || flussoInPagina){ el.hidden=true; el.innerHTML=""; return; }
   el.hidden=false;
-  el.innerHTML='<span class="eyebrow" style="display:block;margin:var(--gap-sezione) 0 8px">Orari dei turni</span>'+
+  el.innerHTML='<span class="eyebrow" style="display:block;margin:var(--gap-sezione) 0 8px">Orari dei turni</span><div class="tt-orari-lista">'+
     turni.map(k=>'<div class="qh-ore-riga"><b>'+esc(sh[k].n)+'</b>'+
       '<input type="time" data-tt-da="'+esc(k)+'" value="'+hhmm(mod1440(sh[k].s))+'" aria-label="Inizio '+esc(sh[k].n)+'">'+
-      '<span>→</span><input type="time" data-tt-a="'+esc(k)+'" value="'+hhmm(mod1440(sh[k].e))+'" aria-label="Fine '+esc(sh[k].n)+'"></div>').join("");
+      '<span>→</span><input type="time" data-tt-a="'+esc(k)+'" value="'+hhmm(mod1440(sh[k].e))+'" aria-label="Fine '+esc(sh[k].n)+'"></div>').join("")+'</div>';
 }
 if($("#ttOrari")) $("#ttOrari").addEventListener("change", e=>{
   const inp=e.target.closest("[data-tt-da],[data-tt-a]"); if(!inp) return;
@@ -9791,6 +9797,7 @@ document.addEventListener("click", e=>{
 function apriFlussoPagina(sub, ritocco){
   const box=$("#ttFlusso"), el=$("#demoEsempio"); if(!box || !el) return;
   flussoInPagina=true; ingressoFlusso=sub; soloRitocco=ritocco||"";
+  { const pg=$("#tuoiTurniPagina"); if(pg) pg.classList.add("tt-flusso"); }
   sceltaSchemaAperta=true; demoEsempioSubflow=sub;
   box.appendChild(el);
   ["#ttRighe","#ttMese","#ttNota","#ttRiepilogo","#ttFatto"].forEach(x=>{ const n=$(x); if(n) n.hidden=true; });
@@ -9800,6 +9807,7 @@ function apriFlussoPagina(sub, ritocco){
 function chiudiFlussoPagina(muto){
   if(!flussoInPagina) return;
   flussoInPagina=false; ingressoFlusso=""; soloRitocco=""; schemaInScelta=null; cambiaSchema=false;
+  { const pg=$("#tuoiTurniPagina"); if(pg) pg.classList.remove("tt-flusso"); }
   sceltaSchemaAperta=false; demoEsempioSubflow="home";
   const el=$("#demoEsempio"), casa=$("#demoCasa");
   if(el && casa) casa.parentNode.insertBefore(el, casa);
