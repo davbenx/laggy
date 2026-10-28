@@ -1883,13 +1883,17 @@ header b{font-size:23px}
     <h1 class="tab-title">Cambio turno</h1>
   </div>
 <div class="ecc" id="scambioBox">
+  <div class="sg-pennelli" role="group" aria-label="Cosa vuoi fare" style="margin-bottom:12px">
+    <button type="button" class="sg-pen" data-swap-modo="scambia" aria-pressed="true">Scambia due giorni</button>
+    <button type="button" class="sg-pen" data-swap-modo="cambia" aria-pressed="false">Cambia un turno</button>
+  </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
     <div>
       <label class="swap-l" for="swapA">Il tuo giorno:</label>
       <select id="swapA" class="swap-s"></select>
     </div>
     <div>
-      <label class="swap-l" for="swapB">Scambia con:</label>
+      <label class="swap-l" for="swapB" id="swapBLab">Scambia con:</label>
       <select id="swapB" class="swap-s"></select>
     </div>
   </div>
@@ -2028,7 +2032,7 @@ header b{font-size:23px}
     <button class="tool azione" id="doLink">
       <span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg></span>
       <span class="tool-tx"><b>Copia di sicurezza</b>
-      <span>Un link con tutte le tue impostazioni: ti serve se cambi telefono o reinstalli l'app.</span></span>
+      <span>Un link con turni, cambi, ferie, impostazioni e persone: ti serve se cambi telefono o reinstalli l'app. Non porta il diario del sonno.</span></span>
     </button>
   </div>
   <span class="eyebrow opz-eb">Informazioni e privacy</span>
@@ -3452,12 +3456,13 @@ function bilancio(giorni){
 }
 
 // Scambia due giorni del ciclo e restituisce prima/dopo.
-function scambio(offA, offB, giorni){
+// nuovo (facoltativo): invece di scambiare con un altro giorno, il giorno A prende quel turno («R» = riposo).
+function scambio(offA, offB, giorni, nuovo){
   const prima=bilancio(giorni);
   const ecc0=state.ecc;
-  const dA=iso(day(state.focus,offA)), dB=iso(day(state.focus,offB));
-  const cA=NT.codeAt(offA), cB=NT.codeAt(offB);
-  state.ecc=Object.assign({}, ecc0, {[dA]:cB, [dB]:cA});
+  const dA=iso(day(state.focus,offA)), dB=nuovo!==undefined ? null : iso(day(state.focus,offB));
+  const cA=NT.codeAt(offA), cB=nuovo!==undefined ? nuovo : NT.codeAt(offB);
+  state.ecc=Object.assign({}, ecc0, nuovo!==undefined ? {[dA]:nuovo} : {[dA]:cB, [dB]:cA});
   const dopo=bilancio(giorni);
   state.ecc=ecc0;
   return {prima, dopo, cA, cB, dA, dB};
@@ -4031,7 +4036,10 @@ function wakeSummary(){
     let dbed=0; if(lb!=null){ dbed=lb-t(state.freeBed); while(dbed>720) dbed-=1440; while(dbed<-720) dbed+=1440; }
     out.liberi={media:m, letto:lb, n:liberi.length};
     const dw=m-dich, cambiaW=Math.abs(dw)>=30, cambiaB=lb!=null && Math.abs(dbed)>=30;
-    if(cambiaW || cambiaB){
+    // Un orario che dà meno sonno del tuo bisogno (di oltre un'ora) non si propone come «il piano»: è il segnale di notti corte, non una preferenza.
+    const bedP=cambiaB ? lb : t(state.freeBed), wakeP=cambiaW ? m : dich;
+    const durP=(((wakeP-bedP)%1440)+1440)%1440;
+    if((cambiaW || cambiaB) && durP>=(+state.need||480)-60){
       const bed=cambiaB ? hhmm(lb) : state.freeBed, wake=cambiaW ? hhmm(m) : state.freeWake;
       out.consigli.push({
         tipo:"liberi",
@@ -4442,7 +4450,8 @@ const ICON={
   trash: ICO('<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>'),
   eyeOff:ICO('<path d="M3 3l18 18"/><path d="M10.6 6.2A9.8 9.8 0 0 1 12 6c6.5 0 10 6 10 6a17 17 0 0 1-3.2 3.8M6.3 7.5C3.8 9.2 2 12 2 12s3.5 6 10 6c1.5 0 2.8-.3 4-.8"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/>'),
   eye:   ICO('<circle cx="12" cy="12" r="3"/><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/>'),
-  cycle: ICO('<path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>'),
+  cycle: ICO('<path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5"/>'),
+  scudo: ICO('<path d="M12 3l8 3v6c0 4.4-3.1 7.9-8 9-4.9-1.1-8-4.6-8-9V6z"/><path d="M9 12l2.2 2.2L15.5 10"/>'),
   calendar: ICO('<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>'),
   sparkles: ICO('<path d="M12 3l1.9 4.8 4.8 1.9-4.8 1.9L12 16.4l-1.9-4.8L5.3 9.7l4.8-1.9z"/>'),
   check: ICO('<path d="M20 6L9 17l-5-5"/>'),
@@ -8845,26 +8854,27 @@ const CONSIGLI_FUNZIONE=[
   {k:"colleghi", quando:()=>!((state.people||[]).length || state.pPattern),
     t:()=> conCicloDaMandare() ? "Manda il tuo ciclo a chi lavora con te: trova l'app già pronta, e vedete subito quando siete liberi insieme."
       : "Aggiungi chi lavora con te o chi ti aspetta a casa: vedi subito quando siete liberi insieme.",
+    cta:()=> conCicloDaMandare() ? "Manda il tuo ciclo" : "Aggiungi una persona",
     a:()=>{ if(conCicloDaMandare()) invitaChiLavoraConTe(); else { setTab("turni"); apriVederci(); } }},
   // I dati stanno solo sul telefono: la copia è un link, e l'unico modo per
   // ritrovarli su un telefono nuovo. Dopo una settimana, quando c'è qualcosa da perdere.
   {k:"copia", dopo:7, quando:()=>!state.backupDone,
-    t:()=>"I tuoi turni stanno solo su questo telefono"+(window.NT_APP.nativo?"":", in questo browser")+". La copia di sicurezza è un link: se cambi telefono, lo apri e ritrovi tutto.",
+    t:()=>"I tuoi turni stanno solo su questo telefono"+(window.NT_APP.nativo?"":", in questo browser")+". La copia di sicurezza è un link con turni, cambi, ferie, impostazioni e persone: se cambi telefono lo apri e li ritrovi. Il diario del sonno non c'è.",
     cta:()=>"Salva la copia", a:()=>salvaConfigurazione()},
   {k:"orologio", dopo:7, quando:()=>!(state.freeBed==="23:30" && state.freeWake==="07:30"),
     t:()=>{ const o=orologio(); return "Il tuo orologio è pronto: "+o.tipo.toLowerCase()+", con il minimo corporeo verso le "+hhmm(o.cbt)+". Quando arriva la melatonina e quando sei più lucido, in «Sonno e carico»."; },
     cta:()=>"Vedi il tuo orologio", a:()=>{ setTab("turni"); apriAndamenti(); usata("orologio");
       const el=$("#orologio"); if(el) try{ el.scrollIntoView({block:"start"}); }catch(e){} }},
-  {k:"mese", t:()=>"Puoi ricopiare il foglio turni in un minuto, un tocco per giorno, o importarlo da un file. Se ricopi almeno due cicli interi, l'app riconosce lo schema e lo continua da sola.", a:()=>{ setTab("turni"); apriSegna(); }},
+  {k:"mese", cta:()=>"Segna i turni", t:()=>"Puoi ricopiare il foglio turni in un minuto, un tocco per giorno, o importarlo da un file. Se ricopi almeno due cicli interi, l'app riconosce lo schema e lo continua da sola.", a:()=>{ setTab("turni"); apriSegna(); }},
   {k:"festivi", quando:()=>!state.festiviRiposo && !(state.festivi && ((state.festivi.extra||[]).length || state.festivi.dom===false)),
     t:()=>"Domeniche e festivi del tuo contratto contano come riposo? Segnali una volta: il piano ne tiene conto, anche il santo patrono.",
     cta:()=>"Aggiungi i tuoi festivi", a:()=>{ setTab("turni"); festiviAperto=true; renderMese(); usata("festivi");
       const x=$("#meseBox .mese-fest-box"); if(x) try{ x.scrollIntoView({block:"center"}); }catch(e){} }},
   {k:"calendario", quando:()=>!inLista("calendario") && (platform.calendar.available ? !platform.calendar.attivo() : !(window.NTPaid && window.NTPaid.paid())),
     t:()=>"Turni e ore di sonno nel calendario del telefono, aggiornati da soli: li vedi dove guardi già i tuoi impegni.", cta:()=>"Attiva", a:()=>apriCalendarioDaWizard()},
-  {k:"ferie", t:()=>"L'app trova i giorni di ferie che ti danno più giorni a casa, attaccati ai riposi. Se hai aggiunto una persona, puoi sceglierli anche per stare a casa insieme.", a:()=>{ setTab("turni"); apriFerie(); }},
-  {k:"scambio", t:()=>"Prima di accettare uno scambio di turno, controlla come cambiano sonno e riposi.", a:()=>{ setTab("turni"); apriScambioTurno(); }},
-  {k:"sonno", t:()=>"In «Sonno e carico» vedi notti di fila e riposi brevi del mese, anche senza diario.", a:()=>{ setTab("turni"); apriAndamenti(); }},
+  {k:"ferie", cta:()=>"Trova le ferie", t:()=>"L'app trova i giorni di ferie che ti danno più giorni a casa, attaccati ai riposi. Se hai aggiunto una persona, puoi sceglierli anche per stare a casa insieme.", a:()=>{ setTab("turni"); apriFerie(); }},
+  {k:"scambio", cta:()=>"Prova un cambio", t:()=>"Prima di accettare uno scambio o un cambio di turno, controlla come cambiano sonno e riposi.", a:()=>{ setTab("turni"); apriScambioTurno(); }},
+  {k:"sonno", cta:()=>"Apri Sonno e carico", t:()=>"In «Sonno e carico» vedi notti di fila e riposi brevi del mese, anche senza diario.", a:()=>{ setTab("turni"); apriAndamenti(); }},
   // Solo nell'app Android: la sveglia nell'Orologio e il voto dal widget
   {k:"sveglia", quando:()=>platform.alarm.available, t:()=>"Sotto «Dormi» c'è «Metti la sveglia»: la mette nell'Orologio del telefono, all'ora in cui finisce il sonno."},
   {k:"votowidget", quando:()=>platform.widget.available && platform.widget.presenti()>0, t:()=>"Dal widget puoi dire come hai dormito con un tocco, senza aprire l'app: il voto arriva nel diario."},
@@ -8873,9 +8883,9 @@ const CONSIGLI_FUNZIONE=[
   {k:"widgetmese", quando:()=>platform.widget.available && platform.widget.presenti()>0, t:()=>"Allarga il widget in altezza: più è alto, più mostra. Il pulsante cambia con l'ora (sveglia, orario del sonno o del pisolino, voto del sonno), poi arrivano le prossime voci e il calendario, con i turni della persona che segui sotto i tuoi."},
   {k:"momenti", quando:()=>!["testa","leggera","intensa"].some(pianoVoce),
     t:()=>"Vuoi sapere quando pensare, muoverti o allenarti meglio? I momenti migliori si accendono in Impostazioni › Cosa vedi nel piano.",
-    cta:()=>"Vedi", a:()=>{ apriOpzioni("voci"); setTimeout(()=>{ const x=$("#opzPianoVoci"); if(x&&x.scrollIntoView) try{ x.scrollIntoView({block:"center"}); }catch(e){} }, 250); }},
+    cta:()=>"Scegli i momenti", a:()=>{ apriOpzioni("voci"); setTimeout(()=>{ const x=$("#opzPianoVoci"); if(x&&x.scrollIntoView) try{ x.scrollIntoView({block:"center"}); }catch(e){} }, 250); }},
   {k:"riepilogo", t:()=>"Puoi mandare il riepilogo del tuo mese o degli ultimi 12 mesi: lo trovi in Turni, nella scheda del mese.",
-    cta:()=>"Vedi", a:()=>{ setTab("turni"); setTimeout(()=>{ const x=$("#meseBox"); if(x&&x.scrollIntoView) try{ x.scrollIntoView({block:"center"}); }catch(e){} }, 250); }},
+    cta:()=>"Apri il mese", a:()=>{ setTab("turni"); setTimeout(()=>{ const x=$("#meseBox"); if(x&&x.scrollIntoView) try{ x.scrollIntoView({block:"center"}); }catch(e){} }, 250); }},
   {k:"dormi", t:()=>"Tocca «Dormi» nel piano: dopo una notte scegli sonno breve o lungo, prima di un mattino presto puoi dormire in due tempi."},
   // Il grazie: dopo due settimane, in un momento buono (mai dopo notti pessime).
   // Sul web il contributo libero; nell'app (regole di Play) solo il Club.
@@ -8884,7 +8894,7 @@ const CONSIGLI_FUNZIONE=[
     t:()=> donateUrl() ? "Notturnisti resta gratis, senza account né pubblicità: se ti è utile, un contributo libero lo tiene in piedi. Su notturnisti.club trovi anche guide su sonno, luce e alimentazione."
       : "Su notturnisti.club trovi guide pratiche su sonno, luce e alimentazione da chi i turni li fa da sempre.",
     link:()=> donateUrl() ? [[donateUrl(),"Offrimi un caffè"],["https://notturnisti.club/planner/","Le guide"]] : [["https://notturnisti.club/planner/","Le guide su notturnisti.club"]]},
-  {k:"medico", dopo:60, t:()=>"Per la visita del medico competente c'è un riepilogo di 12 mesi: turni, notti, riposi.", a:()=>{ setTab("turni"); apriAndamenti(); }}
+  {k:"medico", dopo:60, cta:()=>"Apri il riepilogo", t:()=>"Per la visita del medico competente c'è un riepilogo di 12 mesi: turni, notti, riposi.", a:()=>{ setTab("turni"); apriAndamenti(); }}
 ];
 // Chi aveva già chiuso uno dei vecchi inviti non lo rivede come consiglio.
 function vistiLoSapevi(S){
@@ -8921,7 +8931,7 @@ function renderLoSapevi(){
   try{ if(iso(state.focus)===iso(giornoVero())) c=consiglioFunzione(); }catch(e){}
   el.hidden=!c; if(!c) return;
   el.dataset.k=c.k;
-  const cta=c.cta ? c.cta() : "Prova";
+  const cta=c.cta ? c.cta() : "Apri";
   const FACCE=[["su","Bene",ICON.faceOk,"var(--ok)"],["meh","Così così",ICON.faceMid,"var(--faint)"],["giu","Non bene",ICON.faceLow,"var(--orange)"]];
   const azioni = c.facce
       ? '<span class="sapevi-az sapevi-facce">'+FACCE.map(f=>'<button type="button" class="btn g kface" data-sapevi-faccia="'+f[0]+'" aria-label="'+f[1]+'" style="--tone:'+f[3]+'"><i class="kic" style="color:'+f[3]+'">'+f[2]+'</i><span>'+f[1]+'</span></button>').join("")+'</span>'
@@ -9124,7 +9134,8 @@ if($("#cycToday")) $("#cycToday").onclick=()=>{
    Si scrivono a mano a ogni versione con una funzione che si vede: poche righe, in italiano di tutti i giorni.
    `id` cambia solo quando c'è qualcosa da dire; chi aggiorna la vede una volta. Chi installa adesso non la vede
    (non è una novità per lui), ma la trova sempre in Impostazioni › Novità. «app:true» = solo nell'app Android. */
-const NOVITA={ id:"2026-11-01", data:"Novembre 2026", righe:[
+const NOVITA={ id:"2026-11-02", data:"Novembre 2026", righe:[
+  ["Cambia un turno, senza scambio","In Cambio turno scegli «Cambia un turno»: un giorno prende un altro turno (o il riposo) e vedi subito cosa cambia per il sonno. Più semplice, i consigli sulle funzioni hanno pulsanti più chiari e Dati e privacy ha una nuova icona.",false,"2026-11-02"],
   ["Festivi nel calendario","I festivi hanno un puntino rosso nella striscia e nel calendario di Turni. Con un ciclo puoi dire «Nei festivi sono a casa»: il giorno diventa riposo, anche per le ferie.",false,"2026-11-01"],
   ["Scegli quando allenarti","Il piano ti propone l'ora in cui il corpo rende di più, ma tu puoi preferire un'altra fascia. In Impostazioni › Cosa vedi nel piano › Momenti migliori: Il migliore, Mattina, Pomeriggio o Sera, per testa, movimento e allenamento.",false,"2026-10-31"],
   ["Turni più ordinati","Gli strumenti stanno in una griglia, ognuno con il suo stato. «Modifica turni» apre un foglio: ciclo e orari, segna i giorni, importa, festivi. «Condividi» raccoglie invio, QR e stampa. Il mese è una riga che si apre. In «Segna»: intervallo con due tocchi, «Come 7 giorni prima», «Annulla» e «Prossimo da segnare».",false,"2026-10-31"],
@@ -9195,13 +9206,13 @@ function calcolaRitorniRapidiScambio(){
   return count;
 }
 
-function calcolaScambioDettagliato(offA, offB){
-  if(offA===offB || !isFinite(offA) || !isFinite(offB)) return null;
+function calcolaScambioDettagliato(offA, offB, nuovo){
+  if(!isFinite(offA) || (nuovo===undefined && (offA===offB || !isFinite(offB)))) return null;
   const ritorniPrima=calcolaRitorniRapidiScambio();
-  const r=scambio(offA, offB, 14);
+  const r=scambio(offA, offB, 14, nuovo);
 
   const ecc0=state.ecc;
-  state.ecc=Object.assign({}, ecc0, {[r.dA]:r.cB, [r.dB]:r.cA});
+  state.ecc=Object.assign({}, ecc0, nuovo!==undefined ? {[r.dA]:r.cB} : {[r.dA]:r.cB, [r.dB]:r.cA});
   const ritorniDopo=calcolaRitorniRapidiScambio();
   state.ecc=ecc0;
 
@@ -9213,6 +9224,7 @@ function calcolaScambioDettagliato(offA, offB){
   return { r, dS, dV, dP, dR, ritorniPrima, ritorniDopo };
 }
 
+let swapModo="scambia";   // «scambia» due giorni | «cambia» il turno di un giorno
 function popolaSelettoriScambio(selA, selB){
   const selAVal=(selA!==undefined && isFinite(selA)) ? selA : 0;
   let oA="", oB="";
@@ -9232,24 +9244,34 @@ function popolaSelettoriScambio(selA, selB){
   }
   const sA=$("#swapA"), sB=$("#swapB");
   if(sA) sA.innerHTML=oA;
+  if(swapModo==="cambia"){
+    // i turni che hai, più il riposo; parte da uno diverso da quello del giorno scelto
+    const sh=state.shifts||{}, codici=Object.keys(sh).filter(k=>sh[k] && !sh[k].rest).concat(["R"]);
+    const cur=NT.codeAt(selAVal), prima=(typeof selB==="string" && codici.includes(selB)) ? selB : (codici.find(c=>c!==cur) || "R");
+    oB=codici.map(c=>'<option value="'+esc(c)+'"'+(c===prima?' selected':'')+'>'+esc(c==="R"?"Riposo":sh[c].n)+'</option>').join("");
+  }
   if(sB) sB.innerHTML=oB;
+  const lb=$("#swapBLab"); if(lb) lb.textContent = swapModo==="cambia" ? "Nuovo turno:" : "Scambia con:";
+  document.querySelectorAll("[data-swap-modo]").forEach(b=>{ const on=b.dataset.swapModo===swapModo; b.setAttribute("aria-pressed",String(on)); b.classList.toggle("on",on); });
+  const ap=$("#swapApplica"); if(ap) ap.textContent = swapModo==="cambia" ? "Applica questo cambio nel piano" : "Applica questo scambio nel piano";
 }
 
 function aggiornaScambio(){
   const swapA=$("#swapA"), swapB=$("#swapB");
   if(!swapA || !swapB) return;
-  const a=+swapA.value, b=+swapB.value;
+  const cambia=swapModo==="cambia";
+  const a=+swapA.value, b=cambia ? swapB.value : +swapB.value;
   const vOut=$("#swapVerdict"), dOut=$("#swapOut"), actWrap=$("#swapActionWrap");
 
-  if(a===b || !isFinite(a) || !isFinite(b)){
-    if(vOut) vOut.innerHTML='<p class="hint" style="text-align:center">Seleziona due giorni diversi per confrontare lo scambio.</p>';
+  if(cambia ? (!isFinite(a) || b===NT.codeAt(a)) : (a===b || !isFinite(a) || !isFinite(b))){
+    if(vOut) vOut.innerHTML='<p class="hint" style="text-align:center">'+(cambia?'Scegli un turno diverso da quello del giorno, per vedere come cambia il sonno.':'Seleziona due giorni diversi per confrontare lo scambio.')+'</p>';
     if(dOut) dOut.innerHTML="";
     if(actWrap) actWrap.hidden=true;
     return;
   }
   if(actWrap) actWrap.hidden=false;
 
-  const res=calcolaScambioDettagliato(a,b);
+  const res=cambia ? calcolaScambioDettagliato(a,null,b) : calcolaScambioDettagliato(a,b);
   if(!res) return;
   const { r, dS, dV, dP, dR, ritorniPrima, ritorniDopo }=res;
 
@@ -9257,16 +9279,16 @@ function aggiornaScambio(){
   if(dR>0 || dS<=-90 || dV>=120){
     pillHtml='<span class="traffic-pill red">🔴 Sconsigliato</span>';
     verdictDesc=dR>0
-      ? "Attenzione: questo scambio crea un rientro rapido (&lt;11h) fra turni consecutivi!"
-      : "Lo scambio ti costa parecchio: perdi "+dur(-dS)+" di sonno utile nelle due settimane.";
+      ? "Attenzione: "+(cambia?"questo cambio crea":"questo scambio crea")+" un rientro rapido (&lt;11h) fra turni consecutivi!"
+      : (cambia?"Il cambio":"Lo scambio")+" ti costa parecchio: perdi "+dur(-dS)+" di sonno utile nelle due settimane.";
   } else if(dS<-25 || dV>45 || dP>0){
     pillHtml='<span class="traffic-pill yellow">🟡 Da valutare</span>';
-    verdictDesc="Lo scambio è fattibile ma ti costerà un po' di stanchezza in più ("+
+    verdictDesc=(cambia?"Il cambio":"Lo scambio")+" è fattibile ma ti costerà un po' di stanchezza in più ("+
       (dS<0?"−"+dur(-dS)+" di sonno":"+ "+dur(dV)+" di veglia max")+").";
   } else {
     pillHtml='<span class="traffic-pill green">🟢 Favorevole</span>';
     verdictDesc=dS>=30
-      ? "Ottimo scambio: guadagni +"+dur(dS)+" di sonno rispetto al piano attuale!"
+      ? (cambia?"Ottimo cambio":"Ottimo scambio")+": guadagni +"+dur(dS)+" di sonno rispetto al piano attuale!"
       : "Il sonno cambia poco e tra un turno e l'altro restano sempre almeno 11 ore: puoi accettare senza problemi.";
   }
 
@@ -9317,6 +9339,10 @@ function chiudiScambio(){
 }
 if($("#doScambioTurno")) $("#doScambioTurno").onclick=()=>apriScambioTurno();
 if($("#chiudiScambio")) $("#chiudiScambio").onclick=chiudiScambio;
+document.querySelectorAll("[data-swap-modo]").forEach(b=>b.addEventListener("click",()=>{
+  if(swapModo===b.dataset.swapModo) return; swapModo=b.dataset.swapModo; haptic(4);
+  popolaSelettoriScambio(+$("#swapA").value); aggiornaScambio();
+}));
 if($("#swapA")) $("#swapA").addEventListener("change",aggiornaScambio);
 if($("#swapB")) $("#swapB").addEventListener("change",aggiornaScambio);
 
@@ -10006,20 +10032,25 @@ if($("#sgImport")){
 }
 
 if($("#swapApplica")) $("#swapApplica").onclick=()=>{
-  const a=+$("#swapA").value, b=+$("#swapB").value;
-  if(a===b || !isFinite(a) || !isFinite(b)) return;
+  const cambia=swapModo==="cambia";
+  const a=+$("#swapA").value, b=cambia ? $("#swapB").value : +$("#swapB").value;
+  if(cambia ? (!isFinite(a) || !b || b===NT.codeAt(a)) : (a===b || !isFinite(a) || !isFinite(b))) return;
   haptic(10);
-  const dA=iso(day(state.focus,a)), dB=iso(day(state.focus,b));
-  const cA=NT.codeAt(a), cB=NT.codeAt(b);
-  state.ecc[dA]=cB;
-  state.ecc[dB]=cA;
+  const dA=iso(day(state.focus,a));
+  if(cambia){ scegliTurno(dA, b); }
+  else {
+    const dB=iso(day(state.focus,b));
+    const cA=NT.codeAt(a), cB=NT.codeAt(b);
+    state.ecc[dA]=cB;
+    state.ecc[dB]=cA;
+  }
   salva();
   render();
   popolaSelettoriScambio(a,b);
   aggiornaScambio();
   const vOut=$("#swapVerdict");
   if(vOut){
-    vOut.insertAdjacentHTML("afterbegin",'<div style="background:var(--ok-soft);color:var(--ok);border:1px solid var(--ok-line);padding:8px 12px;border-radius:var(--r);font-size:13px;font-weight:600;text-align:center;margin-bottom:8px">✓ Scambio applicato nel piano!</div>');
+    vOut.insertAdjacentHTML("afterbegin",'<div style="background:var(--ok-soft);color:var(--ok);border:1px solid var(--ok-line);padding:8px 12px;border-radius:var(--r);font-size:13px;font-weight:600;text-align:center;margin-bottom:8px">✓ '+(cambia?"Cambio applicato":"Scambio applicato")+' nel piano!</div>');
   }
 };
 
@@ -11123,7 +11154,7 @@ function renderOpzHub(){
     ["abitudini","moon","Le tue abitudini", ab||"Sonno, tragitto, caffè, pisolini"],
     ["promemoria","alarm","Promemoria e collegamenti", attivi?"Promemoria attivi":"Promemoria spenti"],
     ["voci","eye","Cosa vedi nel piano", nVoci+" "+(nVoci===1?"voce in più":"voci in più")+" accese su "+PIANO_VOCI.length],
-    ["dati","cycle","Dati e privacy", "Copia di sicurezza, statistiche, cancella tutto"],
+    ["dati","scudo","Dati e privacy", "Copia di sicurezza, statistiche, cancella tutto"],
     ["aiuto","sparkles","Aiuto e novità", "Suggerisci, valuta, cosa c'è di nuovo"]
   ];
   const ic=n=>(ICON&&ICON[n])||"";

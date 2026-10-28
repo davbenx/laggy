@@ -1,0 +1,27 @@
+// Cambio turno: oltre a scambiare due giorni, si può cambiare il turno di un giorno con un altro (o col riposo), senza scambio.
+import pw from "./_pw.mjs";
+const ok=(c,m)=>console.log((c?"✔ ":"✘ ")+m);
+const b=await pw.chromium.launch(); const errs=[];
+const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const SH={M:{n:"Mattino",s:360,e:840},P:{n:"Pomeriggio",s:840,e:1320},N:{n:"Notte",s:1320,e:1800}};
+const oggi=new Date(); oggi.setHours(12,0,0,0);
+const ST={turniConfigurati:true,pattern:"MMPPNNRR",anchor:iso(oggi),shifts:SH,repeat:true,firstSeenAt:"2026-01-01",freeBed:"23:30",freeWake:"07:30"};
+const ctx=await b.newContext({locale:"it-IT",viewport:{width:390,height:844}});
+await ctx.addInitScript(st=>{ if(sessionStorage.getItem("x")) return; sessionStorage.setItem("x","1"); localStorage.setItem("nt:state",JSON.stringify(st)); localStorage.setItem("nt:turniConfigurati","true"); localStorage.setItem("nt:firstPlanBannerChiuso","true"); localStorage.setItem("nt:attivazioneNascosta","true"); },ST);
+const p=await ctx.newPage(); p.on("pageerror",e=>errs.push(e.message));
+await p.goto("http://localhost:8765/index.html"); await p.waitForTimeout(900);
+await p.evaluate(()=>document.querySelector('[data-tab="turni"]').click()); await p.waitForTimeout(250);
+await p.evaluate(()=>document.querySelector("#doScambioTurno").click()); await p.waitForTimeout(300);
+ok(await p.evaluate(()=>document.querySelectorAll("[data-swap-modo]").length===2 && document.querySelector('[data-swap-modo="scambia"]').getAttribute("aria-pressed")==="true"), "due modi: scambia due giorni (predefinito) o cambia un turno");
+await p.click('[data-swap-modo="cambia"]'); await p.waitForTimeout(250);
+ok(await p.evaluate(()=>/Nuovo turno/.test(document.querySelector("#swapBLab").textContent) && [...document.querySelectorAll("#swapB option")].map(o=>o.textContent).join()==="Mattino,Pomeriggio,Notte,Riposo"), "«Nuovo turno»: i tuoi turni più il riposo");
+ok(await p.evaluate(()=>document.querySelector("#swapOut").innerText.length>0 && !document.querySelector("#swapActionWrap").hidden), "mostra subito cosa costa il cambio");
+await p.selectOption("#swapB","R"); await p.waitForTimeout(300);
+const prima=await p.evaluate(()=>JSON.parse(localStorage.getItem("nt:state")).ecc||{});
+await p.click("#swapApplica"); await p.waitForTimeout(400);
+const st=await p.evaluate(()=>JSON.parse(localStorage.getItem("nt:state")));
+ok(st.ecc[iso(oggi)]==="R" && Object.keys(st.ecc).length===Object.keys(prima).length+1, "solo il giorno scelto cambia: oggi è riposo, nient'altro si è mosso");
+ok(await p.evaluate(()=>/Cambio applicato/.test(document.querySelector("#swapVerdict").innerText)), "conferma «Cambio applicato»");
+await p.click('[data-swap-modo="scambia"]'); await p.waitForTimeout(250);
+ok(await p.evaluate(()=>/Scambia con/.test(document.querySelector("#swapBLab").textContent) && /Applica questo scambio/.test(document.querySelector("#swapApplica").textContent)), "si torna allo scambio");
+console.log("errori", errs); await b.close();
