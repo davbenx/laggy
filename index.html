@@ -2082,7 +2082,7 @@ header b{font-size:23px}
   <summary>Come funziona, limiti e avvertenze</summary>
   <div class="piu-info-in">
     <p><b>Come ragiona.</b> Non guarda la sigla del turno ma dove cade rispetto al tuo sonno naturale. Un turno che comincia prima della notte e la attraversa vuole il sonno dopo; uno che comincia alle due di notte lo vuole prima, più un recupero al rientro. Poi usa i riposi come rincorsa: circa un'ora al giorno per alzarsi prima, un'ora e mezza per fare più tardi. Dove la rincorsa non basta, lo dice.</p>
-    <p><b>Limiti dichiarati.</b> La domanda sul cronotipo è una scorciatoia rispetto al questionario MCTQ. La curva della luce viene da studi di laboratorio, non da un reparto. L'adattamento completo alla notte riguarda meno del 3% dei notturnisti fissi, e questo strumento non lo promette. Nessuna validazione clinica: è un motore di pianificazione basato sulla letteratura.</p>
+    <p><b>Limiti dichiarati.</b> La domanda sul cronotipo è una scorciatoia rispetto al questionario MCTQ (Roenneberg e coll. 2003). La curva della luce viene da studi di laboratorio, non da un reparto. L'adattamento completo alla notte riguarda meno del 3% dei notturnisti fissi (Folkard 2008), e questo strumento non lo promette. Nessuna validazione clinica: è un motore di pianificazione basato sulla letteratura.</p>
     <p><b>Attenzione.</b> Indicazioni generali di benessere e organizzazione per chi lavora su turni. Non è un dispositivo medico, non diagnostica e non cura nulla, e non sostituisce il parere di un medico.</p>
     <p><b>Melatonina.</b> Non ne parliamo qui perché i dosaggi degli studi sul jet lag e sui turni non coincidono con quelli in vendita come integratore in Italia — proporre un numero sarebbe fuorviante. Se pensi possa servirti, parlane con un medico o un farmacista: possono valutare il tuo caso, non un piano generico.</p>
   </div>
@@ -3682,21 +3682,21 @@ function cards(P){
     sc.sub="A letto appena rientri, senza fermate. Di giorno si dorme meno, è normale: le ore che mancano le recuperi col pisolino del pomeriggio.";
     sc.rows.push(["Camera","buio totale, tappi, telefono in silenzioso"]);
     sc.why="Di giorno il corpo spinge verso la veglia proprio nelle ore in cui devi dormire, e allungare a forza il sonno del mattino funziona poco. Aggiungere un pisolino prima del turno rende molto di più.";
-    sc.cite="Rosekind e coll. (NASA)";
+    sc.cite="Rosekind e coll. 1995 (NASA)";
   }else if(s.kind==="corto"){
     sc.small=dur(s.dur)+" · corto apposta";
     sc.sub="È lo smonto, il primo dei due giorni di rientro. Dormi poco stamattina, poi non dormire fino a sera: costa una giornata e te ne restituisce due, e domani sei di nuovo sugli orari della maggior parte delle persone.";
     sc.rows.push(["Nel pomeriggio","niente pisolini dopo lo smonto, per quanto costi"]);
     sc.rows.push(["Stasera","a letto verso "+hhmm(NT.at(P.S,1).onset)+", anche senza sonno"]);
     sc.why="Dormire fino a pomeriggio dopo l'ultima notte sembra la scelta giusta ed è la trappola classica: sposta l'orologio ancora più in là e ti toglie il sonno la notte dopo, bruciando anche il secondo giorno di riposo.";
-    sc.cite="Minors & Waterhouse · Smith & Eastman";
+    sc.cite="Minors & Waterhouse 1981 · Smith, Fogg & Eastman 2009";
   }else if(lateStart){
     sc.small=dur(s.dur)+" · prima del turno";
     sc.sub="Il turno è nel cuore della notte, quindi il sonno si spezza: la parte grossa adesso, il resto al rientro. Insieme fanno le ore che ti servono.";
 
     if(naps.length) sc.rows.push(["Al rientro",hhmm(naps[0].a)+" → "+hhmm(naps[0].b)]);
     sc.why="Con un turno che parte nelle ore piccole, un blocco unico non regge: otto ore filate prima vorrebbero dire a letto nel tardo pomeriggio, perdendo la serata. Dividere in due — la parte principale prima del turno — è il compromesso a cui molte persone arrivano da sé dopo mesi di tentativi.";
-    sc.cite="Sonno diviso: Minors & Waterhouse (sonno d'ancoraggio)";
+    sc.cite="Sonno diviso: Minors & Waterhouse 1981 (sonno d'ancoraggio)";
   }else if(b.rest){
     sc.sub=s.meta.reset?"Stasera a letto presto anche senza sonno: ci penserà la stanchezza ad addormentarti."
       :s.meta.ramp?"Non è un riposo qualunque: da come dormi stanotte dipende quanto ti peseranno le prossime notti."
@@ -3704,7 +3704,7 @@ function cards(P){
       :"Riposo pieno. Non c'è niente da preparare: dormi senza guardare l'orologio.";
     const o=restOptions(P); if(o) sc.opts=o;
     sc.why="Nei riposi il sonno è l'unica leva che hai in mano. Alzarsi un'ora prima è fattibile; tre ore prima no, semplicemente non ti addormenti. Per questo l'orario consigliato cambia da un riposo all'altro, anche se la giornata è libera uguale.";
-    sc.cite="Eastman & Burgess 2009 · Roenneberg (cronotipo)";
+    sc.cite="Eastman & Burgess 2009 · Roenneberg, Wirz-Justice & Merrow 2003 (cronotipo)";
   }else{
     sc.sub="A letto circa un'ora dopo il rientro: al corpo serve un po' di tempo per scendere di giri dopo il turno.";
     sc.why="L'orario viene calcolato all'indietro dalla sveglia che ti serve domani, tolte le ore di sonno di cui hai bisogno.";
@@ -3726,7 +3726,7 @@ function cards(P){
   else cc.sub="Calcolato sull'ora in cui andrai a letto stasera.";
   out.push(cc);
 
-  const lc={k:"l",lab:"Luce",rows:[],rowsA:[],rowsE:[],at:wake+15,cite:"Khalsa, Jewett, Cajochen & Czeisler, J Physiol 2003 · Smith &amp; Eastman · Thompson, Jones &amp; Gradisar 2014 (alba simulata)"};
+  const lc={k:"l",lab:"Luce",rows:[],rowsA:[],rowsE:[],at:wake+15,cite:"Khalsa, Jewett, Cajochen & Czeisler, J Physiol 2003 · Smith, Fogg &amp; Eastman 2009 · Thompson, Jones, Gregson &amp; Atkinson, Eur J Appl Physiol 2014 (alba simulata)"};
   const whyLight="La luce sposta l'orologio in due direzioni opposte, decise dall'ora in cui la prendi: il confine è il minimo corporeo, per te intorno alle "+hhmm(cbt)+". Prima di quell'ora ti spinge avanti e ti toglie il sonno; dopo ti tira indietro — per questo il sole della strada, dopo la notte, è il nemico numero uno del sonno diurno.";
   if(night){
     const seekEnd=Math.min(cbt-NT.CFG.lightTaper,b.end);
@@ -3813,7 +3813,7 @@ function cards(P){
         ["Al risveglio","per un quarto d'ora sei più impedito di prima del pisolino: non metterti subito alla guida né a fare cose delicate"]],
       nap:{k:hhmm(n.a), fine:hhmm(n.b), min:n.b-n.a, turno:!!n.turno, livello:n.livello},
       why:"Dormire prima di entrare riduce il crollo di attenzione nelle ore centrali della notte, quando gli errori costano di più. Un'ora e mezza copre un ciclo intero; se non hai tempo, venti minuti restano meglio di niente.",
-      cite:"Rosekind e coll. (NASA) · Tassi & Muzet", at:n.a});
+      cite:"Rosekind e coll. 1995 (NASA) · Tassi & Muzet 2000", at:n.a});
   }
 
   // Il conto delle ore era scritto a mano e diceva sempre «16-18», anche a chi
@@ -5419,8 +5419,8 @@ function suggerimentoAdatta(){
   const no=store.lista("adattaNo");
   return suggerimentiAdatta().find(c=>!no.includes(chiaveAdatta(c))) || null;
 }
-// Un segnale, non una diagnosi. Più di un notturnista su quattro ha i sintomi
-// del disturbo del sonno da lavoro a turni, e in Italia chi lavora di notte
+// Un segnale, non una diagnosi. Una parte dei turnisti (le stime variano molto
+// da studio a studio) ha i sintomi del disturbo del sonno da lavoro a turni, e in Italia chi lavora di notte
 // ha già una visita periodica con il medico competente: se il diario dice
 // per settimane "poca energia", lo si suggerisce una volta, con delicatezza.
 function medicoVisibile(){
@@ -7135,9 +7135,9 @@ function caricoHtml(aperta){
   // una frase sola: la cosa più utile da sapere, prima su quello che arriva
   const noti=R=>R.ignoti<25;
   let frase="";
-  if(noti(F) && F.serieMax>=4) frase="Nei prossimi 30 giorni arrivi a "+F.serieMax+" notti di fila: dopo la terza la stanchezza cresce di più [Folkard 2003]. Fai i pisolini prima del turno.";
+  if(noti(F) && F.serieMax>=4) frase="Nei prossimi 30 giorni arrivi a "+F.serieMax+" notti di fila: dopo la terza la stanchezza cresce di più [Folkard & Tucker 2003]. Fai i pisolini prima del turno.";
   else if(noti(F) && F.brevi) frase=(F.brevi===1?"Una volta":F.brevi+" volte")+" nei prossimi 30 giorni stacchi e riattacchi in meno di 11 ore: in quei giorni il sonno va protetto più del solito.";
-  else if(noti(P) && P.serieMax>=4) frase="Nell'ultimo mese hai fatto fino a "+P.serieMax+" notti di fila: dopo la terza la stanchezza cresce di più [Folkard 2003].";
+  else if(noti(P) && P.serieMax>=4) frase="Nell'ultimo mese hai fatto fino a "+P.serieMax+" notti di fila: dopo la terza la stanchezza cresce di più [Folkard & Tucker 2003].";
   else if(noti(P) && P.brevi) frase=(P.brevi===1?"Una volta":P.brevi+" volte")+" nell'ultimo mese hai avuto meno di 11 ore fra un turno e l'altro.";
   else if(noti(P) || noti(F)) frase="Niente serie lunghe di notti né riposi sotto le 11 ore: un carico che si recupera bene.";
   else frase="Segna i turni in «I turni del mese» per vedere il carico.";
