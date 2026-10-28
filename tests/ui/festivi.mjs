@@ -41,6 +41,23 @@ const TURNO={M:{n:"Mattino",s:420,e:840}};
 
 { const p=await apri({turniConfigurati:true,pattern:"MPNSR",anchor:lunedi(),repeat:true,firstSeenAt:"2026-01-01",shifts:{M:{n:"Mattino",s:420,e:840},P:{n:"Pomeriggio",s:840,e:1260},N:{n:"Notte",s:1260,e:1860}}});
   await p.evaluate(()=>document.querySelector("[data-fest-apri]").click()); await p.waitForTimeout(150);
-  ok(await p.evaluate(()=>!document.querySelector("[data-fest-riposo]")), "turni a ciclo: niente «Nei festivi non lavoro» (si lavora anche nei festivi)");
+  ok(await p.evaluate(()=>/sono a casa/.test(document.querySelector("[data-fest-riposo]").parentNode.textContent)), "turni a ciclo: «Nei festivi sono a casa» (non «non lavoro»)");
+  await p.context().close(); }
+// festivo su un giorno di lavoro: puntino nella striscia e nel calendario; con «sono a casa» il giorno diventa riposo (anche per le ferie)
+{ const oggi=new Date(); oggi.setHours(12,0,0,0); const mg=(oggi.getMonth()+1)+"-"+oggi.getDate();
+  const a=new Date(oggi); a.setDate(a.getDate()-2);   // ancora non un lunedì: è un ciclo
+  const p=await apri({turniConfigurati:true,pattern:"MMMMMMMR",anchor:iso(a),repeat:true,firstSeenAt:"2026-01-01",festivi:{extra:[mg]},shifts:{M:{n:"Mattino",s:420,e:840}}});
+  const code=()=>p.evaluate(()=>document.querySelector('#cyc .crow[data-off="0"] .ccode').textContent.trim());
+  ok(await p.evaluate(()=>!!document.querySelector('#cyc .crow[data-off="0"] .clab.fest')), "striscia: il festivo ha il puntino");
+  const prima=await code();
+  ok(prima!=="R" && prima!=="Ri", "senza la scelta, il festivo resta giorno di lavoro ("+prima+")");
+  await p.evaluate(()=>document.querySelector("[data-fest-apri]").click()); await p.waitForTimeout(150);
+  await p.evaluate(()=>document.querySelector("[data-fest-riposo]").click()); await p.waitForTimeout(300);
+  ok(await p.evaluate(()=>JSON.parse(localStorage.getItem("nt:state")).festiviRiposo===true), "la scelta si salva");
+  ok(await code()!==prima, "con «sono a casa» il giorno non è più di lavoro ("+await code()+")");
+  await p.context().close(); }
+{ const oggi=new Date(); oggi.setHours(12,0,0,0); const mg=(oggi.getMonth()+1)+"-"+oggi.getDate(); const a=new Date(oggi); a.setDate(a.getDate()-2);
+  const p=await apri({turniConfigurati:true,pattern:"MMMMMMMR",anchor:iso(a),repeat:true,firstSeenAt:"2026-01-01",festivi:{extra:[mg]},piano:{vistaCiclo:"calendario"},shifts:{M:{n:"Mattino",s:420,e:840}}});
+  ok(await p.evaluate(k=>{ const c=document.querySelector('[data-cal-giorno="'+k+'"]'); return !!c && !!c.querySelector(".cnum.fest") && /festivo/.test(c.getAttribute("aria-label")); }, iso(oggi)), "calendario: il festivo ha il puntino e lo dice a voce");
   await p.context().close(); }
 console.log("errori", errs); await b.close();
