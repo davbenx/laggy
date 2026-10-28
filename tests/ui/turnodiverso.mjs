@@ -86,7 +86,7 @@ const imposta=async(p,sel,v)=>{ await p.evaluate(([sel,v])=>{ const i=document.q
   await p.evaluate(()=>document.querySelector("#doFerie").click()); await p.waitForTimeout(500);
   const t=await p.evaluate(()=>({gia:[...document.querySelectorAll(".fg.gia")].length, hint:[...document.querySelectorAll("#ferieOut .hint")].map(x=>x.textContent).join(" ")}));
   ok(/Già nel conto:.*2 giorni di ferie già segnati.*1 cambio turno/.test(t.hint), "il riquadro dice cosa è già nel conto: ferie e cambi segnati → "+t.hint.slice(0,160));
-  ok(/Turni › «Segna o importa i turni»/.test(t.hint) && /Festivi/.test(t.hint), "e dove si segnano ferie, cambi e festivi");
+  ok(/Modifica turni › «Segna i giorni del mese»/.test(t.hint) && /Festivi/.test(t.hint), "e dove si segnano ferie, cambi e festivi");
   await p.context().close(); }
 
 console.log("errori", errs); ok(errs.length===0, "nessun errore di pagina"); await b.close();
