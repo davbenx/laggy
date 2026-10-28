@@ -19,8 +19,10 @@ async function apri(diario){
   const [ore,turni,notti,festivi,liberi]=r.n;
   const giorni=new Date(new Date().getFullYear(), new Date().getMonth()+1, 0).getDate();
   ok(r.vis && turni+liberi===giorni && Math.abs(ore-(turni-notti)*7-notti*10)<0.01 && notti<=turni && festivi<=turni, "mese: ore, turni, notti e giorni senza turno coerenti con il ciclo → "+JSON.stringify(r.n));
-  await p.click('[data-mese="1"]'); await p.waitForTimeout(200);
-  ok(/›/.test(r.t) && await p.evaluate(()=>!/NaN|undefined/.test(document.querySelector("#meseBox").innerText)), "mese dopo: si sfoglia senza testi rotti");
+  const titolo0=await p.evaluate(()=>document.querySelector("#meseBox .mese-riga b").textContent);
+  for(let i=0;i<3;i++){ await p.click("#cycNext"); await p.waitForTimeout(150); }
+  const titolo1=await p.evaluate(()=>document.querySelector("#meseBox .mese-riga b").textContent);
+  ok(titolo1!==titolo0 && await p.evaluate(()=>!/NaN|undefined/.test(document.querySelector("#meseBox").innerText) && !document.querySelector("[data-mese]")), "il mese dei numeri segue le frecce del ciclo ("+titolo0+" → "+titolo1+"), senza una seconda navigazione");
   await p.click('[data-tab="oggi"]'); await p.waitForTimeout(200);
   ok(await p.evaluate(()=>getComputedStyle(document.querySelector("#meseBox")).display==="none"), "in Oggi il riepilogo del mese non compare");
   ok(await p.evaluate(()=>document.querySelector("#medicoCard").hidden), "senza diario nessun segnale per il medico");
@@ -37,5 +39,13 @@ async function apri(diario){
   ok(/medico competente/.test(t) && /non è una diagnosi/i.test(t), "molte note di poca energia: il segnale suggerisce il medico competente, senza diagnosi");
   await p.click("#doMedicoOk"); await p.waitForTimeout(200); await p.reload(); await p.waitForTimeout(1200);
   ok(await p.evaluate(()=>document.querySelector("#medicoCard").hidden), "dopo «Ho capito» non torna");
+  await ctx.close(); }
+// in calendario i numeri sono quelli del mese del calendario, e le frecce del calendario li cambiano
+{ const {p,ctx}=await apri(null);
+  await p.click('[data-tab="turni"]'); await p.waitForTimeout(400); await p.click('[data-vista="calendario"]'); await p.waitForTimeout(300);
+  const a=await p.evaluate(()=>document.querySelector("#meseBox .mese-riga b").textContent);
+  for(let i=0;i<4;i++){ await p.click("#cycNext"); await p.waitForTimeout(150); }
+  const c=await p.evaluate(()=>document.querySelector("#meseBox .mese-riga b").textContent);
+  ok(a!==c, "calendario: le frecce spostano anche il mese dei numeri ("+a+" → "+c+")");
   await ctx.close(); }
 console.log("errori", errs); await b.close();

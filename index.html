@@ -580,7 +580,11 @@ html.js-lento .jsoff{display:block}
 .crow.mod .ccode::before{content:"";position:absolute;top:3px;left:-2px;width:5px;height:5px;border-radius:50%;background:var(--ink)}   /* giorno modificato (scambio, orari diversi): un puntino, non una sottolineatura che sembra un link */
 .cbar.sh{background:var(--orange-bar)}
 .key{display:flex;gap:14px;margin-top:8px;font-size:12px;color:var(--faint);flex-wrap:wrap}
-.mese{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;margin-top:12px}
+.mese{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:4px 14px;margin-top:12px}
+/* «Il tuo ciclo» e i numeri del suo mese sono una scheda sola: il riquadro dei numeri si attacca al ciclo */
+#cyc:has(+ #meseBox:not([hidden])){border-bottom-left-radius:0;border-bottom-right-radius:0;border-bottom-color:transparent;margin-bottom:0}
+#cyc + #meseBox:not([hidden]){margin-top:0;border-top-left-radius:0;border-top-right-radius:0;border-top-color:var(--line)}
+.mese-riga b{color:var(--ink)}
 .mese-testa{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .mese-testa b{font-size:15px;color:var(--ink)}
 .mese-testa button{background:none;border:0;color:var(--blue);font:inherit;font-size:20px;line-height:1;padding:8px 12px;margin:-8px -6px;cursor:pointer}
@@ -1063,7 +1067,7 @@ letter-spacing:.01em;padding:9px 0 8px;min-height:56px;cursor:pointer;position:r
 .tsec-v{display:block;font-size:12.5px;color:var(--dim);margin-top:3px;line-height:1.35}
 .tsec-riga{margin-top:0}
 .mese-det{margin-top:6px}
-.mese-det>summary{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;list-style:none;min-height:44px;font-size:15px;font-weight:600;color:var(--ink)}
+.mese-det>summary{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;list-style:none;min-height:48px;font-size:14px;font-weight:500;letter-spacing:0;text-transform:none;color:var(--dim)}
 .mese-det>summary::-webkit-details-marker{display:none}
 .mese-det>summary::after{content:"›";font-size:20px;color:var(--faint);transition:transform .15s}
 .mese-det[open]>summary::after{transform:rotate(90deg)}
@@ -6588,8 +6592,16 @@ function mandaRiepilogo(tipo){
   track("share_created", {tipo}); usata("riepilogo");
   inviaTesto(testo, tipo==="anno" ? "I miei ultimi 12 mesi" : "Il mio mese");
 }
+// Il mese dei numeri segue la vista del ciclo: il titolo del calendario, o il giorno da cui partono le ore.
+let meseVista=null;   // [anno, mese 1-12], scritto da renderStrip / renderCalendarioCiclo
+function meseDaVista(){
+  if(!meseVista) return 0;
+  const o=giornoVero();
+  return Math.max(-12, Math.min(12, (meseVista[0]-o.getFullYear())*12 + (meseVista[1]-1-o.getMonth())));
+}
 function renderMese(){
   const el=$("#meseBox"); if(!el) return;
+  meseOff=meseDaVista();
   if(!state.turniConfigurati){ el.hidden=true; return; }
   const r=datiMese(meseOff);
   // Un riquadro solo per il mese: i numeri e, sotto, segnare o importare i
@@ -6615,10 +6627,8 @@ function renderMese(){
   // una riga sola (ore, turni, notti), e i dettagli si aprono; «Segna» e «Importa» stanno in «Modifica turni»
   const riga = vuoto ? "Nessun turno segnato" : String(ore).replace(".",",")+" h · "+r.turni+(r.turni===1?" turno":" turni")+" · "+r.notti+(r.notti===1?" notte":" notti");
   const aperto=!!(el.querySelector && el.querySelector(".mese-det[open]")) || festiviAperto;
-  el.innerHTML='<div class="mese-testa"><button type="button" data-mese="-1" aria-label="Mese precedente"'+(meseOff<=-12?' disabled':'')+'>‹</button>'+
-    '<b>'+esc(nome.charAt(0).toUpperCase()+nome.slice(1))+'</b>'+
-    '<button type="button" data-mese="1" aria-label="Mese successivo"'+(meseOff>=12?' disabled':'')+'>›</button></div>'+
-    '<details class="mese-det"'+(aperto?' open':'')+'><summary><span class="mese-riga">'+esc(riga)+(r.ignoti&&!vuoto?' <span class="mese-pall" title="Giorni da segnare">'+r.ignoti+' da segnare</span>':'')+'</span></summary>'+corpo+'</details>';
+  // il mese è quello che si vede sopra (le frecce del ciclo lo cambiano): niente seconda navigazione
+  el.innerHTML='<details class="mese-det"'+(aperto?' open':'')+'><summary><span class="mese-riga"><b>'+esc(nome.charAt(0).toUpperCase()+nome.slice(1))+'</b> · '+esc(riga)+(r.ignoti&&!vuoto?' <span class="mese-pall" title="Giorni da segnare">'+r.ignoti+' da segnare</span>':'')+'</span></summary>'+corpo+'</details>';
 }
 // Festivi del contratto: una riga che dice cosa si conta, e un piccolo editor.
 var festiviAperto=false;   // var: letto da renderMese durante l'avvio
@@ -6716,6 +6726,7 @@ function renderCalendarioCiclo(){
   const oggi=giornoVero(), iOggi=CAL.indiceDi(m.da, 7*CAL_TOT, iso(oggi)), rigaOggi=iOggi<0 ? -1 : Math.floor(iOggi/7);
   calCtx={da:m.da, rigaOggi};
   const r0=CAL.primaRiga(rigaOggi, calSpost, CAL_RIGHE, CAL_TOT), mt=CAL.meseDellaRiga(m.da, r0), tit=CAL.titolo(m.da, r0, oggi.getFullYear());
+  meseVista=[mt[0], mt[1]];
   const persona = pers && m.p.length ? m.p[Math.min(m.sel, m.p.length-1)] : null;
   const leggi=s=>{ s=s||"?:?"; const k=s.lastIndexOf(":"); return {sig:k>0 ? s.slice(0,k) : s, t:k>=0 ? s.charAt(k+1) : "?"}; };
   const TIPO={n:"notte", l:"lavoro", r:"riposo", m:"mattina", p:"pomeriggio", s:"sera"}, descr=c=>c.t==="?" ? "da impostare" : (c.sig===(TIPO[c.t]||"")||c.sig.length<=1 ? TIPO[c.t] : c.sig+", "+TIPO[c.t]);
@@ -6745,6 +6756,7 @@ function renderCalendarioCiclo(){
   const pv=$("#cycPrev"), nx=$("#cycNext"); if(pv) pv.disabled=r0<=0; if(nx) nx.disabled=r0>=ultima;
   el.innerHTML=selettoreVista("calendario")+griglia+
     '<div class="key">'+LEG.filter(l=>viste.has(l[0])).map(l=>sw(l[2])+l[1]+'</span>').join("")+chipPersona(pers)+'</div>';
+  try{ renderMese(); }catch(e){}   // il mese dei numeri segue la pagina del calendario
 }
 // Le frecce e «Scegli giorno» di Turni, quando il ciclo è a calendario: pagine di settimane, e un giorno scelto porta alla sua settimana.
 function calVaiA(d){
@@ -6763,6 +6775,7 @@ function renderStrip(P, f, S){
   // resta sul giorno a cui appartiene e non se ne va a finire su quello dopo.
   let clo=Infinity, chi=-Infinity;
   const [finLo,finHi]=finestraCiclo();
+  { const c=day(state.focus, cicloOff); meseVista=[c.getFullYear(), c.getMonth()+1]; }   // il mese del giorno da cui parte la finestra: oggi → questo mese
   for(let o=finLo;o<=finHi;o++){
     const sd=NT.at(S,o), bb=NT.block(o);
     if(!sd||!bb) continue;
