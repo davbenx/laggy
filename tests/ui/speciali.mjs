@@ -17,11 +17,13 @@ await p.goto("http://localhost:8765/index.html"); await p.waitForTimeout(900);
 await p.click('[data-tab="turni"]'); await p.waitForTimeout(300);
 const stato=()=>p.evaluate(()=>JSON.parse(localStorage.getItem("nt:state")));
 const apri=async off=>{ await p.click('#cyc .crow[data-off="'+off+'"]'); await p.waitForTimeout(250); };
-const chip=async t=>{ await p.click('[data-qs-spec="'+t+'"]'); await p.waitForTimeout(250); };
+const chip=async t=>{ if(!(await p.$('[data-qs-spec="'+t+'"]'))){ await p.click("[data-qs-altro]"); await p.waitForTimeout(150); } await p.click('[data-qs-spec="'+t+'"]'); await p.waitForTimeout(250); };
 const d2=iso(new Date(oggi.getTime()+2*864e5)), d0=iso(oggi), d1=iso(new Date(oggi.getTime()+864e5));
 // 1. ferie sulla notte (giorno +2): riposo, sigla nella striscia; toglierla riporta la notte
 await apri(2);
-ok(await p.evaluate(()=>document.querySelectorAll("[data-qs-spec]").length===5), "nel foglio del giorno ci sono i 5 giorni speciali");
+ok(await p.evaluate(()=>document.querySelectorAll("[data-qs-spec]").length===2), "nel foglio del giorno ferie e malattia sono in vista, il resto dietro «Altro»");
+await p.click("[data-qs-altro]"); await p.waitForTimeout(150);
+ok(await p.evaluate(()=>document.querySelectorAll("[data-qs-spec]").length===5), "…e con «Altro» ci sono tutti e 5 i giorni speciali");
 await chip("ferie");
 let st=await stato();
 ok(st.ecc[d2]==="R" && st.giorni[d2].t==="ferie" && !st.giorni[d2].w, "Ferie: il giorno diventa riposo → "+JSON.stringify(st.giorni[d2]));
@@ -52,7 +54,7 @@ ok(/sei reperibile/.test(oggiTxt), "Oggi: la riga del pisolino dice «sei reperi
 ok(await p.evaluate(()=>/reperibile/.test(document.querySelector("#shiftPill").textContent)), "Oggi: la pillola dice «reperibile» → "+await p.evaluate(()=>document.querySelector("#shiftPill").textContent));
 await p.click('[data-tab="turni"]'); await p.waitForTimeout(300);
 // 4. numeri del mese
-const mese=await p.evaluate(()=>document.querySelector("#meseBox").innerText);
+const mese=await p.evaluate(()=>{ document.querySelector("#meseBox .mese-det").open=true; return document.querySelector("#meseBox").innerText; });
 ok(/\+2h oltre l'orario/.test(mese) && /1 giorno di reperibilità/.test(mese), "Il tuo mese: straordinario e reperibilità contati → "+(mese.match(/\+.*$/m)||[""])[0]);
 // 5. formazione su un riposo (giorno +4, R), poi un turno scelto la toglie
 await apri(4); await chip("formazione"); st=await stato();

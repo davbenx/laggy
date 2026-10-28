@@ -49,9 +49,9 @@ await p.context().close();
 p=await apri({turniConfigurati:true,pattern:"R",anchor:"2000-01-01",shifts:SH,repeat:false,firstSeenAt:fa(30)});
 await p.click('[data-tab="turni"]'); await p.waitForTimeout(300);
 const m=await p.evaluate(()=>{ const e=document.querySelector("#meseBox"); return {vis:!e.hidden && e.offsetParent!==null, t:e.innerText}; });
-ok(m.vis && /Nessun turno segnato/.test(m.t) && /Segna o importa i turni/.test(m.t), "mese vuoto: il riquadro resta, con «Segna o importa i turni»");
+ok(m.vis && /Nessun turno segnato/.test(m.t), "mese vuoto: il riquadro resta, dice che non c'è nulla");
 ok(await p.evaluate(()=>!document.querySelector("#doSegnaMese")), "niente più una seconda voce per il mese");
-await p.click("#meseBox [data-mese-segna]"); await p.waitForTimeout(300);
+await p.click("#tEdit"); await p.waitForTimeout(250); await p.click('[data-mod="ciclo"]'); await p.waitForTimeout(300);
 ok(await p.evaluate(()=>document.body.classList.contains("turni-aperta") && !!document.querySelector("#ttMese #segnaOut")), "turni variabili: il pulsante apre il mese in «I tuoi turni»");
 await p.context().close();
 // 3. la scheda di un altro giorno parla di QUEL giorno (prima: del giorno in vista)
@@ -83,7 +83,7 @@ p=await apri({turniConfigurati:true,pattern:"MPNSR",anchor:fa(2),shifts:SH,repea
 const cl=s=>p.evaluate(s=>document.querySelector(s).click(), s);
 const dove=()=>p.evaluate(()=>({tab:["oggi","turni","opzioni"].find(t=>document.body.classList.contains("tab-"+t)), pagina:document.body.classList.contains("turni-aperta"),
   h:(document.querySelector("#ttFlusso #demoEsempio:not([hidden]) .qh-h")||{}).textContent||"", righe:[...document.querySelectorAll("#ttRighe [data-tt]")].filter(b=>!b.hidden).map(b=>b.dataset.tt).join(",")}));
-await cl('[data-tab="turni"]'); await p.waitForTimeout(300); await cl("#tEdit"); await p.waitForTimeout(300);
+await cl('[data-tab="turni"]'); await p.waitForTimeout(300); await cl("#tEdit"); await p.waitForTimeout(250); await cl('[data-mod="ciclo"]'); await p.waitForTimeout(300);
 let d=await dove();
 ok(d.pagina && d.tab==="turni" && d.righe==="schema" && await p.evaluate(()=>!!document.querySelector("#ttOrari [data-tt-da]") && document.querySelectorAll("#ttRiepilogo [data-tt-oggi]").length>0) && /In quinta/.test(await p.evaluate(()=>document.querySelector("#ttRiepilogo").innerText)), "Turni › Modifica: «I tuoi turni» con riepilogo, striscia da toccare, orari sulla pagina e «Cambia tipo di turni» → "+JSON.stringify(d));
 await cl('[data-tt="schema"]'); await p.waitForTimeout(200); d=await dove();
@@ -111,7 +111,7 @@ await p.context().close();
 // sempre lo stesso turno: «Giorni di riposo» parte da quelli attuali
 { const lun=(()=>{ const x=new Date(); x.setHours(12,0,0,0); x.setDate(x.getDate()-((x.getDay()+6)%7)); return iso(x); })();
   p=await apri({turniConfigurati:true,pattern:"NNNNNRR",anchor:lun,shifts:SH,repeat:true,firstSeenAt:fa(30)});
-  await p.evaluate(()=>document.querySelector('[data-tab="turni"]').click()); await p.evaluate(()=>document.querySelector("#tEdit").click()); await p.waitForTimeout(300);
+  await p.evaluate(()=>document.querySelector('[data-tab="turni"]').click()); await p.evaluate(()=>document.querySelector("#tEdit").click()); await p.waitForTimeout(250); await p.evaluate(()=>document.querySelector('[data-mod="ciclo"]').click()); await p.waitForTimeout(300);
   const f=await p.evaluate(()=>({righe:[...document.querySelectorAll("#ttRighe [data-tt]")].filter(b=>!b.hidden).map(b=>b.dataset.tt).join(","), r:document.querySelector("#ttRiepilogo").innerText}));
   await p.evaluate(()=>document.querySelector('[data-tt="riposi"]').click()); await p.waitForTimeout(200);
   const on=await p.evaluate(()=>[...document.querySelectorAll(".qh-gg.on")].map(b=>b.dataset.gg).join(","));
@@ -120,7 +120,7 @@ await p.context().close();
 // turni variabili: la pagina è il mese; dal riquadro del mese si arriva lì
 p=await apri({turniConfigurati:true,pattern:"R",anchor:"2000-01-01",shifts:SH,repeat:false,firstSeenAt:fa(30)});
 await p.evaluate(()=>document.querySelector('[data-tab="turni"]').click()); await p.waitForTimeout(300);
-await p.evaluate(()=>document.querySelector("#meseBox [data-mese-segna]").click()); await p.waitForTimeout(300);
+await p.evaluate(()=>document.querySelector("#tEdit").click()); await p.waitForTimeout(250); await p.evaluate(()=>document.querySelector('[data-mod="ciclo"]').click()); await p.waitForTimeout(300);
 const v=await p.evaluate(()=>({pagina:document.body.classList.contains("turni-aperta"), mese:!!document.querySelector("#ttMese #segnaOut"), imp:!!document.querySelector("#ttMese .sg-importa"), righe:[...document.querySelectorAll("#ttRighe [data-tt]")].filter(b=>!b.hidden).map(b=>b.dataset.tt).join(","), fatto:!document.querySelector("#ttFatto").hidden}));
 ok(v.pagina && v.mese && v.imp && v.righe==="orari,schema" && v.fatto, "turni variabili: «I tuoi turni» è il mese (con importazione), più Orari e Cambia schema → "+JSON.stringify(v));
 await p.context().close();

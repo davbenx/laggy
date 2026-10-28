@@ -21,7 +21,7 @@ async function apri(diario){
   return p;
 }
 { const p=await apri(true);
-  await p.click("[data-mese-manda]"); await p.waitForTimeout(300);
+  await p.evaluate(()=>document.querySelector("#meseBox .mese-det").open=true); await p.click("[data-mese-manda]"); await p.waitForTimeout(300);
   const t=(await p.evaluate(()=>window.__sh))[0]; const x=t&&t.text||"";
   ok(/^Il mio novembre 2026 in turno:\n/.test(x), "il mese: titolo → "+x.split("\n")[0]);
   ok(/• 18 turni, 144 ore\n/.test(x) && /• 6 notti\n/.test(x) && /• 12 giorni senza turno/.test(x), "i numeri sono quelli della scheda del mese (18 turni, 144 ore, 6 notti, 12 liberi)");
@@ -33,7 +33,7 @@ async function apri(diario){
   console.log("   12 mesi calcolati e mandati in", Date.now()-t0, "ms");
   await p.context().close(); }
 { const p=await apri(false);
-  await p.click("[data-mese-manda]"); await p.waitForTimeout(300);
+  await p.evaluate(()=>document.querySelector("#meseBox .mese-det").open=true); await p.click("[data-mese-manda]"); await p.waitForTimeout(300);
   const x=((await p.evaluate(()=>window.__sh))[0]||{}).text||"";
   ok(x && !/Sonno annotato/.test(x), "senza diario: nessuna riga sul sonno");
   await p.context().close(); }

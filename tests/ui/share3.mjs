@@ -11,21 +11,21 @@ for (const [nome,url,init] of [["web","http://localhost:8765/index.html",()=>{ w
   await p.click("text=Conosco già il mio schema"); await p.click("[data-preset-ob='0']"); await p.click("[data-pos='0']"); await p.click("#qhConfermaOrari"); await p.waitForTimeout(400);
   await p.click("#doChiudiPrimoPiano").catch(()=>{});
   await p.click('[data-tab="turni"]'); await p.waitForTimeout(300);
-  await p.click("#doShareWhatsApp"); await p.waitForTimeout(300);
+  await p.click("#doCondividi"); await p.waitForTimeout(250); await p.click("#doShareWhatsApp"); await p.waitForTimeout(300);
   const r=await p.evaluate(()=>({sh:window.__sh.map(x=>x.text.split("\n")[0]), open:window.__open.map(u=>u.slice(0,24))}));
   if(nome==="computer") ok(r.sh.length===0 && r.open[0]&&r.open[0].startsWith("https://wa.me/?text="), nome+": senza pannello di condivisione → WhatsApp Web "+JSON.stringify(r));
   else ok(r.sh.length===1 && r.open.length===0, nome+": 'Manda i miei turni' usa il pannello del telefono "+JSON.stringify(r));
   if(nome!=="computer"){
-    await p.click("#doCycQR"); await p.waitForTimeout(200);
+    await p.click("#doCondividi"); await p.waitForTimeout(250); await p.click("#doCycQR"); await p.waitForTimeout(200);
     ok(await p.evaluate(()=>!!document.querySelector("#qrHolderCyc svg")), nome+": QR dal link");
     ok(await p.evaluate(()=>{ const m=document.querySelector("#qrModal"), r=m.querySelector(".qs-sheet").getBoundingClientRect();
       return !m.hidden && getComputedStyle(m).position==="fixed" && r.top>=0 && r.bottom<=innerHeight && !!m.querySelector("svg"); }), nome+": il QR si apre in sovraimpressione, non sotto il link");
     await p.keyboard.press("Escape"); await p.waitForTimeout(100);
     ok(await p.evaluate(()=>document.querySelector("#qrModal").hidden), nome+": Esc chiude il QR");
-    await p.click("#doPrint"); await p.waitForTimeout(200);
+    await p.click("#doCondividi"); await p.waitForTimeout(250); await p.click("#doPrint"); await p.waitForTimeout(200);
     ok(await p.evaluate(()=>window.__pr===1), nome+": Stampa o salva in PDF");
     await p.evaluate(()=>{ const t=document.querySelector("#toast"); t&&t.remove(); });
-    await p.locator("#cycShareBox").screenshot({path:"/tmp/s3-"+nome+".png"});
+    await p.click("#doCondividi"); await p.waitForTimeout(250); await p.locator("#cycShareBox").screenshot({path:"/tmp/s3-"+nome+".png"});
   }
   await ctx.close();
 }

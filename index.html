@@ -1017,6 +1017,23 @@ letter-spacing:.01em;padding:9px 0 8px;min-height:56px;cursor:pointer;position:r
 #printSheet{display:none}
 /* elementi nuovi */
 /* voce di sezione espandibile (Turni): stessa affordance per tutte */
+.strumenti{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:var(--gap-sezione) 0}
+.strumenti .tsec{flex-direction:column;align-items:flex-start;gap:10px;min-height:112px;padding:14px;margin:0;width:auto}
+.strumenti .tsec>svg{padding:8px}
+.strumenti .tsec-tx{width:100%}
+.tsec-t{display:block;font-family:var(--serif);font-size:16px;font-weight:600;color:var(--ink)}
+.tsec-v{display:block;font-size:12.5px;color:var(--dim);margin-top:3px;line-height:1.35}
+.tsec-riga{margin-top:0}
+.mese-det{margin-top:6px}
+.mese-det>summary{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;list-style:none;min-height:44px;font-size:15px;font-weight:600;color:var(--ink)}
+.mese-det>summary::-webkit-details-marker{display:none}
+.mese-det>summary::after{content:"›";font-size:20px;color:var(--faint);transition:transform .15s}
+.mese-det[open]>summary::after{transform:rotate(90deg)}
+.mese-pall{margin-left:8px;font-size:12px;font-weight:600;color:var(--orange);background:var(--orange-soft);border-radius:999px;padding:2px 8px}
+.mese-da-segnare{margin:8px 0 0;font-size:13.5px;color:var(--orange)}
+#ciclNome{display:none}
+body.sg-importa-sola #segnaOut,body.sg-importa-sola .sg-legenda{display:none}
+body.sg-segna-solo .sg-importa{display:none}
 .tsec{display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:var(--s1);
 border:1px solid var(--line);border-radius:var(--r);padding:13px 15px;font:inherit;color:inherit;
 cursor:pointer;min-height:52px;margin-top:12px;box-shadow:var(--shadow-card)}
@@ -1618,13 +1635,26 @@ header b{font-size:23px}
      di pagina — stava sopra il range/le frecce, lontana dalla striscia
      a cui si riferisce. -->
 <div class="cap ciclo"><span class="eyebrow">Il tuo ciclo<span id="ciclNome"></span></span>
-  <button type="button" class="btn g sm" id="tEdit"><svg class="ei" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>Modifica</button></div>
+  <button type="button" class="btn g sm" id="tEdit" aria-haspopup="dialog"><svg class="ei" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>Modifica turni</button></div>
 <div class="cyc" id="cyc"></div>
 <!-- Il mese in numeri: ore, turni, notti, domeniche e festivi. È la cosa che
      quasi ogni app di turni fa e che i turnisti chiedono (per controllare la
      busta paga, le notti fatte, i festivi). Niente stima della paga: con le
      regole dei contratti sarebbe facile sbagliare, e sui soldi un errore costa. -->
 <section class="mese" id="meseBox" aria-label="Il mese in numeri"></section>
+<div class="strumenti solo-turni" id="strumenti" role="group" aria-label="Strumenti"></div>
+<button type="button" class="tsec tsec-riga solo-turni" id="doCondividi" aria-haspopup="dialog">
+  <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:var(--blue);background:var(--blue-soft)"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+  <span class="tsec-tx"><b class="tsec-t">Condividi i tuoi turni</b><span class="tsec-v">Invita un collega, manda i turni, PDF, QR</span></span><span class="tchev">›</span>
+</button>
+<div id="condividiModal" class="qs-backdrop" hidden aria-hidden="true"><div class="qs-sheet" role="dialog" aria-modal="true" aria-label="Condividi i tuoi turni"><div class="qs-header"><div><b class="qs-title">Condividi i tuoi turni</b></div><div class="qs-hd-az"><button type="button" class="qs-close" id="condividiChiudi" aria-label="Chiudi">✕</button></div></div><div id="condividiCorpo"></div></div></div>
+<div id="modificaModal" class="qs-backdrop" hidden aria-hidden="true"><div class="qs-sheet" role="dialog" aria-modal="true" aria-label="Modifica turni"><div class="qs-header"><div><b class="qs-title">Modifica turni</b></div><div class="qs-hd-az"><button type="button" class="qs-close" id="modificaChiudi" aria-label="Chiudi">✕</button></div></div>
+  <div class="opz-gruppo" style="margin-top:6px">
+    <button type="button" class="tool tool-1line" data-mod="ciclo"><span class="tool-ic" data-ic="cycle"></span><span class="tool-tx"><b>Ciclo e orari</b><span>La sequenza, gli orari dei turni, dove sei oggi</span></span></button>
+    <button type="button" class="tool tool-1line" data-mod="segna"><span class="tool-ic" data-ic="calendar"></span><span class="tool-tx"><b>Segna i giorni del mese</b><span>Un tocco per giorno, o un intervallo</span></span></button>
+    <button type="button" class="tool tool-1line" data-mod="importa"><span class="tool-ic" data-ic="sparkles"></span><span class="tool-tx"><b>Importa i turni</b><span>Dal calendario del telefono, da un file, da una foto o un PDF</span></span></button>
+    <button type="button" class="tool tool-1line" data-mod="festivi"><span class="tool-ic" data-ic="eye"></span><span class="tool-tx"><b>Festivi</b><span>Quali giorni contano come festivi</span></span></button>
+  </div></div></div>
 <!-- I turni del mese (un tocco per giorno, o dal foglio turni): si apre
      dal riquadro del mese, qui sopra. -->
 <div id="segnaPagina" class="solo-turni" hidden>
@@ -1632,7 +1662,7 @@ header b{font-size:23px}
     <button type="button" class="themebtn" id="chiudiSegna" aria-label="Torna a Turni">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
     </button>
-    <h1 class="tab-title">I turni del mese</h1>
+    <h1 class="tab-title">Segna i turni</h1>
   </div>
   <div id="segnaOut"></div>
   <section class="sg-importa" aria-labelledby="sgImpTit">
@@ -1690,8 +1720,7 @@ header b{font-size:23px}
      persone): sono la stessa domanda, con o senza qualcun altro. -->
 <button type="button" class="tsec" id="doPartner">
   <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:var(--blue);background:var(--blue-soft)"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
-  <span class="tsec-tx"><span class="eyebrow" style="display:block">Quando ho tempo libero</span><b id="doPartnerSub" style="font-family:var(--serif)">—</b></span>
-  <span class="tchev">›</span>
+  <span class="tsec-tx"><b class="tsec-t">Tempo libero</b><span class="tsec-v" id="doPartnerSub">—</span></span>
 </button>
 
 <div id="vederciPagina" hidden>
@@ -1804,8 +1833,7 @@ header b{font-size:23px}
 
 <button type="button" class="tsec" id="doAndamenti">
   <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:var(--orange);background:var(--orange-soft)"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 6h6v6"/></svg>
-  <span class="tsec-tx"><span class="eyebrow" style="display:block">Sonno e carico</span><b id="andamentiAnteprima" style="font-family:var(--serif)">—</b></span>
-  <span class="tchev">›</span>
+  <span class="tsec-tx"><b class="tsec-t">Sonno e carico</b><span class="tsec-v" id="andamentiAnteprima">—</span></span>
 </button>
 
 <div id="andamentiPagina" hidden>
@@ -1823,18 +1851,15 @@ header b{font-size:23px}
      strumenti per decisioni occasionali (uno scambio, le ferie). -->
 <!-- Simulatore Scambio Turno: strumento autonomo dentro la scheda Turni -->
 <!-- Decisioni occasionali sul calendario: un riquadro, due righe. -->
-<div class="tgruppo solo-turni" role="group" aria-labelledby="tgDecidere">
-  <span class="eyebrow" id="tgDecidere">Decidere</span>
+<div class="tgruppo solo-turni" role="group" aria-label="Decidere" id="tgDecidereBox">
   <div class="tgruppo-box">
 <button type="button" class="tsec" id="doFerie">
   <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:var(--blue);background:var(--blue-soft)"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4M9 14.5l2 2 4-4"/></svg>
-  <span class="tsec-tx"><b style="font-family:var(--serif)">Quando prendere le ferie?</b><span style="font-size:12.5px;color:var(--dim);display:block;margin-top:2px">Più giorni a casa con meno ferie.</span></span>
-  <span class="tchev">›</span>
+  <span class="tsec-tx"><b class="tsec-t">Ferie</b><span class="tsec-v">Più giorni a casa con meno ferie</span></span>
 </button>
 <button type="button" class="tsec" id="doScambioTurno">
   <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:var(--blue);background:var(--blue-soft)"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
-  <span class="tsec-tx"><b style="font-family:var(--serif)">Cambio turno</b><span style="font-size:12.5px;color:var(--dim);display:block;margin-top:2px">Sonno e riposo, prima di accettare.</span></span>
-  <span class="tchev">›</span>
+  <span class="tsec-tx"><b class="tsec-t">Cambio turno</b><span class="tsec-v">Sonno e riposo, prima di accettare</span></span>
 </button>
   </div>
 </div>
@@ -6506,10 +6531,7 @@ function renderMese(){
   el.hidden=false;
   const nome=r.primo.toLocaleDateString(LINGUA,{month:"long",year:"numeric"});
   const ore=Math.round(r.ore*10)/10;
-  el.innerHTML='<div class="mese-testa"><button type="button" data-mese="-1" aria-label="Mese precedente"'+(meseOff<=-12?' disabled':'')+'>‹</button>'+
-    '<b>'+esc(nome.charAt(0).toUpperCase()+nome.slice(1))+'</b>'+
-    '<button type="button" data-mese="1" aria-label="Mese successivo"'+(meseOff>=12?' disabled':'')+'>›</button></div>'+
-    (vuoto ? '<p class="mese-vuoto">Nessun turno segnato in questo mese.</p>' : '<div class="mese-num">'+
+  const corpo=(vuoto ? '<p class="mese-vuoto">Nessun turno segnato in questo mese.</p>' : '<div class="mese-num">'+
       '<div><b>'+String(ore).replace(".",",")+'</b><span>ore di turno</span></div>'+
       '<div><b>'+r.turni+'</b><span>turni</span></div>'+
       '<div><b>'+r.notti+'</b><span>notti</span></div>'+
@@ -6518,11 +6540,17 @@ function renderMese(){
     '</div>')+
     (()=>{ const v=specialiMese(r); return v.length ? '<p class="mese-spec">'+esc(v.join(" · "))+'</p>' : ''; })()+
     (vuoto ? '' : '<p class="hint mese-nota">Ore dall\'inizio alla fine di ogni turno, pause comprese: per controllare, non è un conteggio ufficiale.</p>')+
-    '<button type="button" class="btn g mese-segna" data-mese-segna>Segna o importa i turni'+
-      (r.ignoti && !vuoto ? '<small>'+r.ignoti+(r.ignoti===1?' giorno ancora da segnare':' giorni ancora da segnare')+'</small>' : '')+'</button>'+
+    (r.ignoti && !vuoto ? '<p class="mese-da-segnare"><b>'+r.ignoti+(r.ignoti===1?' giorno ancora da segnare':' giorni ancora da segnare')+'</b></p>' : '')+
     (vuoto ? '' : '<div class="mese-sez"><span class="mese-eb">Manda un riepilogo in un messaggio</span>'+
       '<div class="mese-manda"><button type="button" class="btn g" data-mese-manda>Questo mese</button><button type="button" class="btn g" data-anno-manda>Ultimi 12 mesi</button></div></div>')+
     festiviHtml();
+  // una riga sola (ore, turni, notti), e i dettagli si aprono; «Segna» e «Importa» stanno in «Modifica turni»
+  const riga = vuoto ? "Nessun turno segnato" : String(ore).replace(".",",")+" h · "+r.turni+(r.turni===1?" turno":" turni")+" · "+r.notti+(r.notti===1?" notte":" notti");
+  const aperto=!!(el.querySelector && el.querySelector(".mese-det[open]")) || festiviAperto;
+  el.innerHTML='<div class="mese-testa"><button type="button" data-mese="-1" aria-label="Mese precedente"'+(meseOff<=-12?' disabled':'')+'>‹</button>'+
+    '<b>'+esc(nome.charAt(0).toUpperCase()+nome.slice(1))+'</b>'+
+    '<button type="button" data-mese="1" aria-label="Mese successivo"'+(meseOff>=12?' disabled':'')+'>›</button></div>'+
+    '<details class="mese-det"'+(aperto?' open':'')+'><summary><span class="mese-riga">'+esc(riga)+(r.ignoti&&!vuoto?' <span class="mese-pall" title="Giorni da segnare">'+r.ignoti+' da segnare</span>':'')+'</span></summary>'+corpo+'</details>';
 }
 // Festivi del contratto: una riga che dice cosa si conta, e un piccolo editor.
 var festiviAperto=false;   // var: letto da renderMese durante l'avvio
@@ -9070,7 +9098,8 @@ if($("#cycToday")) $("#cycToday").onclick=()=>{
    Si scrivono a mano a ogni versione con una funzione che si vede: poche righe, in italiano di tutti i giorni.
    `id` cambia solo quando c'è qualcosa da dire; chi aggiorna la vede una volta. Chi installa adesso non la vede
    (non è una novità per lui), ma la trova sempre in Impostazioni › Novità. «app:true» = solo nell'app Android. */
-const NOVITA={ id:"2026-10-30", data:"Ottobre 2026", righe:[
+const NOVITA={ id:"2026-10-31", data:"Ottobre 2026", righe:[
+  ["Turni più ordinati","Gli strumenti stanno in una griglia, ognuno con il suo stato. «Modifica turni» apre un foglio: ciclo e orari, segna i giorni, importa, festivi. «Condividi» raccoglie invio, QR e stampa. Il mese è una riga che si apre.",false,"2026-10-31"],
   ["Impostazioni e persone più semplici","Impostazioni è un elenco di sei voci con il valore di ciascuna; gli orari dei turni si cambiano sulla pagina, con «Annulla». Aggiungere una persona: un nome, una scelta (ha l'app, fa i tuoi turni, lun–ven, turni diversi) e solo quello che serve.",false,"2026-10-30"],
   ["Il voto sull'energia, al momento giusto","Appena svegli c'è l'inerzia del sonno e il voto verrebbe più basso del vero: «Come ti senti?» arriva 90 minuti dopo la sveglia. E subito dopo il risveglio non compare più «Rischio fatica alto».",false,"2026-10-29"],
   ["Un altro turno per un giorno","Devi fare una giornata al posto del pomeriggio? Dal foglio del giorno: «＋ Un altro turno», nome e orari. Poi lo ritrovi fra i tuoi turni. Con orari diversi il giorno prende il nome giusto (Giornata, Mattina, Sera…).",false,"2026-10-28"],
@@ -9516,8 +9545,10 @@ function pennella(dIso){
   else scegliTurno(dIso, pen);
   dopoSegna();
 }
-function apriSegna(){
+function apriSegna(modo){
   const pg=$("#segnaPagina"); if(!pg) return;
+  document.body.classList.toggle("sg-importa-sola", modo==="importa"); document.body.classList.toggle("sg-segna-solo", modo!=="importa");
+  { const h=pg.querySelector(".tab-title"); if(h) h.textContent = modo==="importa" ? "Importa i turni" : "Segna i turni"; }
   if(tipoTurni()==="variabili"){ apriTuoiTurni(); return; }
   chiudiAndamenti(); chiudiVederci(); chiudiScambio(); chiudiFerie(); chiudiTuoiTurni(true);
   meseIn(pg);
@@ -9684,7 +9715,7 @@ if($("#ttRighe")) $("#ttRighe").addEventListener("click", e=>{
     apriFlussoPagina("posizione", "posizione"); return; }
 });
 function chiudiSegna(){
-  document.body.classList.remove("segna-aperta"); segnaSottopagina();
+  document.body.classList.remove("segna-aperta","sg-importa-sola","sg-segna-solo"); segnaSottopagina();
   const pg=$("#segnaPagina"); if(pg) pg.hidden=true; _imp=null;
 }
 if($("#chiudiSegna")) $("#chiudiSegna").onclick=chiudiSegna;
@@ -11055,7 +11086,26 @@ if($("#chiudiOpzioni")) $("#chiudiOpzioni").onclick=chiudiOpzioniPagina;
   }); }
 // "Modifica" del ciclo: lo stesso flusso lineare dell'inizio (com'è il ciclo
 // → schema o composizione → oggi dove sei → orari), non le Opzioni.
-if($("#tEdit")) $("#tEdit").onclick=()=>apriTuoiTurni("turni");
+// Tab Turni: i quattro strumenti in una griglia, «Condividi» in un foglio, «Modifica turni» in un foglio con quattro voci.
+{ const gr=$("#strumenti");
+  if(gr){ ["doPartner","doAndamenti","doFerie","doScambioTurno"].forEach(id=>{ const b=document.getElementById(id); if(b) gr.appendChild(b); });
+    const vuoto=$("#tgDecidereBox"); if(vuoto && !vuoto.querySelector(".tsec")) vuoto.remove(); }
+  const cb=$("#condividiCorpo"), cs=$("#cycShareBox"); if(cb && cs) cb.appendChild(cs); }
+function apriFoglio(id,su){ const m=document.getElementById(id); if(!m) return; m.hidden=!su; m.setAttribute("aria-hidden",String(!su));
+  if(su) m.querySelectorAll("[data-ic]").forEach(x=>{ if(!x.innerHTML) x.innerHTML=ICON[x.dataset.ic]||""; }); }
+if($("#tEdit")) $("#tEdit").onclick=()=>apriFoglio("modificaModal",true);
+if($("#doCondividi")) $("#doCondividi").onclick=()=>apriFoglio("condividiModal",true);
+["modificaModal","condividiModal"].forEach(id=>{ const m=document.getElementById(id); if(!m) return;
+  m.addEventListener("click",e=>{ if(e.target===m || e.target.closest(".qs-close")) apriFoglio(id,false); }); });
+if($("#condividiCorpo")) $("#condividiCorpo").addEventListener("click",e=>{ if(e.target.closest("button")) setTimeout(()=>apriFoglio("condividiModal",false),60); });
+if($("#modificaModal")) $("#modificaModal").addEventListener("click",e=>{
+  const b=e.target.closest("[data-mod]"); if(!b) return; haptic(6); apriFoglio("modificaModal",false);
+  const k=b.dataset.mod;
+  if(k==="ciclo") apriTuoiTurni("turni");
+  else if(k==="segna") apriSegna();
+  else if(k==="importa") apriSegna("importa");
+  else if(k==="festivi"){ festiviAperto=true; usata("festivi"); renderMese(); const d=document.querySelector("#meseBox .mese-det"); if(d) d.open=true; setTimeout(()=>{ const x=document.querySelector("#meseBox .mese-fest-box"); if(x&&x.scrollIntoView) x.scrollIntoView({block:"center",behavior:"smooth"}); },80); }
+});
 ["#partner","#partnerShare"].forEach(s=>{ const el=$(s); if(el) el.addEventListener("click", e=>{
   if(e.target.closest("[data-partner-edit]")) apriPartner();
   else if(e.target.closest("[data-partner-msg]")) mandaOrariLiberi();
