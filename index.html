@@ -1179,6 +1179,15 @@ border:1px solid var(--blue-lt);border-radius:var(--r);color:var(--blue);font:in
 .ptile.t-s{background:var(--sera-soft);color:var(--sera)}
 .ptile.t-n{background:var(--cool-tint);color:var(--notte)}
 .ptile.t-q{background:none;border:1px dashed var(--line)}
+.pv-pennelli{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px}
+.pv-pen{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 10px 0 6px;background:var(--bg);border:1.5px solid var(--line);border-radius:999px;color:var(--ink);font:inherit;font-size:13.5px;cursor:pointer}
+.pv-seq{flex-wrap:wrap;gap:4px;margin:2px 0}
+.pv-gg{background:none;border:0;padding:0;cursor:pointer;font:inherit}
+.pv-gg .ptile{width:30px;height:30px;font-size:13px;border-radius:8px}
+.ptile.oggi{box-shadow:0 0 0 2px var(--ink)}
+.pv-seqaz{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:6px 0 4px}
+.pv-testo{margin:6px 0 0}
+.pv-testo summary{cursor:pointer;color:var(--blue);font-size:13.5px;font-weight:600;padding:6px 0}
 .pv-sonno{margin:8px 0 0}
 .pv-sonno summary{cursor:pointer;color:var(--blue);font-size:14px;font-weight:600;padding:8px 0}
 .persone-modo{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin:14px 0 6px}
@@ -1712,9 +1721,17 @@ header b{font-size:23px}
       <div class="wdet" id="pvManuale" hidden>
         <div id="personaManualFields">
           <div class="q" id="personaSeqBox" hidden>
-            <label for="personaPattern">La sua sequenza</label>
-            <input id="personaPattern" spellcheck="false" autocapitalize="characters" placeholder="es. PPPRRNNNRRMMMRR">
-            <span class="hint">Una lettera per giorno, come la tua. R è il riposo.</span>
+            <label>La sua sequenza</label>
+            <span class="hint" style="margin:0 0 6px">Tocca i turni nell'ordine in cui li fa, un giorno alla volta.</span>
+            <div class="pv-pennelli" id="pvPennelli" role="group" aria-label="Aggiungi un giorno"></div>
+            <div class="pstrip pv-seq" id="pvSeqStrip" aria-label="La sua sequenza"></div>
+            <div class="pv-seqaz"><span class="hint" id="pvSeqNota" style="margin:0">Aggiungi i giorni della sequenza.</span><button type="button" class="lnk dim" id="pvSeqTogli" hidden>⌫ Togli l'ultimo</button></div>
+            <span class="hint" id="pvOggiNota" style="display:block;margin:4px 0 2px;font-weight:600"></span>
+            <details class="pv-testo">
+              <summary>Preferisco scriverla a lettere</summary>
+              <input id="personaPattern" spellcheck="false" autocapitalize="characters" placeholder="es. PPPRRNNNRRMMMRR">
+              <span class="hint">Una lettera per giorno. R è il riposo.</span>
+            </details>
           </div>
           <div class="q" id="personaAnchorBox">
             <div id="pvSfasa" hidden>
@@ -1723,9 +1740,12 @@ header b{font-size:23px}
               <div class="pstrip" id="pvAnteprima" aria-label="I suoi prossimi sette giorni"></div>
             </div>
             <div id="pvData">
-              <label for="personaAnchor" id="personaAnchorLab">Primo giorno del suo ciclo</label>
-              <input id="personaAnchor" type="date">
-              <span class="hint" id="personaAnchorHint">Una data in cui era al primo giorno della sua sequenza.</span>
+              <details class="pv-testo">
+                <summary>Oppure scegli la data di partenza</summary>
+                <label for="personaAnchor" id="personaAnchorLab">Primo giorno del suo ciclo</label>
+                <input id="personaAnchor" type="date">
+                <span class="hint" id="personaAnchorHint">Una data in cui era al primo giorno della sua sequenza.</span>
+              </details>
             </div>
           </div>
           <div class="q" id="personaShiftsBox" hidden>
@@ -7169,7 +7189,8 @@ function renderPersonaShifts(){
     prev[row.dataset.l]={s:row.querySelector('[data-fld="s"]').value, e:row.querySelector('[data-fld="e"]').value};
   });
   list.innerHTML=lettere.map(l=>{
-    const v=prev[l]||{s:"07:00",e:"15:00"};
+    const mio=state.shifts&&state.shifts[l];   // se la lettera è un tuo turno si parte dai tuoi orari; altrimenti da una giornata
+    const v=prev[l]||(mio ? {s:hhmm(mod1440(mio.s)), e:hhmm(mod1440(mio.e))} : l==="G" ? {s:"09:00",e:"18:00"} : {s:"07:00",e:"15:00"});
     return '<div class="psh" data-l="'+esc(l)+'"><b>'+esc(l)+'</b>'+
       '<input type="time" data-fld="s" value="'+esc(v.s)+'">'+
       '<input type="time" data-fld="e" value="'+esc(v.e)+'"></div>';
@@ -7251,7 +7272,7 @@ function azzeraFormPersona(){
   const vie=document.querySelector(".pers-vie"); if(vie) vie.hidden=false;
   const tit=$("#persNuovaTit"); if(tit) tit.textContent="Aggiungi una persona";
   const sn=document.querySelector(".pv-sonno"); if(sn) sn.open=false;
-  _sfasa=1; impostaVia(null);
+  _sfasa=1; _oggiIdx=-1; impostaVia(null);
 }
 function iniziaModificaPersona(i){
   const per=tuttePersone()[i]; if(!per) return;
@@ -7265,6 +7286,7 @@ function iniziaModificaPersona(i){
   const tit=$("#persNuovaTit"); if(tit) tit.textContent="Modifica "+(per.name||"la persona");
   $("#personaPattern").value=per.pattern||"";
   $("#personaAnchor").value=per.anchor||"";
+  oggiDaAncora(); renderSeqBuilder();
   renderPersonaShifts();
   const sh=per.shifts||state.shifts||{};   // senza orari suoi (seguiva i tuoi): si parte da quelli di adesso, e salvando diventano suoi
   document.querySelectorAll("#personaShiftsList .psh").forEach(row=>{
@@ -7281,7 +7303,47 @@ function iniziaModificaPersona(i){
 if($("#annullaModificaPersona")) $("#annullaModificaPersona").onclick=()=>azzeraFormPersona();
 // Come aggiungi la persona: una scelta, e compare solo quello che serve. Ha l'app: link. Fa i tuoi turni: di quanti giorni è sfasata.
 // Lavora lun–ven: niente da scrivere. Turni diversi: sequenza e orari.
-var _via=null, _sfasa=1;   // var: il modulo si azzera (azzeraFormPersona) prima di queste righe
+var _via=null, _sfasa=1, _oggiIdx=-1;   // var: il modulo si azzera (azzeraFormPersona) prima di queste righe
+// La sua sequenza a tocchi: i turni come pennelli, i giorni in fila; «oggi è qui» fissa la partenza. Il testo a lettere resta la fonte (#personaPattern).
+function lettereSeq(){ return String(valoreDi("#personaPattern")||"").toUpperCase().replace(/[^A-Z]/g,"").split(""); }
+function pennelliSeq(){
+  const sh=state.shifts||{}, k=Object.keys(sh).filter(x=>sh[x] && x!=="R" && x!=="S");
+  if(!k.includes("G")) k.push("G");
+  return ["R"].concat(k);
+}
+function tessera(l, shifts, extra){
+  let cl="q"; const sh=shifts&&shifts[l];
+  if(l==="R") cl="r"; else if(l==="G" && !sh) cl="m"; else if(sh){ const f=NT.fasciaOre(sh.s, sh.e); cl=f==="g"?"m":f; } else cl="l";
+  return '<span class="ptile t-'+cl+(extra||"")+'">'+esc(l)+'</span>';
+}
+function renderSeqBuilder(){
+  const pen=$("#pvPennelli"), strip=$("#pvSeqStrip"); if(!pen||!strip) return;
+  const sh=Object.assign({G:{n:"Giornata",s:540,e:1080}}, state.shifts||{});
+  pen.innerHTML=pennelliSeq().map(l=>{ const nome=l==="R"?"Riposo":(sh[l]?sh[l].n:l);
+    return '<button type="button" class="pv-pen" data-pv-pen="'+esc(l)+'">'+tessera(l, sh)+'<span>'+esc(nome)+'</span></button>'; }).join("");
+  const seq=lettereSeq().filter(Boolean);
+  strip.innerHTML=seq.map((l,i)=>'<button type="button" class="pv-gg" data-pv-gg="'+i+'" aria-label="Giorno '+(i+1)+': '+esc(l)+(i===_oggiIdx?", oggi":"")+'" aria-pressed="'+(i===_oggiIdx)+'">'+tessera(l, sh, i===_oggiIdx?" oggi":"")+'</button>').join("");
+  const nota=$("#pvSeqNota"), togli=$("#pvSeqTogli"), on=$("#pvOggiNota");
+  if(togli) togli.hidden=!seq.length;
+  if(nota) nota.textContent=seq.length ? seq.length+(seq.length===1?" giorno":" giorni")+" nella sequenza" : "Aggiungi i giorni della sequenza.";
+  if(on) on.textContent=seq.length ? (_oggiIdx>=0 ? "Oggi è il giorno "+(_oggiIdx+1)+" della sua sequenza." : "Tocca il giorno della sequenza in cui è oggi.") : "";
+}
+function segnaOggiSeq(i){
+  _oggiIdx=i; const pa=$("#personaAnchor"); if(pa) pa.value=i>=0 ? iso(day(giornoVero(), -i)) : ""; renderSeqBuilder();
+}
+function oggiDaAncora(){
+  const n=lettereSeq().filter(Boolean).length, a=valoreDi("#personaAnchor"); if(!n||!a){ _oggiIdx=-1; return; }
+  const d=new Date(a+"T12:00:00"); if(isNaN(+d)){ _oggiIdx=-1; return; }
+  _oggiIdx=((dnum(giornoVero())-dnum(d))%n+n)%n;
+}
+document.addEventListener("click",e=>{
+  const pen=e.target.closest("[data-pv-pen]");
+  if(pen){ haptic(6); const pp=$("#personaPattern"); const seq=lettereSeq().filter(Boolean); if(seq.length>=60){ toast("Una sequenza di più di 60 giorni? Controlla"); return; }
+    pp.value=seq.concat(pen.dataset.pvPen).join(""); pp.dispatchEvent(new Event("input")); return; }
+  const gg=e.target.closest("[data-pv-gg]");
+  if(gg){ haptic(6); const i=+gg.dataset.pvGg; segnaOggiSeq(i===_oggiIdx?-1:i); return; }
+  if(e.target.closest("#pvSeqTogli")){ haptic(6); const pp=$("#personaPattern"), seq=lettereSeq().filter(Boolean); seq.pop(); pp.value=seq.join(""); if(_oggiIdx>=seq.length) segnaOggiSeq(-1); pp.dispatchEvent(new Event("input")); }
+});
 const sfasaTesto=n=> n===0 ? "lo stesso giorno del mio" : Math.abs(n)+(Math.abs(n)===1?" giorno ":" giorni ")+(n>0?"dopo il mio":"prima del mio");
 function ancoraSfasata(n){ const d=new Date(String(state.anchor)+"T12:00:00"); if(isNaN(+d)) return ""; d.setDate(d.getDate()+n); return iso(d); }
 function aggiornaSfasa(){
@@ -7299,6 +7361,7 @@ function impostaVia(v){
   if(sf) sf.hidden = v!=="mine";
   if(v==="mine" || v==="day" || v==="custom"){ const sel=$("#personaMode"); if(sel){ sel.value=v; sel.dispatchEvent(new Event("change")); } }
   if(v==="mine") aggiornaSfasa();
+  if(v==="custom"){ if(personaInModifica===null){ _oggiIdx=-1; } renderSeqBuilder(); }
 }
 document.querySelectorAll("[data-pvia]").forEach(b=>b.addEventListener("click",()=>{ haptic(8); impostaVia(b.dataset.pvia); }));
 document.querySelectorAll("[data-pv-sfasa]").forEach(b=>b.addEventListener("click",()=>{ haptic(6); _sfasa=Math.max(-60,Math.min(60,_sfasa+ +b.dataset.pvSfasa)); aggiornaSfasa(); }));
@@ -10188,7 +10251,10 @@ if($("#personaLink")) $("#personaLink").addEventListener("input", ()=>{
 });
 if($("#personaPattern")) $("#personaPattern").addEventListener("input", ()=>{
   const box=$("#personaShiftsBox"); if(box && !box.hidden) renderPersonaShifts();
+  const n=lettereSeq().filter(Boolean).length; if(_oggiIdx>=n) segnaOggiSeq(-1);
+  renderSeqBuilder();
 });
+if($("#personaAnchor")) $("#personaAnchor").addEventListener("change", ()=>{ oggiDaAncora(); renderSeqBuilder(); });
 // Un messaggio già scritto per chiederle i turni: cosa toccare per mandare
 // il suo link, e il nostro, così anche lei vede subito i giorni in comune.
 if($("#doChiediLink")) $("#doChiediLink").onclick=async()=>{

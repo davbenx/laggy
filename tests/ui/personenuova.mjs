@@ -48,11 +48,23 @@ const visibile=(p,s)=>p.evaluate(s=>{ const e=document.querySelector(s); return 
   await p.context().close(); }
 
 { const p=await apri(ST);
+  await p.fill("#personaName","Luca");
   await p.click('[data-pvia="custom"]'); await p.waitForTimeout(150);
-  ok(await visibile(p,"#personaPattern") && await visibile(p,"#personaAnchor") && !(await visibile(p,"#pvSfasa")), "«Turni diversi»: sequenza e primo giorno");
+  ok(await visibile(p,"#pvPennelli") && !(await visibile(p,"#pvSfasa")) && await p.evaluate(()=>!document.querySelector("#personaSeqBox .pv-testo").open), "«Turni diversi»: i turni da toccare, la sequenza a lettere è chiusa");
+  ok(await p.evaluate(()=>[...document.querySelectorAll("#pvPennelli .pv-pen")].map(b=>b.dataset.pvPen).join("")==="RMPNG"), "i pennelli: Riposo e i tuoi turni, più la giornata");
   ok(await p.evaluate(()=>{ const d=document.querySelector(".pv-sonno"); return !!d && !d.open; }), "il sonno è chiuso («＋ Il suo sonno nei giorni liberi (facoltativo)»), senza tendine vuote");
-  await p.fill("#personaPattern","MMRR"); await p.waitForTimeout(150);
-  ok(await p.evaluate(()=>document.querySelectorAll("#personaShiftsList .psh").length===1), "un orario per ogni lettera");
+  for(const l of ["M","M","R","R"]) await p.click('[data-pv-pen="'+l+'"]');
+  await p.waitForTimeout(150);
+  ok(await p.evaluate(()=>document.querySelector("#personaPattern").value==="MMRR" && document.querySelectorAll("#pvSeqStrip .pv-gg").length===4 && /Tocca il giorno/.test(document.querySelector("#pvOggiNota").textContent)), "toccando M, M, R, R: «MMRR», quattro giorni, «Tocca il giorno in cui è oggi»");
+  ok(await p.evaluate(()=>document.querySelectorAll("#personaShiftsList .psh").length===1 && document.querySelector('#personaShiftsList .psh[data-l="M"] [data-fld="s"]').value==="06:00"), "un orario per ogni lettera, partendo dai tuoi (M 06:00)");
+  await p.click('#pvSeqStrip [data-pv-gg="1"]'); await p.waitForTimeout(150);
+  const ieri=new Date(oggi); ieri.setDate(ieri.getDate()-1);
+  ok(await p.evaluate(a=>document.querySelector("#personaAnchor").value===a && /giorno 2/.test(document.querySelector("#pvOggiNota").textContent), iso(ieri)), "tocchi il giorno 2: «oggi è il giorno 2», la partenza è ieri");
+  await p.click("#pvSeqTogli"); await p.waitForTimeout(150);
+  ok(await p.evaluate(()=>document.querySelector("#personaPattern").value==="MMR"), "«Togli l'ultimo»");
+  await p.click("#doConfirmPersona"); await p.waitForTimeout(500);
+  const st=await stato(p), per=st.pPattern ? {pattern:st.pPattern, anchor:st.pAnchor, shifts:st.pShifts, name:st.pName} : st.people[0];
+  ok(per && per.name==="Luca" && per.pattern==="MMR" && per.anchor===iso(ieri) && per.shifts && per.shifts.M.s===360, "Luca: MMR, partito ieri, con gli orari proposti");
   await p.context().close(); }
 
 { const p=await apri(ST);
