@@ -55,7 +55,7 @@ const an=await p.evaluate(()=>{ const num=document.querySelector(".andamento-num
 ok(an.num && /^\d/.test(an.num), "Debito di sonno: il numero senza segno (l'etichetta dice se manca) → "+an.num);
 ok(an.righe.length===5 && an.righe.every(r=>r.n.length>2) && an.righe.every(r=>/^\d,\d$/.test(r.v)), "Voto per giorno: nomi interi e valori con la virgola → "+an.righe.map(r=>r.n+" "+r.v).join(", "));
 ok(an.righe.filter(r=>r.giu).length===1 && an.righe.find(r=>r.giu).n==="Notte", "Voto per giorno: evidenziato solo il giorno che pesa di più (Notte)");
-{ const pf=await p.evaluate(()=>{ const sez=[...document.querySelectorAll("#andamenti .eyebrow")].find(e=>/turno per turno/.test(e.textContent)); const box=sez&&sez.nextElementSibling;
+{ const pf=await p.evaluate(()=>{ const sez=[...document.querySelectorAll("#andamenti .and-t")].find(e=>/turno per turno/.test(e.textContent)); const box=sez&&sez.closest("details").querySelector(".andamento-sezione");
     return box ? {righe:[...box.querySelectorAll(".frow")].map(r=>r.querySelector(".flab").childNodes[0].textContent), frase:(box.querySelector(".fnota")||{}).textContent||"", colori:[...box.querySelectorAll(".fbar i")].map(i=>i.style.background)} : null; });
   ok(pf && pf.righe.length>=3 && pf.righe.includes("Notte") && new Set(pf.colori).size===pf.colori.length, "Come dormi, turno per turno: una riga per ogni fascia che c'è, ciascuna con il suo colore → "+JSON.stringify(pf&&pf.righe));
   ok(pf && /meno del previsto|vicino al sonno previsto/.test(pf.frase), "e una frase su dove il sonno va protetto → "+(pf&&pf.frase)); }
@@ -73,7 +73,7 @@ ok(gr.barre===30 && gr.manca>0 && gr.manca<gr.barre && gr.turni>0, "Sonno che ti
 ok(/Ore dormite nelle ultime 30 notti: in media .* contro .* previste; \d+ notti sotto il previsto/.test(gr.etBarre||""), "Sonno che ti manca: il grafico ha un testo per chi legge lo schermo → "+gr.etBarre);
 ok(/melatonina dalle \d\d:\d\d, minimo corporeo alle \d\d:\d\d/.test(gr.oro||"") && gr.oroTesti===5, "Il tuo orologio: la fascia delle 24 ore con le 5 ore di riferimento e il testo → "+gr.oro);
 ok(gr.celle===60 && gr.oggi===1 && /notti, \d+ altri turni/.test(gr.etCar||""), "Carico: 60 giorni (30 passati, 30 in arrivo), oggi cerchiato → "+gr.etCar);
-ok(gr.punti===60, "Orari del sonno: un punto per notte, letto e sveglia ("+gr.punti+")");
+ok(gr.punti===48, "Orari del sonno: un punto per notte, letto e sveglia, solo per il gruppo più numeroso: le notti di giorno stanno a parte ("+gr.punti+")");
 ok(gr.voti===30, "Come stai: un puntino per ogni voto ("+gr.voti+")");
 
 
