@@ -7111,18 +7111,22 @@ function sonnoPerFascia(trend){
   return ["m","p","s","n","r"].filter(f=>g[f] && g[f].n>=2).map(f=>({f, n:g[f].n, a:g[f].a/g[f].n, p:g[f].np ? g[f].p/g[f].np : null}));
 }
 function sonnoPerFasciaHtml(trend){
-  const R=sonnoPerFascia(trend); if(R.length<2) return "";
+  const R=sonnoPerFascia(trend); if(R.length<2) return null;
+  // voto medio (1–5) dei giorni di ciascun tipo di turno, dal diario degli ultimi 60 giorni
+  const da60=iso(day(giornoVero(),-60)), V={};
+  Object.keys(diary).filter(k=>k>=da60).forEach(k=>{ const v=+diary[k]; if(!(v>=1&&v<=5)) return; const f=fasciaGiornoIso(k); if(!FASCE[f]) return; (V[f]=V[f]||[]).push(v); });
+  const votoF=f=>V[f]&&V[f].length>=2 ? (V[f].reduce((a,b)=>a+b,0)/V[f].length) : null;
   const max=Math.max(540, ...R.map(x=>x.a));
   const peggio=R.filter(x=>x.f!=="r" && x.n>=3 && x.p!=null && x.p-x.a>=30).sort((a,b)=>(b.p-b.a)-(a.p-a.a))[0];
   const righe=R.map(x=>{ const d=x.p!=null ? Math.round(x.a-x.p) : null, manca=d!=null && d<=-30;
     return '<div class="frow'+(manca?" giu":"")+'"><span class="flab">'+esc(FASCE[x.f][0])+'<span class="hint" style="display:block;font-size:11.5px">'+x.n+(x.n===1?' notte':' notti')+'</span></span>'+
       '<span class="fbar"><i style="width:'+Math.max(3,Math.round(x.a/max*100))+'%;background:'+FASCE[x.f][1]+';opacity:'+(manca?1:.75)+'"></i></span>'+
-      '<span class="fval" style="min-width:64px">'+hm(Math.round(x.a))+(d!=null && Math.abs(d)>=15 ? '<span class="hint" style="display:block;font-size:11.5px;font-weight:400">'+(d>0?'+':'–')+hm(Math.abs(d))+'</span>' : '')+'</span></div>'; }).join("");
+      '<span class="fval" style="min-width:64px">'+hm(Math.round(x.a))+(d!=null && Math.abs(d)>=15 ? '<span class="hint" style="display:block;font-size:11.5px;font-weight:400">'+(d>0?'+':'–')+hm(Math.abs(d))+'</span>' : '')+(votoF(x.f)!=null ? '<span class="hint" style="display:block;font-size:11.5px;font-weight:400">voto '+votoF(x.f).toFixed(1).replace(".",",")+'</span>' : '')+'</span></div>'; }).join("");
   const frase = peggio ? 'Sui turni di '+FASCE[peggio.f][0].toLowerCase()+' dormi in media '+hm(Math.round(peggio.p-peggio.a))+' meno del previsto ('+peggio.n+' notti): è lì che il sonno va protetto di più.'
     : 'In ogni tipo di turno stai vicino al sonno previsto.';
-  return sezDet("Come dormi, turno per turno", peggio ? "Meno sonno prima dei turni di "+FASCE[peggio.f][0].toLowerCase() : "Vicino al previsto in ogni turno",
-    '<p class="hint" style="margin:0 0 8px">Sonno medio della notte che precede il giorno di ciascun turno, da quelle che hai annotato. Sotto, quanto in meno o in più rispetto al piano.</p>'+
-    righe+'<p class="fnota">'+esc(frase)+'</p>');
+  return {riga: peggio ? "Meno sonno prima dei turni di "+FASCE[peggio.f][0].toLowerCase() : "Vicino al previsto in ogni turno",
+    corpo:'<p class="hint" style="margin:0 0 8px">Sonno medio della notte che precede il giorno di ciascun turno, da quelle che hai annotato; sotto, quanto in meno o in più rispetto al piano, e il voto medio da 1 a 5.</p>'+
+      righe+'<p class="fnota">'+esc(frase)+'</p>'};
 }
 function caricoHtml(aperta){
   const P=caricoTurni(-30,30), F=caricoTurni(0,30);
@@ -7177,7 +7181,7 @@ function orologioHtml(){
         ? 'Per ora dagli orari di partenza: dimmi come dormi nei giorni liberi e diventa il tuo.'
         : 'Stime dai tuoi orari nei giorni liberi ('+esc(state.freeBed)+' → '+esc(state.freeWake)+'), che il diario può aggiornare. Nei giorni di turno l\'orologio si sposta con il sonno, e il piano lo segue giorno per giorno. Non sono una misura.')+
       '</p><button type="button" class="lnk" data-oro-cambia style="margin-top:8px">'+(o.partenza?'Dimmi come dormi nei giorni liberi':'Cambia come dormi nei giorni liberi')+' →</button>'+
-      '<div class="why" style="margin-top:10px"><cite>Roenneberg 2003 (cronotipo) · Burgess & Eastman 2005 (melatonina) · Åkerstedt & Folkard 1997 (lucidità)</cite></div>', {id:"orologio", cls:"oro"});
+      '', {id:"orologio", cls:"oro"});
 }
 function renderAndamenti(){
   const el=$("#andamenti"); if(!el) return;
@@ -7197,7 +7201,7 @@ function renderAndamenti(){
   // le altre, è la cosa più utile da leggere in questa visita. Il debito di
   // sonno resta subito sotto: hero (numero grande + sparkline), sempre
   // presente perché è un cruscotto, non un consiglio che scade.
-  let capoHtml="", heroHtml="", sezioni=[];
+  let capoHtml="", heroHtml="", sezioni=[], parteFascia=null, parteCiclo=null;
   if(capo){
     capoHtml='<div class="andamento-insight"><span class="aic">'+ICON.sun+'</span>'+
       '<div><span class="andamento-insight-eyebrow">'+(capo.action?"Da provare questa settimana":"Insight")+'</span>'+esc(capo.testo)+
@@ -7231,7 +7235,7 @@ function renderAndamenti(){
   // Il carico dei turni: dai turni soli, senza diario — la pagina non è mai
   // vuota, ed è il rischio di stanchezza più documentato (notti di fila,
   // riposi brevi). Prima i dati del passato, accanto quelli in arrivo.
-  try{ const tr=window.NTHistory && window.NTHistory.sleepTrend({beds:state.beds,wakes:state.wakes}, NT_planSafe, {days:60}); if(tr && tr.n>=4){ const h=sonnoPerFasciaHtml(tr); if(h) sezioni.push(h); } }catch(e){}
+  try{ const tr=window.NTHistory && window.NTHistory.sleepTrend({beds:state.beds,wakes:state.wakes}, NT_planSafe, {days:60}); if(tr && tr.n>=4) parteFascia=sonnoPerFasciaHtml(tr); }catch(e){}
   try{ sezioni.push(caricoHtml(!heroHtml || /andamento-hero/.test(heroHtml)===false)); }catch(e){}
   try{
     // Regolarità: «come previsto» (quante notti annotate coincidono col piano) e gli orari veri, di notte e di giorno a parte.
@@ -7271,10 +7275,13 @@ function renderAndamenti(){
         '<span class="vval">'+(r.avg===null?"—":r.avg.toFixed(1).replace(".",","))+'</span></div>'; });
     // La frase resta qui SOLO se non è già stata promossa in cima.
     if(cs.frase && !(capo && capo.fonte==="cs")) righe+='<p class="vnota">'+cs.frase.replace(/(\d)\.(\d)/g,"$1,$2")+'</p>';
-    sezioni.push(sezDet("Come stai, giorno per giorno", cs.frase ? "Pesa di più: "+nome(cs.peggio) : cs.voti+" voti da 1 a 5",
-      '<p class="hint" style="margin:0 0 6px">Da 1 a 5 · un puntino per ogni voto ('+cs.voti+')</p>'+righe));
+    parteCiclo={riga: cs.frase ? "Pesa di più: "+nome(cs.peggio) : cs.voti+" voti da 1 a 5",
+      corpo:'<p class="hint" style="margin:0 0 6px"><b>Voto per giorno del ciclo</b> · da 1 a 5, un puntino per ogni voto ('+cs.voti+')</p>'+righe};
   }
 
+  // Un solo confronto per turno: quanto dormi, quanto in meno del previsto, come stai.
+  if(parteFascia || parteCiclo) sezioni.unshift(sezDet("Come dormi e come stai, turno per turno", (parteFascia||parteCiclo).riga,
+    (parteFascia ? parteFascia.corpo : "")+(parteCiclo ? (parteFascia ? '<div style="height:14px"></div>' : '')+parteCiclo.corpo : "")));
   const rowsHtml = sezioni.join("");
   const url = donateUrl();
   // Senza diario: un invito di una riga al posto del numero, niente esempi finti.
