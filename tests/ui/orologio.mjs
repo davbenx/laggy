@@ -63,14 +63,14 @@ const avanti=async p=>{ await p.click("#next"); await p.waitForTimeout(150); };
   ok(usate.orologio && usate.sonno, "aperta la pagina, né «Sonno e carico» né l'orologio tornano come «Lo sapevi?»");
   ok(o && /Un po' gufo/.test(o.testo) && /Metà del sonno\s+[\s\S]*05:15/.test(o.testo) && /Minimo corporeo[\s\S]*07:15/.test(o.testo) && /dalle 23:00/.test(o.testo) && /Più lucido[\s\S]*verso le \d\d:\d\d/.test(o.testo),
     "orologio: tipo, metà del sonno 05:15, melatonina dalle 23:00, minimo 07:15, più lucido");
-  ok(/01:00 → 09:30/.test(o.testo) && /Roenneberg/.test(o.testo), "dice da dove vengono i numeri e gli studi");
+  ok(/01:00 → 09:30/.test(o.testo) && /Non sono una misura/.test(o.testo), "dice da dove vengono i numeri e che sono stime");
   await p.click("[data-oro-cambia]"); await p.waitForTimeout(400);
   ok(await p.evaluate(()=>document.body.classList.contains("tab-opzioni") && !document.querySelector("#opzBox3").hidden), "«Cambia come dormi» porta alla sezione giusta di Impostazioni");
   await p.context().close(); }
 
 { const p=await apri({turniConfigurati:true,pattern:"MPNSR",anchor:fa(0),repeat:true,firstSeenAt:fa(10),shifts:TURNI});
   await p.click('[data-tab="turni"]'); await p.click("#doAndamenti"); await p.waitForTimeout(300);
-  const t=await p.evaluate(()=>document.querySelector("#orologio").innerText);
+  const t=await p.evaluate(()=>{ const d=document.querySelector("#orologio"); d.open=true; return d.innerText; });
   ok(/orari di partenza/.test(t) && /Dimmi come dormi/.test(t), "con gli orari di partenza lo dice, e invita a renderlo tuo");
   ok(!(await p.evaluate(()=>JSON.parse(localStorage.getItem("nt:funzioniUsate")||"{}").orologio)), "con gli orari di partenza l'orologio non conta come visto: l'invito arriverà quando sarà suo");
   await p.context().close(); }
