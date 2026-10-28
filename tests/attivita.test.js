@@ -60,3 +60,17 @@ test("a caso: mai una finestra che rompe le regole (3000 giornate)", () => {
   }
   assert.ok(con > 1500, "la maggior parte delle giornate ha almeno una finestra: " + con);
 });
+
+test("«Quando preferisci»: la fascia scelta vince sul momento migliore, e se non c'è posto vale il migliore", () => {
+  const inp = { wake: 420, sleepOnset: 1410, freeWake: "07:00", occupato: [], pasti: [{ at: 450, lt: true }, { at: 750, main: true }, { at: 1230, lt: true }] };
+  const auto = finestreAttivita(inp);
+  assert.ok(hh(auto.intensa.a) >= 12, "da solo l'allenamento cade nel pomeriggio-sera");
+  const mat = finestreAttivita({ ...inp, quando: { intensa: "mattina" } });
+  assert.ok(hh(mat.intensa.a) >= 5 && hh(mat.intensa.a) < 12, "con «mattina» comincia in mattinata: " + hh(mat.intensa.a));
+  controlla(inp, mat, "mattina");
+  assert.deepEqual(mat.testa, auto.testa, "le altre voci non cambiano");
+  const sera = finestreAttivita({ ...inp, quando: { leggera: "sera" } });
+  assert.ok(hh(sera.leggera.a) >= 18 && hh(sera.leggera.a) < 23, "«sera»");
+  const nessuna = finestreAttivita({ wake: 420, sleepOnset: 1410, occupato: [[400, 800]], quando: { intensa: "mattina" } });
+  assert.ok(nessuna.intensa && hh(nessuna.intensa.a) >= 13, "mattina occupata: torna al migliore");
+});

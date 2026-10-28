@@ -596,6 +596,7 @@ html.js-lento .jsoff{display:block}
 .ferie-pref>summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font-size:14px;font-weight:600;color:var(--dim)}
 .swap-l{display:block;font-size:12px;font-weight:600;color:var(--dim);margin-bottom:4px}
 .swap-s{width:100%;min-height:44px;font-size:15px;padding:7px 8px;border-radius:var(--r);background:var(--bg);border:1px solid var(--line);color:var(--ink)}
+.pv-quando{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 12px 2px}
 .sg-azioni{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 12px}
 .sg-pen:disabled{opacity:.4;cursor:default}
 .sg-g.da{outline:2px solid var(--blue);outline-offset:-2px}
@@ -7939,6 +7940,12 @@ function NT_planSafe(d){
 // aperta (classe sul body, non state.tab — che non diventa mai "opzioni",
 // vedi apriOpzioni/setTab).
 // Impostazioni › Cosa vedi nel piano: un interruttore per ogni voce facoltativa.
+// «Quando preferisci»: il momento si sceglie fra le ore in cui il corpo rende di più, ma chi si allena (o studia) sempre allo stesso orario lo dice qui.
+const QUANDO=[["","Il migliore"],["mattina","Mattina"],["pomeriggio","Pomeriggio"],["sera","Sera"]];
+function quandoHtml(k){
+  const cur=((state.piano||{}).quando||{})[k]||"";
+  return '<div class="pv-quando" role="radiogroup" aria-label="Quando preferisci">'+QUANDO.map(([v,n])=>'<button type="button" role="radio" class="sg-pen" data-quando="'+k+'" data-v="'+v+'" aria-checked="'+(cur===v)+'" aria-pressed="'+(cur===v)+'">'+n+'</button>').join("")+'</div>';
+}
 function renderPianoVoci(){
   const el=$("#opzPianoVoci"); if(!el) return;
   const riga=([k,nome,desc])=>'<label class="riga-sw" for="pv-'+k+'"><span><b>'+esc(nome)+'</b><small>'+esc(desc)+'</small></span>'+
@@ -7948,8 +7955,13 @@ function renderPianoVoci(){
   const accesi=momenti.filter(v=>pianoVoce(v[0])).map(v=>({testa:"testa",leggera:"muoverti",intensa:"allenarti"})[v[0]]);
   el.innerHTML=comuni.map(riga).join("")+
     '<details class="pv-momenti"'+(accesi.length?" open":"")+'><summary><span><b>Momenti migliori</b><small>'+(accesi.length?esc(accesi.join(", ")):"Quando pensare, muoverti o allenarti: spenti")+'</small></span></summary>'+
-    momenti.map(riga).join("")+'</details>';
+    momenti.map(v=>riga(v)+(pianoVoce(v[0]) ? quandoHtml(v[0]) : "")).join("")+'</details>';
 }
+if($("#opzPianoVoci")) $("#opzPianoVoci").addEventListener("click", e=>{
+  const q=e.target.closest("[data-quando]"); if(!q) return;
+  const quando=Object.assign({}, (state.piano||{}).quando); if(q.dataset.v) quando[q.dataset.quando]=q.dataset.v; else delete quando[q.dataset.quando];
+  state.piano=Object.assign({}, state.piano, {quando}); salva(); haptic(4); renderPianoVoci(); render(); ntNotifiche();
+});
 if($("#opzPianoVoci")) $("#opzPianoVoci").addEventListener("change", e=>{
   const k=e.target.dataset && e.target.dataset.pv; if(!k) return;
   state.piano=Object.assign({}, state.piano, {[k]:e.target.checked}); salva();
@@ -9108,6 +9120,7 @@ if($("#cycToday")) $("#cycToday").onclick=()=>{
    `id` cambia solo quando c'è qualcosa da dire; chi aggiorna la vede una volta. Chi installa adesso non la vede
    (non è una novità per lui), ma la trova sempre in Impostazioni › Novità. «app:true» = solo nell'app Android. */
 const NOVITA={ id:"2026-10-31", data:"Ottobre 2026", righe:[
+  ["Scegli quando allenarti","Il piano ti propone l'ora in cui il corpo rende di più, ma tu puoi preferire un'altra fascia. In Impostazioni › Cosa vedi nel piano › Momenti migliori: Il migliore, Mattina, Pomeriggio o Sera, per testa, movimento e allenamento.",false,"2026-10-31"],
   ["Turni più ordinati","Gli strumenti stanno in una griglia, ognuno con il suo stato. «Modifica turni» apre un foglio: ciclo e orari, segna i giorni, importa, festivi. «Condividi» raccoglie invio, QR e stampa. Il mese è una riga che si apre. In «Segna»: intervallo con due tocchi, «Come 7 giorni prima», «Annulla» e «Prossimo da segnare».",false,"2026-10-31"],
   ["Impostazioni e persone più semplici","Impostazioni è un elenco di sei voci con il valore di ciascuna; gli orari dei turni si cambiano sulla pagina, con «Annulla». Aggiungere una persona: un nome, una scelta (ha l'app, fa i tuoi turni, lun–ven, turni diversi) e solo quello che serve.",false,"2026-10-30"],
   ["Il voto sull'energia, al momento giusto","Appena svegli c'è l'inerzia del sonno e il voto verrebbe più basso del vero: «Come ti senti?» arriva 90 minuti dopo la sveglia. E subito dopo il risveglio non compare più «Rischio fatica alto».",false,"2026-10-29"],

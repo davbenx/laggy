@@ -71,6 +71,8 @@ const FIN = {
   leggera: { lungo: 45, dopoSveglia: 45,  primaSonno: 60,  dopoPasto: [0, 30],  dopoPastoLt: [0, 20] },
   intensa: { lungo: 60, dopoSveglia: 120, primaSonno: 180, dopoPasto: [-60, 120], dopoPastoLt: [-30, 60] }
 };
+// «Quando preferisci»: la fascia dell'orologio in cui far cominciare il momento (minuti dalla mezzanotte).
+const FASCE = { mattina: [300, 720], pomeriggio: [720, 1080], sera: [1080, 1380] };
 export function finestreAttivita(inp) {
   const fw = isFinite(inp.fase) ? ((inp.fase + 180) % 1440 + 1440) % 1440 : (parseHM(inp.freeWake) != null ? parseHM(inp.freeWake) : 450);
   const w0 = inp.wake, w1 = inp.sleepOnset;
@@ -87,15 +89,21 @@ export function finestreAttivita(inp) {
       const r = p.lt ? R.dopoPastoLt : R.dopoPasto;
       blocchi.push([p.at + r[0], p.at + r[1]]);
     }
-    let meglio = null;
-    for (let a = Math.ceil((w0 + R.dopoSveglia) / 15) * 15; a + R.lungo <= w1 - R.primaSonno; a += 15) {
-      const z = a + R.lungo;
-      if (blocchi.some(x => sovrappone(a, z, x))) continue;
-      let somma = 0, n = 0;
-      for (let m = a; m < z; m += 15) { somma += score(m); n++; }
-      const media = somma / n;
-      if (!meglio || media > meglio.media + 1e-9) meglio = { a, z, media };
-    }
+    // fascia preferita (ora dell'orologio d'inizio); se in quel giorno non c'è posto, vale il momento migliore
+    const trova = fascia => {
+      let meglio = null;
+      for (let a = Math.ceil((w0 + R.dopoSveglia) / 15) * 15; a + R.lungo <= w1 - R.primaSonno; a += 15) {
+        const z = a + R.lungo;
+        if (fascia) { const h = ((a % 1440) + 1440) % 1440; if (h < fascia[0] || h >= fascia[1]) continue; }
+        if (blocchi.some(x => sovrappone(a, z, x))) continue;
+        let somma = 0, n = 0;
+        for (let m = a; m < z; m += 15) { somma += score(m); n++; }
+        const media = somma / n;
+        if (!meglio || media > meglio.media + 1e-9) meglio = { a, z, media };
+      }
+      return meglio;
+    };
+    const meglio = trova(FASCE[inp.quando && inp.quando[tipo]]) || trova(null);
     if (meglio) out[tipo] = { a: meglio.a, z: meglio.z };
   }
   return out;
@@ -108,7 +116,7 @@ export function finestreDelPiano(P, cfg) {
   const b = P.b, occupato = [];
   if (b && !b.rest && isFinite(b.start) && isFinite(b.end)) occupato.push([b.start - prep - cTo, b.end + cFrom]);
   for (const n of (P.naps || [])) occupato.push([n.a, n.b]);
-  return finestreAttivita({ wake: P.wake, sleepOnset: P.s.onset, fase: P.cbt, freeWake: c.freeWake, occupato, pasti: P.meals || [] });
+  return finestreAttivita({ wake: P.wake, sleepOnset: P.s.onset, fase: P.cbt, freeWake: c.freeWake, occupato, pasti: P.meals || [], quando: (c.piano || {}).quando });
 }
 
 // ─────────── integrazione GRATIS nella pagina (guardata: se manca il ponte, non fa nulla) ───────────
