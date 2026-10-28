@@ -55,7 +55,8 @@ ok(await dove()==="tab-oggi", "Impostazioni aperte da Oggi → freccia → Oggi"
 // Modifica del ciclo da configurato: Annulla torna dov'era, senza cambiare nulla
 const prima=await p.evaluate(()=>localStorage.getItem("nt:state"));
 await p.evaluate(()=>document.querySelector('[data-tab="turni"]').click()); await p.waitForTimeout(150);
-await p.evaluate(()=>{ const m=[...document.querySelectorAll("button,a")].find(x=>/^Modifica/.test(x.textContent.trim()) && x.offsetParent); m && m.click(); }); await p.waitForTimeout(300);
+await p.evaluate(()=>{ const m=[...document.querySelectorAll("button,a")].find(x=>/^Modifica/.test(x.textContent.trim()) && x.offsetParent); m && m.click(); }); await p.waitForTimeout(250);
+await p.evaluate(()=>document.querySelector('[data-mod="ciclo"]').click()); await p.waitForTimeout(300);
 await p.evaluate(()=>document.querySelector('[data-tt="schema"]').click()); await p.waitForTimeout(200);
 const inScelta=await h2();
 await p.evaluate(()=>document.querySelector("[data-chiudi-schema]")?.click()); await p.waitForTimeout(250);

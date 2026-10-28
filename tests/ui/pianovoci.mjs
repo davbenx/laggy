@@ -19,11 +19,11 @@ const voci=p=>p.evaluate(()=>[...document.querySelectorAll("#essenziale .tl")].m
 
 { const p=await apri(), v=await voci(p);
   ok(["Luce","Pasti","Turno","Dormi"].every(x=>v.includes(x)) && !v.some(x=>/Testa|Movimento|Allenamento/.test(x)), "predefinito: le voci di sempre ci sono, i momenti migliori no → "+v.join(", "));
-  await p.click("#doOpzioni"); await p.waitForTimeout(400);
+  await p.click("#doOpzioni"); await p.waitForTimeout(400); await p.click('[data-opzg-vai="voci"]'); await p.waitForTimeout(200);
   const sw=await p.evaluate(()=>[...document.querySelectorAll("#opzPianoVoci input[data-pv]")].map(i=>i.dataset.pv+":"+i.checked));
   ok(sw.length===7 && sw.slice(0,4).every(x=>x.endsWith("true")) && sw.slice(4).every(x=>x.endsWith("false")), "Impostazioni: sette interruttori, quattro accesi e tre spenti → "+sw.join(" "));
   ok(await p.evaluate(()=>/Dormi, Turno, Pisolino, Ultimo caffè e Rientro ci sono sempre/.test(document.querySelector("#opzioni").innerText)), "dice quali voci ci sono sempre");
-  await p.click('label[for="pv-luce"]'); await p.click('label[for="pv-testa"]'); await p.waitForTimeout(300);
+  await p.click('label[for="pv-luce"]'); await p.click("#opzPianoVoci .pv-momenti summary"); await p.click('label[for="pv-testa"]'); await p.waitForTimeout(300);
   await p.click("#doOpzioni").catch(()=>{}); await p.evaluate(()=>document.querySelector('[data-tab="oggi"]').click()); await p.waitForTimeout(400);
   const v2=await voci(p);
   ok(!v2.includes("Luce") && v2.includes("Testa") && v2.includes("Turno") && v2.includes("Dormi"), "spenta Luce e accesa Testa: Oggi li segue, Turno e Dormi restano → "+v2.join(", "));

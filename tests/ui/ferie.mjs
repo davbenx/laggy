@@ -33,9 +33,9 @@ ok(/Mattino/.test(turniFerie.testo) && /Pomeriggio/.test(turniFerie.testo) && /N
 await piu(p,2); L=await lunghezze(p); ok(L[0]===9, "5 giorni di ferie → 9 giorni a casa → "+L);
 await piu(p,-4); L=await lunghezze(p); ok(L[0]===3 && await p.evaluate(()=>document.querySelector('[data-ferie-n="-1"]').disabled), "1 giorno → 3 a casa; sotto 1 non si scende → "+L);
 await piu(p,2);
-await p.click("label[for=ferieSmonto]"); await p.waitForTimeout(200);
+await p.evaluate(()=>{ const d=document.querySelector(".ferie-pref"); if(d) d.open=true; }); await p.click("label[for=ferieSmonto]"); await p.waitForTimeout(200);
 L=await lunghezze(p); ok(L[0]===6 && await base(p)===1, "smonto escluso: 6 giorni e riposo più lungo di 1 → "+L);
-await p.click("label[for=ferieSmonto]"); await p.waitForTimeout(200);
+await p.evaluate(()=>{ const d=document.querySelector(".ferie-pref"); if(d) d.open=true; }); await p.click("label[for=ferieSmonto]"); await p.waitForTimeout(200);
 // un mese preciso: le ferie stanno tutte lì
 const val=await p.evaluate(()=>{ const s=document.querySelector("#ferieMese"); s.selectedIndex=3; s.dispatchEvent(new Event("change")); return s.value; });
 await p.waitForTimeout(200);

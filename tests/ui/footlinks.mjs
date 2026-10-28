@@ -6,7 +6,7 @@ for (const scheme of ["dark","light"]) {
   const p=await (await b.newContext({locale:"it-IT",viewport:{width:360,height:780},deviceScaleFactor:2,colorScheme:scheme})).newPage(); p.on("pageerror",e=>errs.push(e.message));
   await p.goto("http://localhost:8765/index.html"); await p.waitForTimeout(700);
   await p.click("[data-pick=M]"); await p.click("#qhConfermaOrario"); await p.waitForTimeout(400);
-  await p.click("#doOpzioni"); await p.waitForTimeout(300);
+  await p.click("#doOpzioni"); await p.waitForTimeout(300); await p.click('[data-opzg-vai="aiuto"]'); await p.waitForTimeout(200);
   await p.evaluate(()=>{ const r=document.getElementById("doReviewLnk"); r.hidden=false; });
   const r=await p.evaluate(()=>{ const righe=[...document.querySelectorAll(".opz-info .opz-gruppo.az>.tool")].filter(a=>a.offsetParent);
     const leg=[...document.querySelectorAll(".opz-info .foot-legal a")];

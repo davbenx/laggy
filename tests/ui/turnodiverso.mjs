@@ -17,22 +17,54 @@ const apri=async(st)=>{
 const stato=p=>p.evaluate(()=>JSON.parse(localStorage.getItem("nt:state")));
 const base={turniConfigurati:true,pattern:"PPPPPPP",anchor:iso(oggi),shifts:SH,repeat:true,firstSeenAt:"2026-01-01",freeBed:"23:30",freeWake:"07:30"};
 
+const imposta=async(p,sel,v)=>{ await p.evaluate(([sel,v])=>{ const i=document.querySelector(sel); i.value=v; i.dispatchEvent(new Event("change",{bubbles:true})); },[sel,v]); await p.waitForTimeout(250); };
 { const p=await apri(base);
-  await p.evaluate(d=>{ const f=document.querySelector("#next"); f.click(); }, 0); await p.waitForTimeout(300);
+  await p.evaluate(()=>document.querySelector("#next").click()); await p.waitForTimeout(300);
   await p.click("#shiftPill"); await p.waitForTimeout(300);
-  ok(await p.evaluate(()=>!!document.querySelector("#qsNuovoApri")), "il foglio del giorno ha «＋ Un altro turno»");
-  await p.click("#qsNuovoApri"); await p.waitForTimeout(150);
-  ok(await p.evaluate(()=>!document.querySelector("#qsNuovoForm").hidden && document.querySelector("#qsNuovoNome").placeholder==="Giornata"), "nome e orari; con 08:00–16:00 il nome proposto è «Giornata»");
-  await p.click("#qsNuovoOk"); await p.waitForTimeout(400);
+  ok(await p.evaluate(()=>{ const s=document.querySelector("#quickShiftModal .qs-sheet"); return !!document.querySelector("#qsOrari [data-qs-ora=s]") && !document.querySelector("#qsNuovoApri") && s.scrollHeight<=s.clientHeight+2; }), "il foglio ha una sola riga di orari, niente modulo a parte, e sta in una schermata");
+  await imposta(p,'#qsOrari [data-qs-ora="s"]',"08:00"); await imposta(p,'#qsOrari [data-qs-ora="e"]',"16:00");
+  ok(await p.evaluate(()=>/Giornata/.test(document.querySelector("#shiftPill").textContent) && !!document.querySelector("#qsOrari [data-qs-salva]")), "cambi le ore e vale subito: il giorno è «Giornata» e compare «Salva «Giornata» fra i tuoi turni»");
+  ok(await p.evaluate(()=>!document.querySelector("#qsReset").hidden && /Annulla/.test(document.querySelector("#toast").textContent)), "«Ripristina» in alto e «Annulla» nell'avviso");
+  await p.click("#qsOrari [data-qs-salva]"); await p.waitForTimeout(400);
   const st=await stato(p), k=Object.keys(st.shifts).find(x=>st.shifts[x].n==="Giornata");
-  ok(k && st.shifts[k].s===480 && st.shifts[k].e===960 && st.ecc[iso(dom)]===k, "nasce il turno «Giornata» (08:00–16:00) e vale per quel giorno → "+k);
-  ok(await p.evaluate(()=>/Giornata/.test(document.querySelector("#shiftPill").textContent)), "il giorno ora dice «Giornata», non «Pomeriggio»");
-  // il secondo giorno: è già fra i tuoi turni, un tocco
+  ok(k && st.shifts[k].s===480 && st.shifts[k].e===960 && st.ecc[iso(dom)]===k && !(st.giorni&&st.giorni[iso(dom)]&&st.giorni[iso(dom)].s!=null), "un tocco: «Giornata» è fra i tuoi turni e vale per quel giorno → "+k);
+  await p.evaluate(()=>document.querySelector("#qsClose").click()); await p.waitForTimeout(200);
   await p.evaluate(()=>document.querySelector("#next").click()); await p.waitForTimeout(300);
   await p.click("#shiftPill"); await p.waitForTimeout(300);
   ok(await p.evaluate(()=>[...document.querySelectorAll("#qsGrid .qs-btn")].some(x=>/Giornata/.test(x.textContent) && /08:00–16:00/.test(x.textContent))), "dopodomani «Giornata 08:00–16:00» è fra i turni, un tocco");
   await p.click('#qsGrid [data-qs]:not([data-qs="R"]):not([data-qs="M"]):not([data-qs="P"]):not([data-qs="N"])'); await p.waitForTimeout(300);
   const st2=await stato(p); ok(st2.ecc[iso(dopo)]===k && Object.keys(st2.shifts).length===4, "un solo turno nuovo per i due giorni");
+  await p.context().close(); }
+
+// mezz'ora in più sullo stesso pomeriggio: niente da salvare; «Annulla» rimette com'era
+{ const p=await apri(base);
+  await p.evaluate(()=>document.querySelector("#next").click()); await p.waitForTimeout(300);
+  await p.click("#shiftPill"); await p.waitForTimeout(300);
+  await imposta(p,'#qsOrari [data-qs-ora="e"]',"22:30");
+  ok(await p.evaluate(()=>!document.querySelector("#qsOrari [data-qs-salva]") && /Pomeriggio/.test(document.querySelector("#shiftPill").textContent)), "straordinario sullo stesso turno: resta «Pomeriggio», niente da salvare");
+  await p.click("#toast .toast-undo"); await p.waitForTimeout(300);
+  const st=await stato(p); ok(!(st.giorni&&st.giorni[iso(dom)]), "«Annulla»: orari di prima");
+  await p.context().close(); }
+
+// giorno di riposo: «＋ Orari diversi»
+{ const p=await apri(Object.assign({}, base, {pattern:"PR", anchor:iso(oggi)}));
+  await p.evaluate(()=>document.querySelector("#next").click()); await p.waitForTimeout(300);
+  await p.click("#shiftPill"); await p.waitForTimeout(300);
+  ok(await p.evaluate(()=>!!document.querySelector("#qsOrari [data-qs-orari-apri]")), "giorno di riposo: «＋ Orari diversi»");
+  await p.click("#qsOrari [data-qs-orari-apri]"); await p.waitForTimeout(150);
+  await p.click("#qsOrari [data-qs-orari-ok]"); await p.waitForTimeout(400);
+  const st=await stato(p), k=Object.keys(st.shifts).find(x=>st.shifts[x].n==="Giornata");
+  ok(k && st.ecc[iso(dom)]===k, "08:00–16:00 sul riposo: nasce «Giornata» e il giorno lo usa");
+  await p.context().close(); }
+
+// giorni speciali: due in vista, il resto dietro «Altro»
+{ const p=await apri(base);
+  await p.evaluate(()=>document.querySelector("#next").click()); await p.waitForTimeout(300);
+  await p.click("#shiftPill"); await p.waitForTimeout(300);
+  ok(await p.evaluate(()=>{ const c=[...document.querySelectorAll("#qsSpec .qs-chip")].map(x=>x.textContent.trim()); return c.length===3 && /Ferie/.test(c[0]) && /Malattia/.test(c[1]) && /Altro/.test(c[2]); }), "giorni speciali: Ferie, Malattia, «Altro»");
+  await p.click("#qsSpec [data-qs-altro]"); await p.waitForTimeout(150);
+  ok(await p.evaluate(()=>{ const c=[...document.querySelectorAll("#qsSpec .qs-chip")].map(x=>x.textContent.trim()).join("|"); return /Reperibil/.test(c) && /Formazione/.test(c) && /extra/i.test(c); }), "«Altro» apre reperibilità, formazione e turno extra");
+  ok(await p.evaluate(()=>/Cambio turno/.test(document.querySelector("#qsVaiScambio").textContent) && !/mi conviene/.test(document.querySelector("#qsVaiScambio").textContent)), "in fondo: «Cambio turno»");
   await p.context().close(); }
 
 // orari diversi: il nome segue la fascia

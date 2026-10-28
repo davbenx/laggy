@@ -21,6 +21,7 @@ await p.reload(); await p.waitForTimeout(3000);
 const r=await p.evaluate(()=>({ dia:window.__sched.filter(n=>n.extra&&n.extra.kind==="diario").map(n=>n.channelId), can:window.__canali.find(c=>c.id==="diario") }));
 ok(r.dia.length>0 && r.dia.every(c=>c==="diario") && r.can && r.can.importance===3, "«Come hai dormito?» in coda sul canale «diario», importanza normale → "+JSON.stringify(r));
 await p.click("#doOpzioni"); await p.waitForTimeout(400);
+await p.click('[data-opzg-vai="promemoria"]'); await p.waitForTimeout(200);
 await p.click("[data-prossimi-promemoria]"); await p.waitForTimeout(300);
 const t=await p.evaluate(()=>{ const e=document.querySelector("#opzProssimi"); return e && !e.hidden ? e.innerText : ""; });
 ok(/I prossimi/.test(t) && t.split("\n").filter(l=>/·/.test(l)).length>=3 && !/NaN|undefined/.test(t), "«Vedi i prossimi promemoria»: elenco con giorno, ora e titolo → "+t.split("\n").slice(1,4).join(" | "));

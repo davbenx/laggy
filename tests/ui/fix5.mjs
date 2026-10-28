@@ -32,7 +32,7 @@ for (const w of [320,360,412]) {
   await p2.goto("http://localhost:8765/index.html"); await p2.waitForTimeout(900);
   const pp=p2;
   await pp.evaluate(()=>document.querySelector("#doOpzioni").click()); await pp.waitForTimeout(200);
-  await pp.click('[data-opz="3"]'); await pp.waitForTimeout(300);
+  await pp.click('[data-opzg-vai="abitudini"]'); await pp.waitForTimeout(300);
   const r=await pp.evaluate(()=>[...document.querySelectorAll("#oBed,#oWake")].map(s=>{ const c=document.createElement("canvas").getContext("2d"); const cs=getComputedStyle(s); c.font=cs.fontWeight+" "+cs.fontSize+" "+cs.fontFamily; return {v:s.value, w:s.clientWidth, testo:Math.ceil(c.measureText(s.value).width)+parseFloat(cs.paddingLeft)+parseFloat(cs.paddingRight)}; }));
   ok(r[0].v==="00:10" && r[1].v==="08:50" && r.every(x=>x.w>=x.testo+16), w+"px: tendine mostrano l'orario salvato per intero "+JSON.stringify(r));
   await pp.locator("#opzBox3").screenshot({path:`${SP}/f-sonno-${w}.png`});
@@ -56,6 +56,7 @@ for (const w of [320,360,412]) {
   await ctx.addInitScript(()=>{ Object.defineProperty(Notification,"permission",{get:()=>"granted"}); });
   const p=await setup(ctx);
   await p.evaluate(()=>document.querySelector("#doOpzioni").click()); await p.waitForTimeout(200);
+  await p.click('[data-opzg-vai="promemoria"]'); await p.waitForTimeout(200);
   const st=()=>p.evaluate(()=>({riga:document.querySelector('#opzFunzioni [data-gestisci="notifiche"]').getAttribute("aria-checked"), lista:document.querySelector('#opzFunzioni [data-gestisci="notifiche"]').getAttribute("aria-checked"), off:localStorage.getItem("nt:promemoriaOff")}));
   ok((await st()).riga==="true", "promemoria: con permesso risultano accesi "+JSON.stringify(await st()));
   await p.click('#opzFunzioni [data-gestisci="notifiche"]'); await p.waitForTimeout(200); await p.evaluate(()=>{ const x=document.querySelector('#sceltaNotif [data-scelta=\"essenziali\"]'); x&&x.click(); }); await p.waitForTimeout(200); const s1=await st();
@@ -83,6 +84,7 @@ for (const w of [320,360,412]) {
   const n1=await p.evaluate(()=>window.__pend.length);
   await p.click('[data-attiva="calendario"]'); await p.waitForTimeout(2500);
   await p.evaluate(()=>document.querySelector("#doOpzioni").click()); await p.waitForTimeout(300);
+  await p.click('[data-opzg-vai="promemoria"]'); await p.waitForTimeout(200);
   await p.click('#opzFunzioni [data-gestisci="notifiche"]'); await p.waitForTimeout(500); await p.evaluate(()=>{ const x=document.querySelector('#sceltaNotif [data-scelta=\"essenziali\"]'); x&&x.click(); }); await p.waitForTimeout(200);
   const n2=await p.evaluate(()=>window.__pend.length);
   ok(n1>0 && n2===0, "nativo: promemoria spenti → coda del telefono svuotata ("+n1+" → "+n2+")");

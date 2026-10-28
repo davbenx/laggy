@@ -25,6 +25,7 @@ ok(canali.every(c=>c!=="promemoria"), "ogni tipo sul suo canale Android "+JSON.s
 ok((await p.evaluate(()=>window.__ch)).length>=8, "canali creati: "+(await p.evaluate(()=>window.__ch.join(","))));
 // Impostazioni: interruttori per tipo
 await p.evaluate(()=>document.querySelector("#doOpzioni").click()); await p.waitForTimeout(400);
+await p.click('[data-opzg-vai="promemoria"]'); await p.waitForTimeout(200);
 await p.click("#opzNotifTipi"); await p.waitForTimeout(200);
 const n=await p.evaluate(()=>document.querySelectorAll("[data-ntipo]").length);
 ok(n>=9, "Impostazioni → Quali promemoria: un interruttore per tipo ("+n+")");

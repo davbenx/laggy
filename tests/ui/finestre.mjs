@@ -32,6 +32,18 @@ const P={P:{n:"Pomeriggio",s:840,e:1320}}, N={N:{n:"Notte",s:1320,e:1800}};
 { const p=await apri("RRRR",N,"2026-11-03T11:45:00+01:00"), r=await righe(p);
   ok(/\bora\b/.test(r[0].cls) && !/\bpast\b/.test(r[2].cls), "alle 11:45 la finestra «Testa» è in corso, l'allenamento deve ancora venire");
   await p.context().close(); }
+// «Quando preferisci»: da Impostazioni › Cosa vedi nel piano si sceglie la fascia, e l'allenamento si sposta
+{ const p=await apri("RRRR",N,"2026-11-03T10:00:00+01:00");
+  const prima=(await righe(p))[2];
+  await p.click("#doOpzioni"); await p.waitForTimeout(400); await p.click('[data-opzg-vai="voci"]'); await p.waitForTimeout(250);
+  await p.evaluate(()=>{ const d=document.querySelector("#opzPianoVoci .pv-momenti"); if(d) d.open=true; });
+  ok(await p.evaluate(()=>document.querySelectorAll("#opzPianoVoci [data-quando]").length===12), "per ognuno dei tre momenti: Il migliore · Mattina · Pomeriggio · Sera");
+  await p.evaluate(()=>document.querySelector('[data-quando="intensa"][data-v="sera"]').click()); await p.waitForTimeout(250);
+  ok(await p.evaluate(()=>JSON.parse(localStorage.getItem("nt:state")).piano.quando.intensa==="sera" && document.querySelector('[data-quando="intensa"][data-v="sera"]').getAttribute("aria-checked")==="true"), "la scelta resta e il tasto è premuto");
+  await p.evaluate(()=>document.querySelector("#chiudiOpzioni").click()); await p.waitForTimeout(250);
+  const dopo=(await righe(p))[2];
+  ok(dopo && prima && (dopo.a%1440)/60>=18 || !dopo, "l'allenamento ora comincia di sera ("+(prima&&prima.a)+" → "+(dopo&&dopo.a)+")");
+  await p.context().close(); }
 { const p=await apri("RRRR",N,"2026-11-03T10:00:00+01:00");
   await p.click("#prev"); await p.waitForTimeout(200);
   ok(await p.evaluate(()=>!document.querySelector('#essenziale [data-row^="fin-"]')), "su un giorno passato non compaiono");
