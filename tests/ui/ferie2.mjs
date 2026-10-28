@@ -20,7 +20,7 @@ const teste=p=>p.evaluate(()=>[...document.querySelectorAll(".ferie-prop .ferie-
 { const p=await nuova({turniConfigurati:true,pattern:"MPNSR",anchor:iso(oggi),shifts:SH,repeat:true,firstSeenAt:"2026-01-01"});
   ok(await p.evaluate(()=>document.querySelector("#feriePrefer").value==="giorni" && document.querySelector("#ferieConRiga").hidden), "di partenza: «Più giorni a casa», e senza persone non compare «A casa con»");
   const prima=await p.evaluate(()=>[...document.querySelectorAll(".ferie-prop")].map(s=>[...s.querySelectorAll(".fg")].filter(x=>/^(Sab|Dom)/.test(x.textContent)).length));
-  await p.selectOption("#feriePrefer","weekend"); await p.waitForTimeout(300);
+  await p.evaluate(()=>{ const d=document.querySelector(".ferie-pref"); if(d) d.open=true; }); await p.selectOption("#feriePrefer","weekend"); await p.waitForTimeout(300);
   const dopo=await p.evaluate(()=>[...document.querySelectorAll(".ferie-prop")].map(s=>[...s.querySelectorAll(".fg")].filter(x=>/^(Sab|Dom)/.test(x.textContent)).length));
   ok(dopo.length>0 && Math.max(...dopo)>=Math.max(...prima), "«Più fine settimana»: nessuna proposta con meno fine settimana di prima ("+prima+" → "+dopo+")");
   ok((await teste(p)).every(t=>/giorni? di fine settimana/.test(t)||true), "le proposte dicono quanti giorni di fine settimana coprono");
@@ -31,7 +31,7 @@ const teste=p=>p.evaluate(()=>[...document.querySelectorAll(".ferie-prop .ferie-
 { const p=await nuova({turniConfigurati:true,pattern:"MPNSR",anchor:iso(oggi),shifts:SH,repeat:true,firstSeenAt:"2026-01-01",
     pPattern:"MMMMMRR",pName:"Marco",pShifts:{M:{n:"Mattino",s:480,e:1020}}});
   ok(await p.evaluate(()=>!document.querySelector("#ferieConRiga").hidden && [...document.querySelectorAll("#ferieCon option")].map(o=>o.textContent).join()==="Nessuno,Marco"), "con una persona in elenco compare «A casa con» → Nessuno, Marco");
-  await p.selectOption("#ferieCon","0"); await p.waitForTimeout(500);
+  await p.evaluate(()=>{ const d=document.querySelector(".ferie-pref"); if(d) d.open=true; }); await p.selectOption("#ferieCon","0"); await p.waitForTimeout(500);
   const t=await teste(p);
   ok(t.length>0 && t.every(x=>/· \d+ con Marco/.test(x)), "ogni proposta dice quanti giorni a casa sono con Marco → "+t[0]);
   const ins=t.map(x=>+(/· (\d+) con Marco/.exec(x)||[])[1]);

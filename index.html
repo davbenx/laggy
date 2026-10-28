@@ -592,6 +592,10 @@ html.js-lento .jsoff{display:block}
 .sg-testa button:disabled{opacity:.35;cursor:default}
 .sg-pennelli{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 12px}
 .sg-pen{border:1.5px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;min-height:40px;padding:0 13px;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer}
+.ferie-pref{margin-top:4px}
+.ferie-pref>summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font-size:14px;font-weight:600;color:var(--dim)}
+.swap-l{display:block;font-size:12px;font-weight:600;color:var(--dim);margin-bottom:4px}
+.swap-s{width:100%;min-height:44px;font-size:15px;padding:7px 8px;border-radius:var(--r);background:var(--bg);border:1px solid var(--line);color:var(--ink)}
 .sg-azioni{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 12px}
 .sg-pen:disabled{opacity:.4;cursor:default}
 .sg-g.da{outline:2px solid var(--blue);outline-offset:-2px}
@@ -1879,12 +1883,12 @@ header b{font-size:23px}
 <div class="ecc" id="scambioBox">
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
     <div>
-      <label style="display:block;font-size:12px;font-weight:600;color:var(--dim);margin-bottom:4px" for="swapA">Il tuo giorno:</label>
-      <select id="swapA" style="width:100%;font-size:13px;padding:7px 8px;border-radius:var(--r);background:var(--bg);border:1px solid var(--line);color:var(--ink)"></select>
+      <label class="swap-l" for="swapA">Il tuo giorno:</label>
+      <select id="swapA" class="swap-s"></select>
     </div>
     <div>
-      <label style="display:block;font-size:12px;font-weight:600;color:var(--dim);margin-bottom:4px" for="swapB">Scambia con:</label>
-      <select id="swapB" style="width:100%;font-size:13px;padding:7px 8px;border-radius:var(--r);background:var(--bg);border:1px solid var(--line);color:var(--ink)"></select>
+      <label class="swap-l" for="swapB">Scambia con:</label>
+      <select id="swapB" class="swap-s"></select>
     </div>
   </div>
 
@@ -1913,9 +1917,11 @@ header b{font-size:23px}
         <button type="button" data-ferie-n="1" aria-label="Un giorno in più">+</button>
       </span></div>
     <div class="ferie-riga"><label for="ferieMese">Quando</label><select id="ferieMese"></select></div>
+    <details class="ferie-pref"><summary>Preferenze</summary>
     <div class="ferie-riga"><label for="feriePrefer">Preferisco</label><select id="feriePrefer"><option value="giorni">Più giorni a casa</option><option value="weekend">Più fine settimana</option></select></div>
     <div class="ferie-riga" id="ferieConRiga" hidden><label for="ferieCon">A casa con</label><select id="ferieCon"></select></div>
     <label class="riga-sw" for="ferieSmonto"><span>Conta lo smonto come giorno a casa</span><span class="switch"><input type="checkbox" id="ferieSmonto" checked><span class="slider"></span></span></label>
+    </details>
   </div>
   <div id="ferieOut" aria-live="polite"></div>
 </div>
