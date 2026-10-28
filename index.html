@@ -9420,7 +9420,7 @@ function giorniCiclo(giorni, persona){
       // il turno di quel giorno, per dire quali turni lasci con le ferie
       // a casa con la persona scelta: il suo giorno è di riposo (non lavora, non smonta dalla notte)
       const insieme = persona ? !!(asPartner(()=>{ const pb=NT.block(o); return pb.rest; }, persona)) : false;
-      out.push({d, lavoro:!b.rest, smonto: b.rest && !ieri.rest && ieri.end>1440, c, nome:NT.etichetta(o), festivo:festivo(d), insieme,
+      out.push({d, lavoro:!b.rest, smonto: b.rest && !ieri.rest && ieri.end>1440, c, nome:NT.etichetta(o), festivo:festivoVero(d), insieme,
         ferieGia: !!(state.giorni[iso(d)] && state.giorni[iso(d)].t==="ferie"), cambio: !!state.ecc[iso(d)]});
     }
   } finally { state.focus=fPrima; }
