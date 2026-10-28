@@ -57,7 +57,7 @@ const aperto=p=>p.evaluate(()=>!document.querySelector("#novitaModal").hidden);
   await p.evaluate(()=>document.querySelector("#doPartner").click()); await p.waitForTimeout(400);
   await p.evaluate(()=>document.querySelector("[data-partner-edit]").click()); await p.waitForTimeout(400);
   const riga=await p.evaluate(()=>document.querySelector("#wizPeopleList .diary")?.textContent||"");
-  ok(/dorme 23:00–07:00/.test(riga) && /turni come i tuoi/.test(riga), "nella lista si vede il suo sonno e se segue i tuoi turni → "+riga.replace(/\s+/g," ").slice(0,90));
+  ok(/dorme 23:00–07:00/.test(riga) && await p.evaluate(()=>document.querySelectorAll("#wizPeopleList .diary .ptile").length===7), "nella lista si vede il suo sonno e i suoi prossimi sette giorni → "+riga.replace(/\s+/g," ").slice(0,90));
   await p.evaluate(()=>document.querySelector("[data-edit-persona]").click()); await p.waitForTimeout(500);
   const f=await p.evaluate(()=>({nome:document.querySelector("#personaName").value, pat:document.querySelector("#personaPattern").value, bed:document.querySelector("#personaBed").value,
     wake:document.querySelector("#personaWake").value, rows:[...document.querySelectorAll("#personaShiftsList .psh")].map(r=>r.dataset.l+" "+r.querySelector('[data-fld="s"]').value), btn:document.querySelector("#doConfirmPersona").textContent}));
@@ -76,7 +76,7 @@ const aperto=p=>p.evaluate(()=>!document.querySelector("#novitaModal").hidden);
   await p.evaluate(()=>document.querySelector('[data-tab="turni"]').click()); await p.waitForTimeout(300);
   await p.evaluate(()=>document.querySelector("#doPartner").click()); await p.waitForTimeout(400);
   await p.evaluate(()=>document.querySelector("[data-partner-edit]").click()); await p.waitForTimeout(400);
-  await p.evaluate(()=>{ document.querySelector("#opzBoxPersone details.wdet").open=true; document.querySelector("#personaName").value="Luca"; document.querySelector("#personaAnchor").value=new Date().toISOString().slice(0,10); });
+  await p.evaluate(()=>{ document.querySelector('[data-pvia="mine"]').click(); document.querySelector("#personaName").value="Luca"; });
   await p.evaluate(()=>document.querySelector("#doConfirmPersona").click()); await p.waitForTimeout(500);
   ok(await p.evaluate(()=>{ const s=JSON.parse(localStorage.getItem("nt:state")); const per=s.pPattern ? {shifts:s.pShifts} : s.people[0]; return !!(per.shifts && per.shifts.N && per.shifts.N.s===1320); }), "«I tuoi stessi turni» copia i tuoi orari: non li segue");
   await p.context().close(); }

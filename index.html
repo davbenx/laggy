@@ -1161,6 +1161,26 @@ body.tab-oggi #scambioPagina,body.tab-opzioni #scambioPagina{display:none}
 .persone-intro span{display:block;font-size:13px;color:var(--dim);margin-top:4px;line-height:1.45}
 .persone-add{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:12px;background:var(--blue-soft);
 border:1px solid var(--blue-lt);border-radius:var(--r);color:var(--blue);font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+#annullaModificaPersona:not([hidden]){display:block}
+.pers-vie{display:grid;gap:8px;margin:4px 0 10px}
+.pers-via{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;width:100%;min-height:56px;padding:10px 14px;background:var(--bg);border:1.5px solid var(--line);border-radius:var(--r);color:var(--ink);font:inherit;cursor:pointer}
+.pers-via b{font-size:15px}
+.pers-via span{font-size:12.5px;color:var(--dim);line-height:1.35}
+.pers-via[aria-checked="true"]{border-color:var(--blue-fill);background:var(--blue-soft)}
+.pv-incolla{display:flex;gap:8px;align-items:flex-start}
+.pv-incolla textarea{flex:1;min-width:0}
+.pv-passo{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:4px 0 8px}
+.pv-passo .ibtn{width:44px;height:44px;border:1.5px solid var(--line);border-radius:50%;font-size:22px;line-height:1}
+.pv-passo b{flex:1;text-align:center;font-size:15px}
+.pstrip{display:flex;gap:3px;margin-top:4px}
+.ptile{display:inline-flex;align-items:center;justify-content:center;width:26px;height:22px;border-radius:6px;font-size:11px;font-weight:700;background:var(--s2);color:var(--dim)}
+.ptile.t-m,.ptile.t-g{background:var(--mattina-soft);color:var(--mattina)}
+.ptile.t-p,.ptile.t-l{background:var(--orange-soft);color:var(--orange)}
+.ptile.t-s{background:var(--sera-soft);color:var(--sera)}
+.ptile.t-n{background:var(--cool-tint);color:var(--notte)}
+.ptile.t-q{background:none;border:1px dashed var(--line)}
+.pv-sonno{margin:8px 0 0}
+.pv-sonno summary{cursor:pointer;color:var(--blue);font-size:14px;font-weight:600;padding:8px 0}
 .persone-modo{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin:14px 0 6px}
 .piu-cal{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;box-shadow:var(--shadow-card)}
 .switch{position:relative;display:inline-block;width:46px;height:26px;flex:none}
@@ -1663,59 +1683,70 @@ header b{font-size:23px}
     <div class="piu-cal" id="piuCal" style="margin:var(--gap-sezione) 0">
       <div id="piuCalTx"></div>
     </div>
-    <p class="persone-modo">Usa Notturnisti</p>
-    <button type="button" class="btn g" id="doChiediLink" style="width:100%;min-height:44px">Manda il tuo link e chiedi il suo →</button>
-    <span class="hint" style="display:block;margin:6px 0 4px">Si apre un messaggio (WhatsApp, SMS…) con il tuo link e le istruzioni per risponderti. Lei lo apre, ti manda il suo link e tu lo incolli qui sotto.</span>
-    <div class="q">
-      <label for="personaLink">Il suo link</label>
-      <textarea id="personaLink" rows="2" placeholder="Incolla qui il link che ti ha mandato"></textarea>
-      <span class="hint" id="personaLinkErr"></span>
-    </div>
-    <div class="q">
-      <label for="personaName">Nome <span class="hint" style="display:inline">(facoltativo)</span></label>
-      <input id="personaName" placeholder="es. Alex">
-    </div>
-    <details class="wdet">
-      <summary>Non usa Notturnisti? Inserisci tu i suoi turni</summary>
+    <div class="pers-nuova" id="persNuova">
+      <p class="persone-modo" id="persNuovaTit">Aggiungi una persona</p>
       <div class="q">
-        <label for="personaMode">Che orari fa</label>
-        <select id="personaMode">
-          <option value="mine">I tuoi stessi turni</option>
-          <option value="day">Giornata, lun-ven 9-18</option>
-          <option value="custom">Turni diversi dai miei</option>
-        </select>
-        <span class="hint" id="personaModeHint">Stessa sequenza e stessi orari dei tuoi di adesso (poi restano suoi: se cambi i tuoi, i suoi non cambiano) — utile quando fate lo stesso tipo di rotazione ma partita in giorni diversi: dimmi solo da quando è partita la sua.</span>
+        <label for="personaName">Come si chiama? <span class="hint" style="display:inline">(facoltativo)</span></label>
+        <input id="personaName" placeholder="es. Alex" autocomplete="off">
       </div>
-      <div id="personaManualFields">
-        <div class="q" id="personaSeqBox" hidden>
-          <label for="personaPattern">La sua sequenza</label>
-          <input id="personaPattern" spellcheck="false" autocapitalize="characters" placeholder="es. PPPRRNNNRRMMMRR">
-          <span class="hint">Stesse regole della tua: una lettera per giorno.</span>
-        </div>
-        <div class="q" id="personaAnchorBox">
-          <label for="personaAnchor">Primo giorno del suo ciclo</label>
-          <input id="personaAnchor" type="date">
-          <span class="hint" id="personaAnchorHint">Una data in cui sai che era al primo giorno della TUA stessa sequenza — non della sua, è la stessa.</span>
-        </div>
-        <div class="q" id="personaShiftsBox" hidden>
-          <label>I suoi turni</label>
-          <div id="personaShiftsList"></div>
-          <span class="hint">Un orario per ogni lettera diversa da R che hai scritto nella sua sequenza qui sopra.</span>
-        </div>
+      <div class="pers-vie" role="radiogroup" aria-label="Che turni fa">
+        <button type="button" class="pers-via" role="radio" aria-checked="false" data-pvia="link"><b>Ha Notturnisti</b><span>Le mandi il tuo link, lei ti manda il suo</span></button>
+        <button type="button" class="pers-via" role="radio" aria-checked="false" data-pvia="mine"><b>Fa i miei turni</b><span>La stessa rotazione, partita in un altro giorno</span></button>
+        <button type="button" class="pers-via" role="radio" aria-checked="false" data-pvia="day"><b>Lavora lun–ven</b><span>Giornata 9–18, riposa nel weekend</span></button>
+        <button type="button" class="pers-via" role="radio" aria-checked="false" data-pvia="custom"><b>Turni diversi</b><span>Li inserisco io</span></button>
+      </div>
+      <select id="personaMode" hidden aria-hidden="true" tabindex="-1">
+        <option value="mine">I tuoi stessi turni</option>
+        <option value="day">Giornata, lun-ven 9-18</option>
+        <option value="custom">Turni diversi dai miei</option>
+      </select>
+      <span id="personaModeHint" hidden></span>
+      <div id="pvLink" hidden>
+        <button type="button" class="btn g" id="doChiediLink" style="width:100%;min-height:44px">Invia il tuo link →</button>
         <div class="q">
-          <label for="personaBed">Il suo sonno nei giorni liberi</label>
-          <span class="hint" style="margin:0 0 6px">Serve per le ore libere in comune: nei giorni senza turno si toglie il tempo in cui dorme. Se lo lasci vuoto vale il tuo.</span>
-          <div style="display:flex;gap:10px;align-items:center">
-            <input type="time" id="personaBed" style="max-width:130px">
-            <span class="hint" style="margin:0">→</span>
-            <input type="time" id="personaWake" style="max-width:130px">
-          </div>
+          <label for="personaLink">Il suo link</label>
+          <div class="pv-incolla"><textarea id="personaLink" rows="2" placeholder="Incolla qui il link che ti ha mandato"></textarea><button type="button" class="btn g sm" id="doIncollaLink">Incolla</button></div>
+          <span class="hint" id="personaLinkErr"></span>
         </div>
       </div>
-
-    </details>
-    <button class="btn pri" type="button" id="doConfirmPersona" style="margin-top:10px;width:100%;min-height:46px">Aggiungi</button>
-    <button class="lnk dim" type="button" id="annullaModificaPersona" hidden style="display:block;margin:8px auto 0">Annulla</button>
+      <div class="wdet" id="pvManuale" hidden>
+        <div id="personaManualFields">
+          <div class="q" id="personaSeqBox" hidden>
+            <label for="personaPattern">La sua sequenza</label>
+            <input id="personaPattern" spellcheck="false" autocapitalize="characters" placeholder="es. PPPRRNNNRRMMMRR">
+            <span class="hint">Una lettera per giorno, come la tua. R è il riposo.</span>
+          </div>
+          <div class="q" id="personaAnchorBox">
+            <div id="pvSfasa" hidden>
+              <label>Il suo ciclo parte…</label>
+              <div class="pv-passo"><button type="button" class="ibtn" data-pv-sfasa="-1" aria-label="Un giorno prima">−</button><b id="pvSfasaTx">1 giorno dopo il mio</b><button type="button" class="ibtn" data-pv-sfasa="1" aria-label="Un giorno dopo">+</button></div>
+              <div class="pstrip" id="pvAnteprima" aria-label="I suoi prossimi sette giorni"></div>
+            </div>
+            <div id="pvData">
+              <label for="personaAnchor" id="personaAnchorLab">Primo giorno del suo ciclo</label>
+              <input id="personaAnchor" type="date">
+              <span class="hint" id="personaAnchorHint">Una data in cui era al primo giorno della sua sequenza.</span>
+            </div>
+          </div>
+          <div class="q" id="personaShiftsBox" hidden>
+            <label>I suoi turni</label>
+            <div id="personaShiftsList"></div>
+            <span class="hint">Un orario per ogni lettera diversa da R.</span>
+          </div>
+          <details class="pv-sonno">
+            <summary>＋ Il suo sonno nei giorni liberi (facoltativo)</summary>
+            <span class="hint" style="margin:6px 0">Serve per le ore libere in comune. Se lo lasci vuoto vale il tuo.</span>
+            <div style="display:flex;gap:10px;align-items:center">
+              <input type="time" id="personaBed" aria-label="A letto" style="max-width:130px">
+              <span class="hint" style="margin:0">→</span>
+              <input type="time" id="personaWake" aria-label="Sveglia" style="max-width:130px">
+            </div>
+          </details>
+        </div>
+      </div>
+      <button class="btn pri" type="button" id="doConfirmPersona" hidden style="margin-top:10px;width:100%;min-height:46px">Aggiungi</button>
+      <button class="lnk dim" type="button" id="annullaModificaPersona" hidden style="margin:8px auto 0">Annulla</button>
+    </div>
     </div>
   </div>
   <div id="partnerShare"></div>
@@ -7154,6 +7185,22 @@ function raccogliPersonaShifts(){
   });
   return Object.keys(shifts).length ? shifts : null;
 }
+// I suoi prossimi giorni a colpo d'occhio: una tessera per giorno, col colore della fascia del suo turno (come nel calendario del ciclo)
+function codicePersonaAl(pattern, ancora, d){
+  const seq=String(pattern||"").replace(/[^A-Za-z]/g,"").toUpperCase(); if(!seq || !ancora) return "?";
+  const a=new Date(ancora+"T12:00:00"); if(isNaN(+a)) return "?";
+  const n=seq.length, diff=dnum(d)-dnum(a); return seq[((diff%n)+n)%n];
+}
+function strisciaPersona(pattern, ancora, shifts, giorni){
+  const oggi=giornoVero(); let h="";
+  for(let i=0;i<giorni;i++){
+    const d=day(oggi,i), c=codicePersonaAl(pattern, ancora, d), sh=shifts&&shifts[c];
+    let cl="q", lab="?";
+    if(c!=="?"){ lab=c; if(!sh || c==="R") cl="r"; else { const f=NT.fasciaOre(sh.s, sh.e); cl=f==="g"?"m":f; } }
+    h+='<span class="ptile t-'+cl+'" title="'+esc(d.toLocaleDateString(LINGUA,{weekday:"short",day:"numeric"}))+'">'+esc(lab)+'</span>';
+  }
+  return h;
+}
 function renderWizPeopleList(){
   const el=$("#wizPeopleList"); if(!el) return;
   const persone=tuttePersone();
@@ -7169,7 +7216,8 @@ function renderWizPeopleList(){
     return '<div class="diary" style="gap:8px;margin-bottom:6px">'+
       (multi?'<button class="lnk" data-glance-persona="'+i+'" aria-label="Mostrala nella card di Oggi" title="Mostrala nella card di Oggi" style="color:'+(attiva?"var(--orange)":"var(--faint)")+';padding:4px">'+star+'</button>':'')+
       '<span style="flex:1;min-width:0"><b style="font-weight:600;display:block">'+esc(nome)+'</b>'+
-        '<span class="hint" style="display:block;margin:0;font-size:12px">'+esc(riassuntoPersona(per))+'</span></span>'+
+        '<span class="pstrip" aria-label="I suoi prossimi sette giorni">'+strisciaPersona(per.pattern, per.anchor, per.shifts||state.shifts, 7)+'</span>'+
+        (per.wake&&per.bed ? '<span class="hint" style="display:block;margin:2px 0 0;font-size:12px">dorme '+esc(per.bed)+'–'+esc(per.wake)+' nei giorni liberi</span>' : '')+'</span>'+
       '<button type="button" class="ibtn" data-edit-persona="'+i+'" aria-label="Modifica '+esc(nome)+'" title="Modifica">'+ICON.pencil+'</button>'+
       '<button type="button" class="ibtn" data-remove-persona="'+i+'" aria-label="Rimuovi '+esc(nome)+'" title="Rimuovi" style="color:var(--faint)">'+ICON.trash+'</button></div>';
   }).join("")+(multi?'<p class="hint" style="margin:2px 0 10px">La stellina sceglie chi vedi nella card "Turni condivisi" di Oggi — le altre restano comunque visibili qui sopra.</p>':'');
@@ -7196,10 +7244,14 @@ function azzeraFormPersona(){
   const hint=$("#personaModeHint"); if(hint) hint.textContent=PERSONA_MODE_HINT.mine;
   const psb=$("#personaShiftsBox"); if(psb) psb.hidden=true;
   const psl=$("#personaShiftsList"); if(psl) psl.innerHTML="";
-  const btn=$("#doConfirmPersona"); if(btn){ btn.textContent="Aggiungi alla lista"; delete btn.dataset.forzato; }
+  const btn=$("#doConfirmPersona"); if(btn){ btn.textContent="Aggiungi"; delete btn.dataset.forzato; }
   const an=$("#annullaModificaPersona"); if(an) an.hidden=true;
-  const err=$("#personaLinkErr"); if(err) err.textContent="";
+  const err=$("#personaLinkErr"); if(err){ err.textContent=""; err.style.color=""; }
   personaInModifica=null;
+  const vie=document.querySelector(".pers-vie"); if(vie) vie.hidden=false;
+  const tit=$("#persNuovaTit"); if(tit) tit.textContent="Aggiungi una persona";
+  const sn=document.querySelector(".pv-sonno"); if(sn) sn.open=false;
+  _sfasa=1; impostaVia(null);
 }
 function iniziaModificaPersona(i){
   const per=tuttePersone()[i]; if(!per) return;
@@ -7208,7 +7260,9 @@ function iniziaModificaPersona(i){
   azzeraFormPersona();
   personaInModifica=i;
   $("#personaName").value=per.name||"";
-  const pm=$("#personaMode"); pm.value="custom"; pm.dispatchEvent(new Event("change"));   // sequenza e turni suoi: mostra e prepara i campi
+  impostaVia("custom");   // sequenza e turni suoi: mostra e prepara i campi
+  const vie=document.querySelector(".pers-vie"); if(vie) vie.hidden=true;
+  const tit=$("#persNuovaTit"); if(tit) tit.textContent="Modifica "+(per.name||"la persona");
   $("#personaPattern").value=per.pattern||"";
   $("#personaAnchor").value=per.anchor||"";
   renderPersonaShifts();
@@ -7219,11 +7273,40 @@ function iniziaModificaPersona(i){
   });
   if(per.wake) $("#personaWake").value=per.wake;
   if(per.bed) $("#personaBed").value=per.bed;
+  if(per.wake||per.bed){ const sn=document.querySelector(".pv-sonno"); if(sn) sn.open=true; }
   $("#doConfirmPersona").textContent="Salva le modifiche";
   const an=$("#annullaModificaPersona"); if(an) an.hidden=false;
   const f=$("#personaName"); if(f && f.scrollIntoView) f.scrollIntoView({behavior:"smooth",block:"center"});
 }
 if($("#annullaModificaPersona")) $("#annullaModificaPersona").onclick=()=>azzeraFormPersona();
+// Come aggiungi la persona: una scelta, e compare solo quello che serve. Ha l'app: link. Fa i tuoi turni: di quanti giorni è sfasata.
+// Lavora lun–ven: niente da scrivere. Turni diversi: sequenza e orari.
+var _via=null, _sfasa=1;   // var: il modulo si azzera (azzeraFormPersona) prima di queste righe
+const sfasaTesto=n=> n===0 ? "lo stesso giorno del mio" : Math.abs(n)+(Math.abs(n)===1?" giorno ":" giorni ")+(n>0?"dopo il mio":"prima del mio");
+function ancoraSfasata(n){ const d=new Date(String(state.anchor)+"T12:00:00"); if(isNaN(+d)) return ""; d.setDate(d.getDate()+n); return iso(d); }
+function aggiornaSfasa(){
+  const a=ancoraSfasata(_sfasa), pa=$("#personaAnchor"); if(pa) pa.value=a;
+  const tx=$("#pvSfasaTx"); if(tx) tx.textContent=sfasaTesto(_sfasa);
+  const an=$("#pvAnteprima"); if(an) an.innerHTML=strisciaPersona(state.pattern, a, state.shifts, 7);
+}
+function impostaVia(v){
+  _via=v;
+  document.querySelectorAll("[data-pvia]").forEach(b=>b.setAttribute("aria-checked", String(b.dataset.pvia===v)));
+  const pl=$("#pvLink"), pm=$("#pvManuale"), btn=$("#doConfirmPersona"), sf=$("#pvSfasa");
+  if(pl) pl.hidden = v!=="link";
+  if(pm) pm.hidden = !(v==="mine" || v==="custom");
+  if(btn) btn.hidden = !v;
+  if(sf) sf.hidden = v!=="mine";
+  if(v==="mine" || v==="day" || v==="custom"){ const sel=$("#personaMode"); if(sel){ sel.value=v; sel.dispatchEvent(new Event("change")); } }
+  if(v==="mine") aggiornaSfasa();
+}
+document.querySelectorAll("[data-pvia]").forEach(b=>b.addEventListener("click",()=>{ haptic(8); impostaVia(b.dataset.pvia); }));
+document.querySelectorAll("[data-pv-sfasa]").forEach(b=>b.addEventListener("click",()=>{ haptic(6); _sfasa=Math.max(-60,Math.min(60,_sfasa+ +b.dataset.pvSfasa)); aggiornaSfasa(); }));
+if($("#doIncollaLink")) $("#doIncollaLink").onclick=async()=>{
+  try{ const tx=((await navigator.clipboard.readText())||"").trim(); if(!tx){ toast("Non hai copiato niente"); return; }
+    $("#personaLink").value=tx; $("#personaLink").dispatchEvent(new Event("input")); }
+  catch(e){ toast("Tieni premuto nel campo per incollare"); $("#personaLink").focus(); }
+};
 function coppiaDaProporre(){ return !!(platform.calendar.available && tuttePersone().length && !(platform.calendar.attivo() && platform.calendar.coppiaAttiva())); }
 // La finestra libera più lunga (almeno tre ore vere) di un giorno in comune —
 // stessa soglia/ordinamento già usati per la card "p" in cards(), qui
@@ -7327,7 +7410,7 @@ function renderPartner(CARDS){
     '<span>Partner, famiglia, amicizie, chi lavora con te: aggiungili e vedi qui i giorni e le ore di tempo libero in comune. I loro turni restano solo su questo telefono.</span></div>';
   h+='<button type="button" data-partner-edit class="persone-add">'+
     '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>'+
-    (tuttePer.length?"Aggiungi un'altra persona o gestisci":"Aggiungi una persona")+'</button>';
+    (tuttePer.length?"Aggiungi o gestisci le persone":"Aggiungi una persona")+'</button>';
 
   el.innerHTML=h;
   // Il pannello per aggiungere una persona sta fra il bottone qui sopra e
@@ -7427,7 +7510,7 @@ function renderPiuCal(){
   const isPaid = !!(window.NTPaid && window.NTPaid.paid());
   const sub = isPaid ? window.NTPaid.getSub() : null;
   const persona = tuttePersone()[0];
-  const pName = persona && persona.name ? persona.name : "partner";
+  const pName = persona && persona.name ? persona.name : "Persona 1";
   const hasPartner = !!(persona || (typeof state!=="undefined" && state.pPattern));
 
   const coupleUrl = (sub && sub.feedUrl ? sub.feedUrl : "").replace("/feed/", "/couple/");
@@ -10078,6 +10161,7 @@ if($("#personaMode")) $("#personaMode").addEventListener("change", e=>{
   const v=e.target.value;
   const mf=$("#personaManualFields"); if(mf) mf.hidden = (v==="day");
   const seq=$("#personaSeqBox"); if(seq) seq.hidden = (v==="mine");
+  const pd=$("#pvData"); if(pd) pd.hidden = (v==="mine");
   const ah=$("#personaAnchorHint"); if(ah) ah.textContent = v==="mine"
     ? "Una data in cui sai che era al primo giorno della TUA stessa sequenza — non della sua, è la stessa."
     : "Una data in cui sai che era al primo giorno della sua sequenza.";
@@ -10098,7 +10182,8 @@ if($("#personaLink")) $("#personaLink").addEventListener("input", ()=>{
   const testo=$("#personaLink").value.trim();
   if(!testo){ err.textContent=""; err.style.color=""; return; }
   const per=personaDaLink(testo);
-  if(per){ err.textContent="✓ Link riconosciuto, pronto per essere aggiunto"; err.style.color="var(--ok)"; }
+  if(per){ err.textContent="✓ Link riconosciuto"+(per.name?": "+per.name:"")+". Tocca «Aggiungi»."; err.style.color="var(--ok)";
+    const nm=$("#personaName"); if(nm && !nm.value.trim() && per.name) nm.value=per.name; }
   else { err.textContent=""; err.style.color=""; }
 });
 if($("#personaPattern")) $("#personaPattern").addEventListener("input", ()=>{
@@ -10156,9 +10241,10 @@ if($("#doConfirmPersona")) $("#doConfirmPersona").onclick=()=>{
     }
   }
   if(!per){
-    if(err) err.textContent = valoreDi("#personaMode")==="mine"
-      ? "Manca la data di partenza del suo ciclo — è l'unica cosa che serve per \"I tuoi stessi turni\"."
-      : "Manca sia un link valido sia una sequenza scritta a mano — serve almeno uno dei due.";
+    if(err) err.textContent = _via==="link" ? "Incolla il suo link: lo trovi nel messaggio che ti ha mandato."
+      : valoreDi("#personaMode")==="mine" ? "Manca la data di partenza del suo ciclo."
+      : "Scrivi la sua sequenza (una lettera per giorno).";
+    if(_via!=="link" && err){ err.style.color="var(--risk)"; toast(err.textContent); }
     return;
   }
   // Un tetto morbido, non un blocco: 5 persone bastano quasi sempre (di più
@@ -10182,6 +10268,7 @@ if($("#doConfirmPersona")) $("#doConfirmPersona").onclick=()=>{
   // che il motore usa per la card riassuntiva e per il calendario di
   // coppia. Da fuori non si vede differenza: è sempre lo stesso identico
   // modulo, non un percorso speciale per il primo.
+  const prima=JSON.parse(JSON.stringify({pPattern:state.pPattern, pAnchor:state.pAnchor, pShifts:state.pShifts, pWake:state.pWake, pBed:state.pBed, pName:state.pName, people:state.people, personaGlance:state.personaGlance}));
   if(!state.pPattern){
     state.pPattern=per.pattern; state.pAnchor=per.anchor||null;
     state.pShifts=per.shifts||null; state.pWake=per.wake||null;
@@ -10192,7 +10279,8 @@ if($("#doConfirmPersona")) $("#doConfirmPersona").onclick=()=>{
   salva();
   if(daLinkCondiviso) track("share_accepted");
   azzeraFormPersona();
-  toast("Aggiunta"); renderWizPeopleList();
+  toastUndo((per.name?per.name+": aggiunta":"Persona aggiunta"), ()=>{ Object.assign(state, prima); salva(); renderWizPeopleList(); render(); });
+  renderWizPeopleList();
 };
 if($("#wizPeopleList")) $("#wizPeopleList").addEventListener("click", e=>{
   const gp=e.target.closest("[data-glance-persona]");
