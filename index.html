@@ -127,7 +127,7 @@ try{
    con Android 15 l'app va a tutto schermo e Capacitor comunica l'ingombro di
    barra di stato e barra dei gesti come --safe-area-inset-* (le WebView
    meno recenti danno 0 a env()). Si prende il più grande dei due. */
-:root{--sat:max(env(safe-area-inset-top,0px),var(--safe-area-inset-top,0px));--sab:max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px))}
+:root{--sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:24px;--r-campo:12px;--tap:44px;--sat:max(env(safe-area-inset-top,0px),var(--safe-area-inset-top,0px));--sab:max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px))}
 :root{
   --bg:#14161A; --s1:#1C1F25; --s2:#23272E; --line:#333941;
   --ink:#E6E8EB; --dim:#A8B0B8; --faint:#98A0A8;
@@ -591,17 +591,29 @@ html.js-lento .jsoff{display:block}
 .sg-testa b{font-family:var(--serif);font-size:18px;color:var(--ink)}
 .sg-testa button{min-width:44px;min-height:44px;border-radius:50%;border:1px solid var(--line);background:var(--s1);color:var(--ink);font-size:20px;cursor:pointer}
 .sg-testa button:disabled{opacity:.35;cursor:default}
-.sg-pennelli{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 12px}
+.sg-pennelli{display:flex;flex-wrap:wrap;gap:var(--sp-2);margin:0 0 var(--sp-3)}
+#segnaOut .sg-pennelli{flex-wrap:nowrap;overflow-x:auto;margin:0 -16px var(--sp-2);padding:2px 16px var(--sp-1);scrollbar-width:none;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent)}
+#segnaOut .sg-pennelli::-webkit-scrollbar{display:none}
+#segnaOut .sg-pen{flex:0 0 auto}
+.sg-barra{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-2);margin:0 0 var(--sp-3)}
+.sg-barra .sg-pen{padding:0 var(--sp-2);font-size:13px;min-height:var(--tap);border-radius:var(--r-campo)}
 .sg-pen{border:1.5px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;min-height:40px;padding:0 13px;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer}
 .ferie-pref{margin-top:4px}
 .ferie-pref>summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font-size:14px;font-weight:600;color:var(--dim)}
+.swap-modo{display:grid;grid-template-columns:1fr 1fr;margin-bottom:var(--sp-4);border:1px solid var(--line);border-radius:var(--r-campo);overflow:hidden;background:var(--bg)}
+.swap-modo button{border:0;border-left:1px solid var(--line);background:none;color:var(--ink);min-height:var(--tap);padding:0 var(--sp-2);font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.swap-modo button:first-child{border-left:0}
+.swap-modo button[aria-pressed="true"]{background:var(--blue);color:var(--su-blu)}
+.swap-griglia{display:grid;grid-template-columns:1fr;gap:var(--sp-3);margin-bottom:var(--sp-3)}
 .swap-l{display:block;font-size:12px;font-weight:600;color:var(--dim);margin-bottom:4px}
-.swap-s{width:100%;min-height:44px;font-size:15px;padding:7px 8px;border-radius:var(--r);background:var(--bg);border:1px solid var(--line);color:var(--ink)}
-.pv-quando{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 12px 2px}
-.sg-azioni{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 12px}
+.swap-s{width:100%;min-height:var(--tap);font-size:15px;padding:7px 10px;border-radius:var(--r-campo);background:var(--bg);border:1px solid var(--line);color:var(--ink)}
+.pv-quando{display:grid;grid-template-columns:repeat(4,1fr);margin:0 var(--sp-3) var(--sp-3);border:1px solid var(--line);border-radius:var(--r-campo);overflow:hidden;background:var(--bg)}
+.pv-quando button{border:0;border-left:1px solid var(--line);background:none;color:var(--ink);min-height:var(--tap);padding:0 2px;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer}
+.pv-quando button:first-child{border-left:0}
+.pv-quando button[aria-checked="true"]{background:var(--blue);color:var(--su-blu)}
 .sg-pen:disabled{opacity:.4;cursor:default}
 .sg-g.da{outline:2px solid var(--blue);outline-offset:-2px}
-.sg-pen[aria-pressed="true"]{background:var(--blue-fill);border-color:var(--blue-fill);color:var(--su-blu)}
+.sg-pen[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:var(--su-blu)}
 .sg-griglia{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
 .sg-gs{font-size:11px;font-weight:700;color:var(--faint);text-align:center;padding:2px 0;text-transform:uppercase}
 .sg-g{position:relative;min-height:52px;border-radius:10px;border:1px solid var(--line);background:var(--s1);color:var(--ink);font:inherit;cursor:pointer;
@@ -676,6 +688,8 @@ display:flex;flex-direction:column;align-items:center;justify-content:center;gap
 .card{background:var(--s1);border:1px solid var(--line);border-left-width:3px;border-radius:var(--r);padding:14px 15px;margin-bottom:10px;box-shadow:var(--shadow-card)}
 #benvenutoLink{border-left-color:var(--blue)}
 #demoEsempio{border-left-color:var(--blue)}
+.qh-annulla{display:inline-flex;align-items:center;min-height:36px;margin:0 0 var(--sp-2);padding:0;font-size:14px}
+#ttFlusso:not(:empty){margin-top:var(--sp-3)}
 
 /* Inviti in alto (una card alla volta): stesso modello per tutti. Titolo,
    una riga, un'azione piena; chiusura sempre con la × in alto a destra. */
@@ -685,6 +699,7 @@ display:flex;flex-direction:column;align-items:center;justify-content:center;gap
 .invito>p.hint{font-size:13.5px;line-height:1.5;margin:5px 0 12px!important}
 .invito .x{position:absolute;top:2px;right:2px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:none;border:0;color:var(--faint);font-size:22px;line-height:1;cursor:pointer;padding:0;float:none;min-height:0}
 .invito .x:hover{color:var(--ink)}
+.btn.pri{background:var(--blue-fill);border-color:var(--blue-fill);color:#fff;font-weight:600}
 .btn.azione{display:inline-flex;align-items:center;justify-content:center;background:var(--blue-fill);border:1px solid var(--blue-fill);color:#fff;font-weight:600;font-size:14px;min-height:42px;padding:8px 16px;text-decoration:none;text-align:center}
 .btn.azione:hover{background:var(--blue-fill);color:#fff;filter:brightness(1.1)}
 .adatta-azioni .lnk{min-height:44px;padding:0 6px}
@@ -1883,11 +1898,11 @@ header b{font-size:23px}
     <h1 class="tab-title">Cambio turno</h1>
   </div>
 <div class="ecc" id="scambioBox">
-  <div class="sg-pennelli" role="group" aria-label="Cosa vuoi fare" style="margin-bottom:12px">
-    <button type="button" class="sg-pen" data-swap-modo="scambia" aria-pressed="true">Scambia due giorni</button>
-    <button type="button" class="sg-pen" data-swap-modo="cambia" aria-pressed="false">Cambia un turno</button>
+  <div class="swap-modo" role="group" aria-label="Cosa vuoi fare">
+    <button type="button" data-swap-modo="scambia" aria-pressed="true">Scambia due giorni</button>
+    <button type="button" data-swap-modo="cambia" aria-pressed="false">Cambia un turno</button>
   </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+  <div class="swap-griglia">
     <div>
       <label class="swap-l" for="swapA">Il tuo giorno:</label>
       <select id="swapA" class="swap-s"></select>
@@ -1901,7 +1916,7 @@ header b{font-size:23px}
   <div id="swapVerdict" style="margin-bottom:12px"></div>
   <div id="swapOut"></div>
   <div id="swapActionWrap" style="margin-top:14px">
-    <button type="button" class="btn pri" id="swapApplica" style="width:100%;min-height:42px;font-size:14px;font-weight:600">Applica questo scambio nel piano</button>
+    <button type="button" class="btn pri" id="swapApplica" style="width:100%;min-height:var(--tap);font-size:15px;font-weight:600">Applica questo scambio nel piano</button>
   </div>
 </div>
 </div>
@@ -2029,10 +2044,22 @@ header b{font-size:23px}
   <section class="opz-g" data-opzg="dati" aria-label="Dati e privacy">
   <span class="eyebrow opz-eb" style="margin-top:0">Salva</span>
   <div class="opz-gruppo">
+    <button class="tool azione" id="doCopiaFile">
+      <span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg></span>
+      <span class="tool-tx"><b>Salva la copia completa</b>
+      <span id="copiaFileSub">Un file con turni, diario del sonno, impostazioni e persone. Lo tieni su Drive o File.</span></span>
+    </button>
+    <p class="hint" id="copiaAuto" hidden style="margin:0;padding:10px 4px">Su Android la copia è automatica: Google salva anche il diario, se hai il backup di Android acceso.</p>
+    <button class="tool azione" id="doRipristina">
+      <span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3M7 8l5-5 5 5M5 21h14"/></svg></span>
+      <span class="tool-tx"><b>Ripristina da un file</b>
+      <span>Riapri una copia salvata, anche su un telefono nuovo.</span></span>
+    </button>
+    <input type="file" id="copiaFile" accept=".json,application/json" hidden>
     <button class="tool azione" id="doLink">
       <span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg></span>
-      <span class="tool-tx"><b>Copia di sicurezza</b>
-      <span>Un link con turni, cambi, ferie, impostazioni e persone: ti serve se cambi telefono o reinstalli l'app. Non porta il diario del sonno.</span></span>
+      <span class="tool-tx"><b>Link per un altro telefono</b>
+      <span>Turni, cambi, ferie, impostazioni e persone in un link da aprire sull'altro telefono. Non porta il diario.</span></span>
     </button>
   </div>
   <span class="eyebrow opz-eb">Informazioni e privacy</span>
@@ -3545,6 +3572,7 @@ const nameDay=(c,k)=>state.shifts[c] ? NT.nomeTurno(state.shifts[c], state.giorn
 function isNightCode(c){ const sh=state.shifts&&state.shifts[c]; if(!sh) return false;
   try{ const b={rest:false,start:sh.s,end:sh.e}; return NT.spansNight(b)||NT.startsInNight(b); }catch(e){ return false; } }
 const dur=m=>{m=Math.round(m/5)*5;const h=Math.floor(m/60),q=m%60;
+if(h>=48){ const g=Math.floor(h/24), hh=h%24; return g+" g"+(hh?" "+hh+"h":""); }   // totali di due settimane: giorni, non 123 ore
 return h?(q?h+"h "+q+"m":h+"h"):q+" min"};
 // Una durata detta a voce: «un'ora», non «1 ore». Arrotondata ai cinque minuti,
 // perché è un consiglio e non una misura.
@@ -4751,9 +4779,9 @@ function renderDemoEsempio(){
   const tile=(k,ic,nome,ore)=>'<button type="button" class="qh-btn" data-pick="'+k+'"><span class="qh-ic">'+ic+'</span><b>'+nome+'</b><small>'+ore+'</small></button>';
   const opt=(attr,ic,nome,sotto)=>'<button type="button" class="qh-opt-btn" '+attr+'><span class="qh-opt-ic">'+ic+'</span><div class="qh-opt-tx"><b>'+esc(nome)+'</b>'+(sotto?'<small>'+esc(sotto)+'</small>':'')+'</div><span class="qh-opt-arrow">→</span></button>';
   const indietro=(dest,txt)=> (flussoInPagina && demoEsempioSubflow===ingressoFlusso)
-    ? '<button type="button" class="lnk dim" data-chiudi-schema style="margin-bottom:10px;font-size:13px">Annulla</button>'
+    ? '<button type="button" class="lnk dim qh-annulla" data-chiudi-schema>‹ Annulla</button>'
     : '<button type="button" class="lnk" data-subflow="'+dest+'" style="margin-bottom:10px;font-size:13px">← '+txt+'</button>';
-  const chiudi = (sceltaSchemaAperta && state.turniConfigurati) ? '<button type="button" class="lnk dim" data-chiudi-schema style="margin-bottom:10px;font-size:13px">Annulla</button>' : "";
+  const chiudi = (sceltaSchemaAperta && state.turniConfigurati) ? '<button type="button" class="lnk dim qh-annulla" data-chiudi-schema>‹ Annulla</button>' : "";
   const f = demoEsempioSubflow;
 
   if(f === "home" && !sceltaSchemaAperta){
@@ -4803,8 +4831,8 @@ function renderDemoEsempio(){
         : '<h2 class="qh-h">E nei prossimi giorni?</h2><p class="qh-sub">Scegli quello che ti somiglia di più: cambi idea quando vuoi.</p>')+
       '<div class="qh-flow-options">'+
         opt('data-subflow="schema"',ICON.cycle,"Si ripetono a ciclo","Es. in quinta, 2·2·2·2, ciclo continuo, 12 ore")+
-        opt('data-subflow="riposi"',ICON.calendar,"Faccio sempre lo stesso turno","Scegli tu in quali giorni riposi")+
-        opt('data-subflow="segna"',ICON.calendar,"Cambiano ogni volta","Me li danno a settimana o a mese: li segno io")+
+        opt('data-subflow="riposi"',ICON.bed,"Faccio sempre lo stesso turno","Scegli tu in quali giorni riposi")+
+        opt('data-subflow="segna"',ICON.pencil,"Cambiano ogni volta","Me li danno a settimana o a mese: li segno io")+
       '</div>';
   } else if(f === "posizione" && schemaInScelta){
     // "Oggi dove sei": con due mattine di fila la sola lettera non basta.
@@ -7955,10 +7983,10 @@ function NT_planSafe(d){
 // vedi apriOpzioni/setTab).
 // Impostazioni › Cosa vedi nel piano: un interruttore per ogni voce facoltativa.
 // «Quando preferisci»: il momento si sceglie fra le ore in cui il corpo rende di più, ma chi si allena (o studia) sempre allo stesso orario lo dice qui.
-const QUANDO=[["","Il migliore"],["mattina","Mattina"],["pomeriggio","Pomeriggio"],["sera","Sera"]];
+const QUANDO=[["","Migliore"],["mattina","Mattina"],["pomeriggio","Pomeriggio"],["sera","Sera"]];
 function quandoHtml(k){
   const cur=((state.piano||{}).quando||{})[k]||"";
-  return '<div class="pv-quando" role="radiogroup" aria-label="Quando preferisci">'+QUANDO.map(([v,n])=>'<button type="button" role="radio" class="sg-pen" data-quando="'+k+'" data-v="'+v+'" aria-checked="'+(cur===v)+'" aria-pressed="'+(cur===v)+'">'+n+'</button>').join("")+'</div>';
+  return '<div class="pv-quando" role="radiogroup" aria-label="Quando preferisci">'+QUANDO.map(([v,n])=>'<button type="button" role="radio" data-quando="'+k+'" data-v="'+v+'" aria-checked="'+(cur===v)+'">'+n+'</button>').join("")+'</div>';
 }
 function renderPianoVoci(){
   const el=$("#opzPianoVoci"); if(!el) return;
@@ -8858,9 +8886,9 @@ const CONSIGLI_FUNZIONE=[
     a:()=>{ if(conCicloDaMandare()) invitaChiLavoraConTe(); else { setTab("turni"); apriVederci(); } }},
   // I dati stanno solo sul telefono: la copia è un link, e l'unico modo per
   // ritrovarli su un telefono nuovo. Dopo una settimana, quando c'è qualcosa da perdere.
-  {k:"copia", dopo:7, quando:()=>!state.backupDone,
-    t:()=>"I tuoi turni stanno solo su questo telefono"+(window.NT_APP.nativo?"":", in questo browser")+". La copia di sicurezza è un link con turni, cambi, ferie, impostazioni e persone: se cambi telefono lo apri e li ritrovi. Il diario del sonno non c'è.",
-    cta:()=>"Salva la copia", a:()=>salvaConfigurazione()},
+  {k:"copia", dopo:7, quando:()=>!state.backupDone && !window.NT_APP.nativo,
+    t:()=>"I tuoi turni stanno solo su questo telefono, in questo browser. Salva la copia in un file: se cambi telefono o il browser cancella i dati, la riapri e ritrovi tutto, anche il diario del sonno.",
+    cta:()=>"Salva la copia", a:()=>salvaCopiaFile()},
   {k:"orologio", dopo:7, quando:()=>!(state.freeBed==="23:30" && state.freeWake==="07:30"),
     t:()=>{ const o=orologio(); return "Il tuo orologio è pronto: "+o.tipo.toLowerCase()+", con il minimo corporeo verso le "+hhmm(o.cbt)+". Quando arriva la melatonina e quando sei più lucido, in «Sonno e carico»."; },
     cta:()=>"Vedi il tuo orologio", a:()=>{ setTab("turni"); apriAndamenti(); usata("orologio");
@@ -9134,7 +9162,8 @@ if($("#cycToday")) $("#cycToday").onclick=()=>{
    Si scrivono a mano a ogni versione con una funzione che si vede: poche righe, in italiano di tutti i giorni.
    `id` cambia solo quando c'è qualcosa da dire; chi aggiorna la vede una volta. Chi installa adesso non la vede
    (non è una novità per lui), ma la trova sempre in Impostazioni › Novità. «app:true» = solo nell'app Android. */
-const NOVITA={ id:"2026-11-02", data:"Novembre 2026", righe:[
+const NOVITA={ id:"2026-11-03", data:"Novembre 2026", righe:[
+  ["Copia completa su file","In Impostazioni › Dati e privacy: un file con turni, diario del sonno, impostazioni e persone. Lo riapri con «Ripristina da un file», anche su un telefono nuovo. Il link resta per spostare i turni sull'altro telefono.",false,"2026-11-03"],
   ["Cambia un turno, senza scambio","In Cambio turno scegli «Cambia un turno»: un giorno prende un altro turno (o il riposo) e vedi subito cosa cambia per il sonno. Più semplice, i consigli sulle funzioni hanno pulsanti più chiari e Dati e privacy ha una nuova icona.",false,"2026-11-02"],
   ["Festivi nel calendario","I festivi hanno un puntino rosso nella striscia e nel calendario di Turni. Con un ciclo puoi dire «Nei festivi sono a casa»: il giorno diventa riposo, anche per le ferie.",false,"2026-11-01"],
   ["Scegli quando allenarti","Il piano ti propone l'ora in cui il corpo rende di più, ma tu puoi preferire un'altra fascia. In Impostazioni › Cosa vedi nel piano › Momenti migliori: Il migliore, Mattina, Pomeriggio o Sera, per testa, movimento e allenamento.",false,"2026-10-31"],
@@ -9576,8 +9605,8 @@ function renderSegna(){
       : sgIntervallo ? (sgDa ? "Ora tocca l'ultimo giorno dell'intervallo." : "Tocca il primo e l'ultimo giorno: li segno tutti insieme.")
       : sgPennello==="cancella" ? "Tocca i giorni da riportare come prima." : sgPennello==="copia" ? "Tocca un giorno: prende il turno di 7 giorni prima." : "Scegli cosa segnare, poi tocca i giorni. Un secondo tocco lo toglie.")+'</p>'+
     '<div class="sg-pennelli" role="group" aria-label="Cosa segni">'+pen.map(p=>'<button type="button" class="sg-pen" data-pen="'+esc(p.k)+'" aria-pressed="'+(p.k===sgPennello)+'">'+esc(p.t)+'</button>').join("")+'</div>'+
-    '<div class="sg-azioni"><button type="button" class="sg-pen" data-sg-intervallo aria-pressed="'+sgIntervallo+'">Intervallo</button>'+
-      (daSegnare ? '<button type="button" class="sg-pen" data-sg-prossimo>Prossimo da segnare ('+daSegnare+')</button>' : '')+
+    '<div class="sg-barra"><button type="button" class="sg-pen" data-sg-intervallo aria-pressed="'+sgIntervallo+'">Intervallo</button>'+
+      '<button type="button" class="sg-pen" data-sg-prossimo'+(daSegnare?'':' disabled')+'>Da segnare'+(daSegnare?' ('+daSegnare+')':'')+'</button>'+
       '<button type="button" class="sg-pen" data-sg-annulla'+(sgStorico.length?'':' disabled')+'>Annulla</button></div>'+
     '<div class="sg-griglia">'+celle+'</div>'+
     '<p class="sg-legenda"><span><i style="background:var(--orange-fill)"></i>reperibile</span><span><i style="background:var(--ink);width:12px;height:2px;border-radius:2px;vertical-align:3px"></i>orari diversi</span><span><i style="background:var(--blue)"></i>bordo: segnato da te</span>'+
@@ -10165,6 +10194,64 @@ async function salvaConfigurazione(){
   }
 }
 $("#doLink").onclick=salvaConfigurazione;
+/* ─── Copia completa su file ───────────────────────────────────────────────
+   Tutto quello che sta nel telefono e serve (turni, diario, impostazioni, persone,
+   preferenze), in un solo file JSON. Si riapre con «Ripristina da un file», anche su
+   un telefono nuovo. Niente che dipenda dal dispositivo (permessi, id, statistiche). */
+const COPIA_CHIAVI=["state","turniConfigurati","diary","diaryAt","wakes","beds","pisolini","sonnoPiano","ferie","theme","notifTipi","promemoriaOff","sgNome",
+  "onboardingFatto","firstPlanBannerChiuso","attivazioneNascosta","invitoVisto","novitaViste","funzioniUsate","loSapevi","adattaNo","smontoScelto","lettoPrestoScelto","medicoVisto","vociAperte"];
+function raccogliCopia(){
+  salva();
+  const dati={};
+  for(const k of COPIA_CHIAVI){ const v=localStorage.getItem("nt:"+k); if(v!==null){ try{ dati[k]=JSON.parse(v); }catch(e){} } }
+  return {app:"notturnisti", v:1, creata:new Date().toISOString(), dati};
+}
+// Valida e legge il testo di un file di copia: {dati, creata} oppure {errore}
+function leggiCopia(testo){
+  let o; try{ o=JSON.parse(testo); }catch(e){ return {errore:"Il file non è una copia di Notturnisti."}; }
+  if(!o || o.app!=="notturnisti" || !o.dati || typeof o.dati!=="object") return {errore:"Il file non è una copia di Notturnisti."};
+  if(!(o.v>=1) || o.v>1) return {errore:"Questa copia è di una versione più nuova: aggiorna l'app e riprova."};
+  const st=o.dati.state; if(!st || typeof st!=="object" || typeof st.pattern!=="string") return {errore:"La copia non contiene i turni."};
+  return {dati:o.dati, creata:o.creata||""};
+}
+function applicaCopia(dati){
+  for(const k of COPIA_CHIAVI){
+    if(k in dati) localStorage.setItem("nt:"+k, JSON.stringify(dati[k])); else localStorage.removeItem("nt:"+k);
+  }
+  localStorage.setItem("nt:backupDone","true");
+}
+function copiaRecente(){ const d=store.get("copiaFileAl",""); return !!d && (new Date()-new Date(d+"T12:00:00"))/864e5<=30; }
+async function salvaCopiaFile(){
+  const R=raccogliCopia(), json=JSON.stringify(R);
+  const nome="notturnisti-copia-"+iso(new Date())+".json";
+  const file=new File([json],nome,{type:"application/json"});
+  try{
+    if(navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({files:[file],title:"Notturnisti"}); }
+    else { const a=document.createElement("a"); a.href=URL.createObjectURL(file); a.download=nome; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),60000); }
+  }catch(e){ if(e && e.name==="AbortError") return; toast("Non sono riuscito a salvare il file"); return; }
+  store.set("copiaFileAl", iso(new Date())); state.backupDone=true; store.set("backupDone",true);
+  track("setup_item", {item:"copia_file"}); aggiornaCopiaUI(); toast("Copia salvata"); render();
+}
+function aggiornaCopiaUI(){
+  const nat=!!(window.NT_APP && window.NT_APP.nativo);
+  const b=$("#doCopiaFile"), a=$("#copiaAuto"), sub=$("#copiaFileSub");
+  if(b) b.hidden=nat; if(a) a.hidden=!nat;
+  const d=store.get("copiaFileAl","");
+  if(sub) sub.textContent = d ? "Ultima copia: "+new Date(d+"T12:00:00").toLocaleDateString(LINGUA,{day:"numeric",month:"long"})+". Turni, diario del sonno, impostazioni e persone."
+    : "Un file con turni, diario del sonno, impostazioni e persone. Lo tieni su Drive o File.";
+}
+if($("#doCopiaFile")) $("#doCopiaFile").onclick=salvaCopiaFile;
+if($("#doRipristina")) $("#doRipristina").onclick=()=>{ const i=$("#copiaFile"); i.value=""; i.click(); };
+if($("#copiaFile")) $("#copiaFile").addEventListener("change", async e=>{
+  const f=e.target.files && e.target.files[0]; if(!f) return;
+  let testo=""; try{ testo=await f.text(); }catch(x){ toast("Non riesco a leggere il file"); return; }
+  const R=leggiCopia(testo); if(R.errore){ toast(R.errore); return; }
+  const quando=R.creata ? new Date(R.creata).toLocaleDateString(LINGUA,{day:"numeric",month:"long",year:"numeric"}) : "";
+  if(!confirm("Sostituisco i dati di questo telefono con la copia"+(quando?" del "+quando:"")+"? Turni, diario e impostazioni di adesso verranno sostituiti.")) return;
+  applicaCopia(R.dati); track("setup_item", {item:"copia_ripristinata"});
+  location.reload();
+});
+aggiornaCopiaUI();
 // "Condividi il tuo ciclo" (Turni): stesso meccanismo di salvaConfigurazione,
 // ma payload ristretto (toHashCiclo(), solo i tuoi dati) — prima era
 // letteralmente la stessa funzione di "Salva la configurazione", e chi
@@ -11130,6 +11217,7 @@ const OPZ_GRUPPI={
   aiuto:{t:"Aiuto e novità"}
 };
 function applicaGruppoOpz(){
+  try{ aggiornaCopiaUI(); }catch(e){}
   const cl=document.body.classList; [...cl].filter(c=>c.startsWith("opz-g-")).forEach(c=>cl.remove(c));
   if(_opzGruppo && OPZ_GRUPPI[_opzGruppo] && _opzGruppo!=="turni") cl.add("opz-g-"+_opzGruppo);
   const h=document.querySelector("#opzioni .tab-title"); if(h) h.textContent=_opzGruppo&&OPZ_GRUPPI[_opzGruppo] ? OPZ_GRUPPI[_opzGruppo].t : "Impostazioni";
