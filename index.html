@@ -4147,6 +4147,15 @@ function setBadge(n){ try{
   if(n>0) navigator.setAppBadge(n); else if(navigator.clearAppBadge) navigator.clearAppBadge();
 }catch(e){} }
 
+// «Come ti senti?» si chiede da 90 minuti dopo la sveglia di oggi (l'inerzia del sonno falsa il voto); gli orari del sonno si confermano subito.
+// Per i giorni passati sempre. var: letta da render() prima della sua riga.
+var ENERGIA_DOPO=90;
+function energiaDalle(key, wk){ const d=parseIso(key); d.setHours(+String(wk).slice(0,2), +String(wk).slice(3,5)+ENERGIA_DOPO, 0, 0); return hhmm(d.getHours()*60+d.getMinutes()); }
+function energiaPresto(key, wk){
+  if(!/^\d\d:\d\d$/.test(wk||"") || key!==iso(giornoVero())) return false;
+  const d=parseIso(key); d.setHours(+wk.slice(0,2), +wk.slice(3,5), 0, 0);
+  return Date.now() < d.getTime()+ENERGIA_DOPO*60e3;
+}
 function diaryReminder(P, CARDS){
   const f=state.focus;
   // Usava la data letterale invece del giorno vero — la stessa incoerenza
@@ -4230,6 +4239,8 @@ function diaryReminder(P, CARDS){
     const v=VOTI.find(o=>o[0]===+val), votoEditing=state.diaryEditing.has("voto:"+key0);
     if(v && !votoEditing)
       x+='<div class="dq-riga"><i class="kic" style="color:'+v[3]+'">'+v[2]+'</i> Energia: <b>'+v[1]+'</b> <button type="button" class="ibtn drem-edit" data-voto-edit="1" aria-label="Cambia il voto dell\'energia" title="Cambia">'+ICON.pencil+'</button></div>';
+    else if(energiaPresto(key0, wk))
+      x+='<div class="dq-sez">Come ti senti?</div><p class="hint" data-voto-presto="1" style="margin:2px 0 6px">Fra poco: appena svegli il voto non è affidabile, c\'è ancora l\'inerzia del sonno. Te lo chiedo alle '+esc(energiaDalle(key0, wk))+'.</p>';
     else
       x+='<div class="dq-sez">Come ti senti? <span>(facoltativo)</span></div><div class="ora-kss" style="margin-top:0">'+
         VOTI.map(o=>'<button class="dbtn kface'+(+val===o[0]?" on":"")+'" data-diary="'+o[0]+'" aria-label="'+o[1]+'" aria-pressed="'+(+val===o[0])+'" style="--tone:'+o[3]+'">'+
@@ -4326,7 +4337,11 @@ const ICON={
 // dall'averlo scritto: stessa soglia, stessa finestra di prima.
 function votoOraRecente(){
   const k=iso(giornoVero()), v=diary[k], at=diaryAt[k];
-  if(v>=1 && v<=2 && at && Date.now()-at<2*3600e3) return true;
+  if(v>=1 && v<=2 && at && Date.now()-at<2*3600e3){
+    // un voto dato nei primi 90 minuti dopo la sveglia è inerzia del sonno, non stanchezza: non fa scattare l'avviso
+    const w=wakes[k]; if(/^\d\d:\d\d$/.test(w||"")){ const d=giornoVero(); d.setHours(+w.slice(0,2),+w.slice(3,5),0,0); if(at < d.getTime()+ENERGIA_DOPO*60e3) return false; }
+    return true;
+  }
   return false;
 }
 function renderOra(Pfocus){
@@ -4389,8 +4404,11 @@ function renderOra(Pfocus){
   const inDuty = !b.rest && inWin(m, b.start, b.end);
   const risk = r && r.risk;
   const riskDiffMs = (risk && risk.at) ? (risk.at.getTime() - now.getTime()) : null;
-  const riskImminent = !b.rest && risk && risk.severe && riskDiffMs !== null && riskDiffMs <= 45 * 60000 && riskDiffMs >= 0;
   const hoursAwake = lastEnd ? Math.max(0, (now.getTime() - lastEnd.getTime()) / 3600e3) : 6;
+  // Nelle prime due ore dopo la sveglia il calo previsto è il fondo del ritmo del mattino e l'inerzia del sonno, che passano da soli:
+  // non è «rischio fatica» (dopo 7 ore di sonno, 45 minuti dopo la sveglia, sarebbe un allarme fuori luogo).
+  const rischioDopoSveglia = lastEnd && risk && risk.at ? (risk.at.getTime() - lastEnd.getTime()) / 3600e3 : 99;
+  const riskImminent = !b.rest && risk && risk.severe && riskDiffMs !== null && riskDiffMs <= 45 * 60000 && riskDiffMs >= 0 && rischioDopoSveglia >= 2;
   const severeNow = r && r.now && r.now.value < -0.65 && !b.rest && (hoursAwake >= 15 || inNadir || inSmonto);
 
   const isSevere = kssSleepy || inNadir || inSmonto || (riskImminent && !inDuty) || severeNow;
@@ -7652,7 +7670,7 @@ function diarioWidget(off=0){
     if(!/^\d\d:\d\d$/.test(bed) || !/^\d\d:\d\d$/.test(wake)) return null;
     const da=new Date(g); da.setHours(+wake.slice(0,2), +wake.slice(3,5), 0, 0);
     if(!off && da.getTime()>Date.now()+12*3600e3) da.setDate(da.getDate()-1);
-    return {d:k, bed, wake, da:da.getTime(), a:da.getTime()+14*3600e3, sonno:!!wakes[k], voto:diary[k]!=null};
+    return {d:k, bed, wake, da:da.getTime(), en:da.getTime()+ENERGIA_DOPO*60e3, a:da.getTime()+14*3600e3, sonno:!!wakes[k], voto:diary[k]!=null};
   }catch(e){ return null; }
   finally{ state.focus=f; }
 }
