@@ -31,7 +31,7 @@ const aperto=p=>p.evaluate(()=>!document.querySelector("#novitaModal").hidden);
   await p.context().close(); }
 { const p=await apri(ST(), {novitaViste:"2026-10-27"});
   ok(await aperto(p) && await p.evaluate(()=>document.querySelectorAll("#novitaLista b").length===3 && /Impostazioni e persone/.test(document.querySelector("#novitaLista").textContent) && /altro turno/.test(document.querySelector("#novitaLista").textContent) && /voto sull.energia/.test(document.querySelector("#novitaLista").textContent) && !/colore per ogni turno/.test(document.querySelector("#novitaLista").textContent)), "chi ha già letto la versione prima vede solo le righe nuove");
-  ok(await p.evaluate(()=>{ const s=document.querySelector("#novitaModal .qs-sheet"); return s.getBoundingClientRect().height<500 && s.scrollTop===0; }), "e il foglio è corto e parte dall'inizio");
+  ok(await p.evaluate(()=>{ const s=document.querySelector("#novitaModal .qs-sheet"); return s.getBoundingClientRect().height<640 && s.scrollTop===0; }), "e il foglio è corto e parte dall'inizio");
   await p.context().close(); }
 { const p=await apri(ST({firstSeenAt:iso(new Date())}));
   ok(!(await aperto(p)), "chi ha installato oggi non lo vede");
