@@ -21,20 +21,25 @@ async function apri(diario){
   return p;
 }
 { const p=await apri(true);
-  await p.evaluate(()=>document.querySelector("#meseBox .mese-det").open=true); await p.click("[data-mese-manda]"); await p.waitForTimeout(300);
+  await p.click("#doCondividi"); await p.waitForTimeout(250); await p.click("[data-mese-manda]"); await p.waitForTimeout(300);
   const t=(await p.evaluate(()=>window.__sh))[0]; const x=t&&t.text||"";
   ok(/^Il mio novembre 2026 in turno:\n/.test(x), "il mese: titolo → "+x.split("\n")[0]);
   ok(/• 18 turni, 144 ore\n/.test(x) && /• 6 notti\n/.test(x) && /• 12 giorni senza turno/.test(x), "i numeri sono quelli della scheda del mese (18 turni, 144 ore, 6 notti, 12 liberi)");
   ok(/• Sonno annotato: 3 notti, in media 8h · energia 3,5 su 5/.test(x), "sonno e energia dal diario → "+(x.match(/• Sonno annotato.*/)||[""])[0]);
   ok(/\nhttps:\/\/app\.notturnisti\.club\/\?s=mese$/.test(x) && !/[*_#]|[\u{1F300}-\u{1FAFF}]/u.test(x), "testo semplice, firma con ?s=mese, niente emoji né markdown");
-  const t0=Date.now(); await p.click("[data-anno-manda]"); await p.waitForTimeout(200);
+  const t0=Date.now(); await p.click("#doCondividi"); await p.waitForTimeout(250); await p.click("[data-anno-manda]"); await p.waitForTimeout(200);
   const y=((await p.evaluate(()=>window.__sh))[1]||{}).text||"";
   ok(/^I miei ultimi 12 mesi in turno:\n/.test(y) && /• Il mese più pesante: \w+ 20\d\d \(/.test(y) && /\?s=anno$/.test(y), "12 mesi: titolo, mese più pesante, firma → "+y.split("\n").slice(0,4).join(" | "));
   console.log("   12 mesi calcolati e mandati in", Date.now()-t0, "ms");
   await p.context().close(); }
 { const p=await apri(false);
-  await p.evaluate(()=>document.querySelector("#meseBox .mese-det").open=true); await p.click("[data-mese-manda]"); await p.waitForTimeout(300);
+  await p.click("#doCondividi"); await p.waitForTimeout(250); await p.click("[data-mese-manda]"); await p.waitForTimeout(300);
   const x=((await p.evaluate(()=>window.__sh))[0]||{}).text||"";
   ok(x && !/Sonno annotato/.test(x), "senza diario: nessuna riga sul sonno");
+  await p.context().close(); }
+{ const p=await apri(true);
+  await p.click("#doCondividi"); await p.waitForTimeout(250);
+  ok(await p.evaluate(()=>/Riepilogo di novembre/.test(document.querySelector("#riepMeseT").textContent) && !!document.querySelector("#condividiRiepiloghi [data-riepilogo-medico]")), "i riepiloghi stanno nel foglio «Condividi e riepiloghi»: il mese col suo nome, i 12 mesi, il PDF per il medico");
+  ok(await p.evaluate(()=>!document.querySelector("#meseBox [data-mese-manda], #meseBox [data-anno-manda], #meseBox [data-fest-apri]")), "il riquadro del mese non li ripete più");
   await p.context().close(); }
 console.log("errori", errs); await b.close();

@@ -652,18 +652,10 @@ display:flex;flex-direction:column;align-items:center;justify-content:center;gap
 .mese-segna{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;min-height:46px;margin-top:14px;font-weight:600}
 .mese-segna small{font-size:12px;font-weight:400;color:var(--dim);margin-top:1px}
 .mese-vuoto{margin:10px 0 0;font-size:14px;color:var(--dim)}
-.mese-manda{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.mese-manda .btn{min-height:44px}
 .mese-nota{margin:10px 0 0;font-size:12.5px}
 .az-desc{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;min-height:46px;margin-top:8px;font-weight:600;text-align:center}
 .az-desc small{font-size:12px;font-weight:400;color:var(--dim);margin-top:2px;line-height:1.35;max-width:30em}
 .mese-sez{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
-.mese-eb{display:block;font-size:12.5px;font-weight:600;color:var(--dim);margin:0 0 8px}
-.mese-fest{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.mese-fest>div{flex:1;min-width:0}
-.mese-fest b{display:block;font-size:14.5px;color:var(--ink)}
-.mese-fest .hint{display:block;margin:2px 0 0;font-size:12.5px;line-height:1.4}
-.mese-fest .btn{flex:none}
 .mese-spec{margin:10px 0 0;font-size:13px;color:var(--dim);line-height:1.45}
 .mese-num span{font-size:12px;color:var(--dim)}
 .mese .hint{margin:8px 0 0}
@@ -1673,9 +1665,15 @@ header b{font-size:23px}
 <div class="strumenti solo-turni" id="strumenti" role="group" aria-label="Strumenti"></div>
 <button type="button" class="tsec tsec-riga solo-turni" id="doCondividi" aria-haspopup="dialog">
   <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:var(--blue);background:var(--blue-soft)"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
-  <span class="tsec-tx"><b class="tsec-t">Condividi i tuoi turni</b><span class="tsec-v">Invita un collega, manda i turni, PDF, QR</span></span><span class="tchev">›</span>
+  <span class="tsec-tx"><b class="tsec-t">Condividi e riepiloghi</b><span class="tsec-v">Il ciclo, il riepilogo del mese, il PDF per il medico</span></span><span class="tchev">›</span>
 </button>
-<div id="condividiModal" class="qs-backdrop" hidden aria-hidden="true"><div class="qs-sheet" role="dialog" aria-modal="true" aria-label="Condividi i tuoi turni"><div class="qs-header"><div><b class="qs-title">Condividi i tuoi turni</b></div><div class="qs-hd-az"><button type="button" class="qs-close" id="condividiChiudi" aria-label="Chiudi">✕</button></div></div><div id="condividiCorpo"></div></div></div>
+<div id="condividiModal" class="qs-backdrop" hidden aria-hidden="true"><div class="qs-sheet" role="dialog" aria-modal="true" aria-label="Condividi e riepiloghi"><div class="qs-header"><div><b class="qs-title">Condividi e riepiloghi</b></div><div class="qs-hd-az"><button type="button" class="qs-close" id="condividiChiudi" aria-label="Chiudi">✕</button></div></div><div id="condividiCorpo"></div>
+  <span class="eyebrow" style="display:block;margin:var(--sp-4) 0 var(--sp-2)">Riepiloghi</span>
+  <div class="opz-gruppo" id="condividiRiepiloghi">
+    <button type="button" class="tool tool-1line azione" data-mese-manda><span class="tool-ic" data-ic="calendar"></span><span class="tool-tx"><b id="riepMeseT">Riepilogo del mese</b><span>Ore, turni, notti e festivi, in un messaggio</span></span></button>
+    <button type="button" class="tool tool-1line azione" data-anno-manda><span class="tool-ic" data-ic="calendar"></span><span class="tool-tx"><b>Ultimi 12 mesi</b><span>Mese più pesante, notti, sonno annotato</span></span></button>
+    <button type="button" class="tool tool-1line azione" data-riepilogo-medico><span class="tool-ic" data-ic="scudo"></span><span class="tool-tx"><b>PDF per il medico competente</b><span>Turni, notti e riposi degli ultimi 12 mesi</span></span></button>
+  </div></div></div>
 <div id="infoModal" class="qs-backdrop" hidden aria-hidden="true"><div class="qs-sheet" role="dialog" aria-modal="true" aria-labelledby="infoTitolo"><div class="qs-header"><div><b class="qs-title" id="infoTitolo"></b></div><div class="qs-hd-az"><button type="button" class="qs-close" id="infoChiudi" aria-label="Chiudi">✕</button></div></div><div class="ed" id="infoCorpo"></div></div></div>
 <div id="modificaModal" class="qs-backdrop" hidden aria-hidden="true"><div class="qs-sheet" role="dialog" aria-modal="true" aria-label="Modifica turni"><div class="qs-header"><div><b class="qs-title">Modifica turni</b></div><div class="qs-hd-az"><button type="button" class="qs-close" id="modificaChiudi" aria-label="Chiudi">✕</button></div></div>
   <div class="opz-gruppo" style="margin-top:6px">
@@ -6606,9 +6604,7 @@ function renderMese(){
     (()=>{ const v=specialiMese(r); return v.length ? '<p class="mese-spec">'+esc(v.join(" · "))+'</p>' : ''; })()+
     (vuoto ? '' : '<p class="hint mese-nota">Ore dall\'inizio alla fine di ogni turno, pause comprese: per controllare, non è un conteggio ufficiale.</p>')+
     (r.ignoti && !vuoto ? '<p class="mese-da-segnare"><b>'+r.ignoti+(r.ignoti===1?' giorno ancora da segnare':' giorni ancora da segnare')+'</b></p>' : '')+
-    (vuoto ? '' : '<div class="mese-sez"><span class="mese-eb">Manda un riepilogo in un messaggio</span>'+
-      '<div class="mese-manda"><button type="button" class="btn g" data-mese-manda>Questo mese</button><button type="button" class="btn g" data-anno-manda>Ultimi 12 mesi</button></div></div>')+
-    festiviHtml();
+    '';
   // una riga sola (ore, turni, notti), e i dettagli si aprono; «Segna» e «Importa» stanno in «Modifica turni»
   const riga = vuoto ? "Nessun turno segnato" : String(ore).replace(".",",")+" h · "+r.turni+(r.turni===1?" turno":" turni")+" · "+r.notti+(r.notti===1?" notte":" notti");
   const aperto=!!(el.querySelector && el.querySelector(".mese-det[open]"));
@@ -6617,11 +6613,7 @@ function renderMese(){
 }
 // Festivi del contratto: una riga che dice cosa si conta, e un piccolo editor.
 function nomeGiornoMese(k){ const [m,g]=k.split("-").map(Number); return new Date(2000,m-1,g).toLocaleDateString(LINGUA,{day:"numeric",month:"long"}); }
-// Nel riquadro del mese resta solo un rimando; l'editor sta in «I tuoi turni» (i festivi sono una cosa del contratto, come gli orari).
-function festiviHtml(){
-  const c=festiviCfg();
-  return '<div class="mese-sez mese-fest"><div><b>Festivi</b><span class="hint">'+esc(festiviRiga(c))+'</span></div><button type="button" class="btn g sm" data-fest-apri>'+(c.extra.length?'Modifica':'Aggiungi i tuoi')+'</button></div>';
-}
+// I festivi si modificano in «I tuoi turni» (sono una cosa del contratto, come gli orari).
 function festiviRiga(c){ c=c||festiviCfg();
   return "Conto "+(c.dom?"le domeniche e ":"")+"i festivi nazionali"+(c.extra.length?" e "+c.extra.map(nomeGiornoMese).join(", "):"")+(state.festiviRiposo&&state.repeat!==false ? ". Nei festivi sei a casa" : "")+"."; }
 function festiviEditorHtml(){
@@ -6666,12 +6658,6 @@ if($("#ttFestivi")) $("#ttFestivi").addEventListener("click", e=>{
     if(!m){ toast("Scegli il giorno"); return; }
     const k=(+m[1])+"-"+(+m[2]), f=Object.assign({}, state.festivi||{}); f.extra=(f.extra||[]).filter(x=>x!==k).concat(k).sort(); state.festivi=f;
     usata("festivi"); track("setup_item", {item:"festivi_extra"}); festiviCambiati(); }
-});
-if($("#meseBox")) $("#meseBox").addEventListener("click", e=>{
-  if(e.target.closest("[data-riepilogo-medico]")){ stampaRiepilogoMedico(); return; }
-  if(e.target.closest("[data-mese-manda]")){ mandaRiepilogo("mese"); return; }
-  if(e.target.closest("[data-anno-manda]")){ mandaRiepilogo("anno"); return; }
-  if(e.target.closest("[data-fest-apri]")){ apriTuoiTurni("turni",{festivi:true}); return; }
 });
 // Riferimenti orari per le strisce del tempo: le 00, 06, 12 e 18 che cadono
 // nella finestra [clo, chi] (minuti sulla scala del giorno, anche oltre 1440).
@@ -8981,8 +8967,8 @@ const CONSIGLI_FUNZIONE=[
   {k:"momenti", quando:()=>!["testa","leggera","intensa"].some(pianoVoce),
     t:()=>"Vuoi sapere quando pensare, muoverti o allenarti meglio? I momenti migliori si accendono in Impostazioni › Cosa vedi nel piano.",
     cta:()=>"Scegli i momenti", a:()=>{ apriOpzioni("voci"); setTimeout(()=>{ const x=$("#opzPianoVoci"); if(x&&x.scrollIntoView) try{ x.scrollIntoView({block:"center"}); }catch(e){} }, 250); }},
-  {k:"riepilogo", t:()=>"Puoi mandare il riepilogo del tuo mese o degli ultimi 12 mesi: lo trovi in Turni, nella scheda del mese.",
-    cta:()=>"Apri il mese", a:()=>{ setTab("turni"); setTimeout(()=>{ const x=$("#meseBox"); if(x&&x.scrollIntoView) try{ x.scrollIntoView({block:"center"}); }catch(e){} }, 250); }},
+  {k:"riepilogo", t:()=>"Puoi mandare il riepilogo del tuo mese o degli ultimi 12 mesi, e il PDF per il medico: sono in «Condividi e riepiloghi».",
+    cta:()=>"Apri Condividi", a:()=>{ setTab("turni"); setTimeout(apriCondividi, 250); }},
   {k:"dormi", t:()=>"Tocca «Dormi» nel piano: dopo una notte scegli sonno breve o lungo, prima di un mattino presto puoi dormire in due tempi."},
   // Il grazie: dopo due settimane, in un momento buono (mai dopo notti pessime).
   // Sul web il contributo libero; nell'app (regole di Play) solo il Club.
@@ -9243,7 +9229,8 @@ if($("#cycToday")) $("#cycToday").onclick=()=>{
    Si scrivono a mano a ogni versione con una funzione che si vede: poche righe, in italiano di tutti i giorni.
    `id` cambia solo quando c'è qualcosa da dire; chi aggiorna la vede una volta. Chi installa adesso non la vede
    (non è una novità per lui), ma la trova sempre in Impostazioni › Novità. «app:true» = solo nell'app Android. */
-const NOVITA={ id:"2026-11-04", data:"Novembre 2026", righe:[
+const NOVITA={ id:"2026-11-05", data:"Novembre 2026", righe:[
+  ["Il perché in un foglio, i riepiloghi in Condividi","Nel piano di Oggi tocchi una voce (icona ⓘ) e il perché si apre in un foglio, senza allungare la lista. Il riepilogo del mese, dei 12 mesi e il PDF per il medico stanno in «Condividi e riepiloghi».",false,"2026-11-05"],
   ["Sonno e carico più chiaro","La pagina mostra subito il sonno che ti manca; il resto è un elenco di quattro voci, ognuna con la sua riga riassuntiva e la sua pagina. Gli orari del sonno separano le notti dormite di notte da quelle di giorno, e gli assi dei grafici sono corretti.",false,"2026-11-04"],
   ["Copia completa su file","In Impostazioni › Dati e privacy: un file con turni, diario del sonno, impostazioni e persone. Lo riapri con «Ripristina da un file», anche su un telefono nuovo. Il link resta per spostare i turni sull'altro telefono.",false,"2026-11-03"],
   ["Cambia un turno, senza scambio","In Cambio turno scegli «Cambia un turno»: un giorno prende un altro turno (o il riposo) e vedi subito cosa cambia per il sonno. Più semplice, i consigli sulle funzioni hanno pulsanti più chiari e Dati e privacy ha una nuova icona.",false,"2026-11-02"],
@@ -11371,7 +11358,19 @@ if($("#chiudiOpzioni")) $("#chiudiOpzioni").onclick=chiudiOpzioniPagina;
 function apriFoglio(id,su){ const m=document.getElementById(id); if(!m) return; m.hidden=!su; m.setAttribute("aria-hidden",String(!su));
   if(su) m.querySelectorAll("[data-ic]").forEach(x=>{ if(!x.innerHTML) x.innerHTML=ICON[x.dataset.ic]||""; }); }
 if($("#tEdit")) $("#tEdit").onclick=()=>apriFoglio("modificaModal",true);
-if($("#doCondividi")) $("#doCondividi").onclick=()=>apriFoglio("condividiModal",true);
+function apriCondividi(){
+  const o=giornoVero(), d=new Date(o.getFullYear(), o.getMonth()+meseOff, 1, 12), n=d.toLocaleDateString(LINGUA,{month:"long"});
+  const t=$("#riepMeseT"); if(t) t.textContent="Riepilogo di "+n;
+  apriFoglio("condividiModal",true);
+}
+if($("#doCondividi")) $("#doCondividi").onclick=apriCondividi;
+if($("#condividiRiepiloghi")) $("#condividiRiepiloghi").addEventListener("click", e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  apriFoglio("condividiModal",false);
+  if(b.matches("[data-mese-manda]")) mandaRiepilogo("mese");
+  else if(b.matches("[data-anno-manda]")) mandaRiepilogo("anno");
+  else if(b.matches("[data-riepilogo-medico]")) stampaRiepilogoMedico();
+});
 ["modificaModal","condividiModal","infoModal"].forEach(id=>{ const m=document.getElementById(id); if(!m) return;
   m.addEventListener("click",e=>{ if(e.target===m || e.target.closest(".qs-close")) apriFoglio(id,false); }); });
 if($("#condividiCorpo")) $("#condividiCorpo").addEventListener("click",e=>{ if(e.target.closest("button")) setTimeout(()=>apriFoglio("condividiModal",false),60); });
