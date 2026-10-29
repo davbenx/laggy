@@ -127,7 +127,7 @@ await p.context().close();
 p=await apri({turniConfigurati:true,pattern:"MPNSR",anchor:fa(2),shifts:SH,repeat:true,firstSeenAt:fa(30)});
 const nudge=await p.evaluate(()=>(document.querySelector("#essenziale .essnudge")||{}).textContent||"");
 ok(/Dimmi i tuoi e il piano si adatta a te/.test(nudge) && !/affinalo/.test(nudge), "frase sul sonno tipico, in italiano naturale → "+nudge);
-await p.evaluate(()=>{ const d=document.querySelector('#essenziale details[data-row="sonno"]'); d.open=true; d.querySelector("[data-cambia]").click(); }); await p.waitForTimeout(400);
+await p.click('#essenziale [data-row="sonno"]'); await p.waitForTimeout(250); await p.click("#infoModal [data-cambia]"); await p.waitForTimeout(400);
 ok(await p.evaluate(()=>{ const b=document.querySelector("#opzBox3"); return !b.hidden && !!b.offsetParent && !!b.querySelector("#oBed"); }), "«Dormi» → «Dimmi come dormi» apre il sonno nei giorni liberi");
 await p.evaluate(()=>document.querySelector('[data-tab="turni"]').click()); await p.waitForTimeout(300);
 const testi=await p.evaluate(()=>document.body.innerText);
