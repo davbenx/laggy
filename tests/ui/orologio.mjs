@@ -70,7 +70,7 @@ const avanti=async p=>{ await p.click("#next"); await p.waitForTimeout(150); };
 
 { const p=await apri({turniConfigurati:true,pattern:"MPNSR",anchor:fa(0),repeat:true,firstSeenAt:fa(10),shifts:TURNI});
   await p.click('[data-tab="turni"]'); await p.click("#doAndamenti"); await p.waitForTimeout(300);
-  const t=await p.evaluate(()=>{ const d=document.querySelector("#orologio"); d.open=true; return d.innerText; });
+  const t=await p.evaluate(()=>{ document.querySelector('[data-and-sez="orologio"]').click(); return document.querySelector("#orologio").innerText; });
   ok(/orari di partenza/.test(t) && /Dimmi come dormi/.test(t), "con gli orari di partenza lo dice, e invita a renderlo tuo");
   ok(!(await p.evaluate(()=>JSON.parse(localStorage.getItem("nt:funzioniUsate")||"{}").orologio)), "con gli orari di partenza l'orologio non conta come visto: l'invito arriverà quando sarà suo");
   await p.context().close(); }

@@ -1,6 +1,7 @@
 // La fonte del sonno: le notti registrate «come da piano» (un tocco, dal widget o dagli stessi orari del piano) non misurano la
 // regolarità; quelle con orari corretti sì. Il debito di sonno le conta tutte.
 import pw from "./_pw.mjs";
+import { espandi } from "./_andamenti.mjs";
 import { nativo } from "./_nativo.mjs";
 const ok=(c,m)=>console.log((c?"✔ ":"✘ ")+m);
 const b=await pw.chromium.launch(); const errs=[];
@@ -19,7 +20,7 @@ async function apri(risposte){
   await p.goto("http://localhost:8766/index.html"); await p.waitForTimeout(2600);
   return p;
 }
-const apriAndamenti=async p=>{ await p.evaluate(()=>document.querySelector('[data-tab="turni"]').click()); await p.waitForTimeout(400); await p.evaluate(()=>document.querySelector("#doAndamenti").click()); await p.waitForTimeout(600); };
+const apriAndamenti=async p=>{ await p.evaluate(()=>document.querySelector('[data-tab="turni"]').click()); await p.waitForTimeout(400); await p.evaluate(()=>document.querySelector("#doAndamenti").click()); await p.waitForTimeout(600); await espandi(p); };
 
 // 10 notti «Sì, così» (fonte p, anche senza campo: le risposte vecchie del widget erano tutte così) e 8 corrette (fonte m)
 { const r={}; for(let i=1;i<=10;i++) r[fa(i)]={sonno:true,bed:"23:30",wake:"07:30",fonte:i%2?"p":undefined};
@@ -28,7 +29,7 @@ const apriAndamenti=async p=>{ await p.evaluate(()=>document.querySelector('[dat
   const s=await p.evaluate(()=>({piano:Object.keys(JSON.parse(localStorage.getItem("nt:sonnoPiano")||"{}")).length, notti:Object.keys(JSON.parse(localStorage.getItem("nt:beds")||"{}")).length}));
   ok(s.notti===18 && s.piano===10, "widget: 18 notti importate, 10 segnate «come da piano» ("+JSON.stringify(s)+")");
   await apriAndamenti(p);
-  const o=await p.evaluate(()=>{ const sez=[...document.querySelectorAll("#andamenti > details")].find(x=>/Gli orari del tuo sonno/.test(x.textContent)); return sez ? {testo:sez.textContent, punti:sez.querySelectorAll("circle.g-punto").length} : null; });
+  const o=await p.evaluate(()=>{ const sez=document.querySelector("#andamenti #orari"); return sez ? {testo:sez.textContent, punti:sez.querySelectorAll("circle.g-punto").length} : null; });
   ok(o && /Le 8 notti dormite/.test(o.testo) && o.punti===16, "Gli orari del tuo sonno: contano solo le 8 notti corrette (16 punti: letto e sveglia) → "+(o&&o.testo.slice(0,40)));
   ok(o && /10 notti registrate «come previsto» non contano/.test(o.testo), "Gli orari del tuo sonno: dice che 10 notti «come previsto» non contano");
   await p.context().close(); }
@@ -36,7 +37,7 @@ const apriAndamenti=async p=>{ await p.evaluate(()=>document.querySelector('[dat
 // solo notti «come da piano»: niente regolarità inventata, e lo dice
 { const r={}; for(let i=1;i<=9;i++) r[fa(i)]={sonno:true,bed:"23:30",wake:"07:30",fonte:"p"};
   const p=await apri(r); await apriAndamenti(p);
-  const o=await p.evaluate(()=>{ const sez=[...document.querySelectorAll("#andamenti > details")].find(x=>/Gli orari del tuo sonno/.test(x.textContent)); return sez ? {testo:sez.textContent, punti:sez.querySelectorAll("circle.g-punto").length, righe:sez.querySelectorAll(".rows .row").length} : null; });
+  const o=await p.evaluate(()=>{ const sez=document.querySelector("#andamenti #orari"); return sez ? {testo:sez.textContent, punti:sez.querySelectorAll("circle.g-punto").length, righe:sez.querySelectorAll(".rows .row").length} : null; });
   ok(o && o.punti===0 && !/regolare|variabile/.test(o.testo) && /9 notti registrate «come previsto» non contano/.test(o.testo) && /almeno cinque notti con i tuoi orari veri/.test(o.testo), "solo notti «come previsto»: nessun grafico né «molto regolare», e il perché");
   await p.context().close(); }
 

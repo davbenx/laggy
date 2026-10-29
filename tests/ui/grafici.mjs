@@ -3,6 +3,7 @@
 // turno, il voto per giorno ha i nomi interi e il valore in fondo alla barra,
 // il debito di sonno è senza segno ridondante, il tempo libero un giorno per riga.
 import pw from "./_pw.mjs";
+import { espandi } from "./_andamenti.mjs";
 const ok=(c,m)=>console.log((c?"✔ ":"✘ ")+m);
 const b=await pw.chromium.launch(); const errs=[];
 const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
@@ -48,14 +49,14 @@ ok(giorni.length>0 && new Set(giorni).size===giorni.length, "Tempo libero: nessu
 await p.evaluate(()=>document.querySelector("#chiudiVederci")?.click());
 
 // Sonno e carico
-await clic('[data-tab="turni"]'); await clic("#doAndamenti"); await p.waitForTimeout(400);
+await clic('[data-tab="turni"]'); await clic("#doAndamenti"); await p.waitForTimeout(400); await espandi(p);
 const an=await p.evaluate(()=>{ const num=document.querySelector(".andamento-num");
   const righe=[...document.querySelectorAll(".vrow")].map(r=>({n:r.querySelector(".vlab").textContent, v:r.querySelector(".vval").textContent, giu:r.classList.contains("giu")}));
   return {num:num&&num.textContent, righe}; });
 ok(an.num && /^\d/.test(an.num), "Debito di sonno: il numero senza segno (l'etichetta dice se manca) → "+an.num);
 ok(an.righe.length===5 && an.righe.every(r=>r.n.length>2) && an.righe.every(r=>/^\d,\d$/.test(r.v)), "Voto per giorno: nomi interi e valori con la virgola → "+an.righe.map(r=>r.n+" "+r.v).join(", "));
 ok(an.righe.filter(r=>r.giu).length===1 && an.righe.find(r=>r.giu).n==="Notte", "Voto per giorno: evidenziato solo il giorno che pesa di più (Notte)");
-{ const pf=await p.evaluate(()=>{ const sez=[...document.querySelectorAll("#andamenti .and-t")].find(e=>/turno per turno/.test(e.textContent)); const box=sez&&sez.closest("details").querySelector(".andamento-sezione");
+{ const pf=await p.evaluate(()=>{ const box=document.querySelector("#andamenti #dormi");
     return box ? {righe:[...box.querySelectorAll(".frow")].map(r=>r.querySelector(".flab").childNodes[0].textContent), frase:(box.querySelector(".fnota")||{}).textContent||"", colori:[...box.querySelectorAll(".fbar i")].map(i=>i.style.background)} : null; });
   ok(pf && pf.righe.length>=3 && pf.righe.includes("Notte") && new Set(pf.colori).size===pf.colori.length, "Come dormi, turno per turno: una riga per ogni fascia che c'è, ciascuna con il suo colore → "+JSON.stringify(pf&&pf.righe));
   ok(pf && /meno del previsto|vicino al sonno previsto/.test(pf.frase), "e una frase su dove il sonno va protetto → "+(pf&&pf.frase)); }
@@ -84,7 +85,7 @@ for(const [pat,shifts,nome,min] of [["PMR",{M:{n:"Mattino",s:360,e:840},P:{n:"Po
     {turniConfigurati:true,pattern:pat,anchor:fa(0),repeat:true,firstSeenAt:fa(40),freeBed:"00:30",freeWake:"08:30",shifts});
   const q=await c2.newPage(); q.on("pageerror",e=>errs.push(e.message)); await q.clock.setFixedTime(dieci);
   await q.goto("http://localhost:8765/index.html"); await q.waitForTimeout(1000);
-  await q.evaluate(()=>document.querySelector('[data-tab="turni"]').click()); await q.waitForTimeout(300); await q.evaluate(()=>document.querySelector("#doAndamenti").click()); await q.waitForTimeout(500);
+  await q.evaluate(()=>document.querySelector('[data-tab="turni"]').click()); await q.waitForTimeout(300); await q.evaluate(()=>document.querySelector("#doAndamenti").click()); await q.waitForTimeout(500); await espandi(q);
   const rs=await q.evaluate(()=>({r:document.querySelectorAll(".car-striscia svg rect.g-rischio").length, riga:[...document.querySelectorAll(".car-r")].find(x=>/Riposi sotto/.test(x.textContent))?.textContent}));
   ok(rs.r>=min, "Carico, "+nome+": i giorni a rischio hanno il contorno rosso ("+rs.r+" nei 60 giorni)");
   await c2.close(); }

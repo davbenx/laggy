@@ -599,6 +599,9 @@ html.js-lento .jsoff{display:block}
 #segnaOut .sg-pennelli{flex-wrap:nowrap;overflow-x:auto;margin:0 -16px var(--sp-2);padding:2px 16px var(--sp-1);scrollbar-width:none;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent)}
 #segnaOut .sg-pennelli::-webkit-scrollbar{display:none}
 #segnaOut .sg-pen{flex:0 0 auto}
+.and-hub{margin:0 0 var(--sp-4)}
+.and-hub .opz-hub-r{min-height:62px}
+.and-hub .opz-val{white-space:normal}
 .and-det{margin:0 0 var(--sp-3);border:1px solid var(--line);border-radius:var(--r);background:var(--s1)}
 .and-det>summary{text-align:left;letter-spacing:0;text-transform:none;align-items:flex-start;display:flex;flex-direction:column;gap:2px;min-height:var(--tap);padding:var(--sp-3) 36px var(--sp-3) var(--sp-4);cursor:pointer;list-style:none;position:relative}
 .and-det>summary::-webkit-details-marker{display:none}
@@ -7115,8 +7118,8 @@ function graficoRegolarita(reg){
 }
 // Quanto si dorme in media, turno per turno (mattina, pomeriggio, sera, notte, giorni liberi): per qualunque ciclo,
 // solo le fasce che ci sono. Dalle notti annotate; il confronto è con quanto prevedeva il piano per le stesse notti.
-// Una sezione della pagina «Sonno e carico»: chiusa, con una riga che dice già l'essenziale; si apre per i dettagli.
-const sezDet=(titolo,riga,corpo,opz)=>'<details class="and-det"'+((opz&&opz.id)?' id="'+opz.id+'"':'')+((opz&&opz.aperta)?' open':'')+'><summary><span class="and-t">'+esc(titolo)+'</span><span class="and-r">'+esc(riga)+'</span></summary><div class="andamento-sezione'+((opz&&opz.cls)?' '+opz.cls:'')+'">'+corpo+'</div></details>';
+// Una voce di «Sonno e carico»: titolo, una riga che dice già l'essenziale, e la pagina con i dettagli.
+const sezDet=(titolo,riga,corpo,opz)=>({id:(opz&&opz.id)||"", t:titolo, r:riga, c:corpo, cls:(opz&&opz.cls)||""});
 function sonnoPerFascia(trend){
   const g={};
   (trend.series||[]).forEach(x=>{ if(x.actual==null) return; const f=fasciaGiornoIso(x.date); if(!FASCE[f]) return;
@@ -7160,7 +7163,7 @@ function caricoHtml(aperta){
       '<div class="car-r car-testa"><span></span><b>Passati</b><b>In arrivo</b></div>'+
       riga("Notti","notti")+riga("Notti di fila, al massimo","serieMax")+riga("Riposi sotto le 11 ore","brevi")+
       riga("Domeniche e festivi","festivi")+riga("Ore di turno","ore")+
-      '<p class="car-frase">'+esc(frase).replace(/\[(.+?)\]/,'<span class="hint">($1)</span>')+'</p>', {cls:"carico", aperta:!!aperta});
+      '<p class="car-frase">'+esc(frase).replace(/\[(.+?)\]/,'<span class="hint">($1)</span>')+'</p>', {id:"carico", cls:"carico"});
 }
 // «Il tuo orologio»: i punti fissi del ritmo, stimati dagli orari dei giorni
 // liberi (dichiarati, o aggiornati dal diario con «Il piano si adatta»).
@@ -7214,7 +7217,7 @@ function renderAndamenti(){
   // le altre, è la cosa più utile da leggere in questa visita. Il debito di
   // sonno resta subito sotto: hero (numero grande + sparkline), sempre
   // presente perché è un cruscotto, non un consiglio che scade.
-  let capoHtml="", heroHtml="", sezioni=[], parteFascia=null, parteCiclo=null;
+  let capoHtml="", heroHtml="", sezioni=[], parteFascia=null, parteCiclo=null; const vociAnd={};
   if(capo){
     capoHtml='<div class="andamento-insight"><span class="aic">'+ICON.sun+'</span>'+
       '<div><span class="andamento-insight-eyebrow">'+(capo.action?"Da provare questa settimana":"Insight")+'</span>'+esc(capo.testo)+
@@ -7244,12 +7247,12 @@ function renderAndamenti(){
       }
     }
   }catch(e){}
-  try{ heroHtml+=orologioHtml(); }catch(e){}
+  try{ vociAnd.orologio=orologioHtml(); }catch(e){}
   // Il carico dei turni: dai turni soli, senza diario — la pagina non è mai
   // vuota, ed è il rischio di stanchezza più documentato (notti di fila,
   // riposi brevi). Prima i dati del passato, accanto quelli in arrivo.
   try{ const tr=window.NTHistory && window.NTHistory.sleepTrend({beds:state.beds,wakes:state.wakes}, NT_planSafe, {days:60}); if(tr && tr.n>=4) parteFascia=sonnoPerFasciaHtml(tr); }catch(e){}
-  try{ sezioni.push(caricoHtml(!heroHtml || /andamento-hero/.test(heroHtml)===false)); }catch(e){}
+  try{ vociAnd.carico=caricoHtml(); }catch(e){}
   try{
     // Regolarità: «come previsto» (quante notti annotate coincidono col piano) e gli orari veri, di notte e di giorno a parte.
     const da=iso(day(giornoVero(),-30)), annotate=Object.keys(state.wakes).filter(k=>k>=da && state.beds[k]), ok=annotate.filter(k=>sonnoPiano[k]).length;
@@ -7267,7 +7270,7 @@ function renderAndamenti(){
     }
     if(annotate.length>=5) righe+='<div class="row"><b style="min-width:118px">Come previsto</b><span>'+ok+' su '+annotate.length+' <span class="hint">· ultimi 30 giorni</span></span></div>'+
       '<p class="hint" style="margin:6px 0 0">'+(ok<annotate.length?'Le altre le hai corrette tu: è così che il piano impara come dormi davvero.':'Il piano ti conosce bene.')+'</p>';
-    if(righe || nota) sezioni.push(sezDet("Gli orari del tuo sonno", riassunto || (annotate.length>=5 ? ok+" notti su "+annotate.length+" come previsto" : "Servono più notti"), grafico+(righe?'<div class="rows">'+righe+'</div>':'')+nota));
+    if(righe || nota) vociAnd.orari=(sezDet("Gli orari del tuo sonno", riassunto || (annotate.length>=5 ? ok+" notti su "+annotate.length+" come previsto" : "Servono più notti"), grafico+(righe?'<div class="rows">'+righe+'</div>':'')+nota,{id:"orari"}));
   }catch(e){}
 
   if(cs){
@@ -7293,9 +7296,21 @@ function renderAndamenti(){
   }
 
   // Un solo confronto per turno: quanto dormi, quanto in meno del previsto, come stai.
-  if(parteFascia || parteCiclo) sezioni.unshift(sezDet("Come dormi e come stai, turno per turno", (parteFascia||parteCiclo).riga,
-    (parteFascia ? parteFascia.corpo : "")+(parteCiclo ? (parteFascia ? '<div style="height:14px"></div>' : '')+parteCiclo.corpo : "")));
-  const rowsHtml = sezioni.join("");
+  if(parteFascia || parteCiclo) vociAnd.dormi=sezDet("Come dormi e come stai, turno per turno", (parteFascia||parteCiclo).riga,
+    (parteFascia ? parteFascia.corpo : "")+(parteCiclo ? (parteFascia ? '<div style="height:14px"></div>' : '')+parteCiclo.corpo : ""), {id:"dormi"});
+  // Quattro voci sempre in lista, come le Impostazioni: se mancano i dati la riga dice cosa serve.
+  const VOCI=[["carico","calendar","Il carico dei turni","Segna i turni per vederlo","Notti di fila, riposi brevi, festivi e ore dei prossimi 30 giorni, calcolati dai tuoi turni."],
+    ["dormi","bed","Come dormi e come stai","Dopo qualche notte annotata","Quanto dormi e come ti senti prima di ogni tipo di turno: compare dopo almeno 4 notti annotate."],
+    ["orari","alarm","Gli orari del tuo sonno","Servono 5 notti annotate","Quanto sono regolari gli orari a cui vai a letto e ti svegli: servono almeno 5 notti con i tuoi orari veri."],
+    ["orologio","sun","Il tuo orologio","—","Il tuo ritmo stimato dagli orari dei giorni liberi."]]
+    .map(([id,ic,t,vuoto,spiega])=>Object.assign({ic}, vociAnd[id] || {id, t, r:vuoto, c:'<p class="hint" style="margin:0">'+esc(spiega)+'</p>', vuota:true}));
+  const voceAperta=VOCI.find(v=>v.id===andSez);
+  const tt=document.querySelector("#andamentiPagina .tab-title"); if(tt) tt.textContent=voceAperta ? voceAperta.t : "Sonno e carico";
+  if(voceAperta){
+    el.innerHTML='<div class="andamento-sezione'+(voceAperta.cls?' '+voceAperta.cls:'')+'" id="'+voceAperta.id+'">'+voceAperta.c+'</div>';
+    return;
+  }
+  const rowsHtml='<div class="opz-gruppo and-hub" role="list">'+VOCI.map(v=>'<button type="button" class="opz-hub-r" role="listitem" data-and-sez="'+v.id+'"><span class="tool-ic">'+(ICON[v.ic]||"")+'</span><span class="opz-tx"><b>'+esc(v.t)+'</b><span class="opz-val">'+esc(v.r)+'</span></span><span class="tchev" aria-hidden="true">›</span></button>').join("")+'</div>';
   const url = donateUrl();
   // Senza diario: un invito di una riga al posto del numero, niente esempi finti.
   const invito = heroHtml ? "" : '<div class="andamento-sezione"><p style="margin:0"><b>Quanto sonno ti manca</b></p>'+
@@ -8929,8 +8944,7 @@ const CONSIGLI_FUNZIONE=[
     cta:()=>"Salva la copia", a:()=>salvaCopiaFile()},
   {k:"orologio", dopo:7, quando:()=>!(state.freeBed==="23:30" && state.freeWake==="07:30"),
     t:()=>{ const o=orologio(); return "Il tuo orologio è pronto: "+o.tipo.toLowerCase()+", con il minimo corporeo verso le "+hhmm(o.cbt)+". Quando arriva la melatonina e quando sei più lucido, in «Sonno e carico»."; },
-    cta:()=>"Vedi il tuo orologio", a:()=>{ setTab("turni"); apriAndamenti(); usata("orologio");
-      const el=$("#orologio"); if(el){ el.open=true; try{ el.scrollIntoView({block:"start"}); }catch(e){} } }},
+    cta:()=>"Vedi il tuo orologio", a:()=>{ setTab("turni"); apriAndamenti("orologio"); usata("orologio"); }},
   {k:"mese", cta:()=>"Segna i turni", t:()=>"Puoi ricopiare il foglio turni in un minuto, un tocco per giorno, o importarlo da un file. Se ricopi almeno due cicli interi, l'app riconosce lo schema e lo continua da sola.", a:()=>{ setTab("turni"); apriSegna(); }},
   {k:"festivi", quando:()=>!state.festiviRiposo && !(state.festivi && ((state.festivi.extra||[]).length || state.festivi.dom===false)),
     t:()=>"Domeniche e festivi del tuo contratto contano come riposo? Segnali una volta: il piano ne tiene conto, anche il santo patrono.",
@@ -9050,7 +9064,11 @@ function segnaSottopagina(){
   const aperte=["andamenti-aperta","vederci-aperta","scambio-aperta","ferie-aperta","segna-aperta","turni-aperta"].some(c=>document.body.classList.contains(c));
   document.body.classList.toggle("sottopagina", aperte);
 }
-function apriAndamenti(){
+var andSez=null;   // la voce di «Sonno e carico» aperta (null = l'elenco)
+function andIndietro(){ if(andSez){ andSez=null; renderAndamenti(); try{ window.scrollTo(0,0); }catch(e){} } else chiudiAndamenti(); }
+document.addEventListener("click",e=>{ const b=e.target.closest("[data-and-sez]"); if(!b) return; haptic(6); andSez=b.dataset.andSez; renderAndamenti(); try{ window.scrollTo(0,0); }catch(e){} });
+function apriAndamenti(sez){
+  andSez=sez||null;
   chiudiVederci(); chiudiScambio(); chiudiFerie(); chiudiSegna(); chiudiTuoiTurni(true);
   document.body.classList.add("andamenti-aperta"); segnaSottopagina(); usata("sonno");
   // l'orologio sta in questa pagina: chi l'ha già vista non riceve l'invito a scoprirlo
@@ -9060,6 +9078,7 @@ function apriAndamenti(){
   try{ window.scrollTo(0,0); }catch(e){}
 }
 function chiudiAndamenti(){
+  andSez=null;
   document.body.classList.remove("andamenti-aperta"); segnaSottopagina();
   const p=$("#andamentiPagina"); if(p) p.hidden=true;
 }
@@ -9074,8 +9093,8 @@ function chiudiVederci(){
   document.body.classList.remove("vederci-aperta"); segnaSottopagina();
   const p=$("#vederciPagina"); if(p) p.hidden=true;
 }
-if($("#doAndamenti")) $("#doAndamenti").onclick=apriAndamenti;
-if($("#chiudiAndamenti")) $("#chiudiAndamenti").onclick=chiudiAndamenti;
+if($("#doAndamenti")) $("#doAndamenti").onclick=()=>apriAndamenti();
+if($("#chiudiAndamenti")) $("#chiudiAndamenti").onclick=andIndietro;
 if($("#doPartner")) $("#doPartner").onclick=apriVederci;
 if($("#chiudiVederci")) $("#chiudiVederci").onclick=chiudiVederci;
 
@@ -11101,7 +11120,7 @@ platform.onBackButton(()=>{
   const qs=$("#quickShiftModal"); if(qs && !qs.hidden){ chiudiQuickShift(); return true; }
   if($("#qrModal") && !$("#qrModal").hidden){ mostraQR(false); return true; }
   if($("#novitaModal") && !$("#novitaModal").hidden){ mostraNovita(false,true); return true; }
-  if(document.body.classList.contains("andamenti-aperta")){ chiudiAndamenti(); return true; }
+  if(document.body.classList.contains("andamenti-aperta")){ andIndietro(); return true; }
   if(document.body.classList.contains("vederci-aperta")){ chiudiVederci(); return true; }
   if(document.body.classList.contains("scambio-aperta")){ chiudiScambio(); return true; }
   if(document.body.classList.contains("ferie-aperta")){ chiudiFerie(); return true; }
