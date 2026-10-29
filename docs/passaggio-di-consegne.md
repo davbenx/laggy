@@ -1,6 +1,6 @@
 # Passaggio di consegne: Notturnisti (repo `davbenx/laggy`)
 
-Testo da dare al nuovo agente. Data dell'ultimo stato: sabato 24 ottobre 2026, sera.
+Testo da dare al nuovo agente. Data dell'ultimo stato: giovedì 29 ottobre 2026, sera (sezioni 6 e 10 aggiornate; il resto descrive anche la storia precedente).
 
 ## 0. Come lavorare con l'utente (regole permanenti)
 - **Lingua:** italiano. Risposte concise, basate su prove, con livello di confidenza e incognite dichiarate.
@@ -209,9 +209,10 @@ L'anteprima mostra layout, colori e stati come progettati. Un solo difetto trova
 ### Seam di test
 `NotturnistiWidget.senzaIntent` (solo per l'anteprima): evita i `PendingIntent` sulla JVM.
 
-## 6. Stato delle release e dei PR (al momento della consegna)
-- **`main` = `a46c8d0`** (PR #155 unito). Branch di lavoro allineata a `main`.
-- Tutte le PR aperte sono state unite: l'ultima è la #155. Nessuna PR aperta.
+## 6. Stato delle release e dei PR (aggiornato al 29 ottobre 2026)
+- **`main` = `786497a`** (PR #165 unito: ciclo con numeri del mese, «Sonno e carico» a elenco, Festivi in «I tuoi turni», widget/timeline, contatori e domanda neutra). Branch di lavoro allineata a `main`. Nessuna PR aperta.
+- **PWA**: online con la #165. **Android**: run #27 = 1.3.7, **run #28 = 1.3.8 (da caricare su Play)**: contiene tutto ciò che è in `main`, incluso il widget con la sveglia vera annotata. Le note di versione sono in `docs/play/scheda.md` (1.3.8). Stato di caricamento su Play: non confermato.
+- Sotto, la storia delle run precedenti (fino alla 1.3.1) com'era alla consegna di ottobre.
 - **Release Android:**
   - Run #14 = 1.2.2 (con la correzione «dormi dopo il turno»).
   - Run #15 = 1.2.3.
@@ -245,7 +246,7 @@ L'anteprima mostra layout, colori e stati come progettati. Un solo difetto trova
 - ‹ › per i mesi nel widget: tolti (superati dalla struttura a settimane).
 
 ### Statistiche da guardare
-Nel pannello analytics: `sveglia_messa`, `diario_widget`, `voce_*`, `sapevi_*` (incluso `widgetmese` e `coppia`), `festivi_*`, `ferie_con`.
+Nel pannello analytics: `funzione_utile` (la domanda neutra «quale funzione ti mancherebbe di più», dal giorno 30, una volta), `funzioni_attive`, `persone_attive`, `import_*`, `medico_pdf`, `sveglia_messa`, `diario_widget`, `voce_*`, `sapevi_*` (incluso `widgetmese` e `coppia`), `festivi_*`, `ferie_con`.
 
 ## 8. Trappole note (leggere prima di toccare)
 - **Android build locale rotto** (sezione 2). Fare le prove in CI.
@@ -258,6 +259,17 @@ Nel pannello analytics: `sveglia_messa`, `diario_widget`, `voce_*`, `sapevi_*` (
 - Il piano del widget e quello dell'app derivano dallo stesso motore: non duplicare mai la logica dei turni in Java (i dati arrivano già calcolati dalla pagina).
 - PR senza modifiche all'app (solo test o strumenti) non fanno partire `e2e`: basta il controllo Workers Builds.
 - Un workflow nuovo si può lanciare solo se esiste su `main`; per provare una modifica a un workflow esistente si può lanciare con `ref` = la branch.
+
+## 10. Novembre 2026: cosa è cambiato (da sapere prima di toccare)
+- **Turni**: strumenti in griglia (`#strumenti`), fogli «Modifica turni» e «Condividi» (`apriFoglio`); «Il tuo ciclo» è una scheda sola con i numeri del mese (`renderMese` segue la vista: `meseVista` scritto da `renderStrip` e `renderCalendarioCiclo`); «Segna» con intervallo, «Come 7 giorni prima», annulla (`sgStorico`), «Da segnare»; «Cambio turno» con due modi (`swapModo`: scambia | cambia un turno).
+- **Festivi**: riga in «I tuoi turni» (`apriFestivi`, `#ttFestivi`); `festivoVero` (senza domeniche) è ciò che si segna nel calendario e che, con `festiviRiposo`, diventa riposo anche nei cicli; `festivo` (con domeniche) conta nel mese.
+- **«Sonno e carico»**: elenco di quattro voci (`andSez`, `[data-and-sez]`, `vociAnd`, `sezDet`); la regolarità separa notti dormite di notte e di giorno (`regolaritaSonno`); i test che leggono i grafici usano `tests/ui/_andamenti.mjs` (`espandi`).
+- **Backup**: copia completa su file (`raccogliCopia`, `leggiCopia`, `applicaCopia`, lista `COPIA_CHIAVI`: ogni chiave persistente nuova va aggiunta lì), solo web (su Android vale il backup automatico di Google); il link porta `fs` (primo uso).
+- **Widget**: `ntWidget` chiude il sonno alla sveglia vera annotata (`fineReale`). **Timeline di Oggi**: niente linea dell'ora oltre un'ultima voce in corso.
+- **Statistiche e transizione a pagamento**: nessun badge; regole in `docs/prossimo-aggiornamento.md` («Funzioni a pagamento»). `funzione_utile` è in `ALLOWED` di `analytics.js` e `functions/_analytics.js` (un test li vuole identici).
+- **Health Connect**: to-do con specifiche in `docs/prossimo-aggiornamento.md` (non iniziato).
+- **Test**: ora ~80 suite UI e 106 test node. Nuove: `schedaturni`, `cambioturno`, `adattacorta`, `copia`, `sonnocarico`, `funzioneutile`. Per lanciarle in questo ambiente servono `PLAYWRIGHT_BROWSERS_PATH` e `NODE_PATH` che puntino a un'installazione di Playwright con Chromium (la suite `e2e` usa un percorso proprio e gira in CI). Alcuni test partono dal primo avvio e dipendono dall'ora reale (`ux3`, `adatta`): se falliscono di notte, ripassarli di giorno.
+- **Fonti scientifiche**: citazioni complete; «Smith, Fogg & Eastman 2009» è una scelta mia fra più lavori possibili di Smith ed Eastman, da confrontare con la fonte originale.
 
 ## 9. Primo passo suggerito al nuovo agente
 1. Chiedere all'utente: (a) ha caricato l'AAB 1.3.1 (run #18)? (b) cosa vede sul widget? (c) ha già i file della nuova icona?

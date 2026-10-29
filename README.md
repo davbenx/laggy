@@ -84,7 +84,7 @@ diary and generated plans live in the browser, not in a database. The only
 network calls are to the optional share/restore/couple endpoints, which you
 trigger explicitly, and anonymous usage counters ("a plan was generated", no
 identifiers, no schedule data — stored only as per-day totals, switchable off
-in Options). See `docs/app-nativa.md` for the native-app plan.
+in Options). A complete backup (schedule, sleep diary, settings, people) can be saved to a file and restored, entirely on the device. See `docs/app-nativa.md` for the native-app plan.
 
 ## Roadmap
 
