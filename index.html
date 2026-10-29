@@ -897,8 +897,10 @@ display:flex;align-items:center;justify-content:center;position:relative;z-index
 .tl-adesso i{justify-self:center;width:9px;height:9px;border-radius:50%;background:var(--blue);position:relative;z-index:1;box-shadow:0 0 0 3px var(--bg)}
 .tl-adesso::after{content:"";position:absolute;left:calc(var(--tcol) + 10px + var(--nodo));right:0;top:50%;height:1px;background:var(--blue);opacity:.45}
 .tl-extra{margin:2px 0 8px}
-.ora-sveglia{display:flex;margin:12px 0 0 58px}
-.ora-sveglia.lnk{align-items:center;min-height:44px;padding:0;font-size:14px;font-weight:600;margin-top:4px}
+.sv-riga{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);margin-top:var(--sp-3);padding-top:var(--sp-3);border-top:1px solid var(--line);font-size:14px;color:var(--dim)}
+.sv-t{display:flex;align-items:center;gap:var(--sp-2);min-width:0}
+.sv-t b{color:var(--ink)}
+.sv-riga .btn,.sv-riga .lnk{flex:none}
 /* voce del piano: tutta la riga si tocca per il «perché» (foglio), con l'icona ⓘ a destra */
 .erow{margin:0;cursor:pointer;border-radius:12px}
 .erow:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
@@ -972,7 +974,6 @@ padding:12px 6px 12px 14px;margin:-6px 0 var(--gap-sezione);font-size:13.5px;lin
 .essnudge{font-size:12.5px;color:var(--faint);margin-top:14px;line-height:1.55}
 .esshint{font-size:13px;color:var(--dim);margin:0 2px 10px}
 .ed-cambia{display:block;margin-top:10px;font-size:13px;text-align:left}
-.ed-sveglia{display:flex;width:100%;align-items:center;justify-content:center;text-align:center;margin-bottom:8px}
 #ora[hidden]{display:none}
 .oro .oro-tipo{font-family:var(--serif);font-size:22px;font-weight:600;margin:0 0 6px}
 .grf{display:block;width:100%;margin-top:8px}
@@ -4524,10 +4525,12 @@ function svegliaDelPiano(P, m){
   const fine=P.s.onset+P.s.dur, tra=fine-m;
   return tra>0 && tra<=1440 ? {t:hhmm(fine), fra:P.s.onset-m} : null;   // fra: minuti all'inizio del sonno (negativo = già cominciato)
 }
-function svegliaHtml(sv, cls){
+// La riga «Stanotte» della scheda «Il tuo sonno» (la zona delle azioni di Oggi): da 4 ore prima del sonno fino alla sua fine.
+function svegliaRiga(P, m){
+  const sv=svegliaDelPiano(P, m); if(!sv || sv.fra>SVEGLIA_ORE_PRIMA) return "";
   const v=store.get("svegliaMessa",null), messa=!!v && v.t===sv.t && Date.now()-v.at<24*3600e3;
-  return messa ? '<button type="button" class="lnk '+cls+'" data-sveglia="'+sv.t+'">✓ Sveglia messa alle '+sv.t+' · rimettila</button>'
-    : '<button type="button" class="btn g sm '+cls+'" data-sveglia="'+sv.t+'">Metti la sveglia alle '+sv.t+'</button>';
+  return '<div class="sv-riga"><span class="sv-t">'+ICON.alarm+(messa ? '<span class="drem-ok">✓</span> Sveglia <b>'+sv.t+'</b>' : 'Sveglia <b>'+sv.t+'</b>')+'</span>'+
+    (messa ? '<button type="button" class="lnk dim" data-sveglia="'+sv.t+'">Rimettila</button>' : '<button type="button" class="btn g sm" data-sveglia="'+sv.t+'">Metti</button>')+'</div>';
 }
 const SVEGLIA_ORE_PRIMA=240;   // in «Adesso» da 4 ore prima del sonno (come nel widget) fino alla fine del sonno
 function renderOra(Pfocus){
@@ -4677,7 +4680,7 @@ function renderOra(Pfocus){
     '<div class="ora-h"><span class="ora-ic">' + oraIc + '</span>' +
     '<div class="ora-tx"><span class="eyebrow">Adesso</span>' +
     '<b>' + esc(title) + '</b></div></div>' +
-    '<span class="ora-sub">' + esc(sub) + '</span>' + momenti + (()=>{ const sv=svegliaDelPiano(P, m); return sv && sv.fra<=SVEGLIA_ORE_PRIMA ? svegliaHtml(sv,"ora-sveglia") : ""; })() +
+    '<span class="ora-sub">' + esc(sub) + '</span>' + momenti +
     '</div>';
 }
 if($("#ora")) $("#ora").addEventListener("click", () => {
@@ -6088,8 +6091,10 @@ function renderEssenziale(P, CARDS){
   const voci=[];   // {t, html} — poi ordinate per orario della giornata
 
   // ── il diario, in testa: si riferisce al sonno appena finito ──
-  const drem=diaryReminder(P, CARDS);
-  if(drem) voci.push({t:-2, html:drem});
+  // La scheda «Il tuo sonno» è la zona delle azioni: il diario e, di sera, la sveglia (solo Android). Senza diario da fare, resta la sola sveglia.
+  const drem=diaryReminder(P, CARDS), svR=dnum(state.focus)===dnum(giornoVero()) ? svegliaRiga(P, minutiDaFocus()) : "";
+  const blocco = svR ? (drem ? drem.replace(/<\/div>$/, svR+'</div>') : '<div class="drem done"><div class="drem-q"><span class="dic">'+ICON.moon+'</span>Il tuo sonno</div>'+svR+'</div>') : drem;
+  if(blocco) voci.push({t:-2, html:blocco});
 
   // ── la finestra di sonno: non è una scheda, la costruiamo qui ──
   // Sotto "Dormi" solo il numero di ore: il perché (smonto, turno nel cuore
@@ -6106,8 +6111,6 @@ function renderEssenziale(P, CARDS){
   // Sveglia vera nell'Orologio del telefono (solo app Android): l'Orologio
   // la mette alla prossima volta che arriva quell'ora, quindi solo se la
   // fine del sonno cade nelle prossime 24 ore.
-  const svP=svegliaDelPiano(P, minutiDaFocus());
-  const sveglia = svP ? svegliaHtml(svP,"ed-sveglia") : "";
   const vSonno={t:dSv(P.s.onset), html:riga("sonno","Dormi",sonnoWin(P),sonnoSub,false,ICON.moon,
     dettSonno+'<button type="button" class="lnk ed-cambia" data-cambia="3">Orari che non fanno per te? Dimmi come dormi →</button>',
     {a:P.s.onset, z:P.s.onset+P.s.dur, poi:"a letto alle "+hhmm(P.s.onset)})};
@@ -6126,8 +6129,8 @@ function renderEssenziale(P, CARDS){
   // "pre-turno-bifasico", non "pre-turno"), c'è un modo di risolverlo che
   // l'utente potrebbe non aver ancora trovato da solo.
   const lp=sceltaLettoPresto(P);
-  // Le azioni di «Dormi» (la sveglia, le scelte dopo la notte) non stanno dentro la riga: vedi più sotto, dove si decide da che parte della linea dell'ora vanno.
-  if(sveglia || dn || lp) vSonno.extra='<div class="tl-extra">'+sveglia+(dn||"")+(lp||"")+'</div>';
+  // Le scelte di «Dormi» (dopo la notte, letto presto) non stanno dentro la riga: vedi più sotto, dove si decide da che parte della linea dell'ora vanno.
+  if(dn || lp) vSonno.extra='<div class="tl-extra">'+(dn||"")+(lp||"")+'</div>';
 
   // Tempo libero: le ore da sveglio fuori da turno, viaggio, sonno e pisolini.
   // Risponde a «e la palestra quando la faccio?» (e figli, spesa…) senza un
@@ -8642,7 +8645,7 @@ if($("#andamenti")) $("#andamenti").addEventListener("click", e=>{
   if(!e.target.closest("[data-oro-cambia]")) return;
   apriOpzioni("abitudini"); apriSezioneInline(3);
 });
-["#essenziale","#ora"].forEach(sel=>{ if($(sel)) $(sel).addEventListener("click", e=>{
+["#essenziale"].forEach(sel=>{ if($(sel)) $(sel).addEventListener("click", e=>{
   const b=e.target.closest("[data-sveglia]"); if(!b) return;
   const t=b.dataset.sveglia, [h,m]=t.split(":").map(Number);
   platform.alarm.set(h, m, "Notturnisti")
@@ -8974,7 +8977,7 @@ const CONSIGLI_FUNZIONE=[
   {k:"scambio", cta:()=>"Prova un cambio", t:()=>"Prima di accettare uno scambio o un cambio di turno, controlla come cambiano sonno e riposi.", a:()=>{ setTab("turni"); apriScambioTurno(); }},
   {k:"sonno", cta:()=>"Apri Sonno e carico", t:()=>"In «Sonno e carico» vedi notti di fila e riposi brevi del mese, anche senza diario.", a:()=>{ setTab("turni"); apriAndamenti(); }},
   // Solo nell'app Android: la sveglia nell'Orologio e il voto dal widget
-  {k:"sveglia", quando:()=>platform.alarm.available, t:()=>"Sotto «Dormi» c'è «Metti la sveglia»: la mette nell'Orologio del telefono, all'ora in cui finisce il sonno."},
+  {k:"sveglia", quando:()=>platform.alarm.available, t:()=>"Nella scheda «Il tuo sonno», di sera, c'è «Metti la sveglia»: la mette nell'Orologio del telefono, all'ora in cui finisce il sonno."},
   {k:"votowidget", quando:()=>platform.widget.available && platform.widget.presenti()>0, t:()=>"Dal widget puoi dire come hai dormito con un tocco, senza aprire l'app: il voto arriva nel diario."},
   {k:"coppia", quando:()=>coppiaDaProporre(), t:()=>"Hai una persona in elenco: puoi mettere i vostri riposi in comune nel calendario del telefono, in un calendario a parte che accendi e spegni quando vuoi.",
     cta:()=>"Attiva", a:()=>{ impostaCoppiaNativa(true).then(ok=>{ if(ok) toast("Fatto: li trovi nel calendario «Notturnisti · insieme»"); }); }},
@@ -9245,7 +9248,7 @@ if($("#cycToday")) $("#cycToday").onclick=()=>{
    `id` cambia solo quando c'è qualcosa da dire; chi aggiorna la vede una volta. Chi installa adesso non la vede
    (non è una novità per lui), ma la trova sempre in Impostazioni › Novità. «app:true» = solo nell'app Android. */
 const NOVITA={ id:"2026-11-05", data:"Novembre 2026", righe:[
-  ["Il perché in un foglio, i riepiloghi in Condividi","Nel piano di Oggi tocchi una voce (icona ⓘ) e il perché si apre in un foglio, senza allungare la lista. Il riepilogo del mese, dei 12 mesi e il PDF per il medico stanno in «Condividi e riepiloghi». Su Android «Metti la sveglia» compare in «Adesso» nelle ore prima di dormire.",false,"2026-11-05"],
+  ["Il perché in un foglio, i riepiloghi in Condividi","Nel piano di Oggi tocchi una voce (icona ⓘ) e il perché si apre in un foglio, senza allungare la lista. Il riepilogo del mese, dei 12 mesi e il PDF per il medico stanno in «Condividi e riepiloghi». Su Android «Metti la sveglia» sta in «Il tuo sonno», nelle ore prima di dormire.",false,"2026-11-05"],
   ["Sonno e carico più chiaro","La pagina mostra subito il sonno che ti manca; il resto è un elenco di quattro voci, ognuna con la sua riga riassuntiva e la sua pagina. Gli orari del sonno separano le notti dormite di notte da quelle di giorno, e gli assi dei grafici sono corretti.",false,"2026-11-04"],
   ["Copia completa su file","In Impostazioni › Dati e privacy: un file con turni, diario del sonno, impostazioni e persone. Lo riapri con «Ripristina da un file», anche su un telefono nuovo. Il link resta per spostare i turni sull'altro telefono.",false,"2026-11-03"],
   ["Cambia un turno, senza scambio","In Cambio turno scegli «Cambia un turno»: un giorno prende un altro turno (o il riposo) e vedi subito cosa cambia per il sonno. Più semplice, i consigli sulle funzioni hanno pulsanti più chiari e Dati e privacy ha una nuova icona.",false,"2026-11-02"],
@@ -10507,7 +10510,7 @@ if(store.get("sub") && $("#privacyNotaAbbonato")) $("#privacyNotaAbbonato").hidd
 if(!window.NT_APP.nativo && platform.notify.pushStato && platform.notify.pushStato()!=="no" && $("#notifHint"))
   $("#notifHint").textContent="Arrivano anche ad app chiusa: per svegliarla all'ora giusta il nostro server conserva solo gli orari dei promemoria (non cosa dicono), finché li tieni accesi. Non sostituiscono la sveglia.";
 if(window.NT_APP.nativo){
-  if($("#notifHint")) $("#notifHint").textContent="Arrivano anche con l'app chiusa. Non sono una sveglia: per quella usa «Metti la sveglia» in «Dormi». Se non ti arrivano, controlla che il risparmio batteria non limiti Notturnisti.";
+  if($("#notifHint")) $("#notifHint").textContent="Arrivano anche con l'app chiusa. Non sono una sveglia: per quella usa «Metti la sveglia» in «Il tuo sonno». Se non ti arrivano, controlla che il risparmio batteria non limiti Notturnisti.";
   // Android 12+: senza "Sveglie e promemoria" la sveglia può arrivare con
   // qualche minuto di ritardo. Si propone solo a chi ha già le notifiche.
   const riga=document.createElement("p"); riga.className="hint"; riga.hidden=true; riga.style.margin="6px 2px 0";
