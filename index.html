@@ -981,7 +981,7 @@ padding:12px 6px 12px 14px;margin:-6px 0 var(--gap-sezione);font-size:13.5px;lin
 .sapevi[hidden]{display:none}
 .sapevi>div{flex:1;min-width:0}
 .sapevi b{color:var(--ink)}
-.sapevi-az{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:6px}
+.sapevi-az{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:10px}
 .sapevi-az .btn{min-height:40px;padding:0 14px}
 .sapevi-az.sapevi-facce{flex-wrap:nowrap;gap:8px}
 .sapevi-facce .kface{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:56px;padding:6px 4px;font-size:13px}
@@ -6283,7 +6283,10 @@ function renderEssenziale(P, CARDS){
     // la linea sta dopo ogni voce già cominciata (passata o in corso), prima della prima ancora da venire
     const passate=idxR.filter(i=>/^<div class="tl[^"]*\b(past|ora)\b/.test(voci[i].html));
     const ultima=passate.length ? passate[passate.length-1] : undefined;
-    const dopo=ultima===undefined ? undefined : (idxR.find(i=>i>ultima) ?? ultima+1);   // se non c'è niente dopo, in fondo
+    const dopoReale=ultima===undefined ? undefined : idxR.find(i=>i>ultima);
+    // l'ultima voce del piano è in corso (es. «Dormi»): la voce stessa dice già «adesso», la linea dopo di lei sarebbe «oltre» il sonno
+    const finisceInCorso=ultima!==undefined && dopoReale===undefined && /^<div class="tl[^"]*\bora\b/.test(voci[ultima].html);
+    const dopo=ultima===undefined || finisceInCorso ? undefined : (dopoReale ?? ultima+1);   // se non c'è niente dopo, in fondo
     if(dopo!==undefined){
       const mm=mod1440(Math.round(nowT));
       voci.splice(dopo, 0, {t:0, html:'<div class="tl-adesso" aria-hidden="true"><span class="en">'+
@@ -7965,8 +7968,18 @@ function ntWidget(){
   if(!platform.widget.available) return;
   if(!state.turniConfigurati){ platform.widget.publish([]); return; }   // niente piano di esempio sul widget
   const {ev}=eventiCalendario(), ora=Date.now();
-  const voci=ev.filter(e=>+e.end>ora && +e.start<ora+48*3600e3)
-    .map(e=>({s:+e.start, e:+e.end, t:e.title, k:e.tipo}))
+  // Se la sveglia vera è già annotata (diario), il sonno finisce lì: il widget non deve dire «Sonno» fino all'ora prevista.
+  const fineReale=e=>{
+    if(e.tipo!=="sonno") return +e.end;
+    let migliore=null;
+    for(const dk of [0,-1]){ const g=day(new Date(+e.end), dk), k=iso(g), w=wakes[k];
+      if(!/^\d\d:\d\d$/.test(w||"")) continue;
+      const ts=new Date(g); ts.setHours(+w.slice(0,2), +w.slice(3,5), 0, 0); const T=ts.getTime();
+      if(T>ora || T<=+e.start+90*60e3 || Math.abs(T-(+e.end))>4*3600e3) continue;   // non futura, non un pisolino, vicina alla fine prevista
+      if(migliore===null || Math.abs(T-(+e.end))<Math.abs(migliore-(+e.end))) migliore=T; }
+    return migliore!==null && migliore<+e.end ? migliore : +e.end;
+  };
+  const voci=ev.map(e=>({s:+e.start, e:fineReale(e), t:e.title, k:e.tipo})).filter(e=>e.e>ora && e.s<ora+48*3600e3)
     .sort((a,b)=>a.s-b.s);
   // Il prossimo turno, anche fra giorni: la prima cosa che si guarda.
   const tn=ev.filter(e=>e.tipo==="turno" && +e.end>ora).sort((a,b)=>a.start-b.start)[0];
@@ -9043,7 +9056,7 @@ function renderLoSapevi(){
       ? '<span class="sapevi-az">'+c.link().map(([h,t])=>'<a class="btn sm" href="'+esc(h)+'" target="_blank" rel="noopener" data-sapevi-link>'+esc(t)+'</a>').join("")+'</span>'
     : (cta && c.a ? '<button type="button" class="btn sm" data-sapevi-prova>'+esc(cta)+'</button>' : '');
   // statistiche: sì e no sono entrambe risposte, niente ×
-  el.innerHTML='<div><b>'+esc(c.titolo||"Lo sapevi?")+'</b> '+esc(c.t())+(azioni?'<br>'+azioni:'')+'</div>'+
+  el.innerHTML='<div><b>'+esc(c.titolo||"Lo sapevi?")+'</b> '+esc(c.t())+(azioni||'')+'</div>'+
     (c.scelta ? '' : '<button type="button" class="x" data-sapevi-chiudi aria-label="Chiudi, non lo mostro più">×</button>');
 }
 if($("#loSapevi")) $("#loSapevi").addEventListener("click", e=>{

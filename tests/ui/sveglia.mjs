@@ -48,13 +48,13 @@ const bottone=p=>p.evaluate(()=>{ const t=document.querySelector('#essenziale [d
   ok(!(await bottone(p)), "sito: niente pulsante (la sveglia c'è solo nell'app)");
   await p.context().close(); }
 
-// la linea dell'ora sta fra «Dormi» (già cominciato) e il pulsante della sveglia, non sotto il pulsante
+// sonno in corso e ultima voce del piano: niente linea dell'ora oltre «Dormi» (la voce dice già «adesso»), subito sotto c'è il pulsante della sveglia
 { const ieri=new Date(); ieri.setDate(ieri.getDate()-1);
   const p=await apri(8766, true, true, [3,43], {turniConfigurati:true,pattern:"NR",anchor:iso(ieri),repeat:true,firstSeenAt:"2026-01-01",shifts:{N:{n:"Notte",s:1320,e:1575}}});
   const o=await p.evaluate(()=>{ const t=document.querySelector('#essenziale [data-row="sonno"]'); if(!t) return null; const v=t.closest(".tl");
-    const a=v.nextElementSibling, c=a&&a.nextElementSibling;
-    return {riga:v.className, dopo:a&&a.className, poi:c&&c.className, sveglia:!!(c&&c.querySelector("[data-sveglia]")), ora:a&&a.querySelector(".en")&&a.querySelector(".en").textContent}; });
-  ok(o && /tl-adesso/.test(o.dopo||"") && /tl-extra/.test(o.poi||"") && o.sveglia && o.ora==="03:43", "sonno in corso (03:43): «Dormi» → linea dell'ora → «Metti la sveglia» → "+JSON.stringify(o));
+    const a=v.nextElementSibling;
+    return {riga:v.className, dopo:a&&a.className, sveglia:!!(a&&a.querySelector("[data-sveglia]")), linee:document.querySelectorAll(".tl-adesso").length}; });
+  ok(o && /\bora\b/.test(o.riga) && /tl-extra/.test(o.dopo||"") && o.sveglia && o.linee===0, "sonno in corso (03:43), ultima voce: «Dormi» → «Metti la sveglia», nessuna linea dell'ora oltre il sonno → "+JSON.stringify(o));
   await p.context().close(); }
 // prima del sonno la linea sta prima di «Dormi» e il pulsante resta attaccato alla riga
 { const p=await apri(8766, true, true, [10,0]);

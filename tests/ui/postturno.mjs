@@ -46,7 +46,7 @@ const stato=p=>p.evaluate(()=>({titolo:document.querySelector("#dateLabel").text
     const dormi=righe.find(r=>r.classList.contains("ora"));
     return {adesso:on?on.innerText.replace(/\s+/g," "):"", linea:righe.findIndex(r=>r.classList.contains("tl-adesso")), iDormi:righe.indexOf(dormi), quando:dormi?(dormi.querySelector(".dwhen")||{}).textContent||"":"?", oraSonno:dormi?dormi.innerText.replace(/\s+/g," ").slice(0,40):""}; });
   ok(/Dovresti dormire/.test(x.adesso) && !/Rientro dal turno/.test(x.adesso), "07:38, sonno già cominciato: «Adesso» dice di dormire, non «Rientro» → "+x.adesso.slice(0,70));
-  ok(x.linea>=0 && x.iDormi>=0 && x.linea>x.iDormi, "la linea dell'ora sta dopo «Dormi», che è già cominciato ("+x.linea+" > "+x.iDormi+")");
+  ok(x.iDormi>=0 && x.linea===-1, "«Dormi» è in corso e ultima voce: la linea dell'ora non va oltre il sonno ("+x.linea+", Dormi alla posizione "+x.iDormi+")");
   ok(x.quando!=="Domani", "il sonno di stamattina non è «Domani» → «"+x.quando+"» "+x.oraSonno);
   await ctx.close(); }
 // sonno che comincia dopo mezzanotte (letto all'01:00): prima che cominci sei ancora nel giorno di ieri
