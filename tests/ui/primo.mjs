@@ -10,7 +10,7 @@ ok(/Gratis, senza account: turni e sonno restano sul tuo telefono/.test(await p.
 ok(await p.evaluate(()=>["[data-subflow=schema]","[data-importa-primo]"].every(q=>{ const e=document.querySelector(q); return e && e.tagName==="BUTTON" && e.classList.contains("btn") && e.getBoundingClientRect().height>=44; })), "primo passo: «Conosco già il mio schema» e «Ho già i turni in un calendario» sono pulsanti, non link: sono percorsi veri");
 await p.click("[data-pick=M]"); await p.click("#qhConfermaOrario"); await p.waitForTimeout(800);
 ok(await p.evaluate(()=>!!document.querySelector("#essenziale .esshint")), "primo piano: «Tocca una voce per sapere perché»");
-await p.evaluate(()=>{ const d=document.querySelector("#essenziale details.erow"); d.open=true; }); await p.waitForTimeout(300);
+await p.click("#essenziale .erow[data-row]"); await p.waitForTimeout(300);   // il perché si apre in un foglio
 await p.reload(); await p.waitForTimeout(1500);
 ok(await p.evaluate(()=>!document.querySelector("#essenziale .esshint")), "aperta una voce, il suggerimento non torna");
 const leg=await p.evaluate(()=>document.body.innerText.includes("Picco di sonnolenza") || !document.body.innerText.includes("Sonnolenza"));
