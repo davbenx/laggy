@@ -10,6 +10,11 @@ Fatto nella 1.1.1 (non serve più): tolto il vecchio wizard nascosto; suggerimen
 - Domenica 25/10: la riga «Cambio d'ora» nel giorno di sabato e «Mancano» in ore vere.
 - Statistiche: guardare `sveglia_messa`, `diario_widget`, `voce_*`, `orologio_tuo`, `festivi_*`, `ferie_con`.
 
+## Valutazioni aperte (da decidere e fare, uno alla volta)
+1. **Punti di accesso alle funzioni**: una casa e al massimo una scorciatoia per funzione. Doppioni da sistemare: Festivi (4 ingressi → 3), riepilogo mese/12 mesi e PDF per il medico (3 posti → raccolti nel foglio «Condividi»), nomi più distinguibili fra i «Condividi». Verificare con i contatori d'uso dopo un paio di mesi.
+2. **Timeline di Oggi**: sostituire le voci espandibili (`details.erow`) con un popup (foglio) e la freccina con un'icona ⓘ. Le voci con azioni dentro («Orari che non fanno per te?», «Pisolini sul lavoro…», le scelte dopo la notte) vanno valutate una per una. Costo: ~mezza giornata + 11 suite che guardano le voci aperte.
+3. **«Metti la sveglia» in alto**: oggi sta sotto «Dormi» (solo Android), in fondo alla giornata. Proposta: nella scheda «Adesso» da 4 ore prima del sonno fino alla fine del sonno (stessa regola del widget), con «Sveglia messa» ricordato in locale (`nt:svegliaMessa`: l'Orologio non conferma), e restare sotto «Dormi» come unica altra casa.
+
 ## Funzioni a pagamento: come si farà la transizione (decisioni, novembre 2026)
 **Oggi tutto è gratis per tutti, senza badge e senza promesse pubbliche oltre «senza account e senza pubblicità».** Nel frattempo si misura cosa conta (sotto), senza cambiare nulla di visibile. Se un giorno si decide di far pagare qualcosa:
 1. **Preavviso**: annuncio nell'app (Novità) e sul sito almeno 60 giorni prima di una data di taglio D. Mai togliere una funzione da un giorno all'altro.
