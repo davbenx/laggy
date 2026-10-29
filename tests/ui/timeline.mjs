@@ -57,10 +57,10 @@ const base={turniConfigurati:true,pattern:"MPNSR",anchor:iso(new Date()),repeat:
   ok(!ore || !t.sub.includes(ore), "«Poi» non ripete un orario che «Adesso» ha già detto → «"+t.sub+"» / «"+t.poi+"»");
   await p.context().close(); }
 
-// le scelte sul sonno stanno attaccate a Dormi (riposo prima di un mattino alle 06:00)
+// le scelte sul sonno stanno nella scheda «Il tuo sonno» (riposo prima di un mattino alle 06:00), non sotto «Dormi»
 { const p=await apri({turniConfigurati:true,pattern:"RM",anchor:iso(new Date()),shifts:{M:{n:"Mattino",s:360,e:840}},repeat:true,firstSeenAt:"2026-01-01"}, 10);
-  const dentro=await p.evaluate(()=>{ const s=document.querySelector('[data-row="sonno"]').closest(".tl"); let e=s.nextElementSibling; while(e && !e.classList.contains("tl-extra") && !e.classList.contains("tl")) e=e.nextElementSibling; const x=e && e.classList.contains("tl-extra") && e.querySelector(".dopo-notte"); return !!x && x.querySelectorAll("[data-mattinobif]").length===2; });
-  ok(dentro, "«Tutto stanotte / Più tardi + pisolino» sta subito sotto la voce Dormi, sempre visibile");
+  const o=await p.evaluate(()=>({nellaScheda:!!document.querySelector("#essenziale .drem .dopo-notte [data-mattinobif]"), sottoDormi:!!document.querySelector('#essenziale [data-row="sonno"]').closest(".tl").nextElementSibling.querySelector(".dopo-notte"), card:!!document.querySelector("#essenziale .drem")}));
+  ok(o.card && o.nellaScheda && !o.sottoDormi, "«Tutto stanotte / Più tardi + pisolino» sta nella scheda «Il tuo sonno», non sotto «Dormi» → "+JSON.stringify(o));
   await p.context().close(); }
 
 // telefono stretto: niente scorrimento orizzontale, testo non tagliato

@@ -896,7 +896,7 @@ display:flex;align-items:center;justify-content:center;position:relative;z-index
 .tl-adesso .en{font-size:12.5px;font-weight:700;color:var(--blue);text-align:right;font-variant-numeric:tabular-nums}
 .tl-adesso i{justify-self:center;width:9px;height:9px;border-radius:50%;background:var(--blue);position:relative;z-index:1;box-shadow:0 0 0 3px var(--bg)}
 .tl-adesso::after{content:"";position:absolute;left:calc(var(--tcol) + 10px + var(--nodo));right:0;top:50%;height:1px;background:var(--blue);opacity:.45}
-.tl-extra{margin:2px 0 8px}
+.drem .dopo-notte{margin:var(--sp-3) 0 0;padding:var(--sp-3) 0 0;border-top:1px solid var(--line)}
 .sv-riga{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);margin-top:var(--sp-3);padding-top:var(--sp-3);border-top:1px solid var(--line);font-size:14px;color:var(--dim)}
 .sv-t{display:flex;align-items:center;gap:var(--sp-2);min-width:0}
 .sv-t b{color:var(--ink)}
@@ -6091,10 +6091,9 @@ function renderEssenziale(P, CARDS){
   const voci=[];   // {t, html} — poi ordinate per orario della giornata
 
   // ── il diario, in testa: si riferisce al sonno appena finito ──
-  // La scheda «Il tuo sonno» è la zona delle azioni: il diario e, di sera, la sveglia (solo Android). Senza diario da fare, resta la sola sveglia.
+  // La scheda «Il tuo sonno» è la zona delle azioni, tutte in un posto: il diario, le scelte su come dormire (dopo la notte, letto presto)
+  // e, di sera, la sveglia (solo Android). Si compone più sotto, quando le scelte sono pronte; se non c'è il diario da fare, resta il resto.
   const drem=diaryReminder(P, CARDS), svR=dnum(state.focus)===dnum(giornoVero()) ? svegliaRiga(P, minutiDaFocus()) : "";
-  const blocco = svR ? (drem ? drem.replace(/<\/div>$/, svR+'</div>') : '<div class="drem done"><div class="drem-q"><span class="dic">'+ICON.moon+'</span>Il tuo sonno</div>'+svR+'</div>') : drem;
-  if(blocco) voci.push({t:-2, html:blocco});
 
   // ── la finestra di sonno: non è una scheda, la costruiamo qui ──
   // Sotto "Dormi" solo il numero di ore: il perché (smonto, turno nel cuore
@@ -6129,8 +6128,10 @@ function renderEssenziale(P, CARDS){
   // "pre-turno-bifasico", non "pre-turno"), c'è un modo di risolverlo che
   // l'utente potrebbe non aver ancora trovato da solo.
   const lp=sceltaLettoPresto(P);
-  // Le scelte di «Dormi» (dopo la notte, letto presto) non stanno dentro la riga: vedi più sotto, dove si decide da che parte della linea dell'ora vanno.
-  if(dn || lp) vSonno.extra='<div class="tl-extra">'+(dn||"")+(lp||"")+'</div>';
+  // Le scelte sul sonno e la sveglia stanno nella scheda «Il tuo sonno», in testa: «Dormi» resta solo informazione.
+  { const azioni=(dn||"")+(lp||"")+svR;
+    const blocco = azioni ? (drem ? drem.replace(/<\/div>$/, azioni+'</div>') : '<div class="drem done"><div class="drem-q"><span class="dic">'+ICON.moon+'</span>Il tuo sonno</div>'+azioni+'</div>') : drem;
+    if(blocco) voci.push({t:-2, html:blocco}); }
 
   // Tempo libero: le ore da sveglio fuori da turno, viaggio, sonno e pisolini.
   // Risponde a «e la palestra quando la faccio?» (e figli, spesa…) senza un
@@ -6301,13 +6302,6 @@ function renderEssenziale(P, CARDS){
   // ripeterlo qui sotto come etichetta su una riga creava due segnali
   // "adesso" sullo stesso schermo, in competizione. Questa resta la
   // lista cronologica semplice, senza separatori.
-  // Le azioni di una voce stanno subito sotto di lei; ma se la linea dell'ora cade fra la voce (già cominciata) e il resto,
-  // vanno sotto la linea: «da adesso puoi…», non fra «Dormi» e il segno dell'ora.
-  for(let i=voci.length-1;i>=0;i--){
-    if(!voci[i].extra) continue;
-    const sottoLinea=voci[i+1] && /^<div class="tl-adesso"/.test(voci[i+1].html);
-    voci.splice(i+1+(sottoLinea?1:0), 0, {t:voci[i].t, html:voci[i].extra});
-  }
   let h=voci.map(v=>v.html).join("");
   // Ogni voce si apre e spiega il suo perché, ma l'unico indizio era la
   // freccina: al primo piano lo si dice una volta, finché non se ne apre una.
@@ -9248,7 +9242,7 @@ if($("#cycToday")) $("#cycToday").onclick=()=>{
    `id` cambia solo quando c'è qualcosa da dire; chi aggiorna la vede una volta. Chi installa adesso non la vede
    (non è una novità per lui), ma la trova sempre in Impostazioni › Novità. «app:true» = solo nell'app Android. */
 const NOVITA={ id:"2026-11-05", data:"Novembre 2026", righe:[
-  ["Il perché in un foglio, i riepiloghi in Condividi","Nel piano di Oggi tocchi una voce (icona ⓘ) e il perché si apre in un foglio, senza allungare la lista. Il riepilogo del mese, dei 12 mesi e il PDF per il medico stanno in «Condividi e riepiloghi». Su Android «Metti la sveglia» sta in «Il tuo sonno», nelle ore prima di dormire.",false,"2026-11-05"],
+  ["Il perché in un foglio, i riepiloghi in Condividi","Nel piano di Oggi tocchi una voce (icona ⓘ) e il perché si apre in un foglio, senza allungare la lista. Il riepilogo del mese, dei 12 mesi e il PDF per il medico stanno in «Condividi e riepiloghi». In «Il tuo sonno» ci sono ora anche le scelte su come dormire e, su Android, «Metti la sveglia».",false,"2026-11-05"],
   ["Sonno e carico più chiaro","La pagina mostra subito il sonno che ti manca; il resto è un elenco di quattro voci, ognuna con la sua riga riassuntiva e la sua pagina. Gli orari del sonno separano le notti dormite di notte da quelle di giorno, e gli assi dei grafici sono corretti.",false,"2026-11-04"],
   ["Copia completa su file","In Impostazioni › Dati e privacy: un file con turni, diario del sonno, impostazioni e persone. Lo riapri con «Ripristina da un file», anche su un telefono nuovo. Il link resta per spostare i turni sull'altro telefono.",false,"2026-11-03"],
   ["Cambia un turno, senza scambio","In Cambio turno scegli «Cambia un turno»: un giorno prende un altro turno (o il riposo) e vedi subito cosa cambia per il sonno. Più semplice, i consigli sulle funzioni hanno pulsanti più chiari e Dati e privacy ha una nuova icona.",false,"2026-11-02"],

@@ -26,7 +26,7 @@ const riga=p=>p.evaluate(()=>{ const x=document.querySelector("#essenziale .drem
 { const p=await apri(8766, true, true, [20,30]);
   const s=await riga(p);
   ok(s && /^\d\d:\d\d$/.test(s.ora) && s.fine.includes(s.ora) && s.visibile && s.ovunque===1, "app, di sera: «Metti» nella scheda «Il tuo sonno», all'ora di fine sonno, e in nessun altro posto → "+JSON.stringify(s));
-  ok(await p.evaluate(()=>!document.querySelector("#ora [data-sveglia]") && !document.querySelector(".tl-extra [data-sveglia]")), "non nella scheda «Adesso» né sotto «Dormi»");
+  ok(await p.evaluate(()=>!document.querySelector("#ora [data-sveglia]") && !document.querySelector("#essenziale .tl [data-sveglia]")), "non nella scheda «Adesso» né sotto «Dormi»");
   await p.click("[data-sveglia]"); await p.waitForTimeout(400);
   const [h,m]=s.ora.split(":").map(Number), sv=await p.evaluate(()=>window.__sveglie);
   ok(sv.length===1 && sv[0].hour===h && sv[0].minutes===m && sv[0].message==="Notturnisti", "tocco: sveglia chiesta all'Orologio → "+JSON.stringify(sv));
