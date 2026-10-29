@@ -897,6 +897,8 @@ display:flex;align-items:center;justify-content:center;position:relative;z-index
 .tl-adesso i{justify-self:center;width:9px;height:9px;border-radius:50%;background:var(--blue);position:relative;z-index:1;box-shadow:0 0 0 3px var(--bg)}
 .tl-adesso::after{content:"";position:absolute;left:calc(var(--tcol) + 10px + var(--nodo));right:0;top:50%;height:1px;background:var(--blue);opacity:.45}
 .tl-extra{margin:2px 0 8px}
+.ora-sveglia{display:flex;margin:12px 0 0 58px}
+.ora-sveglia.lnk{align-items:center;min-height:44px;padding:0;font-size:14px;font-weight:600;margin-top:4px}
 /* voce del piano: tutta la riga si tocca per il «perché» (foglio), con l'icona ⓘ a destra */
 .erow{margin:0;cursor:pointer;border-radius:12px}
 .erow:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
@@ -4514,6 +4516,20 @@ function votoOraRecente(){
   }
   return false;
 }
+// La sveglia per la fine del sonno (solo app Android): vale se la fine cade nelle prossime 24 ore (l'Orologio la mette
+// alla prossima volta che arriva quell'ora). `m` = minuti di adesso sulla scala del piano. L'Orologio non dice se l'abbiamo messa:
+// lo ricordiamo noi, in locale, per quell'ora e per 24 ore.
+function svegliaDelPiano(P, m){
+  if(!platform.alarm.available || !P || !P.s) return null;
+  const fine=P.s.onset+P.s.dur, tra=fine-m;
+  return tra>0 && tra<=1440 ? {t:hhmm(fine), fra:P.s.onset-m} : null;   // fra: minuti all'inizio del sonno (negativo = già cominciato)
+}
+function svegliaHtml(sv, cls){
+  const v=store.get("svegliaMessa",null), messa=!!v && v.t===sv.t && Date.now()-v.at<24*3600e3;
+  return messa ? '<button type="button" class="lnk '+cls+'" data-sveglia="'+sv.t+'">✓ Sveglia messa alle '+sv.t+' · rimettila</button>'
+    : '<button type="button" class="btn g sm '+cls+'" data-sveglia="'+sv.t+'">Metti la sveglia alle '+sv.t+'</button>';
+}
+const SVEGLIA_ORE_PRIMA=240;   // in «Adesso» da 4 ore prima del sonno (come nel widget) fino alla fine del sonno
 function renderOra(Pfocus){
   const el=$("#ora"); if(!el) return;
   if(state.vista==="dettaglio"){ el.innerHTML=""; return; }
@@ -4661,7 +4677,7 @@ function renderOra(Pfocus){
     '<div class="ora-h"><span class="ora-ic">' + oraIc + '</span>' +
     '<div class="ora-tx"><span class="eyebrow">Adesso</span>' +
     '<b>' + esc(title) + '</b></div></div>' +
-    '<span class="ora-sub">' + esc(sub) + '</span>' + momenti +
+    '<span class="ora-sub">' + esc(sub) + '</span>' + momenti + (()=>{ const sv=svegliaDelPiano(P, m); return sv && sv.fra<=SVEGLIA_ORE_PRIMA ? svegliaHtml(sv,"ora-sveglia") : ""; })() +
     '</div>';
 }
 if($("#ora")) $("#ora").addEventListener("click", () => {
@@ -6090,9 +6106,8 @@ function renderEssenziale(P, CARDS){
   // Sveglia vera nell'Orologio del telefono (solo app Android): l'Orologio
   // la mette alla prossima volta che arriva quell'ora, quindi solo se la
   // fine del sonno cade nelle prossime 24 ore.
-  const fineSonno=P.s.onset+P.s.dur, traQuanto=fineSonno-minutiDaFocus();
-  const sveglia = platform.alarm.available && traQuanto>0 && traQuanto<=1440
-    ? '<button type="button" class="btn g ed-sveglia" data-sveglia="'+hhmm(fineSonno)+'">Metti la sveglia alle '+hhmm(fineSonno)+'</button>' : "";
+  const svP=svegliaDelPiano(P, minutiDaFocus());
+  const sveglia = svP ? svegliaHtml(svP,"ed-sveglia") : "";
   const vSonno={t:dSv(P.s.onset), html:riga("sonno","Dormi",sonnoWin(P),sonnoSub,false,ICON.moon,
     dettSonno+'<button type="button" class="lnk ed-cambia" data-cambia="3">Orari che non fanno per te? Dimmi come dormi →</button>',
     {a:P.s.onset, z:P.s.onset+P.s.dur, poi:"a letto alle "+hhmm(P.s.onset)})};
@@ -8627,13 +8642,13 @@ if($("#andamenti")) $("#andamenti").addEventListener("click", e=>{
   if(!e.target.closest("[data-oro-cambia]")) return;
   apriOpzioni("abitudini"); apriSezioneInline(3);
 });
-if($("#essenziale")) $("#essenziale").addEventListener("click", e=>{
+["#essenziale","#ora"].forEach(sel=>{ if($(sel)) $(sel).addEventListener("click", e=>{
   const b=e.target.closest("[data-sveglia]"); if(!b) return;
   const t=b.dataset.sveglia, [h,m]=t.split(":").map(Number);
   platform.alarm.set(h, m, "Notturnisti")
-    .then(()=>{ toast("Sveglia delle "+t+" messa nell'Orologio"); track("sveglia_messa"); usata("sveglia"); haptic(8); })
+    .then(()=>{ store.set("svegliaMessa",{t, at:Date.now()}); toast("Sveglia delle "+t+" messa nell'Orologio"); track("sveglia_messa"); usata("sveglia"); haptic(8); render(); })
     .catch(()=>toast("Non riesco a metterla: usa l'app Orologio del telefono"));
-});
+}); });
 // Il foglio per il frigo: si costruisce apposta, non si spreme il DOM vivo.
 // Copre un giro completo di ciclo, con le sole informazioni che servono.
 function buildPrintSheet(){
@@ -9230,7 +9245,7 @@ if($("#cycToday")) $("#cycToday").onclick=()=>{
    `id` cambia solo quando c'è qualcosa da dire; chi aggiorna la vede una volta. Chi installa adesso non la vede
    (non è una novità per lui), ma la trova sempre in Impostazioni › Novità. «app:true» = solo nell'app Android. */
 const NOVITA={ id:"2026-11-05", data:"Novembre 2026", righe:[
-  ["Il perché in un foglio, i riepiloghi in Condividi","Nel piano di Oggi tocchi una voce (icona ⓘ) e il perché si apre in un foglio, senza allungare la lista. Il riepilogo del mese, dei 12 mesi e il PDF per il medico stanno in «Condividi e riepiloghi».",false,"2026-11-05"],
+  ["Il perché in un foglio, i riepiloghi in Condividi","Nel piano di Oggi tocchi una voce (icona ⓘ) e il perché si apre in un foglio, senza allungare la lista. Il riepilogo del mese, dei 12 mesi e il PDF per il medico stanno in «Condividi e riepiloghi». Su Android «Metti la sveglia» compare in «Adesso» nelle ore prima di dormire.",false,"2026-11-05"],
   ["Sonno e carico più chiaro","La pagina mostra subito il sonno che ti manca; il resto è un elenco di quattro voci, ognuna con la sua riga riassuntiva e la sua pagina. Gli orari del sonno separano le notti dormite di notte da quelle di giorno, e gli assi dei grafici sono corretti.",false,"2026-11-04"],
   ["Copia completa su file","In Impostazioni › Dati e privacy: un file con turni, diario del sonno, impostazioni e persone. Lo riapri con «Ripristina da un file», anche su un telefono nuovo. Il link resta per spostare i turni sull'altro telefono.",false,"2026-11-03"],
   ["Cambia un turno, senza scambio","In Cambio turno scegli «Cambia un turno»: un giorno prende un altro turno (o il riposo) e vedi subito cosa cambia per il sonno. Più semplice, i consigli sulle funzioni hanno pulsanti più chiari e Dati e privacy ha una nuova icona.",false,"2026-11-02"],

@@ -39,6 +39,21 @@ const bottone=p=>p.evaluate(()=>{ const t=document.querySelector('#essenziale [d
   ok(!(await bottone(p)), "fra tre giorni: niente sveglia (l'Orologio la metterebbe domani)");
   await p.context().close(); }
 
+// in «Adesso»: da 4 ore prima del sonno la sveglia è in cima; prima no. Dopo il tocco si ricorda che è messa.
+{ const lontano=await apri(8766, true, true, [10,0]);
+  ok(await lontano.evaluate(()=>!document.querySelector("#ora [data-sveglia]")), "alle 10, lontano dal sonno: niente sveglia nella scheda «Adesso»");
+  await lontano.context().close();
+  const p=await apri(8766, true, true, [20,30]);
+  const h=await p.evaluate(()=>{ const x=document.querySelector("#ora [data-sveglia]"); return x ? {t:x.dataset.sveglia, testo:x.textContent.trim(), inScheda:!!x.closest(".ora-card")} : null; });
+  ok(h && /^Metti la sveglia alle \d\d:\d\d$/.test(h.testo) && h.inScheda, "alle 20:30, vicino al sonno: «Metti la sveglia» nella scheda «Adesso» → "+JSON.stringify(h));
+  ok(await p.evaluate(()=>!!document.querySelector('#essenziale [data-row="sonno"]') && document.querySelectorAll("[data-sveglia]").length===2), "e c'è anche sotto «Dormi» (una casa e una scorciatoia)");
+  await p.click("#ora [data-sveglia]"); await p.waitForTimeout(400);
+  ok(await p.evaluate(()=>window.__sveglie.length===1 && !!JSON.parse(localStorage.getItem("nt:svegliaMessa")||"null")), "tocco: sveglia messa e ricordata");
+  ok(await p.evaluate(()=>[...document.querySelectorAll("[data-sveglia]")].every(x=>/✓ Sveglia messa alle \d\d:\d\d/.test(x.textContent))), "ora entrambe dicono «✓ Sveglia messa alle …»");
+  await p.click("#ora [data-sveglia]"); await p.waitForTimeout(300);
+  ok(await p.evaluate(()=>window.__sveglie.length===2), "«rimettila» la rimanda all'Orologio");
+  await p.context().close(); }
+
 { const p=await apri(8766, true, "rifiuta");
   await bottone(p); await p.click("[data-sveglia]"); await p.waitForTimeout(300);
   ok(await p.evaluate(()=>[...document.querySelectorAll(".toast,#toast")].some(t=>/usa l'app Orologio/.test(t.textContent))), "senza app Orologio: lo dice, niente errori");
