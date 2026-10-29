@@ -585,10 +585,6 @@ html.js-lento .jsoff{display:block}
 #cyc:has(+ #meseBox:not([hidden])){border-bottom-left-radius:0;border-bottom-right-radius:0;border-bottom-color:transparent;margin-bottom:0}
 #cyc + #meseBox:not([hidden]){margin-top:0;border-top-left-radius:0;border-top-right-radius:0;border-top-color:var(--line)}
 .mese-riga b{color:var(--ink)}
-.mese-testa{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.mese-testa b{font-size:15px;color:var(--ink)}
-.mese-testa button{background:none;border:0;color:var(--blue);font:inherit;font-size:20px;line-height:1;padding:8px 12px;margin:-8px -6px;cursor:pointer}
-.mese-testa button[disabled]{color:var(--faint);opacity:.4;cursor:default}
 
 /* I turni del mese: pennelli + griglia */
 .sg-testa{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 10px}
@@ -602,14 +598,6 @@ html.js-lento .jsoff{display:block}
 .and-hub{margin:0 0 var(--sp-4)}
 .and-hub .opz-hub-r{min-height:62px}
 .and-hub .opz-val{white-space:normal}
-.and-det{margin:0 0 var(--sp-3);border:1px solid var(--line);border-radius:var(--r);background:var(--s1)}
-.and-det>summary{text-align:left;letter-spacing:0;text-transform:none;align-items:flex-start;display:flex;flex-direction:column;gap:2px;min-height:var(--tap);padding:var(--sp-3) 36px var(--sp-3) var(--sp-4);cursor:pointer;list-style:none;position:relative}
-.and-det>summary::-webkit-details-marker{display:none}
-.and-det>summary::after{content:"›";position:absolute;right:var(--sp-4);top:50%;margin-top:-12px;font-size:22px;color:var(--faint);transition:transform .15s}
-.and-det[open]>summary::after{transform:rotate(90deg)}
-.and-t{font-size:15px;font-weight:700;color:var(--ink);letter-spacing:0;text-transform:none}
-.and-r{font-size:13px;font-weight:400;color:var(--dim);letter-spacing:0;text-transform:none}
-.and-det>.andamento-sezione{border:0;border-top:1px solid var(--line);border-radius:0;background:none;margin:0;padding:var(--sp-3) var(--sp-4) var(--sp-4)}
 .sg-barra{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-2);margin:0 0 var(--sp-3)}
 .sg-barra .sg-pen{padding:0 var(--sp-2);font-size:13px;min-height:var(--tap);border-radius:var(--r-campo)}
 .sg-pen{border:1.5px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;min-height:40px;padding:0 13px;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer}
@@ -6695,12 +6683,9 @@ if($("#ttFestivi")) $("#ttFestivi").addEventListener("click", e=>{
 });
 if($("#meseBox")) $("#meseBox").addEventListener("click", e=>{
   if(e.target.closest("[data-riepilogo-medico]")){ stampaRiepilogoMedico(); return; }
-  if(e.target.closest("[data-mese-segna]")){ sgOff=meseOff; apriSegna(); return; }
   if(e.target.closest("[data-mese-manda]")){ mandaRiepilogo("mese"); return; }
   if(e.target.closest("[data-anno-manda]")){ mandaRiepilogo("anno"); return; }
   if(e.target.closest("[data-fest-apri]")){ apriTuoiTurni("turni",{festivi:true}); return; }
-  const b=e.target.closest("[data-mese]"); if(!b || b.disabled) return;
-  meseOff=Math.max(-12, Math.min(12, meseOff + +b.dataset.mese)); renderMese();
 });
 // Riferimenti orari per le strisce del tempo: le 00, 06, 12 e 18 che cadono
 // nella finestra [clo, chi] (minuti sulla scala del giorno, anche oltre 1440).
@@ -7245,7 +7230,7 @@ function renderAndamenti(){
   // le altre, è la cosa più utile da leggere in questa visita. Il debito di
   // sonno resta subito sotto: hero (numero grande + sparkline), sempre
   // presente perché è un cruscotto, non un consiglio che scade.
-  let capoHtml="", heroHtml="", sezioni=[], parteFascia=null, parteCiclo=null; const vociAnd={};
+  let capoHtml="", heroHtml="", parteFascia=null, parteCiclo=null; const vociAnd={};
   if(capo){
     capoHtml='<div class="andamento-insight"><span class="aic">'+ICON.sun+'</span>'+
       '<div><span class="andamento-insight-eyebrow">'+(capo.action?"Da provare questa settimana":"Insight")+'</span>'+esc(capo.testo)+
@@ -9268,7 +9253,7 @@ if($("#cycToday")) $("#cycToday").onclick=()=>{
    `id` cambia solo quando c'è qualcosa da dire; chi aggiorna la vede una volta. Chi installa adesso non la vede
    (non è una novità per lui), ma la trova sempre in Impostazioni › Novità. «app:true» = solo nell'app Android. */
 const NOVITA={ id:"2026-11-04", data:"Novembre 2026", righe:[
-  ["Sonno e carico più chiaro","La pagina mostra subito il sonno che ti manca; il resto sta in sezioni chiuse, ognuna con la sua riga riassuntiva. Gli orari del sonno separano le notti dormite di notte da quelle di giorno, e gli assi dei grafici sono corretti.",false,"2026-11-04"],
+  ["Sonno e carico più chiaro","La pagina mostra subito il sonno che ti manca; il resto è un elenco di quattro voci, ognuna con la sua riga riassuntiva e la sua pagina. Gli orari del sonno separano le notti dormite di notte da quelle di giorno, e gli assi dei grafici sono corretti.",false,"2026-11-04"],
   ["Copia completa su file","In Impostazioni › Dati e privacy: un file con turni, diario del sonno, impostazioni e persone. Lo riapri con «Ripristina da un file», anche su un telefono nuovo. Il link resta per spostare i turni sull'altro telefono.",false,"2026-11-03"],
   ["Cambia un turno, senza scambio","In Cambio turno scegli «Cambia un turno»: un giorno prende un altro turno (o il riposo) e vedi subito cosa cambia per il sonno. Più semplice, i consigli sulle funzioni hanno pulsanti più chiari e Dati e privacy ha una nuova icona.",false,"2026-11-02"],
   ["Festivi nel calendario","I festivi hanno un puntino rosso nella striscia e nel calendario di Turni. Con un ciclo puoi dire «Nei festivi sono a casa»: il giorno diventa riposo, anche per le ferie.",false,"2026-11-01"],
