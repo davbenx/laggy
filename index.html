@@ -3214,6 +3214,7 @@ function toHash(perServer){
     if(state.pWake) p.set("pw",state.pWake);
     if(state.pBed) p.set("pwb",state.pBed); }
   if(state.pName) p.set("pn",safeName(state.pName));
+  if(/^\d{4}-\d{2}-\d{2}$/.test(state.firstSeenAt||"")) p.set("fs",state.firstSeenAt);   // da quando usi l'app: chi cambia telefono non diventa «nuovo»
   if(state.people && state.people.length) p.set("ppl", JSON.stringify(state.people.map(per=>({
     p:(per.pattern||"").toUpperCase().replace(/[^A-Z]/g,"").slice(0,400),
     a:per.anchor||null, s:per.shifts||null, w:per.wake||null, b:per.bed||null, n:safeName(per.name)||null
@@ -3230,6 +3231,7 @@ function fromHash(hashStr){
   if(p.get("s")){ const sh=decShifts(p.get("s")); if(sh) state.shifts=sh; }
   if(p.get("p")) state.pattern=seq(p.get("p"))||state.pattern;
   if(okDate(p.get("a"))) state.anchor=p.get("a");
+  if(okDate(p.get("fs")) && p.get("fs")<=iso(new Date()) && (!state.firstSeenAt || p.get("fs")<state.firstSeenAt)) state.firstSeenAt=p.get("fs");   // vale la data più vecchia
   if(okTime(p.get("w"))) state.freeWake=p.get("w");
   if(okTime(p.get("wb"))) state.freeBed=p.get("wb");
   if(NT.CFG.caffScala[p.get("cs")]) state.caffSens=p.get("cs");
