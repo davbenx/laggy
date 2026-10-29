@@ -66,4 +66,21 @@ p=await nuova({turniConfigurati:true,pattern:"MPN",anchor:iso(oggi),shifts:SH,re
 await p.click("#doFerie"); await p.waitForTimeout(300);
 ok(/non si ripete/.test(await p.evaluate(()=>document.querySelector("#ferieOut").innerText)), "ciclo che non si ripete: lo dice invece di proporre a caso");
 await p.context().close();
+// festivi nelle proposte: il puntino è solo dei festivi veri; la domenica no. E «Nei festivi sono a casa» li rende giorni a casa.
+// Data fissa (2 febbraio 2026, nessun festivo nazionale nelle settimane dopo) perché il test non dipenda da quando si lancia.
+{ const FIS=new Date("2026-02-02T12:00:00+01:00"), ctx=await b.newContext({locale:"it-IT",viewport:{width:360,height:740},timezoneId:"Europe/Rome"});
+  const stato=extra=>({turniConfigurati:true,pattern:"MMMMMMMR",anchor:"2026-01-31",shifts:SH,repeat:true,firstSeenAt:"2026-01-01",festivi:{extra:["2-5"]},festiviRiposo:extra});
+  await ctx.addInitScript(st=>{ if(sessionStorage.getItem("x")) return; sessionStorage.setItem("x","1"); localStorage.setItem("nt:state",JSON.stringify(st)); localStorage.setItem("nt:turniConfigurati","true"); localStorage.setItem("nt:firstPlanBannerChiuso","true"); }, stato(false));
+  const q=await ctx.newPage(); q.on("pageerror",e=>errs.push(e.message));
+  await q.clock.setFixedTime(FIS); await q.goto("http://localhost:8765/index.html"); await q.waitForTimeout(900);
+  await q.click('[data-tab="turni"]'); await q.waitForTimeout(300); await q.click("#doFerie"); await q.waitForTimeout(400);
+  const dom=await q.evaluate(()=>{ const fg=[...document.querySelectorAll(".ferie-giorni .fg")]; return {domenicheConPuntino:fg.filter(x=>/^Dom/.test(x.textContent)&&x.classList.contains("fest")).length, domeniche:fg.filter(x=>/^Dom/.test(x.textContent)).length}; });
+  ok(dom.domeniche>0 && dom.domenicheConPuntino===0, "ferie: la domenica non ha il puntino del festivo, solo i festivi veri → "+JSON.stringify(dom));
+  const prima=await q.evaluate(()=>[...document.querySelectorAll(".ferie-prop .ferie-testa b")].map(e=>parseInt(e.textContent)).sort((a,c)=>c-a)[0]||0);
+  await q.evaluate(()=>{ const s=JSON.parse(localStorage.getItem("nt:state")); s.festiviRiposo=true; localStorage.setItem("nt:state",JSON.stringify(s)); });
+  await q.evaluate(()=>{ sessionStorage.setItem("x","1"); }); await q.reload(); await q.waitForTimeout(900);
+  await q.click('[data-tab="turni"]'); await q.waitForTimeout(300); await q.click("#doFerie"); await q.waitForTimeout(400);
+  const dopo=await q.evaluate(()=>[...document.querySelectorAll(".ferie-prop .ferie-testa b")].map(e=>parseInt(e.textContent)).sort((a,c)=>c-a)[0]||0);
+  ok(dopo>prima, "con «Nei festivi sono a casa» il periodo a casa si allunga ("+prima+" → "+dopo+" giorni)");
+  await ctx.close(); }
 console.log("errori", errs); await b.close();

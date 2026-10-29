@@ -85,7 +85,7 @@ const dove=()=>p.evaluate(()=>({tab:["oggi","turni","opzioni"].find(t=>document.
   h:(document.querySelector("#ttFlusso #demoEsempio:not([hidden]) .qh-h")||{}).textContent||"", righe:[...document.querySelectorAll("#ttRighe [data-tt]")].filter(b=>!b.hidden).map(b=>b.dataset.tt).join(",")}));
 await cl('[data-tab="turni"]'); await p.waitForTimeout(300); await cl("#tEdit"); await p.waitForTimeout(250); await cl('[data-mod="ciclo"]'); await p.waitForTimeout(300);
 let d=await dove();
-ok(d.pagina && d.tab==="turni" && d.righe==="schema" && await p.evaluate(()=>!!document.querySelector("#ttOrari [data-tt-da]") && document.querySelectorAll("#ttRiepilogo [data-tt-oggi]").length>0) && /In quinta/.test(await p.evaluate(()=>document.querySelector("#ttRiepilogo").innerText)), "Turni › Modifica: «I tuoi turni» con riepilogo, striscia da toccare, orari sulla pagina e «Cambia tipo di turni» → "+JSON.stringify(d));
+ok(d.pagina && d.tab==="turni" && d.righe==="festivi,schema" && await p.evaluate(()=>!!document.querySelector("#ttOrari [data-tt-da]") && document.querySelectorAll("#ttRiepilogo [data-tt-oggi]").length>0) && /In quinta/.test(await p.evaluate(()=>document.querySelector("#ttRiepilogo").innerText)), "Turni › Modifica: «I tuoi turni» con riepilogo, striscia da toccare, orari sulla pagina e «Cambia tipo di turni» → "+JSON.stringify(d));
 await cl('[data-tt="schema"]'); await p.waitForTimeout(200); d=await dove();
 const sotto=await p.evaluate(()=>({casa:!!document.querySelector("#aCasa").offsetParent, sap:!!document.querySelector("#loSapevi").offsetParent}));
 ok(d.h==="Come sono i tuoi turni?" && !sotto.casa && !sotto.sap, "Cambia schema: il flusso dentro la pagina, niente altro sotto → "+d.h);
@@ -94,7 +94,7 @@ const dodici=await p.evaluate(()=>[...document.querySelectorAll("[data-preset-ob
 ok(dodici.length===2, "dodici ore: entrambi gli schemi hanno lo smonto → "+dodici.join(" / "));
 await cl('[data-subflow="prossimi"]').catch(()=>{}); await p.waitForTimeout(150);
 await cl("[data-chiudi-schema]"); await p.waitForTimeout(200); d=await dove();
-ok(d.pagina && d.h==="" && d.righe==="schema", "Annulla: si torna alla pagina, non a Oggi");
+ok(d.pagina && d.h==="" && d.righe==="festivi,schema", "Annulla: si torna alla pagina, non a Oggi");
 await cl('[data-tt="orari"]'); await p.waitForTimeout(200);
 await p.evaluate(()=>{ const i=document.querySelector('[data-ora-da="M"]'); i.value="06:30"; }); await cl("#qhConfermaOrari"); await p.waitForTimeout(300); d=await dove();
 ok(d.pagina && d.h==="" && await p.evaluate(()=>JSON.parse(localStorage.getItem("nt:state")).shifts.M.s)===390, "Orari dei turni: il mattino alle 6:30, e si torna alla pagina");
@@ -115,14 +115,14 @@ await p.context().close();
   const f=await p.evaluate(()=>({righe:[...document.querySelectorAll("#ttRighe [data-tt]")].filter(b=>!b.hidden).map(b=>b.dataset.tt).join(","), r:document.querySelector("#ttRiepilogo").innerText}));
   await p.evaluate(()=>document.querySelector('[data-tt="riposi"]').click()); await p.waitForTimeout(200);
   const on=await p.evaluate(()=>[...document.querySelectorAll(".qh-gg.on")].map(b=>b.dataset.gg).join(","));
-  ok(f.righe==="riposi,schema" && /Sempre Notte/.test(f.r) && on==="5,6", "turno fisso: «Sempre Notte», Giorni di riposo parte da sab-dom → "+JSON.stringify(f)+" "+on);
+  ok(f.righe==="riposi,festivi,schema" && /Sempre Notte/.test(f.r) && on==="5,6", "turno fisso: «Sempre Notte», Giorni di riposo parte da sab-dom → "+JSON.stringify(f)+" "+on);
   await p.context().close(); }
 // turni variabili: la pagina è il mese; dal riquadro del mese si arriva lì
 p=await apri({turniConfigurati:true,pattern:"R",anchor:"2000-01-01",shifts:SH,repeat:false,firstSeenAt:fa(30)});
 await p.evaluate(()=>document.querySelector('[data-tab="turni"]').click()); await p.waitForTimeout(300);
 await p.evaluate(()=>document.querySelector("#tEdit").click()); await p.waitForTimeout(250); await p.evaluate(()=>document.querySelector('[data-mod="ciclo"]').click()); await p.waitForTimeout(300);
 const v=await p.evaluate(()=>({pagina:document.body.classList.contains("turni-aperta"), mese:!!document.querySelector("#ttMese #segnaOut"), imp:!!document.querySelector("#ttMese .sg-importa"), righe:[...document.querySelectorAll("#ttRighe [data-tt]")].filter(b=>!b.hidden).map(b=>b.dataset.tt).join(","), fatto:!document.querySelector("#ttFatto").hidden}));
-ok(v.pagina && v.mese && v.imp && v.righe==="orari,schema" && v.fatto, "turni variabili: «I tuoi turni» è il mese (con importazione), più Orari e Cambia schema → "+JSON.stringify(v));
+ok(v.pagina && v.mese && v.imp && v.righe==="orari,festivi,schema" && v.fatto, "turni variabili: «I tuoi turni» è il mese (con importazione), più Orari e Cambia schema → "+JSON.stringify(v));
 await p.context().close();
 p=await apri({turniConfigurati:true,pattern:"MPNSR",anchor:fa(2),shifts:SH,repeat:true,firstSeenAt:fa(30)});
 const nudge=await p.evaluate(()=>(document.querySelector("#essenziale .essnudge")||{}).textContent||"");

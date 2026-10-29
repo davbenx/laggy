@@ -580,11 +580,11 @@ html.js-lento .jsoff{display:block}
 .crow.mod .ccode::before{content:"";position:absolute;top:3px;left:-2px;width:5px;height:5px;border-radius:50%;background:var(--ink)}   /* giorno modificato (scambio, orari diversi): un puntino, non una sottolineatura che sembra un link */
 .cbar.sh{background:var(--orange-bar)}
 .key{display:flex;gap:14px;margin-top:8px;font-size:12px;color:var(--faint);flex-wrap:wrap}
-.mese{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;margin-top:12px}
-.mese-testa{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.mese-testa b{font-size:15px;color:var(--ink)}
-.mese-testa button{background:none;border:0;color:var(--blue);font:inherit;font-size:20px;line-height:1;padding:8px 12px;margin:-8px -6px;cursor:pointer}
-.mese-testa button[disabled]{color:var(--faint);opacity:.4;cursor:default}
+.mese{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:4px 14px;margin-top:12px}
+/* «Il tuo ciclo» e i numeri del suo mese sono una scheda sola: il riquadro dei numeri si attacca al ciclo */
+#cyc:has(+ #meseBox:not([hidden])){border-bottom-left-radius:0;border-bottom-right-radius:0;border-bottom-color:transparent;margin-bottom:0}
+#cyc + #meseBox:not([hidden]){margin-top:0;border-top-left-radius:0;border-top-right-radius:0;border-top-color:var(--line)}
+.mese-riga b{color:var(--ink)}
 
 /* I turni del mese: pennelli + griglia */
 .sg-testa{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 10px}
@@ -595,14 +595,9 @@ html.js-lento .jsoff{display:block}
 #segnaOut .sg-pennelli{flex-wrap:nowrap;overflow-x:auto;margin:0 -16px var(--sp-2);padding:2px 16px var(--sp-1);scrollbar-width:none;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent)}
 #segnaOut .sg-pennelli::-webkit-scrollbar{display:none}
 #segnaOut .sg-pen{flex:0 0 auto}
-.and-det{margin:0 0 var(--sp-3);border:1px solid var(--line);border-radius:var(--r);background:var(--s1)}
-.and-det>summary{text-align:left;letter-spacing:0;text-transform:none;align-items:flex-start;display:flex;flex-direction:column;gap:2px;min-height:var(--tap);padding:var(--sp-3) 36px var(--sp-3) var(--sp-4);cursor:pointer;list-style:none;position:relative}
-.and-det>summary::-webkit-details-marker{display:none}
-.and-det>summary::after{content:"›";position:absolute;right:var(--sp-4);top:50%;margin-top:-12px;font-size:22px;color:var(--faint);transition:transform .15s}
-.and-det[open]>summary::after{transform:rotate(90deg)}
-.and-t{font-size:15px;font-weight:700;color:var(--ink);letter-spacing:0;text-transform:none}
-.and-r{font-size:13px;font-weight:400;color:var(--dim);letter-spacing:0;text-transform:none}
-.and-det>.andamento-sezione{border:0;border-top:1px solid var(--line);border-radius:0;background:none;margin:0;padding:var(--sp-3) var(--sp-4) var(--sp-4)}
+.and-hub{margin:0 0 var(--sp-4)}
+.and-hub .opz-hub-r{min-height:62px}
+.and-hub .opz-val{white-space:normal}
 .sg-barra{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-2);margin:0 0 var(--sp-3)}
 .sg-barra .sg-pen{padding:0 var(--sp-2);font-size:13px;min-height:var(--tap);border-radius:var(--r-campo)}
 .sg-pen{border:1.5px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;min-height:40px;padding:0 13px;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer}
@@ -974,7 +969,7 @@ padding:12px 6px 12px 14px;margin:-6px 0 var(--gap-sezione);font-size:13.5px;lin
 .sapevi[hidden]{display:none}
 .sapevi>div{flex:1;min-width:0}
 .sapevi b{color:var(--ink)}
-.sapevi-az{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:6px}
+.sapevi-az{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:10px}
 .sapevi-az .btn{min-height:40px;padding:0 14px}
 .sapevi-az.sapevi-facce{flex-wrap:nowrap;gap:8px}
 .sapevi-facce .kface{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:56px;padding:6px 4px;font-size:13px}
@@ -1023,6 +1018,7 @@ padding:12px 6px 12px 14px;margin:-6px 0 var(--gap-sezione);font-size:13.5px;lin
 .tt-orari .qh-ore-riga>:first-child{grid-column:auto;font-size:15px}
 .tt-orari .qh-ore-riga input{background:var(--bg)}
 #tuoiTurniPagina.tt-flusso #ttOrari,#tuoiTurniPagina.tt-flusso #ttOggiNota{display:none}
+#tuoiTurniPagina.tt-festivi #ttRiepilogo,#tuoiTurniPagina.tt-festivi #ttOrari,#tuoiTurniPagina.tt-festivi #ttOggiNota,#tuoiTurniPagina.tt-festivi #ttMese,#tuoiTurniPagina.tt-festivi #ttRighe,#tuoiTurniPagina.tt-festivi #ttNota,#tuoiTurniPagina.tt-festivi #ttFatto{display:none}
 #ttFlusso #demoEsempio{border:0;background:none;box-shadow:none;padding:0;margin:0}
 #tuoiTurniPagina [hidden]{display:none!important}
 body.tab-turni.turni-aperta #ttFlusso #demoEsempio:not([hidden]){display:block!important}
@@ -1063,7 +1059,7 @@ letter-spacing:.01em;padding:9px 0 8px;min-height:56px;cursor:pointer;position:r
 .tsec-v{display:block;font-size:12.5px;color:var(--dim);margin-top:3px;line-height:1.35}
 .tsec-riga{margin-top:0}
 .mese-det{margin-top:6px}
-.mese-det>summary{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;list-style:none;min-height:44px;font-size:15px;font-weight:600;color:var(--ink)}
+.mese-det>summary{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;list-style:none;min-height:48px;font-size:14px;font-weight:500;letter-spacing:0;text-transform:none;color:var(--dim)}
 .mese-det>summary::-webkit-details-marker{display:none}
 .mese-det>summary::after{content:"›";font-size:20px;color:var(--faint);transition:transform .15s}
 .mese-det[open]>summary::after{transform:rotate(90deg)}
@@ -1731,9 +1727,11 @@ header b{font-size:23px}
     <button type="button" class="tool tool-1line va" data-tt="orari"><span class="tool-ic" data-ic="alarm"></span><span class="tool-tx"><b>Orari dei turni</b><span><span id="ttValOrari"></span></span></span></button>
     <button type="button" class="tool tool-1line va" data-tt="posizione" hidden><span class="tool-ic" data-ic="calendar"></span><span class="tool-tx"><b>Oggi dove sei nel ciclo</b><span>Se il ciclo risulta sfasato di qualche giorno</span></span></button>
     <button type="button" class="tool tool-1line va" data-tt="riposi"><span class="tool-ic" data-ic="bed"></span><span class="tool-tx"><b>Giorni di riposo</b><span><span id="ttValRiposi"></span></span></span></button>
+    <button type="button" class="tool tool-1line va" data-tt="festivi"><span class="tool-ic" data-ic="sparkles"></span><span class="tool-tx"><b>Festivi</b><span><span id="ttValFestivi"></span></span></span></button>
     <button type="button" class="tool tool-1line va" data-tt="schema"><span class="tool-ic" data-ic="cycle"></span><span class="tool-tx"><b>Cambia tipo di turni</b><span>In quinta, 12 ore, sempre lo stesso turno, turni che cambiano…</span></span></button>
   </div>
   <div id="ttFlusso"></div>
+  <div id="ttFestivi" hidden></div>
   <button type="button" class="btn pri" id="ttFatto" hidden style="width:100%;min-height:46px;margin-top:14px;font-weight:700">Fatto</button>
   <p class="hint" id="ttNota" style="margin:12px 2px 0">Un giorno diverso dal solito (ferie, cambio, straordinario)? Toccalo nel calendario di Turni: cambia solo quel giorno.</p>
 </div>
@@ -2082,7 +2080,7 @@ header b{font-size:23px}
   <summary>Come funziona, limiti e avvertenze</summary>
   <div class="piu-info-in">
     <p><b>Come ragiona.</b> Non guarda la sigla del turno ma dove cade rispetto al tuo sonno naturale. Un turno che comincia prima della notte e la attraversa vuole il sonno dopo; uno che comincia alle due di notte lo vuole prima, più un recupero al rientro. Poi usa i riposi come rincorsa: circa un'ora al giorno per alzarsi prima, un'ora e mezza per fare più tardi. Dove la rincorsa non basta, lo dice.</p>
-    <p><b>Limiti dichiarati.</b> La domanda sul cronotipo è una scorciatoia rispetto al questionario MCTQ. La curva della luce viene da studi di laboratorio, non da un reparto. L'adattamento completo alla notte riguarda meno del 3% dei notturnisti fissi, e questo strumento non lo promette. Nessuna validazione clinica: è un motore di pianificazione basato sulla letteratura.</p>
+    <p><b>Limiti dichiarati.</b> La domanda sul cronotipo è una scorciatoia rispetto al questionario MCTQ (Roenneberg e coll. 2003). La curva della luce viene da studi di laboratorio, non da un reparto. L'adattamento completo alla notte riguarda meno del 3% dei notturnisti fissi (Folkard 2008), e questo strumento non lo promette. Nessuna validazione clinica: è un motore di pianificazione basato sulla letteratura.</p>
     <p><b>Attenzione.</b> Indicazioni generali di benessere e organizzazione per chi lavora su turni. Non è un dispositivo medico, non diagnostica e non cura nulla, e non sostituisce il parere di un medico.</p>
     <p><b>Melatonina.</b> Non ne parliamo qui perché i dosaggi degli studi sul jet lag e sui turni non coincidono con quelli in vendita come integratore in Italia — proporre un numero sarebbe fuorviante. Se pensi possa servirti, parlane con un medico o un farmacista: possono valutare il tuo caso, non un piano generico.</p>
   </div>
@@ -3204,6 +3202,7 @@ function toHash(perServer){
     if(state.pWake) p.set("pw",state.pWake);
     if(state.pBed) p.set("pwb",state.pBed); }
   if(state.pName) p.set("pn",safeName(state.pName));
+  if(/^\d{4}-\d{2}-\d{2}$/.test(state.firstSeenAt||"")) p.set("fs",state.firstSeenAt);   // da quando usi l'app: chi cambia telefono non diventa «nuovo»
   if(state.people && state.people.length) p.set("ppl", JSON.stringify(state.people.map(per=>({
     p:(per.pattern||"").toUpperCase().replace(/[^A-Z]/g,"").slice(0,400),
     a:per.anchor||null, s:per.shifts||null, w:per.wake||null, b:per.bed||null, n:safeName(per.name)||null
@@ -3220,6 +3219,7 @@ function fromHash(hashStr){
   if(p.get("s")){ const sh=decShifts(p.get("s")); if(sh) state.shifts=sh; }
   if(p.get("p")) state.pattern=seq(p.get("p"))||state.pattern;
   if(okDate(p.get("a"))) state.anchor=p.get("a");
+  if(okDate(p.get("fs")) && p.get("fs")<=iso(new Date()) && (!state.firstSeenAt || p.get("fs")<state.firstSeenAt)) state.firstSeenAt=p.get("fs");   // vale la data più vecchia
   if(okTime(p.get("w"))) state.freeWake=p.get("w");
   if(okTime(p.get("wb"))) state.freeBed=p.get("wb");
   if(NT.CFG.caffScala[p.get("cs")]) state.caffSens=p.get("cs");
@@ -3682,21 +3682,21 @@ function cards(P){
     sc.sub="A letto appena rientri, senza fermate. Di giorno si dorme meno, è normale: le ore che mancano le recuperi col pisolino del pomeriggio.";
     sc.rows.push(["Camera","buio totale, tappi, telefono in silenzioso"]);
     sc.why="Di giorno il corpo spinge verso la veglia proprio nelle ore in cui devi dormire, e allungare a forza il sonno del mattino funziona poco. Aggiungere un pisolino prima del turno rende molto di più.";
-    sc.cite="Rosekind e coll. (NASA)";
+    sc.cite="Rosekind e coll. 1995 (NASA)";
   }else if(s.kind==="corto"){
     sc.small=dur(s.dur)+" · corto apposta";
     sc.sub="È lo smonto, il primo dei due giorni di rientro. Dormi poco stamattina, poi non dormire fino a sera: costa una giornata e te ne restituisce due, e domani sei di nuovo sugli orari della maggior parte delle persone.";
     sc.rows.push(["Nel pomeriggio","niente pisolini dopo lo smonto, per quanto costi"]);
     sc.rows.push(["Stasera","a letto verso "+hhmm(NT.at(P.S,1).onset)+", anche senza sonno"]);
     sc.why="Dormire fino a pomeriggio dopo l'ultima notte sembra la scelta giusta ed è la trappola classica: sposta l'orologio ancora più in là e ti toglie il sonno la notte dopo, bruciando anche il secondo giorno di riposo.";
-    sc.cite="Minors & Waterhouse · Smith & Eastman";
+    sc.cite="Minors & Waterhouse 1981 · Smith, Fogg & Eastman 2009";
   }else if(lateStart){
     sc.small=dur(s.dur)+" · prima del turno";
     sc.sub="Il turno è nel cuore della notte, quindi il sonno si spezza: la parte grossa adesso, il resto al rientro. Insieme fanno le ore che ti servono.";
 
     if(naps.length) sc.rows.push(["Al rientro",hhmm(naps[0].a)+" → "+hhmm(naps[0].b)]);
     sc.why="Con un turno che parte nelle ore piccole, un blocco unico non regge: otto ore filate prima vorrebbero dire a letto nel tardo pomeriggio, perdendo la serata. Dividere in due — la parte principale prima del turno — è il compromesso a cui molte persone arrivano da sé dopo mesi di tentativi.";
-    sc.cite="Sonno diviso: Minors & Waterhouse (sonno d'ancoraggio)";
+    sc.cite="Sonno diviso: Minors & Waterhouse 1981 (sonno d'ancoraggio)";
   }else if(b.rest){
     sc.sub=s.meta.reset?"Stasera a letto presto anche senza sonno: ci penserà la stanchezza ad addormentarti."
       :s.meta.ramp?"Non è un riposo qualunque: da come dormi stanotte dipende quanto ti peseranno le prossime notti."
@@ -3704,7 +3704,7 @@ function cards(P){
       :"Riposo pieno. Non c'è niente da preparare: dormi senza guardare l'orologio.";
     const o=restOptions(P); if(o) sc.opts=o;
     sc.why="Nei riposi il sonno è l'unica leva che hai in mano. Alzarsi un'ora prima è fattibile; tre ore prima no, semplicemente non ti addormenti. Per questo l'orario consigliato cambia da un riposo all'altro, anche se la giornata è libera uguale.";
-    sc.cite="Eastman & Burgess 2009 · Roenneberg (cronotipo)";
+    sc.cite="Eastman & Burgess 2009 · Roenneberg, Wirz-Justice & Merrow 2003 (cronotipo)";
   }else{
     sc.sub="A letto circa un'ora dopo il rientro: al corpo serve un po' di tempo per scendere di giri dopo il turno.";
     sc.why="L'orario viene calcolato all'indietro dalla sveglia che ti serve domani, tolte le ore di sonno di cui hai bisogno.";
@@ -3726,7 +3726,7 @@ function cards(P){
   else cc.sub="Calcolato sull'ora in cui andrai a letto stasera.";
   out.push(cc);
 
-  const lc={k:"l",lab:"Luce",rows:[],rowsA:[],rowsE:[],at:wake+15,cite:"Khalsa, Jewett, Cajochen & Czeisler, J Physiol 2003 · Smith &amp; Eastman · Thompson, Jones &amp; Gradisar 2014 (alba simulata)"};
+  const lc={k:"l",lab:"Luce",rows:[],rowsA:[],rowsE:[],at:wake+15,cite:"Khalsa, Jewett, Cajochen & Czeisler, J Physiol 2003 · Smith, Fogg &amp; Eastman 2009 · Thompson, Jones, Gregson &amp; Atkinson, Eur J Appl Physiol 2014 (alba simulata)"};
   const whyLight="La luce sposta l'orologio in due direzioni opposte, decise dall'ora in cui la prendi: il confine è il minimo corporeo, per te intorno alle "+hhmm(cbt)+". Prima di quell'ora ti spinge avanti e ti toglie il sonno; dopo ti tira indietro — per questo il sole della strada, dopo la notte, è il nemico numero uno del sonno diurno.";
   if(night){
     const seekEnd=Math.min(cbt-NT.CFG.lightTaper,b.end);
@@ -3813,7 +3813,7 @@ function cards(P){
         ["Al risveglio","per un quarto d'ora sei più impedito di prima del pisolino: non metterti subito alla guida né a fare cose delicate"]],
       nap:{k:hhmm(n.a), fine:hhmm(n.b), min:n.b-n.a, turno:!!n.turno, livello:n.livello},
       why:"Dormire prima di entrare riduce il crollo di attenzione nelle ore centrali della notte, quando gli errori costano di più. Un'ora e mezza copre un ciclo intero; se non hai tempo, venti minuti restano meglio di niente.",
-      cite:"Rosekind e coll. (NASA) · Tassi & Muzet", at:n.a});
+      cite:"Rosekind e coll. 1995 (NASA) · Tassi & Muzet 2000", at:n.a});
   }
 
   // Il conto delle ore era scritto a mano e diceva sempre «16-18», anche a chi
@@ -5419,8 +5419,8 @@ function suggerimentoAdatta(){
   const no=store.lista("adattaNo");
   return suggerimentiAdatta().find(c=>!no.includes(chiaveAdatta(c))) || null;
 }
-// Un segnale, non una diagnosi. Più di un notturnista su quattro ha i sintomi
-// del disturbo del sonno da lavoro a turni, e in Italia chi lavora di notte
+// Un segnale, non una diagnosi. Una parte dei turnisti (le stime variano molto
+// da studio a studio) ha i sintomi del disturbo del sonno da lavoro a turni, e in Italia chi lavora di notte
 // ha già una visita periodica con il medico competente: se il diario dice
 // per settimane "poca energia", lo si suggerisce una volta, con delicatezza.
 function medicoVisibile(){
@@ -6273,7 +6273,10 @@ function renderEssenziale(P, CARDS){
     // la linea sta dopo ogni voce già cominciata (passata o in corso), prima della prima ancora da venire
     const passate=idxR.filter(i=>/^<div class="tl[^"]*\b(past|ora)\b/.test(voci[i].html));
     const ultima=passate.length ? passate[passate.length-1] : undefined;
-    const dopo=ultima===undefined ? undefined : (idxR.find(i=>i>ultima) ?? ultima+1);   // se non c'è niente dopo, in fondo
+    const dopoReale=ultima===undefined ? undefined : idxR.find(i=>i>ultima);
+    // l'ultima voce del piano è in corso (es. «Dormi»): la voce stessa dice già «adesso», la linea dopo di lei sarebbe «oltre» il sonno
+    const finisceInCorso=ultima!==undefined && dopoReale===undefined && /^<div class="tl[^"]*\bora\b/.test(voci[ultima].html);
+    const dopo=ultima===undefined || finisceInCorso ? undefined : (dopoReale ?? ultima+1);   // se non c'è niente dopo, in fondo
     if(dopo!==undefined){
       const mm=mod1440(Math.round(nowT));
       voci.splice(dopo, 0, {t:0, html:'<div class="tl-adesso" aria-hidden="true"><span class="en">'+
@@ -6588,8 +6591,16 @@ function mandaRiepilogo(tipo){
   track("share_created", {tipo}); usata("riepilogo");
   inviaTesto(testo, tipo==="anno" ? "I miei ultimi 12 mesi" : "Il mio mese");
 }
+// Il mese dei numeri segue la vista del ciclo: il titolo del calendario, o il giorno da cui partono le ore.
+let meseVista=null;   // [anno, mese 1-12], scritto da renderStrip / renderCalendarioCiclo
+function meseDaVista(){
+  if(!meseVista) return 0;
+  const o=giornoVero();
+  return Math.max(-12, Math.min(12, (meseVista[0]-o.getFullYear())*12 + (meseVista[1]-1-o.getMonth())));
+}
 function renderMese(){
   const el=$("#meseBox"); if(!el) return;
+  meseOff=meseDaVista();
   if(!state.turniConfigurati){ el.hidden=true; return; }
   const r=datiMese(meseOff);
   // Un riquadro solo per il mese: i numeri e, sotto, segnare o importare i
@@ -6614,52 +6625,67 @@ function renderMese(){
     festiviHtml();
   // una riga sola (ore, turni, notti), e i dettagli si aprono; «Segna» e «Importa» stanno in «Modifica turni»
   const riga = vuoto ? "Nessun turno segnato" : String(ore).replace(".",",")+" h · "+r.turni+(r.turni===1?" turno":" turni")+" · "+r.notti+(r.notti===1?" notte":" notti");
-  const aperto=!!(el.querySelector && el.querySelector(".mese-det[open]")) || festiviAperto;
-  el.innerHTML='<div class="mese-testa"><button type="button" data-mese="-1" aria-label="Mese precedente"'+(meseOff<=-12?' disabled':'')+'>‹</button>'+
-    '<b>'+esc(nome.charAt(0).toUpperCase()+nome.slice(1))+'</b>'+
-    '<button type="button" data-mese="1" aria-label="Mese successivo"'+(meseOff>=12?' disabled':'')+'>›</button></div>'+
-    '<details class="mese-det"'+(aperto?' open':'')+'><summary><span class="mese-riga">'+esc(riga)+(r.ignoti&&!vuoto?' <span class="mese-pall" title="Giorni da segnare">'+r.ignoti+' da segnare</span>':'')+'</span></summary>'+corpo+'</details>';
+  const aperto=!!(el.querySelector && el.querySelector(".mese-det[open]"));
+  // il mese è quello che si vede sopra (le frecce del ciclo lo cambiano): niente seconda navigazione
+  el.innerHTML='<details class="mese-det"'+(aperto?' open':'')+'><summary><span class="mese-riga"><b>'+esc(nome.charAt(0).toUpperCase()+nome.slice(1))+'</b> · '+esc(riga)+(r.ignoti&&!vuoto?' <span class="mese-pall" title="Giorni da segnare">'+r.ignoti+' da segnare</span>':'')+'</span></summary>'+corpo+'</details>';
 }
 // Festivi del contratto: una riga che dice cosa si conta, e un piccolo editor.
-var festiviAperto=false;   // var: letto da renderMese durante l'avvio
 function nomeGiornoMese(k){ const [m,g]=k.split("-").map(Number); return new Date(2000,m-1,g).toLocaleDateString(LINGUA,{day:"numeric",month:"long"}); }
+// Nel riquadro del mese resta solo un rimando; l'editor sta in «I tuoi turni» (i festivi sono una cosa del contratto, come gli orari).
 function festiviHtml(){
+  const c=festiviCfg();
+  return '<div class="mese-sez mese-fest"><div><b>Festivi</b><span class="hint">'+esc(festiviRiga(c))+'</span></div><button type="button" class="btn g sm" data-fest-apri>'+(c.extra.length?'Modifica':'Aggiungi i tuoi')+'</button></div>';
+}
+function festiviRiga(c){ c=c||festiviCfg();
+  return "Conto "+(c.dom?"le domeniche e ":"")+"i festivi nazionali"+(c.extra.length?" e "+c.extra.map(nomeGiornoMese).join(", "):"")+(state.festiviRiposo&&state.repeat!==false ? ". Nei festivi sei a casa" : "")+"."; }
+function festiviEditorHtml(){
   const c=festiviCfg(), fisso=tipoTurni()==="fisso";
-  const conta="Conto "+(c.dom?"le domeniche e ":"")+"i festivi nazionali"+(c.extra.length?" e "+c.extra.map(nomeGiornoMese).join(", "):"")+".";
-  if(!festiviAperto) return '<div class="mese-sez mese-fest"><div><b>Festivi</b><span class="hint">'+esc(conta)+'</span></div><button type="button" class="btn g sm" data-fest-apri>'+(c.extra.length?'Modifica':'Aggiungi i tuoi')+'</button></div>';
-  return '<div class="ecc mese-fest-box mese-sez">'+
-    '<b style="display:block;margin-bottom:4px">I festivi del tuo contratto</b>'+
-    '<p class="hint" style="margin:0 0 8px">Oltre ai festivi nazionali: il santo patrono o altre feste che per te contano. Si ripetono ogni anno.</p>'+
+  return '<div class="ecc mese-fest-box">'+
+    '<button type="button" class="lnk dim qh-annulla" data-fest-chiudi>‹ Fatto</button>'+
+    '<h2 class="qh-h">I festivi del tuo contratto</h2>'+
+    '<p class="hint" style="margin:4px 0 10px">Oltre ai festivi nazionali: il santo patrono o altre feste che per te contano. Si ripetono ogni anno.</p>'+
     (c.extra.length ? '<div class="qh-chips" style="margin:0 0 10px">'+c.extra.map(k=>'<button type="button" class="btn g" data-fest-del="'+k+'" aria-label="Togli '+esc(nomeGiornoMese(k))+'">'+esc(nomeGiornoMese(k))+' ×</button>').join("")+'</div>' : '')+
     '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input type="date" id="festData" aria-label="Giorno festivo" style="flex:1;min-width:150px">'+
     '<button type="button" class="btn g" data-fest-add>Aggiungi</button></div>'+
     '<label class="chk" style="display:flex;gap:10px;align-items:center;margin-top:12px;min-height:44px"><input type="checkbox" data-fest-dom'+(c.dom?' checked':'')+'> La domenica conta come festivo</label>'+
     (state.repeat!==false ? '<label class="chk" style="display:flex;gap:10px;align-items:center;min-height:44px"><input type="checkbox" data-fest-riposo'+(state.festiviRiposo?' checked':'')+'> '+(fisso?'Nei festivi non lavoro':'Nei festivi sono a casa')+'</label>'+
       (fisso ? '' : '<p class="hint" style="margin:0 0 8px">Il turno di quei giorni diventa riposo, anche per le ferie. Le domeniche restano come il ciclo.</p>') : '')+
-    '<button type="button" class="lnk dim" data-fest-chiudi style="margin-top:6px">Fatto</button></div>';
+    '</div>';
 }
-function festiviCambiati(){ salva(); try{ NT.setFestivo(festivoVero); }catch(e){} render(); }
+var festiviPagina=false;   // var: letto da renderTuoiTurni durante l'avvio
+function apriFestivi(){
+  const pg=$("#tuoiTurniPagina"); if(!pg) return;
+  festiviPagina=true; pg.classList.add("tt-festivi"); usata("festivi");
+  const b=$("#ttFestivi"); if(b){ b.hidden=false; b.innerHTML=festiviEditorHtml(); }
+  try{ window.scrollTo(0,0); }catch(e){}
+}
+function chiudiFestivi(){
+  festiviPagina=false; const pg=$("#tuoiTurniPagina"); if(pg) pg.classList.remove("tt-festivi");
+  const b=$("#ttFestivi"); if(b){ b.hidden=true; b.innerHTML=""; }
+  renderTuoiTurni();
+}
+function festiviCambiati(){ salva(); try{ NT.setFestivo(festivoVero); }catch(e){} render();
+  if(festiviPagina){ const b=$("#ttFestivi"); if(b){ b.innerHTML=festiviEditorHtml(); } } }
 function durataBreve(m){ m=Math.round(m/15)*15; const h=Math.floor(m/60), r=m%60; return h ? h+"h"+(r?String(r).padStart(2,"0"):"") : r+" min"; }
-if($("#meseBox")) $("#meseBox").addEventListener("change", e=>{
+if($("#ttFestivi")) $("#ttFestivi").addEventListener("change", e=>{
   if(e.target.matches("[data-fest-dom]")){ state.festivi=Object.assign({}, state.festivi||{}, {dom:e.target.checked}); festiviCambiati(); }
   else if(e.target.matches("[data-fest-riposo]")){ state.festiviRiposo=e.target.checked; if(e.target.checked) track("setup_item", {item:"festivi_riposo"}); festiviCambiati(); }
 });
-if($("#meseBox")) $("#meseBox").addEventListener("click", e=>{
-  if(e.target.closest("[data-riepilogo-medico]")){ stampaRiepilogoMedico(); return; }
-  if(e.target.closest("[data-mese-segna]")){ sgOff=meseOff; apriSegna(); return; }
-  if(e.target.closest("[data-mese-manda]")){ mandaRiepilogo("mese"); return; }
-  if(e.target.closest("[data-anno-manda]")){ mandaRiepilogo("anno"); return; }
-  if(e.target.closest("[data-fest-apri]")){ festiviAperto=true; usata("festivi"); renderMese(); return; }
-  if(e.target.closest("[data-fest-chiudi]")){ festiviAperto=false; renderMese(); return; }
+if($("#ttFestivi")) $("#ttFestivi").addEventListener("click", e=>{
+  if(e.target.closest("[data-fest-chiudi]")){ chiudiFestivi(); return; }
   const fd=e.target.closest("[data-fest-del]");
   if(fd){ const f=Object.assign({}, state.festivi||{}); f.extra=(f.extra||[]).filter(k=>k!==fd.dataset.festDel); state.festivi=f; festiviCambiati(); return; }
   if(e.target.closest("[data-fest-add]")){
     const v=($("#festData")||{}).value||""; const m=/^\d{4}-(\d\d)-(\d\d)$/.exec(v);
     if(!m){ toast("Scegli il giorno"); return; }
     const k=(+m[1])+"-"+(+m[2]), f=Object.assign({}, state.festivi||{}); f.extra=(f.extra||[]).filter(x=>x!==k).concat(k).sort(); state.festivi=f;
-    usata("festivi"); track("setup_item", {item:"festivi_extra"}); festiviCambiati(); return; }
-  const b=e.target.closest("[data-mese]"); if(!b || b.disabled) return;
-  meseOff=Math.max(-12, Math.min(12, meseOff + +b.dataset.mese)); renderMese();
+    usata("festivi"); track("setup_item", {item:"festivi_extra"}); festiviCambiati(); }
+});
+if($("#meseBox")) $("#meseBox").addEventListener("click", e=>{
+  if(e.target.closest("[data-riepilogo-medico]")){ stampaRiepilogoMedico(); return; }
+  if(e.target.closest("[data-mese-manda]")){ mandaRiepilogo("mese"); return; }
+  if(e.target.closest("[data-anno-manda]")){ mandaRiepilogo("anno"); return; }
+  if(e.target.closest("[data-fest-apri]")){ apriTuoiTurni("turni",{festivi:true}); return; }
 });
 // Riferimenti orari per le strisce del tempo: le 00, 06, 12 e 18 che cadono
 // nella finestra [clo, chi] (minuti sulla scala del giorno, anche oltre 1440).
@@ -6716,6 +6742,7 @@ function renderCalendarioCiclo(){
   const oggi=giornoVero(), iOggi=CAL.indiceDi(m.da, 7*CAL_TOT, iso(oggi)), rigaOggi=iOggi<0 ? -1 : Math.floor(iOggi/7);
   calCtx={da:m.da, rigaOggi};
   const r0=CAL.primaRiga(rigaOggi, calSpost, CAL_RIGHE, CAL_TOT), mt=CAL.meseDellaRiga(m.da, r0), tit=CAL.titolo(m.da, r0, oggi.getFullYear());
+  meseVista=[mt[0], mt[1]];
   const persona = pers && m.p.length ? m.p[Math.min(m.sel, m.p.length-1)] : null;
   const leggi=s=>{ s=s||"?:?"; const k=s.lastIndexOf(":"); return {sig:k>0 ? s.slice(0,k) : s, t:k>=0 ? s.charAt(k+1) : "?"}; };
   const TIPO={n:"notte", l:"lavoro", r:"riposo", m:"mattina", p:"pomeriggio", s:"sera"}, descr=c=>c.t==="?" ? "da impostare" : (c.sig===(TIPO[c.t]||"")||c.sig.length<=1 ? TIPO[c.t] : c.sig+", "+TIPO[c.t]);
@@ -6745,6 +6772,7 @@ function renderCalendarioCiclo(){
   const pv=$("#cycPrev"), nx=$("#cycNext"); if(pv) pv.disabled=r0<=0; if(nx) nx.disabled=r0>=ultima;
   el.innerHTML=selettoreVista("calendario")+griglia+
     '<div class="key">'+LEG.filter(l=>viste.has(l[0])).map(l=>sw(l[2])+l[1]+'</span>').join("")+chipPersona(pers)+'</div>';
+  try{ renderMese(); }catch(e){}   // il mese dei numeri segue la pagina del calendario
 }
 // Le frecce e «Scegli giorno» di Turni, quando il ciclo è a calendario: pagine di settimane, e un giorno scelto porta alla sua settimana.
 function calVaiA(d){
@@ -6763,6 +6791,7 @@ function renderStrip(P, f, S){
   // resta sul giorno a cui appartiene e non se ne va a finire su quello dopo.
   let clo=Infinity, chi=-Infinity;
   const [finLo,finHi]=finestraCiclo();
+  { const c=day(state.focus, cicloOff); meseVista=[c.getFullYear(), c.getMonth()+1]; }   // il mese del giorno da cui parte la finestra: oggi → questo mese
   for(let o=finLo;o<=finHi;o++){
     const sd=NT.at(S,o), bb=NT.block(o);
     if(!sd||!bb) continue;
@@ -7102,8 +7131,8 @@ function graficoRegolarita(reg){
 }
 // Quanto si dorme in media, turno per turno (mattina, pomeriggio, sera, notte, giorni liberi): per qualunque ciclo,
 // solo le fasce che ci sono. Dalle notti annotate; il confronto è con quanto prevedeva il piano per le stesse notti.
-// Una sezione della pagina «Sonno e carico»: chiusa, con una riga che dice già l'essenziale; si apre per i dettagli.
-const sezDet=(titolo,riga,corpo,opz)=>'<details class="and-det"'+((opz&&opz.id)?' id="'+opz.id+'"':'')+((opz&&opz.aperta)?' open':'')+'><summary><span class="and-t">'+esc(titolo)+'</span><span class="and-r">'+esc(riga)+'</span></summary><div class="andamento-sezione'+((opz&&opz.cls)?' '+opz.cls:'')+'">'+corpo+'</div></details>';
+// Una voce di «Sonno e carico»: titolo, una riga che dice già l'essenziale, e la pagina con i dettagli.
+const sezDet=(titolo,riga,corpo,opz)=>({id:(opz&&opz.id)||"", t:titolo, r:riga, c:corpo, cls:(opz&&opz.cls)||""});
 function sonnoPerFascia(trend){
   const g={};
   (trend.series||[]).forEach(x=>{ if(x.actual==null) return; const f=fasciaGiornoIso(x.date); if(!FASCE[f]) return;
@@ -7135,9 +7164,9 @@ function caricoHtml(aperta){
   // una frase sola: la cosa più utile da sapere, prima su quello che arriva
   const noti=R=>R.ignoti<25;
   let frase="";
-  if(noti(F) && F.serieMax>=4) frase="Nei prossimi 30 giorni arrivi a "+F.serieMax+" notti di fila: dopo la terza la stanchezza cresce di più [Folkard 2003]. Fai i pisolini prima del turno.";
+  if(noti(F) && F.serieMax>=4) frase="Nei prossimi 30 giorni arrivi a "+F.serieMax+" notti di fila: dopo la terza la stanchezza cresce di più [Folkard & Tucker 2003]. Fai i pisolini prima del turno.";
   else if(noti(F) && F.brevi) frase=(F.brevi===1?"Una volta":F.brevi+" volte")+" nei prossimi 30 giorni stacchi e riattacchi in meno di 11 ore: in quei giorni il sonno va protetto più del solito.";
-  else if(noti(P) && P.serieMax>=4) frase="Nell'ultimo mese hai fatto fino a "+P.serieMax+" notti di fila: dopo la terza la stanchezza cresce di più [Folkard 2003].";
+  else if(noti(P) && P.serieMax>=4) frase="Nell'ultimo mese hai fatto fino a "+P.serieMax+" notti di fila: dopo la terza la stanchezza cresce di più [Folkard & Tucker 2003].";
   else if(noti(P) && P.brevi) frase=(P.brevi===1?"Una volta":P.brevi+" volte")+" nell'ultimo mese hai avuto meno di 11 ore fra un turno e l'altro.";
   else if(noti(P) || noti(F)) frase="Niente serie lunghe di notti né riposi sotto le 11 ore: un carico che si recupera bene.";
   else frase="Segna i turni in «I turni del mese» per vedere il carico.";
@@ -7147,7 +7176,7 @@ function caricoHtml(aperta){
       '<div class="car-r car-testa"><span></span><b>Passati</b><b>In arrivo</b></div>'+
       riga("Notti","notti")+riga("Notti di fila, al massimo","serieMax")+riga("Riposi sotto le 11 ore","brevi")+
       riga("Domeniche e festivi","festivi")+riga("Ore di turno","ore")+
-      '<p class="car-frase">'+esc(frase).replace(/\[(.+?)\]/,'<span class="hint">($1)</span>')+'</p>', {cls:"carico", aperta:!!aperta});
+      '<p class="car-frase">'+esc(frase).replace(/\[(.+?)\]/,'<span class="hint">($1)</span>')+'</p>', {id:"carico", cls:"carico"});
 }
 // «Il tuo orologio»: i punti fissi del ritmo, stimati dagli orari dei giorni
 // liberi (dichiarati, o aggiornati dal diario con «Il piano si adatta»).
@@ -7201,7 +7230,7 @@ function renderAndamenti(){
   // le altre, è la cosa più utile da leggere in questa visita. Il debito di
   // sonno resta subito sotto: hero (numero grande + sparkline), sempre
   // presente perché è un cruscotto, non un consiglio che scade.
-  let capoHtml="", heroHtml="", sezioni=[], parteFascia=null, parteCiclo=null;
+  let capoHtml="", heroHtml="", parteFascia=null, parteCiclo=null; const vociAnd={};
   if(capo){
     capoHtml='<div class="andamento-insight"><span class="aic">'+ICON.sun+'</span>'+
       '<div><span class="andamento-insight-eyebrow">'+(capo.action?"Da provare questa settimana":"Insight")+'</span>'+esc(capo.testo)+
@@ -7231,12 +7260,12 @@ function renderAndamenti(){
       }
     }
   }catch(e){}
-  try{ heroHtml+=orologioHtml(); }catch(e){}
+  try{ vociAnd.orologio=orologioHtml(); }catch(e){}
   // Il carico dei turni: dai turni soli, senza diario — la pagina non è mai
   // vuota, ed è il rischio di stanchezza più documentato (notti di fila,
   // riposi brevi). Prima i dati del passato, accanto quelli in arrivo.
   try{ const tr=window.NTHistory && window.NTHistory.sleepTrend({beds:state.beds,wakes:state.wakes}, NT_planSafe, {days:60}); if(tr && tr.n>=4) parteFascia=sonnoPerFasciaHtml(tr); }catch(e){}
-  try{ sezioni.push(caricoHtml(!heroHtml || /andamento-hero/.test(heroHtml)===false)); }catch(e){}
+  try{ vociAnd.carico=caricoHtml(); }catch(e){}
   try{
     // Regolarità: «come previsto» (quante notti annotate coincidono col piano) e gli orari veri, di notte e di giorno a parte.
     const da=iso(day(giornoVero(),-30)), annotate=Object.keys(state.wakes).filter(k=>k>=da && state.beds[k]), ok=annotate.filter(k=>sonnoPiano[k]).length;
@@ -7254,7 +7283,7 @@ function renderAndamenti(){
     }
     if(annotate.length>=5) righe+='<div class="row"><b style="min-width:118px">Come previsto</b><span>'+ok+' su '+annotate.length+' <span class="hint">· ultimi 30 giorni</span></span></div>'+
       '<p class="hint" style="margin:6px 0 0">'+(ok<annotate.length?'Le altre le hai corrette tu: è così che il piano impara come dormi davvero.':'Il piano ti conosce bene.')+'</p>';
-    if(righe || nota) sezioni.push(sezDet("Gli orari del tuo sonno", riassunto || (annotate.length>=5 ? ok+" notti su "+annotate.length+" come previsto" : "Servono più notti"), grafico+(righe?'<div class="rows">'+righe+'</div>':'')+nota));
+    if(righe || nota) vociAnd.orari=(sezDet("Gli orari del tuo sonno", riassunto || (annotate.length>=5 ? ok+" notti su "+annotate.length+" come previsto" : "Servono più notti"), grafico+(righe?'<div class="rows">'+righe+'</div>':'')+nota,{id:"orari"}));
   }catch(e){}
 
   if(cs){
@@ -7280,9 +7309,21 @@ function renderAndamenti(){
   }
 
   // Un solo confronto per turno: quanto dormi, quanto in meno del previsto, come stai.
-  if(parteFascia || parteCiclo) sezioni.unshift(sezDet("Come dormi e come stai, turno per turno", (parteFascia||parteCiclo).riga,
-    (parteFascia ? parteFascia.corpo : "")+(parteCiclo ? (parteFascia ? '<div style="height:14px"></div>' : '')+parteCiclo.corpo : "")));
-  const rowsHtml = sezioni.join("");
+  if(parteFascia || parteCiclo) vociAnd.dormi=sezDet("Come dormi e come stai, turno per turno", (parteFascia||parteCiclo).riga,
+    (parteFascia ? parteFascia.corpo : "")+(parteCiclo ? (parteFascia ? '<div style="height:14px"></div>' : '')+parteCiclo.corpo : ""), {id:"dormi"});
+  // Quattro voci sempre in lista, come le Impostazioni: se mancano i dati la riga dice cosa serve.
+  const VOCI=[["carico","calendar","Il carico dei turni","Segna i turni per vederlo","Notti di fila, riposi brevi, festivi e ore dei prossimi 30 giorni, calcolati dai tuoi turni."],
+    ["dormi","bed","Come dormi e come stai","Dopo qualche notte annotata","Quanto dormi e come ti senti prima di ogni tipo di turno: compare dopo almeno 4 notti annotate."],
+    ["orari","alarm","Gli orari del tuo sonno","Servono 5 notti annotate","Quanto sono regolari gli orari a cui vai a letto e ti svegli: servono almeno 5 notti con i tuoi orari veri."],
+    ["orologio","sun","Il tuo orologio","—","Il tuo ritmo stimato dagli orari dei giorni liberi."]]
+    .map(([id,ic,t,vuoto,spiega])=>Object.assign({ic}, vociAnd[id] || {id, t, r:vuoto, c:'<p class="hint" style="margin:0">'+esc(spiega)+'</p>', vuota:true}));
+  const voceAperta=VOCI.find(v=>v.id===andSez);
+  const tt=document.querySelector("#andamentiPagina .tab-title"); if(tt) tt.textContent=voceAperta ? voceAperta.t : "Sonno e carico";
+  if(voceAperta){
+    el.innerHTML='<div class="andamento-sezione'+(voceAperta.cls?' '+voceAperta.cls:'')+'" id="'+voceAperta.id+'">'+voceAperta.c+'</div>';
+    return;
+  }
+  const rowsHtml='<div class="opz-gruppo and-hub" role="list">'+VOCI.map(v=>'<button type="button" class="opz-hub-r" role="listitem" data-and-sez="'+v.id+'"><span class="tool-ic">'+(ICON[v.ic]||"")+'</span><span class="opz-tx"><b>'+esc(v.t)+'</b><span class="opz-val">'+esc(v.r)+'</span></span><span class="tchev" aria-hidden="true">›</span></button>').join("")+'</div>';
   const url = donateUrl();
   // Senza diario: un invito di una riga al posto del numero, niente esempi finti.
   const invito = heroHtml ? "" : '<div class="andamento-sezione"><p style="margin:0"><b>Quanto sonno ti manca</b></p>'+
@@ -7914,8 +7955,18 @@ function ntWidget(){
   if(!platform.widget.available) return;
   if(!state.turniConfigurati){ platform.widget.publish([]); return; }   // niente piano di esempio sul widget
   const {ev}=eventiCalendario(), ora=Date.now();
-  const voci=ev.filter(e=>+e.end>ora && +e.start<ora+48*3600e3)
-    .map(e=>({s:+e.start, e:+e.end, t:e.title, k:e.tipo}))
+  // Se la sveglia vera è già annotata (diario), il sonno finisce lì: il widget non deve dire «Sonno» fino all'ora prevista.
+  const fineReale=e=>{
+    if(e.tipo!=="sonno") return +e.end;
+    let migliore=null;
+    for(const dk of [0,-1]){ const g=day(new Date(+e.end), dk), k=iso(g), w=wakes[k];
+      if(!/^\d\d:\d\d$/.test(w||"")) continue;
+      const ts=new Date(g); ts.setHours(+w.slice(0,2), +w.slice(3,5), 0, 0); const T=ts.getTime();
+      if(T>ora || T<=+e.start+90*60e3 || Math.abs(T-(+e.end))>4*3600e3) continue;   // non futura, non un pisolino, vicina alla fine prevista
+      if(migliore===null || Math.abs(T-(+e.end))<Math.abs(migliore-(+e.end))) migliore=T; }
+    return migliore!==null && migliore<+e.end ? migliore : +e.end;
+  };
+  const voci=ev.map(e=>({s:+e.start, e:fineReale(e), t:e.title, k:e.tipo})).filter(e=>e.e>ora && e.s<ora+48*3600e3)
     .sort((a,b)=>a.s-b.s);
   // Il prossimo turno, anche fra giorni: la prima cosa che si guarda.
   const tn=ev.filter(e=>e.tipo==="turno" && +e.end>ora).sort((a,b)=>a.start-b.start)[0];
@@ -8889,6 +8940,10 @@ const CONSIGLI_FUNZIONE=[
   {k:"soddisfazione", dopo:14, ripeti:true, partecipa:true, facce:true, titolo:"Una domanda",
     quando:()=>{ const u=store.get("soddisfazioneAl",""); return !u || (new Date()-new Date(u+"T12:00:00"))/864e5>=90; },
     t:()=>"Come ti trovi con Notturnisti?"},
+  // Quale funzione ti mancherebbe di più: una domanda neutra, una volta sola (solo con le statistiche accese), per capire cosa conta.
+  {k:"funzioneUtile", dopo:30, partecipa:true, funzioni:true, titolo:"Una domanda",
+    quando:()=>{ try{ return !!(window.NTAnalytics && window.NTAnalytics.isEnabled()) && !store.get("funzioneUtileAl",""); }catch(e){ return false; } },
+    t:()=>"Quale funzione ti mancherebbe di più se non ci fosse? Una risposta sola, anonima: ci aiuta a capire dove lavorare."},
   {k:"installa", quando:()=>!giaInstallata() && !inLista("installa") && (playDaWeb() || isIOSPerInstall() || !!installPromptEvento),
     t:()=> playDaWeb() ? "C'è l'app Android su Google Play: promemoria anche ad app chiusa, widget e calendario del telefono. I turni li porti con un tocco."
       : isIOSPerInstall() ? "Aggiungila alla schermata Home: in Safari tocca Condividi, poi «Aggiungi a schermata Home». Si apre come un'app e tiene al sicuro i turni."
@@ -8916,13 +8971,11 @@ const CONSIGLI_FUNZIONE=[
     cta:()=>"Salva la copia", a:()=>salvaCopiaFile()},
   {k:"orologio", dopo:7, quando:()=>!(state.freeBed==="23:30" && state.freeWake==="07:30"),
     t:()=>{ const o=orologio(); return "Il tuo orologio è pronto: "+o.tipo.toLowerCase()+", con il minimo corporeo verso le "+hhmm(o.cbt)+". Quando arriva la melatonina e quando sei più lucido, in «Sonno e carico»."; },
-    cta:()=>"Vedi il tuo orologio", a:()=>{ setTab("turni"); apriAndamenti(); usata("orologio");
-      const el=$("#orologio"); if(el){ el.open=true; try{ el.scrollIntoView({block:"start"}); }catch(e){} } }},
+    cta:()=>"Vedi il tuo orologio", a:()=>{ setTab("turni"); apriAndamenti("orologio"); usata("orologio"); }},
   {k:"mese", cta:()=>"Segna i turni", t:()=>"Puoi ricopiare il foglio turni in un minuto, un tocco per giorno, o importarlo da un file. Se ricopi almeno due cicli interi, l'app riconosce lo schema e lo continua da sola.", a:()=>{ setTab("turni"); apriSegna(); }},
   {k:"festivi", quando:()=>!state.festiviRiposo && !(state.festivi && ((state.festivi.extra||[]).length || state.festivi.dom===false)),
     t:()=>"Domeniche e festivi del tuo contratto contano come riposo? Segnali una volta: il piano ne tiene conto, anche il santo patrono.",
-    cta:()=>"Aggiungi i tuoi festivi", a:()=>{ setTab("turni"); festiviAperto=true; renderMese(); usata("festivi");
-      const x=$("#meseBox .mese-fest-box"); if(x) try{ x.scrollIntoView({block:"center"}); }catch(e){} }},
+    cta:()=>"Aggiungi i tuoi festivi", a:()=>{ apriTuoiTurni("turni",{festivi:true}); usata("festivi"); }},
   {k:"calendario", quando:()=>!inLista("calendario") && (platform.calendar.available ? !platform.calendar.attivo() : !(window.NTPaid && window.NTPaid.paid())),
     t:()=>"Turni e ore di sonno nel calendario del telefono, aggiornati da soli: li vedi dove guardi già i tuoi impegni.", cta:()=>"Attiva", a:()=>apriCalendarioDaWizard()},
   {k:"ferie", cta:()=>"Trova le ferie", t:()=>"L'app trova i giorni di ferie che ti danno più giorni a casa, attaccati ai riposi. Se hai aggiunto una persona, puoi sceglierli anche per stare a casa insieme.", a:()=>{ setTab("turni"); apriFerie(); }},
@@ -8978,6 +9031,9 @@ function consiglioFunzione(){
   store.set("loSapevi", Object.assign(S, {visti:visti.concat(c.k), oggi:{k:c.k, d:oggi}}));
   return c;
 }
+// Elenco chiuso delle funzioni della domanda «quale ti mancherebbe di più» (id brevi: finiscono nelle statistiche aggregate).
+const FUNZIONI_UTILI=[["piano","Il piano del sonno"],["promemoria","I promemoria"],["calendario","Calendario e widget"],["ferie","Ferie e cambio turno"],
+  ["riepilogo","Riepilogo e PDF"],["import","Importare i turni"],["persone","Le persone"],["andamenti","Sonno e carico"]];
 function renderLoSapevi(){
   const el=$("#loSapevi"); if(!el) return;
   let c=null;
@@ -8988,18 +9044,22 @@ function renderLoSapevi(){
   const FACCE=[["su","Bene",ICON.faceOk,"var(--ok)"],["meh","Così così",ICON.faceMid,"var(--faint)"],["giu","Non bene",ICON.faceLow,"var(--orange)"]];
   const azioni = c.facce
       ? '<span class="sapevi-az sapevi-facce">'+FACCE.map(f=>'<button type="button" class="btn g kface" data-sapevi-faccia="'+f[0]+'" aria-label="'+f[1]+'" style="--tone:'+f[3]+'"><i class="kic" style="color:'+f[3]+'">'+f[2]+'</i><span>'+f[1]+'</span></button>').join("")+'</span>'
+    : c.funzioni
+      ? '<span class="sapevi-az">'+FUNZIONI_UTILI.map(([id,t])=>'<button type="button" class="btn g sm" data-sapevi-funzione="'+id+'">'+esc(t)+'</button>').join("")+'</span>'
     : c.scelta
       ? '<span class="sapevi-az"><button type="button" class="btn g" data-sapevi-si>Sì, va bene</button><button type="button" class="btn g" data-sapevi-no>No, grazie</button></span>'
     : c.link
       ? '<span class="sapevi-az">'+c.link().map(([h,t])=>'<a class="btn sm" href="'+esc(h)+'" target="_blank" rel="noopener" data-sapevi-link>'+esc(t)+'</a>').join("")+'</span>'
     : (cta && c.a ? '<button type="button" class="btn sm" data-sapevi-prova>'+esc(cta)+'</button>' : '');
   // statistiche: sì e no sono entrambe risposte, niente ×
-  el.innerHTML='<div><b>'+esc(c.titolo||"Lo sapevi?")+'</b> '+esc(c.t())+(azioni?'<br>'+azioni:'')+'</div>'+
+  el.innerHTML='<div><b>'+esc(c.titolo||"Lo sapevi?")+'</b> '+esc(c.t())+(azioni||'')+'</div>'+
     (c.scelta ? '' : '<button type="button" class="x" data-sapevi-chiudi aria-label="Chiudi, non lo mostro più">×</button>');
 }
 if($("#loSapevi")) $("#loSapevi").addEventListener("click", e=>{
   const el=$("#loSapevi"), k=el.dataset.k, c=CONSIGLI_FUNZIONE.find(x=>x.k===k);
   const fatto=()=>{ usata(k); el.hidden=true; };
+  const fu=e.target.closest("[data-sapevi-funzione]");
+  if(fu){ track("funzione_utile",{f:fu.dataset.sapeviFunzione}); store.set("funzioneUtileAl", iso(new Date())); el.hidden=true; toast("Grazie!"); return; }
   const fc=e.target.closest("[data-sapevi-faccia]");
   if(fc){ const v=fc.dataset.sapeviFaccia; track("soddisfazione",{voto:v}); store.set("soddisfazioneAl", iso(new Date())); el.hidden=true;
     if(v==="giu") apriFeedback("soddisfazione"); else toast("Grazie!"); return; }
@@ -9037,7 +9097,11 @@ function segnaSottopagina(){
   const aperte=["andamenti-aperta","vederci-aperta","scambio-aperta","ferie-aperta","segna-aperta","turni-aperta"].some(c=>document.body.classList.contains(c));
   document.body.classList.toggle("sottopagina", aperte);
 }
-function apriAndamenti(){
+var andSez=null;   // la voce di «Sonno e carico» aperta (null = l'elenco)
+function andIndietro(){ if(andSez){ andSez=null; renderAndamenti(); try{ window.scrollTo(0,0); }catch(e){} } else chiudiAndamenti(); }
+document.addEventListener("click",e=>{ const b=e.target.closest("[data-and-sez]"); if(!b) return; haptic(6); andSez=b.dataset.andSez; renderAndamenti(); try{ window.scrollTo(0,0); }catch(e){} });
+function apriAndamenti(sez){
+  andSez=sez||null;
   chiudiVederci(); chiudiScambio(); chiudiFerie(); chiudiSegna(); chiudiTuoiTurni(true);
   document.body.classList.add("andamenti-aperta"); segnaSottopagina(); usata("sonno");
   // l'orologio sta in questa pagina: chi l'ha già vista non riceve l'invito a scoprirlo
@@ -9047,6 +9111,7 @@ function apriAndamenti(){
   try{ window.scrollTo(0,0); }catch(e){}
 }
 function chiudiAndamenti(){
+  andSez=null;
   document.body.classList.remove("andamenti-aperta"); segnaSottopagina();
   const p=$("#andamentiPagina"); if(p) p.hidden=true;
 }
@@ -9061,8 +9126,8 @@ function chiudiVederci(){
   document.body.classList.remove("vederci-aperta"); segnaSottopagina();
   const p=$("#vederciPagina"); if(p) p.hidden=true;
 }
-if($("#doAndamenti")) $("#doAndamenti").onclick=apriAndamenti;
-if($("#chiudiAndamenti")) $("#chiudiAndamenti").onclick=chiudiAndamenti;
+if($("#doAndamenti")) $("#doAndamenti").onclick=()=>apriAndamenti();
+if($("#chiudiAndamenti")) $("#chiudiAndamenti").onclick=andIndietro;
 if($("#doPartner")) $("#doPartner").onclick=apriVederci;
 if($("#chiudiVederci")) $("#chiudiVederci").onclick=chiudiVederci;
 
@@ -9188,7 +9253,7 @@ if($("#cycToday")) $("#cycToday").onclick=()=>{
    `id` cambia solo quando c'è qualcosa da dire; chi aggiorna la vede una volta. Chi installa adesso non la vede
    (non è una novità per lui), ma la trova sempre in Impostazioni › Novità. «app:true» = solo nell'app Android. */
 const NOVITA={ id:"2026-11-04", data:"Novembre 2026", righe:[
-  ["Sonno e carico più chiaro","La pagina mostra subito il sonno che ti manca; il resto sta in sezioni chiuse, ognuna con la sua riga riassuntiva. Gli orari del sonno separano le notti dormite di notte da quelle di giorno, e gli assi dei grafici sono corretti.",false,"2026-11-04"],
+  ["Sonno e carico più chiaro","La pagina mostra subito il sonno che ti manca; il resto è un elenco di quattro voci, ognuna con la sua riga riassuntiva e la sua pagina. Gli orari del sonno separano le notti dormite di notte da quelle di giorno, e gli assi dei grafici sono corretti.",false,"2026-11-04"],
   ["Copia completa su file","In Impostazioni › Dati e privacy: un file con turni, diario del sonno, impostazioni e persone. Lo riapri con «Ripristina da un file», anche su un telefono nuovo. Il link resta per spostare i turni sull'altro telefono.",false,"2026-11-03"],
   ["Cambia un turno, senza scambio","In Cambio turno scegli «Cambia un turno»: un giorno prende un altro turno (o il riposo) e vedi subito cosa cambia per il sonno. Più semplice, i consigli sulle funzioni hanno pulsanti più chiari e Dati e privacy ha una nuova icona.",false,"2026-11-02"],
   ["Festivi nel calendario","I festivi hanno un puntino rosso nella striscia e nel calendario di Turni. Con un ciclo puoi dire «Nei festivi sono a casa»: il giorno diventa riposo, anche per le ferie.",false,"2026-11-01"],
@@ -9420,7 +9485,7 @@ function giorniCiclo(giorni, persona){
       // il turno di quel giorno, per dire quali turni lasci con le ferie
       // a casa con la persona scelta: il suo giorno è di riposo (non lavora, non smonta dalla notte)
       const insieme = persona ? !!(asPartner(()=>{ const pb=NT.block(o); return pb.rest; }, persona)) : false;
-      out.push({d, lavoro:!b.rest, smonto: b.rest && !ieri.rest && ieri.end>1440, c, nome:NT.etichetta(o), festivo:festivo(d), insieme,
+      out.push({d, lavoro:!b.rest, smonto: b.rest && !ieri.rest && ieri.end>1440, c, nome:NT.etichetta(o), festivo:festivoVero(d), insieme,
         ferieGia: !!(state.giorni[iso(d)] && state.giorni[iso(d)].t==="ferie"), cambio: !!state.ecc[iso(d)]});
     }
   } finally { state.focus=fPrima; }
@@ -9741,14 +9806,17 @@ function apriTuoiTurni(da, opz){
   pg.hidden=false; _imp=null;
   pg.querySelectorAll("[data-ic]").forEach(x=>{ if(!x.innerHTML) x.innerHTML=ICON[x.dataset.ic]||""; });
   chiudiFlussoPagina(true);
+  festiviPagina=false; pg.classList.remove("tt-festivi"); { const b=$("#ttFestivi"); if(b){ b.hidden=true; b.innerHTML=""; } }
   renderTuoiTurni();
   if(opz.flusso) apriFlussoPagina(opz.flusso);
+  if(opz.festivi) apriFestivi();
   usata("turni"); track("setup_item", {item:"tuoi_turni"});
   try{ window.scrollTo(0,0); }catch(e){}
 }
 function chiudiTuoiTurni(muto){
   const pg=$("#tuoiTurniPagina"); if(!pg || pg.hidden) return;
   chiudiFlussoPagina(true);
+  festiviPagina=false; pg.classList.remove("tt-festivi"); { const b=$("#ttFestivi"); if(b){ b.hidden=true; b.innerHTML=""; } }
   meseIn($("#segnaPagina"));
   pg.hidden=true; _imp=null;
   document.body.classList.remove("turni-aperta"); segnaSottopagina();
@@ -9766,6 +9834,7 @@ function renderTuoiTurni(){
   const usati=new Set(String(state.pattern||"").split(""));
   const turni=Object.keys(sh).filter(k=>sh[k] && !sh[k].rest && (tipo==="variabili" || usati.has(k)));
   const voOld=$("#ttValOrari"); const vo=voOld; if(vo) vo.textContent=turni.map(k=>sh[k].n+" "+hhmm(sh[k].s)+"–"+hhmm(sh[k].e)).join(" · ");
+  { const vf=$("#ttValFestivi"); if(vf) vf.textContent=festiviRiga().replace(/\.$/,""); }
   const rie=$("#ttRiepilogo");
   if(tipo==="variabili"){
     { const o=$("#ttOrari"); if(o){ o.hidden=true; o.innerHTML=""; } const on=$("#ttOggiNota"); if(on) on.hidden=true; }
@@ -9843,12 +9912,13 @@ function vaiATurniVariabili(){
   primoPianoPronto("variabile", "Segna i turni che conosci già");
   if(!daPagina) apriTuoiTurni("oggi");
 }
-if($("#chiudiTuoiTurni")) $("#chiudiTuoiTurni").onclick=()=>chiudiTuoiTurni();
+if($("#chiudiTuoiTurni")) $("#chiudiTuoiTurni").onclick=()=>{ if(festiviPagina){ chiudiFestivi(); return; } chiudiTuoiTurni(); };
 if($("#ttFatto")) $("#ttFatto").onclick=()=>chiudiTuoiTurni();
 if($("#ttRighe")) $("#ttRighe").addEventListener("click", e=>{
   const b=e.target.closest("[data-tt]"); if(!b) return;
   const k=b.dataset.tt; haptic(6);
   if(k==="schema"){ passo("cambia_schema"); cambiaSchema=true; apriFlussoPagina("prossimi"); return; }
+  if(k==="festivi"){ apriFestivi(); return; }
   if(k==="orari"){ apriFlussoPagina("orari", "orari"); return; }
   if(k==="riposi"){
     turnoInScelta=[...new Set(String(state.pattern).split("").filter(c=>c!=="R"&&c!=="S"))][0]||null;
@@ -11088,12 +11158,13 @@ platform.onBackButton(()=>{
   const qs=$("#quickShiftModal"); if(qs && !qs.hidden){ chiudiQuickShift(); return true; }
   if($("#qrModal") && !$("#qrModal").hidden){ mostraQR(false); return true; }
   if($("#novitaModal") && !$("#novitaModal").hidden){ mostraNovita(false,true); return true; }
-  if(document.body.classList.contains("andamenti-aperta")){ chiudiAndamenti(); return true; }
+  if(document.body.classList.contains("andamenti-aperta")){ andIndietro(); return true; }
   if(document.body.classList.contains("vederci-aperta")){ chiudiVederci(); return true; }
   if(document.body.classList.contains("scambio-aperta")){ chiudiScambio(); return true; }
   if(document.body.classList.contains("ferie-aperta")){ chiudiFerie(); return true; }
   if(document.body.classList.contains("segna-aperta")){ if(_imp){ _imp=null; renderImport(); return true; } chiudiSegna(); return true; }
   if(document.body.classList.contains("turni-aperta")){
+    if(festiviPagina){ chiudiFestivi(); return true; }
     if(flussoInPagina){ chiudiFlussoPagina(); return true; }
     if(_imp){ _imp=null; renderImport(); return true; }
     chiudiTuoiTurni(); return true; }
@@ -11178,6 +11249,7 @@ function contaFunzioniAttive(){
     if(!store.get("orologioContato",false) && !(state.freeBed==="23:30" && state.freeWake==="07:30")){ store.set("orologioContato", true); track("setup_item", {item:"orologio_tuo"}); }
     const pl = platform.isNative ? (platform.name==="ios"?"i":"a") : (window.matchMedia("(display-mode: standalone)").matches?"p":"w");
     const cal = platform.calendar.available ? platform.calendar.attivo() : !!(window.NTPaid && window.NTPaid.paid());
+    if((state.people||[]).length || state.pPattern) track("setup_item", {item:"persone_attive"});
     track("funzioni_attive", {mix: pl+"_n"+(promemoriaAttivi()?1:0)+"c"+(cal?1:0)+"w"+(platform.widget.presenti()>0?1:0)+
       (platform.isNative ? "" : "p"+(promemoriaAttivi() && platform.notify.pushStato && platform.notify.pushStato()==="attive" ? 1 : 0))});
   }catch(e){}
@@ -11317,7 +11389,7 @@ if($("#modificaModal")) $("#modificaModal").addEventListener("click",e=>{
   if(k==="ciclo") apriTuoiTurni("turni");
   else if(k==="segna") apriSegna();
   else if(k==="importa") apriSegna("importa");
-  else if(k==="festivi"){ festiviAperto=true; usata("festivi"); renderMese(); const d=document.querySelector("#meseBox .mese-det"); if(d) d.open=true; setTimeout(()=>{ const x=document.querySelector("#meseBox .mese-fest-box"); if(x&&x.scrollIntoView) x.scrollIntoView({block:"center",behavior:"smooth"}); },80); }
+  else if(k==="festivi") apriTuoiTurni("turni",{festivi:true});
 });
 ["#partner","#partnerShare"].forEach(s=>{ const el=$(s); if(el) el.addEventListener("click", e=>{
   if(e.target.closest("[data-partner-edit]")) apriPartner();

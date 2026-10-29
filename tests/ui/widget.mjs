@@ -7,7 +7,7 @@ const b=await pw.chromium.launch(); const errs=[];
 const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 const tra=n=>{ const d=new Date(); d.setHours(12,0,0,0); d.setDate(d.getDate()+n); return iso(d); };
 const SH={M:{n:"Mattino",s:420,e:840},P:{n:"Pomeriggio",s:840,e:1260},N:{n:"Notte",s:1260,e:1860}};
-const apri=async(st, extra={}, risposte=null)=>{
+const apri=async(st, extra={}, risposte=null, ora=[16,0])=>{
   const ctx=await b.newContext({locale:"it-IT",viewport:{width:360,height:740}});
   await ctx.addInitScript(nativo);
   await ctx.addInitScript(([st,extra,risposte])=>{ if(risposte) window.__risposte=risposte;
@@ -16,7 +16,7 @@ const apri=async(st, extra={}, risposte=null)=>{
     for(const k in extra) localStorage.setItem("nt:"+k, JSON.stringify(extra[k])); }, [st,extra,risposte]);
   const p=await ctx.newPage(); p.on("pageerror",e=>errs.push(e.message));
   // alle 16: finito il sonno dopo l'eventuale notte di ieri, «oggi» è il giorno di calendario
-  const sera=new Date(); sera.setHours(16,0,0,0); await p.clock.setFixedTime(sera);
+  const sera=new Date(); sera.setHours(ora[0],ora[1],0,0); await p.clock.setFixedTime(sera);
   await p.goto("http://localhost:8766/index.html"); await p.waitForTimeout(2600);
   return p;
 };
@@ -84,5 +84,11 @@ await p.context().close();
   const sonno=await q.evaluate(()=>{ const v=window.__widget.voci.find(v=>/^sonno/.test(v.k) && v.s>Date.now() && v.s<Date.now()+4*3600e3); return v ? new Date(v.s).toTimeString().slice(0,5) : null; });
   ok(!!sonno, "alle 06:38 dopo la notte il widget ha il sonno che sta per cominciare → "+(sonno||"manca"));
   await ctx.close(); }
+// la sveglia vera già annotata (07:00) chiude il sonno: alle 07:15 il widget non deve dire «Sonno» fino alle 07:30 previste
+{ const st={turniConfigurati:true,pattern:"R",anchor:tra(-3),shifts:SH,repeat:true,firstSeenAt:tra(-30),freeBed:"23:30",freeWake:"07:30"};
+  const inCorso=async extra=>{ const q=await apri(st, extra, null, [7,15]); const r=await q.evaluate(()=>{ const n=Date.now(); return (window.__widget.voci||[]).filter(v=>v.k==="sonno" && v.s<=n && v.e>n).map(v=>new Date(v.e).toTimeString().slice(0,5)); }); await q.context().close(); return r; };
+  const senza=await inCorso({}), con=await inCorso({wakes:{[tra(0)]:"07:00"}, beds:{[tra(0)]:"23:30"}});
+  ok(senza.length===1 && senza[0]==="07:30", "senza sveglia annotata: alle 07:15 il sonno prosegue fino alle 07:30 → "+JSON.stringify(senza));
+  ok(con.length===0, "con la sveglia annotata alle 07:00: il sonno non è più in corso per il widget → "+JSON.stringify(con)); }
 ok(!errs.length, "nessun errore di pagina "+JSON.stringify(errs));
 await b.close();

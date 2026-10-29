@@ -46,4 +46,21 @@ await ctx.close();
   await q.setInputFiles("#copiaFile", file); await q.waitForTimeout(500);
   ok(/Sostituisco i dati/.test(msg) && await q.evaluate(p=>localStorage.getItem("nt:state")===p, prima), "una copia vera chiede conferma; se rifiuti non cambia nulla");
   await c2.close(); }
+// il link di backup porta anche «da quando usi l'app»: su un telefono nuovo non si diventa «nuovi» (vale la data più vecchia)
+{ const ctx=await b.newContext({locale:"it-IT",viewport:{width:390,height:844}});
+  await ctx.addInitScript(([st])=>{ if(sessionStorage.getItem("x")) return; sessionStorage.setItem("x","1"); localStorage.setItem("nt:state",JSON.stringify(st)); localStorage.setItem("nt:turniConfigurati","true");
+    localStorage.setItem("nt:firstPlanBannerChiuso","true"); localStorage.setItem("nt:attivazioneNascosta","true"); window.__sh=[]; navigator.share=async o=>{ window.__sh.push(o); }; },[{...ST,firstSeenAt:"2026-03-15"}]);
+  const p=await ctx.newPage(); p.on("pageerror",e=>errs.push(e.message));
+  await p.goto("http://localhost:8765/index.html"); await p.waitForTimeout(900);
+  await p.click("#doOpzioni"); await p.waitForTimeout(300); await p.click('[data-opzg-vai="dati"]'); await p.waitForTimeout(250);
+  await p.click("#doLink"); await p.waitForTimeout(400);
+  const url=await p.evaluate(()=>(window.__sh[0]||{}).url||"");
+  ok(/[#&]fs=2026-03-15\b/.test(url), "il link di backup contiene la data del primo uso");
+  await ctx.close();
+  const c2=await b.newContext({locale:"it-IT",viewport:{width:390,height:844}});
+  const q=await c2.newPage(); q.on("pageerror",e=>errs.push(e.message));
+  await q.goto("http://localhost:8765/index.html"+url.slice(url.indexOf("#"))); await q.waitForTimeout(1200);
+  const fs=await q.evaluate(()=>JSON.parse(localStorage.getItem("nt:state")||"{}").firstSeenAt);
+  ok(fs==="2026-03-15", "aprendo il link su un telefono nuovo, la data di primo uso torna quella vecchia → "+fs);
+  await c2.close(); }
 console.log("errori", errs); await b.close();
