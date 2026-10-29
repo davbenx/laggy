@@ -2,7 +2,7 @@
 // (non appena svegli, non a ridosso del sonno, non nel turno né dopo i pasti) e cadono nelle ore giuste.
 import test from "node:test";
 import assert from "node:assert/strict";
-import { finestreAttivita } from "../alertness.js";
+import { finestreAttivita, alertness } from "../alertness.js";
 
 const REGOLE = { testa:{ lungo:90, dopoSveglia:90, primaSonno:120 }, leggera:{ lungo:45, dopoSveglia:45, primaSonno:60 }, intensa:{ lungo:60, dopoSveglia:120, primaSonno:180 } };
 const hh = m => ((m % 1440) + 1440) % 1440 / 60;
@@ -73,4 +73,14 @@ test("«Quando preferisci»: la fascia scelta vince sul momento migliore, e se n
   assert.ok(hh(sera.leggera.a) >= 18 && hh(sera.leggera.a) < 23, "«sera»");
   const nessuna = finestreAttivita({ wake: 420, sleepOnset: 1410, occupato: [[400, 800]], quando: { intensa: "mattina" } });
   assert.ok(nessuna.intensa && hh(nessuna.intensa.a) >= 13, "mattina occupata: torna al migliore");
+});
+
+test("il calo previsto è un punto di svolta vero: non scorre con l'orologio e non è mai «adesso + 30 minuti»", () => {
+  const d = (h, m = 0, g = 29) => new Date(2026, 9, g, h, m);
+  const base = { freeWake: "09:45", freeBed: "00:30", lastSleepEnd: d(7), nextSleepStart: d(25, 0) };
+  const ore = [[7, 30], [8, 30], [9, 46], [10, 30], [12, 0], [14, 0], [17, 0]];
+  const calo = ore.map(([h, m]) => alertness({ ...base, now: d(h, m) }).risk);
+  assert.ok(calo.every(r => r && r.hhmm === calo[0].hhmm), "sempre lo stesso orario nel corso della giornata: " + calo.map(r => r && r.hhmm).join(" "));
+  ore.forEach(([h, m], i) => assert.notEqual(calo[i].at.getTime(), d(h, m).getTime() + 30 * 60000, "non «adesso + 30 minuti» alle " + h + ":" + m));
+  assert.equal(alertness({ ...base, now: d(20) }).risk, null, "a sera, con la curva che scende solo verso il sonno, non c'è un calo da annunciare");
 });

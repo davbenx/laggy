@@ -42,15 +42,19 @@ export function alertness(opts) {
   const S = tMs => 1 - Math.exp(-Math.max(0, (tMs - lastEnd) / 3600e3) / 8); // pressione del sonno
   const A = tMs => C(minOf(new Date(tMs))) - 1.1 * S(tMs);                   // allerta netta
 
+  // Il calo e il picco sono veri punti di svolta della curva (più bassa/alta dei punti vicini, 45 minuti prima
+  // e dopo): così non dipendono da quando si guarda. Prima si cercava il minimo nella finestra da «adesso»:
+  // se la curva scendeva e basta, il «calo» cadeva sempre a «adesso + 30 minuti» e scorreva avanti con l'orologio.
+  const VICINO = 45 * 60000;
   let riskT = null, riskV = Infinity, peakT = null, peakV = -Infinity;
   const end = horizon;
   for (let t = now.getTime(); t <= end; t += 15 * 60000) {
-    const a = A(t);
-    if ((t - now.getTime()) >= 30 * 60000 && a < riskV) { riskV = a; riskT = t; }
-    if (a > peakV) { peakV = a; peakT = t; }
+    const a = A(t), prima = A(t - VICINO), dopo = A(t + VICINO);
+    if ((t - now.getTime()) >= 30 * 60000 && a < prima && a < dopo && a < riskV) { riskV = a; riskT = t; }
+    if ((t - now.getTime()) > 45 * 60000 && a > prima && a > dopo && a > peakV) { peakV = a; peakT = t; }
   }
   const aNow = A(now.getTime());
-  const peakFuture = peakT != null && (peakT - now.getTime()) > 45 * 60000;
+  const peakFuture = peakT != null;
   return {
     nadirMin: nadir,
     now: { level: aNow > 0.2 ? "alta" : aNow < -0.35 ? "bassa" : "media", value: +aNow.toFixed(3) },
