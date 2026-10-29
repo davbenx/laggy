@@ -969,6 +969,7 @@ padding:12px 6px 12px 14px;margin:-6px 0 var(--gap-sezione);font-size:13.5px;lin
 .sapevi[hidden]{display:none}
 .sapevi>div{flex:1;min-width:0}
 .sapevi b{color:var(--ink)}
+.sapevi-cta{display:flex;align-items:center;min-height:44px;margin-top:4px;padding:0;font-size:14px;font-weight:600}
 .sapevi-az{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:10px}
 .sapevi-az .btn{min-height:40px;padding:0 14px}
 .sapevi-az.sapevi-facce{flex-wrap:nowrap;gap:8px}
@@ -4124,37 +4125,36 @@ function wakeSummary(){
   return out.consigli.length||out.liberi||out.anticipi ? out : null;
 }
 
-// Proposta 1 del giro di consulenza: il voto "come ti senti" e il debito di
-// sonno oggettivo vengono mostrati oggi separati, mai messi in relazione fra
-// loro. La restrizione di sonno cumulativa predice sia la percezione sia le
-// prestazioni in modo dose-dipendente (Van Dongen et al. 2003) — un confronto
-// concreto fra "quando il debito è alto" e "quando è basso" dà un motivo
-// personale, non un principio generico.
-//
-// Finestra più ampia (90 notti, non le 30 del riquadro del debito sopra):
-// qui serve potenza statistica per un confronto fra due gruppi, non una
-// fotografia recente. Confine mediano, non una soglia arbitraria in minuti —
-// si adatta a chi ha poco debito quanto a chi ne ha tanto. Come cycleSummary,
-// non parla se il campione è scarso: almeno 3 giorni per gruppo, e una
-// differenza di almeno mezzo punto — sotto, è rumore, non un pattern.
+// Il voto del giorno dopo le notti corte: confronta, per ogni giorno con un voto, quanto mancava di sonno la notte
+// prima (rispetto al piano) con il voto stesso (Van Dongen et al. 2003: il debito di sonno pesa sulle prestazioni).
+// Non il «debito» accumulato: è una somma che cresce nel tempo, e confrontarne le due metà vuol dire confrontare
+// inizio e fine del periodo. Qui serve un legame vero e più forte del caso: almeno 14 giorni con voto,
+// correlazione di rango (Spearman) negativa oltre ~2/√(n−1), almeno 4 notti corte e 4 altre, e mezzo punto di differenza.
+// Un legame contrario, o debole, non si dice: con pochi giorni è rumore.
+const rangoMedio=a=>{ const o=a.map((v,i)=>[v,i]).sort((x,y)=>x[0]-y[0]), r=new Array(a.length); let i=0;
+  while(i<o.length){ let j=i; while(j+1<o.length && o[j+1][0]===o[i][0]) j++; const m=(i+j)/2+1; for(let q=i;q<=j;q++) r[o[q][1]]=m; i=j+1; } return r; };
+function spearman(x, y){
+  const a=rangoMedio(x), b=rangoMedio(y), n=a.length, ma=a.reduce((s,v)=>s+v,0)/n, mb=b.reduce((s,v)=>s+v,0)/n;
+  let sab=0, saa=0, sbb=0; for(let i=0;i<n;i++){ sab+=(a[i]-ma)*(b[i]-mb); saa+=(a[i]-ma)**2; sbb+=(b[i]-mb)**2; }
+  return saa && sbb ? sab/Math.sqrt(saa*sbb) : 0;
+}
+const NOTTE_CORTA_MIN=45;   // quanto in meno del piano per dire «notte corta»
 function correlazioneVotoDebito(){
   if(!window.NTHistory) return null;
   let trend=null;
   try{ trend=window.NTHistory.sleepTrend({beds:state.beds,wakes:state.wakes}, NT_planSafe, {days:90}); }catch(e){ return null; }
   if(!trend) return null;
   const coppie=trend.series
-    .map(s=>{ const v=+diary[s.date]; return (v>=1&&v<=5) ? {debt:s.debt, voto:v} : null; })
+    .map(s=>{ const v=+diary[s.date]; return (v>=1&&v<=5) ? {mancano:(s.planned!=null ? s.planned : state.need||480)-s.actual, voto:v} : null; })
     .filter(Boolean);
-  if(coppie.length<6) return null;
-  const debiti=coppie.map(c=>c.debt).sort((a,b)=>a-b);
-  const mediana=debiti[Math.floor(debiti.length/2)];
-  const alto=coppie.filter(c=>c.debt>=mediana), basso=coppie.filter(c=>c.debt<mediana);
-  if(alto.length<3 || basso.length<3) return null;
-  const media=a=>a.reduce((s,c)=>s+c.voto,0)/a.length;
-  const vAlto=media(alto), vBasso=media(basso);
-  const diff=vBasso-vAlto;
-  if(Math.abs(diff)<0.5) return null;
-  return {n:coppie.length, sogliaDebito:mediana, vAlto, vBasso, diff, coerente:diff>0};
+  if(coppie.length<14) return null;
+  const rho=spearman(coppie.map(c=>c.mancano), coppie.map(c=>c.voto));
+  if(!(rho<=-2/Math.sqrt(coppie.length-1))) return null;
+  const corte=coppie.filter(c=>c.mancano>=NOTTE_CORTA_MIN), altre=coppie.filter(c=>c.mancano<NOTTE_CORTA_MIN);
+  if(corte.length<4 || altre.length<4) return null;
+  const media=a=>a.reduce((s,c)=>s+c.voto,0)/a.length, vCorto=media(corte), vAltre=media(altre);
+  if(vAltre-vCorto<0.5) return null;
+  return {n:coppie.length, rho, vCorto, vAltre};
 }
 
 // Proposta 4 del giro di consulenza: la regolarità degli orari, non solo la
@@ -4214,12 +4214,7 @@ function summaryText(){
   const seDebito = trend ? ["", "— SONNO, ULTIME "+trend.series.length+" NOTTI —",
     "In media dormi "+hm(trend.avgActual)+(trend.avgPlanned?" contro "+hm(trend.avgPlanned)+" pianificate":""),
     "Debito accumulato: "+(trend.debtNow>0?hm(trend.debtNow)+" in meno":hm(-trend.debtNow)+" in più")+" rispetto al pianificato"]
-    .concat((()=>{ const corr=correlazioneVotoDebito(); if(!corr) return [];
-      const sopra = corr.sogliaDebito>0 ? "quando il debito supera "+hm(corr.sogliaDebito)
-        : "nei giorni con meno sonno accumulato rispetto al solito";
-      return [corr.coerente
-        ? "Sembra che "+sopra+", il voto scenda in media a "+corr.vAlto.toFixed(1)+" (contro "+corr.vBasso.toFixed(1)+" negli altri giorni)."
-        : "Curioso: il voto è più alto proprio "+sopra+" ("+corr.vAlto.toFixed(1)+" contro "+corr.vBasso.toFixed(1)+")."]; })())
+    .concat((()=>{ const corr=correlazioneVotoDebito(); return corr ? [fraseCorrDebito(corr)] : []; })())
     : [];
   const seRegolarita = (()=>{ let reg=null; try{ reg=regolaritaSonno(); }catch(e){}
     if(!reg) return [];
@@ -6967,13 +6962,9 @@ function donateUrl(){ try{ return (window.NT_DONATE && window.NT_DONATE.url) || 
 // sia se diventa il consiglio principale (in cima), sia se resta la sua
 // card descrittiva più sotto (quando qualcos'altro ha la priorità).
 function fraseCorrDebito(corr){
-  const sopra = corr.sogliaDebito>0 ? "quando il debito supera "+hm(corr.sogliaDebito)
-    : "nei giorni con meno sonno accumulato rispetto al solito";
-  return corr.coerente
-    ? "Sembra che "+sopra+", il tuo voto scenda in media a "+corr.vAlto.toFixed(1)+
-      " (contro "+corr.vBasso.toFixed(1)+" negli altri giorni)."
-    : "Curioso: nei tuoi dati il voto è più alto proprio "+sopra+
-      " ("+corr.vAlto.toFixed(1)+" contro "+corr.vBasso.toFixed(1)+"). Potrebbe dipendere da altro — vale la pena osservarlo.";
+  const virg=v=>v.toFixed(1).replace(".",",");
+  return "Dopo le notti in cui dormi almeno "+NOTTE_CORTA_MIN+" minuti meno del previsto, il tuo voto scende in media a "+virg(corr.vCorto)+
+    " (contro "+virg(corr.vAltre)+" dopo le altre).";
 }
 // Non un'altra sezione da interpretare: la singola cosa più utile da sapere
 // ORA, scelta fra tutti gli insight già calcolati dalle sezioni sotto (che
@@ -7309,7 +7300,7 @@ function renderAndamenti(){
   }
 
   // Un solo confronto per turno: quanto dormi, quanto in meno del previsto, come stai.
-  if(parteFascia || parteCiclo) vociAnd.dormi=sezDet("Come dormi e come stai, turno per turno", (parteFascia||parteCiclo).riga,
+  if(parteFascia || parteCiclo) vociAnd.dormi=sezDet("Come dormi e come stai", (parteFascia||parteCiclo).riga,
     (parteFascia ? parteFascia.corpo : "")+(parteCiclo ? (parteFascia ? '<div style="height:14px"></div>' : '')+parteCiclo.corpo : ""), {id:"dormi"});
   // Quattro voci sempre in lista, come le Impostazioni: se mancano i dati la riga dice cosa serve.
   const VOCI=[["carico","calendar","Il carico dei turni","Segna i turni per vederlo","Notti di fila, riposi brevi, festivi e ore dei prossimi 30 giorni, calcolati dai tuoi turni."],
@@ -9050,7 +9041,7 @@ function renderLoSapevi(){
       ? '<span class="sapevi-az"><button type="button" class="btn g" data-sapevi-si>Sì, va bene</button><button type="button" class="btn g" data-sapevi-no>No, grazie</button></span>'
     : c.link
       ? '<span class="sapevi-az">'+c.link().map(([h,t])=>'<a class="btn sm" href="'+esc(h)+'" target="_blank" rel="noopener" data-sapevi-link>'+esc(t)+'</a>').join("")+'</span>'
-    : (cta && c.a ? '<button type="button" class="btn sm" data-sapevi-prova>'+esc(cta)+'</button>' : '');
+    : (cta && c.a ? '<button type="button" class="lnk sapevi-cta" data-sapevi-prova>'+esc(cta)+' →</button>' : '');
   // statistiche: sì e no sono entrambe risposte, niente ×
   el.innerHTML='<div><b>'+esc(c.titolo||"Lo sapevi?")+'</b> '+esc(c.t())+(azioni||'')+'</div>'+
     (c.scelta ? '' : '<button type="button" class="x" data-sapevi-chiudi aria-label="Chiudi, non lo mostro più">×</button>');

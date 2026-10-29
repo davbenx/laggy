@@ -58,7 +58,7 @@ ok(an.righe.length===5 && an.righe.every(r=>r.n.length>2) && an.righe.every(r=>/
 ok(an.righe.filter(r=>r.giu).length===1 && an.righe.find(r=>r.giu).n==="Notte", "Voto per giorno: evidenziato solo il giorno che pesa di più (Notte)");
 { const pf=await p.evaluate(()=>{ const box=document.querySelector("#andamenti #dormi");
     return box ? {righe:[...box.querySelectorAll(".frow")].map(r=>r.querySelector(".flab").childNodes[0].textContent), frase:(box.querySelector(".fnota")||{}).textContent||"", colori:[...box.querySelectorAll(".fbar i")].map(i=>i.style.background)} : null; });
-  ok(pf && pf.righe.length>=3 && pf.righe.includes("Notte") && new Set(pf.colori).size===pf.colori.length, "Come dormi, turno per turno: una riga per ogni fascia che c'è, ciascuna con il suo colore → "+JSON.stringify(pf&&pf.righe));
+  ok(pf && pf.righe.length>=3 && pf.righe.includes("Notte") && new Set(pf.colori).size===pf.colori.length, "Come dormi e come stai: una riga per ogni fascia che c'è, ciascuna con il suo colore → "+JSON.stringify(pf&&pf.righe));
   ok(pf && /meno del previsto|vicino al sonno previsto/.test(pf.frase), "e una frase su dove il sonno va protetto → "+(pf&&pf.frase)); }
 // le notti del grafico e la striscia del carico portano il colore della fascia, e la legenda dice solo quelle che ci sono
 ok(await p.evaluate(()=>{ const l=[...document.querySelectorAll("#andamenti .grf-leg, #andamenti .car-leg")].map(x=>x.textContent).join(" "); return /mattina/.test(l) && /pomeriggio/i.test(l) && /notte/i.test(l) && !/sera/i.test(l); }), "legende per fascia: mattina, pomeriggio e notte (il ciclo non ha la sera)");
