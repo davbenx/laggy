@@ -3710,6 +3710,7 @@ function cards(P){
     sc.flag="Recuperi "+dur(s.dur)+" invece di "+dur(state.need)+". Domani fai un pisolino, ed evita due giornate così di fila.";
 
   const cc={k:"c",lab:"Ultimo caffè",val:hhmm(cut),small:"poi basta",rows:[],at:cut,
+    cambia:4, cambiaTxt:"Cambia la soglia del caffè",
     why:"Nello studio di riferimento, 400 mg di caffeina (circa quattro tazze) presi sei ore prima di coricarsi accorciavano comunque il sonno — spesso senza che il soggetto se ne accorgesse. Da qui la soglia delle sei ore. Puoi cambiarla nelle impostazioni: la caffeina si smaltisce a velocità diverse da persona a persona, e un margine che non ti somiglia lo ignoreresti e basta.",
     cite:"Drake, Roehrs, Shambroom & Roth, J Clin Sleep Med 2013"};
   if(night){
@@ -3871,6 +3872,8 @@ function cards(P){
     out.push({k:"turno", lab:"Il tuo turno",
       val: hhmm(b.start)+" → "+hhmm(b.end),
       small: "<b>"+esc(b.name||nameOf(b.c))+"</b>",
+      sub:"Per il viaggio contiamo "+state.cTo+" minuti all'andata e "+state.cFrom+" al ritorno: decidono quando ti prepari e da quando sei di nuovo libero.",
+      cambia:4, cambiaTxt:"Cambia il tuo tragitto",
       at: b.start});
   } else if(b.c==="?"){
     out.push({k:"turno_mancante", lab:"Turno non impostato",
@@ -6030,6 +6033,11 @@ function renderEssenziale(P, CARDS){
 
   // Il dettaglio di una riga: tutto quello che la scheda sa dire, senza intestazione
   // (l'intestazione è la riga stessa). Sola lettura.
+  // Link di chiusura di un dettaglio, verso le impostazioni giuste: "cambia" per una sezione di
+  // Impostazioni › Le tue abitudini (stesso meccanismo di apriSezioneInline), "vai" per le altre
+  // destinazioni che non passano da lì (oggi solo "momenti", in Cosa vedi nel piano).
+  const linkCambia=(sez,testo)=>'<button type="button" class="lnk ed-cambia" data-cambia="'+sez+'">'+esc(testo)+' →</button>';
+  const linkVai=(dest,testo)=>'<button type="button" class="lnk ed-cambia" data-vai="'+esc(dest)+'">'+esc(testo)+' →</button>';
   const dett=cd=>{
     if(!cd) return "";
     let x="";
@@ -6043,6 +6051,8 @@ function renderEssenziale(P, CARDS){
     if(cd.rows&&cd.rows.length) x+='<div class="rows">'+
       cd.rows.map(r=>'<div class="row"><b>'+r[0]+'</b><span>'+r[1]+'</span></div>').join("")+'</div>';
     if(cd.why) x+='<div class="why">'+cd.why+(cd.cite?'<cite>'+cd.cite+'</cite>':'')+'</div>';
+    if(cd.cambia) x+=linkCambia(cd.cambia, cd.cambiaTxt||"Cambia nelle impostazioni");
+    if(cd.vai) x+=linkVai(cd.vai, cd.vaiTxt||"Cambia nelle impostazioni");
     return x;
   };
 
@@ -6119,7 +6129,7 @@ function renderEssenziale(P, CARDS){
   // I momenti migliori (testa, movimento, allenamento) come voci del piano.
   try{ const fin=finestreDelGiorno(P);
     if(fin) for(const [k,lab,ic,sub,perche] of VOCI_FIN){ const w=fin[k]; if(!w || !pianoVoce(k)) continue;
-      voci.push({t:dSv(w.a), html:riga("fin-"+k, lab, hhmm(w.a)+" → "+hhmm(w.z), sub, false, ic, '<div class="why">'+esc(perche)+'</div>', {a:w.a, z:w.z, poi:lab.toLowerCase()+" dalle "+hhmm(w.a)})}); } }catch(e){}
+      voci.push({t:dSv(w.a), html:riga("fin-"+k, lab, hhmm(w.a)+" → "+hhmm(w.z), sub, false, ic, '<div class="why">'+esc(perche)+'</div>'+linkVai("momenti","Scegli quando preferisci"), {a:w.a, z:w.z, poi:lab.toLowerCase()+" dalle "+hhmm(w.a)})}); } }catch(e){}
   const dn=sceltaDopoNotte(P);
 
   // Letto troppo presto prima di un turno di mattina: stessa soglia della
@@ -6232,7 +6242,7 @@ function renderEssenziale(P, CARDS){
         '<div class="en mono">?</div>'+
         '</div>'});
     } else if(cd.k==="turno"){
-      voci.push({t, html:riga("turno","Turno",cd.val,cd.small,false,ICON.alarm,null,
+      voci.push({t, html:riga("turno","Turno",cd.val,cd.small,false,ICON.alarm,dett(cd),
         {a:P.b.start, z:P.b.end, poi:"entri in turno alle "+hhmm(P.b.start)})});
     } else if(cd.k==="cbt"){
       voci.push({t, html:riga("sonnolenza","Sonnolenza massima",cd.val,cd.small,true,ICON.warn,dett(cd),
@@ -8625,9 +8635,20 @@ if($("#essenziale")){
   $("#essenziale").addEventListener("click", e=>{ const r=e.target.closest(".erow[data-row]"); if(r) apriInfo(r.dataset.row); });
   $("#essenziale").addEventListener("keydown", e=>{ if(e.key!=="Enter" && e.key!==" ") return; const r=e.target.closest(".erow[data-row]"); if(r){ e.preventDefault(); apriInfo(r.dataset.row); } });
 }
+// «Momenti migliori» non è in Le tue abitudini ma in Cosa vedi nel piano: si apre il gruppo e si
+// espande la sezione giusta, riusata sia dal consiglio del giorno sia dai link dentro i popup.
+function apriMomentiMigliori(){
+  apriOpzioni("voci");
+  setTimeout(()=>{
+    const d=document.querySelector("#opzPianoVoci .pv-momenti"); if(d) d.open=true;
+    const x=$("#opzPianoVoci"); if(x&&x.scrollIntoView) try{ x.scrollIntoView({block:"center"}); }catch(e){}
+  }, 250);
+}
 if($("#infoModal")) $("#infoModal").addEventListener("click", e=>{
   const b=e.target.closest("[data-cambia]");
-  if(b){ apriFoglio("infoModal",false); apriOpzioni("abitudini"); apriSezioneInline(+b.dataset.cambia); }
+  if(b){ apriFoglio("infoModal",false); apriOpzioni("abitudini"); apriSezioneInline(+b.dataset.cambia, true); return; }
+  const v=e.target.closest("[data-vai]");
+  if(v && v.dataset.vai==="momenti"){ apriFoglio("infoModal",false); apriMomentiMigliori(); }
 });
 ["#essenziale","#andamenti"].forEach(s=>{ const el=$(s); if(el){ el.addEventListener("change",diaryChange); el.addEventListener("click",diaryClick); } });
 // Dalle righe «Dormi» e «Pisolino» al pannello dove si cambiano davvero.
@@ -8978,7 +8999,7 @@ const CONSIGLI_FUNZIONE=[
   {k:"widgetmese", quando:()=>platform.widget.available && platform.widget.presenti()>0, t:()=>"Allarga il widget in altezza: più è alto, più mostra. Il pulsante cambia con l'ora (sveglia, orario del sonno o del pisolino, voto del sonno), poi arrivano le prossime voci e il calendario, con i turni della persona che segui sotto i tuoi."},
   {k:"momenti", quando:()=>!["testa","leggera","intensa"].some(pianoVoce),
     t:()=>"Vuoi sapere quando pensare, muoverti o allenarti meglio? I momenti migliori si accendono in Impostazioni › Cosa vedi nel piano.",
-    cta:()=>"Scegli i momenti", a:()=>{ apriOpzioni("voci"); setTimeout(()=>{ const x=$("#opzPianoVoci"); if(x&&x.scrollIntoView) try{ x.scrollIntoView({block:"center"}); }catch(e){} }, 250); }},
+    cta:()=>"Scegli i momenti", a:apriMomentiMigliori},
   {k:"riepilogo", t:()=>"Puoi mandare il riepilogo del tuo mese o degli ultimi 12 mesi, e il PDF per il medico: sono in «Condividi e riepiloghi».",
     cta:()=>"Apri Condividi", a:()=>{ setTab("turni"); setTimeout(apriCondividi, 250); }},
   {k:"dormi", t:()=>"Tocca «Dormi» nel piano: dopo una notte scegli sonno breve o lungo, prima di un mattino presto puoi dormire in due tempi."},
@@ -9178,9 +9199,11 @@ function segnaEspansi(){
   });
 }
 if($("#opzioni")) $("#opzioni").addEventListener("click", ()=>setTimeout(segnaEspansi,0));
-function apriSezioneInline(n){
+// forza: sempre aperta (per i link dai popup, che non devono richiudere una sezione lasciata
+// aperta da una visita precedente — un tocco su "Cambia" deve sempre portare lì, mai nasconderla).
+function apriSezioneInline(n, forza){
   const box=$("#opzBox"+n); if(!box) return;
-  const apri=box.hidden;
+  const apri=forza || box.hidden;
   soloUno(apri?"#opzBox"+n:null);
   box.hidden=!apri;
   segnaEspansi();
@@ -9241,7 +9264,8 @@ if($("#cycToday")) $("#cycToday").onclick=()=>{
    Si scrivono a mano a ogni versione con una funzione che si vede: poche righe, in italiano di tutti i giorni.
    `id` cambia solo quando c'è qualcosa da dire; chi aggiorna la vede una volta. Chi installa adesso non la vede
    (non è una novità per lui), ma la trova sempre in Impostazioni › Novità. «app:true» = solo nell'app Android. */
-const NOVITA={ id:"2026-11-05", data:"Novembre 2026", righe:[
+const NOVITA={ id:"2026-11-06", data:"Novembre 2026", righe:[
+  ["Collegamenti dai popup alle impostazioni","I popup di «Turno», «Caffè» e dei momenti migliori hanno ora un link diretto alle impostazioni che cambiano quel calcolo: tragitto, soglia del caffè, quando preferisci allenarti o pensare.",false,"2026-11-06"],
   ["Il perché in un foglio, i riepiloghi in Condividi","Nel piano di Oggi tocchi una voce (icona ⓘ) e il perché si apre in un foglio, senza allungare la lista. Il riepilogo del mese, dei 12 mesi e il PDF per il medico stanno in «Condividi e riepiloghi». In «Il tuo sonno» ci sono ora anche le scelte su come dormire e, su Android, «Metti la sveglia».",false,"2026-11-05"],
   ["Sonno e carico più chiaro","La pagina mostra subito il sonno che ti manca; il resto è un elenco di quattro voci, ognuna con la sua riga riassuntiva e la sua pagina. Gli orari del sonno separano le notti dormite di notte da quelle di giorno, e gli assi dei grafici sono corretti.",false,"2026-11-04"],
   ["Copia completa su file","In Impostazioni › Dati e privacy: un file con turni, diario del sonno, impostazioni e persone. Lo riapri con «Ripristina da un file», anche su un telefono nuovo. Il link resta per spostare i turni sull'altro telefono.",false,"2026-11-03"],
