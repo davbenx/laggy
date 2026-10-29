@@ -210,8 +210,8 @@ L'anteprima mostra layout, colori e stati come progettati. Un solo difetto trova
 `NotturnistiWidget.senzaIntent` (solo per l'anteprima): evita i `PendingIntent` sulla JVM.
 
 ## 6. Stato delle release e dei PR (aggiornato al 29 ottobre 2026)
-- **`main` = `786497a`** (PR #165 unito: ciclo con numeri del mese, «Sonno e carico» a elenco, Festivi in «I tuoi turni», widget/timeline, contatori e domanda neutra). Branch di lavoro allineata a `main`. Nessuna PR aperta.
-- **PWA**: online con la #165. **Android**: run #27 = 1.3.7, **run #28 = 1.3.8 (da caricare su Play)**: contiene tutto ciò che è in `main`, incluso il widget con la sveglia vera annotata. Le note di versione sono in `docs/play/scheda.md` (1.3.8). Stato di caricamento su Play: non confermato.
+- **`main` = `8352469`** (PR #167 unito dopo la #165 e la #166: ciclo con numeri del mese, «Sonno e carico» a elenco, Festivi in «I tuoi turni», widget/timeline, contatori e domanda neutra, correzione del «calo previsto» in `alertness.js`). Branch di lavoro allineata a `main`. Nessuna PR aperta.
+- **PWA**: online con la #165. **Android**: run #27 = 1.3.7, run #28 = 1.3.8, **run #29 = 1.3.9 (da caricare su Play, sostituisce la 1.3.8)**: contiene tutto ciò che è in `main`, incluso il widget con la sveglia vera annotata e il «calo previsto» corretto. Le note di versione sono in `docs/play/scheda.md` (1.3.9). Stato di caricamento su Play: non confermato.
 - Sotto, la storia delle run precedenti (fino alla 1.3.1) com'era alla consegna di ottobre.
 - **Release Android:**
   - Run #14 = 1.2.2 (con la correzione «dormi dopo il turno»).

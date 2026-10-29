@@ -67,7 +67,7 @@ Notturnisti dà indicazioni generali di benessere e organizzazione basate sulla 
 
 Progetto indipendente, nato da chi i turni li fa. Segnalazioni: Impostazioni → Segnala cosa non torna.
 
-## Note di versione 1.3.8 (max 500)
+## Note di versione 1.3.9 (max 500)
 Novità:
 • Il tuo ciclo: ore o calendario, con i numeri del mese nella stessa scheda
 • Sonno e carico a voci chiare; orari di notte e di giorno separati
@@ -75,6 +75,7 @@ Novità:
 • «Cambia un turno» senza scambio; Segna con intervallo e annulla
 • Copia completa su file, con ripristino
 • Widget: mese a sei settimane, energia dopo 90 minuti, sveglia vera annotata
+• «Calo previsto» più preciso: non scorre più con l'orologio
 
 ## Categoria, tag e contatti
 - Categoria: Salute e fitness
