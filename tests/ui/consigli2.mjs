@@ -30,7 +30,7 @@ const coda=async p=>{ await p.waitForTimeout(400); return (globalThis.__inv||[])
 { const p=await apri(ST,"festivi"); const t=await tip(p);
   ok(/^festivi: .*festivi del tuo contratto/.test(t), "consiglio festivi → "+t.slice(0,60));
   await p.click("[data-sapevi-prova]"); await p.waitForTimeout(400);
-  ok(await p.evaluate(()=>document.body.classList.contains("tab-turni") && !!document.querySelector("#meseBox .mese-fest-box")), "«Aggiungi i tuoi festivi» apre il riquadro dei festivi in Turni");
+  ok(await p.evaluate(()=>document.body.classList.contains("tab-turni") && !!document.querySelector("#ttFestivi .mese-fest-box")), "«Aggiungi i tuoi festivi» apre il riquadro dei festivi in Turni");
   ok(await p.evaluate(()=>!!JSON.parse(localStorage.getItem("nt:funzioniUsate")||"{}").festivi), "aperto il riquadro: il consiglio non torna");
   await p.context().close(); }
 

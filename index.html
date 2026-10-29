@@ -1030,6 +1030,7 @@ padding:12px 6px 12px 14px;margin:-6px 0 var(--gap-sezione);font-size:13.5px;lin
 .tt-orari .qh-ore-riga>:first-child{grid-column:auto;font-size:15px}
 .tt-orari .qh-ore-riga input{background:var(--bg)}
 #tuoiTurniPagina.tt-flusso #ttOrari,#tuoiTurniPagina.tt-flusso #ttOggiNota{display:none}
+#tuoiTurniPagina.tt-festivi #ttRiepilogo,#tuoiTurniPagina.tt-festivi #ttOrari,#tuoiTurniPagina.tt-festivi #ttOggiNota,#tuoiTurniPagina.tt-festivi #ttMese,#tuoiTurniPagina.tt-festivi #ttRighe,#tuoiTurniPagina.tt-festivi #ttNota,#tuoiTurniPagina.tt-festivi #ttFatto{display:none}
 #ttFlusso #demoEsempio{border:0;background:none;box-shadow:none;padding:0;margin:0}
 #tuoiTurniPagina [hidden]{display:none!important}
 body.tab-turni.turni-aperta #ttFlusso #demoEsempio:not([hidden]){display:block!important}
@@ -1738,9 +1739,11 @@ header b{font-size:23px}
     <button type="button" class="tool tool-1line va" data-tt="orari"><span class="tool-ic" data-ic="alarm"></span><span class="tool-tx"><b>Orari dei turni</b><span><span id="ttValOrari"></span></span></span></button>
     <button type="button" class="tool tool-1line va" data-tt="posizione" hidden><span class="tool-ic" data-ic="calendar"></span><span class="tool-tx"><b>Oggi dove sei nel ciclo</b><span>Se il ciclo risulta sfasato di qualche giorno</span></span></button>
     <button type="button" class="tool tool-1line va" data-tt="riposi"><span class="tool-ic" data-ic="bed"></span><span class="tool-tx"><b>Giorni di riposo</b><span><span id="ttValRiposi"></span></span></span></button>
+    <button type="button" class="tool tool-1line va" data-tt="festivi"><span class="tool-ic" data-ic="sparkles"></span><span class="tool-tx"><b>Festivi</b><span><span id="ttValFestivi"></span></span></span></button>
     <button type="button" class="tool tool-1line va" data-tt="schema"><span class="tool-ic" data-ic="cycle"></span><span class="tool-tx"><b>Cambia tipo di turni</b><span>In quinta, 12 ore, sempre lo stesso turno, turni che cambiano…</span></span></button>
   </div>
   <div id="ttFlusso"></div>
+  <div id="ttFestivi" hidden></div>
   <button type="button" class="btn pri" id="ttFatto" hidden style="width:100%;min-height:46px;margin-top:14px;font-weight:700">Fatto</button>
   <p class="hint" id="ttNota" style="margin:12px 2px 0">Un giorno diverso dal solito (ferie, cambio, straordinario)? Toccalo nel calendario di Turni: cambia solo quel giorno.</p>
 </div>
@@ -6629,48 +6632,68 @@ function renderMese(){
     festiviHtml();
   // una riga sola (ore, turni, notti), e i dettagli si aprono; «Segna» e «Importa» stanno in «Modifica turni»
   const riga = vuoto ? "Nessun turno segnato" : String(ore).replace(".",",")+" h · "+r.turni+(r.turni===1?" turno":" turni")+" · "+r.notti+(r.notti===1?" notte":" notti");
-  const aperto=!!(el.querySelector && el.querySelector(".mese-det[open]")) || festiviAperto;
+  const aperto=!!(el.querySelector && el.querySelector(".mese-det[open]"));
   // il mese è quello che si vede sopra (le frecce del ciclo lo cambiano): niente seconda navigazione
   el.innerHTML='<details class="mese-det"'+(aperto?' open':'')+'><summary><span class="mese-riga"><b>'+esc(nome.charAt(0).toUpperCase()+nome.slice(1))+'</b> · '+esc(riga)+(r.ignoti&&!vuoto?' <span class="mese-pall" title="Giorni da segnare">'+r.ignoti+' da segnare</span>':'')+'</span></summary>'+corpo+'</details>';
 }
 // Festivi del contratto: una riga che dice cosa si conta, e un piccolo editor.
-var festiviAperto=false;   // var: letto da renderMese durante l'avvio
 function nomeGiornoMese(k){ const [m,g]=k.split("-").map(Number); return new Date(2000,m-1,g).toLocaleDateString(LINGUA,{day:"numeric",month:"long"}); }
+// Nel riquadro del mese resta solo un rimando; l'editor sta in «I tuoi turni» (i festivi sono una cosa del contratto, come gli orari).
 function festiviHtml(){
+  const c=festiviCfg();
+  return '<div class="mese-sez mese-fest"><div><b>Festivi</b><span class="hint">'+esc(festiviRiga(c))+'</span></div><button type="button" class="btn g sm" data-fest-apri>'+(c.extra.length?'Modifica':'Aggiungi i tuoi')+'</button></div>';
+}
+function festiviRiga(c){ c=c||festiviCfg();
+  return "Conto "+(c.dom?"le domeniche e ":"")+"i festivi nazionali"+(c.extra.length?" e "+c.extra.map(nomeGiornoMese).join(", "):"")+(state.festiviRiposo&&state.repeat!==false ? ". Nei festivi sei a casa" : "")+"."; }
+function festiviEditorHtml(){
   const c=festiviCfg(), fisso=tipoTurni()==="fisso";
-  const conta="Conto "+(c.dom?"le domeniche e ":"")+"i festivi nazionali"+(c.extra.length?" e "+c.extra.map(nomeGiornoMese).join(", "):"")+".";
-  if(!festiviAperto) return '<div class="mese-sez mese-fest"><div><b>Festivi</b><span class="hint">'+esc(conta)+'</span></div><button type="button" class="btn g sm" data-fest-apri>'+(c.extra.length?'Modifica':'Aggiungi i tuoi')+'</button></div>';
-  return '<div class="ecc mese-fest-box mese-sez">'+
-    '<b style="display:block;margin-bottom:4px">I festivi del tuo contratto</b>'+
-    '<p class="hint" style="margin:0 0 8px">Oltre ai festivi nazionali: il santo patrono o altre feste che per te contano. Si ripetono ogni anno.</p>'+
+  return '<div class="ecc mese-fest-box">'+
+    '<button type="button" class="lnk dim qh-annulla" data-fest-chiudi>‹ Fatto</button>'+
+    '<h2 class="qh-h">I festivi del tuo contratto</h2>'+
+    '<p class="hint" style="margin:4px 0 10px">Oltre ai festivi nazionali: il santo patrono o altre feste che per te contano. Si ripetono ogni anno.</p>'+
     (c.extra.length ? '<div class="qh-chips" style="margin:0 0 10px">'+c.extra.map(k=>'<button type="button" class="btn g" data-fest-del="'+k+'" aria-label="Togli '+esc(nomeGiornoMese(k))+'">'+esc(nomeGiornoMese(k))+' ×</button>').join("")+'</div>' : '')+
     '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input type="date" id="festData" aria-label="Giorno festivo" style="flex:1;min-width:150px">'+
     '<button type="button" class="btn g" data-fest-add>Aggiungi</button></div>'+
     '<label class="chk" style="display:flex;gap:10px;align-items:center;margin-top:12px;min-height:44px"><input type="checkbox" data-fest-dom'+(c.dom?' checked':'')+'> La domenica conta come festivo</label>'+
     (state.repeat!==false ? '<label class="chk" style="display:flex;gap:10px;align-items:center;min-height:44px"><input type="checkbox" data-fest-riposo'+(state.festiviRiposo?' checked':'')+'> '+(fisso?'Nei festivi non lavoro':'Nei festivi sono a casa')+'</label>'+
       (fisso ? '' : '<p class="hint" style="margin:0 0 8px">Il turno di quei giorni diventa riposo, anche per le ferie. Le domeniche restano come il ciclo.</p>') : '')+
-    '<button type="button" class="lnk dim" data-fest-chiudi style="margin-top:6px">Fatto</button></div>';
+    '</div>';
 }
-function festiviCambiati(){ salva(); try{ NT.setFestivo(festivoVero); }catch(e){} render(); }
+var festiviPagina=false;   // var: letto da renderTuoiTurni durante l'avvio
+function apriFestivi(){
+  const pg=$("#tuoiTurniPagina"); if(!pg) return;
+  festiviPagina=true; pg.classList.add("tt-festivi"); usata("festivi");
+  const b=$("#ttFestivi"); if(b){ b.hidden=false; b.innerHTML=festiviEditorHtml(); }
+  try{ window.scrollTo(0,0); }catch(e){}
+}
+function chiudiFestivi(){
+  festiviPagina=false; const pg=$("#tuoiTurniPagina"); if(pg) pg.classList.remove("tt-festivi");
+  const b=$("#ttFestivi"); if(b){ b.hidden=true; b.innerHTML=""; }
+  renderTuoiTurni();
+}
+function festiviCambiati(){ salva(); try{ NT.setFestivo(festivoVero); }catch(e){} render();
+  if(festiviPagina){ const b=$("#ttFestivi"); if(b){ b.innerHTML=festiviEditorHtml(); } } }
 function durataBreve(m){ m=Math.round(m/15)*15; const h=Math.floor(m/60), r=m%60; return h ? h+"h"+(r?String(r).padStart(2,"0"):"") : r+" min"; }
-if($("#meseBox")) $("#meseBox").addEventListener("change", e=>{
+if($("#ttFestivi")) $("#ttFestivi").addEventListener("change", e=>{
   if(e.target.matches("[data-fest-dom]")){ state.festivi=Object.assign({}, state.festivi||{}, {dom:e.target.checked}); festiviCambiati(); }
   else if(e.target.matches("[data-fest-riposo]")){ state.festiviRiposo=e.target.checked; if(e.target.checked) track("setup_item", {item:"festivi_riposo"}); festiviCambiati(); }
 });
-if($("#meseBox")) $("#meseBox").addEventListener("click", e=>{
-  if(e.target.closest("[data-riepilogo-medico]")){ stampaRiepilogoMedico(); return; }
-  if(e.target.closest("[data-mese-segna]")){ sgOff=meseOff; apriSegna(); return; }
-  if(e.target.closest("[data-mese-manda]")){ mandaRiepilogo("mese"); return; }
-  if(e.target.closest("[data-anno-manda]")){ mandaRiepilogo("anno"); return; }
-  if(e.target.closest("[data-fest-apri]")){ festiviAperto=true; usata("festivi"); renderMese(); return; }
-  if(e.target.closest("[data-fest-chiudi]")){ festiviAperto=false; renderMese(); return; }
+if($("#ttFestivi")) $("#ttFestivi").addEventListener("click", e=>{
+  if(e.target.closest("[data-fest-chiudi]")){ chiudiFestivi(); return; }
   const fd=e.target.closest("[data-fest-del]");
   if(fd){ const f=Object.assign({}, state.festivi||{}); f.extra=(f.extra||[]).filter(k=>k!==fd.dataset.festDel); state.festivi=f; festiviCambiati(); return; }
   if(e.target.closest("[data-fest-add]")){
     const v=($("#festData")||{}).value||""; const m=/^\d{4}-(\d\d)-(\d\d)$/.exec(v);
     if(!m){ toast("Scegli il giorno"); return; }
     const k=(+m[1])+"-"+(+m[2]), f=Object.assign({}, state.festivi||{}); f.extra=(f.extra||[]).filter(x=>x!==k).concat(k).sort(); state.festivi=f;
-    usata("festivi"); track("setup_item", {item:"festivi_extra"}); festiviCambiati(); return; }
+    usata("festivi"); track("setup_item", {item:"festivi_extra"}); festiviCambiati(); }
+});
+if($("#meseBox")) $("#meseBox").addEventListener("click", e=>{
+  if(e.target.closest("[data-riepilogo-medico]")){ stampaRiepilogoMedico(); return; }
+  if(e.target.closest("[data-mese-segna]")){ sgOff=meseOff; apriSegna(); return; }
+  if(e.target.closest("[data-mese-manda]")){ mandaRiepilogo("mese"); return; }
+  if(e.target.closest("[data-anno-manda]")){ mandaRiepilogo("anno"); return; }
+  if(e.target.closest("[data-fest-apri]")){ apriTuoiTurni("turni",{festivi:true}); return; }
   const b=e.target.closest("[data-mese]"); if(!b || b.disabled) return;
   meseOff=Math.max(-12, Math.min(12, meseOff + +b.dataset.mese)); renderMese();
 });
@@ -8948,8 +8971,7 @@ const CONSIGLI_FUNZIONE=[
   {k:"mese", cta:()=>"Segna i turni", t:()=>"Puoi ricopiare il foglio turni in un minuto, un tocco per giorno, o importarlo da un file. Se ricopi almeno due cicli interi, l'app riconosce lo schema e lo continua da sola.", a:()=>{ setTab("turni"); apriSegna(); }},
   {k:"festivi", quando:()=>!state.festiviRiposo && !(state.festivi && ((state.festivi.extra||[]).length || state.festivi.dom===false)),
     t:()=>"Domeniche e festivi del tuo contratto contano come riposo? Segnali una volta: il piano ne tiene conto, anche il santo patrono.",
-    cta:()=>"Aggiungi i tuoi festivi", a:()=>{ setTab("turni"); festiviAperto=true; renderMese(); usata("festivi");
-      const x=$("#meseBox .mese-fest-box"); if(x) try{ x.scrollIntoView({block:"center"}); }catch(e){} }},
+    cta:()=>"Aggiungi i tuoi festivi", a:()=>{ apriTuoiTurni("turni",{festivi:true}); usata("festivi"); }},
   {k:"calendario", quando:()=>!inLista("calendario") && (platform.calendar.available ? !platform.calendar.attivo() : !(window.NTPaid && window.NTPaid.paid())),
     t:()=>"Turni e ore di sonno nel calendario del telefono, aggiornati da soli: li vedi dove guardi già i tuoi impegni.", cta:()=>"Attiva", a:()=>apriCalendarioDaWizard()},
   {k:"ferie", cta:()=>"Trova le ferie", t:()=>"L'app trova i giorni di ferie che ti danno più giorni a casa, attaccati ai riposi. Se hai aggiunto una persona, puoi sceglierli anche per stare a casa insieme.", a:()=>{ setTab("turni"); apriFerie(); }},
@@ -9773,14 +9795,17 @@ function apriTuoiTurni(da, opz){
   pg.hidden=false; _imp=null;
   pg.querySelectorAll("[data-ic]").forEach(x=>{ if(!x.innerHTML) x.innerHTML=ICON[x.dataset.ic]||""; });
   chiudiFlussoPagina(true);
+  festiviPagina=false; pg.classList.remove("tt-festivi"); { const b=$("#ttFestivi"); if(b){ b.hidden=true; b.innerHTML=""; } }
   renderTuoiTurni();
   if(opz.flusso) apriFlussoPagina(opz.flusso);
+  if(opz.festivi) apriFestivi();
   usata("turni"); track("setup_item", {item:"tuoi_turni"});
   try{ window.scrollTo(0,0); }catch(e){}
 }
 function chiudiTuoiTurni(muto){
   const pg=$("#tuoiTurniPagina"); if(!pg || pg.hidden) return;
   chiudiFlussoPagina(true);
+  festiviPagina=false; pg.classList.remove("tt-festivi"); { const b=$("#ttFestivi"); if(b){ b.hidden=true; b.innerHTML=""; } }
   meseIn($("#segnaPagina"));
   pg.hidden=true; _imp=null;
   document.body.classList.remove("turni-aperta"); segnaSottopagina();
@@ -9798,6 +9823,7 @@ function renderTuoiTurni(){
   const usati=new Set(String(state.pattern||"").split(""));
   const turni=Object.keys(sh).filter(k=>sh[k] && !sh[k].rest && (tipo==="variabili" || usati.has(k)));
   const voOld=$("#ttValOrari"); const vo=voOld; if(vo) vo.textContent=turni.map(k=>sh[k].n+" "+hhmm(sh[k].s)+"–"+hhmm(sh[k].e)).join(" · ");
+  { const vf=$("#ttValFestivi"); if(vf) vf.textContent=festiviRiga().replace(/\.$/,""); }
   const rie=$("#ttRiepilogo");
   if(tipo==="variabili"){
     { const o=$("#ttOrari"); if(o){ o.hidden=true; o.innerHTML=""; } const on=$("#ttOggiNota"); if(on) on.hidden=true; }
@@ -9875,12 +9901,13 @@ function vaiATurniVariabili(){
   primoPianoPronto("variabile", "Segna i turni che conosci già");
   if(!daPagina) apriTuoiTurni("oggi");
 }
-if($("#chiudiTuoiTurni")) $("#chiudiTuoiTurni").onclick=()=>chiudiTuoiTurni();
+if($("#chiudiTuoiTurni")) $("#chiudiTuoiTurni").onclick=()=>{ if(festiviPagina){ chiudiFestivi(); return; } chiudiTuoiTurni(); };
 if($("#ttFatto")) $("#ttFatto").onclick=()=>chiudiTuoiTurni();
 if($("#ttRighe")) $("#ttRighe").addEventListener("click", e=>{
   const b=e.target.closest("[data-tt]"); if(!b) return;
   const k=b.dataset.tt; haptic(6);
   if(k==="schema"){ passo("cambia_schema"); cambiaSchema=true; apriFlussoPagina("prossimi"); return; }
+  if(k==="festivi"){ apriFestivi(); return; }
   if(k==="orari"){ apriFlussoPagina("orari", "orari"); return; }
   if(k==="riposi"){
     turnoInScelta=[...new Set(String(state.pattern).split("").filter(c=>c!=="R"&&c!=="S"))][0]||null;
@@ -11126,6 +11153,7 @@ platform.onBackButton(()=>{
   if(document.body.classList.contains("ferie-aperta")){ chiudiFerie(); return true; }
   if(document.body.classList.contains("segna-aperta")){ if(_imp){ _imp=null; renderImport(); return true; } chiudiSegna(); return true; }
   if(document.body.classList.contains("turni-aperta")){
+    if(festiviPagina){ chiudiFestivi(); return true; }
     if(flussoInPagina){ chiudiFlussoPagina(); return true; }
     if(_imp){ _imp=null; renderImport(); return true; }
     chiudiTuoiTurni(); return true; }
@@ -11349,7 +11377,7 @@ if($("#modificaModal")) $("#modificaModal").addEventListener("click",e=>{
   if(k==="ciclo") apriTuoiTurni("turni");
   else if(k==="segna") apriSegna();
   else if(k==="importa") apriSegna("importa");
-  else if(k==="festivi"){ festiviAperto=true; usata("festivi"); renderMese(); const d=document.querySelector("#meseBox .mese-det"); if(d) d.open=true; setTimeout(()=>{ const x=document.querySelector("#meseBox .mese-fest-box"); if(x&&x.scrollIntoView) x.scrollIntoView({block:"center",behavior:"smooth"}); },80); }
+  else if(k==="festivi") apriTuoiTurni("turni",{festivi:true});
 });
 ["#partner","#partnerShare"].forEach(s=>{ const el=$(s); if(el) el.addEventListener("click", e=>{
   if(e.target.closest("[data-partner-edit]")) apriPartner();

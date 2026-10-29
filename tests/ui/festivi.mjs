@@ -60,4 +60,18 @@ const TURNO={M:{n:"Mattino",s:420,e:840}};
   const p=await apri({turniConfigurati:true,pattern:"MMMMMMMR",anchor:iso(a),repeat:true,firstSeenAt:"2026-01-01",festivi:{extra:[mg]},piano:{vistaCiclo:"calendario"},shifts:{M:{n:"Mattino",s:420,e:840}}});
   ok(await p.evaluate(k=>{ const c=document.querySelector('[data-cal-giorno="'+k+'"]'); return !!c && !!c.querySelector(".cnum.fest") && /festivo/.test(c.getAttribute("aria-label")); }, iso(oggi)), "calendario: il festivo ha il puntino e lo dice a voce");
   await p.context().close(); }
+// i festivi sono una riga di «I tuoi turni» (come gli orari): il valore dice cosa conta, si apre l'editor, la freccia torna alla pagina
+{ const oggi=new Date(); oggi.setHours(12,0,0,0);
+  const p=await apri({turniConfigurati:true,pattern:"MPNSR",anchor:iso(oggi),repeat:true,firstSeenAt:"2026-01-01",festivi:{extra:["6-29"]},festiviRiposo:true,shifts:{M:{n:"Mattino",s:420,e:840},P:{n:"Pomeriggio",s:840,e:1260},N:{n:"Notte",s:1260,e:1860}}});
+  await p.evaluate(()=>document.querySelector("#tEdit").click()); await p.waitForTimeout(250); await p.evaluate(()=>document.querySelector('[data-mod="ciclo"]').click()); await p.waitForTimeout(300);
+  ok(await p.evaluate(()=>{ const r=document.querySelector('#ttRighe [data-tt="festivi"]'); return !!r && !r.hidden && /29 giugno/.test(r.textContent) && /a casa/.test(r.textContent); }), "«I tuoi turni»: la riga «Festivi» dice cosa conta (le domeniche, i tuoi, a casa)");
+  await p.evaluate(()=>document.querySelector('#ttRighe [data-tt="festivi"]').click()); await p.waitForTimeout(250);
+  ok(await p.evaluate(()=>!document.querySelector("#ttFestivi").hidden && !!document.querySelector("#ttFestivi [data-fest-riposo]") && getComputedStyle(document.querySelector("#ttRighe")).display==="none"), "toccandola si apre l'editor e il resto della pagina si toglie");
+  await p.evaluate(()=>document.querySelector("#chiudiTuoiTurni").click()); await p.waitForTimeout(250);
+  ok(await p.evaluate(()=>document.querySelector("#ttFestivi").hidden && document.body.classList.contains("turni-aperta") && !!document.querySelector('#ttRighe [data-tt="festivi"]').offsetParent), "la freccia torna a «I tuoi turni»");
+  ok(await p.evaluate(()=>!document.querySelector("#meseBox [data-fest-dom]") && !document.querySelector("#meseBox .mese-fest-box")), "nel riquadro del mese non c'è più l'editor, solo il rimando");
+  await p.evaluate(()=>document.querySelector("#chiudiTuoiTurni").click()); await p.waitForTimeout(250);
+  await p.evaluate(()=>document.querySelector("#tEdit").click()); await p.waitForTimeout(250); await p.evaluate(()=>document.querySelector('[data-mod="festivi"]').click()); await p.waitForTimeout(300);
+  ok(await p.evaluate(()=>!document.querySelector("#ttFestivi").hidden && document.body.classList.contains("turni-aperta")), "«Modifica turni › Festivi» porta direttamente all'editor");
+  await p.context().close(); }
 console.log("errori", errs); await b.close();

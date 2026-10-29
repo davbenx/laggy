@@ -45,5 +45,5 @@ ok((await stato()).shifts.M.s===360, "«Annulla»: 06:00 com'era");
 await p.click('#ttRiepilogo [data-tt-oggi="3"]'); await p.waitForTimeout(300);
 const a=new Date(oggi); a.setDate(a.getDate()-3);
 ok((await stato()).anchor===iso(a) && await p.evaluate(()=>document.querySelector('#ttRiepilogo [data-tt-oggi="3"]').classList.contains("oggi")), "«oggi è qui»: tocchi il giorno 4 e la partenza si sposta");
-ok(await p.evaluate(()=>[...document.querySelectorAll("#ttRighe [data-tt]")].filter(x=>!x.hidden).map(x=>x.dataset.tt).join(",")==="schema"), "resta una sola riga: «Cambia tipo di turni»");
+ok(await p.evaluate(()=>[...document.querySelectorAll("#ttRighe [data-tt]")].filter(x=>!x.hidden).map(x=>x.dataset.tt).join(",")==="festivi,schema"), "restano due righe: «Festivi» e «Cambia tipo di turni»");
 console.log("errori", errs); ok(errs.length===0, "nessun errore di pagina"); await b.close();
