@@ -2,6 +2,7 @@
 // orari veri (stessa preferenza di Impostazioni), e il dettaglio non dice più
 // «dormi senza guardare l'orologio» con una sveglia alle 04:50.
 import pw from "./_pw.mjs";
+import { apriVoce, testoVoce, chiudiVoce } from "./_info.mjs";
 const ok=(c,m)=>console.log((c?"✔ ":"✘ ")+m);
 const b=await pw.chromium.launch(); const errs=[];
 const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
@@ -19,8 +20,8 @@ const leggi=p=>p.evaluate(()=>({dormi:document.querySelector('[data-row="sonno"]
 let p=await apri("RM",360);
 let r=await leggi(p);
 ok(r.opz.length===2 && r.opz[0].on==="true" && r.dormi.includes(r.opz[0].ora.replace("a letto alle ","")) && r.hint, "riposo prima di un mattino alle 06: «Tutto stanotte» / «Più tardi + pisolino» con l'ora di letto ("+r.opz.map(o=>o.ora).join(" / ")+")");
-await p.click('[data-row="sonno"] summary'); await p.waitForTimeout(150);
-const det=await p.evaluate(()=>document.querySelector('[data-row="sonno"] .ed').innerText);
+await apriVoce(p,"sonno");
+const det=await testoVoce(p); await chiudiVoce(p);
 // l'ora del turno la dice già la riga «Il piano, in breve»: qui la sveglia e da dove viene
 ok(/Stanotte la sveglia è alle 04:50, contata all'indietro dal turno di domani/.test(det) && !/senza guardare l'orologio/.test(det), "il dettaglio dice il motivo, non «dormi senza guardare l'orologio»");
 await p.click('[data-mattinobif="1"]'); await p.waitForTimeout(400);

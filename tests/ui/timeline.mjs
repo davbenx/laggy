@@ -3,6 +3,7 @@
 // fra passato e futuro, «Poi» sotto «Adesso», le scelte sul sonno attaccate a
 // «Dormi». Niente schede (bordo, ombra, sfondo) per voce.
 import pw from "./_pw.mjs";
+import { apriVoce, testoVoce, chiudiVoce } from "./_info.mjs";
 const ok=(c,m)=>console.log((c?"✔ ":"✘ ")+m);
 const b=await pw.chromium.launch(); const errs=[];
 const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
@@ -56,10 +57,10 @@ const base={turniConfigurati:true,pattern:"MPNSR",anchor:iso(new Date()),repeat:
   ok(!ore || !t.sub.includes(ore), "«Poi» non ripete un orario che «Adesso» ha già detto → «"+t.sub+"» / «"+t.poi+"»");
   await p.context().close(); }
 
-// le scelte sul sonno stanno attaccate a Dormi (riposo prima di un mattino alle 06:00)
+// le scelte sul sonno stanno nella scheda «Il tuo sonno» (riposo prima di un mattino alle 06:00), non sotto «Dormi»
 { const p=await apri({turniConfigurati:true,pattern:"RM",anchor:iso(new Date()),shifts:{M:{n:"Mattino",s:360,e:840}},repeat:true,firstSeenAt:"2026-01-01"}, 10);
-  const dentro=await p.evaluate(()=>{ const s=document.querySelector('[data-row="sonno"]').closest(".tl"); let e=s.nextElementSibling; while(e && !e.classList.contains("tl-extra") && !e.classList.contains("tl")) e=e.nextElementSibling; const x=e && e.classList.contains("tl-extra") && e.querySelector(".dopo-notte"); return !!x && x.querySelectorAll("[data-mattinobif]").length===2; });
-  ok(dentro, "«Tutto stanotte / Più tardi + pisolino» sta subito sotto la voce Dormi, sempre visibile");
+  const o=await p.evaluate(()=>({nellaScheda:!!document.querySelector("#essenziale .drem .dopo-notte [data-mattinobif]"), sottoDormi:!!document.querySelector('#essenziale [data-row="sonno"]').closest(".tl").nextElementSibling.querySelector(".dopo-notte"), card:!!document.querySelector("#essenziale .drem")}));
+  ok(o.card && o.nellaScheda && !o.sottoDormi, "«Tutto stanotte / Più tardi + pisolino» sta nella scheda «Il tuo sonno», non sotto «Dormi» → "+JSON.stringify(o));
   await p.context().close(); }
 
 // telefono stretto: niente scorrimento orizzontale, testo non tagliato
@@ -70,11 +71,14 @@ const base={turniConfigurati:true,pattern:"MPNSR",anchor:iso(new Date()),repeat:
 
 // il dettaglio si apre sul posto, sotto il nodo (più largo, per leggere il perché)
 { const p=await apri(base, 10);
-  await p.click('[data-row="caffe"] summary'); await p.waitForTimeout(200);
-  const d=await p.evaluate(()=>{ const ed=document.querySelector('[data-row="caffe"] .ed'), nodo=document.querySelector('[data-row="caffe"] .enodo');
-    return {aperto:document.querySelector('[data-row="caffe"]').open, testo:ed.innerText.length, larg:Math.round(ed.getBoundingClientRect().width-parseFloat(getComputedStyle(ed).paddingLeft)),
-      sx:Math.round(ed.getBoundingClientRect().left+parseFloat(getComputedStyle(ed).paddingLeft)-nodo.getBoundingClientRect().left)}; });
-  ok(d.aperto && d.testo>40 && Math.abs(d.sx)<=2 && d.larg>=240, "il dettaglio si apre sul posto, allineato al nodo, largo "+d.larg+" px (scarto "+d.sx+" px)");
+  const altezza=()=>p.evaluate(()=>document.querySelector("#essenziale").getBoundingClientRect().height);
+  await apriVoce(p,"caffe"); await chiudiVoce(p);   // la prima volta sparisce la frase «Tocca una voce…»
+  const h0=await altezza(); await apriVoce(p,"caffe");
+  const d=await p.evaluate(()=>{ const m=document.querySelector("#infoModal"), c=document.querySelector("#infoCorpo");
+    return {visibile:!m.hidden, titolo:document.querySelector("#infoTitolo").textContent, testo:c.innerText.length, larg:Math.round(c.getBoundingClientRect().width), info:!!document.querySelector('#essenziale [data-row="caffe"] .einfo svg')}; });
+  ok(d.visibile && d.titolo.length>2 && d.testo>40 && d.larg>=240 && d.info, "il perché si apre in un foglio («"+d.titolo+"», largo "+d.larg+" px) e la voce ha l'icona ⓘ");
+  ok(await altezza()===h0, "la timeline non cambia altezza: il dettaglio non è dentro la lista");
+  await chiudiVoce(p); ok(await p.evaluate(()=>document.querySelector("#infoModal").hidden), "✕ chiude il foglio");
   await p.context().close(); }
 
 console.log("errori", errs); await b.close();

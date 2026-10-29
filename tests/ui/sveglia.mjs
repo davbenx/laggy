@@ -1,6 +1,5 @@
-// Sveglia nell'Orologio del telefono: nel dettaglio di «Dormi», solo
-// nell'app Android e solo se la fine del sonno cade entro 24 ore (l'Orologio
-// la mette alla prossima volta che arriva quell'ora).
+// Sveglia nell'Orologio del telefono: una riga nella scheda «Il tuo sonno» (la zona delle azioni di Oggi), solo nell'app Android,
+// da 4 ore prima del sonno fino alla sua fine, solo su oggi. Dopo il tocco si ricorda che è messa (l'Orologio non lo dice).
 import pw from "./_pw.mjs";
 import { nativo } from "./_nativo.mjs";
 const ok=(c,m)=>console.log((c?"✔ ":"✘ ")+m);
@@ -21,46 +20,50 @@ async function apri(porta, app, alarm, ora=[10,0], stato=ST){
   await p.goto("http://localhost:"+porta+"/index.html"); await p.waitForTimeout(1500);
   return p;
 }
-// il pulsante sta sotto «Dormi», sempre visibile (non nel dettaglio a scomparsa)
-// (le azioni di «Dormi» sono il blocco .tl-extra che segue la riga, oppure la linea dell'ora e poi il blocco)
-const bottone=p=>p.evaluate(()=>{ const t=document.querySelector('#essenziale [data-row="sonno"]'); if(!t) return null; const v=t.closest(".tl");
-  let x=v.nextElementSibling; while(x && !x.classList.contains("tl-extra") && !x.classList.contains("tl")) x=x.nextElementSibling;
-  const s=x && x.classList.contains("tl-extra") && x.querySelector("[data-sveglia]"); if(!s) return null; const r=s.getBoundingClientRect(), q=s.parentElement.getBoundingClientRect();
-  return {ora:s.dataset.sveglia, testo:s.textContent, fine:v.querySelector(".essrow").textContent, visibile:r.height>0&&!t.open, largo:Math.abs((r.left+r.right)-(q.left+q.right))<=2}; });
+const riga=p=>p.evaluate(()=>{ const x=document.querySelector("#essenziale .drem [data-sveglia]"); if(!x) return null; const r=x.getBoundingClientRect(), c=x.closest(".drem").getBoundingClientRect(), s=document.querySelector('#essenziale [data-row="sonno"]');
+  return {ora:x.dataset.sveglia, testo:x.textContent.trim(), visibile:r.height>0 && r.right<=c.right+1, fine:s ? s.querySelector(".essrow").textContent : "", ovunque:document.querySelectorAll("[data-sveglia]").length}; });
 
-{ const p=await apri(8766, true, true);
-  const s=await bottone(p);
-  ok(s && /^\d\d:\d\d$/.test(s.ora) && s.fine.includes(s.ora) && s.visibile && s.largo, "app: «Metti la sveglia» nel dettaglio di Dormi, all'ora di fine sonno → "+JSON.stringify(s));
-  await p.click("[data-sveglia]"); await p.waitForTimeout(300);
+{ const p=await apri(8766, true, true, [20,30]);
+  const s=await riga(p);
+  ok(s && /^\d\d:\d\d$/.test(s.ora) && s.fine.includes(s.ora) && s.visibile && s.ovunque===1, "app, di sera: «Metti» nella scheda «Il tuo sonno», all'ora di fine sonno, e in nessun altro posto → "+JSON.stringify(s));
+  ok(await p.evaluate(()=>!document.querySelector("#ora [data-sveglia]") && !document.querySelector("#essenziale .tl [data-sveglia]")), "non nella scheda «Adesso» né sotto «Dormi»");
+  await p.click("[data-sveglia]"); await p.waitForTimeout(400);
   const [h,m]=s.ora.split(":").map(Number), sv=await p.evaluate(()=>window.__sveglie);
   ok(sv.length===1 && sv[0].hour===h && sv[0].minutes===m && sv[0].message==="Notturnisti", "tocco: sveglia chiesta all'Orologio → "+JSON.stringify(sv));
   ok(await p.evaluate(()=>[...document.querySelectorAll(".toast,#toast")].some(t=>/Sveglia delle .* messa nell'Orologio/.test(t.textContent))), "conferma: «Sveglia delle … messa nell'Orologio»");
-  for(let i=0;i<3;i++){ await p.click("#next"); await p.waitForTimeout(250); }
-  ok(!(await bottone(p)), "fra tre giorni: niente sveglia (l'Orologio la metterebbe domani)");
+  ok(await p.evaluate(()=>/✓\s*Sveglia\s*\d\d:\d\d/.test(document.querySelector("#essenziale .sv-riga").textContent) && /Rimettila/.test(document.querySelector("#essenziale .sv-riga").textContent)), "dopo il tocco la riga dice «✓ Sveglia 07:20» con «Rimettila»");
+  await p.click("[data-sveglia]"); await p.waitForTimeout(300);
+  ok(await p.evaluate(()=>window.__sveglie.length===2), "«Rimettila» la rimanda all'Orologio");
+  await p.click("#next"); await p.waitForTimeout(300);
+  ok(!(await riga(p)), "su un altro giorno non c'è (è una cosa di stanotte)");
   await p.context().close(); }
 
-{ const p=await apri(8766, true, "rifiuta");
-  await bottone(p); await p.click("[data-sveglia]"); await p.waitForTimeout(300);
+{ const p=await apri(8766, true, true, [10,0]);
+  ok(!(await riga(p)), "alle 10, lontano dal sonno: niente (starebbe lì inutilmente tutto il giorno)");
+  await p.context().close(); }
+
+// il primo giorno non c'è la domanda del diario: resta la scheda con la sola riga della sveglia
+{ const p=await apri(8766, true, true, [20,30], {...ST, firstSeenAt:iso(new Date())});
+  const o=await p.evaluate(()=>{ const c=document.querySelector("#essenziale .drem"); return c ? {sveglia:!!c.querySelector("[data-sveglia]"), domande:c.querySelectorAll(".dq,.dq-az").length} : null; });
+  ok(o && o.sveglia && o.domande===0, "senza diario da fare: la scheda «Il tuo sonno» ha solo la riga della sveglia → "+JSON.stringify(o));
+  await p.context().close(); }
+
+{ const p=await apri(8766, true, "rifiuta", [20,30]);
+  await p.click("[data-sveglia]"); await p.waitForTimeout(300);
   ok(await p.evaluate(()=>[...document.querySelectorAll(".toast,#toast")].some(t=>/usa l'app Orologio/.test(t.textContent))), "senza app Orologio: lo dice, niente errori");
+  ok(await p.evaluate(()=>!localStorage.getItem("nt:svegliaMessa")), "e non la ricorda come messa");
   await p.context().close(); }
 
-{ const p=await apri(8765, false, false);
-  ok(!(await bottone(p)), "sito: niente pulsante (la sveglia c'è solo nell'app)");
+{ const p=await apri(8765, false, false, [20,30]);
+  ok(!(await riga(p)), "sito: niente (la sveglia c'è solo nell'app)");
   await p.context().close(); }
 
-// sonno in corso e ultima voce del piano: niente linea dell'ora oltre «Dormi» (la voce dice già «adesso»), subito sotto c'è il pulsante della sveglia
+// sonno in corso e ultima voce del piano: la riga c'è, la linea dell'ora non va oltre «Dormi»
 { const ieri=new Date(); ieri.setDate(ieri.getDate()-1);
   const p=await apri(8766, true, true, [3,43], {turniConfigurati:true,pattern:"NR",anchor:iso(ieri),repeat:true,firstSeenAt:"2026-01-01",shifts:{N:{n:"Notte",s:1320,e:1575}}});
   const o=await p.evaluate(()=>{ const t=document.querySelector('#essenziale [data-row="sonno"]'); if(!t) return null; const v=t.closest(".tl");
-    const a=v.nextElementSibling;
-    return {riga:v.className, dopo:a&&a.className, sveglia:!!(a&&a.querySelector("[data-sveglia]")), linee:document.querySelectorAll(".tl-adesso").length}; });
-  ok(o && /\bora\b/.test(o.riga) && /tl-extra/.test(o.dopo||"") && o.sveglia && o.linee===0, "sonno in corso (03:43), ultima voce: «Dormi» → «Metti la sveglia», nessuna linea dell'ora oltre il sonno → "+JSON.stringify(o));
-  await p.context().close(); }
-// prima del sonno la linea sta prima di «Dormi» e il pulsante resta attaccato alla riga
-{ const p=await apri(8766, true, true, [10,0]);
-  const o=await p.evaluate(()=>{ const t=document.querySelector('#essenziale [data-row="sonno"]'); const v=t.closest(".tl"), a=v.nextElementSibling, prima=v.previousElementSibling;
-    return {extra:a&&a.className, sveglia:!!(a&&a.querySelector("[data-sveglia]")), lineaPrima:!!(prima&&/tl-adesso/.test(prima.className))}; });
-  ok(/tl-extra/.test(o.extra||"") && o.sveglia, "sonno ancora da venire: il pulsante segue subito la riga «Dormi» → "+JSON.stringify(o));
+    return {riga:v.className, sveglia:!!document.querySelector("#essenziale .drem [data-sveglia]"), sottoDormi:!!(v.nextElementSibling&&v.nextElementSibling.querySelector("[data-sveglia]")), linee:document.querySelectorAll(".tl-adesso").length}; });
+  ok(o && /\bora\b/.test(o.riga) && o.sveglia && !o.sottoDormi && o.linee===0, "sonno in corso (03:43): «Il tuo sonno» ha la sveglia, «Dormi» è solo informazione, nessuna linea dell'ora oltre il sonno → "+JSON.stringify(o));
   await p.context().close(); }
 
 console.log("errori", errs); await b.close();

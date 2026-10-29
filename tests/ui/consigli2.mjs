@@ -2,6 +2,7 @@
 // e le statistiche che li misurano: voce del piano aperta (una volta al giorno)
 // e orari di sonno personalizzati (una volta sola).
 import pw from "./_pw.mjs";
+import { apriVoce, testoVoce, chiudiVoce } from "./_info.mjs";
 import { nativo } from "./_nativo.mjs";
 const ok=(c,m)=>console.log((c?"✔ ":"✘ ")+m);
 const b=await pw.chromium.launch(); const errs=[];
@@ -35,10 +36,10 @@ const coda=async p=>{ await p.waitForTimeout(400); return (globalThis.__inv||[])
   await p.context().close(); }
 
 { const p=await apri(ST,"dormi"); ok(/^dormi: .*Tocca «Dormi»/.test(await tip(p)), "consiglio sulle scelte di «Dormi»");
-  await p.click('[data-row="sonno"] summary'); await p.waitForTimeout(300);
+  await apriVoce(p,"sonno");
   ok(await p.evaluate(()=>!!JSON.parse(localStorage.getItem("nt:funzioniUsate")||"{}").dormi), "aperta la voce Dormi: consiglio usato");
   const q1=await coda(p); ok(q1.includes("voce_sonno"), "statistica: voce del piano aperta → voce_sonno");
-  await p.click('[data-row="sonno"] summary'); await p.click('[data-row="sonno"] summary'); await p.waitForTimeout(200);
+  await chiudiVoce(p); await apriVoce(p,"sonno"); await chiudiVoce(p);
   ok((await coda(p)).split("voce_sonno").length===2, "la stessa voce conta una volta al giorno");
   await p.waitForTimeout(5000);
   ok((await coda(p)).includes("orologio_tuo"), "statistica: orari di sonno personalizzati, una volta");

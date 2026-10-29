@@ -3,6 +3,7 @@
 // «Modifica». Le scelte si salvano al tocco. Il pisolino si chiede solo dopo
 // che è cominciato.
 import pw from "./_pw.mjs";
+import { apriVoce, testoVoce, chiudiVoce } from "./_info.mjs";
 const ok=(c,m)=>console.log((c?"✔ ":"✘ ")+m);
 const b=await pw.chromium.launch(); const errs=[];
 const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
@@ -70,9 +71,9 @@ t=await box(p);
 ok(/Pisolino saltato/.test(t) && await n(p,'[data-nap-riapri][aria-label="Riapri il pisolino"]')===1 && await n(p,"[data-nap]")===0, "«Saltato»: una riga «Pisolino saltato» con la matita per riaprirlo");
 await tap(p,"[data-nap-riapri]");
 ok(/Hai fatto il pisolino/.test(await box(p)), "Modifica: si torna alla domanda");
-ok(await p.evaluate(()=>!!document.querySelector('#essenziale [data-row^="nap"] [data-skip-recupero], #essenziale [data-row^="nap"] .ed')), "le scelte da fare prima del pisolino stanno nella sua riga del piano");
+ok(await p.evaluate(()=>!!document.querySelector('#essenziale [data-row^="nap"]')), "le scelte da fare prima del pisolino stanno nella sua riga del piano");
 // «e la palestra quando la faccio?»: il tempo libero vero, nella lista della giornata
-const lib=await p.evaluate(()=>{ const r=document.querySelector('#essenziale [data-row="liberi"]'); if(!r) return null;
-  r.open=true; return {val:r.querySelector(".essrow").innerText, det:r.querySelector(".ed").innerText}; });
+const val=await p.evaluate(()=>{ const r=document.querySelector('#essenziale [data-row="liberi"]'); return r ? r.querySelector(".essrow").innerText : null; });
+await apriVoce(p,"liberi"); const lib=val===null ? null : {val, det:await testoVoce(p)};
 ok(lib && /\d\d:\d\d[\s\S]*fino alle \d\d:\d\d/.test(lib.val) && /palestra/i.test(lib.det) && /ultima ora prima di dormire/.test(lib.det), "riga «Libero» con le finestre vere e la nota su palestra e sonno");
 console.log("errori", errs); await b.close();

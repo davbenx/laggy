@@ -652,18 +652,10 @@ display:flex;flex-direction:column;align-items:center;justify-content:center;gap
 .mese-segna{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;min-height:46px;margin-top:14px;font-weight:600}
 .mese-segna small{font-size:12px;font-weight:400;color:var(--dim);margin-top:1px}
 .mese-vuoto{margin:10px 0 0;font-size:14px;color:var(--dim)}
-.mese-manda{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.mese-manda .btn{min-height:44px}
 .mese-nota{margin:10px 0 0;font-size:12.5px}
 .az-desc{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;min-height:46px;margin-top:8px;font-weight:600;text-align:center}
 .az-desc small{font-size:12px;font-weight:400;color:var(--dim);margin-top:2px;line-height:1.35;max-width:30em}
 .mese-sez{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
-.mese-eb{display:block;font-size:12.5px;font-weight:600;color:var(--dim);margin:0 0 8px}
-.mese-fest{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.mese-fest>div{flex:1;min-width:0}
-.mese-fest b{display:block;font-size:14.5px;color:var(--ink)}
-.mese-fest .hint{display:block;margin:2px 0 0;font-size:12.5px;line-height:1.4}
-.mese-fest .btn{flex:none}
 .mese-spec{margin:10px 0 0;font-size:13px;color:var(--dim);line-height:1.45}
 .mese-num span{font-size:12px;color:var(--dim)}
 .mese .hint{margin:8px 0 0}
@@ -737,8 +729,6 @@ summary{cursor:pointer;font-size:12px;letter-spacing:.07em;color:var(--faint);
 font-weight:600;list-style:none;display:inline-flex;gap:6px;align-items:center;padding:4px 0}
 summary::-webkit-details-marker{display:none}
 summary::after{content:"›";display:inline-block;margin-left:6px;transform:rotate(90deg);transition:transform .15s}details[open]>summary::after{transform:rotate(-90deg)}
-.erow>summary{text-transform:none}
-.erow>summary::after{content:none!important}
 summary:hover{color:var(--blue)}
 .why{font-size:14px;color:var(--dim);line-height:1.6;margin-top:8px;padding-left:12px;border-left:2px solid var(--line)}
 .why cite{display:block;margin-top:7px;font-style:normal;font-size:12.5px;color:var(--faint)}
@@ -906,22 +896,21 @@ display:flex;align-items:center;justify-content:center;position:relative;z-index
 .tl-adesso .en{font-size:12.5px;font-weight:700;color:var(--blue);text-align:right;font-variant-numeric:tabular-nums}
 .tl-adesso i{justify-self:center;width:9px;height:9px;border-radius:50%;background:var(--blue);position:relative;z-index:1;box-shadow:0 0 0 3px var(--bg)}
 .tl-adesso::after{content:"";position:absolute;left:calc(var(--tcol) + 10px + var(--nodo));right:0;top:50%;height:1px;background:var(--blue);opacity:.45}
-.tl-extra{margin:2px 0 8px}
-/* riga espandibile: chevron a destra, riga toccabile */
-.erow{margin:0}
-.erow>summary{list-style:none;cursor:pointer;display:block;padding:0}
-.erow>summary::-webkit-details-marker{display:none}
-.echev{flex:none;align-self:center;color:var(--faint);font-size:19px;line-height:1;
-transition:transform .15s ease;padding-left:2px}
-.erow>summary .echev{transform:rotate(90deg)}
-.erow[open]>summary .echev{transform:rotate(-90deg)}
-.erow[open]>summary .el{color:var(--blue)}
-.ed{padding:2px 0 16px calc(var(--tcol) + 10px + var(--nodo) + 10px)}
+.drem .dopo-notte{margin:var(--sp-3) 0 0;padding:var(--sp-3) 0 0;border-top:1px solid var(--line)}
+.sv-riga{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);margin-top:var(--sp-3);padding-top:var(--sp-3);border-top:1px solid var(--line);font-size:14px;color:var(--dim)}
+.sv-t{display:flex;align-items:center;gap:var(--sp-2);min-width:0}
+.sv-t b{color:var(--ink)}
+.sv-riga .btn,.sv-riga .lnk{flex:none}
+/* voce del piano: tutta la riga si tocca per il «perché» (foglio), con l'icona ⓘ a destra */
+.erow{margin:0;cursor:pointer;border-radius:12px}
+.erow:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.einfo{flex:none;align-self:center;display:inline-flex;color:var(--faint);padding-left:6px}
+.einfo svg{width:18px;height:18px}
+.ed{padding:2px 0 16px}
 .ed-sub{font-size:14px;color:var(--dim);line-height:1.55;margin:0 0 9px}
 .ed .why{font-size:14px;color:var(--dim);line-height:1.6;border-left:2px solid var(--line);padding-left:11px;margin-top:9px}
 .ed .why cite{display:block;margin-top:6px;font-size:12px;color:var(--faint);font-style:normal}
 .ed .rows{margin-top:9px}
-@media (max-width:430px){.ed{padding-left:calc(var(--tcol) + 10px)}}
 /* icona di stato nel blocco Ora: badge a cerchio, stesso motivo ripreso
    in Turni e Più — prima l'icona era "nuda", senza nulla dietro. */
 .ora-h{display:flex;align-items:center;gap:14px}
@@ -969,6 +958,7 @@ padding:12px 6px 12px 14px;margin:-6px 0 var(--gap-sezione);font-size:13.5px;lin
 .sapevi[hidden]{display:none}
 .sapevi>div{flex:1;min-width:0}
 .sapevi b{color:var(--ink)}
+.sapevi-cta{display:flex;align-items:center;min-height:44px;margin-top:4px;padding:0;font-size:14px;font-weight:600}
 .sapevi-az{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:10px}
 .sapevi-az .btn{min-height:40px;padding:0 14px}
 .sapevi-az.sapevi-facce{flex-wrap:nowrap;gap:8px}
@@ -984,7 +974,6 @@ padding:12px 6px 12px 14px;margin:-6px 0 var(--gap-sezione);font-size:13.5px;lin
 .essnudge{font-size:12.5px;color:var(--faint);margin-top:14px;line-height:1.55}
 .esshint{font-size:13px;color:var(--dim);margin:0 2px 10px}
 .ed-cambia{display:block;margin-top:10px;font-size:13px;text-align:left}
-.ed-sveglia{display:flex;width:100%;align-items:center;justify-content:center;text-align:center;margin-bottom:8px}
 #ora[hidden]{display:none}
 .oro .oro-tipo{font-family:var(--serif);font-size:22px;font-weight:600;margin:0 0 6px}
 .grf{display:block;width:100%;margin-top:8px}
@@ -1679,9 +1668,16 @@ header b{font-size:23px}
 <div class="strumenti solo-turni" id="strumenti" role="group" aria-label="Strumenti"></div>
 <button type="button" class="tsec tsec-riga solo-turni" id="doCondividi" aria-haspopup="dialog">
   <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:var(--blue);background:var(--blue-soft)"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
-  <span class="tsec-tx"><b class="tsec-t">Condividi i tuoi turni</b><span class="tsec-v">Invita un collega, manda i turni, PDF, QR</span></span><span class="tchev">›</span>
+  <span class="tsec-tx"><b class="tsec-t">Condividi e riepiloghi</b><span class="tsec-v">Il ciclo, il riepilogo del mese, il PDF per il medico</span></span><span class="tchev">›</span>
 </button>
-<div id="condividiModal" class="qs-backdrop" hidden aria-hidden="true"><div class="qs-sheet" role="dialog" aria-modal="true" aria-label="Condividi i tuoi turni"><div class="qs-header"><div><b class="qs-title">Condividi i tuoi turni</b></div><div class="qs-hd-az"><button type="button" class="qs-close" id="condividiChiudi" aria-label="Chiudi">✕</button></div></div><div id="condividiCorpo"></div></div></div>
+<div id="condividiModal" class="qs-backdrop" hidden aria-hidden="true"><div class="qs-sheet" role="dialog" aria-modal="true" aria-label="Condividi e riepiloghi"><div class="qs-header"><div><b class="qs-title">Condividi e riepiloghi</b></div><div class="qs-hd-az"><button type="button" class="qs-close" id="condividiChiudi" aria-label="Chiudi">✕</button></div></div><div id="condividiCorpo"></div>
+  <span class="eyebrow" style="display:block;margin:var(--sp-4) 0 var(--sp-2)">Riepiloghi</span>
+  <div class="opz-gruppo" id="condividiRiepiloghi">
+    <button type="button" class="tool tool-1line azione" data-mese-manda><span class="tool-ic" data-ic="calendar"></span><span class="tool-tx"><b id="riepMeseT">Riepilogo del mese</b><span>Ore, turni, notti e festivi, in un messaggio</span></span></button>
+    <button type="button" class="tool tool-1line azione" data-anno-manda><span class="tool-ic" data-ic="calendar"></span><span class="tool-tx"><b>Ultimi 12 mesi</b><span>Mese più pesante, notti, sonno annotato</span></span></button>
+    <button type="button" class="tool tool-1line azione" data-riepilogo-medico><span class="tool-ic" data-ic="scudo"></span><span class="tool-tx"><b>PDF per il medico competente</b><span>Turni, notti e riposi degli ultimi 12 mesi</span></span></button>
+  </div></div></div>
+<div id="infoModal" class="qs-backdrop" hidden aria-hidden="true"><div class="qs-sheet" role="dialog" aria-modal="true" aria-labelledby="infoTitolo"><div class="qs-header"><div><b class="qs-title" id="infoTitolo"></b></div><div class="qs-hd-az"><button type="button" class="qs-close" id="infoChiudi" aria-label="Chiudi">✕</button></div></div><div class="ed" id="infoCorpo"></div></div></div>
 <div id="modificaModal" class="qs-backdrop" hidden aria-hidden="true"><div class="qs-sheet" role="dialog" aria-modal="true" aria-label="Modifica turni"><div class="qs-header"><div><b class="qs-title">Modifica turni</b></div><div class="qs-hd-az"><button type="button" class="qs-close" id="modificaChiudi" aria-label="Chiudi">✕</button></div></div>
   <div class="opz-gruppo" style="margin-top:6px">
     <button type="button" class="tool tool-1line" data-mod="ciclo"><span class="tool-ic" data-ic="cycle"></span><span class="tool-tx"><b>Ciclo e orari</b><span>La sequenza, gli orari dei turni, dove sei oggi</span></span></button>
@@ -4124,37 +4120,36 @@ function wakeSummary(){
   return out.consigli.length||out.liberi||out.anticipi ? out : null;
 }
 
-// Proposta 1 del giro di consulenza: il voto "come ti senti" e il debito di
-// sonno oggettivo vengono mostrati oggi separati, mai messi in relazione fra
-// loro. La restrizione di sonno cumulativa predice sia la percezione sia le
-// prestazioni in modo dose-dipendente (Van Dongen et al. 2003) — un confronto
-// concreto fra "quando il debito è alto" e "quando è basso" dà un motivo
-// personale, non un principio generico.
-//
-// Finestra più ampia (90 notti, non le 30 del riquadro del debito sopra):
-// qui serve potenza statistica per un confronto fra due gruppi, non una
-// fotografia recente. Confine mediano, non una soglia arbitraria in minuti —
-// si adatta a chi ha poco debito quanto a chi ne ha tanto. Come cycleSummary,
-// non parla se il campione è scarso: almeno 3 giorni per gruppo, e una
-// differenza di almeno mezzo punto — sotto, è rumore, non un pattern.
+// Il voto del giorno dopo le notti corte: confronta, per ogni giorno con un voto, quanto mancava di sonno la notte
+// prima (rispetto al piano) con il voto stesso (Van Dongen et al. 2003: il debito di sonno pesa sulle prestazioni).
+// Non il «debito» accumulato: è una somma che cresce nel tempo, e confrontarne le due metà vuol dire confrontare
+// inizio e fine del periodo. Qui serve un legame vero e più forte del caso: almeno 14 giorni con voto,
+// correlazione di rango (Spearman) negativa oltre ~2/√(n−1), almeno 4 notti corte e 4 altre, e mezzo punto di differenza.
+// Un legame contrario, o debole, non si dice: con pochi giorni è rumore.
+const rangoMedio=a=>{ const o=a.map((v,i)=>[v,i]).sort((x,y)=>x[0]-y[0]), r=new Array(a.length); let i=0;
+  while(i<o.length){ let j=i; while(j+1<o.length && o[j+1][0]===o[i][0]) j++; const m=(i+j)/2+1; for(let q=i;q<=j;q++) r[o[q][1]]=m; i=j+1; } return r; };
+function spearman(x, y){
+  const a=rangoMedio(x), b=rangoMedio(y), n=a.length, ma=a.reduce((s,v)=>s+v,0)/n, mb=b.reduce((s,v)=>s+v,0)/n;
+  let sab=0, saa=0, sbb=0; for(let i=0;i<n;i++){ sab+=(a[i]-ma)*(b[i]-mb); saa+=(a[i]-ma)**2; sbb+=(b[i]-mb)**2; }
+  return saa && sbb ? sab/Math.sqrt(saa*sbb) : 0;
+}
+const NOTTE_CORTA_MIN=45;   // quanto in meno del piano per dire «notte corta»
 function correlazioneVotoDebito(){
   if(!window.NTHistory) return null;
   let trend=null;
   try{ trend=window.NTHistory.sleepTrend({beds:state.beds,wakes:state.wakes}, NT_planSafe, {days:90}); }catch(e){ return null; }
   if(!trend) return null;
   const coppie=trend.series
-    .map(s=>{ const v=+diary[s.date]; return (v>=1&&v<=5) ? {debt:s.debt, voto:v} : null; })
+    .map(s=>{ const v=+diary[s.date]; return (v>=1&&v<=5) ? {mancano:(s.planned!=null ? s.planned : state.need||480)-s.actual, voto:v} : null; })
     .filter(Boolean);
-  if(coppie.length<6) return null;
-  const debiti=coppie.map(c=>c.debt).sort((a,b)=>a-b);
-  const mediana=debiti[Math.floor(debiti.length/2)];
-  const alto=coppie.filter(c=>c.debt>=mediana), basso=coppie.filter(c=>c.debt<mediana);
-  if(alto.length<3 || basso.length<3) return null;
-  const media=a=>a.reduce((s,c)=>s+c.voto,0)/a.length;
-  const vAlto=media(alto), vBasso=media(basso);
-  const diff=vBasso-vAlto;
-  if(Math.abs(diff)<0.5) return null;
-  return {n:coppie.length, sogliaDebito:mediana, vAlto, vBasso, diff, coerente:diff>0};
+  if(coppie.length<14) return null;
+  const rho=spearman(coppie.map(c=>c.mancano), coppie.map(c=>c.voto));
+  if(!(rho<=-2/Math.sqrt(coppie.length-1))) return null;
+  const corte=coppie.filter(c=>c.mancano>=NOTTE_CORTA_MIN), altre=coppie.filter(c=>c.mancano<NOTTE_CORTA_MIN);
+  if(corte.length<4 || altre.length<4) return null;
+  const media=a=>a.reduce((s,c)=>s+c.voto,0)/a.length, vCorto=media(corte), vAltre=media(altre);
+  if(vAltre-vCorto<0.5) return null;
+  return {n:coppie.length, rho, vCorto, vAltre};
 }
 
 // Proposta 4 del giro di consulenza: la regolarità degli orari, non solo la
@@ -4214,12 +4209,7 @@ function summaryText(){
   const seDebito = trend ? ["", "— SONNO, ULTIME "+trend.series.length+" NOTTI —",
     "In media dormi "+hm(trend.avgActual)+(trend.avgPlanned?" contro "+hm(trend.avgPlanned)+" pianificate":""),
     "Debito accumulato: "+(trend.debtNow>0?hm(trend.debtNow)+" in meno":hm(-trend.debtNow)+" in più")+" rispetto al pianificato"]
-    .concat((()=>{ const corr=correlazioneVotoDebito(); if(!corr) return [];
-      const sopra = corr.sogliaDebito>0 ? "quando il debito supera "+hm(corr.sogliaDebito)
-        : "nei giorni con meno sonno accumulato rispetto al solito";
-      return [corr.coerente
-        ? "Sembra che "+sopra+", il voto scenda in media a "+corr.vAlto.toFixed(1)+" (contro "+corr.vBasso.toFixed(1)+" negli altri giorni)."
-        : "Curioso: il voto è più alto proprio "+sopra+" ("+corr.vAlto.toFixed(1)+" contro "+corr.vBasso.toFixed(1)+")."]; })())
+    .concat((()=>{ const corr=correlazioneVotoDebito(); return corr ? [fraseCorrDebito(corr)] : []; })())
     : [];
   const seRegolarita = (()=>{ let reg=null; try{ reg=regolaritaSonno(); }catch(e){}
     if(!reg) return [];
@@ -4496,6 +4486,7 @@ const ICON={
   trash: ICO('<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>'),
   eyeOff:ICO('<path d="M3 3l18 18"/><path d="M10.6 6.2A9.8 9.8 0 0 1 12 6c6.5 0 10 6 10 6a17 17 0 0 1-3.2 3.8M6.3 7.5C3.8 9.2 2 12 2 12s3.5 6 10 6c1.5 0 2.8-.3 4-.8"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/>'),
   eye:   ICO('<circle cx="12" cy="12" r="3"/><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/>'),
+  info: ICO('<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>'),
   cycle: ICO('<path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5"/>'),
   scudo: ICO('<path d="M12 3l8 3v6c0 4.4-3.1 7.9-8 9-4.9-1.1-8-4.6-8-9V6z"/><path d="M9 12l2.2 2.2L15.5 10"/>'),
   calendar: ICO('<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>'),
@@ -4526,6 +4517,22 @@ function votoOraRecente(){
   }
   return false;
 }
+// La sveglia per la fine del sonno (solo app Android): vale se la fine cade nelle prossime 24 ore (l'Orologio la mette
+// alla prossima volta che arriva quell'ora). `m` = minuti di adesso sulla scala del piano. L'Orologio non dice se l'abbiamo messa:
+// lo ricordiamo noi, in locale, per quell'ora e per 24 ore.
+function svegliaDelPiano(P, m){
+  if(!platform.alarm.available || !P || !P.s) return null;
+  const fine=P.s.onset+P.s.dur, tra=fine-m;
+  return tra>0 && tra<=1440 ? {t:hhmm(fine), fra:P.s.onset-m} : null;   // fra: minuti all'inizio del sonno (negativo = già cominciato)
+}
+// La riga «Stanotte» della scheda «Il tuo sonno» (la zona delle azioni di Oggi): da 4 ore prima del sonno fino alla sua fine.
+function svegliaRiga(P, m){
+  const sv=svegliaDelPiano(P, m); if(!sv || sv.fra>SVEGLIA_ORE_PRIMA) return "";
+  const v=store.get("svegliaMessa",null), messa=!!v && v.t===sv.t && Date.now()-v.at<24*3600e3;
+  return '<div class="sv-riga"><span class="sv-t">'+ICON.alarm+(messa ? '<span class="drem-ok">✓</span> Sveglia <b>'+sv.t+'</b>' : 'Sveglia <b>'+sv.t+'</b>')+'</span>'+
+    (messa ? '<button type="button" class="lnk dim" data-sveglia="'+sv.t+'">Rimettila</button>' : '<button type="button" class="btn g sm" data-sveglia="'+sv.t+'">Metti</button>')+'</div>';
+}
+const SVEGLIA_ORE_PRIMA=240;   // in «Adesso» da 4 ore prima del sonno (come nel widget) fino alla fine del sonno
 function renderOra(Pfocus){
   const el=$("#ora"); if(!el) return;
   if(state.vista==="dettaglio"){ el.innerHTML=""; return; }
@@ -5880,7 +5887,7 @@ function sonnoWin(P){
   return '<span class="dwhen">'+ancora+'</span>'+hhmm(P.s.onset)+' → <b>'+hhmm(P.end)+'</b>';
 }
 
-const essAperte=new Set();
+const infoVoci=new Map();   // id voce → {t, h}: il «perché» di ogni voce del piano, che si apre in un foglio (ⓘ)
 let cicloOff=0;   // scorrimento della finestra del ciclo (0 = intorno a oggi)
 // La simulazione copre ±CFG.H giorni: la finestra (da off-2 a off+10) va tenuta
 // dentro quell'orizzonte, altrimenti si legge fuori array. CFG.H ora si adatta
@@ -6019,11 +6026,7 @@ function sceltaDopoNotte(P){
 }
 function renderEssenziale(P, CARDS){
   const el=$("#essenziale"); if(!el) return;
-  // quali righe erano aperte: si legge dal DOM prima di ridisegnare, così
-  // l'espansione sopravvive agli aggiornamenti automatici del piano
-  el.querySelectorAll(".erow[data-row]").forEach(r=>{
-    if(r.open) essAperte.add(r.dataset.row); else essAperte.delete(r.dataset.row);
-  });
+  infoVoci.clear();
 
   // Il dettaglio di una riga: tutto quello che la scheda sa dire, senza intestazione
   // (l'intestazione è la riga stessa). Sola lettura.
@@ -6059,7 +6062,6 @@ function renderEssenziale(P, CARDS){
     if(ab.z!=null && ab.a <= nowT) return "ora";
     return ""; };
   const riga=(id,lab,num,sub,warn,ic,det,ab)=>{
-    const apri = det && essAperte.has(id) ? " open" : "";
     const testo = String(num).replace(/<[^>]+>/g," ");
     const ore = testo.match(/\d{1,2}:\d{2}/g)||[];
     const quando = (String(num).match(/class="dwhen">([^<]+)</)||[])[1]||"";
@@ -6074,11 +6076,12 @@ function renderEssenziale(P, CARDS){
       '<span class="enodo">'+(ic||"")+'</span>'+
       '<div class="ev"><div class="el">'+esc(lab)+'</div>'+
       (sotto?'<div class="es">'+sotto+'</div>':'')+'</div>'+
-      (det?'<span class="echev">›</span>':'')+'</div>';
+      (det?'<span class="einfo" aria-hidden="true">'+ICON.info+'</span>':'')+'</div>';
     const stato=statoVoce(ab);
     const dati = ab&&ab.a!=null ? ' data-a="'+ab.a+'"'+(ab.z!=null?' data-z="'+ab.z+'"':'')+(ab.poi?' data-poi="'+esc(ab.poi)+'"':'') : '';
+    if(det) infoVoci.set(id, {t:lab, h:det});
     const dentro = det
-      ? '<details class="erow"'+apri+' data-row="'+esc(id)+'"><summary>'+capo+'</summary><div class="ed">'+det+'</div></details>'
+      ? '<div class="erow" role="button" tabindex="0" aria-haspopup="dialog" data-row="'+esc(id)+'">'+capo+'</div>'
       : capo;
     return '<div class="tl'+(stato?" "+stato:"")+'"'+dati+'>'+dentro+'</div>';
   };
@@ -6088,8 +6091,9 @@ function renderEssenziale(P, CARDS){
   const voci=[];   // {t, html} — poi ordinate per orario della giornata
 
   // ── il diario, in testa: si riferisce al sonno appena finito ──
-  const drem=diaryReminder(P, CARDS);
-  if(drem) voci.push({t:-2, html:drem});
+  // La scheda «Il tuo sonno» è la zona delle azioni, tutte in un posto: il diario, le scelte su come dormire (dopo la notte, letto presto)
+  // e, di sera, la sveglia (solo Android). Si compone più sotto, quando le scelte sono pronte; se non c'è il diario da fare, resta il resto.
+  const drem=diaryReminder(P, CARDS), svR=dnum(state.focus)===dnum(giornoVero()) ? svegliaRiga(P, minutiDaFocus()) : "";
 
   // ── la finestra di sonno: non è una scheda, la costruiamo qui ──
   // Sotto "Dormi" solo il numero di ore: il perché (smonto, turno nel cuore
@@ -6106,9 +6110,6 @@ function renderEssenziale(P, CARDS){
   // Sveglia vera nell'Orologio del telefono (solo app Android): l'Orologio
   // la mette alla prossima volta che arriva quell'ora, quindi solo se la
   // fine del sonno cade nelle prossime 24 ore.
-  const fineSonno=P.s.onset+P.s.dur, traQuanto=fineSonno-minutiDaFocus();
-  const sveglia = platform.alarm.available && traQuanto>0 && traQuanto<=1440
-    ? '<button type="button" class="btn g ed-sveglia" data-sveglia="'+hhmm(fineSonno)+'">Metti la sveglia alle '+hhmm(fineSonno)+'</button>' : "";
   const vSonno={t:dSv(P.s.onset), html:riga("sonno","Dormi",sonnoWin(P),sonnoSub,false,ICON.moon,
     dettSonno+'<button type="button" class="lnk ed-cambia" data-cambia="3">Orari che non fanno per te? Dimmi come dormi →</button>',
     {a:P.s.onset, z:P.s.onset+P.s.dur, poi:"a letto alle "+hhmm(P.s.onset)})};
@@ -6127,8 +6128,10 @@ function renderEssenziale(P, CARDS){
   // "pre-turno-bifasico", non "pre-turno"), c'è un modo di risolverlo che
   // l'utente potrebbe non aver ancora trovato da solo.
   const lp=sceltaLettoPresto(P);
-  // Le azioni di «Dormi» (la sveglia, le scelte dopo la notte) non stanno dentro la riga: vedi più sotto, dove si decide da che parte della linea dell'ora vanno.
-  if(sveglia || dn || lp) vSonno.extra='<div class="tl-extra">'+sveglia+(dn||"")+(lp||"")+'</div>';
+  // Le scelte sul sonno e la sveglia stanno nella scheda «Il tuo sonno», in testa: «Dormi» resta solo informazione.
+  { const azioni=(dn||"")+(lp||"")+svR;
+    const blocco = azioni ? (drem ? drem.replace(/<\/div>$/, azioni+'</div>') : '<div class="drem done"><div class="drem-q"><span class="dic">'+ICON.moon+'</span>Il tuo sonno</div>'+azioni+'</div>') : drem;
+    if(blocco) voci.push({t:-2, html:blocco}); }
 
   // Tempo libero: le ore da sveglio fuori da turno, viaggio, sonno e pisolini.
   // Risponde a «e la palestra quando la faccio?» (e figli, spesa…) senza un
@@ -6299,13 +6302,6 @@ function renderEssenziale(P, CARDS){
   // ripeterlo qui sotto come etichetta su una riga creava due segnali
   // "adesso" sullo stesso schermo, in competizione. Questa resta la
   // lista cronologica semplice, senza separatori.
-  // Le azioni di una voce stanno subito sotto di lei; ma se la linea dell'ora cade fra la voce (già cominciata) e il resto,
-  // vanno sotto la linea: «da adesso puoi…», non fra «Dormi» e il segno dell'ora.
-  for(let i=voci.length-1;i>=0;i--){
-    if(!voci[i].extra) continue;
-    const sottoLinea=voci[i+1] && /^<div class="tl-adesso"/.test(voci[i+1].html);
-    voci.splice(i+1+(sottoLinea?1:0), 0, {t:voci[i].t, html:voci[i].extra});
-  }
   let h=voci.map(v=>v.html).join("");
   // Ogni voce si apre e spiega il suo perché, ma l'unico indizio era la
   // freccina: al primo piano lo si dice una volta, finché non se ne apre una.
@@ -6620,9 +6616,7 @@ function renderMese(){
     (()=>{ const v=specialiMese(r); return v.length ? '<p class="mese-spec">'+esc(v.join(" · "))+'</p>' : ''; })()+
     (vuoto ? '' : '<p class="hint mese-nota">Ore dall\'inizio alla fine di ogni turno, pause comprese: per controllare, non è un conteggio ufficiale.</p>')+
     (r.ignoti && !vuoto ? '<p class="mese-da-segnare"><b>'+r.ignoti+(r.ignoti===1?' giorno ancora da segnare':' giorni ancora da segnare')+'</b></p>' : '')+
-    (vuoto ? '' : '<div class="mese-sez"><span class="mese-eb">Manda un riepilogo in un messaggio</span>'+
-      '<div class="mese-manda"><button type="button" class="btn g" data-mese-manda>Questo mese</button><button type="button" class="btn g" data-anno-manda>Ultimi 12 mesi</button></div></div>')+
-    festiviHtml();
+    '';
   // una riga sola (ore, turni, notti), e i dettagli si aprono; «Segna» e «Importa» stanno in «Modifica turni»
   const riga = vuoto ? "Nessun turno segnato" : String(ore).replace(".",",")+" h · "+r.turni+(r.turni===1?" turno":" turni")+" · "+r.notti+(r.notti===1?" notte":" notti");
   const aperto=!!(el.querySelector && el.querySelector(".mese-det[open]"));
@@ -6631,11 +6625,7 @@ function renderMese(){
 }
 // Festivi del contratto: una riga che dice cosa si conta, e un piccolo editor.
 function nomeGiornoMese(k){ const [m,g]=k.split("-").map(Number); return new Date(2000,m-1,g).toLocaleDateString(LINGUA,{day:"numeric",month:"long"}); }
-// Nel riquadro del mese resta solo un rimando; l'editor sta in «I tuoi turni» (i festivi sono una cosa del contratto, come gli orari).
-function festiviHtml(){
-  const c=festiviCfg();
-  return '<div class="mese-sez mese-fest"><div><b>Festivi</b><span class="hint">'+esc(festiviRiga(c))+'</span></div><button type="button" class="btn g sm" data-fest-apri>'+(c.extra.length?'Modifica':'Aggiungi i tuoi')+'</button></div>';
-}
+// I festivi si modificano in «I tuoi turni» (sono una cosa del contratto, come gli orari).
 function festiviRiga(c){ c=c||festiviCfg();
   return "Conto "+(c.dom?"le domeniche e ":"")+"i festivi nazionali"+(c.extra.length?" e "+c.extra.map(nomeGiornoMese).join(", "):"")+(state.festiviRiposo&&state.repeat!==false ? ". Nei festivi sei a casa" : "")+"."; }
 function festiviEditorHtml(){
@@ -6680,12 +6670,6 @@ if($("#ttFestivi")) $("#ttFestivi").addEventListener("click", e=>{
     if(!m){ toast("Scegli il giorno"); return; }
     const k=(+m[1])+"-"+(+m[2]), f=Object.assign({}, state.festivi||{}); f.extra=(f.extra||[]).filter(x=>x!==k).concat(k).sort(); state.festivi=f;
     usata("festivi"); track("setup_item", {item:"festivi_extra"}); festiviCambiati(); }
-});
-if($("#meseBox")) $("#meseBox").addEventListener("click", e=>{
-  if(e.target.closest("[data-riepilogo-medico]")){ stampaRiepilogoMedico(); return; }
-  if(e.target.closest("[data-mese-manda]")){ mandaRiepilogo("mese"); return; }
-  if(e.target.closest("[data-anno-manda]")){ mandaRiepilogo("anno"); return; }
-  if(e.target.closest("[data-fest-apri]")){ apriTuoiTurni("turni",{festivi:true}); return; }
 });
 // Riferimenti orari per le strisce del tempo: le 00, 06, 12 e 18 che cadono
 // nella finestra [clo, chi] (minuti sulla scala del giorno, anche oltre 1440).
@@ -6967,13 +6951,9 @@ function donateUrl(){ try{ return (window.NT_DONATE && window.NT_DONATE.url) || 
 // sia se diventa il consiglio principale (in cima), sia se resta la sua
 // card descrittiva più sotto (quando qualcos'altro ha la priorità).
 function fraseCorrDebito(corr){
-  const sopra = corr.sogliaDebito>0 ? "quando il debito supera "+hm(corr.sogliaDebito)
-    : "nei giorni con meno sonno accumulato rispetto al solito";
-  return corr.coerente
-    ? "Sembra che "+sopra+", il tuo voto scenda in media a "+corr.vAlto.toFixed(1)+
-      " (contro "+corr.vBasso.toFixed(1)+" negli altri giorni)."
-    : "Curioso: nei tuoi dati il voto è più alto proprio "+sopra+
-      " ("+corr.vAlto.toFixed(1)+" contro "+corr.vBasso.toFixed(1)+"). Potrebbe dipendere da altro — vale la pena osservarlo.";
+  const virg=v=>v.toFixed(1).replace(".",",");
+  return "Dopo le notti in cui dormi almeno "+NOTTE_CORTA_MIN+" minuti meno del previsto, il tuo voto scende in media a "+virg(corr.vCorto)+
+    " (contro "+virg(corr.vAltre)+" dopo le altre).";
 }
 // Non un'altra sezione da interpretare: la singola cosa più utile da sapere
 // ORA, scelta fra tutti gli insight già calcolati dalle sezioni sotto (che
@@ -7309,7 +7289,7 @@ function renderAndamenti(){
   }
 
   // Un solo confronto per turno: quanto dormi, quanto in meno del previsto, come stai.
-  if(parteFascia || parteCiclo) vociAnd.dormi=sezDet("Come dormi e come stai, turno per turno", (parteFascia||parteCiclo).riga,
+  if(parteFascia || parteCiclo) vociAnd.dormi=sezDet("Come dormi e come stai", (parteFascia||parteCiclo).riga,
     (parteFascia ? parteFascia.corpo : "")+(parteCiclo ? (parteFascia ? '<div style="height:14px"></div>' : '')+parteCiclo.corpo : ""), {id:"dormi"});
   // Quattro voci sempre in lista, come le Impostazioni: se mancano i dati la riga dice cosa serve.
   const VOCI=[["carico","calendar","Il carico dei turni","Segna i turni per vederlo","Notti di fila, riposi brevi, festivi e ore dei prossimi 30 giorni, calcolati dai tuoi turni."],
@@ -8634,12 +8614,21 @@ function vocePiano(id){
   try{ const v=String(id).toLowerCase().replace(/[^a-z0-9_]/g,"").slice(0,18), m=store.mappa("vociAperte"), oggi=isoOggi();
     if(!v || m[v]===oggi) return; m[v]=oggi; store.set("vociAperte", m); track("setup_item", {item:"voce_"+v}); }catch(e){}
 }
-if($("#essenziale")) $("#essenziale").addEventListener("toggle", e=>{
-  const r=e.target; if(!r.dataset || !r.dataset.row) return;
-  if(r.open) essAperte.add(r.dataset.row); else essAperte.delete(r.dataset.row);
-  if(r.open){ if(r.dataset.row==="sonno") usata("dormi"); vocePiano(r.dataset.row); }
-  if(r.open && !store.get("perchéVisto", false)){ store.set("perchéVisto", true); const h=$("#essenziale .esshint"); if(h) h.remove(); }
-}, true);
+// Il «perché» di una voce si apre in un foglio (come «Modifica turni»), non dentro la timeline: la lista resta ferma.
+function apriInfo(id){
+  const v=infoVoci.get(id); if(!v) return;
+  $("#infoTitolo").textContent=v.t; $("#infoCorpo").innerHTML=v.h; apriFoglio("infoModal",true);
+  if(id==="sonno") usata("dormi"); vocePiano(id);
+  if(!store.get("perchéVisto", false)){ store.set("perchéVisto", true); const h=$("#essenziale .esshint"); if(h) h.remove(); }
+}
+if($("#essenziale")){
+  $("#essenziale").addEventListener("click", e=>{ const r=e.target.closest(".erow[data-row]"); if(r) apriInfo(r.dataset.row); });
+  $("#essenziale").addEventListener("keydown", e=>{ if(e.key!=="Enter" && e.key!==" ") return; const r=e.target.closest(".erow[data-row]"); if(r){ e.preventDefault(); apriInfo(r.dataset.row); } });
+}
+if($("#infoModal")) $("#infoModal").addEventListener("click", e=>{
+  const b=e.target.closest("[data-cambia]");
+  if(b){ apriFoglio("infoModal",false); apriOpzioni("abitudini"); apriSezioneInline(+b.dataset.cambia); }
+});
 ["#essenziale","#andamenti"].forEach(s=>{ const el=$(s); if(el){ el.addEventListener("change",diaryChange); el.addEventListener("click",diaryClick); } });
 // Dalle righe «Dormi» e «Pisolino» al pannello dove si cambiano davvero.
 if($("#essenziale")) $("#essenziale").addEventListener("click", e=>{
@@ -8650,13 +8639,13 @@ if($("#andamenti")) $("#andamenti").addEventListener("click", e=>{
   if(!e.target.closest("[data-oro-cambia]")) return;
   apriOpzioni("abitudini"); apriSezioneInline(3);
 });
-if($("#essenziale")) $("#essenziale").addEventListener("click", e=>{
+["#essenziale"].forEach(sel=>{ if($(sel)) $(sel).addEventListener("click", e=>{
   const b=e.target.closest("[data-sveglia]"); if(!b) return;
   const t=b.dataset.sveglia, [h,m]=t.split(":").map(Number);
   platform.alarm.set(h, m, "Notturnisti")
-    .then(()=>{ toast("Sveglia delle "+t+" messa nell'Orologio"); track("sveglia_messa"); usata("sveglia"); haptic(8); })
+    .then(()=>{ store.set("svegliaMessa",{t, at:Date.now()}); toast("Sveglia delle "+t+" messa nell'Orologio"); track("sveglia_messa"); usata("sveglia"); haptic(8); render(); })
     .catch(()=>toast("Non riesco a metterla: usa l'app Orologio del telefono"));
-});
+}); });
 // Il foglio per il frigo: si costruisce apposta, non si spreme il DOM vivo.
 // Copre un giro completo di ciclo, con le sole informazioni che servono.
 function buildPrintSheet(){
@@ -8982,7 +8971,7 @@ const CONSIGLI_FUNZIONE=[
   {k:"scambio", cta:()=>"Prova un cambio", t:()=>"Prima di accettare uno scambio o un cambio di turno, controlla come cambiano sonno e riposi.", a:()=>{ setTab("turni"); apriScambioTurno(); }},
   {k:"sonno", cta:()=>"Apri Sonno e carico", t:()=>"In «Sonno e carico» vedi notti di fila e riposi brevi del mese, anche senza diario.", a:()=>{ setTab("turni"); apriAndamenti(); }},
   // Solo nell'app Android: la sveglia nell'Orologio e il voto dal widget
-  {k:"sveglia", quando:()=>platform.alarm.available, t:()=>"Sotto «Dormi» c'è «Metti la sveglia»: la mette nell'Orologio del telefono, all'ora in cui finisce il sonno."},
+  {k:"sveglia", quando:()=>platform.alarm.available, t:()=>"Nella scheda «Il tuo sonno», di sera, c'è «Metti la sveglia»: la mette nell'Orologio del telefono, all'ora in cui finisce il sonno."},
   {k:"votowidget", quando:()=>platform.widget.available && platform.widget.presenti()>0, t:()=>"Dal widget puoi dire come hai dormito con un tocco, senza aprire l'app: il voto arriva nel diario."},
   {k:"coppia", quando:()=>coppiaDaProporre(), t:()=>"Hai una persona in elenco: puoi mettere i vostri riposi in comune nel calendario del telefono, in un calendario a parte che accendi e spegni quando vuoi.",
     cta:()=>"Attiva", a:()=>{ impostaCoppiaNativa(true).then(ok=>{ if(ok) toast("Fatto: li trovi nel calendario «Notturnisti · insieme»"); }); }},
@@ -8990,8 +8979,8 @@ const CONSIGLI_FUNZIONE=[
   {k:"momenti", quando:()=>!["testa","leggera","intensa"].some(pianoVoce),
     t:()=>"Vuoi sapere quando pensare, muoverti o allenarti meglio? I momenti migliori si accendono in Impostazioni › Cosa vedi nel piano.",
     cta:()=>"Scegli i momenti", a:()=>{ apriOpzioni("voci"); setTimeout(()=>{ const x=$("#opzPianoVoci"); if(x&&x.scrollIntoView) try{ x.scrollIntoView({block:"center"}); }catch(e){} }, 250); }},
-  {k:"riepilogo", t:()=>"Puoi mandare il riepilogo del tuo mese o degli ultimi 12 mesi: lo trovi in Turni, nella scheda del mese.",
-    cta:()=>"Apri il mese", a:()=>{ setTab("turni"); setTimeout(()=>{ const x=$("#meseBox"); if(x&&x.scrollIntoView) try{ x.scrollIntoView({block:"center"}); }catch(e){} }, 250); }},
+  {k:"riepilogo", t:()=>"Puoi mandare il riepilogo del tuo mese o degli ultimi 12 mesi, e il PDF per il medico: sono in «Condividi e riepiloghi».",
+    cta:()=>"Apri Condividi", a:()=>{ setTab("turni"); setTimeout(apriCondividi, 250); }},
   {k:"dormi", t:()=>"Tocca «Dormi» nel piano: dopo una notte scegli sonno breve o lungo, prima di un mattino presto puoi dormire in due tempi."},
   // Il grazie: dopo due settimane, in un momento buono (mai dopo notti pessime).
   // Sul web il contributo libero; nell'app (regole di Play) solo il Club.
@@ -9050,7 +9039,7 @@ function renderLoSapevi(){
       ? '<span class="sapevi-az"><button type="button" class="btn g" data-sapevi-si>Sì, va bene</button><button type="button" class="btn g" data-sapevi-no>No, grazie</button></span>'
     : c.link
       ? '<span class="sapevi-az">'+c.link().map(([h,t])=>'<a class="btn sm" href="'+esc(h)+'" target="_blank" rel="noopener" data-sapevi-link>'+esc(t)+'</a>').join("")+'</span>'
-    : (cta && c.a ? '<button type="button" class="btn sm" data-sapevi-prova>'+esc(cta)+'</button>' : '');
+    : (cta && c.a ? '<button type="button" class="lnk sapevi-cta" data-sapevi-prova>'+esc(cta)+' →</button>' : '');
   // statistiche: sì e no sono entrambe risposte, niente ×
   el.innerHTML='<div><b>'+esc(c.titolo||"Lo sapevi?")+'</b> '+esc(c.t())+(azioni||'')+'</div>'+
     (c.scelta ? '' : '<button type="button" class="x" data-sapevi-chiudi aria-label="Chiudi, non lo mostro più">×</button>');
@@ -9252,7 +9241,8 @@ if($("#cycToday")) $("#cycToday").onclick=()=>{
    Si scrivono a mano a ogni versione con una funzione che si vede: poche righe, in italiano di tutti i giorni.
    `id` cambia solo quando c'è qualcosa da dire; chi aggiorna la vede una volta. Chi installa adesso non la vede
    (non è una novità per lui), ma la trova sempre in Impostazioni › Novità. «app:true» = solo nell'app Android. */
-const NOVITA={ id:"2026-11-04", data:"Novembre 2026", righe:[
+const NOVITA={ id:"2026-11-05", data:"Novembre 2026", righe:[
+  ["Il perché in un foglio, i riepiloghi in Condividi","Nel piano di Oggi tocchi una voce (icona ⓘ) e il perché si apre in un foglio, senza allungare la lista. Il riepilogo del mese, dei 12 mesi e il PDF per il medico stanno in «Condividi e riepiloghi». In «Il tuo sonno» ci sono ora anche le scelte su come dormire e, su Android, «Metti la sveglia».",false,"2026-11-05"],
   ["Sonno e carico più chiaro","La pagina mostra subito il sonno che ti manca; il resto è un elenco di quattro voci, ognuna con la sua riga riassuntiva e la sua pagina. Gli orari del sonno separano le notti dormite di notte da quelle di giorno, e gli assi dei grafici sono corretti.",false,"2026-11-04"],
   ["Copia completa su file","In Impostazioni › Dati e privacy: un file con turni, diario del sonno, impostazioni e persone. Lo riapri con «Ripristina da un file», anche su un telefono nuovo. Il link resta per spostare i turni sull'altro telefono.",false,"2026-11-03"],
   ["Cambia un turno, senza scambio","In Cambio turno scegli «Cambia un turno»: un giorno prende un altro turno (o il riposo) e vedi subito cosa cambia per il sonno. Più semplice, i consigli sulle funzioni hanno pulsanti più chiari e Dati e privacy ha una nuova icona.",false,"2026-11-02"],
@@ -10514,7 +10504,7 @@ if(store.get("sub") && $("#privacyNotaAbbonato")) $("#privacyNotaAbbonato").hidd
 if(!window.NT_APP.nativo && platform.notify.pushStato && platform.notify.pushStato()!=="no" && $("#notifHint"))
   $("#notifHint").textContent="Arrivano anche ad app chiusa: per svegliarla all'ora giusta il nostro server conserva solo gli orari dei promemoria (non cosa dicono), finché li tieni accesi. Non sostituiscono la sveglia.";
 if(window.NT_APP.nativo){
-  if($("#notifHint")) $("#notifHint").textContent="Arrivano anche con l'app chiusa. Non sono una sveglia: per quella usa «Metti la sveglia» in «Dormi». Se non ti arrivano, controlla che il risparmio batteria non limiti Notturnisti.";
+  if($("#notifHint")) $("#notifHint").textContent="Arrivano anche con l'app chiusa. Non sono una sveglia: per quella usa «Metti la sveglia» in «Il tuo sonno». Se non ti arrivano, controlla che il risparmio batteria non limiti Notturnisti.";
   // Android 12+: senza "Sveglie e promemoria" la sveglia può arrivare con
   // qualche minuto di ritardo. Si propone solo a chi ha già le notifiche.
   const riga=document.createElement("p"); riga.className="hint"; riga.hidden=true; riga.style.margin="6px 2px 0";
@@ -11157,6 +11147,7 @@ platform.onBackButton(()=>{
   if($("#pf-modal")){ $("#pf-modal").remove(); return true; }
   const qs=$("#quickShiftModal"); if(qs && !qs.hidden){ chiudiQuickShift(); return true; }
   if($("#qrModal") && !$("#qrModal").hidden){ mostraQR(false); return true; }
+  for(const id of ["infoModal","modificaModal","condividiModal"]){ const m=$("#"+id); if(m && !m.hidden){ apriFoglio(id,false); return true; } }
   if($("#novitaModal") && !$("#novitaModal").hidden){ mostraNovita(false,true); return true; }
   if(document.body.classList.contains("andamenti-aperta")){ andIndietro(); return true; }
   if(document.body.classList.contains("vederci-aperta")){ chiudiVederci(); return true; }
@@ -11379,8 +11370,20 @@ if($("#chiudiOpzioni")) $("#chiudiOpzioni").onclick=chiudiOpzioniPagina;
 function apriFoglio(id,su){ const m=document.getElementById(id); if(!m) return; m.hidden=!su; m.setAttribute("aria-hidden",String(!su));
   if(su) m.querySelectorAll("[data-ic]").forEach(x=>{ if(!x.innerHTML) x.innerHTML=ICON[x.dataset.ic]||""; }); }
 if($("#tEdit")) $("#tEdit").onclick=()=>apriFoglio("modificaModal",true);
-if($("#doCondividi")) $("#doCondividi").onclick=()=>apriFoglio("condividiModal",true);
-["modificaModal","condividiModal"].forEach(id=>{ const m=document.getElementById(id); if(!m) return;
+function apriCondividi(){
+  const o=giornoVero(), d=new Date(o.getFullYear(), o.getMonth()+meseOff, 1, 12), n=d.toLocaleDateString(LINGUA,{month:"long"});
+  const t=$("#riepMeseT"); if(t) t.textContent="Riepilogo di "+n;
+  apriFoglio("condividiModal",true);
+}
+if($("#doCondividi")) $("#doCondividi").onclick=apriCondividi;
+if($("#condividiRiepiloghi")) $("#condividiRiepiloghi").addEventListener("click", e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  apriFoglio("condividiModal",false);
+  if(b.matches("[data-mese-manda]")) mandaRiepilogo("mese");
+  else if(b.matches("[data-anno-manda]")) mandaRiepilogo("anno");
+  else if(b.matches("[data-riepilogo-medico]")) stampaRiepilogoMedico();
+});
+["modificaModal","condividiModal","infoModal"].forEach(id=>{ const m=document.getElementById(id); if(!m) return;
   m.addEventListener("click",e=>{ if(e.target===m || e.target.closest(".qs-close")) apriFoglio(id,false); }); });
 if($("#condividiCorpo")) $("#condividiCorpo").addEventListener("click",e=>{ if(e.target.closest("button")) setTimeout(()=>apriFoglio("condividiModal",false),60); });
 if($("#modificaModal")) $("#modificaModal").addEventListener("click",e=>{
