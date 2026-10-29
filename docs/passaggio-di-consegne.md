@@ -236,7 +236,7 @@ L'anteprima mostra layout, colori e stati come progettati. Un solo difetto trova
 
 ### Piani documentati in `docs/prossimo-aggiornamento.md`
 - **Sul telefono vero (senza codice):** sveglia nell'Orologio, voto dal widget, ritorno in primo piano dopo ore, schermata dopo lo smonto, riga «Cambio d'ora» (domenica 25/10), ripristino da backup, statistiche `sveglia_messa`, `diario_widget`, `voce_*`, `festivi_*`.
-- **Health Connect per il sonno** (dopo l'approvazione in produzione): piano in 7 passi. Opzionale, locale, solo lettura (`READ_SLEEP`), plugin `NTHealth`.
+- **Health Connect per il sonno** (to-do, non iniziato): specifiche in `docs/prossimo-aggiornamento.md` («To-do: sonno da Health Connect»). Opzionale, locale, solo lettura (`READ_SLEEP`), spento di default, plugin `NTHealth`, minSdk 26 da verificare, modulo «App di salute» su Play prima del rilascio.
 - **Idee in ordine di valore:** importazione da foto/PDF del foglio turni (OCR locale), conti per la busta paga e controlli sui riposi (da validare con un esperto), inglese/i18n (testi traducibili e festivi per paese), app iPhone, riepilogo annuale, Club in app con Play Billing, Wear OS.
 - Non fare: account, sincronizzazione su server, funzioni sociali.
 

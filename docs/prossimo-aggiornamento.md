@@ -10,29 +10,35 @@ Fatto nella 1.1.1 (non serve più): tolto il vecchio wizard nascosto; suggerimen
 - Domenica 25/10: la riga «Cambio d'ora» nel giorno di sabato e «Mancano» in ore vere.
 - Statistiche: guardare `sveglia_messa`, `diario_widget`, `voce_*`, `orologio_tuo`, `festivi_*`, `ferie_con`.
 
-## Dopo l'approvazione della produzione: sonno da Health Connect (solo Android)
-Perché: il sonno vero (da quando a quando) compila il diario, e il giorno dell'app passa al nuovo
-**al risveglio vero**, non a quello previsto (la soluzione di fondo ai confini del giorno). «Il tuo orologio»
-e il debito di sonno si calcolano su dati reali.
+## To-do: sonno da Health Connect (solo Android) — specifiche concordate (novembre 2026)
+Una sola integrazione per i dispositivi collegati ad Android: Health Connect raccoglie il sonno scritto da Samsung Health, Fitbit, Pixel Watch, Garmin, Oura, Withings e altri. Dipende da ciò che l'app del dispositivo sincronizza, non da noi. Non è ancora iniziato.
 
-Scelte da tenere ferme:
-- **Facoltativo e in locale**: si legge e si calcola sul telefono, niente esce. Interruttore in Impostazioni › «Sonno da Health Connect», spento di default.
-- **Solo lettura** del sonno: `android.permission.health.READ_SLEEP` (SleepSessionRecord). Nessuna scrittura.
-- Niente Fitbit Web API, niente account, niente server (cozzano con «senza account»).
-- iPhone: HealthKit sarebbe un lavoro a parte (oggi non c'è un'app iOS).
+**Come funziona (per la persona)**
+- Impostazioni › «Sonno da Health Connect», **solo Android, spento di default**. Accendendolo compare il permesso di sola lettura del sonno. Se Health Connect non c'è (Android 13 e precedenti) si rimanda a Google Play; su Android 14+ è nel sistema.
+- Il diario si compila da solo: al risveglio l'app trova la sveglia vera.
+- Quello che la persona annota **vince sempre**: il dato importato riempie solo i giorni vuoti, è segnato «da Health Connect» (fonte `h`, accanto a `p`/`m`) e si corregge con un tocco.
 
-Lavoro:
-1. **Plugin Android** `NTHealth` (come NTAlarm/NTWidget): `disponibile()`, `chiediPermesso()`, `sessioniSonno(da, a)` → `[{inizio, fine, fonte, fasi?}]` in millisecondi. Se Health Connect non c'è (Android < 14 senza app) → «non disponibile» con il link per installarla. Schermata del perché del permesso (intent `ACTION_SHOW_PERMISSIONS_RATIONALE`) che rimanda alla privacy.
-2. **Pagina**: `platform.salute` (come `platform.alarm`); sul sito resta assente. Leggere le ultime 48 ore al ritorno in primo piano e all'apertura.
-3. **Dal dato al diario**: la sessione più lunga che finisce in un giorno diventa il sonno di quel giorno (`beds`/`wakes`) *solo se* la persona non l'ha già annotato (mai sovrascrivere). Sessioni brevi (< 90 min) = pisolini, uniti a quelli annotati senza doppioni. Il tocco «Sì, così» resta: si può correggere.
-4. **Giorno di Oggi**: se c'è una sessione di sonno finita per oggi, `giornoVero()` passa al giorno nuovo subito (il risveglio è un fatto, non una previsione); se il sonno è in corso (sessione aperta) resta il giorno del turno.
-5. **Statistiche**: `setup_item` con `salute_attiva` (una volta), nessun dato di sonno.
-6. **Test**: plugin finto in `_nativo.mjs` (come per NTAlarm), casi: nessun dato, sessione che sovrappone un pisolino, sessione già annotata, permesso negato/revocato, fuso orario e cambio d'ora. Prova finale su telefono con orologio e su emulatore con Health Connect (API 34).
-7. **Play Console** (prima di inviare la release): dichiarare i tipi di dato di Health Connect (solo sonno), compilare la «dichiarazione app di salute» se richiesta, aggiornare «Sicurezza dei dati» (dati trattati sul dispositivo, non raccolti), aggiornare privacy e termini sul sito e nell'app. Tempo di revisione di Google: ignoto, da mettere in conto.
+**Cosa legge e come lo usa**
+- Solo `SleepSessionRecord` (inizio, fine, fasi se ci sono), solo lettura (`android.permission.health.READ_SLEEP`). Nessuna scrittura, nessun passo/battito (allargherebbero la dichiarazione), nessun server, niente iPhone (servirebbe HealthKit e un'app iOS).
+- Prima lettura: ultimi 30 giorni (il limite predefinito di Health Connect; oltre serve `READ_HEALTH_DATA_HISTORY`, non lo chiediamo). Poi le ultime 48 ore a ogni apertura e ritorno nell'app. **Niente lettura in background** nella prima versione (servirebbe `READ_HEALTH_DATA_IN_BACKGROUND`).
+- La sessione più lunga della giornata = sonno principale (`beds`/`wakes`); sotto i 90 minuti = pisolino (`pisolini`, uniti a quelli annotati senza doppioni); sessioni sovrapposte (telefono + orologio) unite. Fuso orario preso dal dato (cambi d'ora).
+- La chiave del diario segue la convenzione dell'app (il giorno dell'app in cui cade la sveglia): da fissare con test sui casi a cavallo di mezzanotte e dopo le notti.
 
-Fatto quando: un telefono con orologio compila il diario da solo, il giorno passa al risveglio vero, e con il permesso revocato l'app si comporta come prima.
+**Cosa cambia nell'app**
+- `giornoVero()` passa al giorno nuovo **al risveglio vero**, non a quello previsto (se il sonno è in corso, resta il giorno del turno).
+- Il widget non dice «Sonno» dopo la sveglia (oggi corretto a mano nel widget con la sveglia annotata: `fineReale` in `ntWidget`).
+- Debito di sonno, regolarità, orologio e «Il piano si adatta a te» si calcolano su dati reali, non su «come previsto».
+- «Come hai dormito?» non chiede più gli orari, solo come ci si sente.
 
-Non so ancora: quali dei tester ha un dispositivo compatibile; quanti giorni di storico si vedono dopo il permesso (una fonte terza dice 30, da verificare nella documentazione ufficiale).
+**Lavoro**
+1. Plugin Android `NTHealth` (come NTAlarm/NTWidget): `disponibile()`, `chiediPermesso()`, `sessioniSonno(da, a)` → `[{inizio, fine, fonte, fasi?}]` in millisecondi; schermata del perché del permesso (`ACTION_SHOW_PERMISSIONS_RATIONALE`) con rimando alla privacy. Libreria `androidx.health.connect:connect-client`: **richiede minSdk 26** (oggi 24): da verificare e, se serve, alzare (si perdono pochissimi dispositivi, scelta da confermare).
+2. Pagina: `platform.salute` (come `platform.alarm`); sul sito assente.
+3. Dal dato al diario con le regole sopra; mai sovrascrivere.
+4. Statistiche: `setup_item` `salute_attiva` (una volta), nessun dato di sonno.
+5. Test: plugin finto in `_nativo.mjs`; casi: nessun dato, sessione che sovrappone un pisolino, sessione già annotata, permesso negato/revocato, fuso e cambio d'ora, mezzanotte, doppie fonti. Prova finale su telefono con orologio e su emulatore con Health Connect (API 34): serve un telefono con orologio vero.
+6. Play Console, prima di caricare l'AAB con il permesso: modulo «App di salute» (uso: gestione del sonno, deve corrispondere a ciò che fa l'app), «Sicurezza dei dati» (trattati sul dispositivo, non raccolti), privacy e termini sul sito e nell'app. Tempo di revisione ignoto; non ho trovato conferma di novità 2026 sui requisiti: ricontrollare la pagina attuale prima di partire.
+
+**Quando**: lo sviluppo non dipende da Google e può partire subito, tutto spento di default. Se il modulo non blocca la prova chiusa, si rilascia lì; altrimenti si aspetta l'approvazione della produzione (piano originale).
 
 ## Widget rifatto (1.3.0, 1.3.1 ricalibrato, 1.3.3 sfoglia a pagine; da provare sul telefono)
 Parte minimale e aggiunge un pezzo alla volta con l'altezza (`WidgetPiano`): **adesso** (con la barra se è in corso) → **il pulsante del momento** → **prima voce** → **calendario, prima riga** → **seconda voce** → **altre settimane** (fino a 5). Il calendario riempie lo spazio che resta (righe con peso): niente vuoti.
@@ -64,6 +70,7 @@ Parte minimale e aggiunge un pezzo alla volta con l'altezza (`WidgetPiano`): **a
 - [x] **Scheda Turni, fase 2 (Segna)**: intervallo con due tocchi, «Come 7 giorni prima» (anche su un intervallo = copia una settimana), «Annulla» a più passi, «Prossimo da segnare», importazione con periodo nel riepilogo.
 - [x] **Ferie e Cambio turno**: in Ferie le preferenze (preferisco, a casa con, smonto) stanno sotto «Preferenze»; in Cambio turno i selettori sono più grandi.
 - [x] **Revisione fonti e riordino (novembre)**: citazioni complete e corrette; puntino dei festivi solo sui festivi veri; «Il tuo ciclo» con i numeri del mese nella stessa scheda (il mese segue ore/calendario); «Sonno e carico» come elenco di quattro voci (`andSez`, `[data-and-sez]`, test con `_andamenti.mjs`); «Festivi» come riga di «I tuoi turni» (`apriFestivi`, `#ttFestivi`).
+- [ ] **Sonno da Health Connect** (solo Android, in sola lettura, spento di default): specifiche nella sezione dedicata sotto. Non iniziato.
 - [ ] **App Android 1.3.7** (quando si decide): widget con le facce dell'energia da 90 minuti dopo la sveglia (`WidgetStato`, campo `en`), mese a sei settimane e le altre modifiche del widget già nel ramo `main`.
 - [ ] **Idea dai feedback, da valutare come progetto a parte**: un foglio di squadra stile Excel (chi è in ferie, una data per riunioni o corsi fra squadre diverse) e l'integrazione con l'ecosistema iOS. Richiede dati condivisi fra persone: oggi tutto resta sul telefono, e la privacy dell'app si regge su questo.
 
