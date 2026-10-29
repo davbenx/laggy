@@ -8953,6 +8953,10 @@ const CONSIGLI_FUNZIONE=[
   {k:"soddisfazione", dopo:14, ripeti:true, partecipa:true, facce:true, titolo:"Una domanda",
     quando:()=>{ const u=store.get("soddisfazioneAl",""); return !u || (new Date()-new Date(u+"T12:00:00"))/864e5>=90; },
     t:()=>"Come ti trovi con Notturnisti?"},
+  // Quale funzione ti mancherebbe di più: una domanda neutra, una volta sola (solo con le statistiche accese), per capire cosa conta.
+  {k:"funzioneUtile", dopo:30, partecipa:true, funzioni:true, titolo:"Una domanda",
+    quando:()=>{ try{ return !!(window.NTAnalytics && window.NTAnalytics.isEnabled()) && !store.get("funzioneUtileAl",""); }catch(e){ return false; } },
+    t:()=>"Quale funzione ti mancherebbe di più se non ci fosse? Una risposta sola, anonima: ci aiuta a capire dove lavorare."},
   {k:"installa", quando:()=>!giaInstallata() && !inLista("installa") && (playDaWeb() || isIOSPerInstall() || !!installPromptEvento),
     t:()=> playDaWeb() ? "C'è l'app Android su Google Play: promemoria anche ad app chiusa, widget e calendario del telefono. I turni li porti con un tocco."
       : isIOSPerInstall() ? "Aggiungila alla schermata Home: in Safari tocca Condividi, poi «Aggiungi a schermata Home». Si apre come un'app e tiene al sicuro i turni."
@@ -9040,6 +9044,9 @@ function consiglioFunzione(){
   store.set("loSapevi", Object.assign(S, {visti:visti.concat(c.k), oggi:{k:c.k, d:oggi}}));
   return c;
 }
+// Elenco chiuso delle funzioni della domanda «quale ti mancherebbe di più» (id brevi: finiscono nelle statistiche aggregate).
+const FUNZIONI_UTILI=[["piano","Il piano del sonno"],["promemoria","I promemoria"],["calendario","Calendario e widget"],["ferie","Ferie e cambio turno"],
+  ["riepilogo","Riepilogo e PDF"],["import","Importare i turni"],["persone","Le persone"],["andamenti","Sonno e carico"]];
 function renderLoSapevi(){
   const el=$("#loSapevi"); if(!el) return;
   let c=null;
@@ -9050,6 +9057,8 @@ function renderLoSapevi(){
   const FACCE=[["su","Bene",ICON.faceOk,"var(--ok)"],["meh","Così così",ICON.faceMid,"var(--faint)"],["giu","Non bene",ICON.faceLow,"var(--orange)"]];
   const azioni = c.facce
       ? '<span class="sapevi-az sapevi-facce">'+FACCE.map(f=>'<button type="button" class="btn g kface" data-sapevi-faccia="'+f[0]+'" aria-label="'+f[1]+'" style="--tone:'+f[3]+'"><i class="kic" style="color:'+f[3]+'">'+f[2]+'</i><span>'+f[1]+'</span></button>').join("")+'</span>'
+    : c.funzioni
+      ? '<span class="sapevi-az">'+FUNZIONI_UTILI.map(([id,t])=>'<button type="button" class="btn g sm" data-sapevi-funzione="'+id+'">'+esc(t)+'</button>').join("")+'</span>'
     : c.scelta
       ? '<span class="sapevi-az"><button type="button" class="btn g" data-sapevi-si>Sì, va bene</button><button type="button" class="btn g" data-sapevi-no>No, grazie</button></span>'
     : c.link
@@ -9062,6 +9071,8 @@ function renderLoSapevi(){
 if($("#loSapevi")) $("#loSapevi").addEventListener("click", e=>{
   const el=$("#loSapevi"), k=el.dataset.k, c=CONSIGLI_FUNZIONE.find(x=>x.k===k);
   const fatto=()=>{ usata(k); el.hidden=true; };
+  const fu=e.target.closest("[data-sapevi-funzione]");
+  if(fu){ track("funzione_utile",{f:fu.dataset.sapeviFunzione}); store.set("funzioneUtileAl", iso(new Date())); el.hidden=true; toast("Grazie!"); return; }
   const fc=e.target.closest("[data-sapevi-faccia]");
   if(fc){ const v=fc.dataset.sapeviFaccia; track("soddisfazione",{voto:v}); store.set("soddisfazioneAl", iso(new Date())); el.hidden=true;
     if(v==="giu") apriFeedback("soddisfazione"); else toast("Grazie!"); return; }
@@ -11251,6 +11262,7 @@ function contaFunzioniAttive(){
     if(!store.get("orologioContato",false) && !(state.freeBed==="23:30" && state.freeWake==="07:30")){ store.set("orologioContato", true); track("setup_item", {item:"orologio_tuo"}); }
     const pl = platform.isNative ? (platform.name==="ios"?"i":"a") : (window.matchMedia("(display-mode: standalone)").matches?"p":"w");
     const cal = platform.calendar.available ? platform.calendar.attivo() : !!(window.NTPaid && window.NTPaid.paid());
+    if((state.people||[]).length || state.pPattern) track("setup_item", {item:"persone_attive"});
     track("funzioni_attive", {mix: pl+"_n"+(promemoriaAttivi()?1:0)+"c"+(cal?1:0)+"w"+(platform.widget.presenti()>0?1:0)+
       (platform.isNative ? "" : "p"+(promemoriaAttivi() && platform.notify.pushStato && platform.notify.pushStato()==="attive" ? 1 : 0))});
   }catch(e){}

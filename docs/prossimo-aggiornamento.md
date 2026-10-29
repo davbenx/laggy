@@ -10,6 +10,19 @@ Fatto nella 1.1.1 (non serve più): tolto il vecchio wizard nascosto; suggerimen
 - Domenica 25/10: la riga «Cambio d'ora» nel giorno di sabato e «Mancano» in ore vere.
 - Statistiche: guardare `sveglia_messa`, `diario_widget`, `voce_*`, `orologio_tuo`, `festivi_*`, `ferie_con`.
 
+## Funzioni a pagamento: come si farà la transizione (decisioni, novembre 2026)
+**Oggi tutto è gratis per tutti, senza badge e senza promesse pubbliche oltre «senza account e senza pubblicità».** Nel frattempo si misura cosa conta (sotto), senza cambiare nulla di visibile. Se un giorno si decide di far pagare qualcosa:
+1. **Preavviso**: annuncio nell'app (Novità) e sul sito almeno 60 giorni prima di una data di taglio D. Mai togliere una funzione da un giorno all'altro.
+2. **Fondatori**: chi ha aperto l'app prima di D mantiene per sempre le funzioni che esistono a D (per funzione, non per versione). Dopo D solo i nuovi utenti pagano quelle funzioni. *Da decidere:* le funzioni nate dopo D sono a pagamento anche per i fondatori? (consiglio: sì, è chiaro e sostenibile).
+3. **Come si riconoscono**: `state.firstSeenAt` (già c'è) con `firstSeenAt < D`, più un flag `fondatore` scritto all'apertura dopo l'annuncio e prima di D (così non dipende dalla data del telefono). Viaggia nella copia su file e nel backup automatico di Android; **oggi NON è nel link di backup** (`toHash`): va aggiunto prima dell'annuncio. Chi perde i dati senza copia diventa «nuovo»: limite accettato; la migrazione dalla PWA all'app (`migrazione`) conserva lo stato.
+4. **Costo reale**: l'importazione da foto/PDF (`turni-ai`) costa a ogni uso: un tetto di uso equo al mese per tutti, anche i fondatori, applicato dal server per dispositivo; oltre, a pagamento.
+5. **Non a pagamento mai**: piano del sonno, turni, promemoria, diario, consigli di sicurezza, backup ed esportazione dei propri dati.
+6. **Tecnica** (da fare prima dell'annuncio, invisibile): elenco delle funzioni (id, gratuita o no) e `puoUsare(id)`, sempre vera finché non si decide, con un test che lo dimostra. Nessun blocco forte (niente account: è una regola onesta, non una protezione).
+7. **Comunicazione positiva**: dopo D, i fondatori vedono «Fondatore» (segno di riconoscimento), non prima. Pagamenti nell'app solo con Play Billing.
+8. **Da verificare con un esperto** prima dell'annuncio: obblighi verso i consumatori quando cambiano le condizioni di un servizio digitale, e regole di Play.
+
+**Per decidere cosa far pagare (già in funzione)**: contatori anonimi (solo con le statistiche accese) di quali funzioni si usano — `funzioni_attive` (widget, calendario), `setup_item` (`import_*`, `medico_pdf`, `ferie_aperte`, `persone_attive`, …), `share_created` (riepilogo mese e anno) — e **una domanda neutra, una volta sola dal giorno 30**: «Quale funzione ti mancherebbe di più se non ci fosse?» (`funzione_utile`, otto scelte, visibile in `/stats`). Non parla di prezzi.
+
 ## To-do: sonno da Health Connect (solo Android) — specifiche concordate (novembre 2026)
 Una sola integrazione per i dispositivi collegati ad Android: Health Connect raccoglie il sonno scritto da Samsung Health, Fitbit, Pixel Watch, Garmin, Oura, Withings e altri. Dipende da ciò che l'app del dispositivo sincronizza, non da noi. Non è ancora iniziato.
 

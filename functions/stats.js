@@ -428,9 +428,11 @@ function render(){
     anticipo_proposto:"Anticipo: proposte",anticipo_applicato:"Anticipo: applicate",anticipo_annullato:"Anticipo: annullate",anticipo_rifiutato:"Anticipo: «lascia così»"};
   $("#adatta").innerHTML=rowsHtml(byProp(rows,"adatta").map(function(x){ return {k:ESI[x.k]||x.k, n:x.n}; }));
   var PES={in_linea:"Notte in linea col piano",fino_30:"Scarto fino a 30 minuti",oltre_30:"Scarto oltre 30 minuti"}, PMO={turno:"Motivo: il turno era diverso",abitudine:"Motivo: dormo così di solito",altro:"Motivo: altro"}, SOD={su:"Soddisfatto",meh:"Così così",giu:"Insoddisfatto"};
+  var FUN={piano:"Il piano del sonno",promemoria:"I promemoria",calendario:"Calendario e widget",ferie:"Ferie e cambio turno",riepilogo:"Riepilogo e PDF",import:"Importare i turni",persone:"Le persone",andamenti:"Sonno e carico"};
   $("#pianoEsito").innerHTML=rowsHtml(byProp(rows,"piano_esito").map(function(x){ return {k:PES[x.k]||x.k, n:x.n}; })
     .concat(byProp(rows,"piano_motivo").map(function(x){ return {k:PMO[x.k]||x.k, n:x.n}; }))
-    .concat(byProp(rows,"soddisfazione").map(function(x){ return {k:"Facce: "+(SOD[x.k]||x.k), n:x.n}; })));
+    .concat(byProp(rows,"soddisfazione").map(function(x){ return {k:"Facce: "+(SOD[x.k]||x.k), n:x.n}; }))
+    .concat(byProp(rows,"funzione_utile").map(function(x){ return {k:"Mancherebbe di più: "+(FUN[x.k]||x.k), n:x.n}; })));
   $("#migrazione").innerHTML=rowsHtml(byProp(rows,"migrazione").map(function(x){ return {k:x.k==="export_web"?"Avviate dal sito":x.k==="import_app"?"Arrivate nell'app":x.k, n:x.n}; }));
   $("#errori").innerHTML=rowsHtml(byProp(rows,"errore").map(function(x){ return {k:"Errore in "+x.k, n:x.n}; }));
   var PRESET={essenziali:"Scelta: essenziali",tutte:"Scelta: tutti",mie:"Scelta: personalizzata"};

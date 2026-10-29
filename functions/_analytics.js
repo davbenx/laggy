@@ -55,6 +55,7 @@ export const ALLOWED = {
   piano_esito: ["esito"],           // dopo ogni notte annotata: in_linea | fino_30 | oltre_30 minuti dal piano (mai gli orari)
   piano_motivo: ["motivo"],         // perché il piano non tornava: turno | abitudine | altro (risposta a un tocco)
   soddisfazione: ["voto"],           // le tre facce: su | meh | giu
+  funzione_utile: ["f"],             // «quale funzione ti mancherebbe di più»: una scelta fra un elenco chiuso (piano, promemoria…), una volta
   sveglia_messa: [],               // sveglia chiesta all'Orologio del telefono (app Android)
   errore: ["dove"]                  // errore JavaScript: solo il file (index, engine…), mai il messaggio
 };

@@ -23,7 +23,7 @@ const apri=async({giorni, ora=10, extra={}})=>{
 };
 const sapevi=p=>p.evaluate(()=>{ const e=document.querySelector("#loSapevi"); return e&&!e.hidden?e.dataset.k:""; });
 const coda=async p=>{ await p.clock.runFor(300); return p.ev; };
-const TUTTI=["installa","tester","colleghi","copia","orologio","mese","festivi","calendario","ferie","scambio","sonno","grazie","medico","dormi","sveglia","votowidget","widgetmese","coppia","momenti","riepilogo"];
+const TUTTI=["installa","tester","colleghi","copia","orologio","mese","festivi","calendario","ferie","scambio","sonno","grazie","medico","dormi","sveglia","votowidget","widgetmese","coppia","momenti","riepilogo","funzioneUtile"];
 const visti={visti:TUTTI,migrato:1};
 
 // le facce: giorno 15, statistiche già risposte, nient'altro da dire
