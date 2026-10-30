@@ -31,7 +31,7 @@
 <meta property="og:image:height" content="500">
 <meta property="og:locale" content="it_IT">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#14161A">
+<meta name="theme-color" content="#0B1626">
 <script>
 // Rete di sicurezza: se tra 6 secondi l'app non ha finito di avviarsi
 // (l'ultima riga dello script toglie #jsoff), mostra l'avviso.
@@ -88,7 +88,7 @@ try{
   const t=localStorage.getItem("nt:theme");
   if(t==="\"light\"" || t==="\"dark\"") { const l=t==="\"light\"";
     document.documentElement.dataset.theme=l?"light":"dark";
-    document.querySelector('meta[name="theme-color"]').content=l?"#FFFFFF":"#14161A"; }
+    document.querySelector('meta[name="theme-color"]').content=l?"#FFFFFF":"#0B1626"; }
 }catch(e){}
 </script>
 <link rel="manifest" href="./manifest.webmanifest">
@@ -109,12 +109,13 @@ try{
 @font-face{font-family:"Noto Serif";font-style:normal;font-weight:100 900;font-display:swap;
   src:url(./fonts/noto-serif-latin.woff2) format("woff2");
   unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
-/* Palette Notturnisti — blu #2D5A8C, arancio #FF6B35.
+/* Palette Notturnisti — dal logo: blu notte (#071E3D) e luna in oro (#F4D58A, solo nel marchio: mai colore dei dati,
+   il giallo del Mattino gli somiglia). Blu #2D5A8C per i pulsanti; l'arancio #FF6B35 è il Turno e gli avvisi, non un accento.
    Chiaro come il sito. Scuro automatico per chi ha il telefono in modalità notte:
    sono turnisti, ce l'hanno quasi tutti. */
 /* Scuro è il default per chiunque non abbia scelto nulla a livello di
    sistema — coerente con un prodotto che si chiama "Notturnisti". Lo
-   stesso colore (#14161A) è ora anche lo splash screen PWA
+   stesso colore (#0B1626, il blu notte del logo) è ora anche lo splash screen PWA
    (manifest.webmanifest, background_color/theme_color) e il colore della
    barra del browser (meta theme-color): prima questi due erano scuri
    (#0B0A0E) mentre l'app appena caricata era chiara, con uno scarto
@@ -129,16 +130,16 @@ try{
    meno recenti danno 0 a env()). Si prende il più grande dei due. */
 :root{--sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:24px;--r-campo:12px;--tap:44px;--sat:max(env(safe-area-inset-top,0px),var(--safe-area-inset-top,0px));--sab:max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px))}
 :root{
-  --bg:#14161A; --s1:#1C1F25; --s2:#23272E; --line:#333941;
-  --ink:#E6E8EB; --dim:#A8B0B8; --faint:#98A0A8;
-  --blue:#8CA4C0; --blue-fill:#2D5A8C; --blue-soft:#22303F; --blue-lt:#A9BED6; --su-blu:#14161A;
+  --bg:#0B1626; --s1:#111E31; --s2:#182A42; --line:#27405E;
+  --ink:#E6E8EB; --dim:#A9B6C8; --faint:#9AA9BD;
+  --blue:#8DB4E2; --blue-fill:#2D5A8C; --blue-soft:#17304D; --blue-lt:#B3CCEA; --su-blu:#0B1626;
   --orange-bar:#FF6B35;
   --orange:#FF9068; --orange-fill:#FF6B35; --orange-soft:#3A2119;
   --risk:#FF6B5C; --risk-soft:#3A1C18; --risk-line:#7A342C;
   --picco:#D98CF0;   /* picco di sonnolenza nei grafici: il rosso di --risk qui si confonde con l'arancio del turno */
-  --sleep-fill:#2D5A8C; --ok:#5FBF85; --ok-soft:#173222; --ok-line:#2F6B45; --persona:#7FD9C9; --persona-soft:#173B36; --notte:#9CA3F5; --mattina:#F2C66D; --mattina-soft:#3A3118; --sera:#F08CBA; --sera-soft:#3A1B2B; --on-warm:#15171A;
-  --bg-blur:rgba(20,22,26,0.85);
-  --warm-tint:#241C15; --cool-tint:#1E2142;
+  --sleep-fill:#3D74B3; --ok:#5FBF85; --ok-soft:#173222; --ok-line:#2F6B45; --persona:#7FD9C9; --persona-soft:#173B36; --notte:#9CA3F5; --mattina:#F2C66D; --mattina-soft:#3A3118; --sera:#F08CBA; --sera-soft:#3A1B2B; --on-warm:#15171A;
+  --bg-blur:rgba(11,22,38,.85);
+  --warm-tint:#241C15; --cool-tint:#14264A;
   --violet:var(--blue); --violetd:var(--blue-soft);
   --amber:var(--orange);
   --r:16px;
@@ -150,13 +151,13 @@ try{
 }
 @media (prefers-color-scheme:light){
   :root{
-    --bg:#FFFFFF; --s1:#F7F9FB; --s2:#EDF1F5; --line:#DDE3EA;
-    --ink:#15171A; --dim:#5C6670; --faint:#5F6871;
-    --blue:#2D5A8C; --blue-fill:#2D5A8C; --blue-soft:#E4EBF3; --blue-lt:#5B87B5; --su-blu:#FFFFFF;
+    --bg:#FFFFFF; --s1:#F6F8FB; --s2:#EBF0F6; --line:#D9E1EB;
+    --ink:#101A2A; --dim:#56657A; --faint:#5B6A7E;
+    --blue:#2D5A8C; --blue-fill:#2D5A8C; --blue-soft:#E3ECF7; --blue-lt:#5B87B5; --su-blu:#FFFFFF;
     --orange:#B24B25; --orange-fill:#FF6B35; --orange-bar:#D9541F; --orange-soft:#FCE9E1;
     --risk:#C0392B; --risk-soft:#FBE9E7; --risk-line:#E57368;
     --picco:#8E2A6B;
-    --sleep-fill:#24496F; --ok:#2E7D4F; --ok-soft:#E6F4EC; --ok-line:#8CC9A5; --persona:#0F6B60; --persona-soft:#D8F0EA; --notte:#3B3F9E; --mattina:#8A5A00; --mattina-soft:#FBEFC8; --sera:#A3215F; --sera-soft:#FBE3EE; --on-warm:#15171A;
+    --sleep-fill:#24496F; --ok:#2B7549; --ok-soft:#E6F4EC; --ok-line:#8CC9A5; --persona:#0F6B60; --persona-soft:#D8F0EA; --notte:#3B3F9E; --mattina:#8A5A00; --mattina-soft:#FBEFC8; --sera:#A3215F; --sera-soft:#FBE3EE; --on-warm:#15171A;
     --bg-blur:rgba(255,255,255,.82);
     --warm-tint:#FBF1E9; --cool-tint:#E6E8F8;
     --shadow-card:0 2px 8px -2px rgba(21,23,26,.22);
@@ -172,27 +173,27 @@ try{
 :root[data-theme="dark"]{
   /* Stessi valori del tema scuro predefinito (:root qui sopra): scelto a mano
      deve apparire identico a quello che arriva dal telefono. */
-  --bg:#14161A; --s1:#1C1F25; --s2:#23272E; --line:#333941;
-  --ink:#E6E8EB; --dim:#A8B0B8; --faint:#98A0A8;
-  --blue:#8CA4C0; --blue-fill:#2D5A8C; --blue-soft:#22303F; --blue-lt:#A9BED6; --su-blu:#14161A;
+  --bg:#0B1626; --s1:#111E31; --s2:#182A42; --line:#27405E;
+  --ink:#E6E8EB; --dim:#A9B6C8; --faint:#9AA9BD;
+  --blue:#8DB4E2; --blue-fill:#2D5A8C; --blue-soft:#17304D; --blue-lt:#B3CCEA; --su-blu:#0B1626;
   --orange-bar:#FF6B35;
   --orange:#FF9068; --orange-fill:#FF6B35; --orange-soft:#3A2119;
   --risk:#FF6B5C; --risk-soft:#3A1C18; --risk-line:#7A342C;
   --picco:#D98CF0;   /* picco di sonnolenza nei grafici: il rosso di --risk qui si confonde con l'arancio del turno */
-  --sleep-fill:#2D5A8C; --ok:#5FBF85; --ok-soft:#173222; --ok-line:#2F6B45; --persona:#7FD9C9; --persona-soft:#173B36; --notte:#9CA3F5; --mattina:#F2C66D; --mattina-soft:#3A3118; --sera:#F08CBA; --sera-soft:#3A1B2B; --on-warm:#15171A;
-  --bg-blur:rgba(20,22,26,0.85);
-  --warm-tint:#241C15; --cool-tint:#1E2142;
+  --sleep-fill:#3D74B3; --ok:#5FBF85; --ok-soft:#173222; --ok-line:#2F6B45; --persona:#7FD9C9; --persona-soft:#173B36; --notte:#9CA3F5; --mattina:#F2C66D; --mattina-soft:#3A3118; --sera:#F08CBA; --sera-soft:#3A1B2B; --on-warm:#15171A;
+  --bg-blur:rgba(11,22,38,.85);
+  --warm-tint:#241C15; --cool-tint:#14264A;
   --shadow-card:0 2px 10px -3px rgba(0,0,0,.4);
   --shadow-btn:0 8px 20px -6px rgba(45,90,140,.35);
 }
 :root[data-theme="light"]{
-  --bg:#FFFFFF; --s1:#F7F9FB; --s2:#EDF1F5; --line:#DDE3EA;
-  --ink:#15171A; --dim:#5C6670; --faint:#5F6871;
-  --blue:#2D5A8C; --blue-fill:#2D5A8C; --blue-soft:#E4EBF3; --blue-lt:#5B87B5; --su-blu:#FFFFFF;
+  --bg:#FFFFFF; --s1:#F6F8FB; --s2:#EBF0F6; --line:#D9E1EB;
+  --ink:#101A2A; --dim:#56657A; --faint:#5B6A7E;
+  --blue:#2D5A8C; --blue-fill:#2D5A8C; --blue-soft:#E3ECF7; --blue-lt:#5B87B5; --su-blu:#FFFFFF;
   --orange:#B24B25; --orange-fill:#FF6B35; --orange-bar:#D9541F; --orange-soft:#FCE9E1;
   --risk:#C0392B; --risk-soft:#FBE9E7; --risk-line:#E57368;
   --picco:#8E2A6B;
-  --sleep-fill:#24496F; --ok:#2E7D4F; --ok-soft:#E6F4EC; --ok-line:#8CC9A5; --persona:#0F6B60; --persona-soft:#D8F0EA; --notte:#3B3F9E; --mattina:#8A5A00; --mattina-soft:#FBEFC8; --sera:#A3215F; --sera-soft:#FBE3EE; --on-warm:#15171A;
+  --sleep-fill:#24496F; --ok:#2B7549; --ok-soft:#E6F4EC; --ok-line:#8CC9A5; --persona:#0F6B60; --persona-soft:#D8F0EA; --notte:#3B3F9E; --mattina:#8A5A00; --mattina-soft:#FBEFC8; --sera:#A3215F; --sera-soft:#FBE3EE; --on-warm:#15171A;
   --bg-blur:rgba(255,255,255,.82);
   --warm-tint:#FBF1E9; --cool-tint:#E6E8F8;
   --shadow-card:0 2px 8px -2px rgba(21,23,26,.22);
@@ -3299,7 +3300,7 @@ const store = {
     if(scelta==="light"||scelta==="dark") document.documentElement.dataset.theme=scelta;
     else delete document.documentElement.dataset.theme;
     const l=chiaro();
-    if(meta) meta.content = l ? "#FFFFFF" : "#14161A";
+    if(meta) meta.content = l ? "#FFFFFF" : "#0B1626";
     if(gruppo) gruppo.querySelectorAll("[data-tema]").forEach(b=>b.setAttribute("aria-checked", b.dataset.tema===(scelta||"auto")?"true":"false"));
     platform.setSystemBars(l);   // barre di sistema dell'app nativa
   };
