@@ -11,6 +11,7 @@ const CORE = [
   "./engine.js",
   "./alertness.js",
   "./history.js",
+  "./debito.js",
   "./calendario.js",
   "./paid.js",
   "./notifications.js",

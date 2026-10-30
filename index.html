@@ -4140,7 +4140,7 @@ const NOTTE_CORTA_MIN=45;   // quanto in meno del piano per dire «notte corta»
 function correlazioneVotoDebito(){
   if(!window.NTHistory) return null;
   let trend=null;
-  try{ trend=window.NTHistory.sleepTrend({beds:state.beds,wakes:state.wakes}, NT_planSafe, {days:90}); }catch(e){ return null; }
+  try{ trend=window.NTHistory.sleepTrend({beds:state.beds,wakes:state.wakes,pisolini:state.pisolini}, NT_planSafe, {need:state.need, days:90}); }catch(e){ return null; }
   if(!trend) return null;
   const coppie=trend.series
     .map(s=>{ const v=+diary[s.date]; return (v>=1&&v<=5) ? {mancano:(s.planned!=null ? s.planned : state.need||480)-s.actual, voto:v} : null; })
@@ -4196,7 +4196,7 @@ function summaryText(){
   let sm=diarySummary(), ws=wakeSummary(), cs=cycleSummary();
   let trend=null;
   try{ if(window.NTHistory){
-    const t=window.NTHistory.sleepTrend({beds:state.beds,wakes:state.wakes}, NT_planSafe, {days:30});
+    const t=window.NTHistory.sleepTrend({beds:state.beds,wakes:state.wakes,pisolini:state.pisolini}, NT_planSafe, {need:state.need, days:30});
     if(t && t.n>=3) trend=t;
   } }catch(e){}
   if(!sm && !ws && !cs && !trend) return null;
@@ -4211,7 +4211,7 @@ function summaryText(){
   // stesso contenuto di quello che si vede.
   const seDebito = trend ? ["", "— SONNO, ULTIME "+trend.series.length+" NOTTI —",
     "In media dormi "+hm(trend.avgActual)+(trend.avgPlanned?" contro "+hm(trend.avgPlanned)+" pianificate":""),
-    "Debito accumulato: "+(trend.debtNow>0?hm(trend.debtNow)+" in meno":hm(-trend.debtNow)+" in più")+" rispetto al pianificato"]
+    "Sonno che manca (ultimi 14 giorni): "+(trend.debtNow>0?hm(trend.debtNow):"in pari")]
     .concat((()=>{ const corr=correlazioneVotoDebito(); return corr ? [fraseCorrDebito(corr)] : []; })())
     : [];
   const seRegolarita = (()=>{ let reg=null; try{ reg=regolaritaSonno(); }catch(e){}
@@ -4454,12 +4454,15 @@ function diaryReminder(P, CARDS){
         '<button class="dbtn" data-nap="no" data-k="'+esc(c.nap.k)+'" data-min="'+c.nap.min+'">Saltato</button></div>';
     }
   });
+  // Oltre le 3 ore di debito la notte libera si allunga: lo si dice, con il numero.
+  if(logged && P && P.s && P.s.meta && P.s.meta.debitoExtra && !sleepEditing)
+    x+='<div class="drem-rec" style="margin-top:8px">Ti mancano '+hm(P.debitoMin)+' di sonno: un pisolino non basta, quindi stanotte il piano ti dà '+P.s.meta.debitoExtra+' minuti in più. Il debito cala solo dormendo.</div>';
   // Livello 3: nessuna finestra ha retto, ma il debito non sparisce in
   // silenzio — è quello che chiudeva il bug: prima il testo prometteva un
   // pisolino che poi non compariva mai da nessuna parte.
   if(P && P.debitoScoperto>0)
-    x+='<div class="drem-rec" style="margin-top:8px">Stanotte hai dormito '+hm(P.debitoScoperto)+
-      ' meno di quanto ti serve, e oggi non c\'è spazio per un pisolino, né prima né dopo il turno. '+
+    x+='<div class="drem-rec" style="margin-top:8px">Ti mancano '+hm(P.debitoScoperto)+
+      ' di sonno, e oggi non c\'è spazio per un pisolino, né prima né dopo il turno. '+
       'Il conto resta aperto: recupera stanotte, e se hai sonno evita di guidare.</div>';
   x+='</div>';
   return x;
@@ -6029,13 +6032,9 @@ function sceltaDopoNotte(P){
     '<div class="dn-scelta">'+opz("diviso", corto?"Sonno breve":"In due tempi", eD, diviso, corto?"pomeriggio libero":"poi un pisolino")+opz(unito, corto?"Sonno lungo":"Tutto di fila", eU, !diviso, corto?"recuperi di più":"un blocco solo")+'</div>'+
     spiega+'<p class="dn-vale">Vale per tutte le notti.</p></div>';
 }
-// Perché c'è un pisolino di recupero: il sonno annotato più corto del bisogno,
-// un pisolino saltato ieri, o entrambi. Una sola frase, usata in timeline e nel diario.
+// Perché c'è un pisolino di recupero: il debito di debito.js. Una sola frase, usata in timeline e nel diario.
 function debitoMotivo(n){
-  const m=n.mancante||0, sa=n.saltati||0;
-  if(m>=20 && sa>0) return "Stanotte hai dormito "+hm(m)+" meno di quanto ti serve e ieri hai saltato un pisolino di "+hm(sa)+".";
-  if(sa>0 && m<20) return "Ieri hai saltato un pisolino di "+hm(sa)+" e il conto è ancora aperto.";
-  return "Stanotte hai dormito "+hm(n.debito)+" meno di quanto ti serve, e l'hai annotato tu.";
+  return "Negli ultimi giorni hai dormito "+hm(n.debito)+" meno di quanto ti serve.";
 }
 function renderEssenziale(P, CARDS){
   const el=$("#essenziale"); if(!el) return;
@@ -7239,14 +7238,15 @@ function renderAndamenti(){
   }
   try{
     if(window.NTHistory){
-      const trend=window.NTHistory.sleepTrend({beds:state.beds,wakes:state.wakes}, NT_planSafe, {days:30});
+      const trend=window.NTHistory.sleepTrend({beds:state.beds,wakes:state.wakes,pisolini:state.pisolini}, NT_planSafe, {need:state.need, days:30});
       if(trend && trend.n>=3){
         const d=trend.debtNow;
         const vals=trend.series.map(s=>s.debt);
         const tinta = d>0 ? "var(--orange)" : "var(--ok)";   // (il colore sta nelle barre: arancio dove manca sonno)
         heroHtml='<div class="andamento-hero">'+
-          '<span class="hint" style="display:block">'+(d>0?"Sonno che ti manca":"Sonno in più del necessario")+' · ultime '+trend.series.length+' notti</span>'+
-          '<div class="andamento-num">'+hm(Math.abs(d))+'</div>'+
+          '<span class="hint" style="display:block">'+(d>0?"Sonno che ti manca":"Sonno in pari")+' · ultimi 14 giorni</span>'+
+          '<div class="andamento-num">'+(d>0?hm(d):"✓")+'</div>'+
+          (d>0?'<span class="hint" style="display:block">Cala solo dormendo: una notte lunga ne recupera metà, non azzera una settimana.</span>':'')+
           '<span class="hint" style="display:block">Dormi in media '+hm(trend.avgActual)+
             (trend.avgPlanned?' contro '+hm(trend.avgPlanned)+' pianificate':'')+'</span>'+
           graficoNotti(trend)+
@@ -7264,7 +7264,7 @@ function renderAndamenti(){
   // Il carico dei turni: dai turni soli, senza diario — la pagina non è mai
   // vuota, ed è il rischio di stanchezza più documentato (notti di fila,
   // riposi brevi). Prima i dati del passato, accanto quelli in arrivo.
-  try{ const tr=window.NTHistory && window.NTHistory.sleepTrend({beds:state.beds,wakes:state.wakes}, NT_planSafe, {days:60}); if(tr && tr.n>=4) parteFascia=sonnoPerFasciaHtml(tr); }catch(e){}
+  try{ const tr=window.NTHistory && window.NTHistory.sleepTrend({beds:state.beds,wakes:state.wakes,pisolini:state.pisolini}, NT_planSafe, {need:state.need, days:60}); if(tr && tr.n>=4) parteFascia=sonnoPerFasciaHtml(tr); }catch(e){}
   try{ vociAnd.carico=caricoHtml(); }catch(e){}
   try{
     // Regolarità: «come previsto» (quante notti annotate coincidono col piano) e gli orari veri, di notte e di giorno a parte.
@@ -7345,7 +7345,7 @@ function renderAndamentiPreview(){
   // Calcola da sé solo il numero che mostra: la pagina intera (riepiloghi,
   // confronti) si costruisce quando la si apre, non a ogni disegno di Turni.
   let trend=null;
-  try{ if(window.NTHistory) trend=window.NTHistory.sleepTrend({beds:state.beds,wakes:state.wakes}, NT_planSafe, {days:30}); }catch(e){}
+  try{ if(window.NTHistory) trend=window.NTHistory.sleepTrend({beds:state.beds,wakes:state.wakes,pisolini:state.pisolini}, NT_planSafe, {need:state.need, days:30}); }catch(e){}
   if(!trend || trend.n<3){
     // senza diario: quello che si sa dai turni soli
     let F=null; try{ F=caricoTurni(0,30); }catch(e){}
@@ -7356,7 +7356,7 @@ function renderAndamentiPreview(){
   // "-1h 20m" non diceva se è sonno che manca o che avanza: a parole.
   const d=trend.debtNow;
   el.textContent = d>0 ? "Ti mancano "+hm(d)+" di sonno"
-    : d===0 ? "Sonno in pari" : "Sonno in pari, anzi +"+hm(-d)+" in più";
+    : "Sonno in pari";
 }
 
 // Turni: la card partner (gestione nel wizard, risultato qui)

@@ -428,12 +428,32 @@ test("tutte le combinazioni di tre giorni: sonno e pisolini mai dentro un turno 
   assert.equal(problemi.length, 0, problemi.slice(0, 10).join(" | "));
 });
 
-test("un pisolino saltato ieri non chiede recupero se stanotte hai dormito oltre il bisogno", () => {
+// ── Debito di sonno: un solo conto (debito.js), sui giorni, rispetto al bisogno ──
+import { debitoSonno } from "../debito.js";
+
+test("debito: le notti corte si sommano, quelle lunghe ripagano solo in parte, mai sotto zero", () => {
+  const d = (wakes, beds) => debitoSonno({ wakes, beds }, 480, "2026-10-30").min;
+  assert.equal(d({ "2026-10-29": "06:00", "2026-10-30": "06:00" }, { "2026-10-29": "00:00", "2026-10-30": "00:00" }), 240, "due notti da 6 ore: 2+2 ore");
+  assert.equal(d({ "2026-10-29": "06:00", "2026-10-30": "10:00" }, { "2026-10-29": "00:00", "2026-10-30": "00:00" }), 120 - 60, "10 ore dopo 6: 2 ore − metà delle 2 in più");
+  assert.equal(d({ "2026-10-30": "12:00" }, { "2026-10-30": "00:00" }), 0, "12 ore da sole non vanno sotto zero");
+  assert.equal(debitoSonno({ wakes: { "2026-10-01": "05:00" }, beds: { "2026-10-01": "00:00" } }, 480, "2026-10-30").min, 0, "una notte di 29 giorni fa è fuori finestra");
+});
+
+test("debito: un pisolino fatto ieri conta; quelli di oggi no (cambierebbero il piano che li propone)", () => {
+  const diario = { wakes: { "2026-10-29": "06:00", "2026-10-30": "06:00" }, beds: { "2026-10-29": "00:00", "2026-10-30": "00:00" },
+    pisolini: { "2026-10-29": { "15:00": { si: true, a: "15:00", b: "16:00" } }, "2026-10-30": { "15:00": { si: true, a: "15:00", b: "17:00" } } } };
+  assert.equal(debitoSonno(diario, 480, "2026-10-30").min, 120 + 120 - 60, "ieri 6h+1h, oggi 6h; i 2h di oggi non contano");
+});
+
+test("piano: un sonno corto annotato dà un pisolino di recupero, uno lungo no; oltre 3 ore si allunga la notte libera", () => {
   const base = { pattern: "PRRMMRR", anchor: "2026-10-30", focus: "2026-10-30T11:00:00", freeBed: "00:30", freeWake: "08:30",
-    shifts: { P: { n: "Pomeriggio", s: 840, e: 1260 }, M: { n: "Mattino", s: 420, e: 840 } },
-    beds: { "2026-10-30": "00:30" }, pisolini: { "2026-10-29": { x: { no: true, min: 90 } } } };
-  const lungo = createEngine({ ...base, wakes: { "2026-10-30": "10:30" } }).plan();
-  assert.equal(lungo.naps.length, 0, "10 ore di sonno (bisogno 8) coprono il pisolino saltato");
-  const corto = createEngine({ ...base, wakes: { "2026-10-30": "08:30" } }).plan();
-  assert.equal(corto.naps.length, 1, "con 8 ore il pisolino saltato resta da recuperare");
+    shifts: { P: { n: "Pomeriggio", s: 840, e: 1260 }, M: { n: "Mattino", s: 420, e: 840 } } };
+  const con = (bed, wake, prima = {}) => createEngine({ ...base, beds: { ...prima.beds, "2026-10-30": bed }, wakes: { ...prima.wakes, "2026-10-30": wake } }).plan();
+  assert.equal(con("00:30", "10:30").naps.length, 0, "10 ore: niente recupero");
+  assert.equal(con("02:30", "08:30").naps.filter(n => n.debito).length, 1, "6 ore su 8: recupero");
+  const tre = { beds: { "2026-10-28": "02:30", "2026-10-29": "02:30" }, wakes: { "2026-10-28": "08:30", "2026-10-29": "08:30" } };
+  const p = con("02:30", "08:30", tre);
+  const normale = createEngine({ ...base }).plan().s.dur;
+  assert.ok(p.s.dur > normale, "con 6 ore di debito la notte libera è più lunga: " + normale + " → " + p.s.dur);
+  assert.equal(p.naps.filter(n => n.debito).length, 0, "e allora il pisolino di recupero non serve");
 });
