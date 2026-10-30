@@ -3799,7 +3799,7 @@ function cards(P){
          :n.rec?(n.last?"L'ultimo è corto apposta: stasera devi dormire a un orario normale."
                        :"È la seconda metà del tuo riposo, non un extra.")
          :n.lungo?("Oggi la veglia dura "+hm(n.ore)+" di fila, e le ultime ore cadono quando il corpo è al minimo. Dormire adesso ti toglie il pezzo peggiore: non è comodità, è quello che ti fa arrivare a casa intero.")
-         :n.debito?("Stanotte hai dormito "+hm(n.debito)+" meno di quanto ti serve, e l'hai annotato tu. Questo pisolino non è un extra: rimette a posto il conto prima che si sommi a domani.")
+         :n.debito?(debitoMotivo(n)+" Questo pisolino non è un extra: rimette a posto il conto prima che si sommi a domani.")
          :n.turno?("Nella pausa, prima del momento peggiore della notte. Finisce con largo margine dalla fine del turno: svegliarsi poco prima di salire in macchina peggiorerebbe proprio l'ora più rischiosa.")
          :((n.b-n.a)<40&&!n.rec&&!n.lungo&&!n.debito&&!n.turno)?("Hai dormito abbastanza, ma fra la sveglia di stamattina e il letto di stanotte passano "+hm(n.ore||0)+" di fila. Un pisolino corto prima di uscire non ti ruba il sonno di stanotte e ti rende più sicura la strada di casa.")
          :(n.first?"Il pisolino che rende di più in tutto il ciclo. Fallo anche senza sonno, prima di uscire di casa."
@@ -4368,6 +4368,7 @@ function diaryReminder(P, CARDS){
     } }
   // Il cerchio si chiude a schermo: se hai annotato meno sonno e oggi il piano
   // prescrive un recupero, dillo — così vedi che il TUO dato ha cambiato il piano.
+  const napRec = logged && P && (P.naps||[]).find(n=>n.debito);
   const recupero = logged && debt && P && (P.naps||[]).some(n=>n.rec||n.debito);
   if(dnum(f)===dnum(giornoVero())) setBadge(logged?0:1);
 
@@ -4400,7 +4401,8 @@ function diaryReminder(P, CARDS){
     x+='<div class="drem-done"><span class="drem-ok">✓</span> Sonno <b>'+esc(bd)+'–'+esc(wk)+'</b> · '+durTxt+
        (cmp?' <span class="drem-cmp">'+cmp+'</span>':'')+
        ' <button type="button" class="ibtn drem-edit" data-open="1" aria-label="Modifica gli orari del sonno" title="Modifica">'+ICON.pencil+'</button></div>'+
-       (recupero?'<div class="drem-rec">Hai dormito meno del previsto: il piano ha aggiunto un pisolino di recupero qui sotto.</div>':'')+
+       (recupero?'<div class="drem-rec">Hai dormito meno del previsto: il piano ha aggiunto un pisolino di recupero qui sotto.</div>'
+         :napRec?'<div class="drem-rec">'+esc(debitoMotivo(napRec))+' Il piano ha aggiunto un pisolino alle '+esc(hhmm(napRec.a))+': quando comincia ti chiedo se l\'hai fatto.</div>':'')+
        (_perchePer===key0?'<div class="perche" role="group" aria-label="Cosa ha cambiato il piano?"><span>Cosa ha cambiato il piano?</span><span class="perche-az">'+
          '<button type="button" class="btn g sm" data-perche="turno">Il turno era diverso</button><button type="button" class="btn g sm" data-perche="abitudine">Dormo così di solito</button>'+
          '<button type="button" class="btn g sm" data-perche="altro">Altro</button><button type="button" class="lnk dim" data-perche="no">No, grazie</button></span></div>':'');
@@ -6026,6 +6028,14 @@ function sceltaDopoNotte(P){
     '<span class="dn-lab">Dopo il turno, come dormi?</span>'+
     '<div class="dn-scelta">'+opz("diviso", corto?"Sonno breve":"In due tempi", eD, diviso, corto?"pomeriggio libero":"poi un pisolino")+opz(unito, corto?"Sonno lungo":"Tutto di fila", eU, !diviso, corto?"recuperi di più":"un blocco solo")+'</div>'+
     spiega+'<p class="dn-vale">Vale per tutte le notti.</p></div>';
+}
+// Perché c'è un pisolino di recupero: il sonno annotato più corto del bisogno,
+// un pisolino saltato ieri, o entrambi. Una sola frase, usata in timeline e nel diario.
+function debitoMotivo(n){
+  const m=n.mancante||0, sa=n.saltati||0;
+  if(m>=20 && sa>0) return "Stanotte hai dormito "+hm(m)+" meno di quanto ti serve e ieri hai saltato un pisolino di "+hm(sa)+".";
+  if(sa>0 && m<20) return "Ieri hai saltato un pisolino di "+hm(sa)+" e il conto è ancora aperto.";
+  return "Stanotte hai dormito "+hm(n.debito)+" meno di quanto ti serve, e l'hai annotato tu.";
 }
 function renderEssenziale(P, CARDS){
   const el=$("#essenziale"); if(!el) return;

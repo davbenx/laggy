@@ -768,7 +768,7 @@ function plan(){
         p=dallInizio(dopoInizio, clamp(Math.round(debito*0.6),20,90), dopoLimite, {debito,dopo:true});
         if(p) livello=2;
       }
-      if(p){ p.livello=livello; naps.push(p); }
+      if(p){ p.livello=livello; p.mancante=debitoVero(wakePiano, sp.dur); p.saltati=saltatiIeri(); naps.push(p); }
       else debitoScoperto = debito;   // livello 3: nessuna finzione, si dichiara
     }
   }
