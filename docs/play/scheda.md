@@ -88,8 +88,8 @@ Novità:
 - Termini d'uso: https://app.notturnisti.club/termini/ (Play Console non ha un campo apposito: il link è nell'app, al primo passo e in Impostazioni)
 
 ## Grafica (in docs/play/img/)
-- Icona 512×512: img/icona-app-512.png (a tutto quadrato, fondo crema; Play arrotonda gli angoli)
-- Immagine in evidenza 1024×500: feature-1024x500.png
+- Icona 512×512: img/icona-app-512.png (a tutto quadrato, blu notte con la civetta sulla luna; Play arrotonda gli angoli). Si rigenera con `node tools/icone/genera.mjs`
+- Immagine in evidenza 1024×500: feature-1024x500.png (da `feature.html`, stessa grafica dell'intestazione dello sviluppatore)
 - Screenshot telefono 1080×1920, in quest'ordine (i primi tre sono quelli che si vedono senza scorrere):
   1. 01-oggi — Il tuo piano di oggi, sul tuo turno
   2. 02-turni — Tutta la settimana a colpo d'occhio

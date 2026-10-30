@@ -11,6 +11,7 @@ const CORE = [
   "./engine.js",
   "./alertness.js",
   "./history.js",
+  "./debito.js",
   "./calendario.js",
   "./paid.js",
   "./notifications.js",
@@ -192,7 +193,7 @@ function _opts(n) {
   const opts = {
     body: n.body,
     icon: "./icon-192.png",
-    badge: "./owl-mark.png",
+    badge: "./badge-96.png",
     tag: "nt-" + n.kind,       // raggruppa per tipo (bedtime, wake, nap…)
     renotify: true,
     silent: n.kind === "bedtime",  // la sveglia fa rumore, il promemoria no
@@ -249,7 +250,7 @@ self.addEventListener("push", e => {
     if (nuove) return;
     const ultima = dovute[dovute.length - 1];
     if (ultima) return self.registration.showNotification(ultima.title, { ..._opts(ultima), renotify: false, silent: true });
-    return self.registration.showNotification("Notturnisti", { body: "Il piano di oggi è aggiornato: aprilo per vederlo.", icon: "./icon-192.png", badge: "./owl-mark.png", tag: "nt-agg", silent: true, data: { tab: "oggi" } });
+    return self.registration.showNotification("Notturnisti", { body: "Il piano di oggi è aggiornato: aprilo per vederlo.", icon: "./icon-192.png", badge: "./badge-96.png", tag: "nt-agg", silent: true, data: { tab: "oggi" } });
   })());
 });
 

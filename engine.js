@@ -8,6 +8,8 @@
 // audit. Questo file è ora l'UNICA fonte di verità: un cambiamento fatto
 // solo qui si vede subito ovunque, incluso nel browser.
 
+import { debitoSonno } from "./debito.js";
+
 export const DEFAULTS = {
   pattern:"MPNSR", anchor:"2026-07-13",
   shifts:{ M:{n:"Mattino",s:420,e:840}, P:{n:"Pomeriggio",s:840,e:1260}, N:{n:"Notte",s:1260,e:1860} },
@@ -464,6 +466,27 @@ function constraint(off){
   return {pin:false, floor, ceil, estendibile, bloccoDopo, kind: spansNight(nb) ? "pre-notte" : "libero"};
 }
 
+// Il debito fino al giorno in primo piano. La notte di quel giorno, se si ha
+// solo la sveglia, si ricava dal piano S (come fa dormitoVero); dentro simulate()
+// il piano non c'è ancora e quella notte non conta.
+function debitoDiario(S){
+  const k = iso(state.focus), notti = {};
+  const sv = oraDi((state.wakes||{})[k]);
+  if(S && sv !== null && (state.beds||{})[k] == null){
+    const sp = at(S, -1), d = dormitoVero(sp.onset + sp.dur - 1440, sp.dur);
+    if(d !== null) notti[k] = d;
+  }
+  return debitoSonno({beds:state.beds, wakes:state.wakes, pisolini:state.pisolini, notti}, state.need, k);
+}
+
+// Oltre le 3 ore di debito la prossima notte libera si allunga (30, poi 60 minuti):
+// un pisolino corto non basta e accorcia il sonno di notte. Mai oltre dormitaMax.
+function bonusDebito(){
+  const dd = debitoDiario();
+  if(!dd.haFino || dd.min < 180) return 0;
+  return Math.max(0, Math.min(dd.min >= 300 ? 60 : 30, CFG.dormitaMax - state.need));
+}
+
 CFG.prepGap0 = 45;
 
 function simulate(){
@@ -494,12 +517,15 @@ function simulate(){
     : meta[i].reset ? naturalMid() : naturalMid() + CFG.preNightDelay;
   const nextPin = i => { for(let j=i+1;j<N;j++) if(pin[j]) return j; return -1; };
 
+  const bonus = bonusDebito();
   let prev = null;
   for(let i=0;i<N;i++){
     // Uno zero vero (nessun tempo per dormire fra due turni) resta zero: prima
     // "|| 480" lo scambiava per un valore mancante e ci metteva 8 ore di sonno
     // in pieno turno.
-    const c = C[i], d0 = +(c.pin ? c.dur : state.need);
+    const c = C[i], extra = (i===H && !c.pin) ? bonus : 0;
+    if(extra) meta[i].debitoExtra = extra;
+    const d0 = +(c.pin ? c.dur : state.need) + extra;
     let target, dr = Number.isFinite(d0) ? d0 : 480;
     if(pin[i]){
       target = c.pin ? c.mid : pinMid(i);
@@ -608,6 +634,7 @@ function plan(){
   const cbt = s.mid + CFG.cbtOffset, cut = s.onset - oreCaffe, shift = s.mid - sp.mid;
 
   const sleeps = [{a:s.onset, b:end}], naps = [];
+  const dd = debitoDiario(S);
   let debitoScoperto = 0;   // debito reale che nessuna finestra pre/post turno riesce a coprire
   // Un orario si legge sull'orologio e una durata si dice a voce: «16:11» e
   // «1h39» non sono consigli, sono residui di una divisione. Gli estremi cadono
@@ -727,7 +754,11 @@ function plan(){
   // "livelloMin" permette di saltare le opzioni già rifiutate dall'utente
   // per oggi ("non posso farlo → prossima opzione"), senza ripartire da zero.
   if(!naps.length){
-    const debito = debitoVero(wakePiano, sp.dur) + saltatiIeri();
+    // Un solo conto (debito.js): le notti annotate degli ultimi giorni contro il
+    // bisogno, i pisolini fatti e quelli saltati ieri compresi. Si chiede un
+    // recupero solo a notte annotata, perché è il TUO dato che cambia il piano;
+    // e se il sonno di stanotte è già allungato apposta, il pisolino non serve.
+    const debito = dd.haFino && !s.meta.debitoExtra ? dd.min : 0;
     if(debito >= 60){
       const livelloMin = (state.pisolini && state.pisolini[iso(state.focus)] &&
         state.pisolini[iso(state.focus)].skipRecupero) || 0;
@@ -830,7 +861,7 @@ function plan(){
     meals.push({at:place(s.onset-180, busy), lt:true});
   }
   return {b, pb, nb, s, sp, S, wake, end, cut, cbt, shift, sleeps, naps, meals, busy,
-          night:spansNight(b), lateStart:startsInNight(b), debitoScoperto};
+          night:spansNight(b), lateStart:startsInNight(b), debitoScoperto, debitoMin:dd.haFino?dd.min:0};
 }
 
 function asPartner(fn){

@@ -3630,7 +3630,7 @@ function potaPisolini(P){
   // "skipRecupero" non è l'orario di un pisolino: è un controllo ("non
   // riesco, prova il livello dopo"). Senza questa eccezione, la pulizia lo
   // cancellava nello stesso istante in cui veniva salvato.
-  for(const x in seg) if(x!=="skipRecupero" && !vivi.has(x)){ delete seg[x]; cambiato=true; }
+  for(const x in seg) if(x!=="skipRecupero" && !(seg[x]&&seg[x].extra) && !vivi.has(x)){ delete seg[x]; cambiato=true; }
   if(!Object.keys(seg).length) delete state.pisolini[k];
   if(cambiato && typeof store!=="undefined") store.set("pisolini",state.pisolini);
 }
@@ -3710,6 +3710,7 @@ function cards(P){
     sc.flag="Recuperi "+dur(s.dur)+" invece di "+dur(state.need)+". Domani fai un pisolino, ed evita due giornate così di fila.";
 
   const cc={k:"c",lab:"Ultimo caffè",val:hhmm(cut),small:"poi basta",rows:[],at:cut,
+    cambia:4, cambiaTxt:"Cambia la soglia del caffè",
     why:"Nello studio di riferimento, 400 mg di caffeina (circa quattro tazze) presi sei ore prima di coricarsi accorciavano comunque il sonno — spesso senza che il soggetto se ne accorgesse. Da qui la soglia delle sei ore. Puoi cambiarla nelle impostazioni: la caffeina si smaltisce a velocità diverse da persona a persona, e un margine che non ti somiglia lo ignoreresti e basta.",
     cite:"Drake, Roehrs, Shambroom & Roth, J Clin Sleep Med 2013"};
   if(night){
@@ -3798,7 +3799,7 @@ function cards(P){
          :n.rec?(n.last?"L'ultimo è corto apposta: stasera devi dormire a un orario normale."
                        :"È la seconda metà del tuo riposo, non un extra.")
          :n.lungo?("Oggi la veglia dura "+hm(n.ore)+" di fila, e le ultime ore cadono quando il corpo è al minimo. Dormire adesso ti toglie il pezzo peggiore: non è comodità, è quello che ti fa arrivare a casa intero.")
-         :n.debito?("Stanotte hai dormito "+hm(n.debito)+" meno di quanto ti serve, e l'hai annotato tu. Questo pisolino non è un extra: rimette a posto il conto prima che si sommi a domani.")
+         :n.debito?(debitoMotivo(n)+" Questo pisolino non è un extra: rimette a posto il conto prima che si sommi a domani.")
          :n.turno?("Nella pausa, prima del momento peggiore della notte. Finisce con largo margine dalla fine del turno: svegliarsi poco prima di salire in macchina peggiorerebbe proprio l'ora più rischiosa.")
          :((n.b-n.a)<40&&!n.rec&&!n.lungo&&!n.debito&&!n.turno)?("Hai dormito abbastanza, ma fra la sveglia di stamattina e il letto di stanotte passano "+hm(n.ore||0)+" di fila. Un pisolino corto prima di uscire non ti ruba il sonno di stanotte e ti rende più sicura la strada di casa.")
          :(n.first?"Il pisolino che rende di più in tutto il ciclo. Fallo anche senza sonno, prima di uscire di casa."
@@ -3871,6 +3872,8 @@ function cards(P){
     out.push({k:"turno", lab:"Il tuo turno",
       val: hhmm(b.start)+" → "+hhmm(b.end),
       small: "<b>"+esc(b.name||nameOf(b.c))+"</b>",
+      sub:"Per il viaggio contiamo "+state.cTo+" minuti all'andata e "+state.cFrom+" al ritorno: decidono quando ti prepari e da quando sei di nuovo libero.",
+      cambia:4, cambiaTxt:"Cambia il tuo tragitto",
       at: b.start});
   } else if(b.c==="?"){
     out.push({k:"turno_mancante", lab:"Turno non impostato",
@@ -4137,7 +4140,7 @@ const NOTTE_CORTA_MIN=45;   // quanto in meno del piano per dire «notte corta»
 function correlazioneVotoDebito(){
   if(!window.NTHistory) return null;
   let trend=null;
-  try{ trend=window.NTHistory.sleepTrend({beds:state.beds,wakes:state.wakes}, NT_planSafe, {days:90}); }catch(e){ return null; }
+  try{ trend=window.NTHistory.sleepTrend({beds:state.beds,wakes:state.wakes,pisolini:state.pisolini}, NT_planSafe, {need:state.need, days:90}); }catch(e){ return null; }
   if(!trend) return null;
   const coppie=trend.series
     .map(s=>{ const v=+diary[s.date]; return (v>=1&&v<=5) ? {mancano:(s.planned!=null ? s.planned : state.need||480)-s.actual, voto:v} : null; })
@@ -4193,7 +4196,7 @@ function summaryText(){
   let sm=diarySummary(), ws=wakeSummary(), cs=cycleSummary();
   let trend=null;
   try{ if(window.NTHistory){
-    const t=window.NTHistory.sleepTrend({beds:state.beds,wakes:state.wakes}, NT_planSafe, {days:30});
+    const t=window.NTHistory.sleepTrend({beds:state.beds,wakes:state.wakes,pisolini:state.pisolini}, NT_planSafe, {need:state.need, days:30});
     if(t && t.n>=3) trend=t;
   } }catch(e){}
   if(!sm && !ws && !cs && !trend) return null;
@@ -4208,7 +4211,7 @@ function summaryText(){
   // stesso contenuto di quello che si vede.
   const seDebito = trend ? ["", "— SONNO, ULTIME "+trend.series.length+" NOTTI —",
     "In media dormi "+hm(trend.avgActual)+(trend.avgPlanned?" contro "+hm(trend.avgPlanned)+" pianificate":""),
-    "Debito accumulato: "+(trend.debtNow>0?hm(trend.debtNow)+" in meno":hm(-trend.debtNow)+" in più")+" rispetto al pianificato"]
+    "Sonno che manca (ultimi 14 giorni): "+(trend.debtNow>0?hm(trend.debtNow):"in pari")]
     .concat((()=>{ const corr=correlazioneVotoDebito(); return corr ? [fraseCorrDebito(corr)] : []; })())
     : [];
   const seRegolarita = (()=>{ let reg=null; try{ reg=regolaritaSonno(); }catch(e){}
@@ -4365,6 +4368,7 @@ function diaryReminder(P, CARDS){
     } }
   // Il cerchio si chiude a schermo: se hai annotato meno sonno e oggi il piano
   // prescrive un recupero, dillo — così vedi che il TUO dato ha cambiato il piano.
+  const napRec = logged && P && (P.naps||[]).find(n=>n.debito);
   const recupero = logged && debt && P && (P.naps||[]).some(n=>n.rec||n.debito);
   if(dnum(f)===dnum(giornoVero())) setBadge(logged?0:1);
 
@@ -4397,7 +4401,8 @@ function diaryReminder(P, CARDS){
     x+='<div class="drem-done"><span class="drem-ok">✓</span> Sonno <b>'+esc(bd)+'–'+esc(wk)+'</b> · '+durTxt+
        (cmp?' <span class="drem-cmp">'+cmp+'</span>':'')+
        ' <button type="button" class="ibtn drem-edit" data-open="1" aria-label="Modifica gli orari del sonno" title="Modifica">'+ICON.pencil+'</button></div>'+
-       (recupero?'<div class="drem-rec">Hai dormito meno del previsto: il piano ha aggiunto un pisolino di recupero qui sotto.</div>':'')+
+       (recupero?'<div class="drem-rec">Hai dormito meno del previsto: il piano ha aggiunto un pisolino di recupero qui sotto.</div>'
+         :napRec?'<div class="drem-rec">'+esc(debitoMotivo(napRec))+' Il piano ha aggiunto un pisolino alle '+esc(hhmm(napRec.a))+': quando comincia ti chiedo se l\'hai fatto.</div>':'')+
        (_perchePer===key0?'<div class="perche" role="group" aria-label="Cosa ha cambiato il piano?"><span>Cosa ha cambiato il piano?</span><span class="perche-az">'+
          '<button type="button" class="btn g sm" data-perche="turno">Il turno era diverso</button><button type="button" class="btn g sm" data-perche="abitudine">Dormo così di solito</button>'+
          '<button type="button" class="btn g sm" data-perche="altro">Altro</button><button type="button" class="lnk dim" data-perche="no">No, grazie</button></span></div>':'');
@@ -4449,12 +4454,40 @@ function diaryReminder(P, CARDS){
         '<button class="dbtn" data-nap="no" data-k="'+esc(c.nap.k)+'" data-min="'+c.nap.min+'">Saltato</button></div>';
     }
   });
+  // Un pisolino che il piano non aveva previsto: si annota con un link discreto (non lo si
+  // sollecita, né lo si giudica). Conta nel debito da domani, come gli altri.
+  if(dnum(f) <= dnum(nowD)){
+    const segG=(state.pisolini||{})[key0]||{};
+    const extra=Object.keys(segG).filter(i=>segG[i]&&segG[i].extra).sort();
+    const campiExtra=(id,a,b)=>'<div class="dq-sez">Pisolino in più</div><div class="dq-campi"><label>Inizio<input type="time" class="ora-in" data-extra-in-a="1" aria-label="Inizio del pisolino" value="'+esc(a)+'"></label>'+
+      '<label>Fine<input type="time" class="ora-in" data-extra-in-b="1" aria-label="Fine del pisolino" value="'+esc(b)+'"></label></div>'+
+      '<div class="dq-az"><button class="dbtn pri" data-extra-salva="'+esc(id)+'">Salva</button><button class="lnk dim" data-extra-annulla="'+esc(id)+'">Annulla</button>'+
+      (id!=="nuovo"?'<button class="lnk dim" data-extra-del="'+esc(id)+'">Elimina</button>':'')+'</div>';
+    extra.forEach(i=>{ const g=segG[i];
+      if(state.diaryEditing.has("extra:"+key0+":"+i)) x+=campiExtra(i,g.a,g.b);
+      else {
+        x+='<div class="drem-done"><span class="drem-ok">✓</span> Pisolino in più <b>'+esc(g.a)+'–'+esc(g.b)+'</b> '+
+          '<button type="button" class="ibtn drem-edit" data-extra-edit="'+esc(i)+'" aria-label="Modifica il pisolino" title="Modifica">'+ICON.pencil+'</button></div>';
+        // un pisolino lungo e vicino al letto toglie sonno a stanotte: lo si dice una volta, senza giudicare
+        const a0=NT.oraDi(g.a), b0=NT.oraDi(g.b);
+        if(a0!==null && b0!==null && P && P.s){ let d=b0-a0; while(d<=0) d+=1440;
+          const alLetto=(((P.s.onset-b0)%1440)+1440)%1440;
+          if(d>=35 && alLetto<240) x+='<div class="drem-rec">Stasera potresti addormentarti più tardi. Una luce forte al risveglio aiuta; l\'orario di letto lascialo com\'è.</div>'; }
+      } });
+    if(state.diaryEditing.has("extra:"+key0+":nuovo")){
+      const fineD=isToday?hhmm(nowMin):"15:30", inD=isToday?hhmm(mod1440(nowMin-30)):"15:00";
+      x+=campiExtra("nuovo",inD,fineD);
+    } else x+='<button type="button" class="lnk dim" data-extra-nuovo="1" style="margin-top:8px">Hai fatto un altro pisolino?</button>';
+  }
+  // Oltre le 3 ore di debito la notte libera si allunga: lo si dice, con il numero.
+  if(logged && P && P.s && P.s.meta && P.s.meta.debitoExtra && !sleepEditing)
+    x+='<div class="drem-rec" style="margin-top:8px">Ti mancano '+hm(P.debitoMin)+' di sonno: un pisolino non basta, quindi stanotte il piano ti dà '+P.s.meta.debitoExtra+' minuti in più. Il debito cala solo dormendo.</div>';
   // Livello 3: nessuna finestra ha retto, ma il debito non sparisce in
   // silenzio — è quello che chiudeva il bug: prima il testo prometteva un
   // pisolino che poi non compariva mai da nessuna parte.
   if(P && P.debitoScoperto>0)
-    x+='<div class="drem-rec" style="margin-top:8px">Stanotte hai dormito '+hm(P.debitoScoperto)+
-      ' meno di quanto ti serve, e oggi non c\'è spazio per un pisolino, né prima né dopo il turno. '+
+    x+='<div class="drem-rec" style="margin-top:8px">Ti mancano '+hm(P.debitoScoperto)+
+      ' di sonno, e oggi non c\'è spazio per un pisolino, né prima né dopo il turno. '+
       'Il conto resta aperto: recupera stanotte, e se hai sonno evita di guidare.</div>';
   x+='</div>';
   return x;
@@ -6024,12 +6057,21 @@ function sceltaDopoNotte(P){
     '<div class="dn-scelta">'+opz("diviso", corto?"Sonno breve":"In due tempi", eD, diviso, corto?"pomeriggio libero":"poi un pisolino")+opz(unito, corto?"Sonno lungo":"Tutto di fila", eU, !diviso, corto?"recuperi di più":"un blocco solo")+'</div>'+
     spiega+'<p class="dn-vale">Vale per tutte le notti.</p></div>';
 }
+// Perché c'è un pisolino di recupero: il debito di debito.js. Una sola frase, usata in timeline e nel diario.
+function debitoMotivo(n){
+  return "Negli ultimi giorni hai dormito "+hm(n.debito)+" meno di quanto ti serve.";
+}
 function renderEssenziale(P, CARDS){
   const el=$("#essenziale"); if(!el) return;
   infoVoci.clear();
 
   // Il dettaglio di una riga: tutto quello che la scheda sa dire, senza intestazione
   // (l'intestazione è la riga stessa). Sola lettura.
+  // Link di chiusura di un dettaglio, verso le impostazioni giuste: "cambia" per una sezione di
+  // Impostazioni › Le tue abitudini (stesso meccanismo di apriSezioneInline), "vai" per le altre
+  // destinazioni che non passano da lì (oggi solo "momenti", in Cosa vedi nel piano).
+  const linkCambia=(sez,testo)=>'<button type="button" class="lnk ed-cambia" data-cambia="'+sez+'">'+esc(testo)+' →</button>';
+  const linkVai=(dest,testo)=>'<button type="button" class="lnk ed-cambia" data-vai="'+esc(dest)+'">'+esc(testo)+' →</button>';
   const dett=cd=>{
     if(!cd) return "";
     let x="";
@@ -6043,6 +6085,8 @@ function renderEssenziale(P, CARDS){
     if(cd.rows&&cd.rows.length) x+='<div class="rows">'+
       cd.rows.map(r=>'<div class="row"><b>'+r[0]+'</b><span>'+r[1]+'</span></div>').join("")+'</div>';
     if(cd.why) x+='<div class="why">'+cd.why+(cd.cite?'<cite>'+cd.cite+'</cite>':'')+'</div>';
+    if(cd.cambia) x+=linkCambia(cd.cambia, cd.cambiaTxt||"Cambia nelle impostazioni");
+    if(cd.vai) x+=linkVai(cd.vai, cd.vaiTxt||"Cambia nelle impostazioni");
     return x;
   };
 
@@ -6119,7 +6163,7 @@ function renderEssenziale(P, CARDS){
   // I momenti migliori (testa, movimento, allenamento) come voci del piano.
   try{ const fin=finestreDelGiorno(P);
     if(fin) for(const [k,lab,ic,sub,perche] of VOCI_FIN){ const w=fin[k]; if(!w || !pianoVoce(k)) continue;
-      voci.push({t:dSv(w.a), html:riga("fin-"+k, lab, hhmm(w.a)+" → "+hhmm(w.z), sub, false, ic, '<div class="why">'+esc(perche)+'</div>', {a:w.a, z:w.z, poi:lab.toLowerCase()+" dalle "+hhmm(w.a)})}); } }catch(e){}
+      voci.push({t:dSv(w.a), html:riga("fin-"+k, lab, hhmm(w.a)+" → "+hhmm(w.z), sub, false, ic, '<div class="why">'+esc(perche)+'</div>'+linkVai("momenti","Scegli quando preferisci"), {a:w.a, z:w.z, poi:lab.toLowerCase()+" dalle "+hhmm(w.a)})}); } }catch(e){}
   const dn=sceltaDopoNotte(P);
 
   // Letto troppo presto prima di un turno di mattina: stessa soglia della
@@ -6232,7 +6276,7 @@ function renderEssenziale(P, CARDS){
         '<div class="en mono">?</div>'+
         '</div>'});
     } else if(cd.k==="turno"){
-      voci.push({t, html:riga("turno","Turno",cd.val,cd.small,false,ICON.alarm,null,
+      voci.push({t, html:riga("turno","Turno",cd.val,cd.small,false,ICON.alarm,dett(cd),
         {a:P.b.start, z:P.b.end, poi:"entri in turno alle "+hhmm(P.b.start)})});
     } else if(cd.k==="cbt"){
       voci.push({t, html:riga("sonnolenza","Sonnolenza massima",cd.val,cd.small,true,ICON.warn,dett(cd),
@@ -7219,14 +7263,15 @@ function renderAndamenti(){
   }
   try{
     if(window.NTHistory){
-      const trend=window.NTHistory.sleepTrend({beds:state.beds,wakes:state.wakes}, NT_planSafe, {days:30});
+      const trend=window.NTHistory.sleepTrend({beds:state.beds,wakes:state.wakes,pisolini:state.pisolini}, NT_planSafe, {need:state.need, days:30});
       if(trend && trend.n>=3){
         const d=trend.debtNow;
         const vals=trend.series.map(s=>s.debt);
         const tinta = d>0 ? "var(--orange)" : "var(--ok)";   // (il colore sta nelle barre: arancio dove manca sonno)
         heroHtml='<div class="andamento-hero">'+
-          '<span class="hint" style="display:block">'+(d>0?"Sonno che ti manca":"Sonno in più del necessario")+' · ultime '+trend.series.length+' notti</span>'+
-          '<div class="andamento-num">'+hm(Math.abs(d))+'</div>'+
+          '<span class="hint" style="display:block">'+(d>0?"Sonno che ti manca":"Sonno in pari")+' · ultimi 14 giorni</span>'+
+          '<div class="andamento-num">'+(d>0?hm(d):"✓")+'</div>'+
+          (d>0?'<span class="hint" style="display:block">Cala solo dormendo: una notte lunga ne recupera metà, non azzera una settimana.</span>':'')+
           '<span class="hint" style="display:block">Dormi in media '+hm(trend.avgActual)+
             (trend.avgPlanned?' contro '+hm(trend.avgPlanned)+' pianificate':'')+'</span>'+
           graficoNotti(trend)+
@@ -7244,7 +7289,7 @@ function renderAndamenti(){
   // Il carico dei turni: dai turni soli, senza diario — la pagina non è mai
   // vuota, ed è il rischio di stanchezza più documentato (notti di fila,
   // riposi brevi). Prima i dati del passato, accanto quelli in arrivo.
-  try{ const tr=window.NTHistory && window.NTHistory.sleepTrend({beds:state.beds,wakes:state.wakes}, NT_planSafe, {days:60}); if(tr && tr.n>=4) parteFascia=sonnoPerFasciaHtml(tr); }catch(e){}
+  try{ const tr=window.NTHistory && window.NTHistory.sleepTrend({beds:state.beds,wakes:state.wakes,pisolini:state.pisolini}, NT_planSafe, {need:state.need, days:60}); if(tr && tr.n>=4) parteFascia=sonnoPerFasciaHtml(tr); }catch(e){}
   try{ vociAnd.carico=caricoHtml(); }catch(e){}
   try{
     // Regolarità: «come previsto» (quante notti annotate coincidono col piano) e gli orari veri, di notte e di giorno a parte.
@@ -7325,7 +7370,7 @@ function renderAndamentiPreview(){
   // Calcola da sé solo il numero che mostra: la pagina intera (riepiloghi,
   // confronti) si costruisce quando la si apre, non a ogni disegno di Turni.
   let trend=null;
-  try{ if(window.NTHistory) trend=window.NTHistory.sleepTrend({beds:state.beds,wakes:state.wakes}, NT_planSafe, {days:30}); }catch(e){}
+  try{ if(window.NTHistory) trend=window.NTHistory.sleepTrend({beds:state.beds,wakes:state.wakes,pisolini:state.pisolini}, NT_planSafe, {need:state.need, days:30}); }catch(e){}
   if(!trend || trend.n<3){
     // senza diario: quello che si sa dai turni soli
     let F=null; try{ F=caricoTurni(0,30); }catch(e){}
@@ -7336,7 +7381,7 @@ function renderAndamentiPreview(){
   // "-1h 20m" non diceva se è sonno che manca o che avanza: a parole.
   const d=trend.debtNow;
   el.textContent = d>0 ? "Ti mancano "+hm(d)+" di sonno"
-    : d===0 ? "Sonno in pari" : "Sonno in pari, anzi +"+hm(-d)+" in più";
+    : "Sonno in pari";
 }
 
 // Turni: la card partner (gestione nel wizard, risultato qui)
@@ -8575,6 +8620,25 @@ function diaryClick(e){
     g[i]={si:true, a:a||i, b:b||"", min:+nSalva.dataset.min||0};
     state.diaryEditing.delete("nap:"+k+":"+i);
     store.set("pisolini",state.pisolini); toast("Pisolino registrato"); render(); return; }
+  if(e.target.closest("[data-extra-nuovo]")){ state.diaryEditing.add("extra:"+iso(state.focus)+":nuovo"); render(); return; }
+  const xEd=e.target.closest("[data-extra-edit]");
+  if(xEd){ state.diaryEditing.add("extra:"+iso(state.focus)+":"+xEd.dataset.extraEdit); render(); return; }
+  const xAn=e.target.closest("[data-extra-annulla]");
+  if(xAn){ state.diaryEditing.delete("extra:"+iso(state.focus)+":"+xAn.dataset.extraAnnulla); render(); return; }
+  const xDel=e.target.closest("[data-extra-del]");
+  if(xDel){ const k=iso(state.focus), g=state.pisolini[k]||{}; delete g[xDel.dataset.extraDel];
+    if(!Object.keys(g).length) delete state.pisolini[k];
+    state.diaryEditing.delete("extra:"+k+":"+xDel.dataset.extraDel); store.set("pisolini",state.pisolini); render(); return; }
+  const xSalva=e.target.closest("[data-extra-salva]");
+  if(xSalva){ const k=iso(state.focus), id=xSalva.dataset.extraSalva, box=xSalva.closest(".drem")||document;
+    const a=(box.querySelector("[data-extra-in-a]")||{}).value, b=(box.querySelector("[data-extra-in-b]")||{}).value;
+    const a0=NT.oraDi(a), b0=NT.oraDi(b); let d=(a0!==null&&b0!==null)?b0-a0:NaN; while(d<=0) d+=1440;
+    if(!(d>=5 && d<300)){ toast("Controlla gli orari: da 5 minuti a 5 ore"); return; }
+    const g=state.pisolini[k]=state.pisolini[k]||{};
+    if(id!=="nuovo") delete g[id];
+    g["x"+a]={si:true, a, b, extra:true};
+    state.diaryEditing.delete("extra:"+k+":"+id);
+    store.set("pisolini",state.pisolini); toast("Pisolino registrato"); render(); return; }
   const nRiapri=e.target.closest("[data-nap-riapri]");
   if(nRiapri){ const k=iso(state.focus), g=state.pisolini[k]=state.pisolini[k]||{};
     delete g[nRiapri.dataset.napRiapri]; store.set("pisolini",state.pisolini); render(); return; }
@@ -8625,9 +8689,20 @@ if($("#essenziale")){
   $("#essenziale").addEventListener("click", e=>{ const r=e.target.closest(".erow[data-row]"); if(r) apriInfo(r.dataset.row); });
   $("#essenziale").addEventListener("keydown", e=>{ if(e.key!=="Enter" && e.key!==" ") return; const r=e.target.closest(".erow[data-row]"); if(r){ e.preventDefault(); apriInfo(r.dataset.row); } });
 }
+// «Momenti migliori» non è in Le tue abitudini ma in Cosa vedi nel piano: si apre il gruppo e si
+// espande la sezione giusta, riusata sia dal consiglio del giorno sia dai link dentro i popup.
+function apriMomentiMigliori(){
+  apriOpzioni("voci");
+  setTimeout(()=>{
+    const d=document.querySelector("#opzPianoVoci .pv-momenti"); if(d) d.open=true;
+    const x=$("#opzPianoVoci"); if(x&&x.scrollIntoView) try{ x.scrollIntoView({block:"center"}); }catch(e){}
+  }, 250);
+}
 if($("#infoModal")) $("#infoModal").addEventListener("click", e=>{
   const b=e.target.closest("[data-cambia]");
-  if(b){ apriFoglio("infoModal",false); apriOpzioni("abitudini"); apriSezioneInline(+b.dataset.cambia); }
+  if(b){ apriFoglio("infoModal",false); apriOpzioni("abitudini"); apriSezioneInline(+b.dataset.cambia, true); return; }
+  const v=e.target.closest("[data-vai]");
+  if(v && v.dataset.vai==="momenti"){ apriFoglio("infoModal",false); apriMomentiMigliori(); }
 });
 ["#essenziale","#andamenti"].forEach(s=>{ const el=$(s); if(el){ el.addEventListener("change",diaryChange); el.addEventListener("click",diaryClick); } });
 // Dalle righe «Dormi» e «Pisolino» al pannello dove si cambiano davvero.
@@ -8978,7 +9053,7 @@ const CONSIGLI_FUNZIONE=[
   {k:"widgetmese", quando:()=>platform.widget.available && platform.widget.presenti()>0, t:()=>"Allarga il widget in altezza: più è alto, più mostra. Il pulsante cambia con l'ora (sveglia, orario del sonno o del pisolino, voto del sonno), poi arrivano le prossime voci e il calendario, con i turni della persona che segui sotto i tuoi."},
   {k:"momenti", quando:()=>!["testa","leggera","intensa"].some(pianoVoce),
     t:()=>"Vuoi sapere quando pensare, muoverti o allenarti meglio? I momenti migliori si accendono in Impostazioni › Cosa vedi nel piano.",
-    cta:()=>"Scegli i momenti", a:()=>{ apriOpzioni("voci"); setTimeout(()=>{ const x=$("#opzPianoVoci"); if(x&&x.scrollIntoView) try{ x.scrollIntoView({block:"center"}); }catch(e){} }, 250); }},
+    cta:()=>"Scegli i momenti", a:apriMomentiMigliori},
   {k:"riepilogo", t:()=>"Puoi mandare il riepilogo del tuo mese o degli ultimi 12 mesi, e il PDF per il medico: sono in «Condividi e riepiloghi».",
     cta:()=>"Apri Condividi", a:()=>{ setTab("turni"); setTimeout(apriCondividi, 250); }},
   {k:"dormi", t:()=>"Tocca «Dormi» nel piano: dopo una notte scegli sonno breve o lungo, prima di un mattino presto puoi dormire in due tempi."},
@@ -9178,9 +9253,11 @@ function segnaEspansi(){
   });
 }
 if($("#opzioni")) $("#opzioni").addEventListener("click", ()=>setTimeout(segnaEspansi,0));
-function apriSezioneInline(n){
+// forza: sempre aperta (per i link dai popup, che non devono richiudere una sezione lasciata
+// aperta da una visita precedente — un tocco su "Cambia" deve sempre portare lì, mai nasconderla).
+function apriSezioneInline(n, forza){
   const box=$("#opzBox"+n); if(!box) return;
-  const apri=box.hidden;
+  const apri=forza || box.hidden;
   soloUno(apri?"#opzBox"+n:null);
   box.hidden=!apri;
   segnaEspansi();
@@ -9241,7 +9318,8 @@ if($("#cycToday")) $("#cycToday").onclick=()=>{
    Si scrivono a mano a ogni versione con una funzione che si vede: poche righe, in italiano di tutti i giorni.
    `id` cambia solo quando c'è qualcosa da dire; chi aggiorna la vede una volta. Chi installa adesso non la vede
    (non è una novità per lui), ma la trova sempre in Impostazioni › Novità. «app:true» = solo nell'app Android. */
-const NOVITA={ id:"2026-11-05", data:"Novembre 2026", righe:[
+const NOVITA={ id:"2026-11-06", data:"Novembre 2026", righe:[
+  ["Collegamenti dai popup alle impostazioni","I popup di «Turno», «Caffè» e dei momenti migliori hanno ora un link diretto alle impostazioni che cambiano quel calcolo: tragitto, soglia del caffè, quando preferisci allenarti o pensare.",false,"2026-11-06"],
   ["Il perché in un foglio, i riepiloghi in Condividi","Nel piano di Oggi tocchi una voce (icona ⓘ) e il perché si apre in un foglio, senza allungare la lista. Il riepilogo del mese, dei 12 mesi e il PDF per il medico stanno in «Condividi e riepiloghi». In «Il tuo sonno» ci sono ora anche le scelte su come dormire e, su Android, «Metti la sveglia».",false,"2026-11-05"],
   ["Sonno e carico più chiaro","La pagina mostra subito il sonno che ti manca; il resto è un elenco di quattro voci, ognuna con la sua riga riassuntiva e la sua pagina. Gli orari del sonno separano le notti dormite di notte da quelle di giorno, e gli assi dei grafici sono corretti.",false,"2026-11-04"],
   ["Copia completa su file","In Impostazioni › Dati e privacy: un file con turni, diario del sonno, impostazioni e persone. Lo riapri con «Ripristina da un file», anche su un telefono nuovo. Il link resta per spostare i turni sull'altro telefono.",false,"2026-11-03"],
