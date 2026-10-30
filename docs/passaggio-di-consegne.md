@@ -228,11 +228,7 @@ L'anteprima mostra layout, colori e stati come progettati. Un solo difetto trova
 
 ### Richiesto dall'utente e non concluso
 1. **Verifica sul telefono** del widget 1.3.1 (l'utente non ha ancora dato riscontro). Se serve una correzione: modificare, rilanciare «Anteprima widget», guardare le immagini, preparare un nuovo AAB.
-2. **Icona dell'app** (richiesta in corso):
-   - Gli ho dato due bozze SVG (A piatta su crema, B viso su blu; in `/tmp/claude-0/…/scratchpad/logo/`, effimere) e un prompt per un'IA di immagini.
-   - L'utente ci caricherà i file generati.
-   - Sostituire in: launcher Android (`res/mipmap-*`, `ic_launcher_foreground`, `drawable/ic_launcher_monochrome.xml`, `values/ic_launcher_background.xml` crema `#F7F3EA`), icone web (`icon-180/192/512/maskable`, `owl-mark.png`), `docs/play/img/icona-app-512.png`.
-   - Regola Android: l'icona adattiva ha una zona sicura di circa il 66% centrale.
+2. **Icona dell'app** — *fatta (novembre 2026)*: civetta su luna piena, sfondo blu notte (`tools/icone/civetta.jpg`, scelta dall'utente così com'è). `node tools/icone/genera.mjs` rigenera tutto dall'originale (serve Playwright): icone web (`icon-180/192/512`, `icon-maskable-512`, `owl-mark.png` tondo per l'interfaccia, `badge-96.png` bianco per il distintivo delle notifiche web), icona di Play (`docs/play/img/icona-app-512.png`), Android (adattiva: primo piano con la luna di 66 dp nella zona sicura, sfondo `#071E3D`, a tema `drawable-*dpi/ic_launcher_monochrome.png`; vecchie quadrate e tonde; schermate di avvio). Da caricare a mano in Play Console: icona 512, immagine in evidenza (`feature-1024x500.png`, da `feature.html`) e intestazione dello sviluppatore (`sviluppatore-intestazione-4096x2304.jpg`). L'icona sul telefono cambia solo con un AAB nuovo.
 3. **Popup «Novità»:** implementato. A ogni versione con novità visibili aggiornare `NOVITA` (id, data, righe) in `index.html`.
 
 ### Piani documentati in `docs/prossimo-aggiornamento.md`

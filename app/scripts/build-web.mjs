@@ -15,7 +15,7 @@ const FILES = [
   "engine.js", "alertness.js", "history.js", "calendario.js", "notifications.js",
   "platform.js", "pdf.js", "lingua.js", "analytics.js", "paid.js", "migrate.js", "importa.js",
   "manifest.webmanifest",
-  "icon-180.png", "icon-192.png", "icon-512.png", "icon-maskable-512.png", "owl-mark.png",
+  "icon-180.png", "icon-192.png", "icon-512.png", "icon-maskable-512.png", "owl-mark.png", "badge-96.png",
   "fonts/inter-latin.woff2", "fonts/noto-serif-latin.woff2",
   // Avvisi delle licenze: MIT e OFL chiedono che accompagnino le copie
   // distribuite, quindi stanno anche dentro l'app, non solo sul sito.
