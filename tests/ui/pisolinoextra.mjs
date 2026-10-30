@@ -1,0 +1,36 @@
+// Pisolino non previsto: si annota da un link discreto, si modifica, si elimina; conta nel debito da domani.
+import pw from "./_pw.mjs";
+const ok=(c,m)=>console.log((c?"✔ ":"✘ ")+m);
+const b=await pw.chromium.launch(); const errs=[];
+const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const fa=n=>{ const d=new Date(); d.setDate(d.getDate()-n); return iso(d); };
+const ctx=await b.newContext({locale:"it-IT",viewport:{width:360,height:740}});
+const st={turniConfigurati:true,pattern:"PRRMMRR",anchor:fa(0),shifts:{P:{n:"Pomeriggio",s:840,e:1260},M:{n:"Mattino",s:420,e:840}},repeat:true,
+  firstSeenAt:fa(20),freeBed:"00:30",freeWake:"08:30",beds:{[fa(0)]:"00:30"},wakes:{[fa(0)]:"08:30"}};
+await ctx.addInitScript(st=>{ if(sessionStorage.getItem("x")) return; sessionStorage.setItem("x","1");
+  localStorage.setItem("nt:state",JSON.stringify(st)); for(const k of ["turniConfigurati","firstPlanBannerChiuso","attivazioneNascosta","backupDone","novitaProva"]) localStorage.setItem("nt:"+k,"true");
+  localStorage.setItem("nt:novitaViste",JSON.stringify("2099-01-01")); }, st);
+const p=await ctx.newPage(); p.on("pageerror",e=>errs.push(e.message));
+await p.goto("http://localhost:8765/index.html"); await p.waitForTimeout(4600);
+const sal=()=>p.evaluate(()=>JSON.parse(localStorage.getItem("nt:pisolini")||"{}"));
+ok(await p.evaluate(()=>!!document.querySelector("[data-extra-nuovo]")), "c'è il link «Hai fatto un altro pisolino?»");
+await p.evaluate(()=>document.querySelector("[data-extra-nuovo]").click()); await p.waitForTimeout(300);
+ok(await p.evaluate(()=>!!document.querySelector("[data-extra-in-a]") && /^\d\d:\d\d$/.test(document.querySelector("[data-extra-in-b]").value)), "si apre con inizio e fine già compilati");
+await p.evaluate(()=>{ document.querySelector("[data-extra-in-a]").value="19:30"; document.querySelector("[data-extra-in-b]").value="20:30"; document.querySelector("[data-extra-salva]").click(); }); await p.waitForTimeout(400);
+let m=await sal(); const g=Object.values(m[fa(0)]||{});
+ok(g.length===1 && g[0].extra && g[0].si && g[0].a==="19:30" && g[0].b==="20:30", "salvato come pisolino fatto, «extra» → "+JSON.stringify(m[fa(0)]));
+ok(await p.evaluate(()=>/Pisolino in più\s*19:30–20:30/.test(document.querySelector(".drem").innerText)), "compare nella riga del diario");
+ok(await p.evaluate(()=>/Stasera potresti addormentarti più tardi/.test(document.querySelector(".drem").innerText)), "lungo e vicino al letto: l'avviso, una volta");
+await p.reload(); await p.waitForTimeout(4600);
+ok(Object.keys((await sal())[fa(0)]||{}).length===1, "dopo il ricarico il piano non lo cancella");
+await p.evaluate(()=>document.querySelector("[data-extra-edit]").click()); await p.waitForTimeout(300);
+await p.evaluate(()=>{ document.querySelector("[data-extra-in-a]").value="13:00"; document.querySelector("[data-extra-in-b]").value="13:25"; document.querySelector("[data-extra-salva]").click(); }); await p.waitForTimeout(400);
+m=await sal(); const k2=Object.keys(m[fa(0)]);
+ok(k2.length===1 && m[fa(0)][k2[0]].a==="13:00", "modifica: sostituisce, senza doppioni");
+ok(await p.evaluate(()=>!/Stasera potresti/.test(document.querySelector(".drem").innerText)), "corto e lontano dal letto: nessun avviso");
+await p.evaluate(()=>{ document.querySelector("[data-extra-edit]").click(); }); await p.waitForTimeout(300);
+await p.evaluate(()=>{ document.querySelector("[data-extra-in-a]").value="13:00"; document.querySelector("[data-extra-in-b]").value="13:02"; document.querySelector("[data-extra-salva]").click(); }); await p.waitForTimeout(300);
+ok((await sal())[fa(0)][k2[0]].b==="13:25", "meno di 5 minuti: rifiutato, resta com'era");
+await p.evaluate(()=>{ document.querySelector("[data-extra-del]").click(); }); await p.waitForTimeout(300);
+ok(!(await sal())[fa(0)], "elimina");
+console.log("errori",errs); ok(errs.length===0,"nessun errore di pagina"); await b.close();

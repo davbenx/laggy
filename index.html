@@ -3630,7 +3630,7 @@ function potaPisolini(P){
   // "skipRecupero" non è l'orario di un pisolino: è un controllo ("non
   // riesco, prova il livello dopo"). Senza questa eccezione, la pulizia lo
   // cancellava nello stesso istante in cui veniva salvato.
-  for(const x in seg) if(x!=="skipRecupero" && !vivi.has(x)){ delete seg[x]; cambiato=true; }
+  for(const x in seg) if(x!=="skipRecupero" && !(seg[x]&&seg[x].extra) && !vivi.has(x)){ delete seg[x]; cambiato=true; }
   if(!Object.keys(seg).length) delete state.pisolini[k];
   if(cambiato && typeof store!=="undefined") store.set("pisolini",state.pisolini);
 }
@@ -4454,6 +4454,31 @@ function diaryReminder(P, CARDS){
         '<button class="dbtn" data-nap="no" data-k="'+esc(c.nap.k)+'" data-min="'+c.nap.min+'">Saltato</button></div>';
     }
   });
+  // Un pisolino che il piano non aveva previsto: si annota con un link discreto (non lo si
+  // sollecita, né lo si giudica). Conta nel debito da domani, come gli altri.
+  if(dnum(f) <= dnum(nowD)){
+    const segG=(state.pisolini||{})[key0]||{};
+    const extra=Object.keys(segG).filter(i=>segG[i]&&segG[i].extra).sort();
+    const campiExtra=(id,a,b)=>'<div class="dq-sez">Pisolino in più</div><div class="dq-campi"><label>Inizio<input type="time" class="ora-in" data-extra-in-a="1" aria-label="Inizio del pisolino" value="'+esc(a)+'"></label>'+
+      '<label>Fine<input type="time" class="ora-in" data-extra-in-b="1" aria-label="Fine del pisolino" value="'+esc(b)+'"></label></div>'+
+      '<div class="dq-az"><button class="dbtn pri" data-extra-salva="'+esc(id)+'">Salva</button><button class="lnk dim" data-extra-annulla="'+esc(id)+'">Annulla</button>'+
+      (id!=="nuovo"?'<button class="lnk dim" data-extra-del="'+esc(id)+'">Elimina</button>':'')+'</div>';
+    extra.forEach(i=>{ const g=segG[i];
+      if(state.diaryEditing.has("extra:"+key0+":"+i)) x+=campiExtra(i,g.a,g.b);
+      else {
+        x+='<div class="drem-done"><span class="drem-ok">✓</span> Pisolino in più <b>'+esc(g.a)+'–'+esc(g.b)+'</b> '+
+          '<button type="button" class="ibtn drem-edit" data-extra-edit="'+esc(i)+'" aria-label="Modifica il pisolino" title="Modifica">'+ICON.pencil+'</button></div>';
+        // un pisolino lungo e vicino al letto toglie sonno a stanotte: lo si dice una volta, senza giudicare
+        const a0=NT.oraDi(g.a), b0=NT.oraDi(g.b);
+        if(a0!==null && b0!==null && P && P.s){ let d=b0-a0; while(d<=0) d+=1440;
+          const alLetto=(((P.s.onset-b0)%1440)+1440)%1440;
+          if(d>=35 && alLetto<240) x+='<div class="drem-rec">Stasera potresti addormentarti più tardi. Una luce forte al risveglio aiuta; l\'orario di letto lascialo com\'è.</div>'; }
+      } });
+    if(state.diaryEditing.has("extra:"+key0+":nuovo")){
+      const fineD=isToday?hhmm(nowMin):"15:30", inD=isToday?hhmm(mod1440(nowMin-30)):"15:00";
+      x+=campiExtra("nuovo",inD,fineD);
+    } else x+='<button type="button" class="lnk dim" data-extra-nuovo="1" style="margin-top:8px">Hai fatto un altro pisolino?</button>';
+  }
   // Oltre le 3 ore di debito la notte libera si allunga: lo si dice, con il numero.
   if(logged && P && P.s && P.s.meta && P.s.meta.debitoExtra && !sleepEditing)
     x+='<div class="drem-rec" style="margin-top:8px">Ti mancano '+hm(P.debitoMin)+' di sonno: un pisolino non basta, quindi stanotte il piano ti dà '+P.s.meta.debitoExtra+' minuti in più. Il debito cala solo dormendo.</div>';
@@ -8594,6 +8619,25 @@ function diaryClick(e){
     const g=state.pisolini[k]=state.pisolini[k]||{};
     g[i]={si:true, a:a||i, b:b||"", min:+nSalva.dataset.min||0};
     state.diaryEditing.delete("nap:"+k+":"+i);
+    store.set("pisolini",state.pisolini); toast("Pisolino registrato"); render(); return; }
+  if(e.target.closest("[data-extra-nuovo]")){ state.diaryEditing.add("extra:"+iso(state.focus)+":nuovo"); render(); return; }
+  const xEd=e.target.closest("[data-extra-edit]");
+  if(xEd){ state.diaryEditing.add("extra:"+iso(state.focus)+":"+xEd.dataset.extraEdit); render(); return; }
+  const xAn=e.target.closest("[data-extra-annulla]");
+  if(xAn){ state.diaryEditing.delete("extra:"+iso(state.focus)+":"+xAn.dataset.extraAnnulla); render(); return; }
+  const xDel=e.target.closest("[data-extra-del]");
+  if(xDel){ const k=iso(state.focus), g=state.pisolini[k]||{}; delete g[xDel.dataset.extraDel];
+    if(!Object.keys(g).length) delete state.pisolini[k];
+    state.diaryEditing.delete("extra:"+k+":"+xDel.dataset.extraDel); store.set("pisolini",state.pisolini); render(); return; }
+  const xSalva=e.target.closest("[data-extra-salva]");
+  if(xSalva){ const k=iso(state.focus), id=xSalva.dataset.extraSalva, box=xSalva.closest(".drem")||document;
+    const a=(box.querySelector("[data-extra-in-a]")||{}).value, b=(box.querySelector("[data-extra-in-b]")||{}).value;
+    const a0=NT.oraDi(a), b0=NT.oraDi(b); let d=(a0!==null&&b0!==null)?b0-a0:NaN; while(d<=0) d+=1440;
+    if(!(d>=5 && d<300)){ toast("Controlla gli orari: da 5 minuti a 5 ore"); return; }
+    const g=state.pisolini[k]=state.pisolini[k]||{};
+    if(id!=="nuovo") delete g[id];
+    g["x"+a]={si:true, a, b, extra:true};
+    state.diaryEditing.delete("extra:"+k+":"+id);
     store.set("pisolini",state.pisolini); toast("Pisolino registrato"); render(); return; }
   const nRiapri=e.target.closest("[data-nap-riapri]");
   if(nRiapri){ const k=iso(state.focus), g=state.pisolini[k]=state.pisolini[k]||{};
