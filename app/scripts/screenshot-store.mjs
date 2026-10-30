@@ -82,7 +82,7 @@ h1{margin:0;position:absolute;top:118px;left:0;right:0;text-align:center;font-si
 h1 span{display:block;color:#FF8A5B}
 h1,h1 span{white-space:nowrap}
 .tel{position:absolute;left:150px;top:375px;width:780px;height:1386px;border:10px solid #2a2f37;border-radius:64px;overflow:hidden;
-box-shadow:0 40px 90px rgba(0,0,0,.55);background:#14161A}
+box-shadow:0 40px 90px rgba(0,0,0,.55);background:#0B1626}
 .tel img{display:block;width:780px;height:1386px}
 </style></head><body><h1>${riga1}<span>${riga2}</span></h1><div class="tel"><img src="data:image/png;base64,${img}"></div>
 <script>/* Titolo sempre su due righe: se una riga sfora, carattere più piccolo. */

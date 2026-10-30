@@ -15,13 +15,13 @@ const tema=async(p,t)=>{ await p.evaluate(t=>document.querySelector('#aspetto [d
 { const ctx=await b.newContext({viewport:{width:390,height:800},locale:"it-IT",colorScheme:"light"}); const p=await setup(ctx);
   ok(!(await p.evaluate(()=>!!document.querySelector("#themeToggle"))), "tema: niente più pulsante in alto");
   const a=await bg(p); await tema(p,"dark"); const c=await bg(p);
-  ok(a==="rgb(255, 255, 255)" && c==="rgb(20, 22, 26)", "Aspetto: telefono chiaro → Scuro ("+a+" → "+c+")");
-  await p.reload(); await p.waitForTimeout(800); ok(await bg(p)==="rgb(20, 22, 26)", "Aspetto: lo scuro scelto resta dopo la riapertura");
+  ok(a==="rgb(255, 255, 255)" && c==="rgb(11, 22, 38)", "Aspetto: telefono chiaro → Scuro ("+a+" → "+c+")");
+  await p.reload(); await p.waitForTimeout(800); ok(await bg(p)==="rgb(11, 22, 38)", "Aspetto: lo scuro scelto resta dopo la riapertura");
   await tema(p,"auto"); ok(await bg(p)==="rgb(255, 255, 255)" && await p.evaluate(()=>document.querySelector('#aspetto [data-tema="auto"]').getAttribute("aria-checked"))==="true", "Aspetto: Automatico torna a seguire il telefono");
   await ctx.close(); }
 { const ctx=await b.newContext({viewport:{width:390,height:800},locale:"it-IT",colorScheme:"dark"}); const p=await setup(ctx);
   const a=await bg(p); await tema(p,"light"); const c=await bg(p); await tema(p,"auto"); const d=await bg(p);
-  ok(a==="rgb(20, 22, 26)"&&c==="rgb(255, 255, 255)"&&d==="rgb(20, 22, 26)", "Aspetto: telefono scuro → Chiaro → Automatico");
+  ok(a==="rgb(11, 22, 38)"&&c==="rgb(255, 255, 255)"&&d==="rgb(11, 22, 38)", "Aspetto: telefono scuro → Chiaro → Automatico");
   await ctx.close(); }
 // 2. SONNO GIORNI LIBERI a 320/360/412 px, anche con orario fuori griglia
 for (const w of [320,360,412]) {
