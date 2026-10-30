@@ -4477,7 +4477,7 @@ function diaryReminder(P, CARDS){
     if(state.diaryEditing.has("extra:"+key0+":nuovo")){
       const fineD=isToday?hhmm(nowMin):"15:30", inD=isToday?hhmm(mod1440(nowMin-30)):"15:00";
       x+=campiExtra("nuovo",inD,fineD);
-    } else x+='<button type="button" class="lnk dim" data-extra-nuovo="1" style="margin-top:8px">Hai fatto un altro pisolino?</button>';
+    } else x+='<button type="button" class="lnk" data-extra-nuovo="1" style="margin-top:8px;min-height:44px">+ Hai fatto un altro pisolino?</button>';
   }
   // Oltre le 3 ore di debito la notte libera si allunga: lo si dice, con il numero.
   if(logged && P && P.s && P.s.meta && P.s.meta.debitoExtra && !sleepEditing)
