@@ -727,7 +727,11 @@ function plan(){
   // "livelloMin" permette di saltare le opzioni già rifiutate dall'utente
   // per oggi ("non posso farlo → prossima opzione"), senza ripartire da zero.
   if(!naps.length){
-    const debito = debitoVero(wakePiano, sp.dur) + saltatiIeri();
+    // Il sonno oltre il bisogno ripaga i pisolini saltati ieri: 10 ore dopo un
+    // pisolino non fatto non lasciano un debito da recuperare.
+    const dormitoR = dormitoVero(wakePiano, sp.dur);
+    const eccesso = dormitoR === null ? 0 : Math.max(0, dormitoR - state.need);
+    const debito = Math.max(0, debitoVero(wakePiano, sp.dur) + saltatiIeri() - eccesso);
     if(debito >= 60){
       const livelloMin = (state.pisolini && state.pisolini[iso(state.focus)] &&
         state.pisolini[iso(state.focus)].skipRecupero) || 0;

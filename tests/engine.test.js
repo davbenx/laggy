@@ -427,3 +427,13 @@ test("tutte le combinazioni di tre giorni: sonno e pisolini mai dentro un turno 
   }
   assert.equal(problemi.length, 0, problemi.slice(0, 10).join(" | "));
 });
+
+test("un pisolino saltato ieri non chiede recupero se stanotte hai dormito oltre il bisogno", () => {
+  const base = { pattern: "PRRMMRR", anchor: "2026-10-30", focus: "2026-10-30T11:00:00", freeBed: "00:30", freeWake: "08:30",
+    shifts: { P: { n: "Pomeriggio", s: 840, e: 1260 }, M: { n: "Mattino", s: 420, e: 840 } },
+    beds: { "2026-10-30": "00:30" }, pisolini: { "2026-10-29": { x: { no: true, min: 90 } } } };
+  const lungo = createEngine({ ...base, wakes: { "2026-10-30": "10:30" } }).plan();
+  assert.equal(lungo.naps.length, 0, "10 ore di sonno (bisogno 8) coprono il pisolino saltato");
+  const corto = createEngine({ ...base, wakes: { "2026-10-30": "08:30" } }).plan();
+  assert.equal(corto.naps.length, 1, "con 8 ore il pisolino saltato resta da recuperare");
+});
