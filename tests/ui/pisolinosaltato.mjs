@@ -28,6 +28,6 @@ async function apri(wake, bed="00:30", prima=0){
   const t=await p.evaluate(()=>[...document.querySelectorAll(".drem-stato")].map(e=>e.textContent).join(" | "));
   ok(/Da recuperare: .* di sonno · stanotte \+\d+ min/.test(t) && (await p.evaluate(()=>document.querySelectorAll(".drem-stato").length))===1, "tre notti corte: UNA riga di stato, con la notte più lunga → "+t.slice(0,120));
   await p.evaluate(()=>document.querySelector("[data-info-debito]").click()); await p.waitForTimeout(300);
-  ok(await p.evaluate(()=>!document.querySelector("#infoModal").hidden && /cala solo dormendo/i.test(document.querySelector("#infoCorpo").textContent)), "«Perché?» apre il foglio con la spiegazione");
+  ok(await p.evaluate(()=>!document.querySelector("#infoModal").hidden && /Come si recupera/i.test(document.querySelector("#infoCorpo").textContent)), "«Perché?» apre il foglio con la spiegazione");
   await p.context().close(); }
 console.log("errori",errs); ok(errs.length===0,"nessun errore di pagina"); await b.close();

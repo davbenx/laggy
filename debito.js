@@ -1,14 +1,18 @@
 // debito.js — il debito di sonno: un solo conto per piano, diario e Andamenti. Puro.
 //
+// Il recupero non è 1:1 e non passa solo dalla durata: dopo una privazione il cervello aumenta prima l'intensità del sonno
+// (il sonno profondo sale fino a un terzo in più la prima notte, il REM dalla seconda), quindi anche una notte NORMALE ripaga una
+// parte del debito (`recuperoNotte`: 35% a notte: un debito acuto si smaltisce in 1–2 notti, uno cronico di circa 9 ore in 4–9
+// giorni di sonno adeguato, come nei dati di laboratorio); le ore in più valgono la metà (`rendimento`).
 // Un bilancio in minuti rispetto a quanto il PIANO chiedeva di dormire quella notte (il bisogno nelle notti
 // libere, meno quando il turno non lascia di più: dopo l'ultima notte il piano stesso propone 4h30 per
 // dormire normale la sera). Contare quei sonni brevi come debito faceva segnare 10 ore a chi seguiva il
 // piano alla lettera. Ogni notte più corta del piano aumenta il debito per intero; ogni notte più lunga lo
 // riduce solo in parte, perché il recupero è parziale [Banks 2010, Belenky 2003] — il coefficiente è una
-// scelta prudente, non un valore misurato. Mai sotto zero, tetto a 6 ore (oltre, il consiglio non cambia)
+// scelta prudente, non un valore misurato. Mai sotto zero, tetto a 9 ore (oltre, il consiglio non cambia)
 // e finestra di 14 giorni, l'orizzonte degli studi di restrizione cronica [Van Dongen 2003]. Niente
 // decadimento a tempo: il debito cala solo dormendo.
-export const DEBITO = { rendimento: 0.5, tetto: 360, finestra: 14, minNotte: 15, maxNotte: 960, pisolinoMax: 300 };
+export const DEBITO = { rendimento: 0.5, recuperoNotte: 0.35, tolleranza: 15, tetto: 540, finestra: 14, minNotte: 15, maxNotte: 960, pisolinoMax: 300 };
 
 const parseHM = s => { const m = /^(\d{1,2}):(\d{2})$/.exec(String(s || "")); return m ? (+m[1]) * 60 + (+m[2]) : null; };
 const giorno = k => Date.parse(k + "T12:00:00Z") / 864e5;
@@ -51,7 +55,9 @@ export function debitoSonno(diario, need, fino, finestra = DEBITO.finestra, obie
     if (notte === null) continue;
     const totale = notte + (k < fino ? minutiPisolini(pisolini[k]) : 0);
     const meta = obiettivo(k), delta = meta - totale;
-    debito = Math.min(DEBITO.tetto, Math.max(0, debito + (delta > 0 ? delta : delta * DEBITO.rendimento)));
+    if (delta > DEBITO.tolleranza) debito += delta;                                  // notte più corta del piano: si somma
+    else { debito *= 1 - DEBITO.recuperoNotte; if (delta < 0) debito += delta * DEBITO.rendimento; }   // notte adeguata: ne recupera una parte
+    debito = Math.min(DEBITO.tetto, Math.max(0, debito));
     serie.push({ date: k, debt: Math.round(debito), totale, meta, manca: Math.max(0, Math.round(delta)) });
     if (k === fino) haFino = true;
   }

@@ -102,6 +102,7 @@ const CFG = {
   margineFineTurno: 90,  // mai svegliarsi poco prima di salire in macchina
   napBreve: 20, napCiclo: 90,   // fra i 30 e i 45 ci si sveglia dal sonno profondo
   estensionePreNotte: 120,      // quanto si può allungare il sonno prima della prima notte
+  bancoSonno: 60, bancoGiorni: 4,  // sleep banking: +1 h a notte nei giorni liberi che precedono un blocco di notti (fino a 4 notti prima)
   napPreLungo: 120,             // davanti a un blocco lungo il pisolino pre-turno vale di più
   dormitaMax: 600,              // oltre le dieci ore il sonno in più rende poco
   caffeine:  480,    // [Drake 2013: minimo 6h] 8 = margine, ora è il valore di partenza
@@ -462,11 +463,15 @@ function constraint(off){
       break;
     }
   }
-  const estendibile = (b.rest && spansNight(nb)) || recupero;
+  // Sleep banking: nei giorni liberi prima di un blocco di notti conviene dormire un'ora in più a notte, per arrivarci con una riserva
+  // [Rupp 2009: estendere il sonno prima di una restrizione conosciuta riduce il calo di attenzione dopo].
+  let banca = false;
+  if(b.rest) for(let k=2; k<=CFG.bancoGiorni; k++){ if(spansNight(block(off+k)) && !spansNight(block(off+k-1))){ banca = true; break; } }
+  const estendibile = (b.rest && spansNight(nb)) || recupero || banca;
   // quante notti comincia domani: davanti a un blocco lungo si può dormire di più
   let bloccoDopo = 0;
   if(b.rest) for(let k=1; k<=10 && spansNight(block(off+k)); k++) bloccoDopo=k;
-  return {pin:false, floor, ceil, estendibile, bloccoDopo, kind: spansNight(nb) ? "pre-notte" : "libero"};
+  return {pin:false, floor, ceil, estendibile, banca: banca && !(b.rest && spansNight(nb)) && !recupero, bloccoDopo, kind: spansNight(nb) ? "pre-notte" : "libero"};
 }
 
 // Il debito fino al giorno in primo piano. La notte di quel giorno, se si ha
@@ -487,12 +492,12 @@ function debitoDiario(S){
   return debitoSonno({beds:state.beds, wakes:state.wakes, pisolini:state.pisolini, notti}, state.need, k, undefined, obiettivo);
 }
 
-// Oltre le 3 ore di debito la prossima notte libera si allunga (30, poi 60 minuti):
+// Oltre le 3 ore di debito la prossima notte libera si allunga anticipando il letto (30, poi 45 minuti, sveglia ferma):
 // un pisolino corto non basta e accorcia il sonno di notte. Mai oltre dormitaMax.
 function bonusDebito(){
   const dd = debitoDiario();
   if(!dd.haFino || dd.min < 180) return 0;
-  return Math.max(0, Math.min(dd.min >= 300 ? 60 : 30, CFG.dormitaMax - state.need));
+  return Math.max(0, Math.min(dd.min >= 300 ? 45 : 30, CFG.dormitaMax - state.need));
 }
 
 CFG.prepGap0 = 45;
@@ -532,8 +537,7 @@ function simulate(){
     // "|| 480" lo scambiava per un valore mancante e ci metteva 8 ore di sonno
     // in pieno turno.
     const c = C[i], extra = (i===H && !c.pin) ? bonus : 0;
-    if(extra) meta[i].debitoExtra = extra;
-    const d0 = +(c.pin ? c.dur : state.need) + extra;
+    const d0 = +(c.pin ? c.dur : state.need);
     let target, dr = Number.isFinite(d0) ? d0 : 480;
     if(pin[i]){
       target = c.pin ? c.mid : pinMid(i);
@@ -578,6 +582,10 @@ function simulate(){
     // viaggi lunghi), dove il piano metteva il sonno dentro un turno.
     [onset, dr] = dentroLeOre(i-H, onset, dr);
     onset = Math.round(onset/5)*5; dr = Math.round(dr/5)*5;
+    // Per colmare un debito si ANTICIPA l'addormentamento e la sveglia resta ferma: posticiparla sposterebbe l'orologio
+    // (melatonina e cortisolo in ritardo, «social jetlag»). Fino a dove si può: non prima di essere a casa.
+    if(extra){ const prima=onset; onset=Math.max(onset-extra, isFinite(c.floor)?c.floor:-Infinity); const eff=Math.round((prima-onset)/5)*5;
+      if(eff>=15){ onset=prima-eff; dr+=eff; meta[i].debitoExtra=eff; } else onset=prima; }
     mid[i] = Math.round(onset + dr/2);
     if(!c.pin && prev !== null && Math.abs(mid[i]-prev) > 15) meta[i].ramp = true;
     if(c.pin && prev !== null && !meta[i].reset){
@@ -586,7 +594,7 @@ function simulate(){
     }
     if(c.estendibile && !c.pin && !meta[i].tight){
       const tetto = isFinite(c.ceil) ? c.ceil : Infinity;
-      const max = Math.min(state.need + CFG.estensionePreNotte, CFG.dormitaMax, tetto - onset);
+      const max = Math.min(state.need + (c.banca ? CFG.bancoSonno : CFG.estensionePreNotte), CFG.dormitaMax, tetto - onset);
       if(max > dr){ meta[i].esteso = Math.round(max - dr); dr = Math.round(max); }
     }
     c.onsetR = onset; c.durR = dr; prev = mid[i];
@@ -737,11 +745,14 @@ function plan(){
       for(let k=0; k<10 && spansNight(block(k)); k++) bloccoN=k+1;
       const soglia = bloccoN >= CFG.adaptThreshold ? CFG.napPreLungo : CFG.napPre;
       const inPari = dormito !== null && manca <= 0;
-      const len = napCorto ? CFG.napBreve
+      let len = napCorto ? CFG.napBreve
         : solaVeglia ? 25
         : inPari ? CFG.napBreve
         : clamp(Math.max(manca - giaCoperto, profondo ? soglia - giaCoperto : CFG.napMin),
                 CFG.napMin, CFG.napMax);
+      // Un ciclo intero (60 min o più) rende solo se è lontano dal sonno principale (almeno 4 ore dalla sveglia): più vicino la
+      // pressione di sonno è bassa e non si addormenta; allora si ripiega sul pisolino breve di 20 minuti, senza inerzia.
+      if(len >= 60 && napEnd - len < wake + 240) len = CFG.napBreve;
       let napStart = napEnd - len;
       if(napStart < wake + 60) napStart = wake + 60;
       if(napEnd - napStart >= 20 && napEnd < b.start){
