@@ -35,8 +35,11 @@ export function sleepTrend(diary, planFor, opts = {}) {
   // Il debito è quello di debito.js (bisogno, recupero parziale, 14 giorni): lo stesso
   // del piano. Il grafico mostra l'andamento del periodo, il numero l'ultimo conto.
   const fino = series.length ? series[series.length - 1].date : null;
+  // il debito si misura contro il piano di quella notte (come in engine.js), non contro il bisogno
+  const pianificato = new Map(series.map(x => [x.date, x.planned]));
+  const obiettivo = k => (pianificato.get(k) != null ? pianificato.get(k) : need);
   if (fino) {
-    const corso = debitoSonno(diary, need, fino, days).serie, per = new Map(corso.map(x => [x.date, x.debt]));
+    const corso = debitoSonno(diary, need, fino, days, obiettivo).serie, per = new Map(corso.map(x => [x.date, x.debt]));
     series.forEach(x => { x.debt = per.has(x.date) ? per.get(x.date) : 0; });
   }
 
@@ -47,7 +50,7 @@ export function sleepTrend(diary, planFor, opts = {}) {
     n: series.length,
     avgActual: avg(series.map(s => s.actual)),
     avgPlanned: avg(series.filter(s => s.planned != null).map(s => s.planned)),
-    debtNow: fino ? debitoSonno(diary, need, fino).min : 0
+    debtNow: fino ? debitoSonno(diary, need, fino, undefined, obiettivo).min : 0
   };
 }
 

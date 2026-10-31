@@ -479,7 +479,12 @@ function debitoDiario(S){
     const sp = at(S, -1), d = dormitoVero(sp.onset + sp.dur - 1440, sp.dur);
     if(d !== null) notti[k] = d;
   }
-  return debitoSonno({beds:state.beds, wakes:state.wakes, pisolini:state.pisolini, notti}, state.need, k);
+  // Quanto il piano chiedeva di dormire quella notte: il sonno «di quel giorno» è quello vincolato dal turno
+  // (constraint, pin) se c'è, altrimenti il bisogno.
+  const base=dnum(state.focus);
+  const obiettivo=d=>{ let c=null; try{ c=constraint(dnum(new Date(d+"T12:00:00"))-base-1); }catch(e){}
+    return (c && c.pin && c.dur>0) ? c.dur : state.need; };
+  return debitoSonno({beds:state.beds, wakes:state.wakes, pisolini:state.pisolini, notti}, state.need, k, undefined, obiettivo);
 }
 
 // Oltre le 3 ore di debito la prossima notte libera si allunga (30, poi 60 minuti):
@@ -864,7 +869,8 @@ function plan(){
     meals.push({at:place(s.onset-180, busy), lt:true});
   }
   return {b, pb, nb, s, sp, S, wake, end, cut, cbt, shift, sleeps, naps, meals, busy,
-          night:spansNight(b), lateStart:startsInNight(b), debitoScoperto, debitoMin:dd.haFino?dd.min:0};
+          night:spansNight(b), lateStart:startsInNight(b), debitoScoperto, debitoMin:dd.haFino?dd.min:0,
+          debitoNotti:dd.haFino ? dd.serie.filter(x=>x.manca>=30).sort((x,y)=>y.manca-x.manca).slice(0,3) : []};
 }
 
 // Il piano di un'altra persona non deve leggere il MIO diario (sveglie, letto, pisolini del giorno: cambierebbero
