@@ -253,6 +253,7 @@ cursor:pointer;display:flex;border-radius:999px}
    hanno uno a parte (la data/#cycRange ne fa già le veci). */
 .tab-title{font-family:var(--serif);font-size:24px;font-weight:600;color:var(--ink);margin:2px 0 var(--gap-sezione)}
 #dateLabel:active{opacity:.7}
+#dateLabel{padding:8px 0;margin:-8px 0}   /* area di tocco da 44 px senza spostare nulla */
 #jumpDate{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;border:0}
 .nav{background:var(--s1);border:1px solid var(--line);color:var(--ink);width:40px;height:40px;font-size:18px;line-height:1;
 border-radius:var(--r);font-size:16px;cursor:pointer;display:grid;place-items:center;flex:none}
@@ -310,9 +311,9 @@ max-height:calc(100vh - 88px - var(--sab));max-height:calc(100dvh - 88px - var(-
 @keyframes qsSlideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
 .qs-header{display:flex;justify-content:space-between;align-items:center}
 .qs-title{display:block;font-family:var(--serif);font-size:18px;color:var(--ink)}
-.qs-close{background:var(--s2);border:none;color:var(--dim);width:30px;height:30px;border-radius:50%;font-size:14px;
+.qs-close{box-sizing:content-box;padding:7px;margin:-7px;background-clip:content-box;background-color:var(--s2);border:none;color:var(--dim);width:30px;height:30px;border-radius:50%;font-size:14px;
 display:flex;align-items:center;justify-content:center;cursor:pointer}
-.qs-close:hover{color:var(--ink);background:var(--line)}
+.qs-close:hover{color:var(--ink);background-color:var(--line)}   /* area di tocco da 44 px (padding trasparente), il disco resta da 30 */
 .qs-hd-az{display:flex;align-items:center;gap:10px}
 .qs-orari{display:flex;flex-direction:column;gap:8px;align-items:flex-start;margin:10px 0 0}
 .qs-orari .qs-ore{width:100%}
@@ -491,7 +492,7 @@ body.primo-avvio #firstPlanBanner,body.primo-avvio #setupChecklist,body.primo-av
 .cal-gs{font-size:11px;font-weight:700;color:var(--faint);text-align:center;padding:2px 0}
 .ccell{display:flex;flex-direction:column;align-items:stretch;gap:2px;background:none;border:0;padding:3px 2px 4px;font:inherit;cursor:pointer;border-radius:10px;min-width:0;color:var(--ink)}
 .cnum.fest::after,.clab.fest::after{content:"";display:inline-block;width:5px;height:5px;margin-left:3px;border-radius:50%;background:var(--risk);vertical-align:2px}
-.ccell.passato{opacity:.6}
+.ccell.passato{opacity:.72}
 .ccell.oggi{box-shadow:inset 0 0 0 1.5px var(--ink)}
 .cnum{font-size:11px;text-align:center;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
 .cnum.altro{color:var(--blue)}
@@ -6763,7 +6764,7 @@ function renderCalendarioCiclo(){
   const TIPO={n:"notte", l:"lavoro", r:"riposo", m:"mattina", p:"pomeriggio", s:"sera"}, descr=c=>c.t==="?" ? "da impostare" : (c.sig===(TIPO[c.t]||"")||c.sig.length<=1 ? TIPO[c.t] : c.sig+", "+TIPO[c.t]);
   let griglia='<div class="cal-sett cal-gs-riga" aria-hidden="true">'+["L","M","M","G","V","S","D"].map(l=>'<span class="cal-gs">'+l+'</span>').join("")+'</div>';
   for(let r=0;r<CAL_RIGHE;r++){
-    griglia+='<div class="cal-sett" role="row">';
+    griglia+='<div class="cal-sett">';
     for(let c=0;c<7;c++){
       const i=(r0+r)*7+c, d=CAL.dataDi(m.da,i), x=leggi(m.io[i]), pc=persona ? leggi(persona.g[i]) : null;
       const altro=d.anno!==mt[0]||d.mese!==mt[1], num=d.giorno===1 ? "1 "+CAL.MESI[d.mese-1].slice(0,3).toUpperCase() : d.giorno;
