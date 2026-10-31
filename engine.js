@@ -1147,7 +1147,7 @@ function buildIcs(days){
 
   normalizza();
   return {
-    state, plan, buildIcs, buildCouple, buildEvents, buildCoupleEvents, codeAt, block, giornoA, etichetta, tipoDelGiorno, fasciaDelGiorno, nomeTurno, nomeOre, fasciaOre, oreNotturne, eNotte,
+    state, plan, buildIcs, buildCouple, buildEvents, buildCoupleEvents, codeAt, block, etichetta, tipoDelGiorno, fasciaDelGiorno, nomeTurno, nomeOre, fasciaOre, oreNotturne, eNotte,
     sharedDays, freeOverlap, asPartner,
     setIcs(o){ Object.assign(ICS, o||{}); return ICS; },
     // Esposti anche questi: prima privati alla closure, ma index.html (che
@@ -1157,7 +1157,7 @@ function buildIcs(days){
     // naturale, debito di sonno annotato, ecc). Nessuna delle funzioni
     // stesse è cambiata: solo il return si è allargato.
     CFG, constraint, simulate, at,
-    startsInNight, spansNight, oraDi, debitoVero, saltatiIeri,
+    startsInNight, spansNight, oraDi,
     freeWakeOk, freeWakeUsata, naturalMid, durataLibera, sincronizzaNeed, setFestivo,
     // index.html la richiama di nuovo dopo aver ripristinato lo state da
     // link/localStorage (quei valori possono arrivare fuori dai limiti

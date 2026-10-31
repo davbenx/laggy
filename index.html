@@ -128,7 +128,7 @@ try{
    con Android 15 l'app va a tutto schermo e Capacitor comunica l'ingombro di
    barra di stato e barra dei gesti come --safe-area-inset-* (le WebView
    meno recenti danno 0 a env()). Si prende il più grande dei due. */
-:root{--sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:24px;--r-campo:12px;--tap:44px;--sat:max(env(safe-area-inset-top,0px),var(--safe-area-inset-top,0px));--sab:max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px))}
+:root{--sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--r-campo:12px;--tap:44px;--sat:max(env(safe-area-inset-top,0px),var(--safe-area-inset-top,0px));--sab:max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px))}
 :root{
   --bg:#0B1626; --s1:#111E31; --s2:#182A42; --line:#27405E;
   --ink:#E6E8EB; --dim:#A9B6C8; --faint:#9AA9BD;
@@ -136,12 +136,9 @@ try{
   --orange-bar:#FF6B35;
   --orange:#FF9068; --orange-fill:#FF6B35; --orange-soft:#3A2119;
   --risk:#FF6B5C; --risk-soft:#3A1C18; --risk-line:#7A342C;
-  --picco:#D98CF0;   /* picco di sonnolenza nei grafici: il rosso di --risk qui si confonde con l'arancio del turno */
-  --sleep-fill:#3D74B3; --ok:#5FBF85; --ok-soft:#173222; --ok-line:#2F6B45; --persona:#7FD9C9; --persona-soft:#173B36; --notte:#9CA3F5; --mattina:#F2C66D; --mattina-soft:#3A3118; --sera:#F08CBA; --sera-soft:#3A1B2B; --on-warm:#15171A;
+  --picco:#D98CF0;   /* picco di sonnolenza nei grafici: il rosso di --risk qui si confonde con l'arancio del turno */ --ok:#5FBF85; --ok-soft:#173222; --ok-line:#2F6B45; --persona:#7FD9C9; --persona-soft:#173B36; --notte:#9CA3F5; --mattina:#F2C66D; --mattina-soft:#3A3118; --sera:#F08CBA; --sera-soft:#3A1B2B;
   --bg-blur:rgba(11,22,38,.85);
   --warm-tint:#241C15; --cool-tint:#14264A;
-  --violet:var(--blue); --violetd:var(--blue-soft);
-  --amber:var(--orange);
   --r:16px;
   --gap-sezione:20px;
   --shadow-card:0 2px 10px -3px rgba(0,0,0,.4);
@@ -156,8 +153,7 @@ try{
     --blue:#2D5A8C; --blue-fill:#2D5A8C; --blue-soft:#E3ECF7; --blue-lt:#5B87B5; --su-blu:#FFFFFF;
     --orange:#B24B25; --orange-fill:#FF6B35; --orange-bar:#D9541F; --orange-soft:#FCE9E1;
     --risk:#C0392B; --risk-soft:#FBE9E7; --risk-line:#E57368;
-    --picco:#8E2A6B;
-    --sleep-fill:#24496F; --ok:#2B7549; --ok-soft:#E6F4EC; --ok-line:#8CC9A5; --persona:#0F6B60; --persona-soft:#D8F0EA; --notte:#3B3F9E; --mattina:#8A5A00; --mattina-soft:#FBEFC8; --sera:#A3215F; --sera-soft:#FBE3EE; --on-warm:#15171A;
+    --picco:#8E2A6B; --ok:#2B7549; --ok-soft:#E6F4EC; --ok-line:#8CC9A5; --persona:#0F6B60; --persona-soft:#D8F0EA; --notte:#3B3F9E; --mattina:#8A5A00; --mattina-soft:#FBEFC8; --sera:#A3215F; --sera-soft:#FBE3EE;
     --bg-blur:rgba(255,255,255,.82);
     --warm-tint:#FBF1E9; --cool-tint:#E6E8F8;
     --shadow-card:0 2px 8px -2px rgba(21,23,26,.22);
@@ -179,8 +175,7 @@ try{
   --orange-bar:#FF6B35;
   --orange:#FF9068; --orange-fill:#FF6B35; --orange-soft:#3A2119;
   --risk:#FF6B5C; --risk-soft:#3A1C18; --risk-line:#7A342C;
-  --picco:#D98CF0;   /* picco di sonnolenza nei grafici: il rosso di --risk qui si confonde con l'arancio del turno */
-  --sleep-fill:#3D74B3; --ok:#5FBF85; --ok-soft:#173222; --ok-line:#2F6B45; --persona:#7FD9C9; --persona-soft:#173B36; --notte:#9CA3F5; --mattina:#F2C66D; --mattina-soft:#3A3118; --sera:#F08CBA; --sera-soft:#3A1B2B; --on-warm:#15171A;
+  --picco:#D98CF0;   /* picco di sonnolenza nei grafici: il rosso di --risk qui si confonde con l'arancio del turno */ --ok:#5FBF85; --ok-soft:#173222; --ok-line:#2F6B45; --persona:#7FD9C9; --persona-soft:#173B36; --notte:#9CA3F5; --mattina:#F2C66D; --mattina-soft:#3A3118; --sera:#F08CBA; --sera-soft:#3A1B2B;
   --bg-blur:rgba(11,22,38,.85);
   --warm-tint:#241C15; --cool-tint:#14264A;
   --shadow-card:0 2px 10px -3px rgba(0,0,0,.4);
@@ -192,8 +187,7 @@ try{
   --blue:#2D5A8C; --blue-fill:#2D5A8C; --blue-soft:#E3ECF7; --blue-lt:#5B87B5; --su-blu:#FFFFFF;
   --orange:#B24B25; --orange-fill:#FF6B35; --orange-bar:#D9541F; --orange-soft:#FCE9E1;
   --risk:#C0392B; --risk-soft:#FBE9E7; --risk-line:#E57368;
-  --picco:#8E2A6B;
-  --sleep-fill:#24496F; --ok:#2B7549; --ok-soft:#E6F4EC; --ok-line:#8CC9A5; --persona:#0F6B60; --persona-soft:#D8F0EA; --notte:#3B3F9E; --mattina:#8A5A00; --mattina-soft:#FBEFC8; --sera:#A3215F; --sera-soft:#FBE3EE; --on-warm:#15171A;
+  --picco:#8E2A6B; --ok:#2B7549; --ok-soft:#E6F4EC; --ok-line:#8CC9A5; --persona:#0F6B60; --persona-soft:#D8F0EA; --notte:#3B3F9E; --mattina:#8A5A00; --mattina-soft:#FBEFC8; --sera:#A3215F; --sera-soft:#FBE3EE;
   --bg-blur:rgba(255,255,255,.82);
   --warm-tint:#FBF1E9; --cool-tint:#E6E8F8;
   --shadow-card:0 2px 8px -2px rgba(21,23,26,.22);
@@ -347,9 +341,6 @@ font-size:13.5px;font-weight:600;color:var(--ink);cursor:pointer}
 .qs-ore input{min-height:40px;font:inherit;font-size:15px;width:auto!important;flex:1 1 0;min-width:0}
 .qs-ore>span:first-child{flex-basis:100%}
 .qs-ore small{flex-basis:100%;font-size:12px;color:var(--faint)}
-.qs-reset{background:none;border:1px solid var(--line);border-radius:var(--r);color:var(--dim);padding:9px;font-size:13px;
-font-weight:600;cursor:pointer;transition:all .15s ease;font-family:inherit}
-.qs-reset:hover{border-color:var(--risk);color:var(--risk);background:var(--risk-soft)}
 
 /* Traffic light pill per Simulatore Scambio */
 .traffic-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700}
@@ -538,7 +529,7 @@ border-top:5px solid var(--ink)}
    toccabile come la data di Oggi. .cycnav/.btn di prima non servono più
    — prev/oggi/next sono .nav/.today dentro .cycbar. */
 /* stessi colori del mockup (--blue/--orange-fill), non i toni smorzati
-   che la striscia usava per conto suo (--sleep-fill/--orange-bar) —
+   che la striscia usava per conto suo (--orange-bar) —
    quei token restano dove servivano altrove (#band), qui la tinta è la
    stessa che l'utente vede già ovunque per "sonno" e "turno". */
 .fg.fest::after{content:"";position:absolute;top:3px;right:3px;width:5px;height:5px;border-radius:50%;background:var(--risk)}
@@ -650,13 +641,10 @@ display:flex;flex-direction:column;align-items:center;justify-content:center;gap
 .mese-num{display:grid;grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:8px;margin-top:10px}
 .mese-num div{background:var(--bg);border-radius:10px;padding:8px 10px}
 .mese-num b{display:block;font-size:20px;color:var(--ink)}
-.mese-segna{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;min-height:46px;margin-top:14px;font-weight:600}
-.mese-segna small{font-size:12px;font-weight:400;color:var(--dim);margin-top:1px}
 .mese-vuoto{margin:10px 0 0;font-size:14px;color:var(--dim)}
 .mese-nota{margin:10px 0 0;font-size:12.5px}
 .az-desc{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;min-height:46px;margin-top:8px;font-weight:600;text-align:center}
 .az-desc small{font-size:12px;font-weight:400;color:var(--dim);margin-top:2px;line-height:1.35;max-width:30em}
-.mese-sez{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
 .mese-spec{margin:10px 0 0;font-size:13px;color:var(--dim);line-height:1.45}
 .mese-num span{font-size:12px;color:var(--dim)}
 .mese .hint{margin:8px 0 0}
@@ -885,7 +873,6 @@ display:flex;align-items:center;justify-content:center;position:relative;z-index
 .essrow .el{display:block;font-size:16px;font-weight:700;line-height:1.3;color:var(--ink);letter-spacing:0;text-transform:none}
 .essrow .es{font-size:13px;font-weight:400;color:var(--dim);margin-top:2px;line-height:1.4;text-transform:none;letter-spacing:normal}
 .essrow .es b{font-weight:700;color:var(--dim)}
-.essrow .echev{line-height:var(--nodo)}
 /* passato: sbiadito, ma leggibile */
 .tl.past .essrow .en,.tl.past .essrow .el,.tl.past .essrow .es{color:var(--faint)}
 .tl.past .essrow .enodo{border-color:var(--line);color:var(--faint)}
@@ -6762,7 +6749,6 @@ function selettoreVista(v){
   return '<div class="vsw" role="group" aria-label="Come vedere il ciclo">'+
     [["ore","Ore"],["calendario","Calendario"]].map(([k,t])=>'<button type="button" data-vista="'+k+'" aria-pressed="'+(v===k)+'">'+t+'</button>').join("")+'</div>';
 }
-const SVG_FRECCIA=d=>'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="'+d+'"/></svg>';
 function renderCalendarioCiclo(){
   const el=$("#cyc"), pers=personaStriscia();
   el.classList.remove("con-pers");
@@ -7053,12 +7039,6 @@ function caricoTurni(da, n){
 }
 /* --- grafici di «Sonno e carico» (SVG semplici: i numeri sotto restano, il grafico fa vedere la forma) --- */
 const SVGT=(x,y,txt,extra)=>'<text x="'+x+'" y="'+y+'" font-size="10" fill="var(--faint)"'+(extra||"")+'>'+txt+'</text>';
-// tipo del giorno (r riposo, n notte, l lavoro, ? da impostare) per una data
-function tipoGiornoIso(k){
-  const f=state.focus;
-  try{ state.focus=new Date(k+"T12:00:00"); return NT.codeAt(0)==="?" ? "?" : NT.tipoDelGiorno(0); }catch(e){ return "?"; }
-  finally{ state.focus=f; }
-}
 // fascia del turno del giorno (m mattina, p pomeriggio, s sera, n notte, r riposo, ? da impostare) per una data
 function fasciaGiornoIso(k){
   const f=state.focus;
@@ -7457,12 +7437,6 @@ function renderWizPeopleList(){
       '<button type="button" class="ibtn" data-edit-persona="'+i+'" aria-label="Modifica '+esc(nome)+'" title="Modifica">'+ICON.pencil+'</button>'+
       '<button type="button" class="ibtn" data-remove-persona="'+i+'" aria-label="Rimuovi '+esc(nome)+'" title="Rimuovi" style="color:var(--faint)">'+ICON.trash+'</button></div>';
   }).join("")+(multi?'<p class="hint" style="margin:2px 0 10px">La stellina sceglie chi vedi nella card "Turni condivisi" di Oggi — le altre restano comunque visibili qui sopra.</p>':'');
-}
-// «Turni MMPNR… · dorme 23:00–07:00 nei giorni liberi»: quello che l'app sa di lei/lui, a colpo d'occhio
-function riassuntoPersona(per){
-  const seq=String(per.pattern||"").replace(/[^A-Za-z]/g,"");
-  const turni = per.shifts ? "turni suoi" : "turni come i tuoi";
-  return seq.slice(0,16)+(seq.length>16?"…":"")+" · "+turni+" · "+(per.wake&&per.bed ? "dorme "+per.bed+"–"+per.wake+" nei giorni liberi" : "sonno come il tuo");
 }
 // Modifica di una persona già in elenco: lo stesso modulo dell'aggiunta, precompilato. null = si sta aggiungendo.
 let personaInModifica=null;
@@ -10387,7 +10361,6 @@ function applicaCopia(dati){
   }
   localStorage.setItem("nt:backupDone","true");
 }
-function copiaRecente(){ const d=store.get("copiaFileAl",""); return !!d && (new Date()-new Date(d+"T12:00:00"))/864e5<=30; }
 async function salvaCopiaFile(){
   const R=raccogliCopia(), json=JSON.stringify(R);
   const nome="notturnisti-copia-"+iso(new Date())+".json";

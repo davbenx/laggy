@@ -36,10 +36,9 @@ test("quattro blocchi di tema: due scuri identici, due chiari identici", () => {
   assert.deepEqual(chiari[0], chiari[1], "chiaro automatico e chiaro scelto a mano sono identici");
 });
 
-test("contrasto del testo: almeno 4,5:1 su fondo e superfici (AA), 3:1 per le barre dei grafici", () => {
+test("contrasto del testo: almeno 4,5:1 su fondo e superfici (AA)", () => {
   for (const t of blocchi) for (const sfondo of ["bg", "s1", "s2"]) {
     for (const n of ["ink", "dim", "faint", "blue", "orange", "risk", "ok", "notte", "mattina", "sera", "persona", "picco"])
       assert.ok(contrasto(t[n], t[sfondo]) >= 4.5, `${n} ${t[n]} su ${sfondo} ${t[sfondo]}: ${contrasto(t[n], t[sfondo]).toFixed(2)}`);
-    assert.ok(contrasto(t["sleep-fill"], t[sfondo]) >= 3 || sfondo === "s2" && contrasto(t["sleep-fill"], t.bg) >= 3, `sleep-fill ${t["sleep-fill"]} su ${sfondo}`);
   }
 });
