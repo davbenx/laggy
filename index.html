@@ -1043,7 +1043,7 @@ letter-spacing:.01em;padding:9px 0 8px;min-height:56px;cursor:pointer;position:r
 .tsec-top::after{content:"›";margin-left:auto;font-size:20px;color:var(--faint)}
 .tsec-top + .tsec-top{margin-top:10px}
 .tsec-top + .strumenti{margin-top:10px}
-body.tab-opzioni #opzioni #piuCal{display:block}   /* il calendario di coppia sta nel gruppo Persone */
+body.tab-opzioni #opzioni #piuCal:not([hidden]){display:block}   /* il calendario di coppia sta nel gruppo Persone (e resta nascosto senza persone) */
 .tsec-t{display:block;font-family:var(--serif);font-size:16px;font-weight:600;color:var(--ink)}
 .tsec-v{display:block;font-size:12.5px;color:var(--dim);margin-top:3px;line-height:1.35}
 .tsec-riga{margin-top:0}
@@ -7533,7 +7533,7 @@ function strisciaPersona(pattern, ancora, shifts, giorni){
 function renderWizPeopleList(){
   const el=$("#wizPeopleList"); if(!el) return;
   const persone=tuttePersone();
-  if(!persone.length){ el.innerHTML=''; return; }
+  if(!persone.length){ el.innerHTML=''; try{ renderPiuCal(); }catch(e){} return; }
   // La stellina sceglie chi guarda la card compatta di Oggi — ha senso
   // solo con più di una persona: con una sola, è sempre e comunque lei.
   const multi = persone.length>1;
@@ -7550,6 +7550,7 @@ function renderWizPeopleList(){
       '<button type="button" class="ibtn" data-edit-persona="'+i+'" aria-label="Modifica '+esc(nome)+'" title="Modifica">'+ICON.pencil+'</button>'+
       '<button type="button" class="ibtn" data-remove-persona="'+i+'" aria-label="Rimuovi '+esc(nome)+'" title="Rimuovi" style="color:var(--faint)">'+ICON.trash+'</button></div>';
   }).join("")+(multi?'<p class="hint" style="margin:2px 0 10px">La stellina sceglie chi vedi nella card "Turni condivisi" di Oggi — le altre restano comunque visibili qui sopra.</p>':'');
+  try{ renderPiuCal(); }catch(e){}   // il calendario di coppia segue l'elenco: compare con la prima persona, sparisce con l'ultima
 }
 // Modifica di una persona già in elenco: lo stesso modulo dell'aggiunta, precompilato. null = si sta aggiungendo.
 let personaInModifica=null;
