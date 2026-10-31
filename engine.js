@@ -393,7 +393,10 @@ function constraint(off){
     // solo blocco, e se la cava bene lo stesso: la scelta resta sua, non del
     // motore. Il default resta quello con più letteratura alle spalle.
     const cap = state.sonnoDiurno==="diviso" || !state.sonnoDiurno;
-    const dur = run ? (diGiorno && cap ? Math.min(state.need, CFG.daySleepMax) : state.need)
+    // Il sonno «corto» dopo l'ultima notte è un consiglio per chi usa l'app (così stasera dorme
+    // normale). Per un'altra persona (state.stima, vedi asPartner) non si consiglia: si stima
+    // quanto dorme davvero, cioè il sonno pieno di giorno.
+    const dur = (run || state.stima) ? (diGiorno && cap ? Math.min(state.need, CFG.daySleepMax) : state.need)
                     : (diGiorno && cap ? CFG.shortSleep : Math.min(state.need, CFG.daySleepMax));
     return {pin:true, onset, dur, mid:Math.round(onset+dur/2), kind: run ? "diurno" : "corto"};
   }
@@ -864,6 +867,15 @@ function plan(){
           night:spansNight(b), lateStart:startsInNight(b), debitoScoperto, debitoMin:dd.haFino?dd.min:0};
 }
 
+// Il piano di un'altra persona non deve leggere il MIO diario (sveglie, letto, pisolini del giorno: cambierebbero
+// il suo piano e il suo debito), né il mio impegno: si parte da zero, con il bisogno derivato dai SUOI orari
+// liberi, e il sonno dopo la notte è una stima. Restituisce la funzione che rimette tutto com'era.
+function isolaDalMio(){
+  const w=state.wakes, b=state.beds, ps=state.pisolini, ev=state.evento, st=state.stima;
+  state.wakes={}; state.beds={}; state.pisolini={}; state.evento=null; state.stima=true;
+  sincronizzaNeed();
+  return ()=>{ state.wakes=w; state.beds=b; state.pisolini=ps; state.evento=ev; state.stima=st; };
+}
 function asPartner(fn){
   // Il partner è un'entità autonoma: ha una sua sequenza, le SUE definizioni di
   // turno (può fare un orario fisso di giorno mentre tu ruoti) e la SUA finestra
@@ -876,13 +888,15 @@ function asPartner(fn){
   // raggiungibile dall'esterno: buildCoupleFeed() rifiuta già di chiamarla
   // senza partner — qui è solo per coerenza propria del modulo).
   if(!state.pPattern) return null;
-  const p=state.pattern, a=state.anchor, sh=state.shifts, fw=state.freeWake, fb=state.freeBed;
+  const p=state.pattern, a=state.anchor, sh=state.shifts, fw=state.freeWake, fb=state.freeBed, nd=state.need;
   state.pattern=state.pPattern; state.anchor=state.pAnchor||a;
   if(state.pShifts) state.shifts=state.pShifts;
   if(state.pWake) state.freeWake=state.pWake;
   if(state.pBed)  state.freeBed=state.pBed;
+  const mio=isolaDalMio();
   let r=null; try{ r=fn(); }catch(e){}
-  state.pattern=p; state.anchor=a; state.shifts=sh; state.freeWake=fw; state.freeBed=fb;
+  mio();
+  state.pattern=p; state.anchor=a; state.shifts=sh; state.freeWake=fw; state.freeBed=fb; state.need=nd;
   return r;
 }
 
@@ -1157,7 +1171,7 @@ function buildIcs(days){
     // naturale, debito di sonno annotato, ecc). Nessuna delle funzioni
     // stesse è cambiata: solo il return si è allargato.
     CFG, constraint, simulate, at,
-    startsInNight, spansNight, oraDi,
+    startsInNight, spansNight, oraDi, isolaDalMio,
     freeWakeOk, freeWakeUsata, naturalMid, durataLibera, sincronizzaNeed, setFestivo,
     // index.html la richiama di nuovo dopo aver ripristinato lo state da
     // link/localStorage (quei valori possono arrivare fuori dai limiti

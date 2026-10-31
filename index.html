@@ -3353,8 +3353,11 @@ function asPartner(fn, person){
   state.repeat=true;
   // i cambi e i giorni speciali che hai segnato TU (scambi, ferie, malattia, orari di un giorno) non sono i suoi
   state.ecc={}; state.giorni={};
+  // né il tuo diario, né il tuo impegno, né il tuo bisogno di sonno: il suo piano è una stima dai suoi turni
+  const nd=state.need, ripristina=NT.isolaDalMio();
   let r=null; try{ r=fn(); }catch(e){}
-  state.pattern=p; state.anchor=a; state.shifts=sh; state.freeWake=fw; state.freeBed=fb; state.repeat=rp; state.ecc=ecc; state.giorni=gg;
+  ripristina();
+  state.pattern=p; state.anchor=a; state.shifts=sh; state.freeWake=fw; state.freeBed=fb; state.repeat=rp; state.ecc=ecc; state.giorni=gg; state.need=nd;
   return r;
 }
 // intervalli occupati (turno + sonno) di un giorno, in [0,1440)
@@ -7654,6 +7657,8 @@ function renderPartner(CARDS){
       h+='<div class="empty"><p>Nessun riposo in comune nei prossimi tre mesi.</p></div>';
     }
   });
+
+  if(tuttePer.length) h+='<p class="hint" style="margin:10px 0 0">Il loro sonno è una stima dai turni e dagli orari che hai inserito: dopo una notte conto circa sei ore e mezza di sonno di giorno.</p>';
 
   // ── Con chi vederti: da vuota la sezione dice cosa fa (prima c'era solo
   // "+ Aggiungi una persona", senza dire a cosa serve); con qualcuno già

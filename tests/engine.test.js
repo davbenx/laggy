@@ -457,3 +457,24 @@ test("piano: un sonno corto annotato dà un pisolino di recupero, uno lungo no; 
   assert.ok(p.s.dur > normale, "con 6 ore di debito la notte libera è più lunga: " + normale + " → " + p.s.dur);
   assert.equal(p.naps.filter(n => n.debito).length, 0, "e allora il pisolino di recupero non serve");
 });
+
+// ── Un'altra persona: il suo sonno è una stima dai suoi turni, mai dal MIO diario ──
+test("partner in smonto: dopo la notte dorme il sonno pieno di giorno, non il «corto» consigliato a chi usa l'app", () => {
+  const sh = { N: { n: "Notte", s: 1320, e: 1800 }, M: { n: "Mattino", s: 420, e: 840 } };
+  const e = createEngine({ pattern: "RRRRRRRR", anchor: "2026-11-01", focus: "2026-11-01T12:00:00", shifts: sh, freeBed: "23:30", freeWake: "07:30",
+    pPattern: "NNRR", pAnchor: "2026-10-30", pShifts: sh });
+  const sonno = e.asPartner(() => { const P = e.plan(); return P.sp.dur; });
+  assert.ok(sonno >= 360, "sonno dopo la notte di almeno 6 ore: " + sonno);
+  assert.equal(e.state.need, 480, "il bisogno di chi guarda torna com'era");
+  assert.ok(!e.state.stima, "la stima non resta accesa");
+});
+
+test("partner: il mio diario, il mio debito e il mio impegno non entrano nel suo piano", () => {
+  const sh = { N: { n: "Notte", s: 1320, e: 1800 } };
+  const cfg = { pattern: "RRRRRRRR", anchor: "2026-11-01", focus: "2026-11-01T12:00:00", shifts: sh, freeBed: "23:30", freeWake: "07:30", pPattern: "NNRR", pAnchor: "2026-10-30", pShifts: sh };
+  const vuoto = createEngine(cfg);
+  const mio = createEngine({ ...cfg, beds: { "2026-10-30": "03:00", "2026-10-31": "03:00", "2026-11-01": "03:00" }, wakes: { "2026-10-30": "07:00", "2026-10-31": "07:00", "2026-11-01": "07:00" } });
+  const di = (e) => e.asPartner(() => { const P = e.plan(); return JSON.stringify([P.s.onset, P.s.dur, P.naps.map(n => [n.a, n.b])]); });
+  assert.equal(di(mio), di(vuoto), "con un diario corto il piano di lei non cambia");
+  assert.deepEqual(Object.keys(mio.state.wakes), ["2026-10-30", "2026-10-31", "2026-11-01"], "il mio diario è intatto dopo");
+});
