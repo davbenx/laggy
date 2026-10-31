@@ -21,7 +21,7 @@ async function testo(n, votoCorta, votoLunga, casuale){
   const t=await p.evaluate(()=>document.querySelector("#andamenti").innerText); await ctx.close(); return t;
 }
 const vero=await testo(24, 2, 4, false);
-ok(/Dopo le notti in cui dormi almeno 45 minuti meno del previsto, il tuo voto scende in media a 2,0 \(contro 4,0 dopo le altre\)/.test(vero), "un legame vero (notti corte → voto 2, le altre → 4, 24 giorni): la frase compare con i numeri giusti");
+ok(/Quando dormi quanto il piano propone, il tuo voto è in media 4,0 \(dopo le notti più corte di almeno 45 minuti, 2,0\)/.test(vero), "un legame vero (notti corte → voto 2, le altre → 4, 24 giorni): la frase compare con i numeri giusti");
 const contrario=await testo(24, 4, 2, false);
 ok(!/Curioso|voto scende|Dopo le notti in cui/.test(contrario), "legame contrario (dopo le notti corte il voto è più alto): niente, nemmeno «Curioso»");
 const pochi=await testo(10, 2, 4, false);

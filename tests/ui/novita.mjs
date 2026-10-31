@@ -30,7 +30,7 @@ const aperto=p=>p.evaluate(()=>!document.querySelector("#novitaModal").hidden);
   await p.evaluate(()=>document.querySelector('[data-tab="oggi"]'))
   await p.context().close(); }
 { const p=await apri(ST(), {novitaViste:"2026-10-27"});
-  ok(await aperto(p) && await p.evaluate(()=>{ const t=document.querySelector("#novitaLista").textContent; return document.querySelectorAll("#novitaLista b").length===4 && /Il conto del sonno, più chiaro/.test(t) && /Persone a portata di mano/.test(t) && /Collegamenti dai popup/.test(t) && /Il perché in un foglio/.test(t) && !/Copia completa su file/.test(t) && !/colore per ogni turno/.test(t); }), "chi ha già letto la versione prima vede solo le righe nuove (le quattro più recenti)");
+  ok(await aperto(p) && await p.evaluate(()=>{ const t=document.querySelector("#novitaLista").textContent; return document.querySelectorAll("#novitaLista b").length===4 && /Il conto del sonno, più chiaro/.test(t) && /Persone in Impostazioni/.test(t) && /Collegamenti dai popup/.test(t) && /Il perché in un foglio/.test(t) && !/Copia completa su file/.test(t) && !/colore per ogni turno/.test(t); }), "chi ha già letto la versione prima vede solo le righe nuove (le quattro più recenti)");
   ok(await p.evaluate(()=>{ const s=document.querySelector("#novitaModal .qs-sheet"); return s.getBoundingClientRect().height<720 && s.scrollTop===0; }), "e il foglio è corto e parte dall'inizio");
   await p.context().close(); }
 { const p=await apri(ST({firstSeenAt:iso(new Date())}));
@@ -54,8 +54,7 @@ const aperto=p=>p.evaluate(()=>!document.querySelector("#novitaModal").hidden);
 // persone: modifica, orari che restano suoi, sonno visibile
 { const p=await apri(ST({people:[{name:"Anna",pattern:"MPNSR",anchor:fa(1),wake:"07:00",bed:"23:00"}]}), {novitaViste:"2026-11-13"});
   await p.evaluate(()=>document.querySelector('[data-tab="turni"]').click()); await p.waitForTimeout(300);
-  await p.evaluate(()=>document.querySelector("#doPartner").click()); await p.waitForTimeout(400);
-  await p.evaluate(()=>document.querySelector("[data-partner-edit]").click()); await p.waitForTimeout(400);
+  await p.evaluate(()=>{ document.querySelector("#doOpzioni").click(); document.querySelector('[data-opzg-vai="persone"]').click(); }); await p.waitForTimeout(400);
   const riga=await p.evaluate(()=>document.querySelector("#wizPeopleList .diary")?.textContent||"");
   ok(/dorme 23:00–07:00/.test(riga) && await p.evaluate(()=>document.querySelectorAll("#wizPeopleList .diary .ptile").length===7), "nella lista si vede il suo sonno e i suoi prossimi sette giorni → "+riga.replace(/\s+/g," ").slice(0,90));
   await p.evaluate(()=>document.querySelector("[data-edit-persona]").click()); await p.waitForTimeout(500);
@@ -74,15 +73,15 @@ const aperto=p=>p.evaluate(()=>!document.querySelector("#novitaModal").hidden);
 // aggiungere «i tuoi stessi turni» copia gli orari
 { const p=await apri(ST(), {novitaViste:"2026-11-13"});
   await p.evaluate(()=>document.querySelector('[data-tab="turni"]').click()); await p.waitForTimeout(300);
-  await p.evaluate(()=>document.querySelector("#doPartner").click()); await p.waitForTimeout(400);
-  await p.evaluate(()=>document.querySelector("[data-partner-edit]").click()); await p.waitForTimeout(400);
+  await p.evaluate(()=>{ document.querySelector("#doOpzioni").click(); document.querySelector('[data-opzg-vai="persone"]').click(); }); await p.waitForTimeout(400);
   await p.evaluate(()=>{ document.querySelector('[data-pvia="mine"]').click(); document.querySelector("#personaName").value="Luca"; });
   await p.evaluate(()=>document.querySelector("#doConfirmPersona").click()); await p.waitForTimeout(500);
   ok(await p.evaluate(()=>{ const s=JSON.parse(localStorage.getItem("nt:state")); const per=s.pPattern ? {shifts:s.pShifts} : s.people[0]; return !!(per.shifts && per.shifts.N && per.shifts.N.s===1320); }), "«I tuoi stessi turni» copia i tuoi orari: non li segue");
   await p.context().close(); }
-// calendario di coppia sopra «Condividi»
+// calendario di coppia nel gruppo Persone di Impostazioni
 { const p=await apri(ST({people:[{name:"Anna",pattern:"MPNSR",anchor:fa(1)}]}), {novitaViste:"2026-11-13"});
-  ok(await p.evaluate(()=>{ const a=document.querySelector("#piuCal"), b=document.querySelector("#partnerShare"); return !!a && !!b && (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING)!==0; }), "il calendario di coppia sta sopra «Condividi»");
+  await p.evaluate(()=>{ document.querySelector("#doOpzioni").click(); document.querySelector('[data-opzg-vai="persone"]').click(); }); await p.waitForTimeout(400);
+  ok(await p.evaluate(()=>{ const g=document.querySelector('[data-opzg="persone"]'); const c=document.querySelector("#piuCal"); return !!c && g.contains(c) && getComputedStyle(c).display!=="none"; }), "il calendario di coppia sta in Impostazioni › Persone, sotto la lista");
   await p.context().close(); }
 
 console.log("errori", errs); ok(errs.length===0, "nessun errore di pagina"); await b.close();

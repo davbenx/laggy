@@ -30,6 +30,6 @@ ok(tTurni<2000, "Turni con due anni di diario e otto colleghi: "+tTurni+" ms (li
 ok(r[2]<500, "render() in Turni, CPU 4×: mediana "+r[2]+" ms (limite 500)");
 ok(tAnd<2500 && /\d|✓/.test(pag.num) && !/NaN|undefined/.test(pag.testo), "«Sonno e carico» si apre in "+tAnd+" ms con i numeri veri ("+pag.num.trim()+")");
 const n=pag.num.trim().replace(/^[-+−]\s*/,"");
-ok(/Ti mancano|in pari/.test(anteprima) && (anteprima.includes(n) || /in pari$/.test(anteprima)), "anteprima in Turni coerente con la pagina: «"+anteprima+"»");
+ok(/sonno da recuperare|in pari/.test(anteprima) && (anteprima.includes(n) || /in pari$/.test(anteprima)), "anteprima in Turni coerente con la pagina: «"+anteprima+"»");
 ok(errs.length===0, "nessun errore"+(errs.length?": "+errs.slice(0,2).join(" | "):""));
 await b.close();

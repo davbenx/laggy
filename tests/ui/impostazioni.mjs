@@ -1,4 +1,4 @@
-// Impostazioni: sei voci con il valore (niente pagina lunga), ognuna apre il suo gruppo; indietro torna all'elenco;
+// Impostazioni: sette voci con il valore (niente pagina lunga), ognuna apre il suo gruppo; indietro torna all'elenco;
 // «I tuoi turni»: orari e «oggi è qui» sulla pagina, con «Annulla»; minuti con − e +; scelte a tasti; «Momenti migliori».
 import pw from "./_pw.mjs";
 import { nativo } from "./_nativo.mjs";
@@ -15,7 +15,7 @@ await p.goto("http://localhost:8766/index.html"); await p.waitForTimeout(1000);
 const stato=()=>p.evaluate(()=>JSON.parse(localStorage.getItem("nt:state")));
 const vis=s=>p.evaluate(s=>{ const e=document.querySelector(s); return !!e && !e.hidden && e.offsetParent!==null; }, s);
 await p.evaluate(()=>document.querySelector("#doOpzioni").click()); await p.waitForTimeout(400);
-ok(await p.evaluate(()=>[...document.querySelectorAll("#opzHub .opz-hub-r b")].map(e=>e.textContent).join("|")==="Turni e ciclo|Le tue abitudini|Promemoria e collegamenti|Cosa vedi nel piano|Dati e privacy|Aiuto e novità"), "Impostazioni: sei voci");
+ok(await p.evaluate(()=>[...document.querySelectorAll("#opzHub .opz-hub-r b")].map(e=>e.textContent).join("|")==="Turni e ciclo|Le tue abitudini|Persone|Promemoria e collegamenti|Cosa vedi nel piano|Dati e privacy|Aiuto e novità"), "Impostazioni: sette voci");
 ok(await p.evaluate(()=>/MMPPNNRR|oggi/.test(document.querySelector("#opzHub").innerText) && /Sonno 23:30 → 07:30/.test(document.querySelector("#opzHub").innerText)), "ognuna col suo valore");
 ok(await p.evaluate(()=>document.documentElement.scrollHeight<=window.innerHeight+4), "la pagina sta in una schermata, senza scorrere");
 ok(!(await vis("#opzFunzioni")) && !(await vis("#opzPianoVoci")) && !(await vis("#doCancellaTutto")), "i gruppi non si vedono finché non li apri");

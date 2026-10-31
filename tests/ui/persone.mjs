@@ -1,4 +1,4 @@
-// Turni: «Sonno e carico» in alto, «Persone» nella griglia; un tocco apre l'elenco; «Rimuovi» nel foglio di modifica.
+// Turni: «Sonno e carico» e «Tempo libero» in alto; le persone si gestiscono in Impostazioni › Persone; «Rimuovi» nel foglio di modifica.
 import pw from "./_pw.mjs";
 const ok=(c,m)=>console.log((c?"✔ ":"✘ ")+m);
 const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
@@ -15,17 +15,22 @@ async function apri(people){
   await p.evaluate(()=>document.querySelector('[data-tab="turni"]').click()); await p.waitForTimeout(400);
   return p;
 }
+const vaiPersone=p=>p.evaluate(()=>{ document.querySelector("#doOpzioni").click(); document.querySelector('[data-opzg-vai="persone"]').click(); });
 { const p=await apri([]);
-  const l=await p.evaluate(()=>{ const t=document.querySelector("#doAndamenti"), g=document.querySelector("#strumenti"); return {topPrimaDellaGriglia:!!(t.compareDocumentPosition(g)&Node.DOCUMENT_POSITION_FOLLOWING), fuoriGriglia:!g.contains(t), griglia:[...g.querySelectorAll(".tsec")].map(e=>e.id), sub:document.querySelector("#doPersoneSub").textContent}; });
-  ok(l.topPrimaDellaGriglia && l.fuoriGriglia, "«Sonno e carico» è una riga sopra la griglia");
-  ok(JSON.stringify(l.griglia)===JSON.stringify(["doPartner","doPersone","doFerie","doScambioTurno"]), "la griglia 2×2 ha Tempo libero, Persone, Ferie, Cambio turno → "+l.griglia.join(","));
-  ok(l.sub==="Aggiungi qualcuno", "senza persone: «Aggiungi qualcuno»");
-  await p.evaluate(()=>document.querySelector("#doPersone").click()); await p.waitForTimeout(500);
-  ok(await p.evaluate(()=>!document.querySelector("#vederciPagina").hidden && !document.querySelector("#opzBoxPersone").hidden), "un tocco su Persone apre la pagina con l'elenco già aperto");
+  const l=await p.evaluate(()=>{ const a=document.querySelector("#doAndamenti"), tl=document.querySelector("#doPartner"), g=document.querySelector("#strumenti"); return {ordine:!!(a.compareDocumentPosition(tl)&Node.DOCUMENT_POSITION_FOLLOWING) && !!(tl.compareDocumentPosition(g)&Node.DOCUMENT_POSITION_FOLLOWING), fuoriGriglia:!g.contains(a)&&!g.contains(tl), griglia:[...g.querySelectorAll(".tsec")].map(e=>e.id), persone:!!document.querySelector("#doPersone")}; });
+  ok(l.ordine && l.fuoriGriglia, "«Sonno e carico» e «Tempo libero» sono due righe sopra la griglia");
+  ok(JSON.stringify(l.griglia)===JSON.stringify(["doFerie","doScambioTurno"]) && !l.persone, "la griglia ha Ferie e Cambio turno, senza riquadro Persone → "+l.griglia.join(","));
+  await p.evaluate(()=>document.querySelector("#doPartner").click()); await p.waitForTimeout(400);
+  ok(await p.evaluate(()=>!document.querySelector("#opzBoxPersone") || document.querySelector("#vederciPagina").querySelector("#opzBoxPersone")===null), "la pagina del tempo libero non contiene più la gestione delle persone");
+  ok(await p.evaluate(()=>/Aggiungi qualcuno/.test(document.querySelector("#partner").innerText)), "senza persone: il link «Aggiungi qualcuno →»");
+  await p.evaluate(()=>document.querySelector("[data-partner-edit]").click()); await p.waitForTimeout(500);
+  ok(await p.evaluate(()=>document.body.classList.contains("opz-g-persone") && document.querySelector("#opzioni .tab-title").textContent==="Persone"), "il link porta a Impostazioni › Persone");
   await p.context().close(); }
 { const p=await apri([{name:"Anna",pattern:"NNRR",anchor:fa(2)},{name:"Luca",pattern:"MMRR",anchor:fa(1)},{name:"Marta",pattern:"PPRR",anchor:fa(0)}]);
-  ok(await p.evaluate(()=>document.querySelector("#doPersoneSub").textContent)==="Anna, Luca +1", "con tre persone: «Anna, Luca +1»");
-  await p.evaluate(()=>document.querySelector("#doPersone").click()); await p.waitForTimeout(500);
+  await p.evaluate(()=>document.querySelector("#doOpzioni").click()); await p.waitForTimeout(300);
+  ok(await p.evaluate(()=>/Persone[\s\S]*Anna, Luca \+1/.test(document.querySelector("#opzHub").innerText)), "in Impostazioni la riga «Persone» mostra «Anna, Luca +1»");
+  await p.evaluate(()=>document.querySelector('[data-opzg-vai="persone"]').click()); await p.waitForTimeout(400);
+  ok(await p.evaluate(()=>document.querySelectorAll("#wizPeopleList [data-edit-persona]").length===3), "il gruppo mostra le tre persone con modifica");
   await p.evaluate(()=>document.querySelector('[data-edit-persona="1"]').click()); await p.waitForTimeout(400);
   ok(await p.evaluate(()=>!document.querySelector("#rimuoviPersona").hidden), "modificando una persona compare «Rimuovi questa persona»");
   await p.evaluate(()=>document.querySelector("#rimuoviPersona").click()); await p.waitForTimeout(400);
