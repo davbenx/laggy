@@ -4,6 +4,7 @@ Fatto nella 1.1.1 (non serve più): tolto il vecchio wizard nascosto; suggerimen
 (sveglia, voto dal widget); il giorno di Oggi segue il tempo; cambio d'ora.
 
 ## Subito, sul telefono vero (nessun codice)
+- **1.3.10** (icona, palette blu notte, debito di sonno, pisolino in più): provare su un dispositivo vero l'icona del launcher (adattiva e a tema) e lo splash, i colori nei due temi, il calcolo del debito su qualche giorno di diario e «+ Hai fatto un altro pisolino?».
 - Sveglia nell'Orologio dal piano («Metti la sveglia» sotto Dormi) e voto del sonno dal widget: mai provati su un dispositivo.
 - Ritorno in primo piano dopo ore: data, «Adesso» e striscia si aggiornano da soli.
 - Schermata dopo uno smonto (es. 06:30): «Ancora giovedì…», «Poi · a letto alle…», «Dovresti dormire…».
@@ -91,6 +92,18 @@ Parte minimale e aggiunge un pezzo alla volta con l'altezza (`WidgetPiano`): **a
 - [ ] **Sonno da Health Connect** (solo Android, in sola lettura, spento di default): specifiche nella sezione dedicata sotto. Non iniziato.
 - [ ] **App Android 1.3.7** (quando si decide): widget con le facce dell'energia da 90 minuti dopo la sveglia (`WidgetStato`, campo `en`), mese a sei settimane e le altre modifiche del widget già nel ramo `main`.
 - [ ] **Idea dai feedback, da valutare come progetto a parte**: un foglio di squadra stile Excel (chi è in ferie, una data per riunioni o corsi fra squadre diverse) e l'integrazione con l'ecosistema iOS. Richiede dati condivisi fra persone: oggi tutto resta sul telefono, e la privacy dell'app si regge su questo.
+- [ ] **«Il tuo sonno» più lean** (valutato il 31/10/2026, non iniziato): oggi, nel caso più ricco, ~650 px e 12 elementi toccabili (sonno, messaggi sul debito, «Cosa ha cambiato il piano?», energia a cinque facce, domanda del pisolino, «+ un altro pisolino», «Dopo il turno, come dormi?» da 213 px, sveglia). Obiettivo: ~400 px e ~7 elementi; il caso quotidiano (sonno + energia) in due righe. Si fa a gradi, con confronto prima/dopo da guardare insieme:
+  1. **Una sola riga di stato** calcolata dal debito («Ti mancano 2h · stanotte +45 min») al posto dei quattro messaggi che si sovrappongono (`debitoMotivo`, notte allungata, nessuno spazio, «hai dormito meno del previsto»), con «Perché?» che apre il dettaglio nel foglio già esistente.
+  2. **«Dopo il turno, come dormi?» compatta**: scelta già fatta = una riga «In due tempi · cambia», che si espande solo al tocco; la spiegazione lunga solo la prima volta (c'è già `smontoScelto`).
+  3. **Energia in una riga compatta** di cinque icone (i nomi restano come nome accessibile); testo «Fra poco…» più breve.
+  4. **«Cosa ha cambiato il piano?»** come secondo livello della riga del sonno, solo se la notte è andata molto fuori piano.
+  5. **Pisolino previsto e «+ un altro pisolino» insieme**; il link in più solo se non c'è niente da confermare.
+  6. **Ordine dinamico per urgenza**: pisolino già cominciato › sonno › energia › scelta sul turno.
+  Da non toccare: «Sì, così» in un tocco, orari reali, risposte che si salvano subito.
+- [ ] **Colori del widget e risorse Android** (`widget_colori.xml`: `w_ok` ancora `#2E7D4F`, gli altri `w_*`) allineati alla palette dal logo; vale solo con il prossimo AAB. Controllare anche `og-image`, le grafiche Play e il sito.
+- [ ] **Accessibilità, resti dell'audit del 31/10/2026** (axe: zero violazioni su 14 schermate, tema scuro e chiaro): provare a mano con TalkBack (ordine di lettura, nomi dei pulsanti, annunci dei fogli); righe del grafico «Ore» alte 30 px (passano i 24 px di WCAG 2.2, non i 44 consigliati); etichette degli assi dei grafici a 10–11,5 px. Axe non copre il tono dei messaggi né l'uso con testo ingrandito dal sistema Android.
+- [ ] **Debito di sonno, da tarare sui dati reali**: `rendimento` 0,5, soglie 60/180/300 min, tetto 10 h e finestra 14 giorni sono scelte prudenti, non valori misurati (`debito.js`, `DEBITO`, `bonusDebito` in `engine.js`). La notte con la sola sveglia annotata non entra nel bonus della notte (entra nel pisolino). Rivedere dopo qualche settimana di diari veri; se serve, rendere il debito visibile anche in Oggi, non solo in Andamenti.
+- [ ] **Riga in «Novità»** per debito unico, pisolino in più e palette nuova: aggiungerla alla prossima versione (l'`id` di `NOVITA` è usato come «già visto» da quattro suite UI: `novita`, `collegamenti` e le altre che lo impostano; aggiornarle insieme).
 
 ## Idee per dopo (in ordine di valore/rischio, da rivedere con i dati reali)
 1. **Foto del foglio turni → importazione** (OCR sul telefono, nessun invio): per chi riceve i turni variabili su carta o PDF. È il punto più faticoso di chi non ha un ciclo.
