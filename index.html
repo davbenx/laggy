@@ -3696,6 +3696,7 @@ function cards(P){
     sc.sub="È lo smonto, il primo dei due giorni di rientro. Dormi poco stamattina, poi non dormire fino a sera: costa una giornata e te ne restituisce due, e domani sei di nuovo sugli orari della maggior parte delle persone.";
     sc.rows.push(["Nel pomeriggio","niente pisolini dopo lo smonto, per quanto costi"]);
     sc.rows.push(["Stasera","a letto verso "+hhmm(NT.at(P.S,1).onset)+", anche senza sonno"]);
+    sc.rows.push(["Sveglia","sempre alla stessa ora nei giorni di smonto, con luce appena sveglio: è ciò che riallinea meglio l'orologio"]);
     sc.why="Dormire fino a pomeriggio dopo l'ultima notte sembra la scelta giusta ed è la trappola classica: sposta l'orologio ancora più in là e ti toglie il sonno la notte dopo, bruciando anche il secondo giorno di riposo.";
     sc.cite="Minors & Waterhouse 1981 · Smith, Fogg & Eastman 2009";
   }else if(lateStart){
@@ -4388,7 +4389,7 @@ function diaryReminder(P, CARDS){
   if(logged && P){
     const extraN=P.s && P.s.meta && P.s.meta.debitoExtra;
     if(extraN){ stato="Da recuperare: "+hm(P.debitoMin)+" di sonno · stanotte +"+extraN+" min";
-      statoPerche="Con più di tre ore di debito un pisolino non basta, e accorcerebbe il sonno di stanotte: per questo il piano allunga di "+extraN+" minuti la prima notte libera. Il debito cala solo dormendo: una notte lunga ne recupera metà, non azzera una settimana."; }
+      statoPerche="Con più di tre ore di debito un pisolino non basta, e accorcerebbe il sonno di stanotte: per questo il piano anticipa di "+extraN+" minuti l'ora di letto. La sveglia resta la stessa, perché spostarla sposterebbe anche l'orologio del corpo."; }
     else if(napRec){ stato="Da recuperare: "+hm(napRec.debito)+" di sonno · pisolino alle "+hhmm(napRec.a);
       statoPerche=debitoMotivo(napRec)+" Il pisolino non è un extra: rimette a posto il conto prima che si sommi a domani. Quando comincia ti chiedo se l'hai fatto."; }
     else if(P.debitoScoperto>0){ stato="Da recuperare: "+hm(P.debitoScoperto)+" di sonno · oggi non c'è spazio per un pisolino";
@@ -4398,7 +4399,7 @@ function diaryReminder(P, CARDS){
     // le notti che pesano di più: il «Perché?» mostra da dove viene il numero
     const notti=(P.debitoNotti||[]).map(x=>{ const g=new Date(x.date+"T12:00:00").toLocaleDateString(LINGUA,{weekday:"short",day:"numeric",month:"short"});
       return '<div class="row"><b>'+esc(g.charAt(0).toUpperCase()+g.slice(1))+'</b><span>'+hm(x.totale)+' su '+hm(x.meta)+' (–'+hm(x.manca)+')</span></div>'; }).join("");
-    if(stato) infoVoci.set("debito",{t:"Il tuo conto del sonno",h:'<p class="ed-sub">'+esc(statoPerche)+'</p>'+(notti?'<p class="ed-sub" style="margin-bottom:4px">Le notti che pesano di più, rispetto al sonno che il piano proponeva:</p><div class="rows">'+notti+'</div>':'')+'<p class="ed-sub" style="margin-top:10px">Sono stime: il conto conta le notti che annoti degli ultimi 14 giorni, e il recupero vale la metà.</p>'});
+    if(stato) infoVoci.set("debito",{t:"Il tuo conto del sonno",h:'<p class="ed-sub">'+esc(statoPerche)+'</p>'+(notti?'<p class="ed-sub" style="margin-bottom:4px">Le notti che pesano di più, rispetto al sonno che il piano proponeva:</p><div class="rows">'+notti+'</div>':'')+'<p class="ed-sub" style="margin-top:10px"><b>Come si recupera.</b> Non un\'ora per un\'ora: dopo una privazione il sonno diventa prima più profondo e poi più lungo, quindi già una notte normale ne smaltisce una parte. Un debito di una notte si chiude in 1–2 notti; uno accumulato in più giorni chiede da 4 a 9 giorni di sonno regolare. Il recupero del weekend riporta la vigilanza, ma non azzera tutti gli effetti (per esempio sul metabolismo). Non è ancora chiaro se recuperare di tanto in tanto compensi anni di privazione cronica: per questo contano anche la sveglia regolare e la luce.</p><p class="ed-sub" style="margin-top:10px">Sono stime: il conto usa le notti che annoti degli ultimi 14 giorni.</p>'});
   }
   const statoHtml = stato ? '<div class="drem-rec drem-stato"><span>'+esc(stato)+'</span><button type="button" class="lnk" data-info-debito="1">Perché?</button></div>' : "";
   if(dnum(f)===dnum(giornoVero())) setBadge(logged?0:1);

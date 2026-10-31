@@ -434,7 +434,7 @@ import { debitoSonno } from "../debito.js";
 test("debito: le notti corte si sommano, quelle lunghe ripagano solo in parte, mai sotto zero", () => {
   const d = (wakes, beds) => debitoSonno({ wakes, beds }, 480, "2026-10-30").min;
   assert.equal(d({ "2026-10-29": "06:00", "2026-10-30": "06:00" }, { "2026-10-29": "00:00", "2026-10-30": "00:00" }), 240, "due notti da 6 ore: 2+2 ore");
-  assert.equal(d({ "2026-10-29": "06:00", "2026-10-30": "10:00" }, { "2026-10-29": "00:00", "2026-10-30": "00:00" }), 120 - 60, "10 ore dopo 6: 2 ore − metà delle 2 in più");
+  assert.equal(d({ "2026-10-29": "06:00", "2026-10-30": "10:00" }, { "2026-10-29": "00:00", "2026-10-30": "00:00" }), Math.round(120 * 0.65 - 60), "10 ore dopo 6: il 35% si recupera comunque, e la metà delle 2 ore in più");
   assert.equal(d({ "2026-10-30": "12:00" }, { "2026-10-30": "00:00" }), 0, "12 ore da sole non vanno sotto zero");
   assert.equal(debitoSonno({ wakes: { "2026-10-01": "05:00" }, beds: { "2026-10-01": "00:00" } }, 480, "2026-10-30").min, 0, "una notte di 29 giorni fa è fuori finestra");
 });
@@ -493,8 +493,65 @@ function debitoDopo(pattern, fb, fw, dormiMeno) {
   return createEngine({ ...cfg, beds, wakes, focus: f }).plan().debitoMin;
 }
 for (const [pattern, fb, fw] of [["MPNSR", "00:30", "09:45"], ["MPNSR", "23:30", "07:30"], ["NNNRR", "23:30", "07:30"]]) {
-  test(`debito ${pattern} ${fb}→${fw}: seguire il piano per 14 giorni non lascia debito, un'ora in meno ogni notte sì`, () => {
+  test(`debito ${pattern} ${fb}→${fw}: seguire il piano per 14 giorni non lascia debito, dormire meno del piano ogni notte sì`, () => {
     assert.ok(debitoDopo(pattern, fb, fw, 0) <= 30, "segue il piano: " + debitoDopo(pattern, fb, fw, 0));
-    assert.ok(debitoDopo(pattern, fb, fw, 60) >= 180, "un'ora in meno ogni notte: " + debitoDopo(pattern, fb, fw, 60));
+    assert.ok(debitoDopo(pattern, fb, fw, 60) >= 120, "un'ora in meno ogni notte: " + debitoDopo(pattern, fb, fw, 60));
+    assert.ok(debitoDopo(pattern, fb, fw, 120) >= 300, "due ore in meno ogni notte: " + debitoDopo(pattern, fb, fw, 120));
   });
 }
+
+// ── Recupero: non 1:1, e anche una notte normale ne smaltisce una parte (intensità del sonno prima della durata) ──
+function giorniDebito(notti) {
+  // notti: ore dormite per notte, in ordine; bisogno 8 h. Ritorna il debito dopo ogni notte (minuti).
+  const beds = {}, wakes = {}, out = [];
+  notti.forEach((h, i) => { const d = new Date("2026-10-01T12:00:00"); d.setDate(d.getDate() + i); const k = d.toISOString().slice(0, 10);
+    beds[k] = "00:00"; wakes[k] = String(Math.floor(h)).padStart(2, "0") + ":" + String(Math.round((h % 1) * 60)).padStart(2, "0");
+    out.push(debitoSonno({ beds, wakes }, 480, k).min); });
+  return out;
+}
+test("recupero acuto: dopo una notte molto corta, 1–2 notti normali ne smaltiscono la maggior parte", () => {
+  const d = giorniDebito([4, 8, 8]);          // 4 ore di sonno, poi due notti da 8
+  assert.equal(d[0], 240);
+  assert.ok(d[2] <= 110, "dopo due notti normali resta meno della metà: " + d[2]);
+});
+test("recupero cronico: -1,5 h per sei notti (9 h) si smaltiscono in 4–9 giorni di sonno adeguato, non in uno", () => {
+  const d = giorniDebito([6.5, 6.5, 6.5, 6.5, 6.5, 6.5, 8, 8, 8, 8, 8, 8, 8, 8, 8]);
+  assert.equal(d[5], 540, "sei notti corte: 9 ore");
+  assert.ok(d[6] > 300, "una notte sola non basta: " + d[6]);
+  assert.ok(d[9] <= 120, "dopo quattro notti adeguate resta circa un'ora o due: " + d[9]);
+  assert.ok(d[14] <= 20, "dopo nove notti adeguate è praticamente chiuso: " + d[14]);
+});
+
+// ── Logiche di recupero: sveglia ferma, sonno profilattico, pisolino da 90 minuti a distanza ──
+test("debito alto: si anticipa l'addormentamento e la sveglia resta ferma (niente social jetlag)", () => {
+  const base = { pattern: "PRRMMRR", anchor: "2026-10-30", focus: "2026-10-30T11:00:00", freeBed: "00:30", freeWake: "08:30",
+    shifts: { P: { n: "Pomeriggio", s: 840, e: 1260 }, M: { n: "Mattino", s: 420, e: 840 } } };
+  const tre = { beds: { "2026-10-28": "02:30", "2026-10-29": "02:30", "2026-10-30": "02:30" }, wakes: { "2026-10-28": "08:30", "2026-10-29": "08:30", "2026-10-30": "08:30" } };
+  const senza = createEngine({ ...base }).plan(), con = createEngine({ ...base, ...tre }).plan();
+  assert.ok(con.s.meta.debitoExtra >= 15 && con.s.meta.debitoExtra <= 45, "anticipo di 15–45 minuti: " + con.s.meta.debitoExtra);
+  assert.equal(con.s.onset + con.s.dur, senza.s.onset + senza.s.dur, "la sveglia di domani non si sposta");
+  assert.equal(con.s.onset, senza.s.onset - con.s.meta.debitoExtra, "si va a letto prima");
+});
+
+test("sleep banking: nei giorni liberi prima di un blocco di notti si dorme un'ora in più, e non senza il blocco", () => {
+  const sh = { N: { n: "Notte", s: 1320, e: 1800 } };
+  const cfg = { pattern: "RRRNNNN", anchor: "2026-11-02", focus: "2026-11-02T12:00:00", shifts: sh, freeBed: "23:30", freeWake: "07:30" };
+  const e = createEngine(cfg);
+  const dur = e.plan().s.dur;
+  e.CFG.bancoGiorni = 0; const senza = e.plan().s.dur; e.CFG.bancoGiorni = 4;
+  assert.ok(dur >= senza + 30, "con il blocco di notti in arrivo si dorme di più: " + senza + " → " + dur);
+  const nessuna = createEngine({ ...cfg, pattern: "RRRRRRRRR" }).plan().s.dur;
+  assert.equal(nessuna, senza, "senza notti in arrivo non c'è nessuna estensione");
+});
+
+test("un ciclo intero di pisolino solo a distanza dal sonno principale: sotto le 4 ore dalla sveglia, 20 minuti", () => {
+  const sh = { M: { n: "Mattino", s: 420, e: 840 }, P: { n: "Pomeriggio", s: 840, e: 1260 }, N: { n: "Notte", s: 1320, e: 1800 } };
+  let controllati = 0;
+  for (const pattern of ["NNRR", "NNNRR", "MPNSR", "NNNNRR", "RNNR"]) for (let g = 0; g < 14; g++) {
+    const d = new Date("2026-10-05T12:00:00"); d.setDate(d.getDate() + g);
+    const P = createEngine({ pattern, anchor: "2026-10-05", shifts: sh, freeBed: "23:30", freeWake: "07:30", focus: d }).plan();
+    for (const n of P.naps) if (n.ore !== undefined && !n.corto && !n.turno && !n.rep && !n.lungo) { controllati++; const len = n.b - n.a;
+      assert.ok(len < 60 || n.a >= P.wake + 240, `${pattern} giorno ${g}: pisolino di ${len} min alle ${n.a}, sveglia ${P.wake}`); }
+  }
+  assert.ok(controllati > 0, "almeno un pisolino prima del turno controllato");
+});
