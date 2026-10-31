@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="w_sfondo">#1C1F25</color>
-    <color name="w_chip">#2A2F37</color>
+    <color name="w_sfondo">#111E31</color>
+    <color name="w_chip">#182A42</color>
     <color name="w_ink">#E6E8EB</color>
-    <color name="w_dim">#A8B0B8</color>
-    <color name="w_accento">#8CA4C0</color>
-    <color name="w_t_sonno">#8CA4C0</color>
+    <color name="w_dim">#A9B6C8</color>
+    <color name="w_accento">#8DB4E2</color>
+    <color name="w_t_sonno">#8DB4E2</color>
     <color name="w_t_turno">#FF9068</color>
     <color name="w_t_caffe">#D9A06B</color>
     <color name="w_t_luce">#F2C14E</color>
-    <color name="w_t_pisolino">#A9BED6</color>
+    <color name="w_t_pisolino">#B3CCEA</color>
     <color name="w_t_rientro">#FF6B5C</color>
     <color name="w_cella_lavoro">#7A3414</color>
     <color name="w_cella_lavoro_t">#FFD9C4</color>
@@ -23,7 +23,7 @@
     <color name="w_cella_p_lavoro_t">#D4F7F0</color>
     <color name="w_cella_p_notte">#237A70</color>
     <color name="w_cella_p_notte_t">#F2FFFD</color>
-    <color name="w_cella_riposo">#2A2F37</color>
+    <color name="w_cella_riposo">#182A42</color>
     <color name="w_ok">#5FBF85</color>
     <color name="w_su_accento">#0E1116</color>
     <color name="w_pl_lavoro">#173B36</color>

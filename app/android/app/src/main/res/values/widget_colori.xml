@@ -3,9 +3,9 @@
      widget segue il tema del telefono, come le app di sistema. -->
 <resources>
     <color name="w_sfondo">#FFFFFF</color>
-    <color name="w_chip">#EDF1F5</color>
-    <color name="w_ink">#15171A</color>
-    <color name="w_dim">#5C6670</color>
+    <color name="w_chip">#EBF0F6</color>
+    <color name="w_ink">#101A2A</color>
+    <color name="w_dim">#56657A</color>
     <color name="w_accento">#2D5A8C</color>
     <color name="w_t_sonno">#2D5A8C</color>
     <color name="w_t_turno">#D9541F</color>
@@ -25,8 +25,8 @@
     <color name="w_cella_p_lavoro_t">#074F46</color>
     <color name="w_cella_p_notte">#7FD0C0</color>
     <color name="w_cella_p_notte_t">#063F38</color>
-    <color name="w_cella_riposo">#EDF1F5</color>
-    <color name="w_ok">#2E7D4F</color>
+    <color name="w_cella_riposo">#EBF0F6</color>
+    <color name="w_ok">#2B7549</color>
     <color name="w_su_accento">#FFFFFF</color>
     <color name="w_pl_lavoro">#D8F0EA</color>
     <color name="w_pl_lavoro_t">#0F6B60</color>
