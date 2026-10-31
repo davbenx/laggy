@@ -38,4 +38,14 @@ const vaiPersone=p=>p.evaluate(()=>{ document.querySelector("#doOpzioni").click(
   ok(JSON.stringify(nomi)==='["Anna","Marta"]', "«Rimuovi» toglie proprio lei (Luca) → "+JSON.stringify(nomi));
   ok(await p.evaluate(()=>document.querySelector("#rimuoviPersona").hidden), "e il pulsante sparisce");
   await p.context().close(); }
+// la cornice del calendario di coppia: nascosta senza persone, compare subito con la prima, sparisce con l'ultima
+{ const p=await apri([]);
+  await vaiPersone(p); await p.waitForTimeout(300);
+  const visibile=()=>p.evaluate(()=>{ const c=document.querySelector("#piuCal"); const r=c.getBoundingClientRect(); return getComputedStyle(c).display!=="none" && r.height>0; });
+  ok(!(await visibile()), "senza persone non c'è nessuna cornice vuota");
+  await p.evaluate(()=>{ document.querySelector('[data-pvia="mine"]').click(); document.querySelector("#personaName").value="Luca"; document.querySelector("#doConfirmPersona").click(); }); await p.waitForTimeout(600);
+  ok(await visibile() && await p.evaluate(()=>document.querySelector("#piuCalTx").innerText.trim().length>10), "aggiunta la prima persona il calendario di coppia compare subito, con il suo contenuto");
+  await p.evaluate(()=>document.querySelector("[data-remove-persona]").click()); await p.waitForTimeout(500);
+  ok(!(await visibile()), "tolta l'ultima persona la cornice sparisce");
+  await p.context().close(); }
 console.log("errori",errs); ok(errs.length===0,"nessun errore di pagina"); await b.close();

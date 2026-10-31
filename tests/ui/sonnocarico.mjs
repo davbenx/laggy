@@ -17,7 +17,7 @@ await p.goto("http://localhost:8765/index.html"); await p.waitForTimeout(1000);
 await p.evaluate(()=>document.querySelector('[data-tab="turni"]').click()); await p.waitForTimeout(300);
 await p.evaluate(()=>document.querySelector("#doAndamenti").click()); await p.waitForTimeout(500);
 const voci=await p.evaluate(()=>[...document.querySelectorAll("#andamenti .and-hub .opz-hub-r")].map(b=>({id:b.dataset.andSez, t:b.querySelector("b").textContent, r:b.querySelector(".opz-val").textContent})));
-ok(voci.length===4 && voci.every(v=>v.r.length>3), "un elenco di quattro voci come le Impostazioni, ognuna con la sua riga: "+voci.map(v=>v.t+" — "+v.r).join(" | "));
+ok(voci.length===5 && voci.every(v=>v.r.length>3), "un elenco di cinque voci come le Impostazioni, ognuna con la sua riga: "+voci.map(v=>v.t+" — "+v.r).join(" | "));
 ok(await p.evaluate(()=>!!document.querySelector("#andamenti .andamento-hero") && !document.querySelector(".and-det")), "in alto resta il sonno che ti manca; niente fisarmoniche");
 // una voce si apre nella sua pagina, con il titolo, e la freccia riporta all'elenco
 await p.click('[data-and-sez="orari"]'); await p.waitForTimeout(250);

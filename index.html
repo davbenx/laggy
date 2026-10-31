@@ -1043,7 +1043,7 @@ letter-spacing:.01em;padding:9px 0 8px;min-height:56px;cursor:pointer;position:r
 .tsec-top::after{content:"›";margin-left:auto;font-size:20px;color:var(--faint)}
 .tsec-top + .tsec-top{margin-top:10px}
 .tsec-top + .strumenti{margin-top:10px}
-body.tab-opzioni #opzioni #piuCal{display:block}   /* il calendario di coppia sta nel gruppo Persone */
+body.tab-opzioni #opzioni #piuCal:not([hidden]){display:block}   /* il calendario di coppia sta nel gruppo Persone (e resta nascosto senza persone) */
 .tsec-t{display:block;font-family:var(--serif);font-size:16px;font-weight:600;color:var(--ink)}
 .tsec-v{display:block;font-size:12.5px;color:var(--dim);margin-top:3px;line-height:1.35}
 .tsec-riga{margin-top:0}
@@ -4517,6 +4517,8 @@ function diaryReminder(P, CARDS){
   // L'ordine segue l'urgenza: un pisolino da confermare (il tempo scorre) prima dell'energia; altrimenti energia, poi i pisolini.
   x+= pend ? xNap+xEn : xEn+xNap;
   x+=xExtra;
+  // Alcol e pasto abbondante: solo per chi vuole capire i propri schemi, in un riquadro chiuso.
+  if(dnum(f) <= dnum(nowD)) x+='<details class="att-det"><summary>Altro da segnare</summary>'+attivitaHtml("alcol")+attivitaHtml("pasto")+'</details>';
   x+='</div>';
   return x;
 }
@@ -6043,12 +6045,36 @@ const STIMA_FIN="Una stima dai tuoi orari di sonno, non una misura né un consig
 // servono a due cose, un'informazione al momento e, con i giorni, vedere i tuoi schemi in Andamenti.
 // Le voci segnate di un giorno, solo quelle valide: un file ripristinato o un valore rotto non deve mai fermare il piano.
 const attGiorno=k=>{ const v=(state.attivita||{})[k]; return Array.isArray(v) ? v.filter(a=>a && typeof a==="object" && typeof a.t==="string" && /^\d\d:\d\d$/.test(a.fine||"")) : []; };
+function attSalva(sv){
+  const k=sv.dataset.attSalva, box=sv.closest("[data-att-box]")||document, ora=(box.querySelector("[data-att-ora]")||{}).value;
+  if(!/^\d\d:\d\d$/.test(ora||"")){ toast("Metti l'ora"); return; }
+  const voce={t:k, fine:ora};
+  const mi=+(box.querySelector("[data-att-min]")||{}).value, nz=+(box.querySelector("[data-att-n]")||{}).value, nota=((box.querySelector("[data-att-nota]")||{}).value||"").trim().slice(0,80);
+  if(mi>=5 && mi<=300) voce.min=Math.round(mi); if(nz>=1 && nz<=4) voce.n=nz; if(nota) voce.nota=nota;
+  const key=iso(state.focus), lista=attGiorno(key).filter(a=>a.t!==k); lista.push(voce); state.attivita[key]=lista;
+  store.set("attivita",state.attivita); apriFoglio("infoModal",false); render();
+  // Solo un'informazione, mai un giudizio: vicino al letto un allenamento intenso, un caffè o un pasto abbondante possono rallentare l'addormentamento.
+  let msg="Segnato";
+  try{ const P=NT.plan(), prima=(((P.s.onset-t(ora))%1440)+1440)%1440;
+    if(k==="intensa" && prima<60) msg="Segnato. Un allenamento intenso vicino al letto può rallentare l'addormentamento: luce soffusa e qualche minuto di calma aiutano.";
+    else if(k==="caffe" && prima<360) msg="Segnato. Un caffè a meno di 6 ore dal letto può rallentare l'addormentamento: dipende da persona a persona, e con i giorni vedrai il tuo schema.";
+    else if(k==="pasto" && prima<180) msg="Segnato. Un pasto abbondante vicino al letto può rendere il sonno meno riposante: una passeggiata leggera aiuta."; }catch(x){}
+  toast(msg);
+}
+function attAnnulla(an){
+  const key=iso(state.focus), k=an.dataset.attAnnulla; state.attivita[key]=attGiorno(key).filter(a=>a.t!==k); if(!state.attivita[key].length) delete state.attivita[key];
+  store.set("attivita",state.attivita); apriFoglio("infoModal",false); render();
+}
 const ABITUDINI={
   leggera:{ora:"Finito alle", fatto:"Fatto, finito alle", btn:"L'ho fatto", det:"min"},
   intensa:{ora:"Finito alle", fatto:"Fatto, finito alle", btn:"L'ho fatto", det:"min"},
-  caffe:{ora:"Ultimo caffè alle", fatto:"Ultimo caffè alle", btn:"L'ho preso", det:"n"}
+  caffe:{ora:"Ultimo caffè alle", fatto:"Ultimo caffè alle", btn:"L'ho preso", det:"n", nLab:"Quante tazze", u:["tazza","tazze"]},
+  luce:{ora:"Luce presa alle", fatto:"Luce presa alle", btn:"L'ho presa", det:"min", minLab:"Quanto è durata (minuti)"},
+  alcol:{ora:"Ultima bevanda alle", fatto:"Ultima bevanda alle", btn:"Segna", det:"n", nLab:"Quante", u:["bevanda","bevande"]},
+  pasto:{ora:"Pasto abbondante alle", fatto:"Pasto abbondante alle", btn:"Segna", det:"nota"}
 };
-function dettaglioAbitudine(a){ return a.min ? " · "+a.min+" min" : a.n ? " · "+a.n+(a.n===1?" tazza":" tazze") : ""; }
+function dettaglioAbitudine(a){ const c=ABITUDINI[a.t]||{}; return a.min ? " · "+a.min+" min" : a.n ? " · "+a.n+" "+((c.u||["","" ])[a.n===1?0:1]||"").trim() : ""; }
+// Una voce segnata: quello che si legge a posto (ora, dettagli, nota) e il suo «Annulla».
 function attivitaHtml(k){
   const c=ABITUDINI[k]; if(!c || dnum(state.focus)>dnum(giornoVero())) return "";
   const fatte=attGiorno(iso(state.focus)).filter(a=>a.t===k);
@@ -6056,10 +6082,12 @@ function attivitaHtml(k){
     return '<div class="att-riga"><span><span class="drem-ok">✓</span> '+c.fatto+' <b>'+esc(a.fine)+'</b>'+esc(dettaglioAbitudine(a))+(a.nota?' · '+esc(a.nota):'')+'</span><button type="button" class="lnk dim" data-att-annulla="'+k+'">Annulla</button></div>'; }
   const n=new Date(), adesso = dnum(state.focus)===dnum(n) ? hhmm(n.getHours()*60+n.getMinutes()) : "18:00";
   const det = c.det==="min"
-    ? '<label>Quanto è durato (minuti)<input type="number" inputmode="numeric" min="5" max="300" step="5" class="ora-in" data-att-min placeholder="facoltativo" aria-label="Durata in minuti"></label>'
-    : '<label>Quante tazze<select class="ora-in" data-att-n aria-label="Quante tazze"><option value="">facoltativo</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4 o più</option></select></label>';
-  return '<div class="att-riga"><label>'+c.ora+' <input type="time" class="ora-in" data-att-ora value="'+adesso+'" aria-label="'+c.ora+'"></label><button type="button" class="dbtn pri" data-att-salva="'+k+'">'+c.btn+'</button></div>'+
-    '<details class="att-det"><summary>Aggiungi dettagli</summary>'+det+'<label>Una nota<input type="text" maxlength="80" class="ora-in" data-att-nota placeholder="facoltativo" aria-label="Una nota"></label></details>';
+    ? '<label>'+(c.minLab||"Quanto è durato (minuti)")+'<input type="number" inputmode="numeric" min="5" max="300" step="5" class="ora-in" data-att-min placeholder="facoltativo" aria-label="Durata in minuti"></label>'
+    : c.det==="n"
+    ? '<label>'+c.nLab+'<select class="ora-in" data-att-n aria-label="'+c.nLab+'"><option value="">facoltativo</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4 o più</option></select></label>'
+    : '';
+  return '<div data-att-box><div class="att-riga"><label>'+c.ora+' <input type="time" class="ora-in" data-att-ora value="'+adesso+'" aria-label="'+c.ora+'"></label><button type="button" class="dbtn pri" data-att-salva="'+k+'">'+c.btn+'</button></div>'+
+    '<details class="att-det"><summary>Aggiungi dettagli</summary>'+det+'<label>Una nota<input type="text" maxlength="80" class="ora-in" data-att-nota placeholder="facoltativo" aria-label="Una nota"></label></details></div>';
 }
 const VOCI_FIN=[
   ["testa","Testa",ICON.mente,"pensare, studiare","Le ore in cui sei più lucido: almeno 90 minuti dopo il risveglio e 2 ore prima di dormire, fuori dal turno, dal viaggio e dai pasti. "+STIMA_FIN],
@@ -6297,7 +6325,7 @@ function renderEssenziale(P, CARDS){
         // frase() sceglieva sempre cd.val. Uniti senza il prefisso.
         const subLuce=[(cd.val||"").replace(/^Luce\s*/,""),cd.small].filter(Boolean).join(" · ");
         const seekBlk=(cd.blocks||[]).find(bl=>bl[0]==="seek");
-        voci.push({t, html:riga("luce","Luce",ora||"—",subLuce,false,ICON.sun,dettLuce,
+        voci.push({t, html:riga("luce","Luce",ora||"—",subLuce,false,ICON.sun,dettLuce+attivitaHtml("luce"),
           {a:cd.at, z:seekBlk?seekBlk[2]:undefined, poi:"luce dalle "+hhmm(cd.at)})});
         if(splitOra){
           const dettPenombra = righeFase(cd.rowsE)+percheOmbra;
@@ -7050,45 +7078,69 @@ function donateUrl(){ try{ return (window.NT_DONATE && window.NT_DONATE.url) || 
 // La frase della correlazione umore/debito — estratta a parte perché serve
 // sia se diventa il consiglio principale (in cima), sia se resta la sua
 // card descrittiva più sotto (quando qualcos'altro ha la priorità).
-// Il movimento fatto e il voto del giorno: stessa soglia di correlazioneVotoDebito (≥14 giorni con voto, ≥4 con e ≥4 senza movimento,
-// mezzo punto di differenza, mai se contrario). Solo ciò che i dati dell'utente dicono, senza cambiare il piano.
-function correlazioneMovimento(){
-  const att=state.attivita||{}, oggi=giornoVero(), coppie=[];
-  for(const k in diary){ const v=+diary[k]; if(!(v>=1&&v<=5)) continue;
-    const g=new Date(k+"T12:00:00"); if(!(dnum(oggi)-dnum(g)<=90 && dnum(g)<=dnum(oggi))) continue;
-    coppie.push({mosso:attGiorno(k).some(a=>a.t==='leggera'||a.t==='intensa')?1:0, voto:v}); }
-  if(coppie.length<14) return null;
-  const si=coppie.filter(c=>c.mosso), no=coppie.filter(c=>!c.mosso);
-  if(si.length<4 || no.length<4) return null;
-  const rho=spearman(coppie.map(c=>c.mosso), coppie.map(c=>c.voto));
-  if(!(rho>=2/Math.sqrt(coppie.length-1))) return null;
-  const media=a=>a.reduce((x,c)=>x+c.voto,0)/a.length, vSi=media(si), vNo=media(no);
-  if(vSi-vNo<0.5) return null;
-  return {n:coppie.length, vSi, vNo};
-}
-function fraseCorrMovimento(c){ const virg=v=>v.toFixed(1).replace(".",","); return "Nei giorni in cui ti muovi, il tuo voto è in media "+virg(c.vSi)+"."; }
-// L'ultimo caffè e il voto del giorno dopo: stessa soglia (≥14 giorni, ≥4 e ≥4, mezzo punto, solo se positivo). Sei ore è la
-// distanza dal letto dopo la quale la caffeina pesa di meno sul sonno [Drake 2013]; il tuo schema può essere diverso.
-function correlazioneCaffe(){
-  const att=state.attivita||{}, oggi=giornoVero(), coppie=[];
-  for(const k in att){ const c=attGiorno(k).filter(a=>a.t==="caffe").pop(); if(!c) continue;
-    const g=new Date(k+"T12:00:00"); if(!(dnum(oggi)-dnum(g)<=90 && dnum(g)<=dnum(oggi))) continue;
-    const d1=new Date(g); d1.setDate(d1.getDate()+1); const k1=iso(d1), bed=(state.beds||{})[k1], v=+diary[k1];
+// I tuoi schemi: ciò che segni (movimento, luce, caffè, alcol, pasto) contro il voto del giorno. Una sola regola per tutti, la stessa del voto
+// dopo le notti corte: ≥14 giorni con voto, ≥4 con e ≥4 senza, mezzo punto di differenza, un legame netto (rango) e solo se è nel verso
+// buono: il testo dice sempre cosa va bene, mai cosa «non va». Non cambia il piano.
+const SCHEMI=[
+  {id:"mov",  tit:"Movimento", tipi:["leggera","intensa"], dopo:0, tipo:"presenza", buonoSe:"presente", frase:v=>"Nei giorni in cui ti muovi, il tuo voto è in media "+v+"."},
+  {id:"luce", tit:"Luce",      tipi:["luce"],              dopo:0, tipo:"presenza", buonoSe:"presente", frase:v=>"Nei giorni in cui prendi la luce, il tuo voto è in media "+v+"."},
+  {id:"caffe",tit:"Caffè",     tipi:["caffe"],             dopo:1, tipo:"distanza", soglia:360, frase:v=>"Quando l'ultimo caffè è almeno sei ore prima del letto, il tuo voto il giorno dopo è in media "+v+".",
+         azione:()=> state.caffSens!=="alta" ? '<button type="button" class="lnk" data-caff-anticipa="1" style="min-height:44px">Anticipa l\'ultimo caffè nel piano</button>' : ""},
+  {id:"alcol",tit:"Alcol",     tipi:["alcol"],             dopo:1, tipo:"presenza", buonoSe:"assente",  frase:v=>"Nelle sere senza alcol, il tuo voto il giorno dopo è in media "+v+"."},
+  {id:"pasto",tit:"Pasto abbondante", tipi:["pasto"],      dopo:1, tipo:"distanza", soglia:180, frase:v=>"Quando l'ultimo pasto abbondante è almeno tre ore prima del letto, il tuo voto il giorno dopo è in media "+v+"."}
+];
+const venti=v=>v.toFixed(1).replace(".",",");
+function statoSchema(sc){
+  const att=state.attivita||{}, oggi=giornoVero(), segnati=new Set(), coppie=[];
+  const entro=g=>dnum(oggi)-dnum(g)<=90 && dnum(g)<=dnum(oggi);
+  let voti=0;
+  for(const k in att){ if(entro(new Date(k+"T12:00:00")) && attGiorno(k).some(a=>sc.tipi.includes(a.t))) segnati.add(k); }
+  for(const k in diary){ const v=+diary[k]; if(v>=1&&v<=5 && entro(new Date(k+"T12:00:00"))) voti++; }
+  if(sc.tipo==="presenza"){
+    for(const k in diary){ const v=+diary[k]; if(!(v>=1&&v<=5)) continue;
+      const g=new Date(k+"T12:00:00"); if(!entro(g)) continue;
+      const g0=new Date(g); g0.setDate(g0.getDate()-sc.dopo); const k0=iso(g0);
+      const pres=attGiorno(k0).some(a=>sc.tipi.includes(a.t));
+      coppie.push({pres:pres?1:0, voto:v}); }
+    if(coppie.length<14) return {voti, segnati:segnati.size};
+    const si=coppie.filter(c=>c.pres), no=coppie.filter(c=>!c.pres); if(si.length<4||no.length<4) return {voti, segnati:segnati.size};
+    const rho=spearman(coppie.map(c=>c.pres), coppie.map(c=>c.voto)), buono=sc.buonoSe==="presente", media=a=>a.reduce((x,c)=>x+c.voto,0)/a.length;
+    const mB=media(buono?si:no), mC=media(buono?no:si);
+    if(!((buono?rho:-rho)>=2/Math.sqrt(coppie.length-1)) || mB-mC<0.5) return {voti, segnati:segnati.size};
+    return {voti, segnati:segnati.size, schema:{testo:sc.frase(venti(mB))}};
+  }
+  for(const k in att){ const c=attGiorno(k).filter(a=>sc.tipi.includes(a.t)).pop(); if(!c) continue;
+    const g=new Date(k+"T12:00:00"); if(!entro(g)) continue;
+    const d1=new Date(g); d1.setDate(d1.getDate()+sc.dopo); const k1=iso(d1), bed=(state.beds||{})[k1], v=+diary[k1];
     if(!bed || !(v>=1&&v<=5)) continue;
     coppie.push({gap:(((t(bed)-t(c.fine))%1440)+1440)%1440, voto:v}); }
-  if(coppie.length<14) return null;
-  const lungo=coppie.filter(c=>c.gap>=360), corto=coppie.filter(c=>c.gap<360);
-  if(lungo.length<4 || corto.length<4) return null;
-  const rho=spearman(coppie.map(c=>c.gap), coppie.map(c=>c.voto));
-  if(!(rho>=2/Math.sqrt(coppie.length-1))) return null;
-  const media=a=>a.reduce((x,c)=>x+c.voto,0)/a.length, vL=media(lungo), vC=media(corto);
-  if(vL-vC<0.5) return null;
-  return {n:coppie.length, vL};
+  if(coppie.length<14) return {voti, segnati:segnati.size, abbinati:coppie.length};
+  const lungo=coppie.filter(c=>c.gap>=sc.soglia), corto=coppie.filter(c=>c.gap<sc.soglia);
+  if(lungo.length<4||corto.length<4) return {voti, segnati:segnati.size, abbinati:coppie.length};
+  const rho=spearman(coppie.map(c=>c.gap), coppie.map(c=>c.voto)), media=a=>a.reduce((x,c)=>x+c.voto,0)/a.length, mL=media(lungo);
+  if(!(rho>=2/Math.sqrt(coppie.length-1)) || mL-media(corto)<0.5) return {voti, segnati:segnati.size, abbinati:coppie.length};
+  return {voti, segnati:segnati.size, abbinati:coppie.length, schema:{testo:sc.frase(venti(mL))}};
 }
-function fraseCorrCaffe(c){ return "Quando l'ultimo caffè è almeno sei ore prima del letto, il tuo voto il giorno dopo è in media "+c.vL.toFixed(1).replace(".",",")+"."; }
 function cardInsight(icona, testo, id, extra){
   return '<div class="andamento-insight"><span class="aic">'+icona+'</span><div><span class="andamento-insight-eyebrow">Insight</span>'+esc(testo)+
     (extra?'<div>'+extra+'</div>':'')+' <button type="button" class="lnk dim" data-nascondi-insight="'+id+'" style="min-height:44px">Nascondi</button></div></div>';
+}
+// «I tuoi schemi»: una sola voce in Sonno e carico con tutto ciò che i dati dicono (e, per il resto, quanto manca per vederlo, in positivo).
+function sezioneSchemi(){
+  const nasc=store.get("insightNascosti",[]), icone={mov:ICON.passo,luce:ICON.sun,caffe:ICON.coffee,alcol:ICON.moon,pasto:ICON.plate};
+  let trovati=0, html="";
+  // il legame col sonno più corto, già calcolato altrove
+  let cr=null; try{ cr=correlazioneVotoDebito(); }catch(e){}
+  if(cr && !nasc.includes("sonno")){ trovati++; html+=cardInsight(ICON.bed, fraseCorrDebito(cr), "sonno"); }
+  const attesa=[];
+  for(const sc of SCHEMI){ const st=statoSchema(sc); if(nasc.includes(sc.id)) continue;
+    if(st.schema){ trovati++; html+=cardInsight(icone[sc.id], st.schema.testo, sc.id, sc.azione?sc.azione():""); }
+    else if(st.segnati>0){ const m=sc.tipo==="presenza" ? Math.max(0,14-st.voti) : Math.max(0,14-(st.abbinati||0));
+      attesa.push('<li><b>'+esc(sc.tit)+'</b> · segnato in '+st.segnati+(st.segnati===1?' giorno':' giorni')+(m>0?'; ancora '+m+(m===1?' giorno':' giorni')+' con voto per vedere se c\'è un legame':'; servono più giorni diversi per vederlo')+'</li>'); } }
+  const corpo=(html||'<p class="hint" style="margin:0 0 8px">Ancora niente da dire: i tuoi schemi compaiono con i giorni.</p>')+
+    (attesa.length?'<p class="hint" style="margin:14px 0 4px"><b>In arrivo</b></p><ul class="hint" style="margin:0;padding-left:18px;line-height:1.6">'+attesa.join("")+'</ul>':"")+
+    '<p class="hint" style="margin:14px 0 0">Segni quello che vuoi, quando vuoi: movimento, luce e caffè dai popup del piano, alcol e pasto da «Altro da segnare» in Oggi. Nessun obbligo, e ogni schema si può nascondere. Sono legami nei tuoi dati, non diagnosi.</p>';
+  return sezDet("I tuoi schemi", trovati ? trovati+(trovati===1?" schema trovato":" schemi trovati") : "Si vedono con i giorni", corpo, {id:"schemi"});
 }
 function fraseCorrDebito(corr){
   const virg=v=>v.toFixed(1).replace(".",",");
@@ -7368,11 +7420,6 @@ function renderAndamenti(){
       }
       // La card descrittiva resta solo se la correlazione non è già il
       // consiglio in cima — stessa frase due volte sarebbe rumore, non conferma.
-      { const nasc=store.get("insightNascosti",[]);
-        let cm=null, cf=null; try{ cm=correlazioneMovimento(); }catch(x){} try{ cf=correlazioneCaffe(); }catch(x){}
-        if(cm && !nasc.includes("mov")) heroHtml+=cardInsight(ICON.passo, fraseCorrMovimento(cm), "mov");
-        if(cf && !nasc.includes("caffe")) heroHtml+=cardInsight(ICON.coffee, fraseCorrCaffe(cf), "caffe",
-          state.caffSens!=="alta" ? '<button type="button" class="lnk" data-caff-anticipa="1" style="min-height:44px">Anticipa l\'ultimo caffè nel piano</button>' : ""); }
       if(corr && capo && capo.fonte!=="corr"){
         heroHtml+='<div class="andamento-insight"><span class="aic">'+ICON.sun+'</span>'+
           '<div><span class="andamento-insight-eyebrow">Insight</span>'+esc(fraseCorrDebito(corr))+'</div></div>';
@@ -7430,10 +7477,12 @@ function renderAndamenti(){
   // Un solo confronto per turno: quanto dormi, quanto in meno del previsto, come stai.
   if(parteFascia || parteCiclo) vociAnd.dormi=sezDet("Come dormi e come stai", (parteFascia||parteCiclo).riga,
     (parteFascia ? parteFascia.corpo : "")+(parteCiclo ? (parteFascia ? '<div style="height:14px"></div>' : '')+parteCiclo.corpo : ""), {id:"dormi"});
-  // Quattro voci sempre in lista, come le Impostazioni: se mancano i dati la riga dice cosa serve.
+  vociAnd.schemi=sezioneSchemi();
+  // Cinque voci sempre in lista, come le Impostazioni: se mancano i dati la riga dice cosa serve.
   const VOCI=[["carico","calendar","Il carico dei turni","Segna i turni per vederlo","Notti di fila, riposi brevi, festivi e ore dei prossimi 30 giorni, calcolati dai tuoi turni."],
     ["dormi","bed","Come dormi e come stai","Dopo qualche notte annotata","Quanto dormi e come ti senti prima di ogni tipo di turno: compare dopo almeno 4 notti annotate."],
     ["orari","alarm","Gli orari del tuo sonno","Servono 5 notti annotate","Quanto sono regolari gli orari a cui vai a letto e ti svegli: servono almeno 5 notti con i tuoi orari veri."],
+    ["schemi","sparkles","I tuoi schemi","Si vedono con i giorni","Cosa ti fa stare meglio, dai tuoi dati: movimento, luce, caffè, alcol, pasto."],
     ["orologio","sun","Il tuo orologio","—","Il tuo ritmo stimato dagli orari dei giorni liberi."]]
     .map(([id,ic,t,vuoto,spiega])=>Object.assign({ic}, vociAnd[id] || {id, t, r:vuoto, c:'<p class="hint" style="margin:0">'+esc(spiega)+'</p>', vuota:true}));
   const voceAperta=VOCI.find(v=>v.id===andSez);
@@ -7533,7 +7582,7 @@ function strisciaPersona(pattern, ancora, shifts, giorni){
 function renderWizPeopleList(){
   const el=$("#wizPeopleList"); if(!el) return;
   const persone=tuttePersone();
-  if(!persone.length){ el.innerHTML=''; return; }
+  if(!persone.length){ el.innerHTML=''; try{ renderPiuCal(); }catch(e){} return; }
   // La stellina sceglie chi guarda la card compatta di Oggi — ha senso
   // solo con più di una persona: con una sola, è sempre e comunque lei.
   const multi = persone.length>1;
@@ -7550,6 +7599,7 @@ function renderWizPeopleList(){
       '<button type="button" class="ibtn" data-edit-persona="'+i+'" aria-label="Modifica '+esc(nome)+'" title="Modifica">'+ICON.pencil+'</button>'+
       '<button type="button" class="ibtn" data-remove-persona="'+i+'" aria-label="Rimuovi '+esc(nome)+'" title="Rimuovi" style="color:var(--faint)">'+ICON.trash+'</button></div>';
   }).join("")+(multi?'<p class="hint" style="margin:2px 0 10px">La stellina sceglie chi vedi nella card "Turni condivisi" di Oggi — le altre restano comunque visibili qui sopra.</p>':'');
+  try{ renderPiuCal(); }catch(e){}   // il calendario di coppia segue l'elenco: compare con la prima persona, sparisce con l'ultima
 }
 // Modifica di una persona già in elenco: lo stesso modulo dell'aggiunta, precompilato. null = si sta aggiungendo.
 let personaInModifica=null;
@@ -7797,63 +7847,7 @@ function renderPartner(CARDS){
 }
 
 // Rilevamento automatico del sistema operativo per sincronizzazione calendario lean
-function calDeviceOS(){
-  const ua = navigator.userAgent || "";
-  if(/iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) return "ios";
-  if(/Android/i.test(ua)) return "android";
-  return "other";
-}
 
-function calSyncHtml(feedUrl, copyBtnId, isCouple){
-  const os = calDeviceOS();
-  const https = feedUrl.replace(/^webcal/, "https");
-  const icsName = isCouple ? "notturnisti-insieme.ics" : "notturnisti.ics";
-  const gcalSettingsUrl = "https://calendar.google.com/calendar/u/0/r/settings/addbyurl";
-
-  if(os === "ios"){
-    return '<div style="margin:8px 0">' +
-      '<a href="'+feedUrl+'" class="dbtn pri" style="text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center;padding:12px 14px;border-radius:var(--r);font-size:14px;font-weight:600">' +
-        'Aggiungi ad Apple Calendar (1 tocco) →' +
-      '</a>' +
-      '<div style="display:flex;justify-content:center;align-items:center;gap:14px;margin-top:8px;font-size:12.5px">' +
-        '<button type="button" id="'+copyBtnId+'" style="background:none;border:none;color:var(--blue);font-size:12.5px;font-weight:600;cursor:pointer;padding:4px 0">Copia link feed</button>' +
-        '<span style="color:var(--line)">·</span>' +
-        '<a href="'+https+'" download="'+icsName+'" style="color:var(--dim);text-decoration:none;padding:4px 0">Scarica file .ics</a>' +
-      '</div>' +
-    '</div>';
-  }
-
-  if(os === "android"){
-    return '<div style="margin:8px 0">' +
-      '<a href="'+https+'" download="'+icsName+'" class="dbtn pri" style="text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center;padding:12px 14px;border-radius:var(--r);font-size:14px;font-weight:600">' +
-        '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;flex:none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' +
-        'Importa una copia in Google Calendar →' +
-      '</a>' +
-      '<div style="display:flex;justify-content:center;align-items:center;gap:14px;margin-top:8px;font-size:12.5px;flex-wrap:wrap">' +
-        '<a href="'+feedUrl+'" style="color:var(--blue);text-decoration:none;font-weight:600;padding:4px 0">Samsung Calendar (1 tocco)</a>' +
-        '<span style="color:var(--line)">·</span>' +
-        '<button type="button" id="'+copyBtnId+'" style="background:none;border:none;color:var(--dim);font-size:12.5px;cursor:pointer;padding:4px 0">Copia link per PC</button>' +
-      '</div>' +
-      '<div style="font-size:12px;color:var(--faint);text-align:center;margin-top:5px;line-height:1.4">' +
-        'La copia contiene i prossimi 42 giorni e <b>non si aggiorna</b> se cambi i turni.<br>' +
-        'Per l\'aggiornamento automatico: Samsung Calendar (1 tocco) oppure incolla il link in Google Calendar da computer.' +
-      '</div>' +
-    '</div>';
-  }
-
-  return '<div style="margin:8px 0">' +
-    '<a href="'+gcalSettingsUrl+'" target="_blank" rel="noopener" class="dbtn pri" style="text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center;padding:12px 14px;border-radius:var(--r);font-size:14px;font-weight:600">' +
-      '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;flex:none"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' +
-      'Aggiungi a Google Calendar (Web) →' +
-    '</a>' +
-    '<div style="display:flex;justify-content:center;align-items:center;gap:14px;margin-top:8px;font-size:12.5px">' +
-      '<button type="button" id="'+copyBtnId+'" style="background:none;border:none;color:var(--blue);font-size:12.5px;font-weight:600;cursor:pointer;padding:4px 0">Copia link feed</button>' +
-      '<span style="color:var(--line)">·</span>' +
-      '<a href="'+feedUrl+'" style="color:var(--dim);text-decoration:none;padding:4px 0">Apple Calendar</a>' +
-    '</div>' +
-    '<div style="font-size:12px;color:var(--faint);text-align:center;margin-top:5px">Copia il link e incollalo nel campo "URL del calendario" su Google Calendar.</div>' +
-  '</div>';
-}
 
 function wireCalCopy(btnId, feedUrl){
   const btn = $("#" + btnId);
@@ -7905,7 +7899,7 @@ function renderPiuCal(){
         '</span>' +
         '<button type="button" id="coupleCalManageBtn" style="color:var(--blue);font-size:13px;font-weight:600;padding:0;background:none;border:none;cursor:pointer">Gestisci →</button>' +
       '</div>' +
-      calSyncHtml(coupleUrl, "coupleCalCopyBtn", true);
+      (window.NTPaid && window.NTPaid.calAction ? window.NTPaid.calAction(coupleUrl, "coupleCalCopyBtn", true) : "");
   }
 
   el.innerHTML =
@@ -8638,6 +8632,8 @@ function diaryChange(e){
   segnaSonnoPiano(k,false); store.set("wakes",wakes); render();
 }
 function diaryClick(e){
+  const sv=e.target.closest("[data-att-salva]"); if(sv){ attSalva(sv); return; }
+  const an=e.target.closest("[data-att-annulla]"); if(an){ attAnnulla(an); return; }
   const nas=e.target.closest("[data-nascondi-insight]");
   if(nas){ const l=store.get("insightNascosti",[]); if(!l.includes(nas.dataset.nascondiInsight)) l.push(nas.dataset.nascondiInsight); store.set("insightNascosti",l); render(); return; }
   if(e.target.closest("[data-caff-anticipa]")){ const o=["bassa","media","alta"], i=o.indexOf(state.caffSens||"alta"); if(i<o.length-1){ state.caffSens=o[i+1]; salva(); render(); toast("Fatto: il piano propone l'ultimo caffè un po' prima"); } return; }
@@ -8787,24 +8783,8 @@ function apriMomentiMigliori(){
   }, 250);
 }
 if($("#infoModal")) $("#infoModal").addEventListener("click", e=>{
-  const sv=e.target.closest("[data-att-salva]");
-  if(sv){ const k=sv.dataset.attSalva, box=document.querySelector("#infoModal"), ora=(box.querySelector("[data-att-ora]")||{}).value;
-    if(!/^\d\d:\d\d$/.test(ora||"")){ toast("Metti l'ora"); return; }
-    const voce={t:k, fine:ora};
-    const mi=+(box.querySelector("[data-att-min]")||{}).value, nz=+(box.querySelector("[data-att-n]")||{}).value, nota=((box.querySelector("[data-att-nota]")||{}).value||"").trim().slice(0,80);
-    if(mi>=5 && mi<=300) voce.min=Math.round(mi); if(nz>=1 && nz<=4) voce.n=nz; if(nota) voce.nota=nota;
-    const key=iso(state.focus), lista=attGiorno(key).filter(a=>a.t!==k); lista.push(voce); state.attivita[key]=lista;
-    store.set("attivita",state.attivita); apriFoglio("infoModal",false); render();
-    // Solo un'informazione, mai un giudizio: vicino al letto un allenamento intenso o un caffè possono rallentare l'addormentamento.
-    let msg="Segnato";
-    try{ const P=NT.plan(), prima=(((P.s.onset-t(ora))%1440)+1440)%1440;
-      if(k==="intensa" && prima<60) msg="Segnato. Un allenamento intenso vicino al letto può rallentare l'addormentamento: luce soffusa e qualche minuto di calma aiutano.";
-      else if(k==="caffe" && prima<360) msg="Segnato. Un caffè a meno di 6 ore dal letto può rallentare l'addormentamento: dipende da persona a persona, e con i giorni vedrai il tuo schema."; }catch(x){}
-    toast(msg);
-    return; }
-  const an=e.target.closest("[data-att-annulla]");
-  if(an){ const key=iso(state.focus), k=an.dataset.attAnnulla; state.attivita[key]=attGiorno(key).filter(a=>a.t!==k); if(!state.attivita[key].length) delete state.attivita[key];
-    store.set("attivita",state.attivita); apriFoglio("infoModal",false); render(); return; }
+  const sv=e.target.closest("[data-att-salva]"); if(sv){ attSalva(sv); return; }
+  const an=e.target.closest("[data-att-annulla]"); if(an){ attAnnulla(an); return; }
   const b=e.target.closest("[data-cambia]");
   if(b){ apriFoglio("infoModal",false); apriOpzioni("abitudini"); apriSezioneInline(+b.dataset.cambia, true); return; }
   const v=e.target.closest("[data-vai]");

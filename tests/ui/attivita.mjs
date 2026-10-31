@@ -36,14 +36,14 @@ async function apri(extra={}, diary=null, stExtra={}){
 { const att={}, dia={}; for(let i=1;i<=24;i++){ const k=fa(i), mosso=i%2===0; if(mosso) att[k]=[{t:"leggera",fine:"18:00"}]; dia[k]=mosso?5:2; }
   const p=await apri({attivita:att}, dia);
   await p.evaluate(()=>document.querySelector('[data-tab="turni"]').click()); await p.waitForTimeout(300);
-  await p.evaluate(()=>document.querySelector("#doAndamenti").click()); await p.waitForTimeout(500);
+  await p.evaluate(()=>document.querySelector("#doAndamenti").click()); await p.waitForTimeout(400); await p.evaluate(()=>document.querySelector("[data-and-sez=schemi]").click()); await p.waitForTimeout(400);
   const t=await p.evaluate(()=>document.querySelector("#andamenti").innerText);
   ok(/Nei giorni in cui ti muovi, il tuo voto è in media 5,0\./.test(t), "con 24 giorni: l'insight sul movimento compare, senza confronti");
   await p.context().close(); }
 { const att={}, dia={}; for(let i=1;i<=24;i++){ const k=fa(i), mosso=i%2===0; if(mosso) att[k]=[{t:"leggera",fine:"18:00"}]; dia[k]=mosso?2:5; }
   const p=await apri({attivita:att}, dia);
   await p.evaluate(()=>document.querySelector('[data-tab="turni"]').click()); await p.waitForTimeout(300);
-  await p.evaluate(()=>document.querySelector("#doAndamenti").click()); await p.waitForTimeout(500);
+  await p.evaluate(()=>document.querySelector("#doAndamenti").click()); await p.waitForTimeout(400); await p.evaluate(()=>document.querySelector("[data-and-sez=schemi]").click()); await p.waitForTimeout(400);
   ok(!(await p.evaluate(()=>/Nei giorni in cui ti muovi/.test(document.querySelector("#andamenti").innerText))), "legame contrario: nessuna frase");
   await p.context().close(); }
 // dettagli facoltativi: durata e nota
@@ -69,7 +69,7 @@ async function apri(extra={}, diary=null, stExtra={}){
 { const att={}, dia={}, beds={}; for(let i=1;i<=24;i++){ const k=fa(i), k1=fa(i-1), presto=i%2===0; att[k]=[{t:"caffe",fine:presto?"15:00":"21:30"}]; beds[k1]="23:30"; dia[k1]=presto?5:2; }
   const p=await apri({attivita:att,beds,insightNascosti:[]}, dia, {caffSens:"bassa"});
   await p.evaluate(()=>document.querySelector('[data-tab="turni"]').click()); await p.waitForTimeout(300);
-  await p.evaluate(()=>document.querySelector("#doAndamenti").click()); await p.waitForTimeout(500);
+  await p.evaluate(()=>document.querySelector("#doAndamenti").click()); await p.waitForTimeout(400); await p.evaluate(()=>document.querySelector("[data-and-sez=schemi]").click()); await p.waitForTimeout(400);
   const tx=await p.evaluate(()=>document.querySelector("#andamenti").innerText);
   ok(/Quando l'ultimo caffè è almeno sei ore prima del letto, il tuo voto il giorno dopo è in media 5,0\./.test(tx), "caffè: l'insight compare, in positivo");
   ok(/Anticipa l'ultimo caffè nel piano/.test(tx), "e propone, con un tocco, di anticipare l'ultimo caffè");
@@ -77,6 +77,38 @@ async function apri(extra={}, diary=null, stExtra={}){
   ok(await p.evaluate(()=>JSON.parse(localStorage.getItem("nt:state")).caffSens==="media"), "il tocco cambia la sensibilità (bassa → media), mai da sola");
   await p.evaluate(()=>document.querySelector("[data-nascondi-insight=caffe]").click()); await p.waitForTimeout(400);
   ok(!(await p.evaluate(()=>/Quando l'ultimo caffè è almeno sei ore/.test(document.querySelector("#andamenti").innerText))), "«Nascondi» toglie l'insight");
+  await p.context().close(); }
+// luce, alcol, pasto: segnabili, e con i giorni diventano schemi (sempre in positivo)
+{ const att={}, dia={}, beds={};
+  for(let i=1;i<=24;i++){ const k=fa(i), k1=fa(i-1), si=i%2===0;
+    if(si) att[k]=[{t:"luce",fine:"09:00"}];
+    // alcol: nelle sere in cui NON c'è, voto alto
+    if(!si) att[k]=(att[k]||[]).concat([{t:"alcol",fine:"22:00"}]);
+    dia[k]=si?5:2; dia[k1]=dia[k1]||0; beds[k1]="23:30"; }
+  const p=await apri({attivita:att,beds,insightNascosti:[]}, dia);
+  await p.evaluate(()=>document.querySelector('[data-tab="turni"]').click()); await p.waitForTimeout(300);
+  await p.evaluate(()=>document.querySelector("#doAndamenti").click()); await p.waitForTimeout(400);
+  const riga=await p.evaluate(()=>document.querySelector('[data-and-sez="schemi"]').innerText);
+  ok(/I tuoi schemi/.test(riga), "in Sonno e carico c'è la voce «I tuoi schemi» → "+riga.replace(/\s+/g," "));
+  await p.evaluate(()=>document.querySelector("[data-and-sez=schemi]").click()); await p.waitForTimeout(400);
+  const tx=await p.evaluate(()=>document.querySelector("#andamenti").innerText);
+  ok(/Nei giorni in cui prendi la luce, il tuo voto è in media 5,0\./.test(tx), "luce: lo schema compare, in positivo");
+  ok(!/colpa|errore|male|sbagli/i.test(tx), "nessuna parola di giudizio nella pagina degli schemi");
+  await p.context().close(); }
+{ const p=await apri({attivita:{[fa(1)]:[{t:"luce",fine:"09:00"}],[fa(2)]:[{t:"caffe",fine:"15:00"}]}});
+  await p.evaluate(()=>document.querySelector('[data-tab="turni"]').click()); await p.waitForTimeout(300);
+  await p.evaluate(()=>document.querySelector("#doAndamenti").click()); await p.waitForTimeout(400);
+  await p.evaluate(()=>document.querySelector("[data-and-sez=schemi]").click()); await p.waitForTimeout(400);
+  const tx=await p.evaluate(()=>document.querySelector("#andamenti").innerText);
+  ok(/In arrivo/.test(tx) && /Luce · segnato in 1 giorno/.test(tx) && /Caffè · segnato in 1 giorno/.test(tx), "con pochi dati: «In arrivo», con quanto manca, senza pressione");
+  await p.context().close(); }
+{ const p=await apri();
+  await p.evaluate(()=>{ const d=[...document.querySelectorAll(".drem details.att-det")].find(x=>/Altro da segnare/.test(x.textContent)); d.open=true; });
+  ok(await p.evaluate(()=>!!document.querySelector("[data-att-salva=alcol]") && !!document.querySelector("[data-att-salva=pasto]")), "«Altro da segnare» (chiuso) contiene alcol e pasto abbondante");
+  await p.evaluate(()=>{ const b=document.querySelector("[data-att-salva=alcol]").closest("[data-att-box]"); b.querySelector("[data-att-ora]").value="21:00"; document.querySelector("[data-att-salva=alcol]").click(); }); await p.waitForTimeout(400);
+  const a=await p.evaluate(()=>Object.values(JSON.parse(localStorage.getItem("nt:attivita")||"{}"))[0]);
+  ok(a && a[0].t==="alcol" && a[0].fine==="21:00", "alcol salvato, senza avvisi né giudizi → "+JSON.stringify(a));
+  ok(await p.evaluate(()=>document.querySelector("#toast").textContent.trim()==="Segnato"), "il messaggio è solo «Segnato»");
   await p.context().close(); }
 // dati rotti (file ripristinato male, valore corrotto): l'app non si ferma e il segnare funziona
 { const rotto={}; rotto[fa(1)]="x"; rotto[fa(2)]=[null,5,{t:1},{t:"caffe",fine:"zz"},{t:"leggera"}]; rotto[fa(3)]={a:1};
@@ -86,7 +118,7 @@ async function apri(extra={}, diary=null, stExtra={}){
   await p.evaluate(()=>{ document.querySelector("#infoModal [data-att-ora]").value="11:00"; document.querySelector("#infoModal [data-att-salva]").click(); }); await p.waitForTimeout(400);
   ok(await p.evaluate(()=>/^Segnato/.test(document.querySelector("#toast").textContent)), "e si può segnare");
   await p.evaluate(()=>document.querySelector('[data-tab="turni"]').click()); await p.waitForTimeout(300);
-  await p.evaluate(()=>document.querySelector("#doAndamenti").click()); await p.waitForTimeout(500);
+  await p.evaluate(()=>document.querySelector("#doAndamenti").click()); await p.waitForTimeout(400); await p.evaluate(()=>document.querySelector("[data-and-sez=schemi]").click()); await p.waitForTimeout(400);
   ok(await p.evaluate(()=>document.querySelector("#andamenti").innerText.length>50), "Andamenti si apre");
   await p.context().close(); }
 console.log("errori",errs); ok(errs.length===0,"nessun errore di pagina"); await b.close();

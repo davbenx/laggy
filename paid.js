@@ -49,6 +49,11 @@
       ".pf-lnk{display:block;background:var(--blue-soft);border:1px solid var(--blue-lt);border-radius:var(--r);padding:12px 14px;color:var(--blue);text-decoration:none;font-weight:600;margin:10px 0;word-break:break-all}" +
       ".pf-in{width:100%;padding:11px;border:1px solid var(--line);border-radius:var(--r);background:var(--s1);color:var(--ink);font:inherit;margin:6px 0}" +
       ".pf-note{font-size:12.5px;color:var(--faint);line-height:1.5;margin:8px 0}" +
+      ".pf-altre{margin:6px 0}" +
+      ".pf-altre>summary{cursor:pointer;list-style:none;min-height:44px;display:flex;align-items:center;font-size:13.5px;color:var(--dim)}" +
+      ".pf-altre>summary::-webkit-details-marker{display:none}" +
+      ".pf-altre>summary::after{content:'›';margin-left:6px;transition:transform .15s}" +
+      ".pf-altre[open]>summary::after{transform:rotate(90deg)}" +
       ".pf-danger{background:none;border:none;color:#c0392b;text-decoration:underline;cursor:pointer;font:inherit;font-size:13px;padding:6px 0}" +
       ".pf-save{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin:14px 0}.pf-save b{display:block;margin-bottom:2px}" +
       ".pf-lnk2{display:block;width:100%;background:none;border:1px solid var(--line);border-radius:var(--r);padding:11px;color:var(--blue);font:inherit;font-weight:600;cursor:pointer;margin-top:8px}";
@@ -105,41 +110,33 @@
     return "other";
   }
 
+  // Aggiungere il calendario: un pulsante principale per il tuo telefono, il resto in «Altre opzioni» (chiuso).
   function scCalAction(feedUrl, copyId, isCouple) {
     var os = osName();
     var https = feedUrl.replace(/^webcal/, "https");
     var icsName = isCouple ? "notturnisti-insieme.ics" : "notturnisti.ics";
     var gcalSettingsUrl = "https://calendar.google.com/calendar/u/0/r/settings/addbyurl";
-
+    var lnk = function (href, txt, extra) { return '<a href="' + href + '"' + (extra || "") + ' style="color:var(--blue);text-decoration:none;font-weight:600;padding:8px 0;display:block">' + txt + '</a>'; };
+    var copia = '<button type="button" id="' + copyId + '" style="background:none;border:none;color:var(--blue);font-weight:600;font-size:13px;cursor:pointer;padding:8px 0;display:block">Copia il link del calendario</button>';
+    var altre = function (corpo) { return '<details class="pf-altre"><summary>Altre opzioni</summary>' + corpo + '</details>'; };
     if (os === "ios") {
       return '<div style="margin:12px 0">' +
-        '<a class="pf-btn" id="pf-sub" href="' + feedUrl + '" style="display:flex;align-items:center;justify-content:center;text-decoration:none;text-align:center">Aggiungi ad Apple Calendar (1 tocco) →</a>' +
-        '<div style="display:flex;justify-content:center;align-items:center;gap:14px;margin-top:8px;font-size:13px">' +
-          '<button type="button" id="' + copyId + '" style="background:none;border:none;color:var(--blue);font-size:13px;font-weight:600;cursor:pointer;padding:4px 0">Copia link feed</button>' +
-          '<span style="color:var(--line)">·</span>' +
-          '<a href="' + https + '" download="' + icsName + '" style="color:var(--dim);text-decoration:none;padding:4px 0">Scarica file .ics</a>' +
-        '</div>' +
+        '<a class="pf-btn" id="pf-sub" href="' + feedUrl + '" style="display:flex;align-items:center;justify-content:center;text-decoration:none;text-align:center">Aggiungi ad Apple Calendar →</a>' +
+        altre(copia + lnk(https, "Scarica il file .ics", ' download="' + icsName + '"')) +
       '</div>';
     }
     if (os === "android") {
       return '<div style="margin:12px 0">' +
         '<a class="pf-btn" id="pf-ics" href="' + https + '" download="' + icsName + '" style="display:flex;align-items:center;justify-content:center;text-decoration:none;text-align:center">Importa in Google Calendar (.ics) →</a>' +
-        '<div style="display:flex;justify-content:center;align-items:center;gap:14px;margin-top:8px;font-size:13px;flex-wrap:wrap">' +
-          '<a href="' + feedUrl + '" style="color:var(--blue);text-decoration:none;font-weight:600;padding:4px 0">Samsung Calendar (1 tocco)</a>' +
-          '<span style="color:var(--line)">·</span>' +
-          '<button type="button" id="' + copyId + '" style="background:none;border:none;color:var(--dim);font-size:13px;cursor:pointer;padding:4px 0">Copia link per PC</button>' +
-        '</div>' +
-        '<p class="pf-note" style="text-align:center;margin:6px 0 0">Tocca <b>Scarica</b> e poi <b>Apri</b>: Google Calendar si aprirà con i turni pronti da salvare.<br>Per la sincronizzazione da link, incolla il feed da computer in Google Calendar.</p>' +
+        '<p class="pf-note" style="margin:6px 0 0">Tocca <b>Scarica</b> e poi <b>Apri</b>: è una copia di adesso.</p>' +
+        altre(lnk(feedUrl, "Samsung Calendar: si aggiorna da solo") + copia +
+          '<p class="pf-note" style="margin:0">Per l\'aggiornamento automatico in Google Calendar, incolla il link da computer.</p>') +
       '</div>';
     }
     return '<div style="margin:12px 0">' +
       '<a class="pf-btn" id="pf-gcal" href="' + gcalSettingsUrl + '" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;text-decoration:none;text-align:center">Aggiungi a Google Calendar (Web) →</a>' +
-      '<div style="display:flex;justify-content:center;align-items:center;gap:14px;margin-top:8px;font-size:13px">' +
-        '<button type="button" id="' + copyId + '" style="background:none;border:none;color:var(--blue);font-weight:600;font-size:13px;cursor:pointer;padding:4px 0">Copia link feed</button>' +
-        '<span style="color:var(--line)">·</span>' +
-        '<a href="' + feedUrl + '" style="color:var(--dim);text-decoration:none;padding:4px 0">Apple Calendar</a>' +
-      '</div>' +
-      '<p class="pf-note" style="text-align:center;margin:6px 0 0">Copia il link e incollalo nel campo "URL del calendario" su Google Calendar.</p>' +
+      '<p class="pf-note" style="margin:6px 0 0">Copia il link e incollalo nel campo «URL del calendario».</p>' +
+      altre(copia + lnk(feedUrl, "Apple Calendar")) +
     '</div>';
   }
 
@@ -152,19 +149,16 @@
     // iCloud Backup URL, ecc. Solo copia-clipboard e download .txt.
     var restoreText = restoreLink(s);
     return '<h2 class="pf-h">Il tuo calendario</h2>' +
-      '<p class="pf-p">Iscrivi il calendario del telefono a questo indirizzo. Da lì in poi si aggiorna da solo.</p>' +
+      '<p class="pf-p">Iscrivi il calendario del telefono a questo indirizzo: da lì in poi si aggiorna da solo, anche se non subito (lo decide il tuo calendario, di solito dopo qualche ora).</p>' +
       scCalAction(feed, "pf-copy-feed", false) +
-      '<p class="pf-note">L\'aggiornamento non è istantaneo: ogni calendario decide da sé ogni quanto ricontrollare (spesso qualche ora, a volte un giorno intero) — non dipende da noi, e da qui non c\'è modo di farlo controllare più spesso.</p>' +
-      '<button class="pf-btn" id="pf-sync" style="margin-top:12px">Sincronizza i turni di adesso</button>' +
-      '<p class="pf-note">Aggiorna il feed con la configurazione attuale del pianificatore.</p>' +
-      '<p class="pf-note" style="margin-top:16px">La tua configurazione dei turni è salvata sul nostro server per far ruotare il calendario. Non salviamo il diario. ' +
-      '<button class="pf-danger" id="pf-del">Cancella tutto</button></p>' +
-      '<div style="border-top:1px solid var(--line);margin-top:16px;padding-top:14px">' +
-      '<p class="pf-p" style="margin-top:0"><b>Salva questo accesso.</b> Con questo link riattivi tutto su un altro telefono, senza email. Tienilo privato: è la tua chiave.</p>' +
-      '<code class="pf-lnk" id="pf-rlink" style="word-break:break-all;user-select:all;cursor:text;display:block;padding:8px;background:var(--s2);border-radius:6px">' + restoreText + '</code>' +
-      '<button class="pf-btn" id="pf-copy">Copia il link</button>' +
-      '<button class="pf-btn" id="pf-dl" style="margin-top:8px;background:var(--s2);color:var(--ink);border:1px solid var(--line)">Scarica come file .txt</button>' +
-      '</div>' +
+      '<details class="pf-altre" style="margin-top:16px"><summary>Cambi telefono o vuoi cancellare?</summary>' +
+        '<p class="pf-note">Con questo link riattivi tutto su un altro telefono, senza email. Tienilo privato: è la tua chiave.</p>' +
+        '<code class="pf-lnk" id="pf-rlink" style="word-break:break-all;user-select:all;cursor:text;display:block;padding:8px;background:var(--s2);border-radius:6px">' + restoreText + '</code>' +
+        '<button class="pf-btn" id="pf-copy">Copia il link</button>' +
+        '<button class="pf-btn" id="pf-dl" style="margin-top:8px;background:var(--s2);color:var(--ink);border:1px solid var(--line)">Scarica come file .txt</button>' +
+        '<p class="pf-note" style="margin-top:16px">I turni sono salvati sul nostro server solo per far ruotare il calendario. Non salviamo il diario. ' +
+        '<button class="pf-danger" id="pf-del">Cancella tutto</button></p>' +
+      '</details>' +
       (url ? '<p class="pf-note" style="margin-top:16px">Notturnisti è gratis, e lo resta. Se ti è utile, <a href="' + url + '" target="_blank" rel="noopener" style="color:var(--blue)">offrimi un caffè</a> — mai necessario, sempre benvenuto.</p>' : '');
   }
   function scCouple() {
@@ -173,14 +167,11 @@
     var coupleUrl = (s.feedUrl || "").replace("/feed/", "/couple/");
     if (!r.pPattern)
       return '<h2 class="pf-h">Calendario di coppia</h2>' +
-        '<p class="pf-p">La persona con cui vuoi il calendario di coppia si aggiunge una volta sola, in <b>Turni → Quando ho tempo libero → Aggiungi una persona</b>. ' +
+        '<p class="pf-p">La persona con cui vuoi il calendario di coppia si aggiunge una volta sola, in <b>Impostazioni › Persone</b>. ' +
         'Da lì i vostri riposi in comune arrivano anche qui, come calendario da iscrivere che si aggiorna da solo.</p>';
     return '<h2 class="pf-h">Calendario di coppia</h2>' +
-      '<p class="pf-p">Partner impostato. Iscrivi questo calendario: mostra i <b>riposi in comune</b> nei prossimi 60 giorni e si aggiorna da solo.</p>' +
-      scCalAction(coupleUrl, "pf-copy-couple", true) +
-      '<p class="pf-note">Come sopra: l\'aggiornamento non è istantaneo, lo decide il calendario che usi, non c\'è modo di forzarlo da qui.</p>' +
-      '<button class="pf-btn" id="pf-couple-sync">Sincronizza il calendario di coppia</button>' +
-      '<p class="pf-note">Aggiorna il feed con la sequenza del partner impostata in Turni.</p>';
+      '<p class="pf-p">Mostra i <b>riposi in comune</b> nei prossimi 60 giorni e si aggiorna da solo, anche se non subito (lo decide il tuo calendario).</p>' +
+      scCalAction(coupleUrl, "pf-copy-couple", true);
   }
 
   // ── azioni ──
@@ -394,5 +385,5 @@
   } catch (e) {}
   if (document.readyState === "loading") addEventListener("DOMContentLoaded", launcher);
   else launcher();
-  window.NTPaid = { open: open, paid: paid, getSub: getSub, attiva: attiva };   // per test/uso esterno
+  window.NTPaid = { open: open, paid: paid, getSub: getSub, attiva: attiva, calAction: scCalAction };   // per test/uso esterno
 })();
