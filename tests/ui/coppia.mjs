@@ -59,7 +59,7 @@ async function apri(st, app, tab="turni"){
 
 // app: un solo controllo, la scheda «Calendario di coppia» subito sotto la lista delle persone
 { const p=await apri(ST(), true);
-  await p.click("#doPartner"); await p.waitForTimeout(400); await p.click("[data-partner-edit]");
+  await p.click("#doOpzioni"); await p.click('[data-opzg-vai="persone"]');
   await p.waitForTimeout(400);
   ok(await p.evaluate(()=>!document.querySelector("#doCoppiaQui") && document.querySelectorAll("#coupleCalToggle").length===1), "app: niente proposta doppia, un solo interruttore");
   ok(await p.evaluate(()=>{ const m=document.querySelector("[data-edit-persona]"), r=document.querySelector("[data-remove-persona]"); return m && r && /^Modifica /.test(m.getAttribute("aria-label")||"") && /^Rimuovi /.test(r.getAttribute("aria-label")||"") && m.getBoundingClientRect().width>=44 && r.getBoundingClientRect().height>=44 && !!m.querySelector("svg"); }), "persone: Modifica e Rimuovi sono icone da 44 px con etichetta per chi legge lo schermo");
@@ -80,7 +80,7 @@ async function apri(st, app, tab="turni"){
   const p=await ctx.newPage(); p.on("pageerror",e=>errs.push(e.message));
   await p.goto("http://localhost:8766/index.html"); await p.waitForTimeout(1000);
   await p.evaluate(()=>document.querySelector('[data-tab="turni"]')?.click()); await p.waitForTimeout(400);
-  await p.click("#doPartner"); await p.waitForTimeout(400); await p.click("[data-partner-edit]"); await p.waitForTimeout(400);
+  await p.click("#doOpzioni"); await p.click('[data-opzg-vai="persone"]'); await p.waitForTimeout(400);
   await p.evaluate(()=>document.querySelector("#coupleCalToggle").click()); await p.waitForTimeout(600);
   ok(await p.evaluate(()=>!document.querySelector("#coupleCalToggle").checked && !!document.querySelector("#coupleCalImpostazioni") && /permesso/.test(document.querySelector("#coupleCalSub").textContent)), "permesso negato: l'interruttore resta spento e la scheda spiega con «Apri le impostazioni»");
   await p.evaluate(()=>document.querySelector("#coupleCalImpostazioni").click()); await p.waitForTimeout(300);

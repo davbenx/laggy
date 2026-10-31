@@ -1041,7 +1041,9 @@ letter-spacing:.01em;padding:9px 0 8px;min-height:56px;cursor:pointer;position:r
 /* «Sonno e carico»: la prima voce di Turni, una riga a tutta larghezza sopra la griglia */
 .tsec-top{min-height:56px;padding:12px 14px;margin:var(--gap-sezione) 0 0}
 .tsec-top::after{content:"›";margin-left:auto;font-size:20px;color:var(--faint)}
+.tsec-top + .tsec-top{margin-top:10px}
 .tsec-top + .strumenti{margin-top:10px}
+body.tab-opzioni #opzioni #piuCal{display:block}   /* il calendario di coppia sta nel gruppo Persone */
 .tsec-t{display:block;font-family:var(--serif);font-size:16px;font-weight:600;color:var(--ink)}
 .tsec-v{display:block;font-size:12.5px;color:var(--dim);margin-top:3px;line-height:1.35}
 .tsec-riga{margin-top:0}
@@ -1151,7 +1153,7 @@ color:var(--blue);display:inline-flex;align-items:center;justify-content:center}
 body.tab-oggi #status:not(.warn):not(.info){display:none}
 /* OGGI: il giorno. "La giornata" (datebar + dettaglio + diario) è a scomparsa. */
 body.tab-oggi .cap.ciclo,body.tab-oggi #cyc,body.tab-oggi #meseBox,body.tab-oggi #cycShareBox,
-body.tab-oggi #doPartner,body.tab-oggi #doPersone,body.tab-oggi .cycbar,body.tab-oggi #cycRange,body.tab-oggi #doAndamenti,
+body.tab-oggi #doPartner,body.tab-oggi .cycbar,body.tab-oggi #cycRange,body.tab-oggi #doAndamenti,
 body.tab-oggi #icsBox,body.tab-oggi #andamentiPagina,
 body.tab-oggi #vederciPagina,body.tab-oggi #partner,body.tab-oggi .piu-cal,
 body.tab-oggi .tools,body.tab-oggi .piu-info,body.tab-oggi footer{display:none}
@@ -1206,11 +1208,6 @@ body.tab-oggi #scambioPagina,body.tab-opzioni #scambioPagina{display:none}
    salvare/esportare → Opzioni, calendario di coppia → "Quando sono
    disponibile"). Barra a due tab (Oggi, Turni) + Opzioni dietro
    l'icona in header. */
-.persone-intro{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;margin-bottom:8px}
-.persone-intro b{display:block;font-size:15px;color:var(--ink)}
-.persone-intro span{display:block;font-size:13px;color:var(--dim);margin-top:4px;line-height:1.45}
-.persone-add{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:12px;background:var(--blue-soft);
-border:1px solid var(--blue-lt);border-radius:var(--r);color:var(--blue);font:inherit;font-size:14px;font-weight:600;cursor:pointer}
 #annullaModificaPersona:not([hidden]),#rimuoviPersona:not([hidden]){display:block}
 .pers-vie{display:grid;gap:8px;margin:4px 0 10px}
 .pers-via{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;width:100%;min-height:56px;padding:10px 14px;background:var(--bg);border:1.5px solid var(--line);border-radius:var(--r);color:var(--ink);font:inherit;cursor:pointer}
@@ -1350,13 +1347,13 @@ body.tab-opzioni #firstPlanBanner,body.tab-opzioni #setupChecklist,body.tab-opzi
 body.tab-opzioni .daynav,body.tab-opzioni .cap.ciclo,body.tab-opzioni #cyc,body.tab-opzioni #meseBox,
 body.tab-opzioni #cycShareBox,
 body.tab-opzioni .cycbar,body.tab-opzioni #cycRange,body.tab-opzioni #doAndamenti,body.tab-opzioni #doScambioTurno,body.tab-opzioni #scambioBox,
-body.tab-opzioni #andamentiPagina,body.tab-opzioni #vederciPagina,body.tab-opzioni #doPartner,body.tab-opzioni #doPersone,
+body.tab-opzioni #andamentiPagina,body.tab-opzioni #vederciPagina,body.tab-opzioni #doPartner,
 body.tab-opzioni #partner,body.tab-opzioni #luciditaGiornoWrap,body.tab-opzioni .piu-cal,
 /* la sezione Opzioni vive solo nella sua destinazione */
 body:not(.tab-opzioni) #opzioni{display:none}
 /* Impostazioni: prima un elenco di voci con il valore; ognuna apre il suo gruppo, uno alla volta */
 #opzioni .opz-g{display:none}
-body.opz-g-promemoria #opzioni [data-opzg="promemoria"],body.opz-g-abitudini #opzioni [data-opzg="abitudini"],body.opz-g-voci #opzioni [data-opzg="voci"],
+body.opz-g-persone #opzioni [data-opzg="persone"],body.opz-g-promemoria #opzioni [data-opzg="promemoria"],body.opz-g-abitudini #opzioni [data-opzg="abitudini"],body.opz-g-voci #opzioni [data-opzg="voci"],
 body.opz-g-dati #opzioni [data-opzg="dati"],body.opz-g-aiuto #opzioni [data-opzg="aiuto"]{display:block}
 body[class*="opz-g-"] #opzHub,body[class*="opz-g-"] #opzAspetto{display:none}
 .opz-hub-r{display:flex;align-items:center;gap:12px;width:100%;min-height:58px;padding:10px 14px;background:var(--s1);border:0;border-top:1px solid var(--line);color:var(--ink);font:inherit;text-align:left;cursor:pointer}
@@ -1762,11 +1759,6 @@ header b{font-size:23px}
   <span class="tsec-tx"><b class="tsec-t">Tempo libero</b><span class="tsec-v" id="doPartnerSub">—</span></span>
 </button>
 
-<button type="button" class="tsec" id="doPersone">
-  <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:var(--blue);background:var(--blue-soft)"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><circle cx="17" cy="9.5" r="2.4"/><path d="M16.5 14.2c2.3.1 3.8 1.6 4.3 4.3"/></svg>
-  <span class="tsec-tx"><b class="tsec-t">Persone</b><span class="tsec-v" id="doPersoneSub">Aggiungi qualcuno</span></span>
-</button>
-
 <div id="vederciPagina" hidden>
   <div class="pag-testa">
     <button type="button" class="themebtn" id="chiudiVederci" aria-label="Torna a Turni">
@@ -1775,104 +1767,6 @@ header b{font-size:23px}
     <h1 class="tab-title">Quando ho tempo libero</h1>
   </div>
   <div id="partner"></div>
-  <!-- Gestione delle persone tracciate: viveva in Opzioni ("Persone"),
-       spostata qui perché questa pagina parla solo di questo — un secondo
-       posto raggiungibile con un tocco in più non aggiungeva niente,
-       solo un salto di pagina da ricordarsi. Il bottone "Aggiungi una
-       persona"/"Aggiungi un'altra persona" qui sotto (renderPartner)
-       apre e chiude questo pannello — stessi id, stessa apriSezionePersone()
-       di prima, solo diverso genitore nel DOM. -->
-  <div class="ecc" id="opzBoxPersone" hidden>
-    <!-- Due strade, dalla più facile: chi ha Notturnisti ti manda il suo
-         link (un tocco per chiederglielo), chi non ce l'ha si inserisce a
-         mano. L'interruttore "Segui un'altra persona" non serve più: aprire
-         questo pannello è già la scelta. -->
-    <input type="checkbox" id="wantCross" checked hidden>
-    <div id="crossBox">
-    <div id="wizPeopleList"></div>
-    <!-- "Calendario di coppia": una scelta sulle persone, quindi subito sotto la loro lista (era in Più, sparita). #piuCal/#piuCalTx:
-         id invariati, paid.js li cerca per nome (querySelector("#piuCal")). Nell'app è l'unico punto in cui si accende. -->
-    <div class="piu-cal" id="piuCal" style="margin:var(--gap-sezione) 0">
-      <div id="piuCalTx"></div>
-    </div>
-    <div class="pers-nuova" id="persNuova">
-      <p class="persone-modo" id="persNuovaTit">Aggiungi una persona</p>
-      <div class="q">
-        <label for="personaName">Come si chiama? <span class="hint" style="display:inline">(facoltativo)</span></label>
-        <input id="personaName" placeholder="es. Alex" autocomplete="off">
-      </div>
-      <div class="pers-vie" role="radiogroup" aria-label="Che turni fa">
-        <button type="button" class="pers-via" role="radio" aria-checked="false" data-pvia="link"><b>Ha Notturnisti</b><span>Le mandi il tuo link, lei ti manda il suo</span></button>
-        <button type="button" class="pers-via" role="radio" aria-checked="false" data-pvia="mine"><b>Fa i miei turni</b><span>La stessa rotazione, partita in un altro giorno</span></button>
-        <button type="button" class="pers-via" role="radio" aria-checked="false" data-pvia="day"><b>Lavora lun–ven</b><span>Giornata 9–18, riposa nel weekend</span></button>
-        <button type="button" class="pers-via" role="radio" aria-checked="false" data-pvia="custom"><b>Turni diversi</b><span>Li inserisco io</span></button>
-      </div>
-      <select id="personaMode" hidden aria-hidden="true" tabindex="-1">
-        <option value="mine">I tuoi stessi turni</option>
-        <option value="day">Giornata, lun-ven 9-18</option>
-        <option value="custom">Turni diversi dai miei</option>
-      </select>
-      <span id="personaModeHint" hidden></span>
-      <div id="pvLink" hidden>
-        <button type="button" class="btn g" id="doChiediLink" style="width:100%;min-height:44px">Invia il tuo link →</button>
-        <div class="q">
-          <label for="personaLink">Il suo link</label>
-          <div class="pv-incolla"><textarea id="personaLink" rows="2" placeholder="Incolla qui il link che ti ha mandato"></textarea><button type="button" class="btn g sm" id="doIncollaLink">Incolla</button></div>
-          <span class="hint" id="personaLinkErr"></span>
-        </div>
-      </div>
-      <div class="wdet" id="pvManuale" hidden>
-        <div id="personaManualFields">
-          <div class="q" id="personaSeqBox" hidden>
-            <label>La sua sequenza</label>
-            <span class="hint" style="margin:0 0 6px">Tocca i turni nell'ordine in cui li fa, un giorno alla volta.</span>
-            <div class="pv-pennelli" id="pvPennelli" role="group" aria-label="Aggiungi un giorno"></div>
-            <div class="pstrip pv-seq" id="pvSeqStrip" aria-label="La sua sequenza"></div>
-            <div class="pv-seqaz"><span class="hint" id="pvSeqNota" style="margin:0">Aggiungi i giorni della sequenza.</span><button type="button" class="lnk dim" id="pvSeqTogli" hidden>⌫ Togli l'ultimo</button></div>
-            <span class="hint" id="pvOggiNota" style="display:block;margin:4px 0 2px;font-weight:600"></span>
-            <details class="pv-testo">
-              <summary>Preferisco scriverla a lettere</summary>
-              <input id="personaPattern" spellcheck="false" autocapitalize="characters" placeholder="es. PPPRRNNNRRMMMRR">
-              <span class="hint">Una lettera per giorno. R è il riposo.</span>
-            </details>
-          </div>
-          <div class="q" id="personaAnchorBox">
-            <div id="pvSfasa" hidden>
-              <label>Il suo ciclo parte…</label>
-              <div class="pv-passo"><button type="button" class="ibtn" data-pv-sfasa="-1" aria-label="Un giorno prima">−</button><b id="pvSfasaTx">1 giorno dopo il mio</b><button type="button" class="ibtn" data-pv-sfasa="1" aria-label="Un giorno dopo">+</button></div>
-              <div class="pstrip" id="pvAnteprima" aria-label="I suoi prossimi sette giorni"></div>
-            </div>
-            <div id="pvData">
-              <details class="pv-testo">
-                <summary>Oppure scegli la data di partenza</summary>
-                <label for="personaAnchor" id="personaAnchorLab">Primo giorno del suo ciclo</label>
-                <input id="personaAnchor" type="date">
-                <span class="hint" id="personaAnchorHint">Una data in cui era al primo giorno della sua sequenza.</span>
-              </details>
-            </div>
-          </div>
-          <div class="q" id="personaShiftsBox" hidden>
-            <label>I suoi turni</label>
-            <div id="personaShiftsList"></div>
-            <span class="hint">Un orario per ogni lettera diversa da R.</span>
-          </div>
-          <details class="pv-sonno">
-            <summary>＋ Il suo sonno nei giorni liberi (facoltativo)</summary>
-            <span class="hint" style="margin:6px 0">Serve per le ore libere in comune. Se lo lasci vuoto vale il tuo.</span>
-            <div style="display:flex;gap:10px;align-items:center">
-              <input type="time" id="personaBed" aria-label="A letto" style="max-width:130px">
-              <span class="hint" style="margin:0">→</span>
-              <input type="time" id="personaWake" aria-label="Sveglia" style="max-width:130px">
-            </div>
-          </details>
-        </div>
-      </div>
-      <button class="btn pri" type="button" id="doConfirmPersona" hidden style="margin-top:10px;width:100%;min-height:46px">Aggiungi</button>
-      <button class="lnk dim" type="button" id="annullaModificaPersona" hidden style="margin:8px auto 0">Annulla</button>
-      <button class="lnk dim" type="button" id="rimuoviPersona" hidden style="margin:0 auto;color:var(--risk)">Rimuovi questa persona</button>
-    </div>
-    </div>
-  </div>
   <div id="partnerShare"></div>
 </div>
 
@@ -2046,6 +1940,100 @@ header b{font-size:23px}
   <button class="tool tool-1line" data-opz="4"><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h1.5a2.5 2.5 0 0 1 0 5H17"/><path d="M4 8h13v5a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V8z"/><path d="M8 2v3M12 2v3"/></svg></span>
     <span class="tool-tx"><b>Tragitto, caffè e pisolini</b><span>Tempi di viaggio, effetto del caffè, se puoi dormire al lavoro</span></span></button>
   <div class="ecc" id="opzBox4" hidden></div>
+  </div>
+  </section>
+  <section class="opz-g" data-opzg="persone" aria-label="Persone">
+  <p class="hint" style="margin:0 2px 8px"><b>Trova i momenti liberi in comune.</b> Partner, famiglia, amicizie, chi lavora con te: aggiungili e vedi in Turni › Tempo libero i giorni e le ore in comune. I loro turni restano solo su questo telefono.</p>
+  <div class="ecc" id="opzBoxPersone">
+    <!-- Due strade, dalla più facile: chi ha Notturnisti ti manda il suo
+         link (un tocco per chiederglielo), chi non ce l'ha si inserisce a
+         mano. L'interruttore "Segui un'altra persona" non serve più: aprire
+         questo pannello è già la scelta. -->
+    <input type="checkbox" id="wantCross" checked hidden>
+    <div id="crossBox">
+    <div id="wizPeopleList"></div>
+    <!-- "Calendario di coppia": una scelta sulle persone, quindi subito sotto la loro lista (era in Più, sparita). #piuCal/#piuCalTx:
+         id invariati, paid.js li cerca per nome (querySelector("#piuCal")). Nell'app è l'unico punto in cui si accende. -->
+    <div class="piu-cal" id="piuCal" style="margin:var(--gap-sezione) 0">
+      <div id="piuCalTx"></div>
+    </div>
+    <div class="pers-nuova" id="persNuova">
+      <p class="persone-modo" id="persNuovaTit">Aggiungi una persona</p>
+      <div class="q">
+        <label for="personaName">Come si chiama? <span class="hint" style="display:inline">(facoltativo)</span></label>
+        <input id="personaName" placeholder="es. Alex" autocomplete="off">
+      </div>
+      <div class="pers-vie" role="radiogroup" aria-label="Che turni fa">
+        <button type="button" class="pers-via" role="radio" aria-checked="false" data-pvia="link"><b>Ha Notturnisti</b><span>Le mandi il tuo link, lei ti manda il suo</span></button>
+        <button type="button" class="pers-via" role="radio" aria-checked="false" data-pvia="mine"><b>Fa i miei turni</b><span>La stessa rotazione, partita in un altro giorno</span></button>
+        <button type="button" class="pers-via" role="radio" aria-checked="false" data-pvia="day"><b>Lavora lun–ven</b><span>Giornata 9–18, riposa nel weekend</span></button>
+        <button type="button" class="pers-via" role="radio" aria-checked="false" data-pvia="custom"><b>Turni diversi</b><span>Li inserisco io</span></button>
+      </div>
+      <select id="personaMode" hidden aria-hidden="true" tabindex="-1">
+        <option value="mine">I tuoi stessi turni</option>
+        <option value="day">Giornata, lun-ven 9-18</option>
+        <option value="custom">Turni diversi dai miei</option>
+      </select>
+      <span id="personaModeHint" hidden></span>
+      <div id="pvLink" hidden>
+        <button type="button" class="btn g" id="doChiediLink" style="width:100%;min-height:44px">Invia il tuo link →</button>
+        <div class="q">
+          <label for="personaLink">Il suo link</label>
+          <div class="pv-incolla"><textarea id="personaLink" rows="2" placeholder="Incolla qui il link che ti ha mandato"></textarea><button type="button" class="btn g sm" id="doIncollaLink">Incolla</button></div>
+          <span class="hint" id="personaLinkErr"></span>
+        </div>
+      </div>
+      <div class="wdet" id="pvManuale" hidden>
+        <div id="personaManualFields">
+          <div class="q" id="personaSeqBox" hidden>
+            <label>La sua sequenza</label>
+            <span class="hint" style="margin:0 0 6px">Tocca i turni nell'ordine in cui li fa, un giorno alla volta.</span>
+            <div class="pv-pennelli" id="pvPennelli" role="group" aria-label="Aggiungi un giorno"></div>
+            <div class="pstrip pv-seq" id="pvSeqStrip" aria-label="La sua sequenza"></div>
+            <div class="pv-seqaz"><span class="hint" id="pvSeqNota" style="margin:0">Aggiungi i giorni della sequenza.</span><button type="button" class="lnk dim" id="pvSeqTogli" hidden>⌫ Togli l'ultimo</button></div>
+            <span class="hint" id="pvOggiNota" style="display:block;margin:4px 0 2px;font-weight:600"></span>
+            <details class="pv-testo">
+              <summary>Preferisco scriverla a lettere</summary>
+              <input id="personaPattern" spellcheck="false" autocapitalize="characters" placeholder="es. PPPRRNNNRRMMMRR">
+              <span class="hint">Una lettera per giorno. R è il riposo.</span>
+            </details>
+          </div>
+          <div class="q" id="personaAnchorBox">
+            <div id="pvSfasa" hidden>
+              <label>Il suo ciclo parte…</label>
+              <div class="pv-passo"><button type="button" class="ibtn" data-pv-sfasa="-1" aria-label="Un giorno prima">−</button><b id="pvSfasaTx">1 giorno dopo il mio</b><button type="button" class="ibtn" data-pv-sfasa="1" aria-label="Un giorno dopo">+</button></div>
+              <div class="pstrip" id="pvAnteprima" aria-label="I suoi prossimi sette giorni"></div>
+            </div>
+            <div id="pvData">
+              <details class="pv-testo">
+                <summary>Oppure scegli la data di partenza</summary>
+                <label for="personaAnchor" id="personaAnchorLab">Primo giorno del suo ciclo</label>
+                <input id="personaAnchor" type="date">
+                <span class="hint" id="personaAnchorHint">Una data in cui era al primo giorno della sua sequenza.</span>
+              </details>
+            </div>
+          </div>
+          <div class="q" id="personaShiftsBox" hidden>
+            <label>I suoi turni</label>
+            <div id="personaShiftsList"></div>
+            <span class="hint">Un orario per ogni lettera diversa da R.</span>
+          </div>
+          <details class="pv-sonno">
+            <summary>＋ Il suo sonno nei giorni liberi (facoltativo)</summary>
+            <span class="hint" style="margin:6px 0">Serve per le ore libere in comune. Se lo lasci vuoto vale il tuo.</span>
+            <div style="display:flex;gap:10px;align-items:center">
+              <input type="time" id="personaBed" aria-label="A letto" style="max-width:130px">
+              <span class="hint" style="margin:0">→</span>
+              <input type="time" id="personaWake" aria-label="Sveglia" style="max-width:130px">
+            </div>
+          </details>
+        </div>
+      </div>
+      <button class="btn pri" type="button" id="doConfirmPersona" hidden style="margin-top:10px;width:100%;min-height:46px">Aggiungi</button>
+      <button class="lnk dim" type="button" id="annullaModificaPersona" hidden style="margin:8px auto 0">Annulla</button>
+      <button class="lnk dim" type="button" id="rimuoviPersona" hidden style="margin:0 auto;color:var(--risk)">Rimuovi questa persona</button>
+    </div>
+    </div>
   </div>
   </section>
   <section class="opz-g" data-opzg="voci" aria-label="Cosa vedi nel piano">
@@ -7666,13 +7654,7 @@ const finestraTuttoIlGiorno=w=>w.a<=600 && (w.b-w.a)>=720;
 // prima il bottone diceva solo il nome della sezione, senza dare un motivo
 // per aprirla. La tua prossima finestra libera, non quella con qualcuno:
 // è l'unica sempre disponibile, anche senza persone in elenco.
-function renderPersonePreview(){
-  const el=$("#doPersoneSub"); if(!el) return;
-  const nomi=tuttePersone().map((p,i)=>p.name||"Persona "+(i+1));
-  el.textContent = nomi.length ? nomi.slice(0,2).join(", ")+(nomi.length>2?" +"+(nomi.length-2):"") : "Aggiungi qualcuno";
-}
 function renderPartnerPreview(){
-  renderPersonePreview();
   const el=$("#doPartnerSub"); if(!el) return;
   const w=finestreLibere(7);
   if(!w.length){ el.textContent="Nessuna finestra libera nei prossimi sette giorni"; return; }
@@ -7747,15 +7729,8 @@ function renderPartner(CARDS){
 
   if(tuttePer.length) h+='<p class="hint" style="margin:10px 0 0">Il loro sonno è una stima dai turni e dagli orari che hai inserito: dopo una notte conto circa sei ore e mezza di sonno di giorno.</p>';
 
-  // ── Con chi vederti: da vuota la sezione dice cosa fa (prima c'era solo
-  // "+ Aggiungi una persona", senza dire a cosa serve); con qualcuno già
-  // in elenco basta il bottone, le persone sono visibili qui sopra. ──
-  h+='<span class="eyebrow" style="display:block;margin:var(--gap-sezione) 0 8px">Con chi vuoi vederti</span>';
-  if(!tuttePer.length) h+='<div class="persone-intro"><b>Trova i momenti liberi in comune</b>'+
-    '<span>Partner, famiglia, amicizie, chi lavora con te: aggiungili e vedi qui i giorni e le ore di tempo libero in comune. I loro turni restano solo su questo telefono.</span></div>';
-  h+='<button type="button" data-partner-edit class="persone-add">'+
-    '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>'+
-    (tuttePer.length?"Aggiungi o gestisci le persone":"Aggiungi una persona")+'</button>';
+  // La gestione delle persone sta in Impostazioni › Persone: qui, che si guarda soltanto, un link.
+  h+='<button type="button" data-partner-edit class="lnk" style="margin-top:var(--gap-sezione);min-height:44px">'+(tuttePer.length?"Gestisci le persone":"Aggiungi qualcuno")+' →</button>';
 
   el.innerHTML=h;
   // Il pannello per aggiungere una persona sta fra il bottone qui sopra e
@@ -8234,11 +8209,8 @@ $("#essenziale").addEventListener("click",e=>{
 // giusto. Prima apriva Opzioni (Persone viveva lì) — ora il pannello è
 // dentro questa stessa pagina, chi chiama questa funzione c'è già.
 function apriPartner(){
-  apriSezionePersone();
-  const wc=$("#wantCross"), cb=$("#crossBox");
-  if(wc){ wc.checked=true; if(cb) cb.hidden=false; }
-  const pl=$("#personaLink");
-  if(pl && pl.scrollIntoView) setTimeout(()=>pl.scrollIntoView({behavior:"smooth",block:"center"}),80);
+  apriOpzioni("persone");
+  setTimeout(()=>{ const pl=$("#personaLink"); if(pl && pl.scrollIntoView) pl.scrollIntoView({behavior:"smooth",block:"center"}); },120);
 }
 // affina la finestra di sonno: apre la sezione Sonno
 function apriFinestraSonno(){
@@ -9273,9 +9245,6 @@ function chiudiVederci(){
 if($("#doAndamenti")) $("#doAndamenti").onclick=()=>apriAndamenti();
 if($("#chiudiAndamenti")) $("#chiudiAndamenti").onclick=andIndietro;
 if($("#doPartner")) $("#doPartner").onclick=apriVederci;
-// «Persone»: la pagina del tempo libero con l'elenco già aperto (modifica e rimozione a portata di tocco)
-function apriPersone(){ apriVederci(); const box=$("#opzBoxPersone"); if(box && box.hidden) apriSezionePersone(); else if(box && box.scrollIntoView) box.scrollIntoView({block:"nearest"}); }
-if($("#doPersone")) $("#doPersone").onclick=apriPersone;
 if($("#chiudiVederci")) $("#chiudiVederci").onclick=chiudiVederci;
 
 const cycGo=n=>{
@@ -9357,15 +9326,7 @@ function apriSezioneInline(n, forza){
 // "Persone" non è un passo del wizard: niente nodi da spostare, il
 // contenuto vive dentro #opzBoxPersone (ora dentro "Quando sono
 // disponibile", non più in Opzioni — vedi apriPartner), si mostra e basta.
-function apriSezionePersone(){
-  const box=$("#opzBoxPersone"); if(!box) return;
-  const apri=box.hidden;
-  soloUno(apri?"#opzBoxPersone":null);
-  box.hidden=!apri;
-  if(!apri) return;
-  renderWizPeopleList();
-  if(box.scrollIntoView) box.scrollIntoView({behavior:"smooth",block:"nearest"});
-}
+function apriSezionePersone(){ renderWizPeopleList(); }
 if($("#opzioni")) $("#opzioni").addEventListener("click", e=>{
   const b=e.target.closest("[data-opz]"); if(!b) return;
   // "Turni e ciclo": un solo modo di cambiare il ciclo, il flusso lineare
@@ -9403,7 +9364,7 @@ if($("#cycToday")) $("#cycToday").onclick=()=>{
    (non è una novità per lui), ma la trova sempre in Impostazioni › Novità. «app:true» = solo nell'app Android. */
 const NOVITA={ id:"2026-11-13", data:"Novembre 2026", righe:[
   ["Il conto del sonno, più chiaro","Il piano tiene un solo conto del sonno che ti manca (gli ultimi 14 giorni) e lo dice in una riga, con «Perché?». Sopra le tre ore allunga la notte libera invece di aggiungere pisolini. «Il tuo sonno» è più corto: un pisolino in più si segna da lì, e il movimento che hai fatto dal suo popup.",false,"2026-11-13"],
-  ["Persone a portata di mano","In Turni «Sonno e carico» sta in alto e «Persone» ha il suo riquadro: aggiungi, modifica o rimuovi senza cercare. Dopo una notte, il sonno di chi segui è una stima più realistica. Colori dal nuovo logo: tema scuro blu notte.",false,"2026-11-13"],
+  ["Persone in Impostazioni","Le persone si gestiscono ora in Impostazioni › Persone: elenco, modifica, «Rimuovi» e calendario di coppia. In Turni, «Tempo libero» è una riga a sé e serve solo a guardare. Dopo una notte, il sonno di chi segui è una stima più realistica. Colori dal nuovo logo: tema scuro blu notte.",false,"2026-11-13"],
   ["Collegamenti dai popup alle impostazioni","I popup di «Turno», «Caffè» e dei momenti migliori hanno ora un link diretto alle impostazioni che cambiano quel calcolo: tragitto, soglia del caffè, quando preferisci allenarti o pensare.",false,"2026-11-06"],
   ["Il perché in un foglio, i riepiloghi in Condividi","Nel piano di Oggi tocchi una voce (icona ⓘ) e il perché si apre in un foglio, senza allungare la lista. Il riepilogo del mese, dei 12 mesi e il PDF per il medico stanno in «Condividi e riepiloghi». In «Il tuo sonno» ci sono ora anche le scelte su come dormire e, su Android, «Metti la sveglia».",false,"2026-11-05"],
   ["Sonno e carico più chiaro","La pagina mostra subito il sonno che ti manca; il resto è un elenco di quattro voci, ognuna con la sua riga riassuntiva e la sua pagina. Gli orari del sonno separano le notti dormite di notte da quelle di giorno, e gli assi dei grafici sono corretti.",false,"2026-11-04"],
@@ -11464,6 +11425,7 @@ var _opzGruppo=null;   // var: letta da setTab/render prima di queste righe
 const OPZ_GRUPPI={
   turni:{t:"Turni e ciclo"},
   abitudini:{t:"Le tue abitudini"},
+  persone:{t:"Persone"},
   promemoria:{t:"Promemoria e collegamenti"},
   voci:{t:"Cosa vedi nel piano"},
   dati:{t:"Dati e privacy"},
@@ -11481,6 +11443,11 @@ function apriGruppoOpz(g){
   _opzGruppo=g; applicaGruppoOpz();
   if(g==="abitudini"){ const b=document.querySelector('[data-opz="3"]'); if(b && b.getAttribute("aria-expanded")!=="true") b.click(); }
   if(g==="voci") renderPianoVoci();
+  if(g==="persone"){ renderWizPeopleList(); renderPiuCal(); }
+}
+function nomiPersone(){
+  const nomi=tuttePersone().map((p,i)=>p.name||"Persona "+(i+1));
+  return nomi.length ? nomi.slice(0,2).join(", ")+(nomi.length>2?" +"+(nomi.length-2):"") : "Nessuna: aggiungi chi vuoi vedere";
 }
 function renderOpzHub(){
   const el=$("#opzHub"); if(!el) return;
@@ -11493,6 +11460,7 @@ function renderOpzHub(){
   const R=[
     ["turni","calendar","Turni e ciclo", turni+(oggiN?" · oggi "+(oggiN==="Riposo"?"riposo":oggiN):"")],
     ["abitudini","moon","Le tue abitudini", ab||"Sonno, tragitto, caffè, pisolini"],
+    ["persone","duo","Persone", nomiPersone()],
     ["promemoria","alarm","Promemoria e collegamenti", attivi?"Promemoria attivi":"Promemoria spenti"],
     ["voci","eye","Cosa vedi nel piano", nVoci+" "+(nVoci===1?"voce in più":"voci in più")+" accese su "+PIANO_VOCI.length],
     ["dati","scudo","Dati e privacy", "Copia di sicurezza, statistiche, cancella tutto"],
@@ -11526,8 +11494,8 @@ if($("#chiudiOpzioni")) $("#chiudiOpzioni").onclick=chiudiOpzioniPagina;
 // → schema o composizione → oggi dove sei → orari), non le Opzioni.
 // Tab Turni: i quattro strumenti in una griglia, «Condividi» in un foglio, «Modifica turni» in un foglio con quattro voci.
 { const gr=$("#strumenti");
-  if(gr){ const top=document.getElementById("doAndamenti"); if(top){ top.classList.add("tsec-top"); gr.parentNode.insertBefore(top,gr); }
-    ["doPartner","doPersone","doFerie","doScambioTurno"].forEach(id=>{ const b=document.getElementById(id); if(b) gr.appendChild(b); });
+  if(gr){ ["doAndamenti","doPartner"].forEach(id=>{ const top=document.getElementById(id); if(top){ top.classList.add("tsec-top"); gr.parentNode.insertBefore(top,gr); } });
+    ["doFerie","doScambioTurno"].forEach(id=>{ const b=document.getElementById(id); if(b) gr.appendChild(b); });
     const vuoto=$("#tgDecidereBox"); if(vuoto && !vuoto.querySelector(".tsec")) vuoto.remove(); }
   const cb=$("#condividiCorpo"), cs=$("#cycShareBox"); if(cb && cs) cb.appendChild(cs); }
 function apriFoglio(id,su){ const m=document.getElementById(id); if(!m) return; m.hidden=!su; m.setAttribute("aria-hidden",String(!su));

@@ -17,7 +17,7 @@ const apri=async()=>{
 };
 const vis=(p,s)=>p.evaluate(s=>{ const e=document.querySelector(s); return !!e && !e.hidden && getComputedStyle(e).display!=="none"; }, s);
 const p=await apri();
-ok(await p.evaluate(()=>{ const g=document.querySelector("#strumenti"), t=document.getElementById("doAndamenti"); return !!g && ["doPartner","doPersone","doFerie","doScambioTurno"].every(i=>g.contains(document.getElementById(i))) && !g.contains(t) && !!(t.compareDocumentPosition(g)&Node.DOCUMENT_POSITION_FOLLOWING); }), "quattro strumenti in una griglia, «Sonno e carico» in una riga sopra");
+ok(await p.evaluate(()=>{ const g=document.querySelector("#strumenti"), a=document.getElementById("doAndamenti"), tl=document.getElementById("doPartner"); return !!g && ["doFerie","doScambioTurno"].every(i=>g.contains(document.getElementById(i))) && !g.contains(a) && !g.contains(tl) && !!(a.compareDocumentPosition(tl)&Node.DOCUMENT_POSITION_FOLLOWING) && !!(tl.compareDocumentPosition(g)&Node.DOCUMENT_POSITION_FOLLOWING); }), "due righe in alto (Sonno e carico, Tempo libero), poi la griglia con Ferie e Cambio turno");
 ok(await p.evaluate(()=>[...document.querySelectorAll("#strumenti .tsec")].every(t=>t.querySelector(".tsec-t") && t.offsetHeight>=44)), "ogni strumento ha titolo e una riga di stato, ed è un bersaglio comodo");
 // Modifica turni: un foglio con quattro azioni
 await p.click("#tEdit"); await p.waitForTimeout(250);

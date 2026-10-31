@@ -13,8 +13,7 @@ const apri=async(st,w=390,h=844)=>{
   const p=await ctx.newPage(); p.on("pageerror",e=>errs.push(e.message));
   await p.goto("http://localhost:8765/index.html"); await p.waitForTimeout(900);
   await p.evaluate(()=>document.querySelector('[data-tab="turni"]').click()); await p.waitForTimeout(300);
-  await p.evaluate(()=>document.querySelector("#doPartner").click()); await p.waitForTimeout(300);
-  await p.evaluate(()=>document.querySelector("[data-partner-edit]").click()); await p.waitForTimeout(400);
+  await p.evaluate(()=>{ document.querySelector("#doOpzioni").click(); document.querySelector('[data-opzg-vai="persone"]').click(); }); await p.waitForTimeout(400);
   return p;
 };
 const stato=p=>p.evaluate(()=>JSON.parse(localStorage.getItem("nt:state")));

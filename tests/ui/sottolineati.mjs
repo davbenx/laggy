@@ -26,7 +26,7 @@ async function apri(nativoOn, stato){
 const clic=(p,q)=>p.evaluate(q=>document.querySelector(q)?.click(),q);
 { const p=await apri(false,false); const s=await sott(p); ok(s.length===0, "primo avvio: nessun pulsante sottolineato "+JSON.stringify(s)); await p.context().close(); }
 { const p=await apri(true,true);
-  for(const [nome,passi] of [["Oggi",[]],["Turni",['[data-tab="turni"]']],["Persone",['[data-tab="turni"]',"#doPartner","[data-partner-edit]"]],["Sonno e carico",['[data-tab="turni"]',"#doAndamenti"]],["Impostazioni",["#doOpzioni"]]]){
+  for(const [nome,passi] of [["Oggi",[]],["Turni",['[data-tab="turni"]']],["Persone",["#doOpzioni","[data-opzg-vai=\"persone\"]"]],["Sonno e carico",['[data-tab="turni"]',"#doAndamenti"]],["Impostazioni",["#doOpzioni"]]]){
     for(const q of passi){ await clic(p,q); await p.waitForTimeout(450); }
     const s=await sott(p); ok(s.length===0, nome+": nessun pulsante sottolineato "+JSON.stringify(s));
     if(nome==="Persone"||nome==="Sonno e carico"||nome==="Impostazioni") { await clic(p,"#chiudiOpzioni"); await p.waitForTimeout(200); }
