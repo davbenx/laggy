@@ -930,6 +930,11 @@ justify-content:center;flex:none;width:44px;height:44px;border-radius:999px}
 .drem-done,.dq-riga{line-height:1.5}
 .drem-done .lnk,.dq-riga .lnk{min-height:0;padding:10px 6px;margin:-10px 0;vertical-align:baseline}
 .dopo-notte{margin:-2px 0 10px;padding:0 2px}
+.dn-comp>summary{display:flex;align-items:center;gap:4px;min-height:44px;cursor:pointer;list-style:none;font-size:13.5px;color:var(--dim)}
+.dn-comp>summary::-webkit-details-marker{display:none}
+.dn-comp>summary b{color:var(--ink);font-weight:600}
+.dn-comp>summary::after{content:"›";margin-left:auto;font-size:20px;color:var(--faint);transition:transform .15s}
+.dn-comp[open]>summary::after{transform:rotate(90deg)}
 .dn-vale{font-size:12px;color:var(--faint);margin:6px 0 0}
 .dn-lab{display:block;font-size:12px;color:var(--dim);margin:0 0 6px}
 .dn-scelta{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--s2);border:1px solid var(--line);border-radius:var(--r);padding:2px}
@@ -1033,6 +1038,10 @@ letter-spacing:.01em;padding:9px 0 8px;min-height:56px;cursor:pointer;position:r
 .strumenti .tsec{flex-direction:column;align-items:flex-start;gap:10px;min-height:112px;padding:14px;margin:0;width:auto}
 .strumenti .tsec>svg{padding:8px}
 .strumenti .tsec-tx{width:100%}
+/* «Sonno e carico»: la prima voce di Turni, una riga a tutta larghezza sopra la griglia */
+.tsec-top{min-height:56px;padding:12px 14px;margin:var(--gap-sezione) 0 0}
+.tsec-top::after{content:"›";margin-left:auto;font-size:20px;color:var(--faint)}
+.tsec-top + .strumenti{margin-top:10px}
 .tsec-t{display:block;font-family:var(--serif);font-size:16px;font-weight:600;color:var(--ink)}
 .tsec-v{display:block;font-size:12.5px;color:var(--dim);margin-top:3px;line-height:1.35}
 .tsec-riga{margin-top:0}
@@ -1084,6 +1093,12 @@ padding:16px 18px;margin:2px 0 var(--gap-sezione);box-shadow:var(--shadow-btn)}
 /* griglia a 5 colonne invece di righe che si accumulano man mano: prima,
    larghezza di ognuna dettata dalla lunghezza della sua etichetta ("Così
    così" più largo di "Sveglio"), qui tutte uguali per costruzione. */
+.kcompat .kface{min-height:46px;justify-content:center;padding:0}
+.kcompat .kface svg{width:26px;height:26px}
+.kcompat .kface span{display:none}
+.kleg{display:flex;justify-content:space-between;font-size:12px;color:var(--faint);margin:4px 2px 0}
+.drem-stato{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.drem-stato .lnk{flex:none;min-height:44px;padding:0 4px;font-size:13px}
 .ora-kss{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:12px}
 /* Ancorate in alto (non centrate) e con due righe di spazio riservate
    all'etichetta, sempre: "Così così"/"Al meglio" vanno a capo,
@@ -1133,7 +1148,7 @@ color:var(--blue);display:inline-flex;align-items:center;justify-content:center}
 body.tab-oggi #status:not(.warn):not(.info){display:none}
 /* OGGI: il giorno. "La giornata" (datebar + dettaglio + diario) è a scomparsa. */
 body.tab-oggi .cap.ciclo,body.tab-oggi #cyc,body.tab-oggi #meseBox,body.tab-oggi #cycShareBox,
-body.tab-oggi #doPartner,body.tab-oggi .cycbar,body.tab-oggi #cycRange,body.tab-oggi #doAndamenti,
+body.tab-oggi #doPartner,body.tab-oggi #doPersone,body.tab-oggi .cycbar,body.tab-oggi #cycRange,body.tab-oggi #doAndamenti,
 body.tab-oggi #icsBox,body.tab-oggi #andamentiPagina,
 body.tab-oggi #vederciPagina,body.tab-oggi #partner,body.tab-oggi .piu-cal,
 body.tab-oggi .tools,body.tab-oggi .piu-info,body.tab-oggi footer{display:none}
@@ -1193,7 +1208,7 @@ body.tab-oggi #scambioPagina,body.tab-opzioni #scambioPagina{display:none}
 .persone-intro span{display:block;font-size:13px;color:var(--dim);margin-top:4px;line-height:1.45}
 .persone-add{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:12px;background:var(--blue-soft);
 border:1px solid var(--blue-lt);border-radius:var(--r);color:var(--blue);font:inherit;font-size:14px;font-weight:600;cursor:pointer}
-#annullaModificaPersona:not([hidden]){display:block}
+#annullaModificaPersona:not([hidden]),#rimuoviPersona:not([hidden]){display:block}
 .pers-vie{display:grid;gap:8px;margin:4px 0 10px}
 .pers-via{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;width:100%;min-height:56px;padding:10px 14px;background:var(--bg);border:1.5px solid var(--line);border-radius:var(--r);color:var(--ink);font:inherit;cursor:pointer}
 .pers-via b{font-size:15px}
@@ -1332,7 +1347,7 @@ body.tab-opzioni #firstPlanBanner,body.tab-opzioni #setupChecklist,body.tab-opzi
 body.tab-opzioni .daynav,body.tab-opzioni .cap.ciclo,body.tab-opzioni #cyc,body.tab-opzioni #meseBox,
 body.tab-opzioni #cycShareBox,
 body.tab-opzioni .cycbar,body.tab-opzioni #cycRange,body.tab-opzioni #doAndamenti,body.tab-opzioni #doScambioTurno,body.tab-opzioni #scambioBox,
-body.tab-opzioni #andamentiPagina,body.tab-opzioni #vederciPagina,body.tab-opzioni #doPartner,
+body.tab-opzioni #andamentiPagina,body.tab-opzioni #vederciPagina,body.tab-opzioni #doPartner,body.tab-opzioni #doPersone,
 body.tab-opzioni #partner,body.tab-opzioni #luciditaGiornoWrap,body.tab-opzioni .piu-cal,
 /* la sezione Opzioni vive solo nella sua destinazione */
 body:not(.tab-opzioni) #opzioni{display:none}
@@ -1744,6 +1759,11 @@ header b{font-size:23px}
   <span class="tsec-tx"><b class="tsec-t">Tempo libero</b><span class="tsec-v" id="doPartnerSub">—</span></span>
 </button>
 
+<button type="button" class="tsec" id="doPersone">
+  <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:var(--blue);background:var(--blue-soft)"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><circle cx="17" cy="9.5" r="2.4"/><path d="M16.5 14.2c2.3.1 3.8 1.6 4.3 4.3"/></svg>
+  <span class="tsec-tx"><b class="tsec-t">Persone</b><span class="tsec-v" id="doPersoneSub">Aggiungi qualcuno</span></span>
+</button>
+
 <div id="vederciPagina" hidden>
   <div class="pag-testa">
     <button type="button" class="themebtn" id="chiudiVederci" aria-label="Torna a Turni">
@@ -1846,6 +1866,7 @@ header b{font-size:23px}
       </div>
       <button class="btn pri" type="button" id="doConfirmPersona" hidden style="margin-top:10px;width:100%;min-height:46px">Aggiungi</button>
       <button class="lnk dim" type="button" id="annullaModificaPersona" hidden style="margin:8px auto 0">Annulla</button>
+      <button class="lnk dim" type="button" id="rimuoviPersona" hidden style="margin:0 auto;color:var(--risk)">Rimuovi questa persona</button>
     </div>
     </div>
   </div>
@@ -4361,7 +4382,23 @@ function diaryReminder(P, CARDS){
   // Il cerchio si chiude a schermo: se hai annotato meno sonno e oggi il piano
   // prescrive un recupero, dillo — così vedi che il TUO dato ha cambiato il piano.
   const napRec = logged && P && (P.naps||[]).find(n=>n.debito);
-  const recupero = logged && debt && P && (P.naps||[]).some(n=>n.rec||n.debito);
+  const napRecDebt = logged && debt && P && (P.naps||[]).find(n=>n.rec||n.debito);
+  // Una sola riga di stato per tutto quello che il piano ha fatto del tuo conto di sonno (e un «Perché?» col resto):
+  // prima erano quattro messaggi sparsi nella scheda, che dicevano la stessa cosa da angolature diverse.
+  let stato="", statoPerche="";
+  if(logged && P){
+    const extraN=P.s && P.s.meta && P.s.meta.debitoExtra;
+    if(extraN){ stato="Ti mancano "+hm(P.debitoMin)+" di sonno · stanotte +"+extraN+" min";
+      statoPerche="Con più di tre ore di debito un pisolino non basta, e accorcerebbe il sonno di stanotte: per questo il piano allunga di "+extraN+" minuti la prima notte libera. Il debito cala solo dormendo: una notte lunga ne recupera metà, non azzera una settimana."; }
+    else if(napRec){ stato="Ti mancano "+hm(napRec.debito)+" di sonno · pisolino alle "+hhmm(napRec.a);
+      statoPerche=debitoMotivo(napRec)+" Il pisolino non è un extra: rimette a posto il conto prima che si sommi a domani. Quando comincia ti chiedo se l'hai fatto."; }
+    else if(P.debitoScoperto>0){ stato="Ti mancano "+hm(P.debitoScoperto)+" di sonno · oggi niente pisolino";
+      statoPerche="Oggi non c'è spazio per un pisolino, né prima né dopo il turno. Il conto resta aperto: recupera stanotte e, se hai sonno, evita di guidare."; }
+    else if(napRecDebt){ stato="Hai dormito meno del previsto · pisolino alle "+hhmm(napRecDebt.a);
+      statoPerche="Hai dormito meno del previsto, e il piano ha aggiunto un pisolino di recupero per non portare il debito a domani."; }
+    if(stato) infoVoci.set("debito",{t:"Il tuo conto del sonno",h:'<p class="ed-sub">'+esc(statoPerche)+'</p>'});
+  }
+  const statoHtml = stato ? '<div class="drem-rec drem-stato"><span>'+esc(stato)+'</span><button type="button" class="lnk" data-info-debito="1">Perché?</button></div>' : "";
   if(dnum(f)===dnum(giornoVero())) setBadge(logged?0:1);
 
   // Un solo modo per tutto il diario, quello delle app di tutti i giorni:
@@ -4393,8 +4430,7 @@ function diaryReminder(P, CARDS){
     x+='<div class="drem-done"><span class="drem-ok">✓</span> Sonno <b>'+esc(bd)+'–'+esc(wk)+'</b> · '+durTxt+
        (cmp?' <span class="drem-cmp">'+cmp+'</span>':'')+
        ' <button type="button" class="ibtn drem-edit" data-open="1" aria-label="Modifica gli orari del sonno" title="Modifica">'+ICON.pencil+'</button></div>'+
-       (recupero?'<div class="drem-rec">Hai dormito meno del previsto: il piano ha aggiunto un pisolino di recupero qui sotto.</div>'
-         :napRec?'<div class="drem-rec">'+esc(debitoMotivo(napRec))+' Il piano ha aggiunto un pisolino alle '+esc(hhmm(napRec.a))+': quando comincia ti chiedo se l\'hai fatto.</div>':'')+
+       statoHtml+
        (_perchePer===key0?'<div class="perche" role="group" aria-label="Cosa ha cambiato il piano?"><span>Cosa ha cambiato il piano?</span><span class="perche-az">'+
          '<button type="button" class="btn g sm" data-perche="turno">Il turno era diverso</button><button type="button" class="btn g sm" data-perche="abitudine">Dormo così di solito</button>'+
          '<button type="button" class="btn g sm" data-perche="altro">Altro</button><button type="button" class="lnk dim" data-perche="no">No, grazie</button></span></div>':'');
@@ -4403,31 +4439,35 @@ function diaryReminder(P, CARDS){
   // resta la riga con la scelta fatta (i grafici di «Come sto dormendo» la usano).
   const VOTI=[[1,"Senza energie",ICON.faceTerrible,"var(--risk)"],[2,"Poca energia",ICON.faceLow,"var(--orange)"],
     [3,"Così così",ICON.faceMid,"var(--faint)"],[4,"Bene",ICON.faceOk,"var(--blue)"],[5,"Al meglio",ICON.faceGreat,"var(--ok)"]];
+  let xEn="";
   if(logged && !sleepEditing){
     const v=VOTI.find(o=>o[0]===+val), votoEditing=state.diaryEditing.has("voto:"+key0);
     if(v && !votoEditing)
-      x+='<div class="dq-riga"><i class="kic" style="color:'+v[3]+'">'+v[2]+'</i> Energia: <b>'+v[1]+'</b> <button type="button" class="ibtn drem-edit" data-voto-edit="1" aria-label="Cambia il voto dell\'energia" title="Cambia">'+ICON.pencil+'</button></div>';
+      xEn+='<div class="dq-riga"><i class="kic" style="color:'+v[3]+'">'+v[2]+'</i> Energia: <b>'+v[1]+'</b> <button type="button" class="ibtn drem-edit" data-voto-edit="1" aria-label="Cambia il voto dell\'energia" title="Cambia">'+ICON.pencil+'</button></div>';
     else if(energiaPresto(key0, wk))
-      x+='<div class="dq-sez">Come ti senti?</div><p class="hint" data-voto-presto="1" style="margin:2px 0 6px">Fra poco: appena svegli il voto non è affidabile, c\'è ancora l\'inerzia del sonno. Te lo chiedo alle '+esc(energiaDalle(key0, wk))+'.</p>';
+      xEn+='<div class="dq-sez">Come ti senti?</div><p class="hint" data-voto-presto="1" style="margin:2px 0 6px">Fra poco: appena svegli il voto non è affidabile, c\'è ancora l\'inerzia del sonno. Te lo chiedo alle '+esc(energiaDalle(key0, wk))+'.</p>';
     else
-      x+='<div class="dq-sez">Come ti senti? <span>(facoltativo)</span></div><div class="ora-kss" style="margin-top:0">'+
-        VOTI.map(o=>'<button class="dbtn kface'+(+val===o[0]?" on":"")+'" data-diary="'+o[0]+'" aria-label="'+o[1]+'" aria-pressed="'+(+val===o[0])+'" style="--tone:'+o[3]+'">'+
-          '<i class="kic" style="color:'+o[3]+'">'+o[2]+'</i><span>'+o[1]+'</span></button>').join("")+'</div>';
+      xEn+='<div class="dq-sez">Come ti senti? <span>(facoltativo)</span></div><div class="ora-kss kcompat" style="margin-top:0">'+
+        VOTI.map(o=>'<button class="dbtn kface'+(+val===o[0]?" on":"")+'" data-diary="'+o[0]+'" aria-label="'+o[1]+'" title="'+o[1]+'" aria-pressed="'+(+val===o[0])+'" style="--tone:'+o[3]+'">'+
+          '<i class="kic" style="color:'+o[3]+'">'+o[2]+'</i></button>').join("")+'</div>'+
+        '<div class="kleg" aria-hidden="true"><span>Senza energie</span><span>Al meglio</span></div>';
   }
   // Il pisolino: la domanda solo quando è cominciato (prima non c'è niente da
   // dire: «Fatto?» per un pisolino delle 17 alle 9 del mattino non ha senso).
   const ora = dnum(f) < dnum(giornoVero()) ? Infinity : minutiDaFocus();
+  let xNap="", pend=false;
   CARDS.filter(c=>c.nap && isFinite(c.at) && ora>=c.at).forEach(c=>{
     const seg=((state.pisolini||{})[key0]||{})[c.nap.k]||{};
     const fine=c.nap.fine, napEditing=state.diaryEditing.has("nap:"+key0+":"+c.nap.k);
-    if(napEditing || !(seg.si || seg.no)) x+='<div class="dq-sez" data-nap-q="'+esc(c.nap.k)+'">Pisolino</div>';
-    else x+='<div class="dq-sez" data-nap-q="'+esc(c.nap.k)+'" style="padding-top:0;border-top:0;margin:0"></div>';
+    if(napEditing || !(seg.si || seg.no)) pend=true;
+    if(napEditing || !(seg.si || seg.no)) xNap+='<div class="dq-sez" data-nap-q="'+esc(c.nap.k)+'">Pisolino</div>';
+    else xNap+='<div class="dq-sez" data-nap-q="'+esc(c.nap.k)+'" style="padding-top:0;border-top:0;margin:0"></div>';
     if(napEditing){
-      x+='<div class="dq-campi"><label>Inizio<input type="time" class="ora-in" data-nap-in-a="1" aria-label="Inizio del pisolino" value="'+esc(seg.a||c.nap.k)+'"></label>'+
+      xNap+='<div class="dq-campi"><label>Inizio<input type="time" class="ora-in" data-nap-in-a="1" aria-label="Inizio del pisolino" value="'+esc(seg.a||c.nap.k)+'"></label>'+
         '<label>Fine<input type="time" class="ora-in" data-nap-in-b="1" aria-label="Fine del pisolino" value="'+esc(seg.b||fine)+'"></label></div>'+
         '<div class="dq-az"><button class="dbtn pri" data-nap-salva="'+esc(c.nap.k)+'" data-min="'+c.nap.min+'">Salva</button><button class="lnk dim" data-nap-annulla="'+esc(c.nap.k)+'">Annulla</button></div>';
     } else if(seg.si){
-      x+='<div class="drem-done"><span class="drem-ok">✓</span> Pisolino <b>'+esc(seg.a||c.nap.k)+'–'+esc(seg.b||fine)+'</b> '+
+      xNap+='<div class="drem-done"><span class="drem-ok">✓</span> Pisolino <b>'+esc(seg.a||c.nap.k)+'–'+esc(seg.b||fine)+'</b> '+
         '<button type="button" class="ibtn drem-edit" data-edit-nap="'+esc(c.nap.k)+'" aria-label="Modifica gli orari del pisolino" title="Modifica">'+ICON.pencil+'</button></div>';
       // Se il pisolino registrato è durato molto più del previsto, un avviso
       // subito — non solo un conto che si aggiusta domani in silenzio.
@@ -4435,17 +4475,18 @@ function diaryReminder(P, CARDS){
       if(aReale!==null && bReale!==null){
         let dReale=bReale-aReale; while(dReale<=0) dReale+=1440;
         if(dReale-c.nap.min>=20 && dReale<300)
-          x+='<div class="drem-rec">Più lungo del previsto ('+dur(dReale)+'): oltre una certa durata un pisolino rischia di scivolare in sonno profondo, con più intontimento al risveglio invece di meno.</div>';
+          xNap+='<div class="drem-rec">Più lungo del previsto ('+dur(dReale)+'): oltre una certa durata un pisolino rischia di scivolare in sonno profondo, con più intontimento al risveglio invece di meno.</div>';
       }
     } else if(seg.no){
-      x+='<div class="drem-done">Pisolino saltato <button type="button" class="ibtn drem-edit" data-nap-riapri="'+esc(c.nap.k)+'" aria-label="Riapri il pisolino" title="Modifica">'+ICON.pencil+'</button></div>';
+      xNap+='<div class="drem-done">Pisolino saltato <button type="button" class="ibtn drem-edit" data-nap-riapri="'+esc(c.nap.k)+'" aria-label="Riapri il pisolino" title="Modifica">'+ICON.pencil+'</button></div>';
     } else {
-      x+='<p class="dq">Hai fatto il pisolino <b>'+esc(c.nap.k)+' → '+esc(fine)+'</b>?</p>'+
+      xNap+='<p class="dq">Hai fatto il pisolino <b>'+esc(c.nap.k)+' → '+esc(fine)+'</b>?</p>'+
         '<div class="dq-az"><button class="dbtn pri" data-nap="si" data-k="'+esc(c.nap.k)+'" data-fine="'+esc(fine)+'" data-min="'+c.nap.min+'">Sì, così</button>'+
         '<button class="dbtn" data-nap-altri="'+esc(c.nap.k)+'">Altri orari</button>'+
         '<button class="dbtn" data-nap="no" data-k="'+esc(c.nap.k)+'" data-min="'+c.nap.min+'">Saltato</button></div>';
     }
   });
+  let xExtra="";
   // Un pisolino che il piano non aveva previsto: si annota con un link discreto (non lo si
   // sollecita, né lo si giudica). Conta nel debito da domani, come gli altri.
   if(dnum(f) <= dnum(nowD)){
@@ -4456,31 +4497,24 @@ function diaryReminder(P, CARDS){
       '<div class="dq-az"><button class="dbtn pri" data-extra-salva="'+esc(id)+'">Salva</button><button class="lnk dim" data-extra-annulla="'+esc(id)+'">Annulla</button>'+
       (id!=="nuovo"?'<button class="lnk dim" data-extra-del="'+esc(id)+'">Elimina</button>':'')+'</div>';
     extra.forEach(i=>{ const g=segG[i];
-      if(state.diaryEditing.has("extra:"+key0+":"+i)) x+=campiExtra(i,g.a,g.b);
+      if(state.diaryEditing.has("extra:"+key0+":"+i)) xExtra+=campiExtra(i,g.a,g.b);
       else {
-        x+='<div class="drem-done"><span class="drem-ok">✓</span> Pisolino in più <b>'+esc(g.a)+'–'+esc(g.b)+'</b> '+
+        xExtra+='<div class="drem-done"><span class="drem-ok">✓</span> Pisolino in più <b>'+esc(g.a)+'–'+esc(g.b)+'</b> '+
           '<button type="button" class="ibtn drem-edit" data-extra-edit="'+esc(i)+'" aria-label="Modifica il pisolino" title="Modifica">'+ICON.pencil+'</button></div>';
         // un pisolino lungo e vicino al letto toglie sonno a stanotte: lo si dice una volta, senza giudicare
         const a0=NT.oraDi(g.a), b0=NT.oraDi(g.b);
         if(a0!==null && b0!==null && P && P.s){ let d=b0-a0; while(d<=0) d+=1440;
           const alLetto=(((P.s.onset-b0)%1440)+1440)%1440;
-          if(d>=35 && alLetto<240) x+='<div class="drem-rec">Stasera potresti addormentarti più tardi. Una luce forte al risveglio aiuta; l\'orario di letto lascialo com\'è.</div>'; }
+          if(d>=35 && alLetto<240) xExtra+='<div class="drem-rec">Stasera potresti addormentarti più tardi. Una luce forte al risveglio aiuta; l\'orario di letto lascialo com\'è.</div>'; }
       } });
     if(state.diaryEditing.has("extra:"+key0+":nuovo")){
       const fineD=isToday?hhmm(nowMin):"15:30", inD=isToday?hhmm(mod1440(nowMin-30)):"15:00";
-      x+=campiExtra("nuovo",inD,fineD);
-    } else x+='<button type="button" class="lnk" data-extra-nuovo="1" style="margin-top:8px;min-height:44px">+ Hai fatto un altro pisolino?</button>';
+      xExtra+=campiExtra("nuovo",inD,fineD);
+    } else if(!pend) xExtra+='<button type="button" class="lnk" data-extra-nuovo="1" style="margin-top:8px;min-height:44px">+ Hai fatto un altro pisolino?</button>';
   }
-  // Oltre le 3 ore di debito la notte libera si allunga: lo si dice, con il numero.
-  if(logged && P && P.s && P.s.meta && P.s.meta.debitoExtra && !sleepEditing)
-    x+='<div class="drem-rec" style="margin-top:8px">Ti mancano '+hm(P.debitoMin)+' di sonno: un pisolino non basta, quindi stanotte il piano ti dà '+P.s.meta.debitoExtra+' minuti in più. Il debito cala solo dormendo.</div>';
-  // Livello 3: nessuna finestra ha retto, ma il debito non sparisce in
-  // silenzio — è quello che chiudeva il bug: prima il testo prometteva un
-  // pisolino che poi non compariva mai da nessuna parte.
-  if(P && P.debitoScoperto>0)
-    x+='<div class="drem-rec" style="margin-top:8px">Ti mancano '+hm(P.debitoScoperto)+
-      ' di sonno, e oggi non c\'è spazio per un pisolino, né prima né dopo il turno. '+
-      'Il conto resta aperto: recupera stanotte, e se hai sonno evita di guidare.</div>';
+  // L'ordine segue l'urgenza: un pisolino da confermare (il tempo scorre) prima dell'energia; altrimenti energia, poi i pisolini.
+  x+= pend ? xNap+xEn : xEn+xNap;
+  x+=xExtra;
   x+='</div>';
   return x;
 }
@@ -5528,6 +5562,7 @@ function renderAdatta(){
     '<button type="button" class="lnk dim" id="adattaNo">Lascia così</button></div>';
 }
 document.addEventListener("click", e=>{
+  if(e.target.closest("[data-info-debito]")){ apriInfo("debito"); return; }
   const pe=e.target.closest("[data-perche]");
   if(pe){ const m=pe.dataset.perche; _perchePer="";
     if(m!=="no") track("piano_motivo",{motivo:m});
@@ -6044,10 +6079,15 @@ function sceltaDopoNotte(P){
   const spiega = store.get("smontoScelto", false) ? "" : '<p class="dn-hint">'+(corto
     ? 'Sonno breve: il pomeriggio è tuo e stanotte dormi bene. Sonno lungo: recuperi di più adesso, ma stasera il sonno arriva più tardi.'
     : 'In due tempi: un sonno più corto e un pisolino prima della prossima notte (di giorno si dorme più leggeri). Tutto di fila: un blocco solo, se di giorno dormi bene.')+'</p>';
+  const scelte='<div class="dn-scelta">'+opz("diviso", corto?"Sonno breve":"In due tempi", eD, diviso, corto?"pomeriggio libero":"poi un pisolino")+opz(unito, corto?"Sonno lungo":"Tutto di fila", eU, !diviso, corto?"recuperi di più":"un blocco solo")+'</div>'+
+    spiega+'<p class="dn-vale">Vale per tutte le notti.</p>';
+  // Scelta già fatta: una riga («In due tempi · cambia») che si apre solo se serve; la prima volta resta aperta.
+  if(store.get("smontoScelto", false)){
+    const nome=diviso ? (corto?"Sonno breve":"In due tempi") : (corto?"Sonno lungo":"Tutto di fila");
+    return '<details class="dopo-notte dn-comp"><summary>Dopo il turno: <b>'+nome+'</b> · cambia</summary>'+scelte+'</details>';
+  }
   return '<div class="dopo-notte" role="group" aria-label="Dopo la notte, come dormi">'+
-    '<span class="dn-lab">Dopo il turno, come dormi?</span>'+
-    '<div class="dn-scelta">'+opz("diviso", corto?"Sonno breve":"In due tempi", eD, diviso, corto?"pomeriggio libero":"poi un pisolino")+opz(unito, corto?"Sonno lungo":"Tutto di fila", eU, !diviso, corto?"recuperi di più":"un blocco solo")+'</div>'+
-    spiega+'<p class="dn-vale">Vale per tutte le notti.</p></div>';
+    '<span class="dn-lab">Dopo il turno, come dormi?</span>'+scelte+'</div>';
 }
 // Perché c'è un pisolino di recupero: il debito di debito.js. Una sola frase, usata in timeline e nel diario.
 function debitoMotivo(n){
@@ -7460,6 +7500,7 @@ function azzeraFormPersona(){
   const psl=$("#personaShiftsList"); if(psl) psl.innerHTML="";
   const btn=$("#doConfirmPersona"); if(btn){ btn.textContent="Aggiungi"; delete btn.dataset.forzato; }
   const an=$("#annullaModificaPersona"); if(an) an.hidden=true;
+  const rmv=$("#rimuoviPersona"); if(rmv) rmv.hidden=true;
   const err=$("#personaLinkErr"); if(err){ err.textContent=""; err.style.color=""; }
   personaInModifica=null;
   const vie=document.querySelector(".pers-vie"); if(vie) vie.hidden=false;
@@ -7491,9 +7532,13 @@ function iniziaModificaPersona(i){
   if(per.wake||per.bed){ const sn=document.querySelector(".pv-sonno"); if(sn) sn.open=true; }
   $("#doConfirmPersona").textContent="Salva le modifiche";
   const an=$("#annullaModificaPersona"); if(an) an.hidden=false;
+  const rm=$("#rimuoviPersona"); if(rm) rm.hidden=false;
   const f=$("#personaName"); if(f && f.scrollIntoView) f.scrollIntoView({behavior:"smooth",block:"center"});
 }
 if($("#annullaModificaPersona")) $("#annullaModificaPersona").onclick=()=>azzeraFormPersona();
+// «Rimuovi» nel foglio di modifica: stessa azione (e stesso «Annulla») del cestino nell'elenco
+if($("#rimuoviPersona")) $("#rimuoviPersona").onclick=()=>{ const i=personaInModifica; if(i===null) return; azzeraFormPersona();
+  const b=document.querySelector('#wizPeopleList [data-remove-persona="'+i+'"]'); if(b) b.click(); };
 // Come aggiungi la persona: una scelta, e compare solo quello che serve. Ha l'app: link. Fa i tuoi turni: di quanti giorni è sfasata.
 // Lavora lun–ven: niente da scrivere. Turni diversi: sequenza e orari.
 var _via=null, _sfasa=1, _oggiIdx=-1;   // var: il modulo si azzera (azzeraFormPersona) prima di queste righe
@@ -7585,7 +7630,13 @@ const finestraTuttoIlGiorno=w=>w.a<=600 && (w.b-w.a)>=720;
 // prima il bottone diceva solo il nome della sezione, senza dare un motivo
 // per aprirla. La tua prossima finestra libera, non quella con qualcuno:
 // è l'unica sempre disponibile, anche senza persone in elenco.
+function renderPersonePreview(){
+  const el=$("#doPersoneSub"); if(!el) return;
+  const nomi=tuttePersone().map((p,i)=>p.name||"Persona "+(i+1));
+  el.textContent = nomi.length ? nomi.slice(0,2).join(", ")+(nomi.length>2?" +"+(nomi.length-2):"") : "Aggiungi qualcuno";
+}
 function renderPartnerPreview(){
+  renderPersonePreview();
   const el=$("#doPartnerSub"); if(!el) return;
   const w=finestreLibere(7);
   if(!w.length){ el.textContent="Nessuna finestra libera nei prossimi sette giorni"; return; }
@@ -9174,6 +9225,9 @@ function chiudiVederci(){
 if($("#doAndamenti")) $("#doAndamenti").onclick=()=>apriAndamenti();
 if($("#chiudiAndamenti")) $("#chiudiAndamenti").onclick=andIndietro;
 if($("#doPartner")) $("#doPartner").onclick=apriVederci;
+// «Persone»: la pagina del tempo libero con l'elenco già aperto (modifica e rimozione a portata di tocco)
+function apriPersone(){ apriVederci(); const box=$("#opzBoxPersone"); if(box && box.hidden) apriSezionePersone(); else if(box && box.scrollIntoView) box.scrollIntoView({block:"nearest"}); }
+if($("#doPersone")) $("#doPersone").onclick=apriPersone;
 if($("#chiudiVederci")) $("#chiudiVederci").onclick=chiudiVederci;
 
 const cycGo=n=>{
@@ -11422,7 +11476,8 @@ if($("#chiudiOpzioni")) $("#chiudiOpzioni").onclick=chiudiOpzioniPagina;
 // → schema o composizione → oggi dove sei → orari), non le Opzioni.
 // Tab Turni: i quattro strumenti in una griglia, «Condividi» in un foglio, «Modifica turni» in un foglio con quattro voci.
 { const gr=$("#strumenti");
-  if(gr){ ["doPartner","doAndamenti","doFerie","doScambioTurno"].forEach(id=>{ const b=document.getElementById(id); if(b) gr.appendChild(b); });
+  if(gr){ const top=document.getElementById("doAndamenti"); if(top){ top.classList.add("tsec-top"); gr.parentNode.insertBefore(top,gr); }
+    ["doPartner","doPersone","doFerie","doScambioTurno"].forEach(id=>{ const b=document.getElementById(id); if(b) gr.appendChild(b); });
     const vuoto=$("#tgDecidereBox"); if(vuoto && !vuoto.querySelector(".tsec")) vuoto.remove(); }
   const cb=$("#condividiCorpo"), cs=$("#cycShareBox"); if(cb && cs) cb.appendChild(cs); }
 function apriFoglio(id,su){ const m=document.getElementById(id); if(!m) return; m.hidden=!su; m.setAttribute("aria-hidden",String(!su));
