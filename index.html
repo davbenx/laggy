@@ -1099,6 +1099,13 @@ padding:16px 18px;margin:2px 0 var(--gap-sezione);box-shadow:var(--shadow-btn)}
 .kcompat .kface svg{width:26px;height:26px}
 .kcompat .kface span{display:none}
 .kleg{display:flex;justify-content:space-between;font-size:12px;color:var(--faint);margin:4px 2px 0}
+.att-det{margin:2px 0 6px}
+.att-det>summary{cursor:pointer;list-style:none;min-height:44px;display:flex;align-items:center;font-size:13px;color:var(--dim)}
+.att-det>summary::-webkit-details-marker{display:none}
+.att-det>summary::after{content:"›";margin-left:6px;transition:transform .15s}
+.att-det[open]>summary::after{transform:rotate(90deg)}
+.att-det label{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;color:var(--dim);margin:6px 0}
+.att-det .ora-in{max-width:150px}
 .att-riga{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0 4px}
 .att-riga label{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--dim)}
 .att-riga .dbtn{flex:none;min-width:0;padding:0 16px}
@@ -1596,7 +1603,7 @@ header b{font-size:23px}
     </div>
     <div class="q">
       <label class="riga-sw" for="mattinoBif"><span>Prima di un turno molto presto, dividi il sonno</span><span class="switch"><input type="checkbox" id="mattinoBif"><span class="slider"></span></span></label>
-      <span class="hint">Se dovresti coricarti prima delle 21: un sonno più corto a un'ora naturale, più un pisolino dopo il turno.</span>
+      <span class="hint">Se il piano ti mette a letto prima delle 21: un sonno più corto a un'ora naturale, più un pisolino dopo il turno.</span>
     </div>
   </section>
 
@@ -4380,14 +4387,14 @@ function diaryReminder(P, CARDS){
   let stato="", statoPerche="";
   if(logged && P){
     const extraN=P.s && P.s.meta && P.s.meta.debitoExtra;
-    if(extraN){ stato="Ti mancano "+hm(P.debitoMin)+" di sonno · stanotte +"+extraN+" min";
+    if(extraN){ stato="Da recuperare: "+hm(P.debitoMin)+" di sonno · stanotte +"+extraN+" min";
       statoPerche="Con più di tre ore di debito un pisolino non basta, e accorcerebbe il sonno di stanotte: per questo il piano allunga di "+extraN+" minuti la prima notte libera. Il debito cala solo dormendo: una notte lunga ne recupera metà, non azzera una settimana."; }
-    else if(napRec){ stato="Ti mancano "+hm(napRec.debito)+" di sonno · pisolino alle "+hhmm(napRec.a);
+    else if(napRec){ stato="Da recuperare: "+hm(napRec.debito)+" di sonno · pisolino alle "+hhmm(napRec.a);
       statoPerche=debitoMotivo(napRec)+" Il pisolino non è un extra: rimette a posto il conto prima che si sommi a domani. Quando comincia ti chiedo se l'hai fatto."; }
-    else if(P.debitoScoperto>0){ stato="Ti mancano "+hm(P.debitoScoperto)+" di sonno · oggi niente pisolino";
+    else if(P.debitoScoperto>0){ stato="Da recuperare: "+hm(P.debitoScoperto)+" di sonno · oggi non c'è spazio per un pisolino";
       statoPerche="Oggi non c'è spazio per un pisolino, né prima né dopo il turno. Il conto resta aperto: recupera stanotte e, se hai sonno, evita di guidare."; }
-    else if(napRecDebt){ stato="Hai dormito meno del previsto · pisolino alle "+hhmm(napRecDebt.a);
-      statoPerche="Hai dormito meno del previsto, e il piano ha aggiunto un pisolino di recupero per non portare il debito a domani."; }
+    else if(napRecDebt){ stato="Per recuperare, il piano propone un pisolino alle "+hhmm(napRecDebt.a);
+      statoPerche="La notte è stata più corta di quella che il piano proponeva: un pisolino di recupero evita di portare il conto a domani."; }
     // le notti che pesano di più: il «Perché?» mostra da dove viene il numero
     const notti=(P.debitoNotti||[]).map(x=>{ const g=new Date(x.date+"T12:00:00").toLocaleDateString(LINGUA,{weekday:"short",day:"numeric",month:"short"});
       return '<div class="row"><b>'+esc(g.charAt(0).toUpperCase()+g.slice(1))+'</b><span>'+hm(x.totale)+' su '+hm(x.meta)+' (–'+hm(x.manca)+')</span></div>'; }).join("");
@@ -4473,12 +4480,12 @@ function diaryReminder(P, CARDS){
           xNap+='<div class="drem-rec">Più lungo del previsto ('+dur(dReale)+'): oltre una certa durata un pisolino rischia di scivolare in sonno profondo, con più intontimento al risveglio invece di meno.</div>';
       }
     } else if(seg.no){
-      xNap+='<div class="drem-done">Pisolino saltato <button type="button" class="ibtn drem-edit" data-nap-riapri="'+esc(c.nap.k)+'" aria-label="Riapri il pisolino" title="Modifica">'+ICON.pencil+'</button></div>';
+      xNap+='<div class="drem-done">Pisolino non fatto <button type="button" class="ibtn drem-edit" data-nap-riapri="'+esc(c.nap.k)+'" aria-label="Riapri il pisolino" title="Modifica">'+ICON.pencil+'</button></div>';
     } else {
       xNap+='<p class="dq">Hai fatto il pisolino <b>'+esc(c.nap.k)+' → '+esc(fine)+'</b>?</p>'+
         '<div class="dq-az"><button class="dbtn pri" data-nap="si" data-k="'+esc(c.nap.k)+'" data-fine="'+esc(fine)+'" data-min="'+c.nap.min+'">Sì, così</button>'+
         '<button class="dbtn" data-nap-altri="'+esc(c.nap.k)+'">Altri orari</button>'+
-        '<button class="dbtn" data-nap="no" data-k="'+esc(c.nap.k)+'" data-min="'+c.nap.min+'">Saltato</button></div>';
+        '<button class="dbtn" data-nap="no" data-k="'+esc(c.nap.k)+'" data-min="'+c.nap.min+'">Non l\'ho fatto</button></div>';
     }
   });
   let xExtra="";
@@ -4658,7 +4665,7 @@ function renderOra(Pfocus){
   const isMissing = b.c === "?";
 
   const A = isToday ? adessoLine(P, vero) : null;
-  const sleeping = A && A.t==="Dovresti dormire";
+  const sleeping = A && A.t==="È il momento di dormire";
   let title, sub, accent = false, oraIc = ICON.eye;
 
   if(isMissing){
@@ -5858,7 +5865,7 @@ function adessoLine(P, riferimento){
       fallback: false
     };
   }
-  if(inWin(m,P.s.onset,P.end)) return {t:"Dovresti dormire",s:hhmm(P.s.onset)+" → "+hhmm(P.end)};
+  if(inWin(m,P.s.onset,P.end)) return {t:"È il momento di dormire",s:hhmm(P.s.onset)+" → "+hhmm(P.end)};
   for(const n of (P.naps||[])) if(inWin(m,n.a,n.b)) return {t:"È l'ora del pisolino",s:hhmm(n.a)+" → "+hhmm(n.b)};
   let restoFallback=null;
   if(b.rest){
@@ -6031,14 +6038,28 @@ const PIANO_VOCI=[
 ];
 function pianoVoce(k){ const v=(state.piano||{})[k]; if(v!=null) return !!v; const x=PIANO_VOCI.find(y=>y[0]===k); return x ? x[3] : true; }
 const STIMA_FIN="Una stima dai tuoi orari di sonno, non una misura né un consiglio medico.";
-// «L'ho fatto» nel popup di Movimento/Allenamento: l'ora di fine, un tocco. Non cambia il piano di oggi:
-// serve a due cose, l'avviso se si finisce tardi e, con i giorni, il legame col voto (Andamenti).
+// «L'ho fatto» / «L'ho preso» nei popup di Movimento, Allenamento e Caffè: un tocco, con l'ora già pronta. I dettagli
+// (durata, quante tazze, una nota) stanno in un riquadro chiuso, per chi vuole essere più preciso. Non cambia il piano di oggi:
+// servono a due cose, un'informazione al momento e, con i giorni, vedere i tuoi schemi in Andamenti.
+// Le voci segnate di un giorno, solo quelle valide: un file ripristinato o un valore rotto non deve mai fermare il piano.
+const attGiorno=k=>{ const v=(state.attivita||{})[k]; return Array.isArray(v) ? v.filter(a=>a && typeof a==="object" && typeof a.t==="string" && /^\d\d:\d\d$/.test(a.fine||"")) : []; };
+const ABITUDINI={
+  leggera:{ora:"Finito alle", fatto:"Fatto, finito alle", btn:"L'ho fatto", det:"min"},
+  intensa:{ora:"Finito alle", fatto:"Fatto, finito alle", btn:"L'ho fatto", det:"min"},
+  caffe:{ora:"Ultimo caffè alle", fatto:"Ultimo caffè alle", btn:"L'ho preso", det:"n"}
+};
+function dettaglioAbitudine(a){ return a.min ? " · "+a.min+" min" : a.n ? " · "+a.n+(a.n===1?" tazza":" tazze") : ""; }
 function attivitaHtml(k){
-  if(dnum(state.focus)>dnum(giornoVero())) return "";
-  const fatte=((state.attivita||{})[iso(state.focus)]||[]).filter(a=>a.t===k);
-  if(fatte.length) return '<div class="att-riga"><span><span class="drem-ok">✓</span> Fatto, finito alle <b>'+esc(fatte[fatte.length-1].fine)+'</b></span><button type="button" class="lnk dim" data-att-annulla="'+k+'">Annulla</button></div>';
+  const c=ABITUDINI[k]; if(!c || dnum(state.focus)>dnum(giornoVero())) return "";
+  const fatte=attGiorno(iso(state.focus)).filter(a=>a.t===k);
+  if(fatte.length){ const a=fatte[fatte.length-1];
+    return '<div class="att-riga"><span><span class="drem-ok">✓</span> '+c.fatto+' <b>'+esc(a.fine)+'</b>'+esc(dettaglioAbitudine(a))+(a.nota?' · '+esc(a.nota):'')+'</span><button type="button" class="lnk dim" data-att-annulla="'+k+'">Annulla</button></div>'; }
   const n=new Date(), adesso = dnum(state.focus)===dnum(n) ? hhmm(n.getHours()*60+n.getMinutes()) : "18:00";
-  return '<div class="att-riga"><label>Finito alle <input type="time" class="ora-in" data-att-ora value="'+adesso+'" aria-label="Ora di fine"></label><button type="button" class="dbtn pri" data-att-salva="'+k+'">L\'ho fatto</button></div>';
+  const det = c.det==="min"
+    ? '<label>Quanto è durato (minuti)<input type="number" inputmode="numeric" min="5" max="300" step="5" class="ora-in" data-att-min placeholder="facoltativo" aria-label="Durata in minuti"></label>'
+    : '<label>Quante tazze<select class="ora-in" data-att-n aria-label="Quante tazze"><option value="">facoltativo</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4 o più</option></select></label>';
+  return '<div class="att-riga"><label>'+c.ora+' <input type="time" class="ora-in" data-att-ora value="'+adesso+'" aria-label="'+c.ora+'"></label><button type="button" class="dbtn pri" data-att-salva="'+k+'">'+c.btn+'</button></div>'+
+    '<details class="att-det"><summary>Aggiungi dettagli</summary>'+det+'<label>Una nota<input type="text" maxlength="80" class="ora-in" data-att-nota placeholder="facoltativo" aria-label="Una nota"></label></details>';
 }
 const VOCI_FIN=[
   ["testa","Testa",ICON.mente,"pensare, studiare","Le ore in cui sei più lucido: almeno 90 minuti dopo il risveglio e 2 ore prima di dormire, fuori dal turno, dal viaggio e dai pasti. "+STIMA_FIN],
@@ -6249,7 +6270,7 @@ function renderEssenziale(P, CARDS){
       // separata mostrava l'ora di andare a letto sotto l'etichetta "Sveglia" —
       // confuso, e comunque un duplicato.
     } else if(cd.k==="c"){
-      voci.push({t, html:riga("caffe","Caffè",ora||cd.val,frase(cd.val,ora)||cd.small||"",false,ICON.coffee,dett(cd),
+      voci.push({t, html:riga("caffe","Caffè",ora||cd.val,frase(cd.val,ora)||cd.small||"",false,ICON.coffee,dett(cd)+attivitaHtml("caffe"),
         {a:cd.at, poi:"ultimo caffè entro le "+hhmm(cd.at)})});
     } else if(cd.k==="l"){
       if(!P.b.rest){
@@ -6290,7 +6311,7 @@ function renderEssenziale(P, CARDS){
         // in arrivo. Riusa lo stesso segnale già calcolato per "Dormi" in
         // questo stesso ramo (s.meta.ramp), non un rilevamento nuovo.
         const tSera = dSv(P.s.onset-180);
-        const dettSera = '<div class="why">Anche in un giorno libero, la luce di sera sposta l\'orologio nella direzione sbagliata se stai andando verso le notti — tenerla bassa nelle ultime ore aiuta ad arrivarci già un po\' spostato.</div>';
+        const dettSera = '<div class="why">Anche in un giorno libero, la luce di sera sposta l\'orologio nella direzione opposta se stai andando verso le notti — tenerla bassa nelle ultime ore aiuta ad arrivarci già un po\' spostato.</div>';
         voci.push({t:tSera, html:riga("penombra","Penombra",hhmm(P.s.onset-180),"tieni la luce soffusa",false,ICON.dim,dettSera,
           {a:P.s.onset-180, poi:"luci basse dalle "+hhmm(P.s.onset-180)})});
       }
@@ -7035,7 +7056,7 @@ function correlazioneMovimento(){
   const att=state.attivita||{}, oggi=giornoVero(), coppie=[];
   for(const k in diary){ const v=+diary[k]; if(!(v>=1&&v<=5)) continue;
     const g=new Date(k+"T12:00:00"); if(!(dnum(oggi)-dnum(g)<=90 && dnum(g)<=dnum(oggi))) continue;
-    coppie.push({mosso:(att[k]&&att[k].length)?1:0, voto:v}); }
+    coppie.push({mosso:attGiorno(k).some(a=>a.t==='leggera'||a.t==='intensa')?1:0, voto:v}); }
   if(coppie.length<14) return null;
   const si=coppie.filter(c=>c.mosso), no=coppie.filter(c=>!c.mosso);
   if(si.length<4 || no.length<4) return null;
@@ -7045,11 +7066,33 @@ function correlazioneMovimento(){
   if(vSi-vNo<0.5) return null;
   return {n:coppie.length, vSi, vNo};
 }
-function fraseCorrMovimento(c){ const virg=v=>v.toFixed(1).replace(".",","); return "Nei giorni in cui ti muovi il tuo voto è in media "+virg(c.vSi)+" (contro "+virg(c.vNo)+" negli altri)."; }
+function fraseCorrMovimento(c){ const virg=v=>v.toFixed(1).replace(".",","); return "Nei giorni in cui ti muovi, il tuo voto è in media "+virg(c.vSi)+"."; }
+// L'ultimo caffè e il voto del giorno dopo: stessa soglia (≥14 giorni, ≥4 e ≥4, mezzo punto, solo se positivo). Sei ore è la
+// distanza dal letto dopo la quale la caffeina pesa di meno sul sonno [Drake 2013]; il tuo schema può essere diverso.
+function correlazioneCaffe(){
+  const att=state.attivita||{}, oggi=giornoVero(), coppie=[];
+  for(const k in att){ const c=attGiorno(k).filter(a=>a.t==="caffe").pop(); if(!c) continue;
+    const g=new Date(k+"T12:00:00"); if(!(dnum(oggi)-dnum(g)<=90 && dnum(g)<=dnum(oggi))) continue;
+    const d1=new Date(g); d1.setDate(d1.getDate()+1); const k1=iso(d1), bed=(state.beds||{})[k1], v=+diary[k1];
+    if(!bed || !(v>=1&&v<=5)) continue;
+    coppie.push({gap:(((t(bed)-t(c.fine))%1440)+1440)%1440, voto:v}); }
+  if(coppie.length<14) return null;
+  const lungo=coppie.filter(c=>c.gap>=360), corto=coppie.filter(c=>c.gap<360);
+  if(lungo.length<4 || corto.length<4) return null;
+  const rho=spearman(coppie.map(c=>c.gap), coppie.map(c=>c.voto));
+  if(!(rho>=2/Math.sqrt(coppie.length-1))) return null;
+  const media=a=>a.reduce((x,c)=>x+c.voto,0)/a.length, vL=media(lungo), vC=media(corto);
+  if(vL-vC<0.5) return null;
+  return {n:coppie.length, vL};
+}
+function fraseCorrCaffe(c){ return "Quando l'ultimo caffè è almeno sei ore prima del letto, il tuo voto il giorno dopo è in media "+c.vL.toFixed(1).replace(".",",")+"."; }
+function cardInsight(icona, testo, id, extra){
+  return '<div class="andamento-insight"><span class="aic">'+icona+'</span><div><span class="andamento-insight-eyebrow">Insight</span>'+esc(testo)+
+    (extra?'<div>'+extra+'</div>':'')+' <button type="button" class="lnk dim" data-nascondi-insight="'+id+'" style="min-height:44px">Nascondi</button></div></div>';
+}
 function fraseCorrDebito(corr){
   const virg=v=>v.toFixed(1).replace(".",",");
-  return "Dopo le notti in cui dormi almeno "+NOTTE_CORTA_MIN+" minuti meno del previsto, il tuo voto scende in media a "+virg(corr.vCorto)+
-    " (contro "+virg(corr.vAltre)+" dopo le altre).";
+  return "Quando dormi quanto il piano propone, il tuo voto è in media "+virg(corr.vAltre)+" (dopo le notti più corte di almeno "+NOTTE_CORTA_MIN+" minuti, "+virg(corr.vCorto)+").";
 }
 // Non un'altra sezione da interpretare: la singola cosa più utile da sapere
 // ORA, scelta fra tutti gli insight già calcolati dalle sezioni sotto (che
@@ -7130,9 +7173,9 @@ function graficoNotti(trend){
   });
   g+='<line x1="'+pad+'" x2="'+(W-pad)+'" y1="'+Hb+'" y2="'+Hb+'" stroke="var(--line)" stroke-width="1"/>'+
      SVGT(pad,H-3,n+' notti fa')+SVGT(W-pad,H-3,'oggi',' text-anchor="end"');
-  const label='Ore dormite nelle ultime '+n+' notti: in media '+hm(trend.avgActual)+(trend.avgPlanned?' contro '+hm(trend.avgPlanned)+' previste':'')+'; '+sotto+' notti sotto il previsto';
+  const label='Ore dormite nelle ultime '+n+' notti: in media '+hm(trend.avgActual)+(trend.avgPlanned?' contro '+hm(trend.avgPlanned)+' previste':'')+'; '+sotto+' notti più corte del piano';
   return '<svg class="grf" viewBox="0 0 '+W+' '+H+'" style="height:'+H+'px" role="img" aria-label="'+label+'">'+g+'</svg>'+
-    '<div class="grf-leg"><span><i style="background:var(--blue)"></i>ore dormite</span><span><i style="background:var(--orange)"></i>meno del previsto</span><span><i style="background:var(--ink);height:2px;vertical-align:3px"></i>previste</span>'+["m","p","s","n"].filter(f=>fasceViste.has(f)).map(f=>'<span><i style="background:'+FASCE[f][1]+';border-radius:50%"></i>'+FASCE[f][0].toLowerCase()+'</span>').join("")+'</div>';
+    '<div class="grf-leg"><span><i style="background:var(--blue)"></i>ore dormite</span><span><i style="background:var(--orange)"></i>più corta del piano</span><span><i style="background:var(--ink);height:2px;vertical-align:3px"></i>previste</span>'+["m","p","s","n"].filter(f=>fasceViste.has(f)).map(f=>'<span><i style="background:'+FASCE[f][1]+';border-radius:50%"></i>'+FASCE[f][0].toLowerCase()+'</span>').join("")+'</div>';
 }
 // Le 24 ore (dalle 18 alle 18, così la notte sta in mezzo): sonno, melatonina, minimo corporeo, momento più lucido.
 function fasciaOrologio(o){
@@ -7221,7 +7264,7 @@ function sonnoPerFasciaHtml(trend){
     return '<div class="frow'+(manca?" giu":"")+'"><span class="flab">'+esc(FASCE[x.f][0])+'<span class="hint" style="display:block;font-size:11.5px">'+x.n+(x.n===1?' notte':' notti')+'</span></span>'+
       '<span class="fbar"><i style="width:'+Math.max(3,Math.round(x.a/max*100))+'%;background:'+FASCE[x.f][1]+';opacity:'+(manca?1:.75)+'"></i></span>'+
       '<span class="fval" style="min-width:64px">'+hm(Math.round(x.a))+(d!=null && Math.abs(d)>=15 ? '<span class="hint" style="display:block;font-size:11.5px;font-weight:400">'+(d>0?'+':'–')+hm(Math.abs(d))+'</span>' : '')+(votoF(x.f)!=null ? '<span class="hint" style="display:block;font-size:11.5px;font-weight:400">voto '+votoF(x.f).toFixed(1).replace(".",",")+'</span>' : '')+'</span></div>'; }).join("");
-  const frase = peggio ? 'Sui turni di '+FASCE[peggio.f][0].toLowerCase()+' dormi in media '+hm(Math.round(peggio.p-peggio.a))+' meno del previsto ('+peggio.n+' notti): è lì che il sonno va protetto di più.'
+  const frase = peggio ? 'Sui turni di '+FASCE[peggio.f][0].toLowerCase()+' dormi in media '+hm(Math.round(peggio.p-peggio.a))+' in meno rispetto al piano ('+peggio.n+' notti): è lì che conviene proteggere il sonno.'
     : 'In ogni tipo di turno stai vicino al sonno previsto.';
   return {riga: peggio ? "Meno sonno prima dei turni di "+FASCE[peggio.f][0].toLowerCase() : "Vicino al previsto in ogni turno",
     corpo:'<p class="hint" style="margin:0 0 8px">Sonno medio della notte che precede il giorno di ciascun turno, da quelle che hai annotato; sotto, quanto in meno o in più rispetto al piano, e il voto medio da 1 a 5.</p>'+
@@ -7315,7 +7358,7 @@ function renderAndamenti(){
         const vals=trend.series.map(s=>s.debt);
         const tinta = d>0 ? "var(--orange)" : "var(--ok)";   // (il colore sta nelle barre: arancio dove manca sonno)
         heroHtml='<div class="andamento-hero">'+
-          '<span class="hint" style="display:block">'+(d>0?"Sonno che ti manca":"Sonno in pari")+' · ultimi 14 giorni</span>'+
+          '<span class="hint" style="display:block">'+(d>0?"Sonno da recuperare":"Sonno in pari")+' · ultimi 14 giorni</span>'+
           '<div class="andamento-num">'+(d>0?hm(d):"✓")+'</div>'+
           (d>0?'<span class="hint" style="display:block">Cala solo dormendo: una notte lunga ne recupera metà, non azzera una settimana.</span>':'')+
           '<span class="hint" style="display:block">Dormi in media '+hm(trend.avgActual)+
@@ -7325,9 +7368,11 @@ function renderAndamenti(){
       }
       // La card descrittiva resta solo se la correlazione non è già il
       // consiglio in cima — stessa frase due volte sarebbe rumore, non conferma.
-      { let cm=null; try{ cm=correlazioneMovimento(); }catch(x){}
-        if(cm) heroHtml+='<div class="andamento-insight"><span class="aic">'+ICON.passo+'</span>'+
-          '<div><span class="andamento-insight-eyebrow">Insight</span>'+esc(fraseCorrMovimento(cm))+'</div></div>'; }
+      { const nasc=store.get("insightNascosti",[]);
+        let cm=null, cf=null; try{ cm=correlazioneMovimento(); }catch(x){} try{ cf=correlazioneCaffe(); }catch(x){}
+        if(cm && !nasc.includes("mov")) heroHtml+=cardInsight(ICON.passo, fraseCorrMovimento(cm), "mov");
+        if(cf && !nasc.includes("caffe")) heroHtml+=cardInsight(ICON.coffee, fraseCorrCaffe(cf), "caffe",
+          state.caffSens!=="alta" ? '<button type="button" class="lnk" data-caff-anticipa="1" style="min-height:44px">Anticipa l\'ultimo caffè nel piano</button>' : ""); }
       if(corr && capo && capo.fonte!=="corr"){
         heroHtml+='<div class="andamento-insight"><span class="aic">'+ICON.sun+'</span>'+
           '<div><span class="andamento-insight-eyebrow">Insight</span>'+esc(fraseCorrDebito(corr))+'</div></div>';
@@ -7429,7 +7474,7 @@ function renderAndamentiPreview(){
   }
   // "-1h 20m" non diceva se è sonno che manca o che avanza: a parole.
   const d=trend.debtNow;
-  el.textContent = d>0 ? "Ti mancano "+hm(d)+" di sonno"
+  el.textContent = d>0 ? hm(d)+" di sonno da recuperare"
     : "Sonno in pari";
 }
 
@@ -8593,6 +8638,9 @@ function diaryChange(e){
   segnaSonnoPiano(k,false); store.set("wakes",wakes); render();
 }
 function diaryClick(e){
+  const nas=e.target.closest("[data-nascondi-insight]");
+  if(nas){ const l=store.get("insightNascosti",[]); if(!l.includes(nas.dataset.nascondiInsight)) l.push(nas.dataset.nascondiInsight); store.set("insightNascosti",l); render(); return; }
+  if(e.target.closest("[data-caff-anticipa]")){ const o=["bassa","media","alta"], i=o.indexOf(state.caffSens||"alta"); if(i<o.length-1){ state.caffSens=o[i+1]; salva(); render(); toast("Fatto: il piano propone l'ultimo caffè un po' prima"); } return; }
   if(e.target.closest("[data-open-bifasico]")){ apriBifasico(); return; }
   const sd=e.target.closest("[data-sonnod]");
   if(sd){ if(sd.getAttribute("aria-pressed")==="true") return;
@@ -8740,16 +8788,22 @@ function apriMomentiMigliori(){
 }
 if($("#infoModal")) $("#infoModal").addEventListener("click", e=>{
   const sv=e.target.closest("[data-att-salva]");
-  if(sv){ const k=sv.dataset.attSalva, ora=(document.querySelector("#infoModal [data-att-ora]")||{}).value;
-    if(!/^\d\d:\d\d$/.test(ora||"")){ toast("Metti l'ora di fine"); return; }
-    const key=iso(state.focus), lista=((state.attivita[key]||[]).filter(a=>a.t!==k)); lista.push({t:k, fine:ora}); state.attivita[key]=lista;
+  if(sv){ const k=sv.dataset.attSalva, box=document.querySelector("#infoModal"), ora=(box.querySelector("[data-att-ora]")||{}).value;
+    if(!/^\d\d:\d\d$/.test(ora||"")){ toast("Metti l'ora"); return; }
+    const voce={t:k, fine:ora};
+    const mi=+(box.querySelector("[data-att-min]")||{}).value, nz=+(box.querySelector("[data-att-n]")||{}).value, nota=((box.querySelector("[data-att-nota]")||{}).value||"").trim().slice(0,80);
+    if(mi>=5 && mi<=300) voce.min=Math.round(mi); if(nz>=1 && nz<=4) voce.n=nz; if(nota) voce.nota=nota;
+    const key=iso(state.focus), lista=attGiorno(key).filter(a=>a.t!==k); lista.push(voce); state.attivita[key]=lista;
     store.set("attivita",state.attivita); apriFoglio("infoModal",false); render();
-    // un allenamento intenso che finisce meno di un'ora prima del letto può ritardare l'addormentamento: lo si dice una volta, senza cambiare il piano
-    let tardi=false; try{ const P=NT.plan(); tardi = k==="intensa" && ((((P.s.onset-t(ora))%1440)+1440)%1440)<60; }catch(x){}
-    toast(tardi ? "Segnato. Finito tardi: stasera potresti addormentarti più tardi." : "Segnato");
+    // Solo un'informazione, mai un giudizio: vicino al letto un allenamento intenso o un caffè possono rallentare l'addormentamento.
+    let msg="Segnato";
+    try{ const P=NT.plan(), prima=(((P.s.onset-t(ora))%1440)+1440)%1440;
+      if(k==="intensa" && prima<60) msg="Segnato. Un allenamento intenso vicino al letto può rallentare l'addormentamento: luce soffusa e qualche minuto di calma aiutano.";
+      else if(k==="caffe" && prima<360) msg="Segnato. Un caffè a meno di 6 ore dal letto può rallentare l'addormentamento: dipende da persona a persona, e con i giorni vedrai il tuo schema."; }catch(x){}
+    toast(msg);
     return; }
   const an=e.target.closest("[data-att-annulla]");
-  if(an){ const key=iso(state.focus), k=an.dataset.attAnnulla; state.attivita[key]=(state.attivita[key]||[]).filter(a=>a.t!==k); if(!state.attivita[key].length) delete state.attivita[key];
+  if(an){ const key=iso(state.focus), k=an.dataset.attAnnulla; state.attivita[key]=attGiorno(key).filter(a=>a.t!==k); if(!state.attivita[key].length) delete state.attivita[key];
     store.set("attivita",state.attivita); apriFoglio("infoModal",false); render(); return; }
   const b=e.target.closest("[data-cambia]");
   if(b){ apriFoglio("infoModal",false); apriOpzioni("abitudini"); apriSezioneInline(+b.dataset.cambia, true); return; }
@@ -9379,7 +9433,7 @@ const NOVITA={ id:"2026-11-13", data:"Novembre 2026", righe:[
   ["Widget: il mese intero","Allungalo e vedi fino a sei settimane, anche con la persona che segui. Pulsante, voti e barra restano; le voci sono al massimo due.",true,"2026-10-28"],
   ["Un colore per ogni turno","Mattina, pomeriggio, sera e notte hanno ciascuno il suo colore, nel calendario del ciclo e nel widget. In Turni, con «Calendario», il mese è nel titolo e le frecce sfogliano le settimane.",false,"2026-10-27"],
   ["Come dormi, turno per turno","In «Sonno e carico» vedi quanto dormi prima di ogni tipo di turno e dove ti manca più sonno, qualunque sia il tuo ciclo.",false,"2026-10-27"],
-  ["Sonno e carico con i grafici","Una barra per ogni notte (arancio dove dormi meno del previsto), la fascia delle 24 ore del tuo orologio, 60 giorni di turni con i riposi sotto le 11 ore e la quarta notte di fila, e i tuoi orari notte per notte.",false,"2026-10-25"],
+  ["Sonno e carico con i grafici","Una barra per ogni notte (arancio dove la notte è più corta del piano), la fascia delle 24 ore del tuo orologio, 60 giorni di turni con i riposi sotto le 11 ore e la quarta notte di fila, e i tuoi orari notte per notte.",false,"2026-10-25"],
   ["Orari più onesti","Le notti registrate «come previsto» non contano per la regolarità: per misurarti servono i tuoi orari veri. Il sonno che ti manca le conta ancora tutte.",false,"2026-10-25"],
   ["Pulsanti e colori più chiari","I percorsi dell'avvio, la condivisione e le persone hanno pulsanti veri. La persona che segui ha il suo colore e la notte è indaco: il blu resta del sonno.",false,"2026-10-25"],
   ["Calendario di coppia, una scheda sola","Si accende da un solo punto, sotto le tue persone. Se manca il permesso al calendario te lo dice e ti porta alle impostazioni.",true,"2026-10-25"],
@@ -9513,7 +9567,7 @@ function aggiornaScambio(){
   if(dR>0 || dS<=-90 || dV>=120){
     pillHtml='<span class="traffic-pill red">🔴 Sconsigliato</span>';
     verdictDesc=dR>0
-      ? "Attenzione: "+(cambia?"questo cambio crea":"questo scambio crea")+" un rientro rapido (&lt;11h) fra turni consecutivi!"
+      ? (cambia?"Questo cambio crea":"Questo scambio crea")+" un rientro rapido (meno di 11 ore) fra turni consecutivi."
       : (cambia?"Il cambio":"Lo scambio")+" ti costa parecchio: perdi "+dur(-dS)+" di sonno utile nelle due settimane.";
   } else if(dS<-25 || dV>45 || dP>0){
     pillHtml='<span class="traffic-pill yellow">🟡 Da valutare</span>';
@@ -10410,7 +10464,7 @@ $("#doLink").onclick=salvaConfigurazione;
    Tutto quello che sta nel telefono e serve (turni, diario, impostazioni, persone,
    preferenze), in un solo file JSON. Si riapre con «Ripristina da un file», anche su
    un telefono nuovo. Niente che dipenda dal dispositivo (permessi, id, statistiche). */
-const COPIA_CHIAVI=["state","turniConfigurati","diary","diaryAt","wakes","beds","pisolini","attivita","sonnoPiano","ferie","theme","notifTipi","promemoriaOff","sgNome",
+const COPIA_CHIAVI=["state","turniConfigurati","diary","diaryAt","wakes","beds","pisolini","attivita","insightNascosti","sonnoPiano","ferie","theme","notifTipi","promemoriaOff","sgNome",
   "onboardingFatto","firstPlanBannerChiuso","attivazioneNascosta","invitoVisto","novitaViste","funzioniUsate","loSapevi","adattaNo","smontoScelto","lettoPrestoScelto","medicoVisto","vociAperte"];
 function raccogliCopia(){
   salva();

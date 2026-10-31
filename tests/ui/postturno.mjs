@@ -27,7 +27,7 @@ const stato=p=>p.evaluate(()=>({titolo:document.querySelector("#dateLabel").text
   await p.context().close(); }
 { const p=await apri("10:00"), s=await stato(p);
   ok(/^Ancora /.test(s.titolo), "durante il sonno resta il giorno del turno → "+s.titolo);
-  ok(/Dovresti dormire/.test(s.ora), "in pieno sonno «Adesso» dice di dormire, non di rischio → "+s.ora);
+  ok(/È il momento di dormire/.test(s.ora), "in pieno sonno «Adesso» dice di dormire, non di rischio → "+s.ora);
   await p.context().close(); }
 { const p=await apri("15:00"), s=await stato(p);
   ok(/^Oggi, /.test(s.titolo), "dopo il risveglio: «Oggi» sul giorno nuovo → "+s.titolo);
@@ -45,7 +45,7 @@ const stato=p=>p.evaluate(()=>({titolo:document.querySelector("#dateLabel").text
   const x=await p.evaluate(()=>{ const on=document.querySelector("#ora .ora-card"), righe=[...document.querySelectorAll(".tl, .tl-adesso")];
     const dormi=righe.find(r=>r.classList.contains("ora"));
     return {adesso:on?on.innerText.replace(/\s+/g," "):"", linea:righe.findIndex(r=>r.classList.contains("tl-adesso")), iDormi:righe.indexOf(dormi), quando:dormi?(dormi.querySelector(".dwhen")||{}).textContent||"":"?", oraSonno:dormi?dormi.innerText.replace(/\s+/g," ").slice(0,40):""}; });
-  ok(/Dovresti dormire/.test(x.adesso) && !/Rientro dal turno/.test(x.adesso), "07:38, sonno già cominciato: «Adesso» dice di dormire, non «Rientro» → "+x.adesso.slice(0,70));
+  ok(/È il momento di dormire/.test(x.adesso) && !/Rientro dal turno/.test(x.adesso), "07:38, sonno già cominciato: «Adesso» dice di dormire, non «Rientro» → "+x.adesso.slice(0,70));
   ok(x.iDormi>=0 && x.linea===-1, "«Dormi» è in corso e ultima voce: la linea dell'ora non va oltre il sonno ("+x.linea+", Dormi alla posizione "+x.iDormi+")");
   ok(x.quando!=="Domani", "il sonno di stamattina non è «Domani» → «"+x.quando+"» "+x.oraSonno);
   await ctx.close(); }

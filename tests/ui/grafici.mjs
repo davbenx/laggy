@@ -59,7 +59,7 @@ ok(an.righe.filter(r=>r.giu).length===1 && an.righe.find(r=>r.giu).n==="Notte", 
 { const pf=await p.evaluate(()=>{ const box=document.querySelector("#andamenti #dormi");
     return box ? {righe:[...box.querySelectorAll(".frow")].map(r=>r.querySelector(".flab").childNodes[0].textContent), frase:(box.querySelector(".fnota")||{}).textContent||"", colori:[...box.querySelectorAll(".fbar i")].map(i=>i.style.background)} : null; });
   ok(pf && pf.righe.length>=3 && pf.righe.includes("Notte") && new Set(pf.colori).size===pf.colori.length, "Come dormi e come stai: una riga per ogni fascia che c'è, ciascuna con il suo colore → "+JSON.stringify(pf&&pf.righe));
-  ok(pf && /meno del previsto|vicino al sonno previsto/.test(pf.frase), "e una frase su dove il sonno va protetto → "+(pf&&pf.frase)); }
+  ok(pf && /in meno rispetto al piano|vicino al sonno previsto/.test(pf.frase), "e una frase su dove il sonno va protetto → "+(pf&&pf.frase)); }
 // le notti del grafico e la striscia del carico portano il colore della fascia, e la legenda dice solo quelle che ci sono
 ok(await p.evaluate(()=>{ const l=[...document.querySelectorAll("#andamenti .grf-leg, #andamenti .car-leg")].map(x=>x.textContent).join(" "); return /mattina/.test(l) && /pomeriggio/i.test(l) && /notte/i.test(l) && !/sera/i.test(l); }), "legende per fascia: mattina, pomeriggio e notte (il ciclo non ha la sera)");
 
@@ -71,7 +71,7 @@ const gr=await p.evaluate(()=>({
   celle:document.querySelectorAll(".car-striscia svg rect.g-gg").length, oggi:document.querySelectorAll(".car-striscia svg rect.g-oggi").length, etCar:(document.querySelector(".car-striscia svg")||{getAttribute:()=>""}).getAttribute("aria-label"),
   punti:document.querySelectorAll("svg.grf circle.g-punto").length, voti:document.querySelectorAll(".vrow .vdot").length }));
 ok(gr.barre===30 && gr.manca>0 && gr.manca<gr.barre && gr.turni>0, "Sonno che ti manca: una barra per notte ("+gr.barre+"), alcune sotto il previsto ("+gr.manca+"), i puntini dei turni ("+gr.turni+")");
-ok(/Ore dormite nelle ultime 30 notti: in media .* contro .* previste; \d+ notti sotto il previsto/.test(gr.etBarre||""), "Sonno che ti manca: il grafico ha un testo per chi legge lo schermo → "+gr.etBarre);
+ok(/Ore dormite nelle ultime 30 notti: in media .* contro .* previste; \d+ notti più corte del piano/.test(gr.etBarre||""), "Sonno che ti manca: il grafico ha un testo per chi legge lo schermo → "+gr.etBarre);
 ok(/melatonina dalle \d\d:\d\d, minimo corporeo alle \d\d:\d\d/.test(gr.oro||"") && gr.oroTesti===5, "Il tuo orologio: la fascia delle 24 ore con le 5 ore di riferimento e il testo → "+gr.oro);
 ok(gr.celle===60 && gr.oggi===1 && /notti, \d+ altri turni/.test(gr.etCar||""), "Carico: 60 giorni (30 passati, 30 in arrivo), oggi cerchiato → "+gr.etCar);
 ok(gr.punti===48, "Orari del sonno: un punto per notte, letto e sveglia, solo per il gruppo più numeroso: le notti di giorno stanno a parte ("+gr.punti+")");
