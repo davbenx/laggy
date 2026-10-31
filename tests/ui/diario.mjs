@@ -24,12 +24,12 @@ const n=(p,s)=>p.evaluate(s=>document.querySelectorAll("#essenziale .drem "+s).l
 const tap=async(p,s)=>{ await p.click("#essenziale .drem "+s); await p.clock.runFor(300); };
 let p=await apri(9,30);
 let t=await box(p);
-ok(/Hai dormito \d\d:\d\d → \d\d:\d\d\?/.test(t) && /Sì, così/.test(t) && /Altri orari/.test(t) && await n(p,"input")===0, "sonno: una domanda con gli orari, «Sì, così» o «Altri orari», nessun campo aperto");
+ok(/Hai dormito \d\d:\d\d → \d\d:\d\d\?/.test(t) && /Sì, così/.test(t) && /Altri orari/.test(t) && await n(p,"input:not(details input)")===0, "sonno: una domanda con gli orari, «Sì, così» o «Altri orari», nessun campo aperto");
 ok(!/Pisolino/.test(t), "alle 9:30 il pisolino delle 17:20 non si chiede");
 await tap(p,"[data-open]");
-ok(await n(p,"input[type=time]")===2 && /Salva/.test(await box(p)) && /Annulla/.test(await box(p)), "«Altri orari»: due campi, Salva e Annulla");
+ok(await n(p,"input[type=time]:not(details input)")===2 && /Salva/.test(await box(p)) && /Annulla/.test(await box(p)), "«Altri orari»: due campi, Salva e Annulla");
 await tap(p,"[data-annulla-sleep]");
-ok(await n(p,"input")===0 && /Hai dormito/.test(await box(p)), "Annulla: si torna alla domanda, niente salvato");
+ok(await n(p,"input:not(details input)")===0 && /Hai dormito/.test(await box(p)), "Annulla: si torna alla domanda, niente salvato");
 await tap(p,"[data-confirm-sleep]");
 t=await box(p);
 ok(/✓ Sonno \d\d:\d\d–\d\d:\d\d · /.test(t) && await n(p,'.drem-done [data-open][aria-label^="Modifica"]')===1 && await n(p,"[data-confirm-sleep]")===0, "«Sì, così»: una riga con gli orari e la matita per modificarli → "+t.slice(0,70));
@@ -49,7 +49,7 @@ await tap(p,'[data-diary="2"]');
 ok(/Energia: Poca energia/.test(await box(p)) && await p.evaluate(()=>Object.values(JSON.parse(localStorage.getItem("nt:diary")))[0]===2), "e la nuova scelta è salvata");
 await tap(p,"[data-open]");
 await p.fill("#essenziale .drem [data-sleep-wake]","08:15"); await tap(p,"[data-confirm-sleep]");
-ok(/–08:15 ·/.test(await box(p)) && await n(p,"input")===0, "Modifica → campi → Salva: la riga si aggiorna e si richiude");
+ok(/–08:15 ·/.test(await box(p)) && await n(p,"input:not(details input)")===0, "Modifica → campi → Salva: la riga si aggiorna e si richiude");
 ok(await piano()===0, "orari corretti a mano: la notte non è più «come da piano», è una misura");
 await p.context().close();
 // pomeriggio: il pisolino è cominciato
