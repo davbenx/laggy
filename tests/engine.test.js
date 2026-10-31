@@ -478,3 +478,23 @@ test("partner: il mio diario, il mio debito e il mio impegno non entrano nel suo
   assert.equal(di(mio), di(vuoto), "con un diario corto il piano di lei non cambia");
   assert.deepEqual(Object.keys(mio.state.wakes), ["2026-10-30", "2026-10-31", "2026-11-01"], "il mio diario è intatto dopo");
 });
+
+// ── Debito: chi segue il piano non ha debito; chi dorme sistematicamente meno sì ──
+function debitoDopo(pattern, fb, fw, dormiMeno) {
+  const sh = { M: { n: "Mattino", s: 420, e: 840 }, P: { n: "Pomeriggio", s: 840, e: 1260 }, N: { n: "Notte", s: 1320, e: 1800 } };
+  const hhmm = m => { m = ((Math.round(m) % 1440) + 1440) % 1440; return String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0"); };
+  const base = new Date("2026-10-01T12:00:00"), beds = {}, wakes = {}, cfg = { pattern, anchor: "2026-10-01", shifts: sh, freeBed: fb, freeWake: fw };
+  for (let i = 1; i <= 14; i++) {
+    const d = new Date(base); d.setDate(d.getDate() + i);
+    const P = createEngine({ ...cfg, focus: d }).plan(), k = d.toISOString().slice(0, 10);
+    beds[k] = hhmm(P.sp.onset); wakes[k] = hhmm(P.sp.onset + P.sp.dur - dormiMeno);
+  }
+  const f = new Date(base); f.setDate(f.getDate() + 14);
+  return createEngine({ ...cfg, beds, wakes, focus: f }).plan().debitoMin;
+}
+for (const [pattern, fb, fw] of [["MPNSR", "00:30", "09:45"], ["MPNSR", "23:30", "07:30"], ["NNNRR", "23:30", "07:30"]]) {
+  test(`debito ${pattern} ${fb}→${fw}: seguire il piano per 14 giorni non lascia debito, un'ora in meno ogni notte sì`, () => {
+    assert.ok(debitoDopo(pattern, fb, fw, 0) <= 30, "segue il piano: " + debitoDopo(pattern, fb, fw, 0));
+    assert.ok(debitoDopo(pattern, fb, fw, 60) >= 180, "un'ora in meno ogni notte: " + debitoDopo(pattern, fb, fw, 60));
+  });
+}

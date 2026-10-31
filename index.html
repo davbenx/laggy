@@ -4400,7 +4400,10 @@ function diaryReminder(P, CARDS){
       statoPerche="Oggi non c'è spazio per un pisolino, né prima né dopo il turno. Il conto resta aperto: recupera stanotte e, se hai sonno, evita di guidare."; }
     else if(napRecDebt){ stato="Hai dormito meno del previsto · pisolino alle "+hhmm(napRecDebt.a);
       statoPerche="Hai dormito meno del previsto, e il piano ha aggiunto un pisolino di recupero per non portare il debito a domani."; }
-    if(stato) infoVoci.set("debito",{t:"Il tuo conto del sonno",h:'<p class="ed-sub">'+esc(statoPerche)+'</p>'});
+    // le notti che pesano di più: il «Perché?» mostra da dove viene il numero
+    const notti=(P.debitoNotti||[]).map(x=>{ const g=new Date(x.date+"T12:00:00").toLocaleDateString(LINGUA,{weekday:"short",day:"numeric",month:"short"});
+      return '<div class="row"><b>'+esc(g.charAt(0).toUpperCase()+g.slice(1))+'</b><span>'+hm(x.totale)+' su '+hm(x.meta)+' (–'+hm(x.manca)+')</span></div>'; }).join("");
+    if(stato) infoVoci.set("debito",{t:"Il tuo conto del sonno",h:'<p class="ed-sub">'+esc(statoPerche)+'</p>'+(notti?'<p class="ed-sub" style="margin-bottom:4px">Le notti che pesano di più, rispetto al sonno che il piano proponeva:</p><div class="rows">'+notti+'</div>':'')+'<p class="ed-sub" style="margin-top:10px">Sono stime: il conto conta le notti che annoti degli ultimi 14 giorni, e il recupero vale la metà.</p>'});
   }
   const statoHtml = stato ? '<div class="drem-rec drem-stato"><span>'+esc(stato)+'</span><button type="button" class="lnk" data-info-debito="1">Perché?</button></div>' : "";
   if(dnum(f)===dnum(giornoVero())) setBadge(logged?0:1);
