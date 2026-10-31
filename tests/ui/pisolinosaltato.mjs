@@ -22,10 +22,12 @@ async function apri(wake, bed="00:30", prima=0){
   await p.context().close(); }
 { const p=await apri("08:30","02:30");
   const t=await p.evaluate(()=>(document.querySelector(".drem-rec")||{}).textContent||"");
-  ok(/pisolino/.test(t), "una notte corta: il piano dice che ha aggiunto un pisolino → "+t.slice(0,130));
+  ok(/Ti mancano .* di sonno · pisolino alle \d\d:\d\d/.test(t) || /meno del previsto · pisolino alle/.test(t), "una notte corta: una riga di stato dice che il piano ha aggiunto un pisolino → "+t.slice(0,130));
   await p.context().close(); }
 { const p=await apri("08:30","02:30",2);
-  const t=await p.evaluate(()=>[...document.querySelectorAll(".drem-rec")].map(e=>e.textContent).join(" | "));
-  ok(/Ti mancano .* di sonno/.test(t) && /minuti in più/.test(t) && /cala solo dormendo/i.test(t), "tre notti corte: la notte si allunga e il piano lo spiega → "+t.slice(0,200));
+  const t=await p.evaluate(()=>[...document.querySelectorAll(".drem-stato")].map(e=>e.textContent).join(" | "));
+  ok(/Ti mancano .* di sonno · stanotte \+\d+ min/.test(t) && (await p.evaluate(()=>document.querySelectorAll(".drem-stato").length))===1, "tre notti corte: UNA riga di stato, con la notte più lunga → "+t.slice(0,120));
+  await p.evaluate(()=>document.querySelector("[data-info-debito]").click()); await p.waitForTimeout(300);
+  ok(await p.evaluate(()=>!document.querySelector("#infoModal").hidden && /cala solo dormendo/i.test(document.querySelector("#infoCorpo").textContent)), "«Perché?» apre il foglio con la spiegazione");
   await p.context().close(); }
 console.log("errori",errs); ok(errs.length===0,"nessun errore di pagina"); await b.close();
