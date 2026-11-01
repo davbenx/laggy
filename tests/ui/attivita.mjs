@@ -103,9 +103,10 @@ async function apri(extra={}, diary=null, stExtra={}){
   ok(/In arrivo/.test(tx) && /Luce · segnato in 1 giorno/.test(tx) && /Caffè · segnato in 1 giorno/.test(tx), "con pochi dati: «In arrivo», con quanto manca, senza pressione");
   await p.context().close(); }
 { const p=await apri();
-  await p.evaluate(()=>{ const d=[...document.querySelectorAll(".drem details.att-det")].find(x=>/Altro da segnare/.test(x.textContent)); d.open=true; });
-  ok(await p.evaluate(()=>!!document.querySelector("[data-att-salva=alcol]") && !!document.querySelector("[data-att-salva=pasto]")), "«Altro da segnare» (chiuso) contiene alcol e pasto abbondante");
-  await p.evaluate(()=>{ const b=document.querySelector("[data-att-salva=alcol]").closest("[data-att-box]"); b.querySelector("[data-att-ora]").value="21:00"; document.querySelector("[data-att-salva=alcol]").click(); }); await p.waitForTimeout(400);
+  ok(!(await p.evaluate(()=>/Altro da segnare/.test(document.querySelector(".drem").innerText))), "«Il tuo sonno» non ha più «Altro da segnare»");
+  await p.evaluate(()=>document.querySelector('.erow[data-row="pasti"]').click()); await p.waitForTimeout(300);
+  ok(await p.evaluate(()=>!!document.querySelector("#infoModal [data-att-salva=alcol]") && !!document.querySelector("#infoModal [data-att-salva=pasto]") && /Ultimo bicchiere alle/.test(document.querySelector("#infoModal").innerText)), "il popup dei Pasti ha «Pasto abbondante» e «Alcol» (ultimo bicchiere)");
+  await p.evaluate(()=>{ document.querySelector("#infoModal [data-att-salva=alcol]").closest("[data-att-box]").querySelector("[data-att-ora]").value="21:00"; document.querySelector("#infoModal [data-att-salva=alcol]").click(); }); await p.waitForTimeout(400);
   const a=await p.evaluate(()=>Object.values(JSON.parse(localStorage.getItem("nt:attivita")||"{}"))[0]);
   ok(a && a[0].t==="alcol" && a[0].fine==="21:00", "alcol salvato, senza avvisi né giudizi → "+JSON.stringify(a));
   ok(await p.evaluate(()=>document.querySelector("#toast").textContent.trim()==="Segnato"), "il messaggio è solo «Segnato»");
