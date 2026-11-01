@@ -1099,6 +1099,7 @@ padding:16px 18px;margin:2px 0 var(--gap-sezione);box-shadow:var(--shadow-btn)}
 .kcompat .kface svg{width:26px;height:26px}
 .kcompat .kface span{display:none}
 .kleg{display:flex;justify-content:space-between;font-size:12px;color:var(--faint);margin:4px 2px 0}
+.att-tit{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--dim);margin:14px 0 2px}
 .att-det{margin:2px 0 6px}
 .att-det>summary{cursor:pointer;list-style:none;min-height:44px;display:flex;align-items:center;font-size:13px;color:var(--dim)}
 .att-det>summary::-webkit-details-marker{display:none}
@@ -4518,8 +4519,6 @@ function diaryReminder(P, CARDS){
   // L'ordine segue l'urgenza: un pisolino da confermare (il tempo scorre) prima dell'energia; altrimenti energia, poi i pisolini.
   x+= pend ? xNap+xEn : xEn+xNap;
   x+=xExtra;
-  // Alcol e pasto abbondante: solo per chi vuole capire i propri schemi, in un riquadro chiuso.
-  if(dnum(f) <= dnum(nowD)) x+='<details class="att-det"><summary>Altro da segnare</summary>'+attivitaHtml("alcol")+attivitaHtml("pasto")+'</details>';
   x+='</div>';
   return x;
 }
@@ -6033,7 +6032,7 @@ function finestreDelGiorno(P){
 const PIANO_VOCI=[
   ["luce","Luce","Quando prendere o evitare la luce per restare in fase",true],
   ["penombra","Penombra","Le luci basse prima di dormire",true],
-  ["pasti","Pasti","Quando mangiare nei giorni di turno",true],
+  ["pasti","Pasti","Quando mangiare nei giorni di turno. Accesa, puoi segnare pasti abbondanti e alcol",true],
   ["liberi","Tempo libero","Le finestre libere fuori dal lavoro",true],
   ["testa","Momento per la testa","Quando sei più lucido per pensare, studiare, decidere",false],
   ["leggera","Momento per muoverti","45 minuti leggeri: camminare, stretching. Accesa, puoi segnare quando l'hai fatto",false],
@@ -6071,7 +6070,7 @@ const ABITUDINI={
   intensa:{ora:"Finito alle", fatto:"Fatto, finito alle", btn:"L'ho fatto", det:"min"},
   caffe:{ora:"Ultimo caffè alle", fatto:"Ultimo caffè alle", btn:"L'ho preso", det:"n", nLab:"Quante tazze", u:["tazza","tazze"]},
   luce:{ora:"Luce presa alle", fatto:"Luce presa alle", btn:"L'ho presa", det:"min", minLab:"Quanto è durata (minuti)"},
-  alcol:{ora:"Ultima bevanda alle", fatto:"Ultima bevanda alle", btn:"Segna", det:"n", nLab:"Quante", u:["bevanda","bevande"]},
+  alcol:{ora:"Ultimo bicchiere alle", fatto:"Ultimo bicchiere alle", btn:"Segna", det:"n", nLab:"Quanti bicchieri", u:["bicchiere","bicchieri"]},
   pasto:{ora:"Pasto abbondante alle", fatto:"Pasto abbondante alle", btn:"Segna", det:"nota"}
 };
 function dettaglioAbitudine(a){ const c=ABITUDINI[a.t]||{}; return a.min ? " · "+a.min+" min" : a.n ? " · "+a.n+" "+((c.u||["","" ])[a.n===1?0:1]||"").trim() : ""; }
@@ -6348,7 +6347,7 @@ function renderEssenziale(P, CARDS){
       // cd.val ripeteva l'orario due volte ("21:30" come valore, "Pasto
       // pieno alle 21:30" come sottotitolo): cd.small dice la stessa cosa
       // senza il doppione ("prima di uscire").
-      voci.push({t, html:riga("pasti","Pasti",ora||cd.val,cd.small||"",false,ICON.plate,dett(cd),
+      voci.push({t, html:riga("pasti","Pasti",ora||cd.val,cd.small||"",false,ICON.plate,dett(cd)+'<div class="att-tit">Pasto abbondante</div>'+attivitaHtml("pasto")+'<div class="att-tit">Alcol</div>'+attivitaHtml("alcol"),
         {a:cd.at, poi:"pasto alle "+hhmm(cd.at)})});
     } else if(cd.k==="t"){
       voci.push({t, html:riga("rientro",cd.lab,ora||cd.val,frase(cd.val,ora)||cd.small||"",!P.b.rest,ICON.car,dett(cd),
@@ -7140,7 +7139,7 @@ function sezioneSchemi(){
       attesa.push('<li><b>'+esc(sc.tit)+'</b> · segnato in '+st.segnati+(st.segnati===1?' giorno':' giorni')+(m>0?'; ancora '+m+(m===1?' giorno':' giorni')+' con voto per vedere se c\'è un legame':'; servono più giorni diversi per vederlo')+'</li>'); } }
   const corpo=(html||'<p class="hint" style="margin:0 0 8px">Ancora niente da dire: i tuoi schemi compaiono con i giorni.</p>')+
     (attesa.length?'<p class="hint" style="margin:14px 0 4px"><b>In arrivo</b></p><ul class="hint" style="margin:0;padding-left:18px;line-height:1.6">'+attesa.join("")+'</ul>':"")+
-    '<p class="hint" style="margin:14px 0 0">Segni quello che vuoi, quando vuoi: movimento, luce e caffè dai popup del piano, alcol e pasto da «Altro da segnare» in Oggi. Nessun obbligo, e ogni schema si può nascondere. Sono legami nei tuoi dati, non diagnosi.</p>';
+    '<p class="hint" style="margin:14px 0 0">Segni quello che vuoi, quando vuoi: movimento, luce, caffè, pasti e alcol dai popup delle rispettive voci del piano (Pasti, per il pasto abbondante e per l\'alcol). Nessun obbligo, e ogni schema si può nascondere. Sono legami nei tuoi dati, non diagnosi.</p>';
   return sezDet("I tuoi schemi", trovati ? trovati+(trovati===1?" schema trovato":" schemi trovati") : "Si vedono con i giorni", corpo, {id:"schemi"});
 }
 function fraseCorrDebito(corr){
