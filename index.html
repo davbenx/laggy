@@ -333,14 +333,15 @@ display:flex;align-items:center;justify-content:center;cursor:pointer}
 .qs-hd-az{display:flex;align-items:center;gap:10px}
 .qs-orari{display:flex;flex-direction:column;gap:8px;align-items:flex-start;margin:10px 0 0}
 .qs-orari .qs-ore{width:100%}
-.qs-piede{display:flex;justify-content:space-between;gap:12px;margin:12px 0 0}
+.qs-piede{display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px 12px;margin:6px 0 0}
+.qs-guida{font-size:13px;color:var(--dim);margin:-4px 0 10px}
 .qs-piede .lnk{font-size:13px;padding:8px 0}
 .qs-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
 .qs-btn{background:var(--bg);border:1.5px solid var(--line);border-radius:var(--r);padding:11px 13px;font-family:inherit;
 font-size:14.5px;font-weight:600;color:var(--ink);cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;
 gap:3px;transition:all .15s ease}
 .qs-btn:hover{border-color:var(--blue);background:var(--blue-soft);color:var(--blue)}
-.qs-btn.active{border-color:var(--blue-fill);background:var(--blue-fill);color:var(--su-blu)}
+.qs-btn.active{border-color:var(--blue-fill);background:var(--blue-fill);color:#fff}
 .qs-shift-time{font-size:12px;font-weight:400;opacity:.8}
 .qs-spec{display:flex;flex-direction:column;gap:8px}
 .lucidita-card{display:flex;align-items:center;gap:10px;background:var(--blue-soft);border:1px solid var(--blue-lt);border-radius:var(--r);padding:10px 12px 10px 14px;margin-bottom:var(--gap-sezione)}
@@ -353,7 +354,7 @@ gap:3px;transition:all .15s ease}
 .qs-chips{display:flex;flex-wrap:wrap;gap:7px}
 .qs-chip{background:var(--bg);border:1.5px solid var(--line);border-radius:999px;padding:0 13px;min-height:38px;font:inherit;
 font-size:13.5px;font-weight:600;color:var(--ink);cursor:pointer}
-.qs-chip[aria-pressed="true"]{border-color:var(--blue-fill);background:var(--blue-fill);color:var(--su-blu)}
+.qs-chip[aria-pressed="true"]{border-color:var(--blue-fill);background:var(--blue-fill);color:#fff}
 .qs-ore{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13.5px;color:var(--dim)}
 .qs-ore input{min-height:40px;font:inherit;font-size:15px;width:auto!important;flex:1 1 0;min-width:0}
 .qs-ore>span:first-child{flex-basis:100%}
@@ -578,7 +579,7 @@ font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;min-height:44
 .lnk.dim{color:var(--dim);font-weight:500}   /* chiudere, rimandare, annullare: testo semplice, mai in evidenza */
 a.btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
 .btn .ei{margin-right:6px}
-.drem-done .ibtn,.dq-riga .ibtn{width:40px;height:40px;margin:-12px 0 -12px 2px;vertical-align:middle}
+.drem-done .ibtn{width:40px;height:40px;margin:-12px 0 -12px 2px;vertical-align:middle}
 .tools{gap:16px}
 
 .jsoff{background:var(--orange-soft);border:1px solid var(--orange-fill);border-radius:var(--r);
@@ -957,9 +958,6 @@ justify-content:center;flex:none;width:44px;height:44px;border-radius:999px}
 .ora-in{width:auto;min-width:7.2em}
 .dq-sez{border-top:1px solid var(--line);margin:14px 0 8px;padding-top:12px;font-size:12.5px;font-weight:600;color:var(--faint);text-transform:none}
 .dq-sez span{font-weight:400}
-.dq-riga{border-top:1px solid var(--line);margin-top:14px;padding-top:10px;font-size:14px;color:var(--dim);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.dq-riga b{color:var(--ink)}
-.dq-riga .kic{display:inline-flex;width:20px;height:20px}
 .drem-cmp{color:var(--dim);font-size:13px;font-weight:500}
 .tt-sigla{display:inline-block;min-width:22px;padding:1px 5px;margin-right:6px;border-radius:6px;background:var(--s2);color:var(--dim);font-size:12px;font-weight:700;text-align:center}
 .caff-fatt{margin-top:10px}
@@ -970,8 +968,8 @@ justify-content:center;flex:none;width:44px;height:44px;border-radius:999px}
 .hc-da{font-size:12px;color:var(--dim);font-weight:500;white-space:nowrap}
 .lib-tit{font-weight:600;color:var(--ink);margin:14px 0 4px}
 .drem-tx>.drem-cmp{display:block;padding-left:18px}
-.drem-done,.dq-riga{line-height:1.5}
-.drem-done .lnk,.dq-riga .lnk{min-height:0;padding:10px 6px;margin:-10px 0;vertical-align:baseline}
+.drem-done{line-height:1.5}
+.drem-done .lnk{min-height:0;padding:10px 6px;margin:-10px 0;vertical-align:baseline}
 .dopo-notte{margin:-2px 0 10px;padding:0 2px}
 .dn-comp>summary{display:flex;align-items:center;gap:4px;min-height:44px;cursor:pointer;list-style:none;font-size:13.5px;color:var(--dim);letter-spacing:0;text-transform:none}
 .dn-sum{display:flex;flex-direction:column;gap:1px}
@@ -982,7 +980,6 @@ justify-content:center;flex:none;width:44px;height:44px;border-radius:999px}
 .dn-comp>summary::after{content:"›";margin-left:auto;font-size:20px;color:var(--faint);transition:transform .15s}
 .dn-comp[open]>summary::after{transform:rotate(-90deg)}
 .dn-vale{font-size:12px;color:var(--faint);margin:6px 0 0}
-.dn-lab{display:block;font-size:12px;color:var(--dim);margin:0 0 6px}
 .dn-scelta{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--s2);border:1px solid var(--line);border-radius:var(--r);padding:2px}
 .dn-scelta .vb{display:flex;flex-direction:column;align-items:center;gap:1px;padding:7px 8px;min-height:48px}
 .dn-scelta .vb b{font-size:13.5px}
@@ -1040,9 +1037,9 @@ padding:12px 6px 12px 14px;margin:-6px 0 var(--gap-sezione);font-size:13.5px;lin
 .tt-riepilogo>span{display:block;font-size:13.5px;color:var(--dim);margin-top:3px}
 .tt-seq{display:flex;flex-wrap:wrap;gap:4px;margin-top:10px}
 .tt-seq i{font-style:normal;min-width:26px;padding:4px 6px;border-radius:7px;background:var(--bg);border:1px solid var(--line);font-size:12.5px;font-weight:700;text-align:center;color:var(--dim)}
-.tt-seq i.oggi{background:var(--blue-fill);border-color:var(--blue-fill);color:var(--su-blu)}
+.tt-seq i.oggi{background:var(--blue-fill);border-color:var(--blue-fill);color:#fff}
 .tt-g{min-width:34px;min-height:40px;padding:4px 6px;border-radius:9px;background:var(--bg);border:1px solid var(--line);font:inherit;font-size:13px;font-weight:700;text-align:center;color:var(--dim);cursor:pointer}
-.tt-g.oggi{background:var(--blue-fill);border-color:var(--blue-fill);color:var(--su-blu)}
+.tt-g.oggi{background:var(--blue-fill);border-color:var(--blue-fill);color:#fff}
 .tt-orari-lista{margin-bottom:var(--sp-3);background:var(--s1);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
 .tt-orari .qh-ore-riga{grid-template-columns:minmax(78px,92px) minmax(0,1fr) auto minmax(0,1fr);gap:var(--sp-2);margin:0;padding:var(--sp-2) var(--sp-3);border-top:1px solid var(--line)}
 .tt-orari .qh-ore-riga:first-child{border-top:0}
@@ -2219,12 +2216,16 @@ header b{font-size:23px}
         <button type="button" class="qs-close" id="qsClose" aria-label="Chiudi">✕</button>
       </div>
     </div>
+    <!-- Qui non c'è niente da confermare: ogni scelta si salva subito. Lo dice la riga sopra i turni, e «Fatto» chiude
+         (senza, l'unico bottone in fondo era «Cambio turno», che sembrava la conferma e invece apre lo scambio). -->
+    <p class="qs-guida" id="qsGuida" aria-live="polite">Tocca il turno o cambia gli orari: si salva subito.</p>
     <div class="qs-grid" id="qsGrid"></div>
     <div class="qs-orari" id="qsOrari"></div>
     <div class="qs-spec" id="qsSpec"></div>
+    <button type="button" class="btn pri" id="qsFatto" style="width:100%;min-height:46px;margin-top:16px">Fatto</button>
     <div class="qs-piede">
-      <button type="button" class="lnk" id="qsVaiPiano" hidden>Piano del giorno</button>
-      <button type="button" class="lnk" id="qsVaiScambio">Cambio turno</button>
+      <button type="button" class="lnk dim" id="qsVaiPiano" hidden>Piano del giorno →</button>
+      <button type="button" class="lnk dim" id="qsVaiScambio">Scambio con un collega →</button>
     </div>
   </div>
 </div>
@@ -3367,9 +3368,15 @@ function fromHash(hashStr){
 const DIARIO_CHIAVI = new Set(["wakes","beds","pisolini","diary"]);
 let _dopoDiarioT = null;
 function dopoDiario(){ clearTimeout(_dopoDiarioT); _dopoDiarioT = setTimeout(()=>{ try{ ntNotifiche(); }catch(e){} try{ ntWidget(); }catch(e){} }, 300); }
+// Versione dei dati: cresce a ogni scrittura (store.set è l'unica via). Le cache che valgono fra un disegno e l'altro
+// (occupati delle persone, andamento del sonno) si buttano quando cambia, quando cambia il giorno o ogni 15 minuti.
+var _versioneDati = 0, _trendAnteprima = {firma:"", v:null};
+function firmaDati(){
+  return _versioneDati+"|"+dnum(giornoVero())+"|"+Math.floor(Date.now()/9e5);
+}
 const store = {
   get(k,d){ try{ const v=localStorage.getItem("nt:"+k); return v?JSON.parse(v):d; }catch(e){ return d; } },
-  set(k,v){ let ok=true; try{ localStorage.setItem("nt:"+k,JSON.stringify(v)); }catch(e){ ok=false; }
+  set(k,v){ _versioneDati++; let ok=true; try{ localStorage.setItem("nt:"+k,JSON.stringify(v)); }catch(e){ ok=false; }
     if(DIARIO_CHIAVI.has(k)) dopoDiario();
     passaggioIOS();
     return ok; },
@@ -3531,15 +3538,24 @@ function busyOf(off){
 // Occupato di un giorno, per me o per una persona: ricordato solo per il giro
 // in corso, come i piani sopra. Con più persone il mio veniva ricalcolato per
 // ognuna, giorno per giorno: centinaia di piani a ogni disegno.
-let _occupati = new Map();
+// Restano validi fra un disegno e l'altro finché i dati non cambiano (firmaDati) e finché nessuno ha messo al posto di
+// ecc, giorni, turni o persone un oggetto diverso (le simulazioni dello scambio lo fanno, e poi rimettono quello di prima).
+let _occupati = new Map(), _occFirma = "";
 const IO = {};   // "me", come chiave: person vuoto vuol già dire "il partner principale"
+const _idOggetti = new WeakMap(); let _idProssimo = 0;
+const idDi = o => { if(!o || typeof o!=="object") return "-"; let i=_idOggetti.get(o); if(i===undefined){ i=++_idProssimo; _idOggetti.set(o,i); } return i; };
 function occupatiDi(off, person){
-  if(!_occupati.size) Promise.resolve().then(()=>_occupati.clear());
-  const chi = person===IO ? IO : (person || "partner"), g = dnum(state.focus)+off;
+  const firma=firmaDati();
+  if(firma!==_occFirma || _occupati.size>40){ _occupati.clear(); _occFirma=firma; }
+  // la persona per contenuto, non per riferimento: tuttePersone() ricostruisce il partner principale a ogni chiamata
+  const chi = person===IO ? "io" : person ? JSON.stringify(person) : "partner", g = dnum(state.focus)+off;
+  const quale = idDi(state.ecc)+"."+idDi(state.giorni)+"."+idDi(state.shifts)+"."+idDi(state.people);
   let m=_occupati.get(chi); if(!m){ m=new Map(); _occupati.set(chi,m); }
-  if(m.has(g)) return m.get(g);
+  const k = g+"|"+quale;
+  if(m.has(k)) return m.get(k);
   const r = person===IO ? busyOf(off) : asPartner(()=>busyOf(off), person);
-  m.set(g,r); return r;
+  if(m.size>3000) m.clear();
+  m.set(k,r); return r;
 }
 function finestreCondivise(off, person){
   const A=occupatiDi(off, IO), B=occupatiDi(off, person);
@@ -3625,7 +3641,16 @@ function liberiDelGiorno(P){
   if(fine-t>=90) out.push({a:t, b:fine});
   return out;
 }
+// Ricordate finché i dati non cambiano: Turni le chiede due volte a disegno (pagina e anteprima), il messaggio una terza.
+const _liberiMemo = new Map();
 function finestreLibere(giorni){
+  const k=firmaDati()+"|"+giorni+"|"+idDi(state.ecc)+"."+idDi(state.giorni)+"."+idDi(state.shifts);
+  if(_liberiMemo.has(k)) return _liberiMemo.get(k).map(x=>({d:new Date(x.d), a:x.a, b:x.b}));
+  if(_liberiMemo.size>20) _liberiMemo.clear();
+  const out=calcolaFinestreLibere(giorni); _liberiMemo.set(k, out);
+  return out.map(x=>({d:new Date(x.d), a:x.a, b:x.b}));
+}
+function calcolaFinestreLibere(giorni){
   const fPrima=state.focus, f0=giornoVero(), out=[];
   for(let o=0;o<giorni;o++){
     state.focus=day(f0,o);
@@ -4375,7 +4400,7 @@ function summaryText(){
   return testa.concat(seDebito).concat(seRegolarita).concat(seCiclo).concat(seSveglia).concat(seDiario).join("\n");
 }
 function render(){
-  _pianiDelGiro = new Map(); _occupati = new Map();
+  _pianiDelGiro = new Map();   // gli occupati delle persone no: valgono finché i dati non cambiano (firmaDati)
   // salva() qui, non solo nei singoli gestori: trovati (in questa sessione,
   // da segnalazioni reali) SEI punti diversi che cambiano preferenze vere
   // — turni, orari, se il ciclo si ripete, i preset — senza mai chiamare
@@ -5636,12 +5661,22 @@ platform.onResume(()=>{ platform.widget.aggiorna().then(()=>renderAttivazione())
 // nella riga giusta di Impostazioni e, una volta, con una notifica.
 // var, non let: render() gira prima che questa riga venga eseguita (TDZ).
 var _adattaCache=null, _adattaFatto=null;
+// Novanta piani (uno per sveglia annotata): non serve prima del primo disegno, quindi all'apertura si calcola appena il
+// telefono è libero e poi si ridisegna. La firma lunga (diario intero) si ricalcola solo quando i dati sono cambiati.
+let _adattaPronto=false, _adattaInAttesa=false;
 function suggerimentiAdatta(){
+  if(_adattaCache && _adattaCache.ver===_versioneDati) return _adattaCache.v;
   const sig=JSON.stringify([state.wakes,state.beds,state.freeBed,state.freeWake,state.maxAdvance,state.pattern,state.anchor,state.ecc]);
-  if(_adattaCache && _adattaCache.sig===sig) return _adattaCache.v;
+  if(_adattaCache && _adattaCache.sig===sig){ _adattaCache.ver=_versioneDati; return _adattaCache.v; }
+  if(!_adattaPronto){
+    if(!_adattaInAttesa){ _adattaInAttesa=true;
+      const poi=()=>{ _adattaPronto=true; _adattaInAttesa=false; try{ render(); }catch(e){} };
+      if(window.requestIdleCallback) requestIdleCallback(poi, {timeout:600}); else setTimeout(poi, 300); }
+    return [];
+  }
   let v=[];
   try{ const ws=wakeSummary(); v=(ws && ws.consigli || []).filter(c=>c.action && c.tipo); }catch(e){}
-  _adattaCache={sig, v}; return v;
+  _adattaCache={sig, v, ver:_versioneDati}; return v;
 }
 const chiaveAdatta=c=>c.action.field+"="+c.action.value;
 function suggerimentoAdatta(){
@@ -7751,7 +7786,10 @@ function renderAndamentiPreview(){
   // Calcola da sé solo il numero che mostra: la pagina intera (riepiloghi,
   // confronti) si costruisce quando la si apre, non a ogni disegno di Turni.
   let trend=null;
-  try{ if(window.NTHistory) trend=window.NTHistory.sleepTrend({beds:state.beds,wakes:state.wakes,pisolini:state.pisolini}, NT_planSafe, {need:state.need, days:30}); }catch(e){}
+  const firma=firmaDati()+"|"+state.need;
+  if(_trendAnteprima.firma===firma) trend=_trendAnteprima.v;
+  else { try{ if(window.NTHistory) trend=window.NTHistory.sleepTrend({beds:state.beds,wakes:state.wakes,pisolini:state.pisolini}, NT_planSafe, {need:state.need, days:30}); }catch(e){}
+    _trendAnteprima={firma, v:trend}; }
   if(!trend || trend.n<3){
     // senza diario: quello che si sa dai turni soli
     let F=null; try{ F=caricoTurni(0,30); }catch(e){}
@@ -8698,6 +8736,7 @@ function apriQuickShift(d){
   // Da Turni il giorno toccato si apre qui: si cambia il turno o si va al suo piano.
   if($("#qsVaiPiano")) $("#qsVaiPiano").hidden=!document.body.classList.contains("tab-turni");
   $("#qsDateSub").textContent=isOggi?"Cosa fai davvero":"Turno per";
+  if($("#qsGuida")) $("#qsGuida").textContent="Tocca il turno o cambia gli orari: si salva subito.";
 
   const targetIso=iso(quickShiftTarget);
   const eccAttuale=state.ecc[targetIso];
@@ -8917,6 +8956,7 @@ if($("#qsOrari")) $("#qsOrari").addEventListener("change",e=>{
   // il campo resta com'è (chi scrive l'ora a mano lo perderebbe); si ridisegna il resto e si può annullare
   salva(); render();
   if($("#qsReset")) $("#qsReset").hidden=false;
+  if($("#qsGuida")) $("#qsGuida").textContent="Salvato ✓ Puoi chiudere con «Fatto».";
   const nome=NT.etichetta(off);
   toastUndo(nome+" "+hhmm(s0)+"–"+hhmm(e0), ()=>{ if(prima) state.giorni[d]=prima; else delete state.giorni[d]; salva(); render(); if(quickShiftTarget) apriQuickShift(quickShiftTarget); });
   renderQsOrariSalva();
@@ -8933,6 +8973,7 @@ function renderQsOrariSalva(){
   if(nome!==sh.n && !esiste) el.insertAdjacentHTML("beforeend",'<button type="button" class="qs-chip" data-qs-salva>Salva «'+esc(nomePerOrari(nome, g.s, g.e))+'» fra i tuoi turni</button>');
 }
 if($("#qsClose")) $("#qsClose").addEventListener("click",chiudiQuickShift);
+if($("#qsFatto")) $("#qsFatto").addEventListener("click",()=>{ haptic(6); chiudiQuickShift(); });
 if($("#quickShiftModal")) $("#quickShiftModal").addEventListener("click",e=>{
   if(e.target===$("#quickShiftModal")) chiudiQuickShift();
 });

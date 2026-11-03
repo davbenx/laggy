@@ -21,6 +21,7 @@ import com.getcapacitor.annotation.CapacitorPlugin
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import java.time.Duration
 import java.time.Instant
@@ -121,6 +122,9 @@ class SalutePlugin : Plugin() {
             } catch (e: Exception) { call.reject("lettura non riuscita", e) }
         }
     }
+
+    /** Le letture in corso si fermano con il plugin (l'attività chiusa): niente lavoro né risposte orfane. */
+    override fun handleOnDestroy() { scope.cancel(); super.handleOnDestroy() }
 
     /** Le impostazioni di Health Connect (per togliere i permessi), o Google Play se va installato o aggiornato. */
     @PluginMethod

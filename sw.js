@@ -43,7 +43,9 @@ function cacheName() {
   if (_cacheNamePromise && (Date.now() - _cacheNameAt) < CACHE_TTL_MS) return _cacheNamePromise;
   _cacheNameAt = Date.now();
   _cacheNamePromise = (async () => {
-    const responses = await Promise.all(CORE.map(url => fetch(url, { cache: "no-store" })));
+    // no-cache, non no-store: il browser chiede sempre al server se il file è cambiato (ETag), ma se non lo è riceve una
+    // risposta vuota (304) e usa la sua copia. Con no-store riscaricava tutto (circa 1,5 MB) ogni 20 minuti d'uso.
+    const responses = await Promise.all(CORE.map(url => fetch(url, { cache: "no-cache" })));
     for (const res of responses) if (!res || !res.ok) throw new Error("core fetch fallito: " + (res && res.url));
     const chunks = [];
     for (const res of responses) chunks.push(await res.clone().text());

@@ -20,6 +20,14 @@ Fatto nella 1.1.1 (non serve più): tolto il vecchio wizard nascosto; suggerimen
 - **Nuove funzioni**: «Guidi per lavoro» (pause del Reg. CE 561/2006 nel turno, con caffè + pisolino breve); idea del «compromesso» nei giorni liberi con le notti fisse (Smith, Fogg & Eastman 2009); figlio «a scuola o all'asilo» (lun–ven 8–13:30; le vacanze scolastiche non ci sono: si segnano a mano); «Copia una settimana» in Segna; la foto del foglio turni per prima fra le importazioni; il primo piano spiega l'app in tre punti.
 - **Novità** con id `2026-11-14`.
 
+## Revisione del codice (03/11/2026)
+- **Velocità**: con due anni di diario e otto colleghi, un disegno di Turni passa da circa 356 a 80 ms (CPU 4×). Le cache degli occupati delle persone, delle finestre libere e dell'anteprima di «Sonno e carico» valgono fra un disegno e l'altro e si buttano quando cambiano i dati (`_versioneDati`, cresce a ogni `store.set`), il giorno o ogni 15 minuti (`firmaDati()`); le simulazioni che scambiano `ecc`/`giorni` hanno chiavi proprie (`idDi`). I 90 piani di «Il piano si adatta» si calcolano dopo il primo disegno (`requestIdleCallback`).
+- **Dati mobili**: il service worker controlla i file con `no-cache` (ETag, 304) invece di riscaricarli tutti ogni 20 minuti (circa 1,5 MB).
+- **Pulizia**: tolti `debitoVero` (engine, morto dopo `debito.js`) e il CSS di `.dn-lab`, `.dq-riga`; `tools/` non è più servito dal sito.
+- **Android**: `SalutePlugin` ferma le letture quando il plugin viene distrutto.
+- Verificato: nessun errore su 235 schermate (6 utenti tipo × 4 momenti, con tutti i fogli), nessun ascoltatore che si accumula fra un disegno e l'altro.
+- **Non fatto, di proposito**: spezzare `index.html` (12 mila righe) in moduli. Sarebbe la cosa più utile per la manutenzione, ma è un lavoro grande e rischioso: da fare a pezzi, una sezione alla volta con la suite completa dopo ognuna.
+
 ## Valutazioni
 1. **Punti di accesso alle funzioni** — *fatto in parte (novembre 2026)*: i riepiloghi (mese, 12 mesi, PDF per il medico) stanno nel foglio «Condividi e riepiloghi» (`apriCondividi`, `#condividiRiepiloghi`); il PDF resta anche in fondo a «Sonno e carico» come scorciatoia; Festivi: tre ingressi (riga in «I tuoi turni», «Modifica turni», consiglio), tolto il rimando nel mese. Resta da verificare con i contatori d'uso dopo un paio di mesi (regola: una casa e al massimo una scorciatoia per funzione).
 2. **Timeline di Oggi** — *fatto*: il «perché» di ogni voce si apre in un foglio (`#infoModal`, `apriInfo`, mappa `infoVoci`) con l'icona ⓘ; la voce è un `div.erow[role=button]`. Le scelte (dopo la notte, letto presto, sveglia) restano sotto «Dormi», fuori dal foglio; «Orari che non fanno per te?» e «Pisolini sul lavoro…» sono nel foglio (chiudono e vanno alle Impostazioni). Test: `_info.mjs`.
