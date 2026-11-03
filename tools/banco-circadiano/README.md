@@ -97,3 +97,21 @@ nella rotazione rapida con τ 24,4.
 Nelle rotazioni con notti l'ottimizzatore vince con tutti i modelli; con le sole mattine le regole (3 h di luce al mattino)
 reggono meglio nei modelli di Hannay. Nota: nella rotazione rapida le regole attuali (luce forte per tutta la notte)
 fanno peggio di nessun consiglio con quasi tutti i modelli.
+
+## Metriche e ottimizzatore finale (novembre 2026)
+
+Tre metriche, tutte dal 7° giorno (a regime):
+1. **Allineamento**: scarto medio (ore) del minimo corporeo dalla sua posizione ideale, 2 h prima della sveglia del sonno principale.
+2. **Vigilanza bassa al lavoro e al rientro** (minuti al giorno): ritmo del modello (x di Forger) meno pressione del sonno
+   (Borbély: sale da svegli con τ 18,2 h, scende dormendo con τ 4,2 h), sotto la soglia del 10% più basso di una giornata
+   regolare; contano il turno e i 30 minuti dopo (la guida verso casa).
+3. **Carico**: ore al giorno di luce da cercare o da evitare (un consiglio pesante non viene seguito).
+
+L'ottimizzatore minimizza insieme: disallineamento² + 8 × ore di vigilanza bassa al lavoro/rientro + 0,1 × ore di consigli,
+su un gruppo di quattro orologi (Forger τ 24,0 / 24,4, Hannay τ 23,64 / 24,04; `ROBUSTO=2`). Con questi pesi, sul modello
+di Forger e τ 24,2, è migliore delle regole attuali in tutte e 10 le turnazioni per allineamento e vigilanza, con meno carico
+in 9 su 10 (esempi: M-P-N-S-R 84 contro 126 min/giorno di vigilanza bassa; 7 notti fisse 46 contro 62; sere lunghe carico
+3,1 contro 7,8 h/giorno). Sui modelli fuori dal gruppo (Hannay a due popolazioni, Jewett 1999) l'allineamento è migliore in
+17 casi su 20 (eccezioni: sere lunghe e 24 ore con Hannay a due popolazioni, rientri rapidi con Jewett: il peso della
+vigilanza costa un po' di allineamento, scelta voluta). Per riprodurre la tabella fuori dal gruppo: `ottimizza.mjs` con una
+cartella di esportazione e `valuta_ext.py` (in `~/.venvs/notturnisti`).

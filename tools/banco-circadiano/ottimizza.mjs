@@ -103,13 +103,26 @@ function candidati(st, g, tipo) {
     for (const l of lens) out.push([a, a + l]); }
   return out;
 }
+const PESO_VIG = +(process.env.PESO_VIG ?? 8), PESO_CARICO = +(process.env.PESO_CARICO ?? 0.1);
+function pressione(st) { const S = new Float32Array(st.length); let v = 0.3; for (let i = 0; i < st.length; i++) { v = st[i] === 0 ? v * Math.exp(-h / 4.2) : 1 - (1 - v) * Math.exp(-h / 18.2); S[i] = v; } return S; }
+function simulaV(y0, L, i0, i1, S, st) {   // come simula, più le ore di vigilanza bassa al lavoro e al rientro
+  let y = y0.slice(), p = null, p2 = null, bassi = 0; const min = [], forger = !F.H;
+  for (let i = i0; i < i1; i++) { y = passo(y, L[i]); const x = F.H ? Math.cos(y[1]) : y[0];
+    if (forger && st && (st[i] === 1 || (st[i] === 2 && i >= 3 && (st[i-1] === 1 || st[i-2] === 1 || st[i-3] === 1))) && 0.5 * y[0] - S[i] < SOGLIA) bassi += h;
+    if (p2 !== null && p < p2 && p <= x) { const d = p2 - 2 * p + x, v = d > 0 ? 0.5 * (p2 - x) / d : 0; min.push((i - 1 + v) * DT + DT); }
+    p2 = p; p = x; }
+  return { y, min, bassi };
+}
 function ottimizza(P, st, ideale) {
+  const S = pressione(st);
   const dec = regole(P), R = regole(P), tutti = new Array(P.length).fill(true);
   const MINIMAX = process.env.MINIMAX === "1";
   let ys = GRUPPO.map(m => m.y.slice());
   for (let g = 0; g < GIORNI; g++) {
     const i0 = g * 1440 / DT, i1 = (g + H) * 1440 / DT;
-    const prova = () => { const L = luce(st, dec, tutti); let c = 0; GRUPPO.forEach((m, k) => { F = m.F; c += costo(simula(ys[k], L, i0, i1).min, ideale, g, g + H - 1, m.fase); }); F = NOM; return c; };
+    const prova = () => { const L = luce(st, dec, tutti); let c = 0;
+      GRUPPO.forEach((m, k) => { F = m.F; const r = simulaV(ys[k], L, i0, i1, S, st); c += costo(r.min, ideale, g, g + H - 1, m.fase) + PESO_VIG * r.bassi; }); F = NOM;
+      return c + PESO_CARICO * GRUPPO.length * carico(dec, g, g + H) * H; };
     let migliore = prova();
     for (let pass = 0; pass < 2; pass++) for (let d = g; d < g + H; d++) for (const t of ["c", "e"]) {
       const prima = dec[d][t]; let best = prima;
@@ -126,18 +139,44 @@ function ottimizza(P, st, ideale) {
   }
   return dec;
 }
+// Vigilanza: ritmo (x del modello di Forger: il fondo è il minimo corporeo) meno pressione del sonno (modello a due
+// processi di Borbély: sale da svegli con τ 18,2 h, scende dormendo con τ 4,2 h). Soglia: il 10% più basso delle ore da
+// sveglio in una giornata regolare. Si contano i minuti di lavoro e dei 30 minuti di rientro sotto soglia.
+function vigilanza(y0, L, st, n) {
+  let y = y0.slice(), S = 0.3; const A = new Float32Array(n);
+  for (let i = 0; i < n; i++) { y = passo(y, L[i]);
+    S = st[i] === 0 ? S * Math.exp(-h / 4.2) : 1 - (1 - S) * Math.exp(-h / 18.2);
+    A[i] = 0.5 * y[0] - S; }
+  return A;
+}
+const SOGLIA = (() => { const st = new Uint8Array(30 * 1440 / DT), L = new Float32Array(st.length);
+  for (let i = 0; i < st.length; i++) { const m = (i * DT) % 1440; st[i] = (m >= 1410 || m < 450) ? 0 : 2; L[i] = luceBase(st[i], i); }
+  const A = vigilanza([-0.0843259, -1.09607546, 0.45584306], L, st, st.length), v = [];
+  for (let i = 20 * 1440 / DT; i < st.length; i++) if (st[i] !== 0) v.push(A[i]);
+  v.sort((a, b) => a - b); return v[Math.floor(v.length * 0.1)]; })();
+function minutiBassi(A, st, g0, g1) {
+  let n = 0; for (let i = g0 * 1440 / DT; i < g1 * 1440 / DT; i++) {
+    const rientro = st[i] === 2 && [1, 2, 3].some(k => i - k >= 0 && st[i - k] === 1);
+    if ((st[i] === 1 || rientro) && A[i] < SOGLIA) n += DT; }
+  return n / (g1 - g0);   // minuti al giorno
+}
+const carico = (dec, g0, g1) => { let m = 0; for (let g = g0; g < g1; g++) { const d = dec[g]; if (!d) continue; if (d.c) m += d.c[1] - d.c[0]; if (d.e) m += d.e[1] - d.e[0]; } return m / 60 / (g1 - g0); };
 const rnd = (() => { let s = 12345; return () => (s = (s * 1103515245 + 12345) % 2147483648) / 2147483648; })();
 const ris = [];
 for (const [nome, pattern, turni] of ROT) {
   const P = piani(pattern, turni), st = base(P), ideale = ideali(P);
   const ades = P.map(() => rnd() < ADES);
+  const extra = dec => { F = VERA; const n = GIORNI * 1440 / DT, A = vigilanza(libVera.y, luce(st, dec, ades), st, n); F = NOM;
+    return { bassi: minutiBassi(A, st, 7, GIORNI - 1), carico: carico(dec, 7, GIORNI - 1) }; };
   const valuta = dec => { F = VERA; const r = simula(libVera.y, luce(st, dec, ades), 0, GIORNI * 1440 / DT); F = NOM; let e = 0, n = 0;
     for (let g = 7; g < GIORNI - 1; g++) { const t = ideale[g]; let b = Infinity; for (const m of r.min) { const v = m + lib.fase; if (Math.abs(v - t) < Math.abs(b - t)) b = v; } e += Math.abs(b - t) / 60; n++; } return e / n; };
   const nulla = P.map(() => ({ c: null, e: null })), R = regole(P);
   const t0 = Date.now(), O = ottimizza(P, st, ideale), ms = Date.now() - t0;
-  ris.push([nome, valuta(nulla), valuta(R), valuta(O), ms]);
+  ris.push([nome, valuta(nulla), valuta(R), valuta(O), ms, extra(nulla), extra(R), extra(O)]);
   if (OUT) for (const [k, dec] of [["nulla", nulla], ["regole", R], ["ottimo", O]]) writeFileSync(`${OUT}/${pattern}_${k}.json`, JSON.stringify(Array.from(luce(st, dec, ades)).slice(0, GIORNI * 1440 / DT)));
   if (OUT) writeFileSync(`${OUT}/${pattern}_ideale.json`, JSON.stringify(ideale.slice(0, GIORNI)));
 }
 console.log(`τ ${TAU} h, adesione ${ADES * 100}% — scarto medio dal minimo ideale (dal 7° giorno)`);
-for (const [n, a, b, c, ms] of ris) console.log(`  ${n.padEnd(18)} senza consigli ${a.toFixed(2)} h · regole attuali ${b.toFixed(2)} h · ottimizzatore ${c.toFixed(2)} h  (${(ms / 1000).toFixed(1)} s)`);
+for (const [n, a, b, c, ms, xa, xb, xc] of ris) {
+  console.log(`  ${n.padEnd(24)} allineamento: senza ${a.toFixed(2)} · regole ${b.toFixed(2)} · ottimizzatore ${c.toFixed(2)} h  (${(ms / 1000).toFixed(1)} s)`);
+  console.log(`  ${"".padEnd(24)} vigilanza bassa al lavoro/rientro: senza ${xa.bassi.toFixed(0)} · regole ${xb.bassi.toFixed(0)} · ottimizzatore ${xc.bassi.toFixed(0)} min/giorno; carico: regole ${xb.carico.toFixed(1)} · ottimizzatore ${xc.carico.toFixed(1)} h/giorno`); }
