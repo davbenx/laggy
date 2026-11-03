@@ -30,8 +30,9 @@ ok(fg.ore.length>=3 && fg.ore.every(t=>/^(00|06|12|18):00$/.test(t)), "Oggi: la 
 ok(fg.dentro, "Oggi: nessuna etichetta oraria esce dalla striscia");
 ok(fg.picco, "Oggi: il picco di sonnolenza è un punto ad anello, non un tratto del colore del turno");
 
-// Turni: la griglia del ciclo
+// Turni: la griglia del ciclo («Ore»: il calendario è la vista principale)
 await clic('[data-tab="turni"]'); await p.waitForTimeout(300);
+await clic('[data-vista="ore"]'); await p.waitForTimeout(300);
 const cy=await p.evaluate(()=>{ const box=document.querySelector("#cyc").getBoundingClientRect();
   const et=[...document.querySelectorAll("#cyc .caxis .crail span")].map(s=>({t:s.textContent, r:s.getBoundingClientRect()}));
   return {ore:et.map(x=>x.t), dentro:et.every(x=>x.r.left>=box.left && x.r.right<=box.right), linee:document.querySelectorAll("#cyc .cgrid i").length}; });

@@ -18,7 +18,7 @@ await p.reload().catch(e=>errs.push("reload: "+e.message.split("\n")[0])); await
 const r=await p.evaluate(()=>({ partita:!document.querySelector("#jsoff"), piano:!!document.querySelector("#doOpzioni") && document.body.innerText.length>300, t:document.body.innerText.slice(0,80) })).catch(e=>({err:e.message}));
 ok(ctrl && r.partita && r.piano, "offline, service worker riavviato: l'app si apre con il piano → "+JSON.stringify(r).slice(0,120));
 await p.click('[data-tab="turni"]').catch(()=>{}); await p.waitForTimeout(500);
-ok(await p.evaluate(()=>document.querySelectorAll("#cyc .crow, .crow").length>0).catch(()=>false), "offline: anche Turni funziona");
+ok(await p.evaluate(()=>document.querySelectorAll("#cyc .crow, #cyc .ccell").length>0).catch(()=>false), "offline: anche Turni funziona");
 await ctx.setOffline(false);
 // rilascio simulato: lo script cambia sul server, la pagina deve riceverlo al primo avvio
 await ctx.route("**/lingua.js", async r=>{ const res=await r.fetch(); await r.fulfill({response:res, body:(await res.text())+"\nwindow.__versioneNuova=1;"}); });

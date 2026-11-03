@@ -506,7 +506,11 @@ body.primo-avvio #firstPlanBanner,body.primo-avvio #setupChecklist,body.primo-av
 .key-fest{font-size:11px;font-weight:800;margin-right:4px}   /* i festivi: i «giorni rossi», come nel widget */
 .cnum.mod::after{content:"";display:inline-block;width:4px;height:4px;margin-left:3px;border-radius:50%;background:var(--ink);vertical-align:2px}   /* giorno modificato, come nella striscia e nel widget */
 .ccell.passato{opacity:.72}
-.ccell.oggi{box-shadow:inset 0 0 0 1.5px var(--ink)}
+.ccell.oggi .cnum{display:inline-block;align-self:center;min-width:22px;padding:1px 6px;border-radius:999px;background:var(--blue);color:var(--su-blu);font-weight:800}   /* oggi su un cerchio, come nei calendari da muro */
+/* i giorni degli altri mesi: ci sono (il ciclo continua) ma in secondo piano, come nei calendari da muro: numero grigio.
+   Niente trasparenza né colori spenti: abbasserebbero il contrasto del testo sotto la soglia di leggibilità (WCAG AA) */
+.ccell.fuori .cnum,.ccell.fuori .cnum.altro{color:var(--dim);font-weight:400}
+.ccell.fuori.passato{opacity:1}   /* un solo modo di attenuare: il grigio basta, due insieme scendono sotto il contrasto minimo */
 .cnum{font-size:11px;text-align:center;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
 .cnum.altro{color:var(--blue)}
 .cnum.altro.fest{color:var(--risk)}   /* anche in un altro mese il festivo resta rosso, come nel widget */
@@ -950,6 +954,7 @@ justify-content:center;flex:none;width:44px;height:44px;border-radius:999px}
 .caff-fatt>summary span{color:var(--dim);font-weight:400}
 .cf-grav{margin:10px 0 4px}
 .cf-grav>b{display:block;font-size:14px;margin-bottom:6px}
+.hc-da{font-size:12px;color:var(--dim);font-weight:500;white-space:nowrap}
 .lib-tit{font-weight:600;color:var(--ink);margin:14px 0 4px}
 .drem-tx>.drem-cmp{display:block;padding-left:18px}
 .drem-done,.dq-riga{line-height:1.5}
@@ -1957,6 +1962,15 @@ header b{font-size:23px}
   <section class="opz-g" data-opzg="promemoria" aria-label="Promemoria e collegamenti">
   <span class="eyebrow opz-eb" style="margin-top:0">Funziona da solo</span>
   <div id="opzFunzioni"></div>
+  <div class="ecc" id="saluteBox" hidden>
+    <b>Health Connect</b>
+    <p class="hint">Facoltativo. Se usi un orologio o un'app del sonno, il piano può leggere il sonno vero e i passi: l'orologio biologico si stima meglio. Solo lettura, tutto resta sul telefono. Ogni tipo lo accendi tu, e il permesso si chiede solo allora.</p>
+    <label class="riga-sw" for="hcSonno"><span><b>Sonno</b><small>quando hai dormito davvero; nel diario ti propone quegli orari</small></span><span class="switch"><input type="checkbox" id="hcSonno" data-hc="sonno"><span class="slider"></span></span></label>
+    <label class="riga-sw" for="hcPassi"><span><b>Passi</b><small>per capire quando eri sveglio anche se il piano diceva sonno</small></span><span class="switch"><input type="checkbox" id="hcPassi" data-hc="passi"><span class="slider"></span></span></label>
+    <p class="hint" id="hcNota" aria-live="polite"></p>
+    <button type="button" class="lnk" data-hc-apri>Permessi in Health Connect →</button>
+    <p class="hint">Spegnendo un interruttore l'app dimentica i dati letti di quel tipo. I permessi li togli anche da Health Connect: l'app se ne accorge.</p>
+  </div>
   <div class="ecc" id="icsBox" hidden>
       <b>Il calendario come file</b>
       <p class="hint">Per chi non vuole il calendario automatico: 4 settimane in un file da aprire con il calendario. Non si aggiorna da solo, quando cambia qualcosa va riscaricato. Il turno non ha promemoria (lo sai già); gli altri solo dove l'orario conta.</p>
@@ -3387,6 +3401,8 @@ let diaryAt = store.mappa("diaryAt");
 let sonnoPiano = store.mappa("sonnoPiano");
 function segnaSonnoPiano(k, comePiano){ if(comePiano) sonnoPiano[k]=1; else delete sonnoPiano[k]; store.set("sonnoPiano", sonnoPiano); }
 state.wakes = store.mappa("wakes");
+// Health Connect: quello che si è letto (solo se acceso), nelle sue chiavi; spegnendo un tipo, l'app lo dimentica
+try{ state.hcSonno = store.get("hcSonno", []); state.hcPassi = store.get("hcPassi", []); }catch(e){ state.hcSonno = []; state.hcPassi = []; }
 state.beds  = store.mappa("beds");
 state.pisolini = store.mappa("pisolini");
 state.attivita = store.mappa("attivita");   // movimento fatto, per giorno: [{t:"leggera"|"intensa", fine:"HH:MM"}]
@@ -4497,14 +4513,15 @@ function diaryReminder(P, CARDS){
   x+='<div class="drem-q"><span class="dic">'+ICON.moon+'</span>Il tuo sonno</div>';
   const nowD = new Date(), nowMin = nowD.getHours()*60 + nowD.getMinutes();
   const isToday = dnum(f) === dnum(nowD);
-  const defBed = bd || cd.bedPiano || (P && P.sp ? hhmm(P.sp.onset) : "23:00");
-  const defWake = wk || (isToday && nowMin < t(cd.wakePiano) ? hhmm(nowMin) : cd.wakePiano) || (P && P.sp ? hhmm(P.sp.onset + P.sp.dur) : "07:00");
+  const hcProp = !bd && !wk ? sonnoHcDel(f, cd.bedPiano, cd.wakePiano) : null;
+  const defBed = bd || (hcProp && hcProp.bed) || cd.bedPiano || (P && P.sp ? hhmm(P.sp.onset) : "23:00");
+  const defWake = wk || (hcProp && hcProp.wake) || (isToday && nowMin < t(cd.wakePiano) ? hhmm(nowMin) : cd.wakePiano) || (P && P.sp ? hhmm(P.sp.onset + P.sp.dur) : "07:00");
   if(sleepEditing){
     x+=campiOra(['data-sleep-bed="1" aria-label="A letto"','data-sleep-wake="1" aria-label="Sveglia"'], defBed, defWake,
       '<button class="dbtn pri" data-confirm-sleep="1">Salva</button>',
       '<button class="lnk dim" data-annulla-sleep="1">Annulla</button>');
   } else if(!logged){
-    x+='<p class="dq" data-k="s-q">Hai dormito <b>'+esc(defBed)+' → '+esc(defWake)+'</b>?</p>'+
+    x+='<p class="dq" data-k="s-q">Hai dormito <b>'+esc(defBed)+' → '+esc(defWake)+'</b>?'+(hcProp?' <span class="hc-da">da Health Connect</span>':'')+'</p>'+
       '<div class="dq-az"><button class="dbtn pri" data-confirm-sleep="1" data-def-bed="'+esc(defBed)+'" data-def-wake="'+esc(defWake)+'">Sì, così</button>'+
       '<button class="dbtn" data-open="1">Altri orari</button></div>';
   } else {
@@ -6966,15 +6983,16 @@ function barraPersona(x, cpx){
   return x1>x0 ? '<span class="cbar pers" style="left:'+x0+'%;width:'+(x1-x0)+'%"></span>' : '';
 }
 // ── Il ciclo a calendario ──────────────────────────────────────────────────────────────────────────────────────
-// La stessa griglia del widget Android per chi non ce l'ha (web, iPhone): settimane dal lunedì, turno e persona
-// impilati, mese dal giovedì, frecce che si agganciano al mese. Le regole stanno in calendario.js; i dati
-// (sigla:tipo per giorno) sono quelli del widget, da meseWidget().
-const CAL_PRIMA=13, CAL_TOT=53, CAL_RIGHE=5;
-let calSpost=0, calCtx=null, calStato=null;   // settimane da oggi (le frecce); non si salva: ogni volta si riparte da oggi
-const vistaCiclo=()=> (state.piano||{}).vistaCiclo==="calendario" ? "calendario" : "ore";
+// Un calendario da muro, lo stesso del widget Android: il mese intero dal lunedì della settimana del giorno 1 (sempre
+// 6 righe, l'altezza non salta), i giorni degli altri mesi attenuati, oggi su un cerchio, frecce di mese in mese.
+// Le regole stanno in calendario.js; i dati (sigla:tipo per giorno) sono quelli del widget, da meseWidget().
+const CAL_PRIMA=13, CAL_TOT=53, CAL_RIGHE=6;
+let calMese=0, calCtx=null;   // mesi da quello di oggi (le frecce); non si salva: ogni volta si riparte da oggi
+// La vista principale è il calendario; «Ore» è l'alternativa (chi l'aveva scelta la ritrova)
+const vistaCiclo=()=> (state.piano||{}).vistaCiclo==="ore" ? "ore" : "calendario";
 function selettoreVista(v){
   return '<div class="vsw" role="group" aria-label="Come vedere il ciclo">'+
-    [["ore","Ore"],["calendario","Calendario"]].map(([k,t])=>'<button type="button" data-vista="'+k+'" aria-pressed="'+(v===k)+'">'+t+'</button>').join("")+'</div>';
+    [["calendario","Calendario"],["ore","Ore"]].map(([k,t])=>'<button type="button" data-vista="'+k+'" aria-pressed="'+(v===k)+'">'+t+'</button>').join("")+'</div>';
 }
 function renderCalendarioCiclo(){
   const el=$("#cyc"), pers=personaStriscia();
@@ -6982,8 +7000,11 @@ function renderCalendarioCiclo(){
   const m=meseWidget(CAL_PRIMA, CAL_TOT);
   if(!m){ el.innerHTML=selettoreVista("calendario")+'<p class="hint">Il calendario non è disponibile: controlla i turni in «Modifica».</p>'; return; }
   const oggi=giornoVero(), iOggi=CAL.indiceDi(m.da, 7*CAL_TOT, iso(oggi)), rigaOggi=iOggi<0 ? -1 : Math.floor(iOggi/7);
-  calCtx={da:m.da, rigaOggi};
-  const r0=CAL.primaRiga(rigaOggi, calSpost, CAL_RIGHE, CAL_TOT), mt=CAL.meseDellaRiga(m.da, r0), tit=CAL.titolo(m.da, r0, oggi.getFullYear());
+  const meseDi=k=>CAL.meseSpostato(oggi.getFullYear(), oggi.getMonth()+1, k), neiDati=k=>{ const x=meseDi(k); return !!CAL.righeMese(m.da, 7*CAL_TOT, x[0], x[1]); };
+  if(!neiDati(calMese)) calMese=0;
+  calCtx={da:m.da, rigaOggi, neiDati, meseDi};
+  const mt=meseDi(calMese), rm=CAL.righeMese(m.da, 7*CAL_TOT, mt[0], mt[1]) || [Math.max(rigaOggi,0), Math.max(rigaOggi,0)];
+  const r0=CAL.primaRigaMese(rm, rigaOggi, calMese===0, CAL_RIGHE, CAL_TOT), tit=CAL.titoloMese(mt[0], mt[1], oggi.getFullYear());
   meseVista=[mt[0], mt[1]];
   const persona = pers && m.p.length ? m.p[Math.min(m.sel, m.p.length-1)] : null;
   const leggi=s=>{ s=s||"?:?"; let segni=""; const u=s.lastIndexOf(":");
@@ -6995,26 +7016,25 @@ function renderCalendarioCiclo(){
     griglia+='<div class="cal-sett">';
     for(let c=0;c<7;c++){
       const i=(r0+r)*7+c, d=CAL.dataDi(m.da,i), x=leggi(m.io[i]), pc=persona ? leggi(persona.g[i]) : null;
-      const altro=d.anno!==mt[0]||d.mese!==mt[1], num=d.giorno===1 ? "1 "+CAL.MESI[d.mese-1].slice(0,3).toUpperCase() : d.giorno;
+      const altro=d.anno!==mt[0]||d.mese!==mt[1], num=d.giorno;   // il mese è nel titolo: il giorno 1 è solo «1», in grassetto (anche col testo grande sta nella cella)
       const fest=x.f;
       const etic=new Date(d.iso+"T12:00:00").toLocaleDateString(LINGUA,{weekday:"long",day:"numeric",month:"long"})+(fest?" (festivo)":"")+": "+descr(x)+(x.x?", modificato":"")+(pc ? ", "+(pers.nome)+": "+descr(pc) : "");
-      griglia+='<button type="button" class="ccell'+(i<iOggi?" passato":"")+(i===iOggi?" oggi":"")+'" data-cal-giorno="'+d.iso+'" aria-label="'+esc(etic)+'">'+
+      griglia+='<button type="button" class="ccell'+(i<iOggi?" passato":"")+(i===iOggi?" oggi":"")+(altro?" fuori":"")+'" data-cal-giorno="'+d.iso+'" aria-label="'+esc(etic)+'">'+
         '<span class="cnum'+(altro?" altro":"")+(d.giorno===1?" uno":"")+(fest?" fest":"")+(x.x?" mod":"")+'">'+num+'</span>'+
         '<span class="ctile t-'+(x.t==="?"?"q":x.t)+'">'+(x.t==="?" ? "·" : esc(x.sig))+'</span>'+
         (pc ? '<span class="ctile p t-'+(pc.t==="?"?"q":pc.t)+'">'+(pc.t==="?" ? "·" : esc(pc.sig))+'</span>' : '')+'</button>';
     }
     griglia+='</div>';
   }
-  const ultima=CAL_TOT-CAL_RIGHE, sw=(c,x)=>'<span><i style="background:'+c+';'+(x||"")+'"></i>';
+  const sw=(c,x)=>'<span><i style="background:'+c+';'+(x||"")+'"></i>';
   // la legenda dice solo le fasce che si vedono in queste settimane: chi fa solo mattine e pomeriggi non legge «Sera» e «Notte»
   const viste=new Set(); let vFest=false, vMod=false;
   for(let r=0;r<CAL_RIGHE;r++) for(let c=0;c<7;c++){ const y=leggi(m.io[(r0+r)*7+c]); viste.add(y.t); vFest=vFest||y.f; vMod=vMod||y.x; }
   const LEG=[["m","Mattina","var(--mattina)"],["p","Pomeriggio","var(--orange)"],["l","Turno","var(--orange)"],["s","Sera","var(--sera)"],["n","Notte","var(--notte)"],["r","Riposo","var(--s2);border:1px solid var(--line)"]];
   // il mese sta nel titolo della pagina («Turni ottobre»), le frecce e «Scegli giorno» sono quelle di sempre sotto il titolo
   const re=$("#cycRange"); if(re) re.textContent="Turni "+tit.charAt(0).toLowerCase()+tit.slice(1);
-  calStato={r0, ultima, tit, rigaOggi};
-  const bt=$("#cycToday"); if(bt){ const altrove=calSpost!==0; bt.textContent=altrove?"Torna a oggi":"Scegli giorno"; bt.classList.toggle("full", altrove); }
-  const pv=$("#cycPrev"), nx=$("#cycNext"); if(pv) pv.disabled=r0<=0; if(nx) nx.disabled=r0>=ultima;
+  const bt=$("#cycToday"); if(bt){ const altrove=calMese!==0; bt.textContent=altrove?"Torna a oggi":"Scegli giorno"; bt.classList.toggle("full", altrove); }
+  const pv=$("#cycPrev"), nx=$("#cycNext"); if(pv) pv.disabled=!neiDati(calMese-1); if(nx) nx.disabled=!neiDati(calMese+1);
   el.innerHTML=selettoreVista("calendario")+griglia+
     '<div class="key">'+LEG.filter(l=>viste.has(l[0])).map(l=>sw(l[2])+l[1]+'</span>').join("")+
     (vFest ? '<span><b class="key-fest">1</b>festivo</span>' : '')+(vMod ? '<span><i class="key-mod"></i>giorno modificato</span>' : '')+chipPersona(pers)+'</div>';
@@ -7023,7 +7043,7 @@ function renderCalendarioCiclo(){
 // Le frecce e «Scegli giorno» di Turni, quando il ciclo è a calendario: pagine di settimane, e un giorno scelto porta alla sua settimana.
 function calVaiA(d){
   if(!calCtx) return; const i=CAL.indiceDi(calCtx.da, 7*CAL_TOT, iso(d)); if(i<0){ toast("Quel giorno è fuori dal calendario"); return; }
-  calSpost=Math.floor(i/7)-Math.max(calCtx.rigaOggi,0); renderCalendarioCiclo();
+  const o=giornoVero(); calMese=(d.getFullYear()-o.getFullYear())*12+(d.getMonth()-o.getMonth()); renderCalendarioCiclo();
 }
 
 function renderStrip(P, f, S){
@@ -8188,6 +8208,57 @@ async function impostaCoppiaNativa(on){
 }
 // Tornando nell'app dalle impostazioni: se il permesso è arrivato, lo stato «negato» sparisce.
 platform.onResume(()=>{ if(_coppiaNegata) platform.calendar.permesso().then(ok=>{ if(ok){ _coppiaNegata=false; renderPiuCal(); } }).catch(()=>{}); });
+// Health Connect: gli interruttori, la lettura (all'apertura e al ritorno nell'app), lo spegnimento se il permesso sparisce.
+// Si leggono le ultime 3 settimane: sono quelle che servono all'orologio. Mai in background, mai fuori dal telefono.
+function saluteCfg(){ const s=state.salute||{}; return {sonno:s.sonno===true, passi:s.passi===true}; }
+function renderSalute(){
+  const box=$("#saluteBox"); if(!box) return; box.hidden=!platform.salute.available; if(box.hidden) return;
+  const c=saluteCfg(); $("#hcSonno").checked=c.sonno; $("#hcPassi").checked=c.passi;
+}
+function dimenticaSalute(tipo){
+  if(tipo==="sonno"){ state.hcSonno=[]; store.set("hcSonno", []); }
+  if(tipo==="passi"){ state.hcPassi=[]; store.set("hcPassi", []); }
+}
+async function leggiSalute(){
+  if(!platform.salute.available) return;
+  const c=saluteCfg(); if(!c.sonno && !c.passi) return;
+  const st=await platform.salute.stato(); if(st.stato!=="ok") return;
+  let cambiato=false;
+  for(const tipo of ["sonno","passi"]) if(c[tipo] && !st[tipo]){ state.salute={...saluteCfg(), [tipo]:false}; dimenticaSalute(tipo); cambiato=true; }   // permesso tolto da Android
+  const a=Date.now(), da=a-21*864e5, cc=saluteCfg();
+  try{ if(cc.sonno){ const s=await platform.salute.sonno(da, a); state.hcSonno=s.map(x=>[+x.inizio, +x.fine]).filter(v=>v[1]>v[0]); store.set("hcSonno", state.hcSonno); cambiato=true; } }catch(e){}
+  try{ if(cc.passi){ const p=await platform.salute.passi(da, a); state.hcPassi=p.map(x=>[+x.t, +x.n]); store.set("hcPassi", state.hcPassi); cambiato=true; } }catch(e){}
+  if(cambiato){ salva(); render(); renderSalute(); aggiornaLuceOttima(); }
+}
+// gli orari del sonno da Health Connect per la domanda del diario: la sessione che combacia di più con il sonno previsto
+function sonnoHcDel(giorno, bedPiano, wakePiano){
+  const s=Array.isArray(state.hcSonno)?state.hcSonno:[]; if(!s.length || !/^\d\d:\d\d$/.test(bedPiano||"") || !/^\d\d:\d\d$/.test(wakePiano||"")) return null;
+  const w=new Date(giorno); w.setHours(+wakePiano.slice(0,2), +wakePiano.slice(3,5), 0, 0);
+  let dur=t(wakePiano)-t(bedPiano); while(dur<=0) dur+=1440; const a0=w.getTime()-dur*6e4, z0=w.getTime();
+  let migliore=null;
+  for(const [a,z] of s){ const c=Math.min(z,z0)-Math.max(a,a0); if(c>=0.5*Math.min(z-a, z0-a0) && (!migliore || c>migliore.c)) migliore={a,z,c}; }
+  if(!migliore) return null;
+  const hm=ms=>{ const d=new Date(ms); return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"); };
+  return {bed:hm(migliore.a), wake:hm(migliore.z)};
+}
+if($("#saluteBox")){
+  $("#saluteBox").addEventListener("change", async e=>{
+    const x=e.target.closest("[data-hc]"); if(!x) return; const tipo=x.dataset.hc, nota=$("#hcNota");
+    if(!x.checked){ state.salute={...saluteCfg(), [tipo]:false}; dimenticaSalute(tipo); salva(); render(); aggiornaLuceOttima(); if(nota) nota.textContent="Spento: i dati letti sono stati dimenticati."; return; }
+    const st=await platform.salute.stato();
+    if(st.stato!=="ok"){ x.checked=false; if(nota) nota.textContent=st.stato==="da_installare" ? "Serve Health Connect aggiornato: lo apro su Google Play." : "Health Connect non è disponibile su questo telefono.";
+      if(st.stato==="da_installare") platform.salute.apri(); return; }
+    const r=await platform.salute.chiedi([tipo]);
+    if(r && r[tipo]){ state.salute={...saluteCfg(), [tipo]:true}; salva(); haptic(10); if(nota) nota.textContent="Acceso: leggo "+(tipo==="sonno"?"il sonno":"i passi")+" delle ultime 3 settimane."; track("setup_item",{item:"salute_"+tipo}); leggiSalute(); }
+    else { x.checked=false; if(nota) nota.textContent="Permesso non concesso. Puoi darlo quando vuoi da Health Connect."; }
+  });
+  $("#saluteBox").addEventListener("click", e=>{ if(e.target.closest("[data-hc-apri]")) platform.salute.apri(); });
+}
+if(platform.salute.available){
+  addEventListener("load", ()=>setTimeout(()=>{ renderSalute(); leggiSalute(); }, 2000));
+  platform.onResume(()=>{ leggiSalute(); });
+}
+
 // La luce ottimale (luce-ottima.js) si calcola in un Worker: qualche secondo, una volta al giorno o quando cambiano turni,
 // diario o orari. Il risultato si ricorda per giorno con una chiave sullo stato; finché non c'è, valgono le regole.
 let _luceOttima = null, _luceWorker = null, _luceInCorso = null, _luceTimer = 0, _luceMemo = null;
@@ -8195,7 +8266,7 @@ try{ _luceOttima = store.get("luceOttima", null); }catch(e){}
 function chiaveLuce(oggi, stato){ const t=JSON.stringify(stato)+"|"+oggi; let h=5381; for(let i=0;i<t.length;i++) h=((h<<5)+h+t.charCodeAt(i))|0; return oggi+":"+(h>>>0).toString(36); }
 function statoPerLuce(){
   const st={}; for(const k of ["pattern","anchor","shifts","repeat","ecc","giorni","freeWake","freeBed","need","cTo","cFrom","prep","maxAdvance",
-    "napTurno","sonnoDiurno","mattinoBifasico","festiviRiposo","beds","wakes","pisolini","pausa","caffSens"]) if(state[k]!==undefined) st[k]=state[k];
+    "napTurno","sonnoDiurno","mattinoBifasico","festiviRiposo","beds","wakes","pisolini","pausa","caffSens","hcSonno","hcPassi"]) if(state[k]!==undefined) st[k]=state[k];
   return JSON.parse(JSON.stringify(st));
 }
 function luceOttimaDel(k){
@@ -8503,8 +8574,8 @@ $("#cyc").addEventListener("click",e=>{
   const vs=e.target.closest("[data-vista]");
   if(vs){ state.piano=Object.assign({}, state.piano, {vistaCiclo:vs.dataset.vista}); salva(); render(); return; }
   const nv=e.target.closest("[data-cal-nav]");
-  if(nv && calCtx){ calSpost=CAL.paginaDopo(calCtx.da, CAL_TOT, calCtx.rigaOggi, calSpost, CAL_RIGHE, +nv.dataset.calNav); renderCalendarioCiclo(); return; }
-  if(e.target.closest("[data-cal-oggi]")){ calSpost=0; renderCalendarioCiclo(); return; }
+  if(nv && calCtx){ const k=calMese+(+nv.dataset.calNav); if(calCtx.neiDati(k)){ calMese=k; renderCalendarioCiclo(); } return; }
+  if(e.target.closest("[data-cal-oggi]")){ calMese=0; renderCalendarioCiclo(); return; }
   const cg=e.target.closest("[data-cal-giorno]");
   if(cg){ haptic(8); apriQuickShift(new Date(cg.dataset.calGiorno+"T12:00:00")); return; }
   if(e.target.closest("[data-cp-toggle]")){ state.piano=Object.assign({}, state.piano, {persona:(state.piano||{}).persona===false}); salva(); render(); return; }
@@ -9557,24 +9628,18 @@ function passoCiclo(){
   const p=(state.pattern||"").replace(/[^A-Za-z]/g,"").length;
   return p>=1 ? p : 7;
 }
-// La striscia mostra 13 giorni per costruzione (2 prima, 10 dopo il centro)
-// — larghezza pensata per un ciclo corto, dove avanzi e trovi comunque
-// tutto quello che ti serve. Ma le frecce ora saltano esattamente di un
-// ciclo intero: con un ciclo più lungo di 13 giorni, il salto superava la
-// larghezza della finestra, e fra una vista e la successiva restavano
-// giorni scoperti — un buco di calendario, non solo un dettaglio estetico.
-// La finestra ora si allarga fino a coprire il ciclo intero quando serve,
-// restando com'era per i cicli brevi.
+// «Ore» mostra una settimana, da lunedì a domenica (quella del giorno da cui parte la vista): 7 righe stanno in una
+// schermata, le barre restano leggibili, ed è la stessa unità della griglia del mese. Le frecce vanno di 7 giorni.
 function finestraCiclo(){
-  const largh = Math.max(13, passoCiclo());
-  return [cicloOff-2, cicloOff+largh-3];
+  const c=day(state.focus, cicloOff), lun=-((c.getDay()+6)%7);
+  return [cicloOff+lun, cicloOff+lun+6];
 }
 const sulCalendario=()=>document.body.classList.contains("cic-cal");
-const calPagina=v=>{ if(!calCtx) return; calSpost=CAL.paginaDopo(calCtx.da, CAL_TOT, calCtx.rigaOggi, calSpost, CAL_RIGHE, v); renderCalendarioCiclo(); };
-if($("#cycPrev"))  $("#cycPrev").onclick =()=>{ if(sulCalendario()) return calPagina(-1); cycGo(cicloOff-passoCiclo()); };
-if($("#cycNext"))  $("#cycNext").onclick =()=>{ if(sulCalendario()) return calPagina(1); cycGo(cicloOff+passoCiclo()); };
+const calPagina=v=>{ if(!calCtx || !calCtx.neiDati(calMese+v)) return; calMese+=v; renderCalendarioCiclo(); };
+if($("#cycPrev"))  $("#cycPrev").onclick =()=>{ if(sulCalendario()) return calPagina(-1); cycGo(cicloOff-7); };
+if($("#cycNext"))  $("#cycNext").onclick =()=>{ if(sulCalendario()) return calPagina(1); cycGo(cicloOff+7); };
 if($("#cycToday")) $("#cycToday").onclick=()=>{
-  if(sulCalendario()){ if(calSpost!==0){ calSpost=0; renderCalendarioCiclo(); } else apriSelettoreData(); return; }
+  if(sulCalendario()){ if(calMese!==0){ calMese=0; renderCalendarioCiclo(); } else apriSelettoreData(); return; }
   if(suOggi()){ apriSelettoreData(); return; } state.focus=giornoVero(); cycGo(0); };
 
 /* ===================== NOVITÀ =====================
@@ -11373,7 +11438,7 @@ function salva(){
     maxAdvance:state.maxAdvance,pPattern:state.pPattern,pAnchor:state.pAnchor,
     pShifts:state.pShifts,pWake:state.pWake,pBed:state.pBed,pName:state.pName,people:state.people,personaGlance:state.personaGlance,piano:state.piano,
     repeat:state.repeat,ecc:state.ecc,giorni:state.giorni,evento:state.evento,festivi:state.festivi,festiviRiposo:state.festiviRiposo,
-    napTurno:state.napTurno,sonnoDiurno:state.sonnoDiurno,mattinoBifasico:state.mattinoBifasico,avvisoBifasicoOff:state.avvisoBifasicoOff,firstSeenAt:state.firstSeenAt,pausa:state.pausa,caffSens:state.caffSens,caffFattori:state.caffFattori,vista:state.vista};
+    napTurno:state.napTurno,sonnoDiurno:state.sonnoDiurno,mattinoBifasico:state.mattinoBifasico,avvisoBifasicoOff:state.avvisoBifasicoOff,firstSeenAt:state.firstSeenAt,pausa:state.pausa,caffSens:state.caffSens,caffFattori:state.caffFattori,salute:state.salute,vista:state.vista};
   const testo=JSON.stringify(dati);
   if(testo!==_ultimoSalvato){
     store.set("turniConfigurati", !!state.turniConfigurati);
@@ -11395,7 +11460,7 @@ function salva(){
     const sig=JSON.stringify([!!state.turniConfigurati,state.pattern,state.shifts,state.anchor,state.repeat,
       state.freeWake,state.freeBed,state.cTo,state.cFrom,state.need,state.prep,state.maxAdvance,
       state.pPattern,state.pAnchor,state.pShifts,state.pWake,state.pBed,state.pName,state.people,state.personaGlance,
-      state.ecc,state.giorni,state.evento,state.napTurno,state.pausa,state.caffSens,state.caffFattori]);
+      state.ecc,state.giorni,state.evento,state.napTurno,state.pausa,state.caffSens,state.caffFattori,state.salute]);
     if(_cfgSig!==null && sig!==_cfgSig) dispatchEvent(new Event("nt:config-changed"));
     _cfgSig=sig;
   }catch(e){}

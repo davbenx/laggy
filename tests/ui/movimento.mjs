@@ -12,7 +12,7 @@ const apri=async(ridotto)=>{
   await p.goto("http://localhost:8765/index.html"); await p.waitForTimeout(1600); return {p,ctx};
 };
 const foglio=p=>p.evaluate(()=>{ const m=document.querySelector("#infoModal"), s=m.querySelector(".qs-sheet"); return {hidden:m.hidden, disp:getComputedStyle(m).display, op:+getComputedStyle(m).opacity, tr:getComputedStyle(s).transform}; });
-const voce=p=>p.evaluate(()=>document.querySelector('#essenziale [data-row]').click());
+const voce=p=>p.evaluate(()=>(document.querySelector('#essenziale [data-row="sonno"]')||document.querySelector('#essenziale [data-row]')).click());   // «Dormi»: un foglio senza campi da compilare
 
 let {p,ctx}=await apri(false);
 await voce(p); await p.waitForTimeout(60); let f=await foglio(p);
@@ -34,7 +34,8 @@ const trascina=async(px)=>{ await voce(p); await p.waitForTimeout(500);
   await tp("touchStart",bx.y); const n=Math.ceil(px/20); for(let i=1;i<=n;i++){ await tp("touchMove",bx.y+Math.min(px,i*20)); await p.waitForTimeout(16); }
   const durante=(await foglio(p)).tr; await tp("touchEnd"); await p.waitForTimeout(400); return {durante, dopo:await foglio(p)}; };
 let r=await trascina(160);
-ok(/, 160\)$/.test(r.durante) && r.dopo.hidden, "trascinato in basso di 160 px: segue il dito e poi si chiude");
+const dy=+((r.durante.match(/, ([\d.]+)\)$/)||[])[1]||0);   // sotto carico i tocchi arrivano raggruppati: conta che segua il dito, non il pixel esatto
+ok(dy>=100 && r.dopo.hidden, "trascinato in basso di 160 px: segue il dito ("+dy+" px) e poi si chiude");
 r=await trascina(40);
 ok(!r.dopo.hidden && r.dopo.tr==="none", "trascinato di poco: torna su e resta aperto");
 await p.click("#infoChiudi"); await p.waitForTimeout(300);

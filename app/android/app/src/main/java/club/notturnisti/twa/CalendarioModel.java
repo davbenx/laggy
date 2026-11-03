@@ -103,54 +103,39 @@ final class CalendarioModel {
         return i >= 0 && i < giorni() ? i : -1;
     }
 
-    /** Mese (anno, 1-12) della settimana nella riga: quello del suo giovedì, come per le settimane ISO. */
-    int[] meseDellaRiga(int riga) { int[] d = data(riga * 7 + 3); return new int[]{ d[0], d[1] }; }
+    /** Il mese {anno, 1-12} spostato di `mesi` mesi. */
+    static int[] meseSpostato(int anno, int mese, int mesi) {
+        int t = anno * 12 + (mese - 1) + mesi;
+        return new int[]{ Math.floorDiv(t, 12), Math.floorMod(t, 12) + 1 };
+    }
 
-    /** «Ottobre», o «Gennaio 2027» se non è l'anno di oggi: il titolo sopra il calendario. */
-    String titolo(int riga, int annoOggi) {
-        int[] m = meseDellaRiga(riga);
-        return MESI[m[1] - 1] + (m[0] != annoOggi ? " " + m[0] : "");
+    /** Le settimane (righe) del mese nei dati: {prima, ultima}, o null se il mese non c'è. */
+    int[] righeMese(int anno, int mese) {
+        int ultimo = new GregorianCalendar(anno, mese - 1, 1).getActualMaximum(Calendar.DAY_OF_MONTH);
+        int a = indice(anno, mese, 1), z = indice(anno, mese, ultimo);
+        if (a < 0 && z < 0) return null;
+        if (a < 0) a = 0;
+        if (z < 0) z = giorni() - 1;
+        return new int[]{ a / 7, z / 7 };
     }
 
     /**
-     * Prima riga mostrata: la settimana di oggi (la prima se i dati non la contengono) spostata di `spostamento`
-     * settimane, senza uscire dai dati (con `righe` righe in vista).
+     * Prima riga per mostrare il mese con `righe` righe: la settimana del giorno 1 (il mese intero, come un calendario
+     * da muro); se il mese di oggi non entra tutto (widget basso), la settimana di oggi: le settimane passate servono meno.
      */
-    static int primaRiga(int rigaOggi, int spostamento, int righe, int settimane) {
-        int massimo = Math.max(0, settimane - righe);
-        return Math.max(0, Math.min(massimo, Math.max(rigaOggi, 0) + spostamento));
+    static int primaRigaMese(int[] rm, int rigaOggi, boolean meseDiOggi, int righe, int settimane) {
+        int r = rm[0];
+        if (rm[1] - rm[0] + 1 > righe && meseDiOggi && rigaOggi >= 0) r = Math.max(rm[0], Math.min(rigaOggi, rm[1] - righe + 1));
+        return Math.max(0, Math.min(Math.max(0, settimane - righe), r));
     }
 
-    /** La riga è la prima settimana di un mese (il suo giovedì cade in un mese diverso da quello della riga prima). */
-    boolean inizioMese(int riga) {
-        if (riga <= 0) return false;
-        int[] a = meseDellaRiga(riga - 1), b = meseDellaRiga(riga);
-        return a[0] != b[0] || a[1] != b[1];
-    }
-
-    /**
-     * Lo spostamento dopo un tocco su ‹ (-1) o › (+1), a partire dalla prima riga che si vede ora. Il passo è il
-     * più corto fra una pagina intera (tante settimane quante se ne vedono: non se ne salta mai nessuna) e l'inizio del
-     * mese vicino in quel verso: nei widget alti ‹ › sono il mese prima e dopo, in quelli bassi si procede a pagine
-     * e ci si aggancia all'inizio del mese quando è a meno di una pagina. Mai oltre i dati.
-     */
-    int paginaDopo(int rigaOggi, int spostamento, int righe, int verso) {
-        int massimo = Math.max(0, settimane() - righe);
-        int attuale = primaRiga(rigaOggi, spostamento, righe, settimane());
-        int passo = righe;
-        if (verso > 0) {
-            for (int r = attuale + 1; r < attuale + righe; r++) if (inizioMese(r)) { passo = r - attuale; break; }
-        } else {
-            for (int r = attuale - 1; r > attuale - righe && r > 0; r--) if (inizioMese(r)) { passo = attuale - r; break; }
-        }
-        int nuova = Math.max(0, Math.min(massimo, attuale + (verso > 0 ? passo : -passo)));
-        return nuova - Math.max(rigaOggi, 0);
-    }
+    /** «Novembre», o «Gennaio 2027» se non è l'anno di oggi. */
+    static String titoloMese(int anno, int mese, int annoOggi) { return MESI[mese - 1] + (anno != annoOggi ? " " + anno : ""); }
 
     static final long SCADENZA_SPOSTAMENTO = 60 * 60_000L;
 
     /**
-     * Lo spostamento fatto con ‹ › vale per lo stesso giorno, con lo stesso numero di righe in vista e per un'ora: poi
+     * Lo spostamento fatto con ‹ › (in mesi da quello di oggi) vale per lo stesso giorno, con lo stesso numero di righe in vista e per un'ora: poi
      * si torna a oggi. (Un widget è uno sguardo veloce, non un'app da lasciare su un'altra pagina; e se le righe
      * cambiano, un passo calcolato per un'altra altezza lascerebbe la prima riga a una settimana qualunque.)
      */

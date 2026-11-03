@@ -747,6 +747,7 @@ function minimiOrologio(S, mi = 0){
     // Il sonno vero del diario, dove c'è, al posto di quello del piano: è il dato che sposta davvero l'orologio. Si usa solo
     // se combacia almeno a metà con un sonno del piano (fra le collocazioni possibili, quella che combacia di più), così
     // la convenzione del «giorno» del diario dopo una notte non può mai mettere un sonno dove non c'era.
+    const dalDiario = new Set();
     for(let o = inizio - 1; o <= 0; o++){
       const k = iso(day(state.focus, o)), w = oraDi((state.wakes||{})[k]), bd = oraDi((state.beds||{})[k]);
       if(w === null || bd === null) continue;
@@ -757,7 +758,29 @@ function minimiOrologio(S, mi = 0){
         sonni.forEach((x, i) => { const c = Math.min(z, x[1]) - Math.max(a, x[0]);
           if(c >= 0.5 * Math.min(d, x[1] - x[0]) && (!migliore || c > migliore.c)) migliore = {i, a, z, c}; });
       }
-      if(migliore) sonni[migliore.i] = [migliore.a, migliore.z];
+      if(migliore){ sonni[migliore.i] = [migliore.a, migliore.z]; dalDiario.add(migliore.i); }
+    }
+    // Health Connect (se l'utente l'ha acceso): le sessioni di sonno vere, con lo stesso aggancio (dove il diario non c'è
+    // già: quello che scrivi tu vince), e i passi: un blocco di 10 minuti con almeno 50 passi dentro un sonno lo
+    // interrompe (eri sveglio). In minuti dalla mezzanotte del giorno guardato.
+    const mezz = new Date(state.focus); mezz.setHours(0, 0, 0, 0);
+    const minuti = ms => Math.round((ms - mezz.getTime()) / 60000);
+    for(const v of (Array.isArray(state.hcSonno) ? state.hcSonno : [])){
+      if(!Array.isArray(v)) continue; const a = minuti(+v[0]), z = minuti(+v[1]);
+      if(!(z > a) || z - a < 60 || z - a > 960 || z < (inizio - 1) * 1440 || a > 1440) continue;
+      let migliore = null;
+      sonni.forEach((x, i) => { if(dalDiario.has(i)) return; const c = Math.min(z, x[1]) - Math.max(a, x[0]);
+        if(c >= 0.5 * Math.min(z - a, x[1] - x[0]) && (!migliore || c > migliore.c)) migliore = {i, c}; });
+      if(migliore) sonni[migliore.i] = [a, z];
+    }
+    const attivi = (Array.isArray(state.hcPassi) ? state.hcPassi : []).filter(v => Array.isArray(v) && +v[1] >= 50).map(v => minuti(+v[0]))
+      .filter(m => m >= (inizio - 1) * 1440 && m <= (OROL_DOPO + 1) * 1440).sort((p, q) => p - q);
+    if(attivi.length){
+      const spezzati = [];
+      for(const [a, z] of sonni){ let pezzo = a;
+        for(const m of attivi){ if(m + 10 <= pezzo || m >= z) continue; if(m - pezzo >= 30) spezzati.push([pezzo, m]); pezzo = Math.max(pezzo, m + 10); }
+        if(z - pezzo >= 30) spezzati.push([pezzo, z]); }
+      sonni.length = 0; sonni.push(...spezzati);
     }
     const chiaveTutto = oggi + "|" + lib.chiave + JSON.stringify(sonni) + JSON.stringify(lavoro);
     const memo = _orologio.get(mi); if(memo && memo.chiave === chiaveTutto) return memo.minimi;

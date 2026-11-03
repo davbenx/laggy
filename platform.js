@@ -558,6 +558,17 @@ export function onBackButton(cb) {
   });
 }
 
-const NTPlatform = { isNative, name, notify, calendar, widget, onResume, onApriGiorno, onNotificationTap, onBackButton, canShare, share, print, review, alarm, dispositivo, versione, setSystemBars };
+// Health Connect (solo app Android, solo se l'utente lo accende): sonno e passi in sola lettura. Ogni tipo chiede il suo
+// permesso quando l'utente accende il suo interruttore; la pagina non chiede mai niente da sola.
+export const salute = {
+  available: isNative && name === "android" && !!plugin("NTSalute"),
+  async stato() { const S = plugin("NTSalute"); if (!S) return { stato: "assente" }; try { return await S.stato(); } catch (e) { return { stato: "assente" }; } },
+  async chiedi(tipi) { const S = plugin("NTSalute"); if (!S) return {}; try { return await S.chiedi({ tipi }); } catch (e) { return {}; } },
+  async sonno(da, a) { const S = plugin("NTSalute"); if (!S) return []; const r = await S.sonno({ da, a }); return (r && r.sessioni) || []; },
+  async passi(da, a) { const S = plugin("NTSalute"); if (!S) return []; const r = await S.passi({ da, a }); return (r && r.blocchi) || []; },
+  async apri() { const S = plugin("NTSalute"); if (!S) return false; try { await S.apri(); return true; } catch (e) { return false; } }
+};
+
+const NTPlatform = { isNative, name, notify, calendar, widget, onResume, onApriGiorno, onNotificationTap, onBackButton, canShare, share, print, review, alarm, dispositivo, salute, versione, setSystemBars };
 try { if (typeof window !== "undefined") window.NTPlatform = NTPlatform; } catch (e) {}
 export default NTPlatform;

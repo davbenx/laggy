@@ -19,38 +19,41 @@ const primo=p=>q(p,()=>document.querySelector(".ccell")?.dataset.calGiorno);
 // il mese sta nel titolo della pagina: «Turni ottobre»
 const titolo=p=>q(p,()=>{ const t=document.querySelector("#cycRange").textContent.replace(/^Turni /,""); return t.charAt(0).toUpperCase()+t.slice(1); });
 
-// vista predefinita: le ore; il selettore c'è e dice dove si è
+// vista predefinita: il calendario (il primo pulsante); «Ore» è l'alternativa, e la scelta resta
 { const p=await apri(ST());
-  const s=await q(p,()=>({ore:document.querySelector('[data-vista="ore"]')?.getAttribute("aria-pressed"), cal:document.querySelector('[data-vista="calendario"]')?.getAttribute("aria-pressed"), righe:document.querySelectorAll("#cyc .crow").length, celle:document.querySelectorAll(".ccell").length}));
-  ok(s.ore==="true" && s.cal==="false" && s.righe>0 && s.celle===0, "predefinito: «Ore» (la striscia), il selettore dice dove si è → "+JSON.stringify(s));
-  await p.click('[data-vista="calendario"]'); await p.waitForTimeout(400);
-  const c=await q(p,()=>({celle:document.querySelectorAll(".ccell").length, righe:document.querySelectorAll("#cyc .crow").length, nav:getComputedStyle(document.querySelector(".cycbar")).display, corpo:document.body.classList.contains("cic-cal"), salvato:JSON.parse(localStorage.getItem("nt:state")).piano?.vistaCiclo}));
-  ok(c.celle===35 && c.righe===0 && c.nav!=="none" && c.corpo && c.salvato==="calendario", "«Calendario»: 5 settimane da 7 giorni, la striscia sparisce, le frecce e «Scegli giorno» restano, la scelta resta → "+JSON.stringify(c));
+  const s=await q(p,()=>({primo:document.querySelector(".vsw button")?.dataset.vista, ore:document.querySelector('[data-vista="ore"]')?.getAttribute("aria-pressed"), cal:document.querySelector('[data-vista="calendario"]')?.getAttribute("aria-pressed"), righe:document.querySelectorAll("#cyc .crow").length, celle:document.querySelectorAll(".ccell").length, nav:getComputedStyle(document.querySelector(".cycbar")).display}));
+  ok(s.primo==="calendario" && s.cal==="true" && s.ore==="false" && s.celle===42 && s.righe===0 && s.nav!=="none", "predefinito: «Calendario», primo nel selettore: 6 settimane da 7 giorni, frecce e «Scegli giorno» → "+JSON.stringify(s));
+  await p.click('[data-vista="ore"]'); await p.waitForTimeout(400);
+  const c=await q(p,()=>({righe:[...document.querySelectorAll("#cyc .crow .clab")].map(x=>x.textContent), celle:document.querySelectorAll(".ccell").length, salvato:JSON.parse(localStorage.getItem("nt:state")).piano?.vistaCiclo}));
+  ok(c.righe.length===7 && /^lun/.test(c.righe[0]) && /^dom/.test(c.righe[6]) && c.celle===0 && c.salvato==="ore", "«Ore»: una settimana, da lunedì a domenica, e la scelta resta → "+c.righe.join(", "));
+  await p.click('#cycNext'); await p.waitForTimeout(300);
+  ok(await q(p,()=>document.querySelector("#cyc .crow .clab").textContent)==="lun 26", "in «Ore» la freccia va di una settimana → "+await q(p,()=>document.querySelector("#cyc .crow .clab").textContent));
   await p.reload(); await p.waitForTimeout(1100); await p.evaluate(()=>document.querySelector('[data-tab="turni"]').click()); await p.waitForTimeout(400);
-  ok(await q(p,()=>document.querySelectorAll(".ccell").length===35), "dopo aver riaperto la pagina si resta sul calendario");
+  ok(await q(p,()=>document.querySelectorAll("#cyc .crow").length===7), "dopo aver riaperto la pagina si resta su «Ore»");
   await p.context().close(); }
 
-// oggi è domenica 25 ottobre: la settimana di oggi in cima, titolo del mese del giovedì, frecce agganciate al mese
+// oggi è domenica 25 ottobre: il mese intero come un calendario da muro, dal lunedì della settimana del 1°, frecce di mese in mese
 { const p=await apri(ST({piano:{vistaCiclo:"calendario"}}));
-  ok(await titolo(p)==="Ottobre" && await primo(p)==="2026-10-19", "parte dalla settimana di oggi: «Ottobre», lunedì 19 → "+await titolo(p)+" "+await primo(p));
+  ok(await titolo(p)==="Ottobre" && await primo(p)==="2026-09-28", "ottobre intero: dal lunedì 28 settembre → "+await titolo(p)+" "+await primo(p));
+  ok(await q(p,()=>document.querySelectorAll(".ccell.fuori").length===11), "i giorni di settembre e novembre (11) ci sono ma attenuati (classe «fuori»)");
   const oggi=await q(p,()=>{ const o=document.querySelectorAll(".ccell.oggi"); return {n:o.length, g:o[0]?.dataset.calGiorno, passati:document.querySelectorAll(".ccell.passato").length}; });
-  ok(oggi.n===1 && oggi.g==="2026-10-25" && oggi.passati===6, "oggi è uno solo e cerchiato (25 ottobre), i giorni prima sono più tenui ("+oggi.passati+")");
+  ok(oggi.n===1 && oggi.g==="2026-10-25" && oggi.passati===27, "oggi è uno solo e cerchiato (25 ottobre), i giorni prima sono più tenui ("+oggi.passati+")");
   await p.click('#cycNext'); await p.waitForTimeout(150);
-  ok(await titolo(p)==="Novembre" && await primo(p)==="2026-11-02", "› si aggancia all'inizio di novembre (lunedì 2) → "+await titolo(p)+" "+await primo(p));
+  ok(await titolo(p)==="Novembre" && await primo(p)==="2026-10-26", "› novembre intero, dal lunedì 26 ottobre → "+await titolo(p)+" "+await primo(p));
   await p.click('#cycNext'); await p.waitForTimeout(150);
-  ok(await titolo(p)==="Dicembre" && await primo(p)==="2026-11-30", "› di nuovo: la settimana che contiene il primo giorno di dicembre → "+await titolo(p)+" "+await primo(p));
+  ok(await titolo(p)==="Dicembre" && await primo(p)==="2026-11-30", "› di nuovo: dicembre, dalla settimana del suo giorno 1 → "+await titolo(p)+" "+await primo(p));
   ok(await q(p,()=>document.querySelector("#cycToday").textContent==="Torna a oggi"), "lontano da oggi il pulsante dice «Torna a oggi»");
   await p.click("#cycToday"); await p.waitForTimeout(150);
-  ok(await titolo(p)==="Ottobre" && await primo(p)==="2026-10-19" && await q(p,()=>document.querySelector("#cycToday").textContent==="Scegli giorno"), "«Torna a oggi» riporta a oggi");
+  ok(await titolo(p)==="Ottobre" && await primo(p)==="2026-09-28" && await q(p,()=>document.querySelector("#cycToday").textContent==="Scegli giorno"), "«Torna a oggi» riporta a oggi");
   await p.click('#cycPrev'); await p.waitForTimeout(150);
-  ok(await primo(p)<"2026-10-19", "‹ va indietro → "+await primo(p));
+  ok(await titolo(p)==="Settembre" && await primo(p)==="2026-08-31", "‹ settembre → "+await titolo(p)+" "+await primo(p));
   // le sigle, i colori e il mese: 1 novembre è «1 NOV» in grassetto, i numeri di un altro mese hanno la loro classe
   await p.click("#cycToday"); await p.waitForTimeout(150);
   const g=await q(p,()=>({uno:[...document.querySelectorAll(".cnum.uno")].map(x=>x.textContent), altro:document.querySelectorAll(".cnum.altro").length, tipi:[...document.querySelectorAll(".ctile:not(.p)")].slice(0,7).map(x=>x.textContent+":"+x.className.replace("ctile ","")).join(" ")}));
-  ok(g.uno[0]==="1 NOV" && g.altro>0, "«1 NOV» in grassetto e i numeri di novembre con la classe «altro mese» ("+g.altro+")");
-  // «Scegli giorno»: il calendario salta alla settimana di quel giorno, il titolo dice il mese
+  ok(g.uno.length===2 && g.uno.every(x=>x==="1") && g.altro===11, "il giorno 1 di ottobre e di novembre in grassetto (solo «1»: il mese è nel titolo), i numeri di settembre e novembre con la classe «altro mese» ("+g.altro+")");
+  // «Scegli giorno»: il calendario va al mese di quel giorno
   await p.evaluate(()=>{ const j=document.querySelector("#jumpDate"); j.value="2026-12-14"; j.dispatchEvent(new Event("change",{bubbles:true})); }); await p.waitForTimeout(250);
-  ok(await primo(p)==="2026-12-14" && await titolo(p)==="Dicembre", "un giorno scelto porta alla sua settimana, e il mese è nel titolo → "+await primo(p)+" "+await titolo(p));
+  ok(await primo(p)==="2026-11-30" && await titolo(p)==="Dicembre", "un giorno scelto porta al suo mese → "+await primo(p)+" "+await titolo(p));
   ok(await q(p,()=>!document.querySelector(".cal-testa, .cal-titolo")), "dentro il calendario non c'è più un secondo titolo");
   ok(await q(p,()=>{ const l=document.querySelector("#cyc .key").textContent; return /Mattina/.test(l) && /Pomeriggio/.test(l) && /Notte/.test(l) && /Riposo/.test(l); }), "la legenda dice le fasce che ci sono: mattina, pomeriggio, notte, riposo");
   ok(/M:t-m/.test(g.tipi) && /R:t-r/.test(g.tipi), "sigle e fasce dei giorni: mattina (t-m) e riposo (t-r) → "+g.tipi);
@@ -58,9 +61,9 @@ const titolo=p=>q(p,()=>{ const t=document.querySelector("#cycRange").textConten
 
 // la persona: seconda riga più bassa, nascondibile dal chip; un tocco su un giorno apre il giorno
 { const p=await apri(ST({piano:{vistaCiclo:"calendario"}}));
-  ok(await q(p,()=>document.querySelectorAll(".ctile.p").length===35 && document.querySelector(".key-pers")?.getAttribute("aria-pressed")==="true"), "con la persona: una seconda riga per ogni giorno e il chip nella legenda");
+  ok(await q(p,()=>document.querySelectorAll(".ctile.p").length===42 && document.querySelector(".key-pers")?.getAttribute("aria-pressed")==="true"), "con la persona: una seconda riga per ogni giorno e il chip nella legenda");
   await p.click("[data-cp-toggle]"); await p.waitForTimeout(300);
-  ok(await q(p,()=>document.querySelectorAll(".ctile.p").length===0 && document.querySelector(".key-pers")?.getAttribute("aria-pressed")==="false" && document.querySelectorAll(".ccell").length===35), "il chip la nasconde (e il calendario resta)");
+  ok(await q(p,()=>document.querySelectorAll(".ctile.p").length===0 && document.querySelector(".key-pers")?.getAttribute("aria-pressed")==="false" && document.querySelectorAll(".ccell").length===42), "il chip la nasconde (e il calendario resta)");
   await p.click('.ccell[data-cal-giorno="2026-10-28"]'); await p.waitForTimeout(300);
   ok(await q(p,()=>!document.querySelector("#quickShiftModal").hidden), "un tocco su un giorno apre il giorno (scelta del turno)");
   await p.context().close(); }
@@ -71,11 +74,11 @@ const titolo=p=>q(p,()=>{ const t=document.querySelector("#cycRange").textConten
   await p.context().close(); }
 
 // il sonno della persona: solo se è un dato suo (ha mandato gli orari), tratteggiato sullo stesso filo del turno
-{ const p=await apri(ST({people:[{name:"Anna",pattern:"MMRR",anchor:"2026-10-20",wake:"08:00",bed:"00:30"}]}));
+{ const p=await apri(ST({people:[{name:"Anna",pattern:"MMRR",anchor:"2026-10-20",wake:"08:00",bed:"00:30"}],piano:{vistaCiclo:"ore"}}));
   const s=await q(p,()=>({sonno:document.querySelectorAll("#cyc .cbar.pers.son").length, turno:document.querySelectorAll("#cyc .cbar.pers:not(.son)").length, hint:/tratteggiato: sonno/.test(document.querySelector("#cyc .key").textContent)}));
-  ok(s.sonno>=5 && s.turno>0 && s.hint, "con gli orari di Anna: il suo sonno è un tratto tratteggiato accanto al filo del turno, e la legenda lo dice → "+JSON.stringify(s));
+  ok(s.sonno>=4 && s.turno>0 && s.hint, "con gli orari di Anna: il suo sonno è un tratto tratteggiato accanto al filo del turno, e la legenda lo dice → "+JSON.stringify(s));
   await p.context().close(); }
-{ const p=await apri(ST());
+{ const p=await apri(ST({piano:{vistaCiclo:"ore"}}));
   const s=await q(p,()=>({sonno:document.querySelectorAll("#cyc .cbar.pers.son").length, turno:document.querySelectorAll("#cyc .cbar.pers:not(.son)").length, hint:/tratteggiato/.test(document.querySelector("#cyc .key").textContent)}));
   ok(s.sonno===0 && s.turno>0 && !s.hint, "senza i suoi orari («sonno come il tuo»): niente sonno inventato, resta il filo del turno → "+JSON.stringify(s));
   await p.context().close(); }

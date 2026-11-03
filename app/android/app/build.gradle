@@ -1,7 +1,10 @@
 apply plugin: 'com.android.application'
+apply plugin: 'org.jetbrains.kotlin.android'
 
 android {
     namespace = "club.notturnisti.twa"
+    compileOptions { sourceCompatibility JavaVersion.VERSION_21; targetCompatibility JavaVersion.VERSION_21 }
+    kotlinOptions { jvmTarget = "21" }
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
         applicationId "club.notturnisti.app"
@@ -56,6 +59,8 @@ dependencies {
     implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
     implementation project(':capacitor-android')
     implementation "com.google.android.play:review:2.0.2"
+    // Health Connect: sonno e passi, solo lettura, solo se l'utente lo accende (SalutePlugin.kt)
+    implementation "androidx.health.connect:connect-client:1.1.0"
     testImplementation "junit:junit:$junitVersion"
     testImplementation "org.json:json:20231013"
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"

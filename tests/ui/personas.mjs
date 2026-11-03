@@ -26,7 +26,7 @@ ok(s.ecc[dIso(1)]==="N" && /Notte/.test(s.pill), "P1 un tocco imposta domani: "+
 // Turni: un giorno '?' si imposta al tocco
 await p.click("#goToday").catch(()=>{});
 await p.evaluate(()=>[...document.querySelectorAll("#tabbar button")].find(b=>/Turni/.test(b.textContent)).click()); await p.waitForTimeout(400);
-await p.evaluate(()=>{ const r=[...document.querySelectorAll("#cyc .crow")].find(r=>/\?/.test(r.innerText)); r && r.click(); }); await p.waitForTimeout(300);
+await p.evaluate(()=>{ const r=[...document.querySelectorAll("#cyc .ccell")].find(r=>/·/.test(r.innerText)); r && r.click(); }); await p.waitForTimeout(300);   // il calendario: un giorno da impostare ha «·»
 ok(await p.evaluate(()=>!document.querySelector("#quickShiftModal").hidden), "P1 in Turni il tocco su un giorno da impostare apre la scelta del turno");
 
 // P2 notte che inizia a mezzanotte

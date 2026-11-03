@@ -1,7 +1,7 @@
-/* Notturnisti — il calendario a settimane del ciclo.
+/* Notturnisti — il calendario del ciclo, a mese come un calendario da muro.
    Le stesse regole del widget Android (CalendarioModel.java), in JS per chi non ha il widget: settimane dal lunedì,
-   ogni settimana appartiene al mese del suo giovedì (come le settimane ISO), le frecce fanno una pagina ma si
-   agganciano all'inizio del mese se è più vicino (mai una settimana saltata). Solo conti sulle date, niente DOM:
+   il mese intero dalla settimana del giorno 1, le frecce vanno di mese in mese. Se le righe non bastano per tutto il
+   mese di oggi, si parte dalla settimana di oggi (le settimane passate servono meno). Solo conti sulle date, niente DOM:
    si prova con node. I dati (sigle e tipi dei giorni) arrivano già calcolati dal motore, qui non si calcolano turni. */
 
 export const MESI = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"];
@@ -19,34 +19,21 @@ export function indiceDi(da, giorni, iso) {
   const i = Math.round((mezzogiorno(iso) - mezzogiorno(da)) / 86400000);
   return i >= 0 && i < giorni ? i : -1;
 }
-/** Mese (anno, 1-12) della settimana nella riga: quello del suo giovedì. */
-export function meseDellaRiga(da, riga) { const d = dataDi(da, riga * 7 + 3); return [d.anno, d.mese]; }
-/** «Ottobre», o «Gennaio 2027» se non è l'anno di oggi. */
-export function titolo(da, riga, annoOggi) {
-  const [a, m] = meseDellaRiga(da, riga);
-  return MESI[m - 1] + (a !== annoOggi ? " " + a : "");
+/** Il mese (anno, 1-12) spostato di `mesi` mesi. */
+export function meseSpostato(anno, mese, mesi) { const t = anno * 12 + (mese - 1) + mesi; return [Math.floor(t / 12), ((t % 12) + 12) % 12 + 1]; }
+/** Le settimane (righe) del mese nei dati che cominciano da `da`: [prima, ultima], o null se il mese non c'è. */
+export function righeMese(da, giorni, anno, mese) {
+  const ultimo = new Date(anno, mese, 0).getDate(), iso = g => anno + "-" + String(mese).padStart(2, "0") + "-" + String(g).padStart(2, "0");
+  let a = indiceDi(da, giorni, iso(1)), z = indiceDi(da, giorni, iso(ultimo));
+  if (a < 0 && z < 0) return null;
+  if (a < 0) a = 0; if (z < 0) z = giorni - 1;
+  return [Math.floor(a / 7), Math.floor(z / 7)];
 }
-/** La riga è la prima settimana di un mese. */
-export function inizioMese(da, riga) {
-  if (riga <= 0) return false;
-  const a = meseDellaRiga(da, riga - 1), b = meseDellaRiga(da, riga);
-  return a[0] !== b[0] || a[1] !== b[1];
+/** Prima riga per mostrare il mese con `righe` righe: la settimana del giorno 1; se il mese di oggi non entra tutto, la settimana di oggi. */
+export function primaRigaMese(rm, rigaOggi, meseDiOggi, righe, settimane) {
+  let r = rm[0];
+  if (rm[1] - rm[0] + 1 > righe && meseDiOggi && rigaOggi >= 0) r = Math.max(rm[0], Math.min(rigaOggi, rm[1] - righe + 1));
+  return Math.max(0, Math.min(Math.max(0, settimane - righe), r));
 }
-/** Prima riga mostrata: la settimana di oggi spostata di `spostamento` settimane, senza uscire dai dati. */
-export function primaRiga(rigaOggi, spostamento, righe, settimane) {
-  const massimo = Math.max(0, settimane - righe);
-  return Math.max(0, Math.min(massimo, Math.max(rigaOggi, 0) + spostamento));
-}
-/**
- * Lo spostamento dopo un tocco su ‹ (-1) o › (+1): una pagina intera, o l'inizio del mese se è più vicino. Così nei
- * calendari alti le frecce sono il mese prima e dopo, e in quelli bassi non si salta mai una settimana.
- */
-export function paginaDopo(da, settimane, rigaOggi, spostamento, righe, verso) {
-  const massimo = Math.max(0, settimane - righe);
-  const attuale = primaRiga(rigaOggi, spostamento, righe, settimane);
-  let passo = righe;
-  if (verso > 0) { for (let r = attuale + 1; r < attuale + righe; r++) if (inizioMese(da, r)) { passo = r - attuale; break; } }
-  else { for (let r = attuale - 1; r > attuale - righe && r > 0; r--) if (inizioMese(da, r)) { passo = attuale - r; break; } }
-  const nuova = Math.max(0, Math.min(massimo, attuale + (verso > 0 ? passo : -passo)));
-  return nuova - Math.max(rigaOggi, 0);
-}
+/** «Novembre», o «Gennaio 2027» se non è l'anno di oggi. */
+export function titoloMese(anno, mese, annoOggi) { return MESI[mese - 1] + (anno !== annoOggi ? " " + anno : ""); }
