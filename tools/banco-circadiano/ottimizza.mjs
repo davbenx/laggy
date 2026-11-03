@@ -6,6 +6,7 @@
 // Uso: node ottimizza.mjs [tau] [adesione 0-1] [cartella per esportare la luce]
 import { createEngine } from "../../engine.js";
 import { writeFileSync } from "node:fs";
+import { calcola } from "../../luce-worker.js";   // APP=1: le finestre le sceglie il codice dell'app (luce-ottima.js), giorno per giorno
 
 const TAU = +(process.argv[2] || 24.2), ADES = +(process.argv[3] || 1), OUT = process.argv[4] || null;
 // l'ottimizzatore conosce solo la persona media (τ 24,2); la valutazione usa la persona «vera» (τ dato)
@@ -171,7 +172,13 @@ for (const [nome, pattern, turni] of ROT) {
   const valuta = dec => { F = VERA; const r = simula(libVera.y, luce(st, dec, ades), 0, GIORNI * 1440 / DT); F = NOM; let e = 0, n = 0;
     for (let g = 7; g < GIORNI - 1; g++) { const t = ideale[g]; let b = Infinity; for (const m of r.min) { const v = m + lib.fase; if (Math.abs(v - t) < Math.abs(b - t)) b = v; } e += Math.abs(b - t) / 60; n++; } return e / n; };
   const nulla = P.map(() => ({ c: null, e: null })), R = regole(P);
-  const t0 = Date.now(), O = ottimizza(P, st, ideale), ms = Date.now() - t0;
+  const t0 = Date.now();
+  const O = process.env.APP === "1" ? R.map((x, g) => { if (g >= GIORNI) return x;
+      const d = new Date(INIZIO + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + g);
+      const r = calcola({ stato: { pattern, anchor: INIZIO, shifts: turni || SH, repeat: true, freeBed: "23:30", freeWake: "07:30" }, oggi: iso(d) })[0];
+      return { c: r.cerca ? [g * 1440 + r.cerca[0], g * 1440 + r.cerca[1]] : null, e: r.evita ? [g * 1440 + r.evita[0], g * 1440 + r.evita[1]] : null }; })
+    : ottimizza(P, st, ideale);
+  const ms = Date.now() - t0;
   ris.push([nome, valuta(nulla), valuta(R), valuta(O), ms, extra(nulla), extra(R), extra(O)]);
   if (OUT) for (const [k, dec] of [["nulla", nulla], ["regole", R], ["ottimo", O]]) writeFileSync(`${OUT}/${pattern}_${k}.json`, JSON.stringify(Array.from(luce(st, dec, ades)).slice(0, GIORNI * 1440 / DT)));
   if (OUT) writeFileSync(`${OUT}/${pattern}_ideale.json`, JSON.stringify(ideale.slice(0, GIORNI)));

@@ -1352,7 +1352,7 @@ function buildIcs(days){
 
   normalizza();
   return {
-    state, plan, caffeinaOre, _orologioPasso: (y, I, mi = 0) => fjkPasso(y, I, MODELLI[mi]), buildIcs, buildCouple, buildEvents, buildCoupleEvents, codeAt, block, etichetta, tipoDelGiorno, fasciaDelGiorno, nomeTurno, nomeOre, fasciaOre, oreNotturne, eNotte,
+    state, plan, caffeinaOre, luceDelGiorno, _orologioPasso: (y, I, mi = 0) => fjkPasso(y, I, MODELLI[mi]), buildIcs, buildCouple, buildEvents, buildCoupleEvents, codeAt, block, etichetta, tipoDelGiorno, fasciaDelGiorno, nomeTurno, nomeOre, fasciaOre, oreNotturne, eNotte,
     sharedDays, freeOverlap, asPartner,
     setIcs(o){ Object.assign(ICS, o||{}); return ICS; },
     // Esposti anche questi: prima privati alla closure, ma index.html (che

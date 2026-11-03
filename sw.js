@@ -9,6 +9,8 @@ const CORE = [
   "./icon-512.png",
   "./icon-180.png",
   "./engine.js",
+  "./luce-ottima.js",
+  "./luce-worker.js",
   "./alertness.js",
   "./history.js",
   "./debito.js",

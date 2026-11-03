@@ -3826,6 +3826,24 @@ function cards(P){
     lc.rowsE.push(["Sera","luci basse dalle "+hhmm(s.onset-NT.CFG.eveningDim)]);
     lc.why="Senza niente da spostare, l'obiettivo è tenere fermo l'orologio. "+whyLight;
   }
+  // Le ore scelte dall'ottimizzatore (luce-ottima.js, in background): quando ci sono per questo giorno, prendono il posto
+  // delle regole. Le scelte rispettano già la sicurezza (mai luce bassa al lavoro); il testo dice dove e come.
+  const ott = luceOttimaDel(iso(state.focus));
+  if(ott){
+    lc.ott=true;
+    const fmt=w=>hhmm(w[0])+"–"+hhmm(w[1]), alLavoro=w=>!b.rest && w[0]<b.end && b.start<w[1];
+    lc.blocks=[ott.cerca?["seek",ott.cerca[0],ott.cerca[1],"cerca"]:null, ott.evita?["avoid",ott.evita[0],ott.evita[1],"evita"]:null].filter(Boolean);
+    if(ott.cerca) lc.at=ott.cerca[0];
+    lc.rowsA=[]; lc.rowsE=[]; lc.small="";
+    if(ott.cerca){ lc.val="Luce forte "+fmt(ott.cerca);
+      const c=ott.cerca, inizioL=!b.rest && c[0]<b.start && c[1]>b.start;
+      lc.rowsA.push(["Luce forte", fmt(c)+(inizioL ? ": prima di uscire tutte le luci accese, poi al lavoro le luci più forti che trovi" : alLavoro(c) ? ": al lavoro, le luci più forti che trovi" : ": fuori se c'è il sole, o alla finestra; altrimenti tutte le luci accese")]); }
+    else if(ott.evita){ lc.val="Luce bassa "+fmt(ott.evita); lc.at=ott.evita[0]; }   // oggi conta solo il buio: la riga dice quello
+    if(ott.evita) lc.rowsE.push(["Luce bassa", fmt(ott.evita)+(night && ott.evita[0]>=b.end-15 && ott.evita[0]<=b.end+120 ? ": occhiali da sole scuri per tornare a casa, poi buio" : ": luci basse, schermi al minimo")]);
+    if(night) lc.rowsE.push(["Camera","oscurante vero, non tende leggere, e sui 18-19°C: la temperatura conta quanto il buio"]);
+    lc.why="Le ore della luce le sceglie l'ottimizzatore dell'app: guarda i tuoi prossimi 4 giorni di turni e mette la luce dove porta il tuo orologio più vicino ai tuoi sonni, senza toglierti vigilanza al lavoro o alla guida. "+whyLight;
+    lc.cite+=" · Serkh &amp; Forger, PLoS Comput Biol 2014 (luce ottimale)";
+  }
   lc.rows=lc.rowsA.concat(lc.rowsE);   // combinato: usato quando le due fasi restano una sola riga
   out.push(lc);
 
@@ -6404,7 +6422,7 @@ function renderEssenziale(P, CARDS){
       voci.push({t, html:riga("caffe","Caffè",ora||cd.val,frase(cd.val,ora)||cd.small||"",false,ICON.coffee,dett(cd)+attivitaHtml("caffe"),
         {a:cd.at, poi:"ultimo caffè entro le "+hhmm(cd.at)})});
     } else if(cd.k==="l"){
-      if(!P.b.rest){
+      if(!P.b.rest || cd.ott){
         // Righe pratiche taggate per fase (rowsA=mattino, rowsE=sera): ognuna
         // mostra solo le proprie. Prima "Luce" teneva tutte le righe, incluse
         // quelle serali ("occhiali da sole", "camera oscurante") che
@@ -6432,7 +6450,10 @@ function renderEssenziale(P, CARDS){
           {a:cd.at, z:seekBlk?seekBlk[2]:undefined, poi:"luce dalle "+hhmm(cd.at)})});
         if(splitOra){
           const dettPenombra = righeFase(cd.rowsE)+percheOmbra;
-          voci.push({t:tAvoid, html:riga("penombra","Penombra",hhmm(avoidBlk[1]),"poi buio, per dormire",false,ICON.dim,dettPenombra,
+          // finisce quando vai a dormire: «poi buio»; altrimenti (ottimizzatore: luce bassa a metà giornata) dice fino a quando
+          const finoAlSonno = avoidBlk[2] >= P.s.onset-15 && avoidBlk[2] <= P.s.onset+5;
+          voci.push({t:tAvoid, html:riga("penombra","Penombra",hhmm(avoidBlk[1]),finoAlSonno?"poi buio, per dormire":"luce bassa fino alle "+hhmm(avoidBlk[2]),false,ICON.dim,
+            finoAlSonno ? dettPenombra : righeFase(cd.rowsE)+'<div class="why">In queste ore la luce sposterebbe il tuo orologio nella direzione sbagliata per i prossimi turni: tenerla bassa lo aiuta ad andare dove serve.</div>',
             {a:avoidBlk[1], z:avoidBlk[2], poi:"luci basse dalle "+hhmm(avoidBlk[1])})});
         }
       } else if(P.s.meta && P.s.meta.ramp){
@@ -8163,6 +8184,44 @@ async function impostaCoppiaNativa(on){
 }
 // Tornando nell'app dalle impostazioni: se il permesso è arrivato, lo stato «negato» sparisce.
 platform.onResume(()=>{ if(_coppiaNegata) platform.calendar.permesso().then(ok=>{ if(ok){ _coppiaNegata=false; renderPiuCal(); } }).catch(()=>{}); });
+// La luce ottimale (luce-ottima.js) si calcola in un Worker: qualche secondo, una volta al giorno o quando cambiano turni,
+// diario o orari. Il risultato si ricorda per giorno con una chiave sullo stato; finché non c'è, valgono le regole.
+let _luceOttima = null, _luceWorker = null, _luceInCorso = null, _luceTimer = 0, _luceMemo = null;
+try{ _luceOttima = store.get("luceOttima", null); }catch(e){}
+function chiaveLuce(oggi, stato){ const t=JSON.stringify(stato)+"|"+oggi; let h=5381; for(let i=0;i<t.length;i++) h=((h<<5)+h+t.charCodeAt(i))|0; return oggi+":"+(h>>>0).toString(36); }
+function statoPerLuce(){
+  const st={}; for(const k of ["pattern","anchor","shifts","repeat","ecc","giorni","freeWake","freeBed","need","cTo","cFrom","prep","maxAdvance",
+    "napTurno","sonnoDiurno","mattinoBifasico","festiviRiposo","beds","wakes","pisolini","pausa","caffSens"]) if(state[k]!==undefined) st[k]=state[k];
+  return JSON.parse(JSON.stringify(st));
+}
+function luceOttimaDel(k){
+  const L=_luceOttima; if(!L || !L.giorni || !state.turniConfigurati) return null;
+  // turni o diario cambiati: si aspetta il ricalcolo (l'impronta dello stato si ricalcola al massimo ogni 2 secondi)
+  const ora=Date.now(); if(!_luceMemo || ora-_luceMemo.t>2000 || _luceMemo.oggi!==L.oggi) _luceMemo={t:ora, oggi:L.oggi, chiave:chiaveLuce(L.oggi, statoPerLuce())};
+  if(L.chiave!==_luceMemo.chiave) return null;
+  const g=Math.round((new Date(k+"T12:00:00")-new Date(L.oggi+"T12:00:00"))/864e5), x=L.giorni.find(d=>d.g===g);
+  return x && (x.cerca || x.evita) ? x : null;
+}
+function aggiornaLuceOttima(){
+  if(!state.turniConfigurati || typeof Worker==="undefined") return;
+  clearTimeout(_luceTimer);
+  _luceTimer=setTimeout(()=>{
+    const oggi=iso(giornoVero()), stato=statoPerLuce(), chiave=chiaveLuce(oggi, stato);
+    if((_luceOttima && _luceOttima.chiave===chiave) || _luceInCorso===chiave) return;
+    const festivi=[]; for(let g=-12; g<6; g++){ const d=day(giornoVero(), g); if(festivoVero(d)) festivi.push(iso(d)); }
+    try{
+      if(!_luceWorker){ _luceWorker=new Worker("./luce-worker.js", {type:"module"});
+        _luceWorker.onmessage=ev=>{ const r=ev.data||{}; _luceInCorso=null;
+          if(r.giorni && !r.errore){ _luceOttima={chiave:r.chiave, oggi:r.chiave.slice(0,10), giorni:r.giorni}; store.set("luceOttima", _luceOttima); render(); } };
+        _luceWorker.onerror=()=>{ _luceInCorso=null; }; }
+      _luceInCorso=chiave; _luceWorker.postMessage({chiave, stato, oggi, festivi});
+    }catch(e){ _luceInCorso=null; }
+  }, 1500);
+}
+addEventListener("nt:config-changed", aggiornaLuceOttima);
+addEventListener("load", ()=>setTimeout(aggiornaLuceOttima, 2500));
+platform.onResume(aggiornaLuceOttima);
+
 // Widget Android: le prossime 48 ore del piano, già calcolate. Si aggiorna a
 // ogni cambio, a ogni apertura e a ogni ritorno nell'app; da lì il widget
 // si ridisegna da solo al prossimo cambio di attività.
