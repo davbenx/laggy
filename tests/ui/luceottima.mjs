@@ -22,7 +22,7 @@ await p.waitForTimeout(500);
 const dopo=await riga(p);
 ok(!/Luce forte \d\d:\d\d–\d\d:\d\d/.test(prima) && /Luce forte \d\d:\d\d–\d\d:\d\d/.test(dopo), "il Worker calcola e la riga passa alle ore ottimizzate → «"+dopo+"»");
 await p.click('#essenziale [data-row="luce"]'); await p.waitForTimeout(400);
-ok(/l'ottimizzatore dell'app/.test(await p.evaluate(()=>document.querySelector("#infoCorpo").innerText)), "il perché dice da dove vengono le ore");
+ok(/l'ottimizzatore dell'app/.test(await p.evaluate(()=>document.querySelector("#infoCorpo").textContent)), "il perché dice da dove vengono le ore");
 await p.click("#infoChiudi"); await p.waitForTimeout(300);
 await p.reload(); await p.waitForTimeout(1500);
 ok(/Luce forte \d\d:\d\d–\d\d:\d\d/.test(await riga(p)), "riaprendo l'app il risultato c'è subito (ricordato per il giorno)");

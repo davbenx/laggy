@@ -78,7 +78,7 @@ per coordinate partendo dalle regole attuali, minimizzando il disallineamento de
 24,4), come gli schemi per «più individui» (IFAC 2020).
 
 ```
-ROBUSTO=1 node tools/banco-circadiano/ottimizza.mjs [τ vero] [adesione 0-1] [cartella per esportare la luce]
+RICERCA=1 ROBUSTO=1 node tools/banco-circadiano/ottimizza.mjs [τ vero] [adesione 0-1] [cartella per esportare la luce]
 ```
 
 **Robustezza** (l'ottimizzatore non conosce la persona vera): migliore delle regole attuali in 19 casi su 24 (4 rotazioni ×
@@ -115,3 +115,22 @@ in 9 su 10 (esempi: M-P-N-S-R 84 contro 126 min/giorno di vigilanza bassa; 7 not
 17 casi su 20 (eccezioni: sere lunghe e 24 ore con Hannay a due popolazioni, rientri rapidi con Jewett: il peso della
 vigilanza costa un po' di allineamento, scelta voluta). Per riprodurre la tabella fuori dal gruppo: `ottimizza.mjs` con una
 cartella di esportazione e `valuta_ext.py` (in `~/.venvs/notturnisti`).
+
+## Una sola versione dell'ottimizzatore (03/11/2026)
+
+`ottimizza.mjs` valuta di norma il codice che l'app usa davvero (`luce-ottima.js`, chiamato come nell'app attraverso
+`luce-worker.js`, giorno per giorno): i numeri del banco sono quelli dell'app, non di una copia. La copia di ricerca
+dentro `ottimizza.mjs` resta per provare pesi e varianti (`RICERCA=1`, con `ROBUSTO`, `PESO_VIG`, `PESO_CARICO`,
+`MINIMAX`); una variante che vince si porta in `luce-ottima.js` e si riverifica senza `RICERCA`.
+
+Con il codice dell'app (τ 24,2, adesione 100%, Forger 1999; allineamento in ore, vigilanza bassa in min/giorno, carico in h/giorno):
+
+| | allineamento: senza · regole · app | vigilanza bassa: senza · regole · app | carico: regole · app |
+|---|---|---|---|
+| M-P-N-S-R | 1,88 · 2,28 · **1,73** | 108 · 126 · **80** | 5,4 · **5,0** |
+| 2M 2P 2N 4R | 2,11 · 2,18 · **1,88** | 97 · 111 · **76** | **5,4** · 5,6 |
+| 5 notti, 2 riposi | 1,58 · **1,43** · 1,62 | 127 · 94 · **76** | 7,8 · **6,4** |
+| Solo mattine | 1,00 · 0,81 · **0,52** | 0 · 0 · 0 | 4,3 · **3,8** |
+
+Nelle 5 notti l'app cede un po' di allineamento per 18 minuti al giorno in meno di vigilanza bassa al lavoro e al rientro:
+è il peso voluto della sicurezza (8 × ore di vigilanza bassa).

@@ -20,7 +20,7 @@ const stato=p=>p.evaluate(()=>JSON.parse(localStorage.getItem("nt:state")));
 const visibile=(p,s)=>p.evaluate(s=>{ const e=document.querySelector(s); return !!e && !e.hidden && e.offsetParent!==null; }, s);
 
 { const p=await apri(ST);
-  ok(await p.evaluate(()=>document.querySelectorAll("[data-pvia]").length===4), "quattro scelte: ha l'app, fa i miei turni, lun–ven, turni diversi");
+  ok(await p.evaluate(()=>document.querySelectorAll("[data-pvia]").length===5), "cinque scelte: ha l'app, fa i miei turni, lun–ven, a scuola, turni diversi");
   ok(!(await visibile(p,"#doConfirmPersona")) && !(await visibile(p,"#pvManuale")) && !(await visibile(p,"#pvLink")) && !(await visibile(p,"#annullaModificaPersona")), "all'inizio: nome e scelte, nessun modulo, né «Aggiungi» né «Annulla»");
   await p.fill("#personaName","Anna");
   await p.click('[data-pvia="mine"]'); await p.waitForTimeout(200);

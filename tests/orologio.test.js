@@ -71,3 +71,17 @@ test("due modelli: Forger 1999 e Hannay 2019 insieme, con l'incertezza della sti
   const R = motore("RRRRRRR", "2026-11-12").plan();
   assert.ok(Math.abs(R.orologio.modelli[0] - R.orologio.modelli[1]) <= 20, "nei giorni regolari i due modelli coincidono");
 });
+
+test("il margine della stima dipende dai dati veri, e la stima dice da dove viene", () => {
+  const senza = motore("RRRRRRR", "2026-11-12").plan().orologio;
+  assert.equal(senza.fonte, "orari", "senza diario: dagli orari del piano");
+  const beds = {}, wakes = {};
+  for (let g = 6; g <= 12; g++) { const k = "2026-11-" + String(g).padStart(2, "0"); beds[k] = "23:40"; wakes[k] = "07:20"; }
+  const con = motore("RRRRRRR", "2026-11-12", { beds, wakes }).plan().orologio;
+  assert.equal(con.fonte, "diario");
+  assert.ok(con.incertezza + 25 <= senza.incertezza, "con 7 giorni di diario il margine si stringe (" + senza.incertezza + " → " + con.incertezza + ")");
+  const giorno = d => new Date(2026, 10, d, 7, 20).getTime();
+  const hc = [8, 9, 10, 11, 12].map(d => [giorno(d) - 460 * 60000, giorno(d)]);
+  const salute = motore("RRRRRRR", "2026-11-12", { hcSonno: hc }).plan().orologio;
+  assert.equal(salute.fonte, "salute", "dai dati di Health Connect");
+});

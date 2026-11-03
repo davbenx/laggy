@@ -3,10 +3,10 @@
 // «cerca luce» e una «evita luce» per i prossimi H giorni minimizzando il disallineamento dell'orologio dai sonni principali
 // (minimo corporeo 2 h prima della sveglia); si tiene la scelta di oggi e si ripete domani. Vincoli: mai «evita» al lavoro,
 // luce forte 3000 lux solo con il sole e fuori dal lavoro (1000 altrimenti), buio 20 lux.
-// Uso: node ottimizza.mjs [tau] [adesione 0-1] [cartella per esportare la luce]
+// Uso: node ottimizza.mjs [tau] [adesione 0-1] [cartella per esportare la luce]   (RICERCA=1: la copia di ricerca, non quella dell'app)
 import { createEngine } from "../../engine.js";
 import { writeFileSync } from "node:fs";
-import { calcola } from "../../luce-worker.js";   // APP=1: le finestre le sceglie il codice dell'app (luce-ottima.js), giorno per giorno
+import { calcola } from "../../luce-worker.js";   // le finestre le sceglie il codice dell'app (luce-ottima.js); RICERCA=1 usa la copia qui sotto
 
 const TAU = +(process.argv[2] || 24.2), ADES = +(process.argv[3] || 1), OUT = process.argv[4] || null;
 // l'ottimizzatore conosce solo la persona media (τ 24,2); la valutazione usa la persona «vera» (τ dato)
@@ -173,7 +173,10 @@ for (const [nome, pattern, turni] of ROT) {
     for (let g = 7; g < GIORNI - 1; g++) { const t = ideale[g]; let b = Infinity; for (const m of r.min) { const v = m + lib.fase; if (Math.abs(v - t) < Math.abs(b - t)) b = v; } e += Math.abs(b - t) / 60; n++; } return e / n; };
   const nulla = P.map(() => ({ c: null, e: null })), R = regole(P);
   const t0 = Date.now();
-  const O = process.env.APP === "1" ? R.map((x, g) => { if (g >= GIORNI) return x;
+  // Una sola versione dell'ottimizzatore: di norma il banco valuta il codice che l'app usa davvero (luce-ottima.js, via
+  // luce-worker.js), giorno per giorno. La copia di ricerca qui sopra serve solo a provare pesi e varianti (RICERCA=1);
+  // una variante che vince si porta in luce-ottima.js e si riverifica senza RICERCA.
+  const O = process.env.RICERCA !== "1" ? R.map((x, g) => { if (g >= GIORNI) return x;
       const d = new Date(INIZIO + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + g);
       const r = calcola({ stato: { pattern, anchor: INIZIO, shifts: turni || SH, repeat: true, freeBed: "23:30", freeWake: "07:30" }, oggi: iso(d) })[0];
       return { c: r.cerca ? [g * 1440 + r.cerca[0], g * 1440 + r.cerca[1]] : null, e: r.evita ? [g * 1440 + r.evita[0], g * 1440 + r.evita[1]] : null }; })

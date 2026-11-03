@@ -819,9 +819,24 @@ function stimaOrologio(S, rif){
   const per = MODELLI.map((m, mi) => { const L = minimiOrologio(S, mi); if(!L || !L.length) return null;
     let best = null; for(const v of L) if(best === null || Math.abs(v - rif) < Math.abs(best - rif)) best = v;
     return Math.abs(best - rif) <= 720 ? best : null; }).filter(v => v !== null);
-  if(!per.length) return {cbt: rif, modelli: [], incertezza: null};
+  const d = datiSonno(), reali = Math.max(d.diario, d.salute);
+  const fonte = d.salute >= 2 && d.salute >= d.diario ? "salute" : d.diario >= 2 ? "diario" : "orari";
+  // Il margine: quanto i modelli non sono d'accordo, più quanto mancano i dati veri. Con solo gli orari del piano la fase
+  // vera può stare un'ora più in là (chi dorme meno o più tardi del piano); con 5 giorni su 7 di sonno vero, no.
+  const manca = reali >= 5 ? 0 : reali >= 2 ? 15 : 30;
+  if(!per.length) return {cbt: rif, modelli: [], incertezza: 60 + manca, fonte, giorniVeri: reali};
   const media = per.reduce((a, b) => a + b, 0) / per.length;
-  return {cbt: Math.round(media), modelli: per.map(Math.round), incertezza: Math.max(30, Math.round((Math.max(...per) - Math.min(...per)) / 2))};
+  return {cbt: Math.round(media), modelli: per.map(Math.round), incertezza: Math.max(30, Math.round((Math.max(...per) - Math.min(...per)) / 2)) + manca, fonte, giorniVeri: reali};
+}
+// Quanti degli ultimi 7 giorni hanno un sonno vero: annotato nel diario (letto e sveglia) o da Health Connect.
+function datiSonno(){
+  let diario = 0;
+  for(let o = -6; o <= 0; o++){ const k = iso(day(state.focus, o));
+    if(oraDi((state.wakes||{})[k]) !== null && oraDi((state.beds||{})[k]) !== null) diario++; }
+  const fine = new Date(state.focus).getTime() + 864e5, inizio = fine - 8 * 864e5;
+  const salute = new Set((Array.isArray(state.hcSonno) ? state.hcSonno : []).filter(v => Array.isArray(v) && +v[1] > inizio && +v[0] < fine)
+    .map(v => Math.floor(+v[1] / 864e5))).size;
+  return {diario, salute: Math.min(7, salute)};
 }
 function minimoVicino(S, rif){ return stimaOrologio(S, rif).cbt; }
 // La soglia dell'ultimo caffè: quanto ti resta addosso (la tua scelta in Impostazioni) per quanto dura in te.

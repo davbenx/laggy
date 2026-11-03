@@ -253,7 +253,12 @@ cursor:pointer;display:flex;border-radius:999px}
    hanno uno a parte (la data/#cycRange ne fa già le veci). */
 .tab-title{font-family:var(--serif);font-size:24px;font-weight:600;color:var(--ink);margin:2px 0 var(--gap-sezione)}
 #dateLabel:active{opacity:.7}
-#dateLabel{padding:8px 0;margin:-8px 0}   /* area di tocco da 44 px senza spostare nulla */
+#dateLabel{padding:8px 0;margin:-8px 0}
+.tl.tl-stessa .en,.tl.tl-stessa .en *{color:transparent!important}
+.pv-ess{border-bottom:1px solid var(--line);margin-bottom:4px;padding-bottom:10px}
+.tour3{margin:0 0 12px;padding-left:20px;font-size:13px;color:var(--dim);line-height:1.45}
+.tour3 li{margin:2px 0}.tour3 b{color:var(--ink)}
+.ancora-nota{font-size:12.5px;color:var(--dim);margin:-4px 0 10px;line-height:1.4}   /* area di tocco da 44 px senza spostare nulla */
 #jumpDate{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;border:0}
 .nav{background:var(--s1);border:1px solid var(--line);color:var(--ink);width:40px;height:40px;font-size:18px;line-height:1;
 border-radius:var(--r);font-size:16px;cursor:pointer;display:grid;place-items:center;flex:none}
@@ -609,7 +614,7 @@ html.js-lento .jsoff{display:block}
 .and-hub{margin:0 0 var(--sp-4)}
 .and-hub .opz-hub-r{min-height:62px}
 .and-hub .opz-val{white-space:normal}
-.sg-barra{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-2);margin:0 0 var(--sp-3)}
+.sg-barra{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--sp-2);margin:0 0 var(--sp-3)}
 .sg-barra .sg-pen{padding:0 var(--sp-2);font-size:13px;min-height:var(--tap);border-radius:var(--r-campo)}
 .sg-pen{border:1.5px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;min-height:40px;padding:0 13px;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer}
 .ferie-pref{margin-top:4px}
@@ -919,6 +924,14 @@ display:flex;align-items:center;justify-content:center;position:relative;z-index
 .ed{padding:2px 0 16px}
 .ed-sub{font-size:14px;color:var(--dim);line-height:1.55;margin:0 0 9px}
 .ed .why{font-size:14px;color:var(--dim);line-height:1.6;border-left:2px solid var(--line);padding-left:11px;margin-top:9px}
+.ed details.perche{margin-top:12px;border-top:1px solid var(--line);padding-top:4px}
+.ed details.perche>summary{min-height:44px;display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;font-size:14.5px;color:var(--ink);list-style:none}
+.ed details.perche>summary::-webkit-details-marker{display:none}
+.ed details.perche>summary::after{content:"›";margin-left:auto;font-size:20px;color:var(--faint);transition:transform .2s}
+.ed details.perche[open]>summary::after{transform:rotate(90deg)}
+.ed details.perche .why{margin-top:4px}
+.ed .fonti{font-size:12px;color:var(--faint);margin:10px 0 0;line-height:1.5}
+.ed .fonti b{font-weight:600;color:var(--dim)}
 .ed .why cite{display:block;margin-top:6px;font-size:12px;color:var(--faint);font-style:normal}
 .ed .rows{margin-top:9px}
 /* icona di stato nel blocco Ora: badge a cerchio, stesso motivo ripreso
@@ -1646,6 +1659,10 @@ header b{font-size:23px}
       <span class="hint">Se rispondi no, non te lo propone mai. L'orario lo sceglie da solo, nel momento più difficile del turno.</span>
     </div>
     <div class="q">
+      <label class="riga-sw" for="guidaL"><span>Guidi per lavoro (camion, autobus)</span><span class="switch"><input type="checkbox" id="guidaL"><span class="slider"></span></span></label>
+      <span class="hint">Nel turno compaiono le pause di guida e come usarle se hai sonno.</span>
+    </div>
+    <div class="q">
       <label for="sonnoD">Il sonno dopo una notte: dividerlo o tutto insieme?</label>
       <select id="sonnoD">
         <option value="diviso">Diviso in due</option>
@@ -1765,9 +1782,9 @@ header b{font-size:23px}
     <h2 class="sg-h" id="sgImpTit">Hai già i turni da qualche parte?</h2>
     <p class="hint" style="margin:2px 0 10px">Anche da un'altra app per i turni: tienila, esporta i turni su Google Calendar o in un file. Li leggo io e ti chiedo conferma prima di segnarli.</p>
     <div class="sg-fonti">
+      <button type="button" class="btn g" id="sgDaFoto" hidden>Da una foto del foglio turni o un PDF</button>
       <button type="button" class="btn g" id="sgDaCalendario" hidden>Dal calendario del telefono</button>
       <button type="button" class="btn g" id="sgDaFile">Da un file (.xlsx, .csv, .ics)</button>
-      <button type="button" class="btn g" id="sgDaFoto" hidden>Da una foto o un PDF</button>
       <input type="file" id="sgFile" accept=".ics,.csv,.txt,.xlsx,text/calendar,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden>
       <input type="file" id="sgFoto" accept="image/*,application/pdf" hidden>
     </div>
@@ -2038,11 +2055,13 @@ header b{font-size:23px}
         <button type="button" class="pers-via" role="radio" aria-checked="false" data-pvia="link"><b>Ha Notturnisti</b><span>Le mandi il tuo link, lei ti manda il suo</span></button>
         <button type="button" class="pers-via" role="radio" aria-checked="false" data-pvia="mine"><b>Fa i miei turni</b><span>La stessa rotazione, partita in un altro giorno</span></button>
         <button type="button" class="pers-via" role="radio" aria-checked="false" data-pvia="day"><b>Lavora lun–ven</b><span>Giornata 9–18, riposa nel weekend</span></button>
+        <button type="button" class="pers-via" role="radio" aria-checked="false" data-pvia="scuola"><b>Va a scuola o all'asilo</b><span>Lun–ven 8–13:30: vedi quando siete liberi insieme</span></button>
         <button type="button" class="pers-via" role="radio" aria-checked="false" data-pvia="custom"><b>Turni diversi</b><span>Li inserisco io</span></button>
       </div>
       <select id="personaMode" hidden aria-hidden="true" tabindex="-1">
         <option value="mine">I tuoi stessi turni</option>
         <option value="day">Giornata, lun-ven 9-18</option>
+        <option value="scuola">Scuola, lun-ven 8-13:30</option>
         <option value="custom">Turni diversi dai miei</option>
       </select>
       <span id="personaModeHint" hidden></span>
@@ -3086,6 +3105,8 @@ Object.assign(state, {
   // rimanda alla spunta del sonno bifasico — disattivabile, non
   // obbligatorio vederlo ogni volta una volta capito il meccanismo
   avvisoBifasicoOff:false,
+  // Guidi per lavoro (camion, bus): nel turno compaiono le pause di guida delle regole europee, con il pisolino giusto.
+  guidaLavoro:false,
   // Quali correzioni del diario (sonno o pisolino) sono aperte in modifica
   // adesso — non salvato, si azzera a ogni ricarica: è solo lo stato della
   // sessione corrente, non parte della configurazione.
@@ -3920,7 +3941,7 @@ function cards(P){
         ["Al risveglio","per un quarto d'ora sei più lento di prima del pisolino: concediti qualche minuto prima di guidare o di fare cose delicate"]],
       nap:{k:hhmm(n.a), fine:hhmm(n.b), min:n.b-n.a, turno:!!n.turno, livello:n.livello, caffe:!!n.caffe, caffeNo:n.caffeNo||""},
       why:(night ? "Dormire prima di entrare riduce il crollo di attenzione nelle ore centrali della notte, quando gli errori costano di più."
-                 : "Dormire prima di entrare ti fa arrivare al turno più lucido, e il sonno che manca pesa meno sulle ore di lavoro.")+" Un'ora e mezza copre un ciclo intero; se non hai tempo, venti minuti restano meglio di niente.",
+                 : "Dormire prima di entrare ti fa arrivare al turno più lucido, e il sonno che manca pesa meno sulle ore di lavoro.")+" Un'ora e mezza di solito lascia finire un ciclo di sonno (la durata varia da persona a persona), e ci si sveglia meno intontiti che a metà; se non hai tempo, venti minuti restano meglio di niente.",
       cite:"Rosekind e coll. 1995 (NASA) · Tassi & Muzet 2000", at:n.a});
   }
 
@@ -3984,6 +4005,11 @@ function cards(P){
       val: hhmm(b.start)+" → "+hhmm(b.end),
       small: "<b>"+esc(b.name||nameOf(b.c))+"</b>",
       sub:"Per il viaggio contiamo "+state.cTo+" minuti all'andata e "+state.cFrom+" al ritorno: decidono quando ti prepari e da quando sei di nuovo libero.",
+      ...(state.guidaLavoro ? {
+        rows:[["Pause di guida","dopo 4 ore e mezza di guida, 45 minuti di pausa (anche in due: prima 15, poi 30)"],
+              ["Se hai sonno","nella pausa un caffè e subito un pisolino di 15-20 minuti, poi qualche minuto all'aria prima di ripartire: l'intontimento del risveglio passa presto"]],
+        why:"Per camion e autobus le pause sono le regole europee sui tempi di guida (le stesse del tachigrafo). Il sonno al volante non avvisa: caffè più pisolino breve è la contromisura che al simulatore di guida funziona meglio di ciascuno dei due da solo; aprire il finestrino o alzare la radio no.",
+        cite:"Reg. (CE) 561/2006, art. 7 · Reyner &amp; Horne 1997 (simulatore di guida)" } : {}),
       cambia:4, cambiaTxt:"Cambia il tuo tragitto",
       at: b.start});
   } else if(b.c==="?"){
@@ -4004,10 +4030,14 @@ function cards(P){
   // quando sei davvero libero): resta comunque un momento in cui sei
   // sveglio e attivo, non dentro il sonno — quello lo copre già "Dormi". ──
   if(!b.rest && isFinite(cbt) && cbt>=b.start-state.cTo && cbt<=b.end+state.cFrom){
+    const oro=P.orologio||{}, mezza=Math.min(120, Math.max(60, Math.round((30+(oro.incertezza||30))/15)*15));
+    const FONTE={salute:"stima dai dati di Salute", diario:"stima dal tuo diario del sonno", orari:"stima dai tuoi orari"};
     out.push({k:"cbt", lab:"Momento di sonnolenza",
-      val: hhmm(cbt-60)+"–"+hhmm(cbt+60),
-      small: "stima dai tuoi orari",
-      why: "Ogni notte il corpo attraversa un punto basso naturale, indipendente da quanto hai dormito: la temperatura profonda tocca il fondo e la palpebra pesa di più. È normale sentirlo. Se cade in turno, è il momento giusto per una pausa alla luce, e se puoi lascia i compiti più delicati a prima o a dopo. È una stima dai tuoi orari, non una misura di come stai davvero: conta quello che senti.",
+      val: hhmm(cbt-mezza)+"–"+hhmm(cbt+mezza), mezza,
+      small: FONTE[oro.fonte]||FONTE.orari,
+      why: "Ogni notte il corpo attraversa un punto basso naturale, indipendente da quanto hai dormito: la temperatura profonda tocca il fondo e la palpebra pesa di più. È normale sentirlo. Se cade in turno, è il momento giusto per una pausa alla luce, e se puoi lascia i compiti più delicati a prima o a dopo. È una stima dai tuoi orari, non una misura di come stai davvero: conta quello che senti."+
+        (oro.fonte==="orari"?" La finestra è larga perché parte dagli orari del piano: con qualche giorno di sonno segnato (o da Salute) si stringe.":
+         mezza>60?" La finestra è un po' larga: i modelli dell'orologio non sono del tutto d'accordo su di te.":""),
       at: cbt});
   }
 
@@ -4697,6 +4727,7 @@ function svegliaRiga(P, m){
     (messa ? '<button type="button" class="lnk dim" data-sveglia="'+sv.t+'">Rimettila</button>' : '<button type="button" class="btn g sm" data-sveglia="'+sv.t+'">Metti</button>')+'</div>';
 }
 const SVEGLIA_ORE_PRIMA=240;   // in «Adesso» da 4 ore prima del sonno (come nel widget) fino alla fine del sonno
+var _stimaOra=null;   // l'ultima stima dell'allerta «adesso», per il confronto anonimo con il voto sull'energia
 function renderOra(Pfocus){
   const el=$("#ora"); if(!el) return;
   if(state.vista==="dettaglio"){ el.innerHTML=""; return; }
@@ -4747,6 +4778,7 @@ function renderOra(Pfocus){
     const midnight=new Date(vero.getFullYear(),vero.getMonth(),vero.getDate());
     const nextSleep=(P.s&&typeof P.s.onset==="number")?new Date(midnight.getFullYear(),midnight.getMonth(),midnight.getDate(),0,P.s.onset):null;   // con il calendario: giusto anche nei giorni del cambio d'ora
     r=window.NTAlert.alertness({now, freeWake:state.freeWake, freeBed:state.freeBed, lastSleepEnd:lastEnd, nextSleepStart:nextSleep, nadir:P.cbt});
+    _stimaOra={livello:r && r.now ? r.now.level : "", fonte:(P.orologio||{}).fonte||"", giorno:iso(state.focus)};
   } }catch(e){}
 
   const kssSleepy = votoOraRecente();
@@ -5276,6 +5308,8 @@ function renderFirstPlanBanner(){
         '<p style="margin:4px 0 12px;font-size:13px;color:var(--dim);line-height:1.4">'+
           (soloOggi ? 'Dimmelo una volta e il piano di ogni giorno è già pronto.' : 'Puoi renderlo più tuo: tempi di viaggio, come dormi nei giorni liberi.')+
         '</p>'+
+        (soloOggi ? '' : '<ol class="tour3"><li><b>Adesso</b>, in alto: la cosa da fare in questo momento.</li><li>Tocca una voce della giornata per sapere <b>perché</b>.</li>'+
+          '<li>In <b>Turni</b>: il calendario e, sotto, «Sonno e carico».</li></ol>')+
         '<div style="display:flex;gap:8px;flex-wrap:wrap">'+
           (soloOggi
             ? btn("doProssimiCiclo","A ciclo")+btn("doProssimiFisso","Sempre questo turno")+btn("doProssimiSegna","Cambiano: li segno")+
@@ -5489,9 +5523,12 @@ let attivazioneAperta=false;   // la lista compatta aperta in questa sessione
 // Più card che chiedono qualcosa insieme diventano una lista di compiti, e la giornata finisce sotto. In ogni canale
 // vince il primo nell'ordine; gli altri tornano quando il primo è risolto o chiuso. «Dimmi i tuoi orari» è l'ultimo
 // del fondo: resta finché non li imposti, e davanti a «Lo sapevi?» (ogni qualche giorno) lo zittirebbe per sempre.
+// Per questo aspetta che non ci sia nessun altro invito.
 // «Condividi i tuoi orari» non è un invito ma uno strumento: resta sempre.
-const INVITI=[["#firstPlanBanner","#setupChecklist","#adattaCard","#medicoCard","#setupNudge"],["#loSapevi","#essenziale .essnudge"]];
+// «Dimmi i tuoi orari» (dentro il piano) tace se c'è già un altro invito, in alto o in fondo: è il più paziente.
+const INVITI=[["#firstPlanBanner","#setupChecklist","#adattaCard","#medicoCard","#setupNudge"],["#loSapevi"]], PAZIENTE="#essenziale .essnudge";
 function arbitroInviti(){
+  const paz=document.querySelector(PAZIENTE); let altro=false;
   for(const canale of INVITI){
     let preso=false;
     for(const sel of canale){
@@ -5500,7 +5537,9 @@ function arbitroInviti(){
       if(el.hidden) continue;
       if(preso) el.classList.add("invito-zitto"); else preso=true;
     }
+    altro = altro || preso;
   }
+  if(paz) paz.classList.toggle("invito-zitto", altro);
 }
 // chiamata anche fuori da render(): l'arbitro degli inviti va rifatto ogni volta
 function renderAttivazione(){ _renderAttivazione(); arbitroInviti(); }
@@ -6158,6 +6197,7 @@ const PIANO_VOCI=[
   ["leggera","Momento per muoverti","45 minuti leggeri: camminare, stretching. Accesa, puoi segnare quando l'hai fatto",false],
   ["intensa","Momento per allenarti","60 minuti più impegnativi, lontano da pasti e sonno. Accesa, puoi segnare quando l'hai fatto",false]
 ];
+const PIANO_ESSENZIALE=["penombra","pasti","liberi","testa","leggera","intensa"];
 function pianoVoce(k){ const v=(state.piano||{})[k]; if(v!=null) return !!v; const x=PIANO_VOCI.find(y=>y[0]===k); return x ? x[3] : true; }
 const STIMA_FIN="Una stima dai tuoi orari di sonno, non una misura né un consiglio medico.";
 // «L'ho fatto» / «L'ho preso» nei popup di Movimento, Allenamento e Caffè: un tocco, con l'ora già pronta. I dettagli
@@ -6279,6 +6319,11 @@ function liberiInsieme(liberi){
 // Nel foglio di «Libero»: con chi, e idee per come usarlo secondo il momento. Sono possibilità, mai compiti:
 // prima l'attività e le persone, nell'ultima ora e mezza prima di dormire le cose calme (aiutano a prendere sonno).
 const LIBERO_CALMO=90;
+// Notti fisse: quasi tutti i giorni di lavoro dello schema attraversano la mezzanotte.
+function nottiFisse(){
+  const sh=state.shifts||{}, lav=[...String(state.pattern||"")].filter(c=>sh[c] && isFinite(sh[c].e));
+  return lav.length>=3 && lav.filter(c=>sh[c].e>1440).length/lav.length>=0.7;
+}
 function liberiConsigli(P, liberi, ins){
   let x="";
   if(ins.length) x+='<p class="ed-sub lib-tit">Insieme</p><div class="rows">'+ins.map(i=>'<div class="row"><b>'+hhmm(i.a)+' → '+hhmm(i.b)+'</b><span>libero con '+esc(i.nome)+'</span></div>').join("")+'</div>';
@@ -6293,6 +6338,8 @@ function liberiConsigli(P, liberi, ins){
     : 'muoverti, meglio all\'aperto; vedere amici o il partner; un hobby, qualcosa di creativo']);
   if(ultima.b>calmoDa && ultima.b-Math.max(ultima.a,calmoDa)>=30) idee.push([hhmm(Math.max(ultima.a,calmoDa))+' → '+hhmm(ultima.b),
     'cose calme: leggere, musica, stretching leggero, qualche minuto di respiro lento o meditazione']);
+  if(P.b.rest && nottiFisse()) x+='<p class="ed-sub lib-tit">Con le notti fisse</p><p class="ed-sub">Un\'idea per i giorni liberi: a letto verso le 3 e sveglia in tarda mattinata. L\'orologio resta a metà strada fra notti e giorno: torni al turno con meno fatica, e pomeriggio e sera restano per te e per chi ami. Se una sera ti va di dormire prima, va bene lo stesso.</p>'+
+    '<div class="why">È il «compromesso» studiato per chi lavora sempre di notte: luce forte in turno, buio al mattino, e nei giorni liberi un sonno spostato in avanti di qualche ora. Così il ritmo si sposta quanto basta per le notti senza perdere le giornate.<cite>Smith, Fogg &amp; Eastman 2009 · Smith &amp; Eastman 2012</cite></div>';
   if(idee.length) x+='<p class="ed-sub lib-tit">Qualche idea</p><div class="rows">'+idee.map(r=>'<div class="row"><b>'+r[0]+'</b><span>'+r[1]+'</span></div>').join("")+'</div>';
   x+='<div class="why">Attività fisica, palestra: vanno bene in quasi tutto il tempo libero. Evita solo gli sforzi intensi nell\'ultima ora prima di dormire o di un pisolino, perché rendono più difficile addormentarsi. Se sei all\'aperto conta anche la luce: segui la riga «Luce».'+
     '<cite>Stutz, Eiholzer & Spengler 2019 (esercizio serale e sonno)</cite></div>';
@@ -6534,7 +6581,7 @@ function renderEssenziale(P, CARDS){
         {a:P.b.start, z:P.b.end, poi:"entri in turno alle "+hhmm(P.b.start)})});
     } else if(cd.k==="cbt"){
       voci.push({t, html:riga("sonnolenza","Momento di sonnolenza",cd.val,cd.small,true,ICON.warn,dett(cd),
-        {a:cd.at-60, z:cd.at+60, poi:"momento di sonnolenza verso le "+hhmm(cd.at)})});
+        {a:cd.at-(cd.mezza||60), z:cd.at+(cd.mezza||60), poi:"momento di sonnolenza verso le "+hhmm(cd.at)})});
     }
   }
 
@@ -6600,6 +6647,15 @@ function renderEssenziale(P, CARDS){
   // ripeterlo qui sotto come etichetta su una riga creava due segnali
   // "adesso" sullo stesso schermo, in competizione. Questa resta la
   // lista cronologica semplice, senza separatori.
+  // Due voci di fila alla stessa ora (06:00 Luce bassa, 06:00 Rientro): l'ora si legge una volta, la seconda resta allineata.
+  { let prec=null;
+    for(const v of voci){
+      if(!eVoce(v)){ prec=null; continue; }
+      const m=v.html.match(/<span class="en mono">(.*?)<\/span><span class="enodo">/), en=m?m[1]:null;
+      if(en && en===prec && !/dwhen/.test(en) && !/essrow warn/.test(v.html)) v.html=v.html.replace('<div class="tl','<div class="tl tl-stessa');
+      prec=en;
+    }
+  }
   let h=voci.map(v=>v.html).join("");
   // Ogni voce si apre e spiega il suo perché, ma l'unico indizio era la
   // freccina: al primo piano lo si dice una volta, finché non se ne apre una.
@@ -6664,6 +6720,10 @@ function renderHeader(P, f){
     : scarto===-1 ? "Ieri, "+giornoTxt
     : giornoTxt.charAt(0).toUpperCase()+giornoTxt.slice(1);
   $("#dateLabel").textContent = dataTesto;
+  // «Ancora lunedì» alle 3 di martedì: una riga che dice perché, sotto la data, solo in quel caso.
+  { let n=$("#ancoraNota"); if(ancora){ if(!n){ n=document.createElement("p"); n.id="ancoraNota"; n.className="ancora-nota solo-oggi"; $(".appbar").after(n); }
+      n.textContent="Per il calendario è già "+new Date().toLocaleDateString(LINGUA,{weekday:"long"})+": la tua giornata finisce quando vai a dormire."; n.hidden=false; }
+    else if(n) n.hidden=true; }
   // La pillola del turno torna in linea accanto alla data, come nel
   // mockup — non più una riga a parte sotto (#nowShift, rimossa): stesso
   // valore di prima (nameOf(c) torna già "Riposo" nei giorni liberi, senza
@@ -7894,7 +7954,7 @@ function impostaVia(v){
   if(pm) pm.hidden = !(v==="mine" || v==="custom");
   if(btn) btn.hidden = !v;
   if(sf) sf.hidden = v!=="mine";
-  if(v==="mine" || v==="day" || v==="custom"){ const sel=$("#personaMode"); if(sel){ sel.value=v; sel.dispatchEvent(new Event("change")); } }
+  if(v==="mine" || v==="day" || v==="scuola" || v==="custom"){ const sel=$("#personaMode"); if(sel){ sel.value=v; sel.dispatchEvent(new Event("change")); } }
   if(v==="mine") aggiornaSfasa();
   if(v==="custom"){ if(personaInModifica===null){ _oggiIdx=-1; } renderSeqBuilder(); }
 }
@@ -8301,6 +8361,9 @@ function luceOttimaDel(k){
   const g=Math.round((new Date(k+"T12:00:00")-new Date(L.oggi+"T12:00:00"))/864e5), x=L.giorni.find(d=>d.g===g);
   return x && (x.cerca || x.evita) ? x : null;
 }
+let _luceT0=0;
+// Quanto ci mette il telefono a calcolare la luce (una volta al giorno, senza dati): se i telefoni veri sono lenti, si alleggerisce.
+function luceStat(esito){ try{ const g=isoOggi(); if(store.get("luceStatGiorno","")===g) return; store.set("luceStatGiorno", g); track("luce_calcolo", {esito}); }catch(e){} }
 function aggiornaLuceOttima(){
   if(!state.turniConfigurati || typeof Worker==="undefined") return;
   clearTimeout(_luceTimer);
@@ -8311,9 +8374,10 @@ function aggiornaLuceOttima(){
     try{
       if(!_luceWorker){ _luceWorker=new Worker("./luce-worker.js", {type:"module"});
         _luceWorker.onmessage=ev=>{ const r=ev.data||{}; _luceInCorso=null;
+          const ms=Date.now()-_luceT0; luceStat(r.giorni && !r.errore ? (ms<2000?"ok_2s":ms<5000?"ok_5s":"ok_lento") : "errore");
           if(r.giorni && !r.errore){ _luceOttima={chiave:r.chiave, oggi:r.chiave.slice(0,10), giorni:r.giorni}; store.set("luceOttima", _luceOttima); render(); } };
-        _luceWorker.onerror=()=>{ _luceInCorso=null; }; }
-      _luceInCorso=chiave; _luceWorker.postMessage({chiave, stato, oggi, festivi});
+        _luceWorker.onerror=()=>{ _luceInCorso=null; luceStat("errore"); }; }
+      _luceInCorso=chiave; _luceT0=Date.now(); _luceWorker.postMessage({chiave, stato, oggi, festivi});
     }catch(e){ _luceInCorso=null; }
   }, 1500);
 }
@@ -8447,7 +8511,10 @@ function renderPianoVoci(){
   // quattro voci di uso comune; testa, movimento e allenamento stanno insieme in «Momenti migliori»
   const MOMENTI=["testa","leggera","intensa"], comuni=PIANO_VOCI.filter(v=>!MOMENTI.includes(v[0])), momenti=PIANO_VOCI.filter(v=>MOMENTI.includes(v[0]));
   const accesi=momenti.filter(v=>pianoVoce(v[0])).map(v=>({testa:"testa",leggera:"muoverti",intensa:"allenarti"})[v[0]]);
-  el.innerHTML=comuni.map(riga).join("")+
+  const essenziale=PIANO_ESSENZIALE.every(k=>!pianoVoce(k));
+  el.innerHTML='<label class="riga-sw pv-ess" for="pv-_essenziale"><span><b>Piano essenziale</b><small>Solo sonno, turno, pisolino, caffè, rientro e luce: il resto si nasconde</small></span>'+
+    '<span class="switch"><input type="checkbox" id="pv-_essenziale" data-pv="_essenziale"'+(essenziale?" checked":"")+'><span class="slider"></span></span></label>'+
+    comuni.map(riga).join("")+
     '<details class="pv-momenti"'+(accesi.length?" open":"")+'><summary><span><b>Momenti migliori</b><small>'+(accesi.length?esc(accesi.join(", ")):"Quando pensare, muoverti o allenarti: spenti")+'</small></span></summary>'+
     momenti.map(v=>riga(v)+(pianoVoce(v[0]) ? quandoHtml(v[0]) : "")).join("")+'</details>';
 }
@@ -8458,7 +8525,12 @@ if($("#opzPianoVoci")) $("#opzPianoVoci").addEventListener("click", e=>{
 });
 if($("#opzPianoVoci")) $("#opzPianoVoci").addEventListener("change", e=>{
   const k=e.target.dataset && e.target.dataset.pv; if(!k) return;
-  state.piano=Object.assign({}, state.piano, {[k]:e.target.checked}); salva();
+  if(k==="_essenziale"){
+    const via=e.target.checked, pr=Object.assign({}, state.piano);
+    PIANO_ESSENZIALE.forEach(x=>{ pr[x] = via ? false : PIANO_VOCI.find(y=>y[0]===x)[3]; });
+    state.piano=pr; salva(); haptic(4); track("setup_item", {item:via?"piano_essenziale":"piano_completo"}); renderPianoVoci(); render(); ntNotifiche(); return;
+  }
+  state.piano=Object.assign({}, state.piano, {[k]:e.target.checked}); salva(); renderPianoVoci();
   if(e.target.checked){ track("setup_item", {item:"piano_"+k}); if(["testa","leggera","intensa"].includes(k)) usata("momenti"); }
   render(); ntNotifiche();
 });
@@ -9026,7 +9098,9 @@ function diaryClick(e){
   const d=e.target.closest("[data-diary]");
   if(d){ const k=iso(state.focus), v=+d.dataset.diary;
     if(diary[k]===v){ delete diary[k]; delete diaryAt[k]; }
-    else { diary[k]=v; diaryAt[k]=Date.now(); }
+    else { diary[k]=v; diaryAt[k]=Date.now();
+      if(_stimaOra && _stimaOra.livello && _stimaOra.giorno===k && k===iso(giornoVero()))
+        track("energia_modello", {incrocio:_stimaOra.livello+"_"+(v<=2?"giu":v===3?"meh":"su")+"_"+(_stimaOra.fonte||"orari")}); }
     state.diaryEditing.delete("voto:"+k);
     store.set("diaryAt",diaryAt);
     if(!store.set("diary",diary)) toast("Qui non posso salvare, ma online sì");
@@ -9039,10 +9113,24 @@ function vocePiano(id){
   try{ const v=String(id).toLowerCase().replace(/[^a-z0-9_]/g,"").slice(0,18), m=store.mappa("vociAperte"), oggi=isoOggi();
     if(!v || m[v]===oggi) return; m[v]=oggi; store.set("vociAperte", m); track("setup_item", {item:"voce_"+v}); }catch(e){}
 }
+// Il foglio di una voce in tre strati: in breve (cosa fare, sempre visibile), il perché (chiuso: per chi vuole capire),
+// le fonti (una riga in fondo). Se la voce ha solo il perché, resta aperto: niente foglio vuoto con un solo bottone.
+function strutturaPerche(el){
+  const why=[...el.querySelectorAll(".why")]; if(!why.length) return;
+  const fonti=[];
+  for(const w of why) w.querySelectorAll("cite").forEach(c=>{ const t=c.innerHTML.trim(); if(t && !fonti.includes(t)) fonti.push(t); c.remove(); });
+  const det=document.createElement("details"); det.className="perche";
+  det.innerHTML='<summary>Perché</summary>';
+  why[0].before(det); why.forEach(w=>det.appendChild(w));
+  const resto=[...el.children].filter(x=>x!==det && !x.classList.contains("ed-cambia")).map(x=>x.textContent).join("").trim();
+  if(resto.length<20) det.open=true;
+  else det.addEventListener("toggle", ()=>{ if(!det.open) return; try{ const g=isoOggi(); if(store.get("percheGiorno","")!==g){ store.set("percheGiorno", g); track("setup_item", {item:"perche_aperto"}); } }catch(e){} });
+  if(fonti.length){ const f=document.createElement("p"); f.className="fonti"; f.innerHTML='<b>Fonti</b> '+fonti.join(" · "); det.after(f); }
+}
 // Il «perché» di una voce si apre in un foglio (come «Modifica turni»), non dentro la timeline: la lista resta ferma.
 function apriInfo(id){
   const v=infoVoci.get(id); if(!v) return;
-  $("#infoTitolo").textContent=v.t; $("#infoCorpo").innerHTML=v.h; apriFoglio("infoModal",true);
+  $("#infoTitolo").textContent=v.t; $("#infoCorpo").innerHTML=v.h; strutturaPerche($("#infoCorpo")); apriFoglio("infoModal",true);
   if(id==="sonno") usata("dormi"); vocePiano(id);
   if(!store.get("perchéVisto", false)){ store.set("perchéVisto", true); const h=$("#essenziale .esshint"); if(h) h.remove(); }
 }
@@ -9610,6 +9698,7 @@ function sincronizzaCampiPiano(){
   if($("#napT")) $("#napT").value=state.napTurno||"no";
   if($("#sonnoD")) $("#sonnoD").value=state.sonnoDiurno||"diviso";
   if($("#mattinoBif")) $("#mattinoBif").checked=!!state.mattinoBifasico;
+  if($("#guidaL")) $("#guidaL").checked=!!state.guidaLavoro;
 
 }
 const OPZ_PASSI = {3:[3], 4:[4]};
@@ -9672,7 +9761,14 @@ if($("#cycToday")) $("#cycToday").onclick=()=>{
    Si scrivono a mano a ogni versione con una funzione che si vede: poche righe, in italiano di tutti i giorni.
    `id` cambia solo quando c'è qualcosa da dire; chi aggiorna la vede una volta. Chi installa adesso non la vede
    (non è una novità per lui), ma la trova sempre in Impostazioni › Novità. «app:true» = solo nell'app Android. */
-const NOVITA={ id:"2026-11-13", data:"Novembre 2026", righe:[
+const NOVITA={ id:"2026-11-14", data:"Novembre 2026", righe:[
+  ["Più leggero e più gentile","In Oggi un invito alla volta. Nomi più chiari: «Momento di sonnolenza», «Luce bassa». Nei fogli prima la cosa da fare, poi «Perché» (si apre se vuoi) e le fonti in una riga. In Impostazioni › Cosa vedi nel piano c'è «Piano essenziale»: solo sonno, turno, pisolino, caffè, rientro e luce.",false,"2026-11-14"],
+  ["L'orologio biologico, stimato meglio","Due modelli scientifici dell'orologio lavorano sui tuoi turni e sul tuo diario. Il «Momento di sonnolenza» dice da dove viene la stima (i tuoi orari, il diario o Salute) e la finestra si stringe quando ci sono più dati veri.",false,"2026-11-14"],
+  ["La luce, pensata su più giorni","Le finestre di luce guardano i prossimi quattro giorni, per tenerti più sveglio al lavoro e sulla strada di casa, con meno consigli da seguire.",false,"2026-11-14"],
+  ["Nappuccino","Quando serve essere svegli dopo, il piano propone un caffè subito prima di un pisolino breve: la caffeina arriva proprio al risveglio.",false,"2026-11-14"],
+  ["Salute di Android, solo se vuoi","Nell'app Android il piano può leggere il sonno e i passi da Health Connect, ognuno con il suo permesso. Lo spegni quando vuoi e i dati letti si cancellano.",false,"2026-11-14"],
+  ["Turni come un calendario","Turni si apre sul mese intero, con oggi cerchiato e i festivi in rosso. «Ore» mostra la settimana.",false,"2026-11-14"],
+  ["Per chi guida, per le notti fisse, per la famiglia","Se guidi per lavoro (in Impostazioni › Le tue abitudini), nel turno trovi le pause di guida. Con le notti fisse, nei giorni liberi un'idea per tenere l'orologio a metà strada. Un figlio a scuola si aggiunge in un tocco, e in «Segna i turni» c'è «Copia una settimana».",false,"2026-11-14"],
   ["Il conto del sonno, più chiaro","Il piano tiene un solo conto del sonno che ti manca (gli ultimi 14 giorni) e lo dice in una riga, con «Perché?». Sopra le tre ore allunga la notte libera invece di aggiungere pisolini. «Il tuo sonno» è più corto: un pisolino in più si segna da lì, e il movimento che hai fatto dal suo popup.",false,"2026-11-13"],
   ["Persone in Impostazioni","Le persone si gestiscono ora in Impostazioni › Persone: elenco, modifica, «Rimuovi» e calendario di coppia. In Turni, «Tempo libero» è una riga a sé e serve solo a guardare. Dopo una notte, il sonno di chi segui è una stima più realistica. Colori dal nuovo logo: tema scuro blu notte.",false,"2026-11-13"],
   ["Collegamenti dai popup alle impostazioni","I popup di «Turno», «Caffè» e dei momenti migliori hanno ora un link diretto alle impostazioni che cambiano quel calcolo: tragitto, soglia del caffè, quando preferisci allenarti o pensare.",false,"2026-11-06"],
@@ -10117,10 +10213,11 @@ function renderSegna(){
       '<b aria-live="polite">'+esc(nome.charAt(0).toUpperCase()+nome.slice(1))+'</b>'+
       '<button type="button" data-sg-mese="1" aria-label="Mese successivo"'+(sgOff>=12?' disabled':'')+'>›</button></div>'+
     '<p class="hint" style="margin:0 0 8px" aria-live="polite">'+(sgPennello==="dettagli" ? "Tocca un giorno per malattia, formazione, turno extra o orari diversi."
-      : sgIntervallo ? (sgDa ? "Ora tocca l'ultimo giorno dell'intervallo." : "Tocca il primo e l'ultimo giorno: li segno tutti insieme.")
+      : sgIntervallo ? (sgDa ? "Ora tocca l'ultimo giorno dell'intervallo." : sgPennello==="copia" ? "Tocca il primo e l'ultimo giorno da riempire: ognuno prende il turno di 7 giorni prima." : "Tocca il primo e l'ultimo giorno: li segno tutti insieme.")
       : sgPennello==="cancella" ? "Tocca i giorni da riportare come prima." : sgPennello==="copia" ? "Tocca un giorno: prende il turno di 7 giorni prima." : "Scegli cosa segnare, poi tocca i giorni. Un secondo tocco lo toglie.")+'</p>'+
     '<div class="sg-pennelli" role="group" aria-label="Cosa segni">'+pen.map(p=>'<button type="button" class="sg-pen" data-pen="'+esc(p.k)+'" aria-pressed="'+(p.k===sgPennello)+'">'+esc(p.t)+'</button>').join("")+'</div>'+
     '<div class="sg-barra"><button type="button" class="sg-pen" data-sg-intervallo aria-pressed="'+sgIntervallo+'">Intervallo</button>'+
+      '<button type="button" class="sg-pen" data-sg-settimana aria-pressed="'+(sgIntervallo && sgPennello==="copia")+'">Copia una settimana</button>'+
       '<button type="button" class="sg-pen" data-sg-prossimo'+(daSegnare?'':' disabled')+'>Da segnare'+(daSegnare?' ('+daSegnare+')':'')+'</button>'+
       '<button type="button" class="sg-pen" data-sg-annulla'+(sgStorico.length?'':' disabled')+'>Annulla</button></div>'+
     '<div class="sg-griglia">'+celle+'</div>'+
@@ -10364,6 +10461,7 @@ if($("#segnaOut")) $("#segnaOut").addEventListener("click", e=>{
   const p=e.target.closest("[data-pen]");
   if(p){ sgPennello=p.dataset.pen; sgDa=null; haptic(4); renderSegna(); return; }
   if(e.target.closest("[data-sg-intervallo]")){ sgIntervallo=!sgIntervallo; sgDa=null; haptic(4); renderSegna(); return; }
+  if(e.target.closest("[data-sg-settimana]")){ const on=!(sgIntervallo && sgPennello==="copia"); sgPennello=on?"copia":pennelliSegna()[0].k; sgIntervallo=on; sgDa=null; haptic(4); renderSegna(); if(on) track("setup_item", {item:"copia_settimana"}); return; }
   if(e.target.closest("[data-sg-annulla]")){ sgAnnulla(); return; }
   if(e.target.closest("[data-sg-prossimo]")){ sgProssimoDaSegnare(); return; }
   const c=e.target.closest("[data-sg]"); if(c) pennella(c.dataset.sg);
@@ -11055,6 +11153,7 @@ $("#napT").addEventListener("change",e=>{
 });
 $("#sonnoD").addEventListener("change",e=>{ state.sonnoDiurno=e.target.value; salva(); render(); });
 if($("#mattinoBif")) $("#mattinoBif").addEventListener("change",e=>{ state.mattinoBifasico=e.target.checked; salva(); render(); });
+if($("#guidaL")) $("#guidaL").addEventListener("change",e=>{ state.guidaLavoro=e.target.checked; salva(); render(); if(e.target.checked) track("setup_item", {item:"guida_lavoro"}); });
 
 // Unico elenco dei campi numerici, con i loro limiti [min, max, default].
 // Serve sia a convertire l'input (un menu restituisce testo) sia a ripulire
@@ -11092,7 +11191,7 @@ const PERSONA_MODE_HINT = {
 };
 if($("#personaMode")) $("#personaMode").addEventListener("change", e=>{
   const v=e.target.value;
-  const mf=$("#personaManualFields"); if(mf) mf.hidden = (v==="day");
+  const mf=$("#personaManualFields"); if(mf) mf.hidden = (v==="day" || v==="scuola");
   const seq=$("#personaSeqBox"); if(seq) seq.hidden = (v==="mine");
   const pd=$("#pvData"); if(pd) pd.hidden = (v==="mine");
   const ah=$("#personaAnchorHint"); if(ah) ah.textContent = v==="mine"
@@ -11154,6 +11253,10 @@ if($("#doConfirmPersona")) $("#doConfirmPersona").onclick=()=>{
       // c'è nulla da scrivere per questo caso.
       const oggi=new Date(); oggi.setDate(oggi.getDate()-((oggi.getDay()+6)%7));
       per={pattern:"GGGGGRR", anchor:iso(oggi), shifts:{G:{n:"Giornata",s:540,e:1080}}, wake:"08:00", bed:"23:00"};
+    } else if(modo==="scuola"){
+      // Lo stesso, con gli orari di scuola e il sonno di un bambino: le ore libere insieme sono il pomeriggio e il weekend.
+      const oggi=new Date(); oggi.setDate(oggi.getDate()-((oggi.getDay()+6)%7));
+      per={pattern:"AAAAARR", anchor:iso(oggi), shifts:{A:{n:"Scuola",s:480,e:810}}, wake:"07:00", bed:"21:00"}; track("setup_item", {item:"persona_scuola"});
     } else if(modo==="mine"){
       // Il caso utile non è "identico a me" (sarei io) ma "stesso sistema
       // di turni, partito in un giorno diverso": sequenza e orari sono una
@@ -11464,7 +11567,7 @@ function salva(){
     maxAdvance:state.maxAdvance,pPattern:state.pPattern,pAnchor:state.pAnchor,
     pShifts:state.pShifts,pWake:state.pWake,pBed:state.pBed,pName:state.pName,people:state.people,personaGlance:state.personaGlance,piano:state.piano,
     repeat:state.repeat,ecc:state.ecc,giorni:state.giorni,evento:state.evento,festivi:state.festivi,festiviRiposo:state.festiviRiposo,
-    napTurno:state.napTurno,sonnoDiurno:state.sonnoDiurno,mattinoBifasico:state.mattinoBifasico,avvisoBifasicoOff:state.avvisoBifasicoOff,firstSeenAt:state.firstSeenAt,pausa:state.pausa,caffSens:state.caffSens,caffFattori:state.caffFattori,salute:state.salute,vista:state.vista};
+    napTurno:state.napTurno,sonnoDiurno:state.sonnoDiurno,mattinoBifasico:state.mattinoBifasico,avvisoBifasicoOff:state.avvisoBifasicoOff,guidaLavoro:state.guidaLavoro,firstSeenAt:state.firstSeenAt,pausa:state.pausa,caffSens:state.caffSens,caffFattori:state.caffFattori,salute:state.salute,vista:state.vista};
   const testo=JSON.stringify(dati);
   if(testo!==_ultimoSalvato){
     store.set("turniConfigurati", !!state.turniConfigurati);
