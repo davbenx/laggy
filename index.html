@@ -3822,7 +3822,7 @@ function cards(P){
       lc.rowsA.push(["In turno","più luce possibile fino alle "+hhmm(seekEnd)+": se puoi, esci o mettiti sotto la luce più forte che trovi"]);
       lc.rowsA.push(["Se non puoi","va bene anche quella che c'è, basta non stare al buio"]);
       lc.rowsE.push(["Ultime ore","abbassa la luce: da lì in poi ti tirerebbe indietro"]); }
-    lc.rowsE.push(["Al rientro","occhiali da sole scuri appena esci, anche col cielo coperto"]);
+    lc.rowsE.push(["Al rientro","occhiali da sole appena esci, anche col cielo coperto (se guidi, lenti adatte alla guida: categoria 2 o 3, mai 4)"]);
     lc.rowsE.push(["Camera","oscurante vero, non tende leggere, e sui 18-19°C: la temperatura conta quanto il buio"]);
     lc.why=whyLight;
   }else if(shift<-20){
@@ -3855,7 +3855,7 @@ function cards(P){
       const c=ott.cerca, inizioL=!b.rest && c[0]<b.start && c[1]>b.start;
       lc.rowsA.push(["Luce forte", fmt(c)+(inizioL ? ": prima di uscire tutte le luci accese, poi al lavoro le luci più forti che trovi" : alLavoro(c) ? ": al lavoro, le luci più forti che trovi" : ": fuori se c'è il sole, o alla finestra; altrimenti tutte le luci accese")]); }
     else if(ott.evita){ lc.val="Luce bassa "+fmt(ott.evita); lc.at=ott.evita[0]; }   // oggi conta solo il buio: la riga dice quello
-    if(ott.evita) lc.rowsE.push(["Luce bassa", fmt(ott.evita)+(night && ott.evita[0]>=b.end-15 && ott.evita[0]<=b.end+120 ? ": occhiali da sole scuri per tornare a casa, poi buio" : ": luci basse, schermi al minimo")]);
+    if(ott.evita) lc.rowsE.push(["Luce bassa", fmt(ott.evita)+(night && ott.evita[0]>=b.end-15 && ott.evita[0]<=b.end+120 ? ": occhiali da sole per tornare a casa (se guidi, lenti adatte alla guida: categoria 2 o 3, mai 4), poi buio" : ": luci basse, schermi al minimo")]);
     if(night) lc.rowsE.push(["Camera","oscurante vero, non tende leggere, e sui 18-19°C: la temperatura conta quanto il buio"]);
     lc.why="Le ore della luce le sceglie l'ottimizzatore dell'app: guarda i tuoi prossimi 4 giorni di turni e mette la luce dove porta il tuo orologio più vicino ai tuoi sonni, senza toglierti vigilanza al lavoro o alla guida. "+whyLight;
     lc.cite+=" · Serkh &amp; Forger, PLoS Comput Biol 2014 (luce ottimale)";
@@ -3966,7 +3966,7 @@ function cards(P){
                   : "In piedi da "+hm(filate)+" di fila",
       sub:testo,
       rows:[["Se hai sonno","fermati 20 minuti in auto e prendi un caffè prima di ripartire"],
-            ["Sempre","occhiali da sole: proteggono il sonno che stai per fare"]],
+            ["Sempre","occhiali da sole: proteggono il sonno che stai per fare (se guidi, lenti adatte alla guida: categoria 2 o 3, mai 4)"]],
       why:"L'equivalenza con l'alcol viene da uno studio che ha misurato la coordinazione occhio-mano durante 28 ore di veglia continuata, confrontandola con dosi crescenti di alcol: ogni ora di veglia in più vale circa 0,004% di alcolemia.",
       cite:"Dawson &amp; Reid, Nature 1997 · Arnedt e coll. 2000 (simulatore di guida)",
       at: b.rest ? wake+600 : b.end});
@@ -4789,7 +4789,7 @@ function renderOra(Pfocus){
       oraIc = ICON.warn;
     } else if(inSmonto){
       title = "Rientro dal turno";
-      sub = "Momento critico per la guida: occhiali da sole, e se hai sonno non metterti al volante.";
+      sub = "Momento delicato per la guida: occhiali da sole adatti alla guida, e se hai sonno meglio non metterti al volante.";
       oraIc = ICON.car;
     } else {
       const riskFuture = (risk && risk.at && risk.at.getTime() > now.getTime());
@@ -5984,7 +5984,7 @@ function adessoLine(P, riferimento){
       const veri=Math.round((fineVera-new Date())/60000), mancano=(veri>0 && veri<=1560) ? veri : toEnd;
       // Il rientro è il momento peggiore anche per i turni che iniziano nel cuore
       // della notte (verso le 2): non solo per chi ha fatto tutta la notte.
-      if((P.night||P.lateStart) && toEnd<=90) return {t:"Rientro tra "+hm(mancano),s:"occhiali da sole, e se hai sonno non guidare: è l'ora peggiore",inDuty:true,toEnd};
+      if((P.night||P.lateStart) && toEnd<=90) return {t:"Rientro tra "+hm(mancano),s:"occhiali da sole adatti alla guida, e se hai sonno meglio non guidare: è l'ora più delicata",inDuty:true,toEnd};
       return {
         t: "In turno fino alle " + hhmm(b.end),
         s: "Mancano " + hm(mancano) + (P.night ? " · la parte dura arriva nelle ore piccole" : " · mantieni il ritmo"),
