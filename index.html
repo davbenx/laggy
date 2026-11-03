@@ -7198,6 +7198,9 @@ function renderStrip(P, f, S){
   const oggiInFinestra = finLo<=0 && 0<=finHi &&
     (dnum(state.focus)===dnum(giornoVero()) || dnum(state.focus)===dnum(new Date()));
   if(oggiInFinestra && isFinite(clo)){ clo=Math.min(clo,oggiM); chi=Math.max(chi,oggiM); }
+  // Almeno 18 ore: in una settimana senza turni la scala si stringeva sul solo sonno, e una notte di 8 ore riempiva
+  // tutta la riga (sembrava di dormire tutto il giorno). Si allarga in parti uguali prima e dopo.
+  if(isFinite(clo) && chi-clo<1080){ const m=(1080-(chi-clo))/2; clo-=m; chi+=m; }
   clo=Math.floor((clo-30)/60)*60; chi=Math.ceil((chi+30)/60)*60;
   const cspan=Math.max(chi-clo,60), cpx=m=>(m-clo)/cspan*100;
   const tk=tacche(clo,chi);
