@@ -20,62 +20,62 @@ Varianti per l'esperimento sulla scheda (Play Console → Esperimenti sulla sche
 - B (70): `Il calendario turni che ti dice quando dormire. Gratis, senza account.`
 - C (74): `Turni di notte? Quando dormire, il caffè e la luce, sul tuo turno. Gratis.`
 
-## Descrizione completa (max 4000)
+## Descrizione completa (max 4000) — 3494 caratteri
 Lavori a turni? Notturnisti è il calendario dei turni che fa una cosa in più: ti dice, giorno per giorno, quando dormire, fino a che ora prendere il caffè, quando cercare la luce e quando fare un pisolino, calcolati sul tuo ciclo vero. Notti, mattine, pomeriggi, smonti e riposi.
 
 Un tocco per iniziare. Zero account. Tutto gratis, anche promemoria, widget, sveglia e calendario: niente abbonamenti, niente pubblicità.
 
 Pensata sui turni italiani: smonto, quinta e sesta, 12 ore, reperibilità, festivi, le 11 ore di riposo fra un turno e l'altro.
 
-PERCHÉ NON UN SEMPLICE CALENDARIO TURNI
-Un calendario ti dice che domani fai la notte. Notturnisti ti dice anche cosa fare oggi per arrivarci in forma: quando andare a letto, il pisolino, l'ultimo caffè, e come rientrare dopo l'ultima notte senza perdere due giorni.
-
 COME FUNZIONA
-• Scegli il turno di oggi con un tocco, oppure il tuo schema, anche con turni irregolari o che cambiano ogni settimana.
-• Il piano è una timeline: ora, cosa fare e perché, su come dormi davvero, il tragitto, il caffè e i pisolini.
+• Scegli il turno di oggi con un tocco, oppure il tuo schema, anche se cambia ogni settimana.
+• «Adesso» ti dice cosa fare in questo momento; sotto c'è tutta la giornata.
+• Ogni voce ha il suo perché: prima cosa fare, poi la spiegazione e gli studi da cui viene.
 • Prima di un cambio turno ti prepara: a letto prima per le mattine, sonno lungo e pisolino prima della prima notte.
-• Ogni consiglio ha il suo perché, in parole semplici, con gli studi da cui viene.
-• Hai già i turni nel calendario, in un file Excel o in una foto? Li importi dal primo avvio, e se si ripetono il ciclo continua da solo.
+• Luce pensata su più giorni, per restare più sveglio al lavoro e sulla strada di casa.
+• Nappuccino: quando serve, un caffè subito prima di un pisolino breve.
+• Turni nel calendario, in un file Excel o in una foto? Li importi dal primo avvio.
+• Vuoi solo l'essenziale? «Piano essenziale» lascia sonno, turno, pisolino, caffè, rientro e luce.
 
 FUNZIONA DA SOLO
-• Promemoria: quando prepararti a dormire, l'ultimo caffè, il rientro dopo la notte (l'ora più a rischio per chi guida), e un consiglio in più nei giorni impegnativi, come la terza notte di fila. Scegli tu quali: al massimo 4 al giorno, mai mentre dormi.
+• Promemoria: prepararti a dormire, l'ultimo caffè, il rientro dopo la notte. Scegli tu quali: al massimo 4 al giorno, mai mentre dormi.
 • Calendario del telefono: turni e sonno nell'app Calendario, aggiornati da soli.
-• Widget sulla schermata Home: cosa fare adesso, quanto manca alla prossima cosa e la tua settimana.
-• Sveglia: un tocco e la sveglia per fine sonno è nell'app Orologio del telefono.
+• Widget: cosa fare adesso e il mese dei turni.
+• Sveglia: un tocco e la sveglia è nell'app Orologio.
 
 SI ADATTA A TE
-Il tuo orologio: quando arriva la melatonina, il tuo minimo corporeo, quando sei più lucido, e se sei allodola o gufo. Calcolato dai tuoi orari, senza questionari e senza dispositivi da indossare.
-Non ti impone orari fissi. Annota come hai dormito con un tocco, anche dalla notifica del mattino. Se nei giorni liberi dormi in orari diversi da quelli impostati, o fai fatica ad anticipare la sveglia, l'app te lo propone e aggiorna il piano. Turno cambiato all'ultimo momento? Lo cambi con un tocco e il piano si ricalcola.
-Sonno e carico: quanto dormi prima di ogni turno, notti di fila, riposi brevi, orari regolari. E una copia completa su file, per non perdere niente cambiando telefono.
+Il tuo orologio biologico: melatonina, momento di sonnolenza, quando sei più lucido, allodola o gufo. Lo stimano due modelli scientifici sui tuoi turni e sul tuo sonno, e ti dicono da dove viene la stima.
+Se vuoi, sonno e passi da Salute di Android (Health Connect) rendono il piano più preciso: lo accendi tu, un tipo alla volta, e i dati restano sul telefono.
+Annota come hai dormito con un tocco: se nei giorni liberi dormi in orari diversi, l'app te lo propone e aggiorna il piano.
+Sonno e carico: il sonno da recuperare, quanto dormi prima di ogni turno, notti di fila, riposi brevi.
 
 PER CHI TI ASPETTA
-• Manda i tuoi turni o il tuo tempo libero su WhatsApp, o dove vuoi.
-• Trova il tempo libero in comune con partner, famiglia o chi lavora con te.
-• Cambio turno: scambi due giorni o cambi un turno, e prima vedi quanto sonno ti costa e se ti restano 11 ore di riposo.
-• Stampa o salva in PDF un calendario da appendere al frigo.
-• Il mese in numeri accanto al tuo ciclo, a ore o a calendario: turni, notti, domeniche e festivi del contratto.
-• Ferie: dove metterle per stare più a casa, anche con i festivi, nei fine settimana o con chi ami.
+• Manda turni o tempo libero su WhatsApp, o dove vuoi.
+• Il tempo libero in comune con partner, famiglia o colleghi; un figlio a scuola si aggiunge in un tocco.
+• Cambio turno: prima vedi quanto sonno ti costa e se ti restano 11 ore di riposo.
+• Turni che cambiano? Li segni in un minuto, anche copiando la settimana prima.
+• Calendario da stampare, il mese in numeri, ferie dove stai più a casa.
+• Guidi per lavoro? Nel turno trovi le pause di guida. Notti fisse? Un'idea per i giorni liberi.
 
 PER CHI È
-Per chi lavora a turni e di notte: infermieri e OSS, medici, operai e turnisti, forze dell'ordine, vigili del fuoco, autisti, guardie giurate, addetti a logistica, assistenza e accoglienza.
+Per chi lavora a turni e di notte: infermieri e OSS, medici, operai, forze dell'ordine, vigili del fuoco, autisti, guardie giurate, logistica, assistenza e accoglienza.
 
 PRIVACY, SUL SERIO
-Turni, orari e diario restano sul tuo telefono: il piano si calcola lì. Nessuna profilazione; le statistiche d'uso anonime sono spente finché non le accendi tu.
+Turni, orari, diario e dati di Salute restano sul tuo telefono: il piano si calcola lì. Nessuna profilazione; le statistiche anonime sono spente finché non le accendi tu.
 
 COSA NON È
-Notturnisti dà indicazioni generali di benessere e organizzazione basate sulla letteratura scientifica sul sonno e sul lavoro a turni. Non è un dispositivo medico, non fa diagnosi e non sostituisce il parere di un medico. Le notifiche non sono una sveglia: la sveglia la mette l'app Orologio.
+Spunti di benessere e organizzazione basati sulla letteratura scientifica sul sonno e sul lavoro a turni, non regole da seguire alla lettera. Non è un dispositivo medico, non fa diagnosi e non sostituisce il parere di un medico. Le notifiche non sono una sveglia.
 
 Progetto indipendente, nato da chi i turni li fa. Segnalazioni: Impostazioni → Segnala cosa non torna.
 
-## Note di versione 1.3.9 (max 500)
-Novità:
-• Il tuo ciclo: ore o calendario, con i numeri del mese nella stessa scheda
-• Sonno e carico a voci chiare; orari di notte e di giorno separati
-• Festivi con il puntino; «Nei festivi sono a casa» anche per i cicli
-• «Cambia un turno» senza scambio; Segna con intervallo e annulla
-• Copia completa su file, con ripristino
-• Widget: mese a sei settimane, energia dopo 90 minuti, sveglia vera annotata
-• «Calo previsto» più preciso: non scorre più con l'orologio
+## Note di versione 1.4.0 (max 500)
+Novità 1.4.0
+• Salute di Android, solo se vuoi: sonno e passi rendono il piano più preciso. Restano sul telefono.
+• Orologio biologico stimato meglio, luce pensata su più giorni e «nappuccino»: caffè + pisolino breve quando serve.
+• Turni si apre sul mese, con i festivi in rosso.
+• Più chiaro e gentile: un invito alla volta, il perché in breve.
+• Per chi guida per lavoro, per le notti fisse e per la famiglia.
+• App più veloce.
 
 ## Categoria, tag e contatti
 - Categoria: Salute e fitness
@@ -92,9 +92,9 @@ Novità:
 - Immagine in evidenza 1024×500: feature-1024x500.png (da `feature.html`, stessa grafica dell'intestazione dello sviluppatore)
 - Screenshot telefono 1080×1920, in quest'ordine (i primi tre sono quelli che si vedono senza scorrere):
   1. 01-oggi — Il tuo piano di oggi, sul tuo turno
-  2. 02-turni — Tutta la settimana a colpo d'occhio
+  2. 02-turni — Tutto il mese a colpo d'occhio
   3. 03-onboarding — Che turno fai oggi? Un tocco e hai il piano
-  4. 04-perche — Ogni consiglio spiegato
+  4. 04-perche — Ogni consiglio spiegato, con le fonti
   5. 05-orologio — Il tuo orologio, calcolato su di te
   6. 06-liberi — Il tuo tempo libero, per chi ti aspetta
   7. 07-scambio — Cambio turno: ti conviene?

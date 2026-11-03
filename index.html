@@ -4455,6 +4455,7 @@ function render(){
   renderACasa();
   renderLoSapevi();
   arbitroInviti();
+  { const c=$(".cornice"); if(c) c.hidden=!state.turniConfigurati; }   // la cornice del piano: non sopra l'avvio, che ha già la sua riga
   const tab = state.tab || (ess ? "oggi" : "ciclo");
   // "piu" (la vecchia terza tab, eliminata) non è più un valore raggiungibile
   // di state.tab/tab: oggi solo "oggi"/"turni"/"opzioni" lo sono davvero
