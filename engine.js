@@ -1289,7 +1289,7 @@ function buildEvents(days){
     if(ICS.pisolini) P.naps.forEach(n=>ev(base,n.a,n.b,"pisolino-"+tipoPisolino(n),
       (n.rec||n.debito)?"Pisolino di recupero":n.rep?"Pisolino preventivo":((n.b-n.a)<40?"Pisolino breve":"Pisolino"),
       n.rep?"Sei reperibile: una riserva di sonno se ti chiamano stanotte.":"",true));
-    if(ICS.caffe) ev(base,P.cut,P.cut+15,"caffe","Ultimo caffè",
+    if(ICS.caffe) ev(base,P.cut,P.cut+15,"caffe","Ultima caffeina",
       "Dopo quest'ora la caffeina è ancora in circolo quando provi a dormire.",true);
     // La luce è la leva principale sull'orologio: senza, il piano si disfa.
     if(ICS.luce && isFinite(P.wake))

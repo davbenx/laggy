@@ -71,12 +71,12 @@ async function apri(extra={}, diary=null, stExtra={}){
   await p.evaluate(()=>document.querySelector('[data-tab="turni"]').click()); await p.waitForTimeout(300);
   await p.evaluate(()=>document.querySelector("#doAndamenti").click()); await p.waitForTimeout(400); await p.evaluate(()=>document.querySelector("[data-and-sez=schemi]").click()); await p.waitForTimeout(400);
   const tx=await p.evaluate(()=>document.querySelector("#andamenti").innerText);
-  ok(/Quando l'ultimo caffè è almeno sei ore prima del letto, il tuo voto il giorno dopo è in media 5,0\./.test(tx), "caffè: l'insight compare, in positivo");
-  ok(/Anticipa l'ultimo caffè nel piano/.test(tx), "e propone, con un tocco, di anticipare l'ultimo caffè");
+  ok(/Quando l'ultima caffeina è almeno sei ore prima del letto, il tuo voto il giorno dopo è in media 5,0\./.test(tx), "caffè: l'insight compare, in positivo");
+  ok(/Anticipa l'ultima caffeina nel piano/.test(tx), "e propone, con un tocco, di anticipare l'ultimo caffè");
   await p.evaluate(()=>document.querySelector("[data-caff-anticipa]").click()); await p.waitForTimeout(400);
   ok(await p.evaluate(()=>JSON.parse(localStorage.getItem("nt:state")).caffSens==="media"), "il tocco cambia la sensibilità (bassa → media), mai da sola");
   await p.evaluate(()=>document.querySelector("[data-nascondi-insight=caffe]").click()); await p.waitForTimeout(400);
-  ok(!(await p.evaluate(()=>/Quando l'ultimo caffè è almeno sei ore/.test(document.querySelector("#andamenti").innerText))), "«Nascondi» toglie l'insight");
+  ok(!(await p.evaluate(()=>/Quando l'ultima caffeina è almeno sei ore/.test(document.querySelector("#andamenti").innerText))), "«Nascondi» toglie l'insight");
   await p.context().close(); }
 // luce, alcol, pasto: segnabili, e con i giorni diventano schemi (sempre in positivo)
 { const att={}, dia={}, beds={};
@@ -100,7 +100,7 @@ async function apri(extra={}, diary=null, stExtra={}){
   await p.evaluate(()=>document.querySelector("#doAndamenti").click()); await p.waitForTimeout(400);
   await p.evaluate(()=>document.querySelector("[data-and-sez=schemi]").click()); await p.waitForTimeout(400);
   const tx=await p.evaluate(()=>document.querySelector("#andamenti").innerText);
-  ok(/In arrivo/.test(tx) && /Luce · segnato in 1 giorno/.test(tx) && /Caffè · segnato in 1 giorno/.test(tx), "con pochi dati: «In arrivo», con quanto manca, senza pressione");
+  ok(/In arrivo/.test(tx) && /Luce · segnato in 1 giorno/.test(tx) && /Caffeina · segnato in 1 giorno/.test(tx), "con pochi dati: «In arrivo», con quanto manca, senza pressione");
   await p.context().close(); }
 { const p=await apri();
   ok(!(await p.evaluate(()=>/Altro da segnare/.test(document.querySelector(".drem").innerText))), "«Il tuo sonno» non ha più «Altro da segnare»");

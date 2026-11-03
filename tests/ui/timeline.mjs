@@ -29,7 +29,7 @@ const base={turniConfigurati:true,pattern:"MPNSR",anchor:iso(new Date()),repeat:
   ok(g.length>=5, "il piano è una timeline di voci → "+g.map(x=>x.titolo).join(", "));
   ok(g.every(x=>x.ordine), "ogni voce: ora, poi nodo, poi testo, da sinistra a destra");
   ok(g.every(x=>!x.scheda), "nessuna scheda per voce: niente bordo, ombra o sfondo");
-  const luce=g.find(x=>x.titolo==="Luce"), turno=g.find(x=>x.titolo==="Turno"), caffe=g.find(x=>x.titolo==="Caffè"), dormi=g.find(x=>x.titolo==="Dormi");
+  const luce=g.find(x=>x.titolo==="Luce"), turno=g.find(x=>x.titolo==="Turno"), caffe=g.find(x=>x.titolo==="Caffeina"), dormi=g.find(x=>x.titolo==="Dormi");
   ok(luce && /\bpast\b/.test(luce.cls), "alle 10 la Luce delle 05:05 è passata (sbiadita)");
   ok(turno && /\bora\b/.test(turno.cls) && !/\bpast\b/.test(turno.cls), "il turno 06:00–14:00 è in corso");
   ok(caffe && !/\b(past|ora)\b/.test(caffe.cls), "il caffè delle 14:20 è ancora da venire");
@@ -40,7 +40,7 @@ const base={turniConfigurati:true,pattern:"MPNSR",anchor:iso(new Date()),repeat:
     return {ora:a.querySelector(".en").textContent, prima}; });
   ok(pos && pos.ora==="10:00" && pos.prima.join()==="Luce,Turno", "il segno «ora» (10:00) sta dopo ogni voce già cominciata (anche il turno in corso), prima delle altre → "+JSON.stringify(pos));
   const poi=await p.evaluate(()=>{ const e=document.querySelector("#ora .ora-poi"); return e ? e.textContent : null; });
-  ok(poi==="Poi · ultimo caffè entro le 14:20", "sotto «Adesso»: il passo dopo → "+poi);
+  ok(poi==="Poi · ultima caffeina entro le 14:20", "sotto «Adesso»: il passo dopo → "+poi);
   ok(await p.evaluate(()=>document.querySelector(".tl-first .el").textContent==="Luce" && document.querySelector(".tl-last .el").textContent==="Dormi"), "la linea comincia sulla prima voce e finisce sull'ultima");
   // la linea è continua: le voci si toccano, senza spazi che la spezzano
   const buchi=await p.evaluate(()=>{ const t=[...document.querySelectorAll("#essenziale .tl")].map(x=>x.getBoundingClientRect()); return t.slice(1).map((r,i)=>Math.round(r.top-t[i].bottom)).filter(d=>d>2); });

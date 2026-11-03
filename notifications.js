@@ -28,7 +28,7 @@ export const TIPI = [
   { k: "rischio",  nome: "Giorni impegnativi",       desc: "Prima della terza notte di fila o di un rientro con meno di 11 ore di riposo: cosa fare per arrivarci meglio", essenziale: true, canale: "sicurezza" },
   { k: "bedtime",  nome: "Preparati a dormire",      desc: "Mezz'ora prima del sonno pianificato",                                   essenziale: true,  canale: "sonno" },
   { k: "domani",   nome: "Che turno fai domani?",    desc: "Solo se domani non è segnato: senza turno il piano non c'è",             essenziale: true,  canale: "turni" },
-  { k: "coffee",   nome: "Ultimo caffè",             desc: "L'ora oltre la quale il caffè ti disturba il sonno",                     essenziale: false, canale: "caffe" },
+  { k: "coffee",   nome: "Ultima caffeina",          desc: "L'ora oltre la quale caffè, tè, cola o energy drink disturbano il sonno",                     essenziale: false, canale: "caffe" },
   { k: "nap",      nome: "Pisolino",                 desc: "Solo nei giorni in cui il piano lo prevede",                             essenziale: false, canale: "pisolini" },
   { k: "prep",     nome: "Preparati per il turno",   desc: "Un'ora prima dell'inizio del turno",                                     essenziale: false, canale: "turni" },
   { k: "luce",     nome: "Luce del mattino",         desc: "Quando prendere luce per restare in fase",                               essenziale: false, canale: "luce" },
@@ -132,7 +132,7 @@ export function buildSchedule(config, opts = {}) {
         "Fino alle " + hhmm(at(mid, n.b)) + (n.rep ? ": sei reperibile, una riserva se ti chiamano stanotte." : "."), { tab: "pisolino" }));
 
     if (want("coffee"))
-      push(base, P.cut, "coffee", "Ultimo caffè",
+      push(base, P.cut, "coffee", "Ultima caffeina",
         "Dopo quest'ora la caffeina resta in circolo quando provi a dormire.");
 
     // 10 minuti prima della fine: lo leggi prima di uscire, non già alla guida.

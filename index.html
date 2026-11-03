@@ -452,6 +452,10 @@ padding:16px 18px;margin:2px 0 var(--gap-sezione);box-shadow:0 4px 20px rgba(45,
 .qh-seq-chip.riposo{border-color:var(--line);color:var(--dim)}
 .qh-add{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .qh-nuovo{margin-top:10px;padding:12px;border:1px solid var(--line);border-radius:14px;display:grid;gap:8px}
+.qh-nome-sigla{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:end}
+.qh-sigla{display:grid;gap:2px;font-size:12px;color:var(--dim);text-align:center}
+.qh-sigla input{width:52px;text-align:center;text-transform:uppercase;font-weight:700}
+#qhNtNota.err{color:var(--orange)}
 .qh-nuovo input[type=text]{font:inherit;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
 .qh-add .btn{min-height:40px;font-size:13px;padding:6px 12px}
 .qh-pos{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px}
@@ -1631,14 +1635,14 @@ header b{font-size:23px}
       <div class="sugg" id="suggAdv" hidden></div>
     </div>
     <div class="q">
-      <label for="caffS">Quanto ti resta addosso il caffè</label>
+      <label for="caffS">Quanto ti resta addosso la caffeina</label>
       <select id="caffS">
         <option value="bassa">Poco</option>
         <option value="media">Normale</option>
         <option value="alta">Molto</option>
       </select>
-      <span class="hint">Poco: dormi anche con un caffè nel pomeriggio. Molto: se lo prendi tardi non chiudi occhio. L'ultimo caffè si sposta di 4, 6 o 8 ore prima del sonno.</span>
-      <details class="caff-fatt" id="caffFatt"><summary>Altre cose che cambiano quanto dura il caffè in te <span>(facoltativo)</span></summary>
+      <span class="hint">Poco: dormi anche con un caffè nel pomeriggio. Molto: se lo prendi tardi non chiudi occhio. L'ultima caffeina (caffè, tè, cola, energy drink) si sposta di 4, 6 o 8 ore prima del sonno.</span>
+      <details class="caff-fatt" id="caffFatt"><summary>Altre cose che cambiano quanto dura la caffeina in te <span>(facoltativo)</span></summary>
         <label class="riga-sw" for="cfFumo"><span><b>Fumi</b><small>il fumo fa smaltire la caffeina più in fretta</small></span><span class="switch"><input type="checkbox" id="cfFumo" data-cf="fumo"><span class="slider"></span></span></label>
         <label class="riga-sw" for="cfPillola"><span><b>Pillola o altro contraccettivo ormonale</b><small>la caffeina resta in circolo quasi il doppio</small></span><span class="switch"><input type="checkbox" id="cfPillola" data-cf="pillola"><span class="slider"></span></span></label>
         <div class="cf-grav"><b>Gravidanza</b><div class="pv-quando" role="radiogroup" aria-label="Gravidanza">
@@ -2024,7 +2028,7 @@ header b{font-size:23px}
     <span class="tool-tx"><b>Sonno nei giorni liberi</b><span>Quando dormi senza sveglia: il piano parte da qui</span><span class="tool-val" id="opzValSonno"></span></span></button>
   <div class="ecc" id="opzBox3" hidden></div>
   <button class="tool tool-1line" data-opz="4"><span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h1.5a2.5 2.5 0 0 1 0 5H17"/><path d="M4 8h13v5a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V8z"/><path d="M8 2v3M12 2v3"/></svg></span>
-    <span class="tool-tx"><b>Tragitto, caffè e pisolini</b><span>Tempi di viaggio, effetto del caffè, se puoi dormire al lavoro</span></span></button>
+    <span class="tool-tx"><b>Tragitto, caffeina e pisolini</b><span>Tempi di viaggio, effetto della caffeina, se puoi dormire al lavoro</span></span></button>
   <div class="ecc" id="opzBox4" hidden></div>
   </div>
   </section>
@@ -2127,7 +2131,7 @@ header b{font-size:23px}
   <section class="opz-g" data-opzg="voci" aria-label="Cosa vedi nel piano">
   <span class="eyebrow opz-eb" style="margin-top:0">Cosa vedi nel piano</span>
   <div class="opz-gruppo" id="opzPianoVoci"></div>
-  <p class="hint" style="margin:6px 2px 0">Dormi, Turno, Pisolino, Ultimo caffè e Rientro ci sono sempre. Il resto lo scegli tu.</p>
+  <p class="hint" style="margin:6px 2px 0">Dormi, Turno, Pisolino e Rientro ci sono sempre. Il resto lo scegli tu.</p>
   </section>
   <section class="opz-aspetto" id="opzAspetto" aria-label="Aspetto">
   <span class="eyebrow opz-eb">Aspetto</span>
@@ -3837,12 +3841,12 @@ function cards(P){
   if(s.dur<state.need-25 && s.kind!=="corto" && !lateStart)
     sc.flag="Recuperi "+dur(s.dur)+" invece di "+dur(state.need)+". Domani fai un pisolino, ed evita due giornate così di fila.";
 
-  const cc={k:"c",lab:"Ultimo caffè",val:hhmm(cut),small:"poi basta",rows:[],at:cut,
-    cambia:4, cambiaTxt:"Cambia la soglia del caffè",
+  const cc={k:"c",lab:"Ultima caffeina",val:hhmm(cut),small:"poi basta: caffè, tè, cola, energy drink",rows:[],at:cut,
+    cambia:4, cambiaTxt:"Cambia la soglia della caffeina",
     why:"Nello studio di riferimento, 400 mg di caffeina (circa quattro tazze) presi sei ore prima di coricarsi accorciavano comunque il sonno — spesso senza che il soggetto se ne accorgesse. Da qui la soglia delle sei ore. Puoi cambiarla nelle impostazioni: la caffeina si smaltisce a velocità diverse da persona a persona, e un margine che non ti somiglia lo ignoreresti e basta.",
     cite:"Drake, Roehrs, Shambroom & Roth, J Clin Sleep Med 2013"};
   if(P.caff && P.caff.fattore!==1){
-    cc.why+=" Con quello che hai indicato (fumo, contraccettivi ormonali, gravidanza) la caffeina nel tuo corpo dura "+(P.caff.fattore>1?"di più":"di meno")+" della media: per questo l'ultimo caffè è "+dur(P.caff.min)+" prima di dormire."+
+    cc.why+=" Con quello che hai indicato (fumo, contraccettivi ormonali, gravidanza) la caffeina nel tuo corpo dura "+(P.caff.fattore>1?"di più":"di meno")+" della media: per questo l'ultima caffeina è "+dur(P.caff.min)+" prima di dormire."+
       (P.caff.oltre ? " In questo periodo anche un caffè al mattino può restare in circolo fino a sera: meglio pochi, e presto." : "");
     cc.cite+=" · Parsons & Neims 1978 · Abernethy & Todd 1985 · Knutti e coll. 1981 (durata della caffeina)";
   }
@@ -3858,6 +3862,9 @@ function cards(P){
   }else if(s.meta.ramp&&shift<0)
     cc.sub="Stasera il sonno arriva prima del solito: il caffè del pomeriggio è la prima cosa da anticipare.";
   else cc.sub="Calcolato sull'ora in cui andrai a letto stasera.";
+  // Non solo il caffè: la soglia vale per tutta la caffeina. Quantità tipiche: EFSA 2015.
+  cc.rows.push(["Conta anche","tè, cola, energy drink e alcuni integratori: un energy drink (250 ml) ha circa la caffeina di un espresso, una tazza di tè o una lattina di cola circa la metà"]);
+  cc.cite+=" · EFSA 2015 (caffeina nelle bevande)";
   out.push(cc);
 
   const lc={k:"l",lab:"Luce",rows:[],rowsA:[],rowsE:[],at:wake+15,cite:"Khalsa, Jewett, Cajochen & Czeisler, J Physiol 2003 · Smith, Fogg &amp; Eastman 2009 · Thompson, Jones, Gregson &amp; Atkinson, Eur J Appl Physiol 2014 (alba simulata) · Forger, Jewett &amp; Kronauer, J Biol Rhythms 1999 (modello dell'orologio)"};
@@ -5143,7 +5150,9 @@ function renderDemoEsempio(){
       // permette di ricopiare il proprio foglio così com'è.
       (!sh.S?'<p class="hint" style="margin:6px 0 0;font-size:12px"><b>Smonto</b> = il giorno in cui torni a casa dalla notte. Non ha orari di lavoro: per il piano conta come un giorno libero. Mettilo solo se nel tuo foglio turni c\'è.</p>':'')+
       (nuovoTurnoAperto
-        ? '<div class="qh-nuovo"><input type="text" id="qhNtNome" maxlength="20" placeholder="Nome (es. Giorno 12h)" aria-label="Nome del turno">'+
+        ? '<div class="qh-nuovo"><div class="qh-nome-sigla"><input type="text" id="qhNtNome" maxlength="20" placeholder="Nome (es. Giorno 12h)" aria-label="Nome del turno">'+
+            '<label class="qh-sigla">Sigla<input type="text" id="qhNtSigla" maxlength="1" autocapitalize="characters" autocomplete="off" aria-label="Sigla del turno, una lettera" placeholder="?"></label></div>'+
+            '<p class="hint" id="qhNtNota" style="margin:0;font-size:12px" aria-live="polite">La sigla è la lettera nel calendario: la propongo io, puoi cambiarla.</p>'+
             '<div class="qh-ore"><label>Inizio<input type="time" id="qhNtDa" value="07:00"></label><label>Fine<input type="time" id="qhNtA" value="19:00"></label></div>'+
             '<button type="button" class="btn" id="qhNtSalva" style="width:100%;margin-top:8px">Aggiungi il turno</button></div>'
         : '')+
@@ -5186,6 +5195,13 @@ function apriFlussoProssimi(sub){
   render(); try{ window.scrollTo({top:0, behavior:"smooth"}); }catch(e){}
 }
 
+// La sigla segue il nome finché non la scrivi tu; dopo resta la tua.
+if($("#demoEsempio")) $("#demoEsempio").addEventListener("input", e=>{
+  const sg=$("#qhNtSigla"), nota=$("#qhNtNota");
+  if(nota && nota.classList.contains("err")){ nota.classList.remove("err"); nota.textContent="La sigla è la lettera nel calendario: la propongo io, puoi cambiarla."; }
+  if(e.target.id==="qhNtSigla"){ sg.value=sg.value.toUpperCase().replace(/[^A-Z]/g,""); sg.dataset.mano=sg.value?"1":""; return; }
+  if(e.target.id==="qhNtNome" && sg && !sg.dataset.mano) sg.value=siglaProposta(e.target.value)||"";
+});
 if($("#demoEsempio")) $("#demoEsempio").addEventListener("click", e=>{
   if(e.target.closest("[data-importa-primo]")){
     passo("import_subito"); vaiATurniVariabili();
@@ -5292,9 +5308,14 @@ if($("#demoEsempio")) $("#demoEsempio").addEventListener("click", e=>{
   if(ag){ if(composizione.length>=42){ toast("Massimo 42 giorni"); return; } composizione.push(ag.dataset.aggiungi); haptic(8); renderDemoEsempio(); return; }
   if(e.target.closest("#qhNuovoTurno")){ nuovoTurnoAperto=true; renderDemoEsempio(); const n=$("#qhNtNome"); if(n) n.focus(); return; }
   if(e.target.closest("#qhNtSalva")){
-    const nome=safeName($("#qhNtNome").value)||"Turno";
-    const lettera="ABCDEFGHIJKLOQTUVWXYZ".split("").find(c=>!state.shifts[c]);
-    if(!lettera){ toast("Troppi tipi di turno"); return; }
+    const nome=safeName($("#qhNtNome").value)||"Turno", nota=$("#qhNtNota");
+    const avvisa=(testo, campo)=>{ if(nota){ nota.textContent=testo; nota.classList.add("err"); } haptic(20); const c=$(campo); if(c) c.focus(); };
+    if(nomeGiaUsato(nome)) return avvisa("Hai già un turno «"+nome+"»: dagli un nome diverso, per esempio «"+nome+" 12h».", "#qhNtNome");
+    const lettera=(($("#qhNtSigla")||{}).value||"").trim().toUpperCase() || siglaProposta(nome);
+    if(!lettera) return avvisa("Troppi tipi di turno: togline uno prima di aggiungerne un altro.", "#qhNtNome");
+    if(!/^[A-Z]$/.test(lettera)) return avvisa("La sigla è una lettera sola, dalla A alla Z.", "#qhNtSigla");
+    if(SIGLE_RISERVATE.includes(lettera)) return avvisa("«"+lettera+"» è riservata ("+(lettera==="R"?"riposo":"smonto")+"): scegli un'altra lettera.", "#qhNtSigla");
+    if(state.shifts[lettera]) return avvisa("«"+lettera+"» è già di «"+state.shifts[lettera].n+"»: scegli un'altra lettera.", "#qhNtSigla");
     const t1=turnoDaOrari(lettera, nome, $("#qhNtDa").value||"07:00", $("#qhNtA").value||"19:00");
     if(!orarioPlausibile(t1)) return;
     state.shifts[lettera]=t1; nuovoTurnoAperto=false;
@@ -6093,7 +6114,7 @@ function adessoLine(P, riferimento){
       };
     }
     const toStart=mod1440(b.start-m);
-    if(toStart>0 && toStart<=6*60) return {t:"Tra "+hm(toStart)+" entri in turno",s:"ultimo caffè entro le "+hhmm(P.cut)+(P.naps.length?", e c'è un pisolino prima":"")};
+    if(toStart>0 && toStart<=6*60) return {t:"Tra "+hm(toStart)+" entri in turno",s:"ultima caffeina entro le "+hhmm(P.cut)+(P.naps.length?", e c'è un pisolino prima":"")};
     const afterEnd=mod1440(m-b.end);
     if((P.night||P.lateStart) && afterEnd<=2*60) return {t:"Appena smontato",s:"è l'ora più rischiosa: se hai sonno, non guidare"};
   }
@@ -6105,7 +6126,7 @@ function adessoLine(P, riferimento){
   // routine; poi il pasto; infine la coda specifica del giorno.
   if(isFinite(P.cut)){
     const d=mod1440(P.cut-m);
-    if(d>0 && d<=180) return {t:"Tra poco: ultimo caffè", s:"entro le "+hhmm(P.cut), fallback:true};
+    if(d>0 && d<=180) return {t:"Tra poco: ultima caffeina", s:"entro le "+hhmm(P.cut), fallback:true};
   }
 
   // Prima guardava solo il partner principale — ora chiunque sia in elenco,
@@ -6226,6 +6247,7 @@ function finestreDelGiorno(P){
 // Rientro e gli avvisi — ci sono sempre). Quarto valore = predefinito: le voci che c'erano già
 // restano accese, i momenti migliori sono una scelta.
 const PIANO_VOCI=[
+  ["caffe","Caffeina","L'ora dell'ultima caffeina: caffè, tè, cola, energy drink. Spenta, sparisce anche dal pisolino",true],
   ["luce","Luce","Quando prendere o evitare la luce per restare in fase",true],
   ["penombra","Luce bassa","Le luci basse prima di dormire",true],
   ["pasti","Pasti","Quando mangiare nei giorni di turno. Accesa, puoi segnare pasti abbondanti e alcol",true],
@@ -6265,7 +6287,7 @@ function attAnnulla(an){
 const ABITUDINI={
   leggera:{ora:"Finito alle", fatto:"Fatto, finito alle", btn:"L'ho fatto", det:"min"},
   intensa:{ora:"Finito alle", fatto:"Fatto, finito alle", btn:"L'ho fatto", det:"min"},
-  caffe:{ora:"Ultimo caffè alle", fatto:"Ultimo caffè alle", btn:"L'ho preso", det:"n", nLab:"Quante tazze", u:["tazza","tazze"]},
+  caffe:{ora:"Ultima caffeina alle", fatto:"Ultima caffeina alle", btn:"L'ho presa", det:"n", nLab:"Quante (caffè, tè, lattine)", u:["volta","volte"]},
   luce:{ora:"Luce presa alle", fatto:"Luce presa alle", btn:"L'ho presa", det:"min", minLab:"Quanto è durata (minuti)"},
   alcol:{ora:"Ultimo bicchiere alle", fatto:"Ultimo bicchiere alle", btn:"Segna", det:"n", nLab:"Quanti bicchieri", u:["bicchiere","bicchieri"]},
   pasto:{ora:"Pasto abbondante alle", fatto:"Pasto abbondante alle", btn:"Segna", det:"nota"}
@@ -6535,12 +6557,12 @@ function renderEssenziale(P, CARDS){
     if(cd.nap){
       // Quello che si decide PRIMA del pisolino sta qui, nella sua riga; la
       // domanda «l'hai fatto?» arriva nel diario quando è cominciato.
-      const liv=cd.nap.livello, napCaffe = (cd.nap.caffe
+      const liv=cd.nap.livello, napCaffe = (cd.nap.caffe && pianoVoce("caffe")
           ? '<div class="rows"><div class="row"><b>Nappuccino</b><span>un caffè subito prima di sdraiarti, poi '+cd.nap.min+' minuti: la caffeina entra in circolo in 20-30 minuti, proprio quando ti svegli, e ti ritrovi più lucido che con il solo pisolino o il solo caffè. Anche se non ti addormenti del tutto, il riposo conta.</span></div></div>'+
             '<div class="why">Lo propongo solo quando serve essere vigili dopo, il pisolino è breve e il caffè non arriva fino al tuo sonno di stanotte.<cite>Reyner &amp; Horne 1997 · Hayashi, Masuda &amp; Hori 2003</cite></div>'
-          : cd.nap.caffeNo==="soglia" && isFinite(P.cut) ? '<p class="ed-sub" style="margin-top:8px">Qui niente caffè prima: è dopo le '+hhmm(P.cut)+' e arriverebbe fino al tuo sonno. Va bene il pisolino da solo.</p>' : ''),
+          : cd.nap.caffeNo==="soglia" && isFinite(P.cut) && pianoVoce("caffe") ? '<p class="ed-sub" style="margin-top:8px">Qui niente caffè prima: è dopo le '+hhmm(P.cut)+' e arriverebbe fino al tuo sonno. Va bene il pisolino da solo.</p>' : ''),
         prima = (isFinite(liv) && liv<2 ? '<button type="button" class="lnk dim" data-skip-recupero="'+(liv+1)+'" style="margin-top:6px">Non riesco a farlo: proponimi un\'alternativa</button>' : '');
-      voci.push({t, html:riga("nap"+cd.nap.k,"Pisolino",cd.val,[cd.small||"", cd.nap.caffe?"con un caffè subito prima":""].filter(Boolean).join(" · "),false,ICON.bed,napCaffe+dett(cd)+prima+
+      voci.push({t, html:riga("nap"+cd.nap.k,"Pisolino",cd.val,[cd.small||"", cd.nap.caffe && pianoVoce("caffe")?"con un caffè subito prima":""].filter(Boolean).join(" · "),false,ICON.bed,napCaffe+dett(cd)+prima+
         '<button type="button" class="lnk ed-cambia" data-cambia="4">Pisolini sul lavoro e altre impostazioni →</button>',
         {a:cd.at, z:cd.at+cd.nap.min, poi:"pisolino alle "+hhmm(cd.at)})});
     } else if(cd.k==="s"){
@@ -6548,8 +6570,8 @@ function renderEssenziale(P, CARDS){
       // separata mostrava l'ora di andare a letto sotto l'etichetta "Sveglia" —
       // confuso, e comunque un duplicato.
     } else if(cd.k==="c"){
-      voci.push({t, html:riga("caffe","Caffè",ora||cd.val,frase(cd.val,ora)||cd.small||"",false,ICON.coffee,dett(cd)+attivitaHtml("caffe"),
-        {a:cd.at, poi:"ultimo caffè entro le "+hhmm(cd.at)})});
+      if(pianoVoce("caffe")) voci.push({t, html:riga("caffe","Caffeina",ora||cd.val,frase(cd.val,ora)||cd.small||"",false,ICON.coffee,dett(cd)+attivitaHtml("caffe"),
+        {a:cd.at, poi:"ultima caffeina entro le "+hhmm(cd.at)})});
     } else if(cd.k==="l"){
       if(!P.b.rest || cd.ott){
         // Righe pratiche taggate per fase (rowsA=mattino, rowsE=sera): ognuna
@@ -7363,8 +7385,8 @@ function donateUrl(){ try{ return (window.NT_DONATE && window.NT_DONATE.url) || 
 const SCHEMI=[
   {id:"mov",  tit:"Movimento", tipi:["leggera","intensa"], dopo:0, tipo:"presenza", buonoSe:"presente", frase:v=>"Nei giorni in cui ti muovi, il tuo voto è in media "+v+"."},
   {id:"luce", tit:"Luce",      tipi:["luce"],              dopo:0, tipo:"presenza", buonoSe:"presente", frase:v=>"Nei giorni in cui prendi la luce, il tuo voto è in media "+v+"."},
-  {id:"caffe",tit:"Caffè",     tipi:["caffe"],             dopo:1, tipo:"distanza", soglia:360, frase:v=>"Quando l'ultimo caffè è almeno sei ore prima del letto, il tuo voto il giorno dopo è in media "+v+".",
-         azione:()=> state.caffSens!=="alta" ? '<button type="button" class="lnk" data-caff-anticipa="1" style="min-height:44px">Anticipa l\'ultimo caffè nel piano</button>' : ""},
+  {id:"caffe",tit:"Caffeina",  tipi:["caffe"],             dopo:1, tipo:"distanza", soglia:360, frase:v=>"Quando l'ultima caffeina è almeno sei ore prima del letto, il tuo voto il giorno dopo è in media "+v+".",
+         azione:()=> state.caffSens!=="alta" ? '<button type="button" class="lnk" data-caff-anticipa="1" style="min-height:44px">Anticipa l\'ultima caffeina nel piano</button>' : ""},
   {id:"alcol",tit:"Alcol",     tipi:["alcol"],             dopo:1, tipo:"presenza", buonoSe:"assente",  frase:v=>"Nelle sere senza alcol, il tuo voto il giorno dopo è in media "+v+"."},
   {id:"pasto",tit:"Pasto abbondante", tipi:["pasto"],      dopo:1, tipo:"distanza", soglia:180, frase:v=>"Quando l'ultimo pasto abbondante è almeno tre ore prima del letto, il tuo voto il giorno dopo è in media "+v+"."}
 ];
@@ -8882,15 +8904,24 @@ function renderQsOrari(){
 // nome, saltando quelle che sembrano un altro turno (N notte, M mattino, P pomeriggio, S smonto, R riposo, F ferie);
 // solo alla fine il resto dell'alfabeto (prima veniva subito «A», che non diceva niente).
 const oreCorte=m=>{ m=mod1440(m); const h=Math.floor(m/60), q=m%60; return h+(q?":"+String(q).padStart(2,"0"):""); };
+// La sigla proposta per un turno nuovo: l'iniziale, se libera; poi le altre lettere del nome (saltando quelle che
+// sembrano un altro turno); poi il resto dell'alfabeto. R (riposo) e S (smonto) sono riservate.
+const SIGLE_RISERVATE=["R","S"];
+function siglaProposta(nome){
+  const usate=new Set(Object.keys(state.shifts||{}).concat(SIGLE_RISERVATE));
+  const lettere=String(nome||"").normalize("NFD").replace(/[^A-Za-z]/g,"").toUpperCase().split("");
+  const altre=lettere.slice(1).filter(c=>!"NMPSRF".includes(c));
+  return [lettere[0]].concat(altre, "ABCDEFGHIJKLMNOPQTUVWXYZ".split("")).find(c=>c && !usate.has(c)) || null;
+}
+// Un nome già usato da un altro turno (senza badare a maiuscole e spazi): due «Giornata» nel foglio confondono.
+const chiaveNome=n=>String(n||"").trim().toLowerCase().replace(/\s+/g," ");
+function nomeGiaUsato(nome, tranne){ const c=chiaveNome(nome); return Object.keys(state.shifts||{}).some(k=>k!==tranne && state.shifts[k] && chiaveNome(state.shifts[k].n)===c); }
 function nomePerOrari(nome, a, z){ return Object.values(state.shifts).some(x=>x && x.n===nome) ? (nome+" "+oreCorte(a)+"–"+oreCorte(z)).slice(0,20) : nome; }
 function turnoPerOrari(nome, a, z){
   let k=Object.keys(state.shifts).find(x=>state.shifts[x] && state.shifts[x].s===a && state.shifts[x].e===z);
   if(k) return k;
   nome=nomePerOrari(nome, a, z);
-  const usate=new Set(Object.keys(state.shifts).concat(["R","S"]));
-  const lettere=nome.normalize("NFD").replace(/[^A-Za-z]/g,"").toUpperCase().split("");
-  const altre=lettere.slice(1).filter(c=>!"NMPSRF".includes(c));
-  k=[lettere[0]].concat(altre, "ABCDEFGHIJKLMNOPQTUVWXYZ".split("")).find(c=>c && !usate.has(c));
+  k=siglaProposta(nome);
   if(!k) return null;
   state.shifts[k]={n:nome.slice(0,20), s:a, e:z}; return k;
 }
@@ -9836,7 +9867,9 @@ if($("#cycToday")) $("#cycToday").onclick=()=>{
    Si scrivono a mano a ogni versione con una funzione che si vede: poche righe, in italiano di tutti i giorni.
    `id` cambia solo quando c'è qualcosa da dire; chi aggiorna la vede una volta. Chi installa adesso non la vede
    (non è una novità per lui), ma la trova sempre in Impostazioni › Novità. «app:true» = solo nell'app Android. */
-const NOVITA={ id:"2026-11-14", data:"Novembre 2026", righe:[
+const NOVITA={ id:"2026-11-15", data:"Novembre 2026", righe:[
+  ["Caffeina, non solo caffè","La voce del piano ora si chiama «Caffeina»: vale anche per tè, cola ed energy drink, con quanta ce n'è in ognuno. Se non ne prendi, la togli da Impostazioni › Cosa vedi nel piano.",false,"2026-11-15"],
+  ["Turni più tuoi, calendario più lungo","Un turno nuovo ha un nome tutto suo e la sigla la scegli tu. Il calendario di Turni e del widget arriva a dodici mesi, sempre a mesi interi. In «Ore», le settimane senza turni non sembrano più tutte sonno.",false,"2026-11-15"],
   ["Più leggero e più gentile","In Oggi un invito alla volta. Nomi più chiari: «Momento di sonnolenza», «Luce bassa». Nei fogli prima la cosa da fare, poi «Perché» (si apre se vuoi) e le fonti in una riga. In Impostazioni › Cosa vedi nel piano c'è «Piano essenziale»: solo sonno, turno, pisolino, caffè, rientro e luce.",false,"2026-11-14"],
   ["L'orologio biologico, stimato meglio","Due modelli scientifici dell'orologio lavorano sui tuoi turni e sul tuo diario. Il «Momento di sonnolenza» dice da dove viene la stima (i tuoi orari, il diario o Salute) e la finestra si stringe quando ci sono più dati veri.",false,"2026-11-14"],
   ["La luce, pensata su più giorni","Le finestre di luce guardano i prossimi quattro giorni, per tenerti più sveglio al lavoro e sulla strada di casa, con meno consigli da seguire.",false,"2026-11-14"],
@@ -11209,7 +11242,7 @@ function renderCaffFatt(){
   box.querySelectorAll("[data-cf-grav]").forEach(b=>b.setAttribute("aria-checked", String((f.gravidanza||"")===b.dataset.cfGrav)));
   if(f.fumo||f.pillola||f.gravidanza) box.open=true;
   const c=NT.caffeinaOre(), e=$("#caffEsito");
-  if(e) e.textContent="Il tuo ultimo caffè: "+dur(c.min)+" prima di dormire."+
+  if(e) e.textContent="La tua ultima caffeina: "+dur(c.min)+" prima di dormire."+
     (f.gravidanza ? " In gravidanza l'EFSA indica di non superare 200 mg di caffeina al giorno (circa due caffè)." : "")+
     (c.oltre ? " Più di così il piano non lo sposta: meglio pochi caffè, e al mattino." : "");
 }
@@ -11728,7 +11761,7 @@ function ntNotifiche(){
     // riceveva cambi turno e "vai a dormire" di turni non suoi.
     if(promemoriaSpenti() || !state.turniConfigurati){ platform.notify.schedule([]).catch(()=>{}); return; }
     if(!window.NTNotif || !window.NTNotif.buildSchedule) return;
-    const items = window.NTNotif.buildSchedule(statoPerNotifiche(), { days:platform.notify.days+1, types:tipiNotifiche() });
+    const items = window.NTNotif.buildSchedule(statoPerNotifiche(), { days:platform.notify.days+1, types:tipiNotifiche().filter(k=>k!=="coffee" || pianoVoce("caffe")) });
     _ultimiPromemoria = items;
     try{ const na=notificaAdatta(); if(na) items.push(na); }catch(e){}
     // Diagnostica minima (letta dal test sul telefono): quante ne aggiunge
