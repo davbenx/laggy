@@ -164,6 +164,12 @@ details summary{cursor:pointer;font-weight:600}
         <div class="rows" id="pianoEsito"></div>
       </section>
       <section class="card">
+        <h2>Il modello sul campo</h2>
+        <p class="sub">Il voto sull'energia contro la stima del modello in quel momento. Se il modello ci prende, «giù» cade più spesso dove la stima è «bassa». Per fonte: solo orari, diario, Salute. Sotto, quanto ci mette il telefono a calcolare la luce.</p>
+        <div class="rows" id="modelloCampo"></div>
+        <div class="rows" id="luceCalcolo" style="margin-top:10px"></div>
+      </section>
+      <section class="card">
         <h2>Dalla vecchia app e stabilità</h2>
         <p class="sub">Passaggio dei dati dalla vecchia app (sito → app) ed errori JavaScript per file (una volta al giorno per dispositivo).</p>
         <div class="rows" id="migrazione"></div>
@@ -404,7 +410,8 @@ function render(){
     if(steps[k].skip) sItems.push({k:"Configurazione completa, saltato al passo "+k, n:steps[k].skip});
   });
   $("#steps").innerHTML=rowsHtml(sItems);
-  var VOCI={turni:"Turni dei prossimi giorni",notifiche:"Promemoria",calendario:"Calendario del telefono",widget:"Widget",file_ics:"File .ics scaricato",play:"Dal web a Google Play",
+  var VOCI={perche_aperto:"«Perché» aperto in un foglio",copia_settimana:"Segna: copia una settimana",persona_scuola:"Persona a scuola o all'asilo",guida_lavoro:"Guida per lavoro",piano_essenziale:"Piano essenziale acceso",piano_completo:"Piano essenziale spento",
+    turni:"Turni dei prossimi giorni",notifiche:"Promemoria",calendario:"Calendario del telefono",widget:"Widget",file_ics:"File .ics scaricato",play:"Dal web a Google Play",
     mese_aperto:"Il mio mese aperto",import_ciclo:"Import: ciclo riconosciuto e applicato",ferie_aperte:"Ferie: pianificatore aperto",ferie_segnate:"Ferie: segnate",ferie_con:"Ferie: scelto «a casa con»",
     festivi_riposo:"Festivi contati come riposo",medico_visto:"Riepilogo medico aperto",medico_pdf:"Riepilogo medico in PDF",diario_widget:"Voto dal widget",tuoi_turni:"Pagina «I tuoi turni» aperta",telefono_nuovo:"Telefono nuovo: dati ritrovati dal backup",festivi_extra:"Festivi: aggiunto il proprio",orologio_tuo:"Orari di sonno personalizzati"};
   var SAP={momenti:"Momenti migliori",riepilogo:"Riepilogo del mese",sveglia:"Sveglia nell'Orologio",votowidget:"Voto dal widget",widgetmese:"Widget con il mese",coppia:"Calendario di coppia (proposta)",orologio:"Il tuo orologio",mese:"Il mio mese",festivi:"Festivi",dormi:"Dormi (scelte sul sonno)",acasa:"Orari a casa",ferie:"Ferie",colleghi:"Colleghi",calendario:"Calendario",scambio:"Scambio turno",sonno:"Sonno e carico",medico:"Medico",copia:"Copia di sicurezza",installa:"Installa",statistiche:"Statistiche",grazie:"Grazie",tester:"Tester"};
@@ -433,6 +440,13 @@ function render(){
     .concat(byProp(rows,"piano_motivo").map(function(x){ return {k:PMO[x.k]||x.k, n:x.n}; }))
     .concat(byProp(rows,"soddisfazione").map(function(x){ return {k:"Facce: "+(SOD[x.k]||x.k), n:x.n}; }))
     .concat(byProp(rows,"funzione_utile").map(function(x){ return {k:"Mancherebbe di più: "+(FUN[x.k]||x.k), n:x.n}; })));
+  // energia_modello: «stima_voto_fonte» → per ogni stima, la quota di voti «giù» (e quanti voti), anche per fonte
+  var inc={}; byProp(rows,"energia_modello").forEach(function(x){ var p=x.k.split("_"); if(p.length!==3) return;
+    [p[0], p[0]+" · "+p[2]].forEach(function(k){ inc[k]=inc[k]||{n:0,giu:0}; inc[k].n+=x.n; if(p[1]==="giu") inc[k].giu+=x.n; }); });
+  $("#modelloCampo").innerHTML=rowsHtml(Object.keys(inc).sort().map(function(k){ var v=inc[k];
+    return {k:"Stima "+k+": «giù» nel "+Math.round(100*v.giu/v.n)+"% dei voti", n:v.n}; }));
+  var LUC={ok_2s:"Luce calcolata in meno di 2 s",ok_5s:"Luce calcolata in 2-5 s",ok_lento:"Luce calcolata in più di 5 s",errore:"Calcolo della luce non riuscito"};
+  $("#luceCalcolo").innerHTML=rowsHtml(byProp(rows,"luce_calcolo").map(function(x){ return {k:LUC[x.k]||x.k, n:x.n}; }));
   $("#migrazione").innerHTML=rowsHtml(byProp(rows,"migrazione").map(function(x){ return {k:x.k==="export_web"?"Avviate dal sito":x.k==="import_app"?"Arrivate nell'app":x.k, n:x.n}; }));
   $("#errori").innerHTML=rowsHtml(byProp(rows,"errore").map(function(x){ return {k:"Errore in "+x.k, n:x.n}; }));
   var PRESET={essenziali:"Scelta: essenziali",tutte:"Scelta: tutti",mie:"Scelta: personalizzata"};

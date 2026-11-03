@@ -16,17 +16,17 @@ const apri=async(pattern, inizio)=>{
 };
 const leggi=p=>p.evaluate(()=>({dormi:document.querySelector('[data-row="sonno"] .en').innerText.replace(/\s+/g," "),
   opz:[...document.querySelectorAll("[data-mattinobif]")].map(x=>({t:x.querySelector("b").textContent, ora:x.querySelector("span").textContent, on:x.getAttribute("aria-pressed")})),
-  hint:!!document.querySelector(".dopo-notte .dn-hint")}));
+  hint:!!document.querySelector(".dopo-notte .dn-hint"), sum:(document.querySelector(".dopo-notte summary")||{innerText:""}).innerText.replace(/\s+/g," ")}));
 let p=await apri("RM",360);
 let r=await leggi(p);
-ok(r.opz.length===2 && r.opz[0].on==="true" && r.dormi.includes(r.opz[0].ora.replace("a letto alle ","")) && r.hint, "riposo prima di un mattino alle 06: «Tutto stanotte» / «Più tardi + pisolino» con l'ora di letto ("+r.opz.map(o=>o.ora).join(" / ")+")");
+ok(r.opz.length===2 && r.opz[0].on==="true" && r.dormi.includes(r.opz[0].ora.replace("a letto alle ","")) && r.hint && r.sum.includes("Tutto stanotte · a letto alle "+r.opz[0].ora.replace("a letto alle ","")), "riposo prima di un mattino alle 06: una riga chiusa («"+r.sum+"»), dentro «Tutto stanotte» / «Più tardi + pisolino» con l'ora di letto ("+r.opz.map(o=>o.ora).join(" / ")+")");
 await apriVoce(p,"sonno");
 const det=await testoVoce(p); await chiudiVoce(p);
 // l'ora del turno la dice già la riga «Il piano, in breve»: qui la sveglia e da dove viene
 ok(/Stanotte la sveglia è alle 04:50, contata all'indietro dal turno di domani/.test(det) && !/senza guardare l'orologio/.test(det), "il dettaglio dice il motivo, non «dormi senza guardare l'orologio»");
-await p.click('[data-mattinobif="1"]'); await p.waitForTimeout(400);
+await p.click('.dopo-notte summary'); await p.click('[data-mattinobif="1"]'); await p.waitForTimeout(400);
 r=await leggi(p);
-ok(r.opz[1].on==="true" && r.dormi.includes(r.opz[1].ora.replace("a letto alle ","")) && !r.hint, "scelto «Più tardi + pisolino»: «Dormi» si sposta, la spiegazione sparisce");
+ok(r.opz[1].on==="true" && r.dormi.includes(r.opz[1].ora.replace("a letto alle ","")) && r.sum.includes("Più tardi + pisolino · "+r.opz[1].ora), "scelto «Più tardi + pisolino»: «Dormi» si sposta, e la riga dice la scelta e l'ora");
 ok(await p.evaluate(()=>document.querySelector("#mattinoBif").checked && JSON.parse(localStorage.getItem("nt:state")).mattinoBifasico===true), "è la stessa preferenza di Impostazioni, salvata");
 await p.context().close();
 p=await apri("RM",480);   // mattino alle 8: niente letto presto

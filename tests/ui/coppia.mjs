@@ -17,7 +17,8 @@ async function apri(st, app, tab="turni"){
     localStorage.setItem("nt:attivazioneNascosta","true"); localStorage.setItem("nt:backupDone","true"); localStorage.setItem("nt:loSapevi", JSON.stringify({visti:["installa","tester","statistiche","colleghi","copia","orologio","mese","festivi","calendario","ferie","scambio","sonno","grazie","medico","dormi","acasa","sveglia","votowidget","widgetmese","momenti","riepilogo"], migrato:1})); }, st);
   const p=await ctx.newPage(); p.on("pageerror",e=>errs.push(e.message));
   await p.goto("http://localhost:"+(app?8766:8765)+"/index.html"); await p.waitForTimeout(900);
-  if(tab==="turni"){ await p.evaluate(()=>document.querySelector('[data-tab="turni"]')?.click()); await p.waitForTimeout(500); }
+  if(tab==="turni"){ await p.evaluate(()=>document.querySelector('[data-tab="turni"]')?.click()); await p.waitForTimeout(500);
+    await p.evaluate(()=>document.querySelector('[data-vista="ore"]')?.click()); await p.waitForTimeout(400); }   // la striscia oraria
   return p;
 }
 

@@ -14,6 +14,7 @@ ok(await p.evaluate(()=>document.documentElement.classList.contains("ios")), "iP
 // Oggi compare «Oggi» accanto alla data, in Turni il bottone diventa «Torna a oggi».
 for(const [tab,id,torna,testo] of [["oggi","dateLabel","goToday","Oggi"],["turni","cycToday","cycToday","Torna a oggi"]]){
   await p.click('[data-tab="'+tab+'"]'); await p.waitForTimeout(400);
+  if(tab==="turni"){ await p.click('[data-vista="ore"]'); await p.waitForTimeout(300); }   // «Torna a oggi» della striscia oraria (nel calendario un giorno dello stesso mese resta sul mese)
   const r=await p.evaluate(id=>{ const bt=document.getElementById(id), r=bt.getBoundingClientRect();
     const top=document.elementFromPoint(r.left+r.width/2, r.top+r.height/2);
     return {sopra: top && top.classList.contains("today-pick"), fs:top?getComputedStyle(top).fontSize:""}; }, id);

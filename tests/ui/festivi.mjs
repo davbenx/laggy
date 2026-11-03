@@ -41,12 +41,12 @@ const TURNO={M:{n:"Mattino",s:420,e:840}};
   await p.evaluate(()=>document.querySelector("#tEdit").click()); await p.waitForTimeout(200); await p.evaluate(()=>document.querySelector('[data-mod="festivi"]').click()); await p.waitForTimeout(250);
   ok(await p.evaluate(()=>/sono a casa/.test(document.querySelector("[data-fest-riposo]").parentNode.textContent)), "turni a ciclo: «Nei festivi sono a casa» (non «non lavoro»)");
   await p.context().close(); }
-// festivo su un giorno di lavoro: puntino nella striscia e nel calendario; con «sono a casa» il giorno diventa riposo (anche per le ferie)
+// festivo su un giorno di lavoro: rosso nella striscia e nel calendario; con «sono a casa» il giorno diventa riposo (anche per le ferie)
 { const oggi=new Date(); oggi.setHours(12,0,0,0); const mg=(oggi.getMonth()+1)+"-"+oggi.getDate();
   const a=new Date(oggi); a.setDate(a.getDate()-2);   // ancora non un lunedì: è un ciclo
-  const p=await apri({turniConfigurati:true,pattern:"MMMMMMMR",anchor:iso(a),repeat:true,firstSeenAt:"2026-01-01",festivi:{extra:[mg]},shifts:{M:{n:"Mattino",s:420,e:840}}});
+  const p=await apri({turniConfigurati:true,pattern:"MMMMMMMR",anchor:iso(a),repeat:true,firstSeenAt:"2026-01-01",festivi:{extra:[mg]},piano:{vistaCiclo:"ore"},shifts:{M:{n:"Mattino",s:420,e:840}}});
   const code=()=>p.evaluate(()=>document.querySelector('#cyc .crow[data-off="0"] .ccode').textContent.trim());
-  ok(await p.evaluate(()=>!!document.querySelector('#cyc .crow[data-off="0"] .clab.fest')), "striscia: il festivo ha il puntino");
+  ok(await p.evaluate(()=>!!document.querySelector('#cyc .crow[data-off="0"] .clab.fest')), "striscia: il festivo è in rosso");
   const prima=await code();
   ok(prima!=="R" && prima!=="Ri", "senza la scelta, il festivo resta giorno di lavoro ("+prima+")");
   await p.evaluate(()=>document.querySelector("#tEdit").click()); await p.waitForTimeout(200); await p.evaluate(()=>document.querySelector('[data-mod="festivi"]').click()); await p.waitForTimeout(250);

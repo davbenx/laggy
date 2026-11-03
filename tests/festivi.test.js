@@ -32,3 +32,17 @@ test("niente funzione, niente festivi: nessun effetto", () => {
   const e = fisso({ festiviRiposo: true });
   assert.equal(e.codeAt(2), "M");
 });
+
+// I festivi nazionali vivono nella pagina (festivoIT in index.html): la funzione si legge da lì, così il test segue il codice vero.
+import { readFileSync } from "node:fs";
+const src = readFileSync(new URL("../index.html", import.meta.url), "utf8");
+const corpo = /function festivoIT\(d\)\{[\s\S]*?\n\}\n/.exec(src)[0];
+const festivoIT = new Function(corpo + "return festivoIT;")();
+test("festivi nazionali: fissi, Pasquetta e il 4 ottobre dal 2026", () => {
+  for (const [y, m, g] of [[2026, 1, 1], [2026, 4, 25], [2026, 6, 2], [2026, 12, 26], [2026, 4, 6], [2027, 3, 29]])
+    assert.equal(festivoIT(new Date(y, m - 1, g)), true, `${g}/${m}/${y}`);
+  assert.equal(festivoIT(new Date(2026, 9, 4)), true);    // San Francesco, legge 151/2025
+  assert.equal(festivoIT(new Date(2027, 9, 4)), true);
+  assert.equal(festivoIT(new Date(2025, 9, 4)), false);   // prima della legge no
+  assert.equal(festivoIT(new Date(2027, 9, 5)), false);
+});

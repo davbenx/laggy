@@ -15,6 +15,7 @@ await ctx.addInitScript(st=>{ if(sessionStorage.getItem("x")) return; sessionSto
 const p=await ctx.newPage(); p.on("pageerror",e=>errs.push(e.message));
 await p.goto("http://localhost:8765/index.html"); await p.waitForTimeout(900);
 await p.click('[data-tab="turni"]'); await p.waitForTimeout(300);
+await p.click('[data-vista="ore"]'); await p.waitForTimeout(300);   // la striscia oraria (il calendario è la vista principale)
 const stato=()=>p.evaluate(()=>JSON.parse(localStorage.getItem("nt:state")));
 const apri=async off=>{ await p.click('#cyc .crow[data-off="'+off+'"]'); await p.waitForTimeout(250); };
 const chip=async t=>{ if(!(await p.$('[data-qs-spec="'+t+'"]'))){ await p.click("[data-qs-altro]"); await p.waitForTimeout(150); } await p.click('[data-qs-spec="'+t+'"]'); await p.waitForTimeout(250); };

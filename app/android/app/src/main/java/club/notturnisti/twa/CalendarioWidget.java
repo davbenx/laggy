@@ -7,6 +7,8 @@ import android.graphics.Typeface;
 import android.net.Uri;
 import android.text.SpannableString;
 import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 import android.util.TypedValue;
 import android.view.View;
@@ -19,9 +21,10 @@ import java.util.Locale;
  * di oggi e aggiunge righe quanto il widget è alto. Sono viste vere (non un'immagine): seguono tema e testo, e
  * le righe si dividono lo spazio che resta. Un tocco su un giorno apre l'app su quel giorno; un tocco sul nome della
  * persona passa alla successiva, poi la nasconde (la scelta resta finché nell'app non sposti la stellina).
- * ‹ › sfogliano a pagine (tante settimane quante se ne vedono) e il titolo riporta a oggi; lo spostamento vale per il
- * giorno in cui è fatto. Il mese si legge dal titolo (quello del giovedì della prima riga) e dal colore dei numeri:
- * quelli di un altro mese sono in blu, il primo del mese è «1 NOV» in grassetto.
+ * Come un calendario da muro: il mese intero dalla settimana del giorno 1 (se il widget è basso, dalla settimana di oggi),
+ * ‹ › vanno di mese in mese e il titolo riporta a oggi; lo spostamento vale per il giorno in cui è fatto. I giorni degli
+ * altri mesi sono attenuati, il primo del mese è «1 NOV» in grassetto. I festivi hanno il numero in rosso (i
+ * «giorni rossi»), i giorni modificati (scambio, orari diversi) un puntino accanto al numero, come nell'app.
  */
 final class CalendarioWidget {
     static final int RIGHE = 6, COLONNE = 7;
@@ -72,7 +75,7 @@ final class CalendarioWidget {
         return NotturnistiWidget.trasmetti(ctx, 6000 + id, i);
     }
 
-    /** Un tocco su ‹ (k 0), › (k 1) o sul titolo (k 2): il widget passa a questo spostamento, in settimane da oggi. */
+    /** Un tocco su ‹ (k 0), › (k 1) o sul titolo (k 2): il widget passa a questo spostamento, in mesi da quello di oggi. */
     static PendingIntent pagina(Context ctx, int id, int k, int spostamento, int righe) {
         Intent i = new Intent(ctx, NotturnistiWidget.class).setAction(NotturnistiWidget.AZIONE_PAGINA).putExtra("id", id).putExtra("off", spostamento).putExtra("righe", righe);
         return NotturnistiWidget.trasmetti(ctx, 10000 + id * 4 + k, i);
@@ -93,16 +96,22 @@ final class CalendarioWidget {
         if (righe <= 0) return;
         rv.setViewVisibility(R.id.w_cal_vuoto, righe <= 1 ? View.VISIBLE : View.GONE);   // con una sola settimana il vuoto non la allarga troppo; da due in su le righe riempiono fino in fondo, come prima
         int oggi = indiceOggi(m, ora), rigaOggi = oggi < 0 ? -1 : oggi / COLONNE;
-        int r0 = CalendarioModel.primaRiga(rigaOggi, spostamento, righe, m.settimane());
         Calendar adesso = Calendar.getInstance(); adesso.setTimeInMillis(ora);
-        String titolo = m.titolo(r0, adesso.get(Calendar.YEAR));
-        int[] meseTitolo = m.meseDellaRiga(r0);
+        int annoOggi = adesso.get(Calendar.YEAR), meseOggi = adesso.get(Calendar.MONTH) + 1;
+        // il mese mostrato: quello di oggi spostato con ‹ › (in mesi); se non è nei dati, si torna a oggi
+        if (m.righeMese(CalendarioModel.meseSpostato(annoOggi, meseOggi, spostamento)[0], CalendarioModel.meseSpostato(annoOggi, meseOggi, spostamento)[1]) == null) spostamento = 0;
+        int[] meseTitolo = CalendarioModel.meseSpostato(annoOggi, meseOggi, spostamento);
+        int[] rm = m.righeMese(meseTitolo[0], meseTitolo[1]);
+        if (rm == null) rm = new int[]{ Math.max(rigaOggi, 0), Math.max(rigaOggi, 0) };
+        int r0 = CalendarioModel.primaRigaMese(rm, rigaOggi, spostamento == 0, righe, m.settimane());
+        String titolo = CalendarioModel.titoloMese(meseTitolo[0], meseTitolo[1], annoOggi);
+        int[] mp = CalendarioModel.meseSpostato(annoOggi, meseOggi, spostamento - 1), ms = CalendarioModel.meseSpostato(annoOggi, meseOggi, spostamento + 1);
 
         rv.setTextViewText(R.id.w_cal_mese, titolo);
         rv.setContentDescription(R.id.w_cal_mese, titolo + ". Tocca per tornare a oggi");
         rv.setOnClickPendingIntent(R.id.w_cal_mese, pagina(ctx, idWidget, 2, 0, righe));
-        freccia(rv, R.id.w_cal_prec, r0 > 0, pagina(ctx, idWidget, 0, m.paginaDopo(rigaOggi, spostamento, righe, -1), righe), "Settimane precedenti");
-        freccia(rv, R.id.w_cal_succ, r0 < m.settimane() - righe, pagina(ctx, idWidget, 1, m.paginaDopo(rigaOggi, spostamento, righe, 1), righe), "Settimane successive");
+        freccia(rv, R.id.w_cal_prec, m.righeMese(mp[0], mp[1]) != null, pagina(ctx, idWidget, 0, spostamento - 1, righe), "Mese precedente");
+        freccia(rv, R.id.w_cal_succ, m.righeMese(ms[0], ms[1]) != null, pagina(ctx, idWidget, 1, spostamento + 1, righe), "Mese successivo");
         boolean conPersone = !m.persone.isEmpty();
         // il nome: persona mostrata (verde) oppure «+ Anna» se nascosta; un tocco passa alla successiva
         String nome = persona >= 0 ? m.persone.get(persona).nome : m.persone.isEmpty() ? "" : m.persone.get(m.sel).nome;
@@ -123,7 +132,7 @@ final class CalendarioWidget {
                 int i = (r0 + r) * COLONNE + c;
                 int[] id = ID[r][c], dt = m.data(i);
                 boolean passato = oggi >= 0 && i < oggi, eOggi = i == oggi;
-                // numero del giorno: oggi su un tondo; quelli di un altro mese in blu; il primo del mese «1 NOV» in grassetto
+                // numero del giorno: oggi su un tondo; il primo del mese «1 NOV» in grassetto; gli altri mesi attenuati (sotto)
                 boolean altroMese = dt[0] != meseTitolo[0] || dt[1] != meseTitolo[1];
                 CharSequence numero = String.valueOf(dt[2]);
                 if (dt[2] == 1) {
@@ -131,12 +140,23 @@ final class CalendarioWidget {
                     sp.setSpan(new StyleSpan(Typeface.BOLD), 0, sp.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                     numero = sp;
                 }
+                CalendarioModel.Cella mia = m.mio(i);
+                boolean festivo = mia != null && mia.festivo, modificato = mia != null && mia.modificato;
+                if (modificato) {
+                    // un pallino pieno staccato dal numero (non «27.»): lo stesso segno del calendario dell'app
+                    SpannableString sp = new SpannableString(numero + " ●");
+                    if (dt[2] == 1) sp.setSpan(new StyleSpan(Typeface.BOLD), 0, numero.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    sp.setSpan(new RelativeSizeSpan(0.75f), numero.length(), sp.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    if (!eOggi) sp.setSpan(new ForegroundColorSpan(ctx.getColor(R.color.w_ink)), numero.length(), sp.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    numero = sp;
+                }
                 rv.setTextViewText(id[1], numero);
                 rv.setInt(id[1], "setBackgroundResource", eOggi ? R.drawable.widget_oggi_tondo : 0);
-                rv.setTextColor(id[1], ctx.getColor(eOggi ? R.color.w_su_accento : altroMese ? R.color.w_accento : R.color.w_ink));
+                rv.setTextColor(id[1], ctx.getColor(eOggi ? R.color.w_su_accento : festivo ? R.color.w_festivo : R.color.w_ink));
                 // oggi: una cornice sottile attorno a tutta la cella (data e sigle)
                 rv.setInt(id[0], "setBackgroundResource", eOggi ? R.drawable.widget_oggi_cornice : 0);
-                rv.setFloat(id[0], "setAlpha", passato ? 0.45f : 1f);
+                // gli altri mesi ci sono (il ciclo continua) ma attenuati, come in un calendario da muro; il passato appena
+                rv.setFloat(id[0], "setAlpha", altroMese ? 0.38f : passato ? 0.7f : 1f);
                 pillola(ctx, rv, id[2], m.mio(i), false);
                 rv.setViewVisibility(id[3], persona >= 0 ? View.VISIBLE : View.GONE);
                 if (persona >= 0) pillola(ctx, rv, id[3], m.di(persona, i), true);
@@ -145,7 +165,7 @@ final class CalendarioWidget {
                 Intent gi = new Intent(Intent.ACTION_VIEW, Uri.parse("notturnisti://giorno/" + iso), ctx, MainActivity.class);
                 gi.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 rv.setOnClickPendingIntent(id[0], NotturnistiWidget.attivita(ctx, 400 + r * COLONNE + c, gi));
-                rv.setContentDescription(id[0], GIORNI[c] + " " + dt[2] + ": " + etichetta(m.mio(i)) + (persona >= 0 ? ", " + m.persone.get(persona).nome + ": " + etichetta(m.di(persona, i)) : ""));
+                rv.setContentDescription(id[0], GIORNI[c] + " " + dt[2] + (festivo ? ", festivo" : "") + ": " + etichetta(mia) + (modificato ? ", modificato" : "") + (persona >= 0 ? ", " + m.persone.get(persona).nome + ": " + etichetta(m.di(persona, i)) : ""));
             }
         }
     }

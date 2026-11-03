@@ -75,6 +75,8 @@
   piano_esito: ["esito"],           // dopo ogni notte annotata: in_linea | fino_30 | oltre_30 minuti dal piano (mai gli orari)
   piano_motivo: ["motivo"],         // perché il piano non tornava: turno | abitudine | altro (risposta a un tocco)
   soddisfazione: ["voto"],           // le tre facce: su | meh | giu
+  energia_modello: ["incrocio"],   // verifica sul campo: «stima_voto_fonte», es. bassa_giu_diario (stima del modello alta|media|bassa, voto su|meh|giu, fonte orari|diario|salute); una sola proprietà, il server ne tiene una
+  luce_calcolo: ["esito"],         // il calcolo della luce sul telefono, una volta al giorno: ok_2s | ok_5s | ok_lento | errore (robustezza sui telefoni veri)
   funzione_utile: ["f"],             // «quale funzione ti mancherebbe di più»: una scelta fra un elenco chiuso (piano, promemoria…), una volta
   sveglia_messa: [],               // sveglia chiesta all'Orologio del telefono (app Android)
     errore: ["dove"]                  // errore JavaScript: solo il file (index, engine…), mai il messaggio

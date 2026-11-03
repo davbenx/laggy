@@ -63,6 +63,25 @@
                 android:resource="@xml/widget_piano_info" />
         </receiver>
 
+        <!-- Health Connect: il «perché» dei permessi (Android 13 e precedenti, e Android 14+), apre la privacy dell'app -->
+        <activity
+            android:name=".PerchePermessiActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            <intent-filter><action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" /></intent-filter>
+        </activity>
+        <activity-alias
+            android:name="ViewPermissionUsageActivity"
+            android:exported="true"
+            android:targetActivity=".PerchePermessiActivity"
+            android:permission="android.permission.START_VIEW_PERMISSION_USAGE">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />
+                <category android:name="android.intent.category.HEALTH_PERMISSIONS" />
+            </intent-filter>
+        </activity-alias>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -85,4 +104,8 @@
     <!-- Sveglia nell'app Orologio (AlarmPlugin): permesso normale, concesso
          all'installazione senza chiedere niente. -->
     <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
+    <!-- Health Connect: solo lettura di sonno e passi, chiesti solo quando l'utente accende l'interruttore in Impostazioni -->
+    <uses-permission android:name="android.permission.health.READ_SLEEP" />
+    <uses-permission android:name="android.permission.health.READ_STEPS" />
+    <queries><package android:name="com.google.android.apps.healthdata" /></queries>
 </manifest>

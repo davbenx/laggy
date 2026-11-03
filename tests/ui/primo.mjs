@@ -13,8 +13,8 @@ ok(await p.evaluate(()=>!!document.querySelector("#essenziale .esshint")), "prim
 await p.click("#essenziale .erow[data-row]"); await p.waitForTimeout(300);   // il perché si apre in un foglio
 await p.reload(); await p.waitForTimeout(1500);
 ok(await p.evaluate(()=>!document.querySelector("#essenziale .esshint")), "aperta una voce, il suggerimento non torna");
-const leg=await p.evaluate(()=>document.body.innerText.includes("Picco di sonnolenza") || !document.body.innerText.includes("Sonnolenza"));
-ok(leg, "legenda: «Picco di sonnolenza»");
+const leg=await p.evaluate(()=>document.body.innerText.includes("Momento di sonnolenza") || !document.body.innerText.includes("Sonnolenza"));
+ok(leg, "legenda: «Momento di sonnolenza»");
 await p.click("#doOpzioni"); await p.waitForTimeout(400);
 await p.evaluate(()=>window.scrollTo(0, document.body.scrollHeight)); await p.waitForTimeout(400);
 const vis=await p.evaluate(()=>{ const r=document.querySelector("#chiudiOpzioni").getBoundingClientRect(); const top=document.elementFromPoint(r.left+r.width/2, r.top+r.height/2); return r.top>=0 && r.bottom<=innerHeight && !!top && !!top.closest("#chiudiOpzioni"); });

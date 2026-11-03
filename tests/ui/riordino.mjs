@@ -57,7 +57,7 @@ await p.context().close();
 // 3. la scheda di un altro giorno parla di QUEL giorno (prima: del giorno in vista)
 p=await apri({turniConfigurati:true,pattern:"MPNSR",anchor:fa(0),shifts:SH,repeat:true,firstSeenAt:fa(30)});
 await p.click('[data-tab="turni"]'); await p.waitForTimeout(300);
-await p.click('#cyc .crow[data-off="2"]'); await p.waitForTimeout(250);   // dopodomani: Notte
+await p.click((off=>{ const d=new Date(); d.setDate(d.getDate()+off); return '.ccell[data-cal-giorno="'+d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")+'"]'; })(2)); await p.waitForTimeout(250);   // dopodomani: Notte (dal calendario, la vista principale)
 const sc=await p.evaluate(()=>({att:(document.querySelector(".qs-btn.active")||{}).textContent||"", s:(document.querySelector('[data-qs-ora="s"]')||{}).value, e:(document.querySelector('[data-qs-ora="e"]')||{}).value}));
 ok(/Notte/.test(sc.att) && sc.s==="21:00" && sc.e==="07:00", "scheda di dopodomani: turno attivo Notte e orari 21:00 → 07:00 → "+JSON.stringify(sc));
 await p.evaluate(()=>{ const i=document.querySelector('[data-qs-ora="e"]'); i.value="08:00"; i.dispatchEvent(new Event("change",{bubbles:true})); });

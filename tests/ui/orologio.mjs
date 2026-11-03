@@ -54,14 +54,14 @@ const avanti=async p=>{ await p.click("#next"); await p.waitForTimeout(150); };
 { const p=await apri({turniConfigurati:true,pattern:"MPNSR",anchor:fa(0),repeat:true,firstSeenAt:fa(10),freeBed:"01:00",freeWake:"09:30",shifts:TURNI,pPattern:"MPNSR",backupDone:true},
     {"nt:analytics-consent":"false","nt:backupDone":"true"});
   const sap=await p.evaluate(()=>{ const e=document.querySelector("#loSapevi"); return e && !e.hidden ? e.dataset.k+" | "+e.textContent : null; });
-  ok(sap && sap.startsWith("orologio |") && /un po' gufo, con il minimo corporeo verso le 07:15/.test(sap), "dopo una settimana, «Lo sapevi?»: il tuo orologio è pronto → "+sap);
+  ok(sap && sap.startsWith("orologio |") && /un po' gufo, con il momento di sonnolenza verso le 07:15/.test(sap), "dopo una settimana, «Lo sapevi?»: il tuo orologio è pronto → "+sap);
   await p.click("[data-sapevi-prova]"); await p.waitForTimeout(400);
   const o=await p.evaluate(()=>{ const e=document.querySelector("#orologio"); if(!e) return null; const r=e.getBoundingClientRect();
     return {vis:document.body.classList.contains("andamenti-aperta"), top:Math.round(r.top), testo:e.innerText}; });
   ok(o && o.vis && o.top<200, "il tocco apre Sonno e carico sull'orologio → top "+(o&&o.top));
   const usate=await p.evaluate(()=>JSON.parse(localStorage.getItem("nt:funzioniUsate")||"{}"));
   ok(usate.orologio && usate.sonno, "aperta la pagina, né «Sonno e carico» né l'orologio tornano come «Lo sapevi?»");
-  ok(o && /Un po' gufo/.test(o.testo) && /Metà del sonno\s+[\s\S]*05:15/.test(o.testo) && /Minimo corporeo[\s\S]*07:15/.test(o.testo) && /dalle 23:00/.test(o.testo) && /Più lucido[\s\S]*verso le \d\d:\d\d/.test(o.testo),
+  ok(o && /Un po' gufo/.test(o.testo) && /Metà del sonno\s+[\s\S]*05:15/.test(o.testo) && /Momento di sonnolenza[\s\S]*07:15/.test(o.testo) && /dalle 23:00/.test(o.testo) && /Più lucido[\s\S]*verso le \d\d:\d\d/.test(o.testo),
     "orologio: tipo, metà del sonno 05:15, melatonina dalle 23:00, minimo 07:15, più lucido");
   ok(/01:00 → 09:30/.test(o.testo) && /Non sono una misura/.test(o.testo), "dice da dove vengono i numeri e che sono stime");
   await p.click("[data-oro-cambia]"); await p.waitForTimeout(400);

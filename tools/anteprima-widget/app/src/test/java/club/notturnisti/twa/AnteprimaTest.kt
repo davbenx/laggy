@@ -26,7 +26,9 @@ class AnteprimaTest {
         val pat = "NNNRRRPPPRRMMMR"; val mie = JSONArray(); val sue = JSONArray()
         fun cella(c: Char) = "$c:" + (if (c == 'N') "n" else if (c == 'R') "r" else "l")
         // 20 settimane da lunedì 21 settembre (quattro prima di quella di oggi), come le pubblica la pagina
-        for (i in 0 until 140) { mie.put(if (i == 52) "Fe:r" else cella(pat[(i + 4 - 28 + 150) % pat.length])); sue.put(cella(pat[(i + 6 - 28 + 150) % pat.length])) }
+        // segni del giorno: 1 novembre festivo (giorno rosso), 27 e 30 ottobre modificati (puntino)
+        fun segni(i: Int) = if (i == 41) ":f" else if (i == 36 || i == 39) ":x" else ""
+        for (i in 0 until 140) { mie.put((if (i == 52) "Fe:r" else cella(pat[(i + 4 - 28 + 150) % pat.length])) + segni(i)); sue.put(cella(pat[(i + 6 - 28 + 150) % pat.length])) }
         val o = JSONObject().put("da", "2026-09-21").put("io", mie).put("sel", 0).put("star", "0|Anna")
         o.put("p", if (persone) JSONArray().put(JSONObject().put("n", "Anna").put("g", sue)) else JSONArray())
         return o

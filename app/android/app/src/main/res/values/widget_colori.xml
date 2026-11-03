@@ -7,6 +7,7 @@
     <color name="w_ink">#101A2A</color>
     <color name="w_dim">#56657A</color>
     <color name="w_accento">#2D5A8C</color>
+    <color name="w_festivo">#C0392B</color>   <!-- i giorni rossi: festivi (lo stesso rosso dell'app) -->
     <color name="w_t_sonno">#2D5A8C</color>
     <color name="w_t_turno">#D9541F</color>
     <color name="w_t_caffe">#8A5A2B</color>
