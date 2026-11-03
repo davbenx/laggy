@@ -927,6 +927,7 @@ justify-content:center;flex:none;width:44px;height:44px;border-radius:999px}
 .dq-riga b{color:var(--ink)}
 .dq-riga .kic{display:inline-flex;width:20px;height:20px}
 .drem-cmp{color:var(--dim);font-size:13px;font-weight:500}
+.lib-tit{font-weight:600;color:var(--ink);margin:14px 0 4px}
 .drem-tx>.drem-cmp{display:block;padding-left:18px}
 .drem-done,.dq-riga{line-height:1.5}
 .drem-done .lnk,.dq-riga .lnk{min-height:0;padding:10px 6px;margin:-10px 0;vertical-align:baseline}
@@ -6148,6 +6149,43 @@ function sceltaDopoNotte(P){
 function debitoMotivo(n){
   return "Negli ultimi giorni hai dormito "+hm(n.debito)+" meno di quanto ti serve.";
 }
+// Il tempo libero insieme: le ore di oggi in cui tu e una persona che segui siete liberi e svegli (almeno un'ora di fila),
+// dentro le tue finestre libere. Le stesse ore di «Adesso» («Tempo libero con Anna»), qui per tutta la giornata.
+function liberiInsieme(liberi){
+  const out=[];
+  for(const per of tuttePersone().slice(0,3)){
+    let com=null; try{ com=finestreCondivise(0, per); }catch(e){}
+    if(!com) continue;
+    for(const w of liberi) for(const [a,z] of com){
+      const x=Math.max(w.a,a), y=Math.min(w.b,z);
+      if(y-x>=60) out.push({nome:per.name||"la persona che segui", a:x, b:y});
+    }
+  }
+  return out.sort((u,v)=>u.a-v.a);
+}
+// Nel foglio di «Libero»: con chi, e idee per come usarlo secondo il momento. Sono possibilità, mai compiti:
+// prima l'attività e le persone, nell'ultima ora e mezza prima di dormire le cose calme (aiutano a prendere sonno).
+const LIBERO_CALMO=90;
+function liberiConsigli(P, liberi, ins){
+  let x="";
+  if(ins.length) x+='<p class="ed-sub lib-tit">Insieme</p><div class="rows">'+ins.map(i=>'<div class="row"><b>'+hhmm(i.a)+' → '+hhmm(i.b)+'</b><span>libero con '+esc(i.nome)+'</span></div>').join("")+'</div>';
+  else if(!tuttePersone().length) x+='<p class="ed-sub lib-tit">Insieme</p><p class="ed-sub">Aggiungi chi vive con te o chi vedi spesso, e qui compaiono le ore libere che avete in comune.</p>'+
+    '<button type="button" class="lnk ed-cambia" data-vai="persone">Aggiungi una persona →</button>';
+  const sonno=P.s.onset, calmoDa=sonno-LIBERO_CALMO, ultima=liberi[liberi.length-1];
+  let smonto=false; try{ smonto = NT.tipoDelGiorno(-1)==="n" && NT.tipoDelGiorno(0)!=="n"; }catch(e){}   // il giorno dopo l'ultima notte
+  const idee=[];
+  const attivo=liberi.filter(w=>Math.min(w.b,calmoDa)-w.a>=60);
+  if(attivo.length) idee.push([hhmm(attivo[0].a)+' → '+hhmm(Math.min(attivo[attivo.length-1].b,calmoDa)), smonto
+    ? 'dopo la notte, cose leggere: una passeggiata alla luce del giorno, un po\' di compagnia, un hobby tranquillo'
+    : 'muoverti, meglio all\'aperto; vedere amici o il partner; un hobby, qualcosa di creativo']);
+  if(ultima.b>calmoDa && ultima.b-Math.max(ultima.a,calmoDa)>=30) idee.push([hhmm(Math.max(ultima.a,calmoDa))+' → '+hhmm(ultima.b),
+    'cose calme: leggere, musica, stretching leggero, qualche minuto di respiro lento o meditazione']);
+  if(idee.length) x+='<p class="ed-sub lib-tit">Qualche idea</p><div class="rows">'+idee.map(r=>'<div class="row"><b>'+r[0]+'</b><span>'+r[1]+'</span></div>').join("")+'</div>';
+  x+='<div class="why">Attività fisica, palestra: vanno bene in quasi tutto il tempo libero. Evita solo gli sforzi intensi nell\'ultima ora prima di dormire o di un pisolino, perché rendono più difficile addormentarsi. Se sei all\'aperto conta anche la luce: segui la riga «Luce».'+
+    '<cite>Stutz, Eiholzer & Spengler 2019 (esercizio serale e sonno)</cite></div>';
+  if(!pianoVoce("leggera") && !pianoVoce("intensa")) x+='<button type="button" class="lnk ed-cambia" data-vai="momenti">Vedi il momento migliore per muoverti →</button>';
+  return x;
+}
 function renderEssenziale(P, CARDS){
   const el=$("#essenziale"); if(!el) return;
   infoVoci.clear();
@@ -6271,11 +6309,13 @@ function renderEssenziale(P, CARDS){
   if(liberi.length){
     const tot=liberi.reduce((a,w)=>a+(w.b-w.a),0);
     const altre=liberi.slice(1).map(w=>hhmm(w.a)+"–"+hhmm(w.b)).join(", ");
-    const dettLiberi='<div class="rows">'+liberi.map(w=>'<div class="row"><b>'+hhmm(w.a)+' → '+hhmm(w.b)+'</b><span>'+dur(w.b-w.a)+'</span></div>').join("")+'</div>'+
-      '<div class="why">Attività fisica, palestra: vanno bene in quasi tutto il tempo libero. Evita solo gli sforzi intensi nell\'ultima ora prima di dormire o di un pisolino, perché rendono più difficile addormentarsi. Se sei all\'aperto conta anche la luce: segui la riga «Luce».'+
-      '<cite>Stutz, Eiholzer & Spengler 2019 (esercizio serale e sonno)</cite></div>';
+    const ins=liberiInsieme(liberi), primo=ins[0];
+    // una finestra tutta in comune si dice sulla sua riga («tutto con Anna»); «Insieme» resta per le sovrapposizioni parziali
+    const tutta=w=>ins.filter(i=>i.a===w.a && i.b===w.b).map(i=>i.nome);
+    const dettLiberi='<div class="rows">'+liberi.map(w=>{ const c=tutta(w); return '<div class="row"><b>'+hhmm(w.a)+' → '+hhmm(w.b)+'</b><span>'+dur(w.b-w.a)+(c.length?', tutto con '+esc(c.join(" e ")):'')+'</span></div>'; }).join("")+'</div>'+
+      liberiConsigli(P, liberi, ins.filter(i=>!liberi.some(w=>i.a===w.a && i.b===w.b)));
     voci.push({t:dSv(liberi[0].a)+0.1, html:riga("liberi","Libero",hhmm(liberi[0].a)+" → "+hhmm(liberi[0].b),
-      altre ? "poi "+altre : "in tutto "+dur(tot), false, ICON.calendar, dettLiberi,
+      (altre ? "poi "+altre : "in tutto "+dur(tot))+(primo ? " · con "+primo.nome+(primo.a===liberi[0].a ? "" : " dalle "+hhmm(primo.a)) : ""), false, ICON.calendar, dettLiberi,
       {a:liberi[0].a, z:liberi[0].b, poi:"tempo libero dalle "+hhmm(liberi[0].a)})});
   }
 
@@ -8793,6 +8833,7 @@ if($("#infoModal")) $("#infoModal").addEventListener("click", e=>{
   if(b){ apriFoglio("infoModal",false); apriOpzioni("abitudini"); apriSezioneInline(+b.dataset.cambia, true); return; }
   const v=e.target.closest("[data-vai]");
   if(v && v.dataset.vai==="momenti"){ apriFoglio("infoModal",false); apriMomentiMigliori(); }
+  if(v && v.dataset.vai==="persone"){ apriFoglio("infoModal",false); apriPartner(); }
 });
 ["#essenziale","#andamenti"].forEach(s=>{ const el=$(s); if(el){ el.addEventListener("change",diaryChange); el.addEventListener("click",diaryClick); } });
 // Dalle righe «Dormi» e «Pisolino» al pannello dove si cambiano davvero.
