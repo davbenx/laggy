@@ -12,8 +12,8 @@ function deriv([x, xc, n], I) {
   const Bh = P99.G * (1 - n) * a, B = Bh * (1 - 0.4 * x) * (1 - 0.4 * xc);
   const w = Math.PI / 12;
   return [
-    w * (xc + P99.mu * (x / 3 + 4 * x ** 3 / 3 - 256 * x ** 7 / 105) + B),
-    w * (P99.q * B * xc - x * ((24 / (0.99729 * P99.taux)) ** 2 + P99.k * B)),
+    w * (xc + B),
+    w * (P99.mu * (xc - 4 * xc ** 3 / 3) - x * ((24 / (0.99669 * P99.taux)) ** 2 + P99.k * B)),
     60 * (a * (1 - n) - P99.beta * n)
   ];
 }
@@ -110,20 +110,33 @@ for (const [nome, pattern] of ROT) {
     misure[consigli] = ris.minimi.map(cbtDi);
   }
   console.log(`== ${nome}`);
-  console.log("giorno  turno  motore(P.cbt)  alertness  modello senza consigli  modello con consigli  minimo nel sonno principale? (senza/con)");
+  console.log("giorno  turno  motore(P.cbt)  vecchio alertness  modello senza consigli  modello con consigli  minimo nel sonno principale? (senza/con)");
   const st = { mot: [], ale: [], dentroS: 0, dentroC: 0, n: 0 };
   for (const { g, P, codice } of L) {
     const o = g * 1440, vicino = (arr, m) => arr.reduce((b, x) => Math.abs(x - m) < Math.abs(b - m) ? x : b, Infinity);
     const mot = o + P.cbt, mS = vicino(misure[false], mot), mC = vicino(misure[true], mot);
     const ale = o + hm(LIBERO.wake) - 180 + (Math.abs(o + hm(LIBERO.wake) - 180 + 1440 - mC) < Math.abs(o + hm(LIBERO.wake) - 180 - mC) ? 1440 : 0);
     const sonnoPrinc = [o + P.s.onset, o + P.s.onset + P.s.dur], dentro = m => m >= sonnoPrinc[0] && m < sonnoPrinc[1];
-    if (g >= 7) { st.mot.push((mot - mC) / 60); st.ale.push((ale - mC) / 60); st.n++; if (dentro(mS)) st.dentroS++; if (dentro(mC)) st.dentroC++; }
+    if (g >= 7 && g < GIORNI - 1) { st.mot.push((mot - mS) / 60); st.motC = (st.motC || []).concat((mot - mC) / 60); st.ale.push((ale - mS) / 60); st.reg = (st.reg || []).concat((o + P.cbtRegola - mS) / 60); st.n++; if (dentro(mS)) st.dentroS++; if (dentro(mC)) st.dentroC++; }
     if (g >= 7 && g < 7 + Math.max(pattern.length, 5) + 2)
       righe.push(`${String(g).padStart(5)}  ${codice.padEnd(5)}  ${fmt(P.cbt).padEnd(13)}  ${fmt(ale - o).padEnd(9)}  ${fmt(mS - o).padEnd(22)}  ${fmt(mC - o).padEnd(20)}  ${dentro(mS) ? "sì" : "no"} / ${dentro(mC) ? "sì" : "no"}`);
   }
   righe.forEach(r => console.log(r));
   const media = a => a.reduce((x, y) => x + y, 0) / a.length, assm = a => media(a.map(Math.abs));
-  console.log(`  dal giorno 7: scarto medio |motore − modello| ${assm(st.mot).toFixed(1)} h, |alertness − modello| ${assm(st.ale).toFixed(1)} h; minimo dentro il sonno principale ${st.dentroS}/${st.n} senza consigli, ${st.dentroC}/${st.n} con i consigli\n`);
-  riep.push({ nome, mot: assm(st.mot), ale: assm(st.ale), dentroS: st.dentroS, dentroC: st.dentroC, n: st.n });
+  console.log(`  dal giorno 7, scarto medio dal modello senza consigli: motore ${assm(st.mot).toFixed(1)} h (con i consigli ${assm(st.motC).toFixed(1)} h), vecchia regola ${assm(st.reg).toFixed(1)} h, vecchio alertness (sveglia − 3 h) ${assm(st.ale).toFixed(1)} h; minimo dentro il sonno principale ${st.dentroS}/${st.n} senza consigli, ${st.dentroC}/${st.n} con i consigli\n`);
+  // allineamento: quanto il minimo sta lontano dal posto giusto (2 h prima della sveglia del sonno principale), per scenario
+  const allinea = {};
+  for (const sc of [false, true]) {
+    const err = [], dentro = [];
+    for (const { g, P } of L) { if (g < 7 || g >= GIORNI - 1) continue;
+      const o = g * 1440, ideale = o + P.s.onset + P.s.dur - 120;
+      const m = misure[sc].reduce((b, x) => Math.abs(x - ideale) < Math.abs(b - ideale) ? x : b, Infinity);
+      err.push(Math.abs(m - ideale) / 60); dentro.push(m >= o + P.s.onset && m < o + P.s.onset + P.s.dur); }
+    allinea[sc] = { err: media(err), dentro: dentro.filter(Boolean).length, n: dentro.length };
+  }
+  console.log(`  allineamento (scarto dal minimo ideale): senza consigli ${allinea[false].err.toFixed(2)} h, con i consigli ${allinea[true].err.toFixed(2)} h; minimo nel sonno ${allinea[false].dentro}/${allinea[true].dentro} su ${allinea[true].n}\n`);
+  riep.push({ nome, mot: assm(st.mot), motC: assm(st.motC), reg: assm(st.reg), ale: assm(st.ale), dentroS: st.dentroS, dentroC: st.dentroC, n: st.n, allinea });
 }
-console.log("RIEPILOGO"); for (const r of riep) console.log(`${r.nome}: motore ±${r.mot.toFixed(1)} h, alertness ±${r.ale.toFixed(1)} h, minimo nel sonno ${r.dentroS}→${r.dentroC} su ${r.n}`);
+console.log("RIEPILOGO (scarto medio dal modello senza consigli)"); for (const r of riep) console.log(`${r.nome}: motore ±${r.mot.toFixed(1)} h, vecchia regola ±${r.reg.toFixed(1)} h, vecchio alertness ±${r.ale.toFixed(1)} h`);
+console.log("\nALLINEAMENTO DELL'OROLOGIO (scarto medio dal minimo ideale; minimo dentro il sonno principale)");
+for (const r of riep) { const a = r.allinea; console.log(`${r.nome}: senza consigli ${a[false].err.toFixed(2)} h (${a[false].dentro}/${a[false].n}) · con i consigli ${a[true].err.toFixed(2)} h (${a[true].dentro}/${a[true].n})`); }

@@ -87,6 +87,8 @@ export function createEngine(config){
     state.giorni = gg;
     for(const k of ["pWake","pBed"]) if(state[k]!=null && !/^([01]\d|2[0-3]):[0-5]\d$/.test(String(state[k]))) state[k] = "";
     if(!{bassa:1, media:1, alta:1}[state.caffSens]) state.caffSens = DEFAULTS.caffSens;
+    { const f = state.caffFattori || {};   // facoltativi, restano sul telefono: cambiano quanto dura la caffeina nel corpo
+      state.caffFattori = {fumo: f.fumo===true, pillola: f.pillola===true, gravidanza: {inizio:1, fine:1}[f.gravidanza] ? f.gravidanza : ""}; }
     if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(String(state.freeWake))) state.freeWake="07:30";
     if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(String(state.freeBed)))  state.freeBed="23:30";
     sincronizzaNeed();
@@ -107,6 +109,13 @@ const CFG = {
   dormitaMax: 600,              // oltre le dieci ore il sonno in più rende poco
   caffeine:  480,    // [Drake 2013: minimo 6h] 8 = margine, ora è il valore di partenza
   caffScala: {bassa:240, media:360, alta:480},   // quanto prima smettere
+  // Quanto dura la caffeina in te (emivita), rispetto a una persona tipo (~5 h): la soglia del caffè si allunga o si
+  // accorcia in proporzione. Fumo: il fumo accelera l'enzima che la smaltisce (CYP1A2), emivita circa dimezzata
+  // (Parsons & Neims 1978; Joeres e coll. 1988). Pillola o altri contraccettivi ormonali: quasi il doppio
+  // (Patwardhan e coll. 1980; Abernethy & Todd 1985). Gravidanza: poco nei primi mesi, fino a 2-3 volte negli ultimi
+  // (Knutti e coll. 1981; Brazier e coll. 1983).
+  caffEmivita: {fumo:0.6, pillola:1.7, inizio:1.3, fine:2.5},
+  caffMin: 240, caffMax: 720,   // la soglia resta fra 4 e 12 ore prima di dormire
   cbtOffset: 120,    // [SOLIDO] minimo corporeo ~2h prima della sveglia libera
   eveningDim:120, lightTaper: 120,
   daySleepMax:390,   // [DEFAULT] 6h30 di sonno diurno
@@ -641,13 +650,156 @@ function svegliaVera(wakePiano){
   return x;
 }
 
+// ── L'orologio: modello di Forger, Jewett & Kronauer (J Biol Rhythms 1999), forma «semplice» ─────────────────────────────────────────
+// Il pacemaker circadiano come oscillatore che la luce sposta. Si simula sugli ultimi 14 giorni e i 3 prossimi del piano
+// (sonni e turni), con una luce stimata: buio quando dormi, 300 lux al lavoro, di giorno 600 (casa, fuori a tratti),
+// la sera 150; il giorno segue la stagione. Il minimo del modello si calibra sui tuoi orari liberi (minimo corporeo
+// due ore prima della sveglia libera, come cbtOffset): nei giorni regolari non cambia niente; con i turni il minimo
+// si sposta come sposterebbe il tuo orologio, poco nelle rotazioni rapide, di più nei blocchi lunghi di notti.
+// Nessun dato biologico: è un modello dai tuoi orari, come il resto del piano.
+const FJK = {taux:24.2, mu:0.23, k:0.55, G:33.75, a0:0.05, beta:0.0075, I0:9500, p:0.5};   // Forger 1999, come nella libreria circadian (Arcascope)
+const FJK_DT = 10/60;  // ore: passo di 10 minuti (Runge-Kutta 4; con 5 gli orari cambiano di meno di 5 minuti)
+function fjkDeriv(x, xc, n, I){
+  const a = I > 0 ? FJK.a0 * Math.pow(I / FJK.I0, FJK.p) : 0;
+  const B = FJK.G * (1 - n) * a * (1 - 0.4*x) * (1 - 0.4*xc), w = Math.PI / 12;
+  return [w * (xc + B),
+          w * (FJK.mu * (xc - 4*xc*xc*xc/3) - x * ((24 / (0.99669 * FJK.taux)) ** 2 + FJK.k * B)),
+          60 * (a * (1 - n) - FJK.beta * n)];
+}
+// il minimo fra un passo e l'altro: parabola sui tre punti attorno al minimo (precisione di un minuto anche con passi di 10)
+const vertice = (a, b, c) => { const d = a - 2*b + c; return d > 0 ? 0.5 * (a - c) / d : 0; };
+function fjkPasso(y, I){
+  const h = FJK_DT, f = (a, d, c) => fjkDeriv(y[0] + c*d[0], y[1] + c*d[1], y[2] + c*d[2], I);
+  const k1 = fjkDeriv(y[0], y[1], y[2], I), k2 = f(0, k1, h/2), k3 = f(0, k2, h/2), k4 = f(0, k3, h);
+  return [0,1,2].map(i => y[i] + h/6 * (k1[i] + 2*k2[i] + 2*k3[i] + k4[i]));
+}
+// la luce del giorno per stagione (Italia, ~44°N): ore di luce e mezzogiorno vero, con l'ora legale
+function luceDelGiorno(d){
+  const g = Math.floor((Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) - Date.UTC(d.getFullYear(), 0, 0)) / 864e5);
+  const ore = 12 + 3.2 * Math.sin(2 * Math.PI * (g - 80) / 365);
+  const legale = -new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12).getTimezoneOffset() > -new Date(d.getFullYear(), 0, 1).getTimezoneOffset();
+  const mezzo = 12*60 + 20 + (legale ? 60 : 0);
+  return [mezzo - ore*30, mezzo + ore*30];
+}
+function luceStimata(minuto, dentro, alba, tramonto){
+  if(dentro === "sonno") return 0;
+  if(dentro === "lavoro") return 300;
+  return (minuto >= alba && minuto < tramonto) ? 600 : 150;
+}
+// orario libero ripetuto: lo stato del modello a mezzanotte e lo scarto per leggere il minimo come minimo corporeo
+let _fjkLibero = {chiave:null};
+function fjkLibero(d){
+  const chiave = state.freeBed + "|" + state.freeWake + "|" + state.need + "|" + d.getFullYear() + "-" + d.getMonth();
+  if(_fjkLibero.chiave === chiave) return _fjkLibero;
+  const [alba, tramonto] = luceDelGiorno(d);
+  const fine = freeWakeUsata(), inizio = fine - state.need;
+  const dorme = m => { const x = ((m - inizio) % 1440 + 1440) % 1440; return x < state.need; };
+  let y = [-0.5, -0.5, 0.2], prec = null, prec2 = null; const minimi = [];
+  const passi = Math.round(24 / FJK_DT);
+  for(let g = 0; g < 30; g++) for(let i = 0; i < passi; i++){
+    const m = i * FJK_DT * 60;
+    y = fjkPasso(y, luceStimata(m, dorme(m) ? "sonno" : "", alba, tramonto));
+    if(g >= 20 && prec2 !== null && prec < prec2 && prec <= y[0]) minimi.push(((m - FJK_DT*60*(1 - vertice(prec2, prec, y[0]))) % 1440 + 1440) % 1440);
+    prec2 = prec; prec = y[0];
+  }
+  // media circolare dei minimi degli ultimi giorni
+  const ang = minimi.map(m => m / 1440 * 2 * Math.PI);
+  const xm = ((Math.atan2(ang.reduce((a,b)=>a+Math.sin(b),0), ang.reduce((a,b)=>a+Math.cos(b),0)) / (2*Math.PI) * 1440) % 1440 + 1440) % 1440;
+  const rif = ((naturalMid() + CFG.cbtOffset) % 1440 + 1440) % 1440;
+  let fase = rif - xm; while(fase > 720) fase -= 1440; while(fase < -720) fase += 1440;
+  _fjkLibero = {chiave, y, fase};
+  return _fjkLibero;
+}
+// I minimi corporei stimati dal modello, in minuti sulla scala del giorno guardato (0 = mezzanotte di oggi).
+// La simulazione parte da un giorno fisso della settimana (non dal giorno guardato) e ogni giornata simulata si ricorda
+// con una chiave fatta dei sonni e dei turni di quel giorno e di tutti i precedenti della stessa partenza: guardare il
+// giorno dopo, o ridisegnare, riusa il lavoro già fatto. Un sonno o un turno diverso cambia la chiave, e si ricalcola.
+const OROL_PRIMA = 10, OROL_DOPO = 2;
+const _orolGiorni = new Map();
+let _orologio = {chiave:null, minimi:null};
+function minimiOrologio(S){
+  try{
+    const oggi = dnum(state.focus), lib = fjkLibero(state.focus);
+    const inizio = Math.floor((oggi - OROL_PRIMA) / 7) * 7 - oggi;    // giorni dal giorno guardato: fra -16 e -10
+    const sonni = [], lavoro = [];
+    for(let o = inizio - 1; o <= OROL_DOPO; o++){
+      const x = at(S, o); if(x && x.dur > 0) sonni.push([o*1440 + x.onset, o*1440 + x.onset + x.dur]);
+      const b = block(o); if(!b.rest) lavoro.push([o*1440 + b.start, o*1440 + b.end]);
+    }
+    // Il sonno vero del diario, dove c'è, al posto di quello del piano: è il dato che sposta davvero l'orologio. Si usa solo
+    // se combacia almeno a metà con un sonno del piano (fra le collocazioni possibili, quella che combacia di più), così
+    // la convenzione del «giorno» del diario dopo una notte non può mai mettere un sonno dove non c'era.
+    for(let o = inizio - 1; o <= 0; o++){
+      const k = iso(day(state.focus, o)), w = oraDi((state.wakes||{})[k]), bd = oraDi((state.beds||{})[k]);
+      if(w === null || bd === null) continue;
+      let d = w - bd; while(d <= 0) d += 1440; if(d < 60 || d > 960) continue;
+      let migliore = null;
+      for(const g of [o - 1, o, o + 1]){
+        const z = g*1440 + w, a = z - d;
+        sonni.forEach((x, i) => { const c = Math.min(z, x[1]) - Math.max(a, x[0]);
+          if(c >= 0.5 * Math.min(d, x[1] - x[0]) && (!migliore || c > migliore.c)) migliore = {i, a, z, c}; });
+      }
+      if(migliore) sonni[migliore.i] = [migliore.a, migliore.z];
+    }
+    const chiaveTutto = oggi + "|" + lib.chiave + JSON.stringify(sonni) + JSON.stringify(lavoro);
+    if(_orologio.chiave === chiaveTutto) return _orologio.minimi;
+    if(_orolGiorni.size > 3000) _orolGiorni.clear();
+    const taglia = (L, a, z) => L.filter(([p, q]) => q > a && p < z).map(([p, q]) => [Math.max(p, a) - a, Math.min(q, z) - a]);
+    const dentro = (L, m) => { for(const [p, q] of L) if(m >= p && m < q) return true; return false; };
+    const passo = FJK_DT * 60, minimi = [];
+    let chiave = lib.chiave + "|" + (oggi + inizio), st = {y: lib.y.slice(), prec: null, prec2: null};
+    for(let o = inizio; o <= OROL_DOPO; o++){
+      const a = o*1440, sG = taglia(sonni, a, a + 1440), lG = taglia(lavoro, a, a + 1440);
+      chiave += "|" + JSON.stringify(sG) + JSON.stringify(lG);
+      let g = _orolGiorni.get(chiave);
+      if(!g){
+        const [alba, tramonto] = luceDelGiorno(day(state.focus, o));
+        let y = st.y, prec = st.prec, prec2 = st.prec2; const mm = [];
+        for(let m = 0; m < 1440; m += passo){
+          y = fjkPasso(y, luceStimata(m, dentro(sG, m) ? "sonno" : dentro(lG, m) ? "lavoro" : "", alba, tramonto));
+          if(!isFinite(y[0])) throw new Error("modello instabile");
+          if(prec2 !== null && prec < prec2 && prec <= y[0]) mm.push(m - passo*(1 - vertice(prec2, prec, y[0])));
+          prec2 = prec; prec = y[0];
+        }
+        g = {y, prec, prec2, mm};
+        _orolGiorni.set(chiave, g);
+      }
+      for(const m of g.mm) minimi.push(a + m + lib.fase);
+      st = g;
+    }
+    _orologio = {chiave: chiaveTutto, minimi};
+    return minimi;
+  }catch(e){ return null; }
+}
+// Il minimo corporeo del modello più vicino a quello che la regola semplice si aspetterebbe (rif): lo stesso «quale
+// notte» di prima, ma all'ora in cui il tuo orologio sta davvero. Senza modello, la regola semplice.
+function minimoVicino(S, rif){
+  const L = minimiOrologio(S);
+  if(!L || !L.length) return rif;
+  let best = null; for(const m of L) if(best === null || Math.abs(m - rif) < Math.abs(best - rif)) best = m;
+  return Math.abs(best - rif) <= 720 ? Math.round(best) : rif;
+}
+// La soglia dell'ultimo caffè: quanto ti resta addosso (la tua scelta in Impostazioni) per quanto dura in te.
+function caffeinaFattore(){
+  const f = state.caffFattori || {}, E = CFG.caffEmivita;
+  return (f.fumo ? E.fumo : 1) * (f.pillola ? E.pillola : 1) * (f.gravidanza === "fine" ? E.fine : f.gravidanza === "inizio" ? E.inizio : 1);
+}
+function caffeinaOre(){
+  const base = CFG.caffScala[state.caffSens] || CFG.caffeine, x = base * caffeinaFattore();
+  return {min: Math.round(clamp(x, CFG.caffMin, CFG.caffMax) / 15) * 15, oltre: x > CFG.caffMax, fattore: caffeinaFattore()};
+}
+
 function plan(){
   const S = simulate(), b = block(0), pb = block(-1), nb = block(1);
   const s = at(S,0), sp = at(S,-1);
   const end = s.onset + s.dur, wakePiano = sp.onset + sp.dur - 1440;
   const wake = svegliaVera(wakePiano);
-  const oreCaffe = CFG.caffScala[state.caffSens] || CFG.caffeine;
-  const cbt = s.mid + CFG.cbtOffset, cut = s.onset - oreCaffe, shift = s.mid - sp.mid;
+  const caff = caffeinaOre(), oreCaffe = caff.min;
+  const cbt = minimoVicino(S, s.mid + CFG.cbtOffset), shift = s.mid - sp.mid;
+  // Nelle notti la caffeina serve anche a restare svegli: se la tua soglia cadrebbe prima del turno (caffeina che in te
+  // dura molto), resta almeno un caffè a inizio turno. La sicurezza viene prima del sonno di domattina.
+  let cut = s.onset - oreCaffe;
+  if(!b.rest && spansNight(b) && cut < b.start + 60){ cut = b.start + 60; caff.notte = true; }
 
   const sleeps = [{a:s.onset, b:end}], naps = [];
   const dd = debitoDiario(S);
@@ -701,7 +853,7 @@ function plan(){
   // l'ora del rientro, che è già la più rischiosa della giornata.
   const inTurno = (function(){
     if(state.napTurno === "no" || b.rest || !spansNight(b)) return null;
-    const minimo = sp.mid + CFG.cbtOffset;              // dove cade il peggio
+    const minimo = minimoVicino(S, sp.mid + CFG.cbtOffset);   // dove cade il peggio (il modello dell'orologio)
     const ultimo = b.end - CFG.margineFineTurno;        // oltre qui è pericoloso
     const primo  = b.start + 60;                        // non appena entri
     if(ultimo - primo < CFG.napBreve) return null;
@@ -826,7 +978,7 @@ function plan(){
   // giornata lunga resta solo una giornata lunga e non serve prescrivere niente.
   if(!naps.length){
     const veglia = s.onset - wake;
-    const minimo = sp.mid + CFG.cbtOffset;
+    const minimo = minimoVicino(S, sp.mid + CFG.cbtOffset);
     const tocca  = s.onset >= minimo - 240;
     const soglia = s.meta.reset ? 1140 : 960;      // il rientro è una giornata lunga apposta
     if(veglia > soglia && (tocca || veglia > 1080)){
@@ -879,7 +1031,7 @@ function plan(){
     meals.push({at:place(main, busy), main:true});
     meals.push({at:place(s.onset-180, busy), lt:true});
   }
-  return {b, pb, nb, s, sp, S, wake, end, cut, cbt, shift, sleeps, naps, meals, busy,
+  return {b, pb, nb, s, sp, S, wake, end, cut, cbt, cbtRegola: s.mid + CFG.cbtOffset, caff, shift, sleeps, naps, meals, busy,
           night:spansNight(b), lateStart:startsInNight(b), debitoScoperto, debitoMin:dd.haFino?dd.min:0,
           debitoNotti:dd.haFino ? dd.serie.filter(x=>x.manca>=30).sort((x,y)=>y.manca-x.manca).slice(0,3) : []};
 }
@@ -1178,7 +1330,7 @@ function buildIcs(days){
 
   normalizza();
   return {
-    state, plan, buildIcs, buildCouple, buildEvents, buildCoupleEvents, codeAt, block, etichetta, tipoDelGiorno, fasciaDelGiorno, nomeTurno, nomeOre, fasciaOre, oreNotturne, eNotte,
+    state, plan, caffeinaOre, _orologioPasso: (y, I) => fjkPasso(y, I), buildIcs, buildCouple, buildEvents, buildCoupleEvents, codeAt, block, etichetta, tipoDelGiorno, fasciaDelGiorno, nomeTurno, nomeOre, fasciaOre, oreNotturne, eNotte,
     sharedDays, freeOverlap, asPartner,
     setIcs(o){ Object.assign(ICS, o||{}); return ICS; },
     // Esposti anche questi: prima privati alla closure, ma index.html (che

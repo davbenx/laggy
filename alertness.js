@@ -26,11 +26,14 @@ const hhmm = d => {
 const ritmo24 = (min, wake) => 0.7 * Math.cos(2 * Math.PI * (min - (wake + 540) % 1440) / 1440);
 const ritmo12 = (min, wake) => 0.5 * Math.cos(2 * Math.PI * (min - (wake + 180) % 1440) / 720);
 
-// opts: { now:Date, freeWake, freeBed, lastSleepEnd:Date|null, nextSleepStart:Date|null }
+// opts: { now:Date, freeWake, freeBed, lastSleepEnd:Date|null, nextSleepStart:Date|null, nadir?:minuti }
+// nadir: il minimo corporeo del motore (il modello dell'orologio, P.cbt): il ritmo si centra lì, così la vigilanza e il
+// piano dicono la stessa ora. Senza, si stima dalla sveglia libera.
 export function alertness(opts) {
   const now = opts.now || new Date();
-  const wake = parseHM(opts.freeWake) != null ? parseHM(opts.freeWake) : 450;   // 07:30
-  const nadir = ((wake - 180) % 1440 + 1440) % 1440;   // ~3h prima del risveglio, per l'etichetta
+  const fw = parseHM(opts.freeWake) != null ? parseHM(opts.freeWake) : 450;   // 07:30
+  const nadir = Number.isFinite(opts.nadir) ? ((Math.round(opts.nadir) % 1440) + 1440) % 1440 : ((fw - 180) % 1440 + 1440) % 1440;
+  const wake = nadir + 180;   // il ritmo a due armoniche ha il fondo 3 h prima di questo riferimento (senza nadir: la sveglia libera)
 
   const lastEnd = opts.lastSleepEnd ? opts.lastSleepEnd.getTime() : now.getTime() - 6 * 3600e3;
   // orizzonte: fino a ~1h prima del sonno pianificato (la stanchezza da nanna non è

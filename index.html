@@ -945,6 +945,11 @@ justify-content:center;flex:none;width:44px;height:44px;border-radius:999px}
 .dq-riga .kic{display:inline-flex;width:20px;height:20px}
 .drem-cmp{color:var(--dim);font-size:13px;font-weight:500}
 .tt-sigla{display:inline-block;min-width:22px;padding:1px 5px;margin-right:6px;border-radius:6px;background:var(--s2);color:var(--dim);font-size:12px;font-weight:700;text-align:center}
+.caff-fatt{margin-top:10px}
+.caff-fatt>summary{font-size:13.5px;color:var(--blue);font-weight:600;min-height:44px;display:flex;align-items:center;gap:4px;letter-spacing:0;text-transform:none}
+.caff-fatt>summary span{color:var(--dim);font-weight:400}
+.cf-grav{margin:10px 0 4px}
+.cf-grav>b{display:block;font-size:14px;margin-bottom:6px}
 .lib-tit{font-weight:600;color:var(--ink);margin:14px 0 4px}
 .drem-tx>.drem-cmp{display:block;padding-left:18px}
 .drem-done,.dq-riga{line-height:1.5}
@@ -1615,6 +1620,14 @@ header b{font-size:23px}
         <option value="alta">Molto</option>
       </select>
       <span class="hint">Poco: dormi anche con un caffè nel pomeriggio. Molto: se lo prendi tardi non chiudi occhio. L'ultimo caffè si sposta di 4, 6 o 8 ore prima del sonno.</span>
+      <details class="caff-fatt" id="caffFatt"><summary>Altre cose che cambiano quanto dura il caffè in te <span>(facoltativo)</span></summary>
+        <label class="riga-sw" for="cfFumo"><span><b>Fumi</b><small>il fumo fa smaltire la caffeina più in fretta</small></span><span class="switch"><input type="checkbox" id="cfFumo" data-cf="fumo"><span class="slider"></span></span></label>
+        <label class="riga-sw" for="cfPillola"><span><b>Pillola o altro contraccettivo ormonale</b><small>la caffeina resta in circolo quasi il doppio</small></span><span class="switch"><input type="checkbox" id="cfPillola" data-cf="pillola"><span class="slider"></span></span></label>
+        <div class="cf-grav"><b>Gravidanza</b><div class="pv-quando" role="radiogroup" aria-label="Gravidanza">
+          <button type="button" role="radio" data-cf-grav="">No</button><button type="button" role="radio" data-cf-grav="inizio">Primi mesi</button><button type="button" role="radio" data-cf-grav="fine">Ultimi mesi</button></div></div>
+        <p class="hint" id="caffEsito" aria-live="polite"></p>
+        <p class="hint">Restano solo sul telefono e servono solo a questo calcolo.</p>
+      </details>
     </div>
     <div class="q">
       <label for="napT">Puoi dormire durante il turno?</label>
@@ -3761,7 +3774,16 @@ function cards(P){
     cambia:4, cambiaTxt:"Cambia la soglia del caffè",
     why:"Nello studio di riferimento, 400 mg di caffeina (circa quattro tazze) presi sei ore prima di coricarsi accorciavano comunque il sonno — spesso senza che il soggetto se ne accorgesse. Da qui la soglia delle sei ore. Puoi cambiarla nelle impostazioni: la caffeina si smaltisce a velocità diverse da persona a persona, e un margine che non ti somiglia lo ignoreresti e basta.",
     cite:"Drake, Roehrs, Shambroom & Roth, J Clin Sleep Med 2013"};
-  if(night){
+  if(P.caff && P.caff.fattore!==1){
+    cc.why+=" Con quello che hai indicato (fumo, contraccettivi ormonali, gravidanza) la caffeina nel tuo corpo dura "+(P.caff.fattore>1?"di più":"di meno")+" della media: per questo l'ultimo caffè è "+dur(P.caff.min)+" prima di dormire."+
+      (P.caff.oltre ? " In questo periodo anche un caffè al mattino può restare in circolo fino a sera: meglio pochi, e presto." : "");
+    cc.cite+=" · Parsons & Neims 1978 · Abernethy & Todd 1985 · Knutti e coll. 1981 (durata della caffeina)";
+  }
+  if(night && P.caff && P.caff.notte){
+    cc.sub="Uno piccolo appena entri, se ti serve per restare sveglio.";
+    cc.rows.push(["Sì","uno piccolo entro le "+hhmm(cut)+", a inizio turno"]);
+    cc.rows.push(["Dopo","meglio di no: in te la caffeina dura a lungo, e quella presa più tardi arriverebbe fino al sonno di domattina"]);
+  }else if(night){
     cc.sub="Di notte serve, ma va concentrata a inizio turno.";
     cc.rows.push(["Sì",hhmm(b.start)+" appena entri, un altro entro le "+hhmm(cut)]);
     cc.rows.push(["Come prenderlo","piccoli e distanziati: due caffè normali a distanza reggono meglio di un doppio, e disturbano meno il sonno dopo"]);
@@ -3771,10 +3793,12 @@ function cards(P){
   else cc.sub="Calcolato sull'ora in cui andrai a letto stasera.";
   out.push(cc);
 
-  const lc={k:"l",lab:"Luce",rows:[],rowsA:[],rowsE:[],at:wake+15,cite:"Khalsa, Jewett, Cajochen & Czeisler, J Physiol 2003 · Smith, Fogg &amp; Eastman 2009 · Thompson, Jones, Gregson &amp; Atkinson, Eur J Appl Physiol 2014 (alba simulata)"};
-  const whyLight="La luce sposta l'orologio in due direzioni opposte, decise dall'ora in cui la prendi: il confine è il minimo corporeo, per te intorno alle "+hhmm(cbt)+". Prima di quell'ora ti spinge avanti e ti toglie il sonno; dopo ti tira indietro — per questo il sole della strada, dopo la notte, è il nemico numero uno del sonno diurno.";
+  const lc={k:"l",lab:"Luce",rows:[],rowsA:[],rowsE:[],at:wake+15,cite:"Khalsa, Jewett, Cajochen & Czeisler, J Physiol 2003 · Smith, Fogg &amp; Eastman 2009 · Thompson, Jones, Gregson &amp; Atkinson, Eur J Appl Physiol 2014 (alba simulata) · Forger, Jewett &amp; Kronauer, J Biol Rhythms 1999 (modello dell'orologio)"};
+  const whyLight="La luce sposta l'orologio in due direzioni opposte, decise dall'ora in cui la prendi: il confine è il minimo corporeo, per te intorno alle "+hhmm(cbt)+" (lo stima un modello dell'orologio biologico dai tuoi ultimi giorni di turni e sonno). Prima di quell'ora ti spinge avanti e ti toglie il sonno; dopo ti tira indietro — per questo il sole della strada, dopo la notte, è il nemico numero uno del sonno diurno.";
   if(night){
-    const seekEnd=Math.min(cbt-NT.CFG.lightTaper,b.end);
+    // Poche notti di fila («contieni»: l'orologio non si sposta, ed è giusto così): luce per restare vigili tutto il turno.
+    // Blocco lungo: luce fino a due ore prima del minimo corporeo (il modello dell'orologio dice dov'è oggi), poi bassa.
+    const seekEnd = s.strategy==="contieni" ? b.end : Math.min(cbt-NT.CFG.lightTaper,b.end);
     lc.blocks=[["seek",b.start,seekEnd,"cerca"],["avoid",seekEnd,Math.max(s.onset,b.end),"evita"]];
     if(s.strategy==="contieni"){ lc.val="Luce contro il sonno";
       lc.rowsA.push(["In turno","tieni le luci accese dove lavori, senza esagerare"]); }
@@ -4681,7 +4705,7 @@ function renderOra(Pfocus){
     }
     const midnight=new Date(vero.getFullYear(),vero.getMonth(),vero.getDate());
     const nextSleep=(P.s&&typeof P.s.onset==="number")?new Date(midnight.getFullYear(),midnight.getMonth(),midnight.getDate(),0,P.s.onset):null;   // con il calendario: giusto anche nei giorni del cambio d'ora
-    r=window.NTAlert.alertness({now, freeWake:state.freeWake, freeBed:state.freeBed, lastSleepEnd:lastEnd, nextSleepStart:nextSleep});
+    r=window.NTAlert.alertness({now, freeWake:state.freeWake, freeBed:state.freeBed, lastSleepEnd:lastEnd, nextSleepStart:nextSleep, nadir:P.cbt});
   } }catch(e){}
 
   const kssSleepy = votoOraRecente();
@@ -7441,7 +7465,7 @@ function orologio(){
   try{ if(window.NTAlert){
     const d=new Date(); d.setHours(0,0,0,0);
     const sv=new Date(+d+wake*6e4), letto=new Date(+d+(bed>wake?bed:bed+1440)*6e4);
-    const r=window.NTAlert.alertness({now:sv, freeWake:hhmm(wake), freeBed:state.freeBed, lastSleepEnd:sv, nextSleepStart:letto});
+    const r=window.NTAlert.alertness({now:sv, freeWake:hhmm(wake), freeBed:state.freeBed, lastSleepEnd:sv, nextSleepStart:letto, nadir:cbt});
     if(r && r.peak) lucido=r.peak.hhmm;
   } }catch(e){}
   return {tipo, mid, cbt, mel:mod1440(bed-120), lucido, partenza: state.freeBed==="23:30" && state.freeWake==="07:30"};
@@ -9422,6 +9446,7 @@ function sincronizzaCampiPiano(){
   if(selBed && !selImposta(selBed, state.freeBed, true)) selBed.value="23:30";
   mostraDurata();
   if($("#caffS")) $("#caffS").value=state.caffSens||"alta";
+  try{ renderCaffFatt(); }catch(e){}
   if($("#napT")) $("#napT").value=state.napTurno||"no";
   if($("#sonnoD")) $("#sonnoD").value=state.sonnoDiurno||"diviso";
   if($("#mattinoBif")) $("#mattinoBif").checked=!!state.mattinoBifasico;
@@ -10848,7 +10873,27 @@ const PRESETS=[
 // (il titolo "Il tuo ciclo — …" e il valore accanto a "Turni e ciclo" in
 // Opzioni) — non per le card, che titolo/settore li mostrano già separati.
 const nomePreset = p => p.sector ? p.sector+" · "+p.title : p.title;
-$("#caffS").addEventListener("change",e=>{ state.caffSens=e.target.value; salva(); render(); });
+$("#caffS").addEventListener("change",e=>{ state.caffSens=e.target.value; salva(); render(); renderCaffFatt(); });
+// I fattori facoltativi del caffè: si salvano al tocco; sotto, la soglia che ne viene fuori (una frase, nessun giudizio).
+function renderCaffFatt(){
+  const box=$("#caffFatt"); if(!box) return;
+  const f=state.caffFattori||{};
+  const fu=$("#cfFumo"), pi=$("#cfPillola"); if(fu) fu.checked=!!f.fumo; if(pi) pi.checked=!!f.pillola;
+  box.querySelectorAll("[data-cf-grav]").forEach(b=>b.setAttribute("aria-checked", String((f.gravidanza||"")===b.dataset.cfGrav)));
+  if(f.fumo||f.pillola||f.gravidanza) box.open=true;
+  const c=NT.caffeinaOre(), e=$("#caffEsito");
+  if(e) e.textContent="Il tuo ultimo caffè: "+dur(c.min)+" prima di dormire."+
+    (f.gravidanza ? " In gravidanza l'EFSA indica di non superare 200 mg di caffeina al giorno (circa due caffè)." : "")+
+    (c.oltre ? " Più di così il piano non lo sposta: meglio pochi caffè, e al mattino." : "");
+}
+if($("#caffFatt")) $("#caffFatt").addEventListener("change", e=>{
+  const x=e.target.closest("[data-cf]"); if(!x) return;
+  state.caffFattori=Object.assign({}, state.caffFattori, {[x.dataset.cf]:x.checked}); salva(); render(); renderCaffFatt();
+});
+if($("#caffFatt")) $("#caffFatt").addEventListener("click", e=>{
+  const b=e.target.closest("[data-cf-grav]"); if(!b) return; haptic(6);
+  state.caffFattori=Object.assign({}, state.caffFattori, {gravidanza:b.dataset.cfGrav}); salva(); render(); renderCaffFatt();
+});
 $("#napT").addEventListener("change",e=>{
   state.napTurno=e.target.value;
   state.pausa="";   // il campo esiste ancora nello stato per compatibilità, ma non si chiede più
@@ -11265,7 +11310,7 @@ function salva(){
     maxAdvance:state.maxAdvance,pPattern:state.pPattern,pAnchor:state.pAnchor,
     pShifts:state.pShifts,pWake:state.pWake,pBed:state.pBed,pName:state.pName,people:state.people,personaGlance:state.personaGlance,piano:state.piano,
     repeat:state.repeat,ecc:state.ecc,giorni:state.giorni,evento:state.evento,festivi:state.festivi,festiviRiposo:state.festiviRiposo,
-    napTurno:state.napTurno,sonnoDiurno:state.sonnoDiurno,mattinoBifasico:state.mattinoBifasico,avvisoBifasicoOff:state.avvisoBifasicoOff,firstSeenAt:state.firstSeenAt,pausa:state.pausa,caffSens:state.caffSens,vista:state.vista};
+    napTurno:state.napTurno,sonnoDiurno:state.sonnoDiurno,mattinoBifasico:state.mattinoBifasico,avvisoBifasicoOff:state.avvisoBifasicoOff,firstSeenAt:state.firstSeenAt,pausa:state.pausa,caffSens:state.caffSens,caffFattori:state.caffFattori,vista:state.vista};
   const testo=JSON.stringify(dati);
   if(testo!==_ultimoSalvato){
     store.set("turniConfigurati", !!state.turniConfigurati);
@@ -11287,7 +11332,7 @@ function salva(){
     const sig=JSON.stringify([!!state.turniConfigurati,state.pattern,state.shifts,state.anchor,state.repeat,
       state.freeWake,state.freeBed,state.cTo,state.cFrom,state.need,state.prep,state.maxAdvance,
       state.pPattern,state.pAnchor,state.pShifts,state.pWake,state.pBed,state.pName,state.people,state.personaGlance,
-      state.ecc,state.giorni,state.evento,state.napTurno,state.pausa,state.caffSens]);
+      state.ecc,state.giorni,state.evento,state.napTurno,state.pausa,state.caffSens,state.caffFattori]);
     if(_cfgSig!==null && sig!==_cfgSig) dispatchEvent(new Event("nt:config-changed"));
     _cfgSig=sig;
   }catch(e){}

@@ -1,0 +1,133 @@
+// Ottimizzatore della luce su più giorni (orizzonte mobile) contro le regole attuali dell'app. Fuori dall'app.
+// Idea (Serkh & Forger, PLoS Comput Biol 2014; schemi «bang-bang»: luce forte o buio): ogni giorno si scelgono una finestra
+// «cerca luce» e una «evita luce» per i prossimi H giorni minimizzando il disallineamento dell'orologio dai sonni principali
+// (minimo corporeo 2 h prima della sveglia); si tiene la scelta di oggi e si ripete domani. Vincoli: mai «evita» al lavoro,
+// luce forte 3000 lux solo con il sole e fuori dal lavoro (1000 altrimenti), buio 20 lux.
+// Uso: node ottimizza.mjs [tau] [adesione 0-1] [cartella per esportare la luce]
+import { createEngine } from "../../engine.js";
+import { writeFileSync } from "node:fs";
+
+const TAU = +(process.argv[2] || 24.2), ADES = +(process.argv[3] || 1), OUT = process.argv[4] || null;
+// l'ottimizzatore conosce solo la persona media (τ 24,2); la valutazione usa la persona «vera» (τ dato)
+const NOM = { taux: 24.2, mu: 0.23, k: 0.55, G: 33.75, a0: 0.05, beta: 0.0075, I0: 9500, p: 0.5 }, VERA = { ...NOM, taux: TAU };
+let F = NOM;
+const _F_inutile = { taux: TAU, mu: 0.23, k: 0.55, G: 33.75, a0: 0.05, beta: 0.0075, I0: 9500, p: 0.5 };
+const der = (x, xc, n, I) => { const a = I > 0 ? F.a0 * Math.pow(I / F.I0, F.p) : 0, B = F.G * (1 - n) * a * (1 - 0.4 * x) * (1 - 0.4 * xc), w = Math.PI / 12;
+  return [w * (xc + B), w * (F.mu * (xc - 4 * xc ** 3 / 3) - x * ((24 / (0.99669 * F.taux)) ** 2 + F.k * B)), 60 * (a * (1 - n) - F.beta * n)]; };
+// Hannay 2019 (come la libreria circadian): ampiezza R, fase ψ; minimo corporeo dove ψ = π
+const HN = {tau:23.84, K:0.06358, gamma:0.024, Beta1:-0.09318, A1:0.3855, A2:0.1977, BetaL1:-0.0026, BetaL2:-0.957756, sigma:0.0400692, G:33.75, a0:0.05, delta:0.0075, p:1.5, I0:9325};
+const derH = (R, Psi, n, I) => { const Hp = F.H || HN, Ip = I > 0 ? Math.pow(I, Hp.p) : 0, a = Hp.a0 * Ip / (Ip + Hp.I0), B = Hp.G * (1 - n) * a, R4 = R ** 4, R8 = R4 * R4;
+  const amp = Hp.A1*0.5*B*(1-R4)*Math.cos(Psi+Hp.BetaL1) + Hp.A2*0.5*B*R*(1-R8)*Math.cos(2*Psi+Hp.BetaL2);
+  const fa = Hp.sigma*B - Hp.A1*B*0.5*(R**3 + 1/R)*Math.sin(Psi+Hp.BetaL1) - Hp.A2*B*0.5*(1+R8)*Math.sin(2*Psi+Hp.BetaL2);
+  return [-Hp.gamma*R + Hp.K*Math.cos(Hp.Beta1)/2*R*(1-R4) + amp, 2*Math.PI/Hp.tau + Hp.K/2*Math.sin(Hp.Beta1)*(1+R4) + fa, 60*(a*(1-n) - Hp.delta*n)]; };
+const DT = 10, h = DT / 60;
+const passo = (y, I) => { const D = F.H ? derH : der, f = (d, c) => D(y[0] + c * d[0], y[1] + c * d[1], y[2] + c * d[2], I);
+  const k1 = D(y[0], y[1], y[2], I), k2 = f(k1, h / 2), k3 = f(k2, h / 2), k4 = f(k3, h); return [0, 1, 2].map(i => y[i] + h / 6 * (k1[i] + 2 * k2[i] + 2 * k3[i] + k4[i])); };
+
+const SH = { M: { n: "Mattino", s: 360, e: 840 }, P: { n: "Pomeriggio", s: 840, e: 1320 }, N: { n: "Notte", s: 1320, e: 1800 } };
+const ROT_BASE = [["M-P-N-S-R", "MPNSR"], ["2M 2P 2N 4R", "MMPPNNSRRR"], ["5 notti, 2 riposi", "NNNNNSR"], ["Solo mattine", "MMMMMRR"]];
+// turnazioni estreme: 12 ore, 24 ore, notti fisse, rientri rapidi, sere lunghe, calendario irregolare senza schema
+const SH12 = { G: { n: "Giorno 12h", s: 420, e: 1140 }, N: { n: "Notte 12h", s: 1140, e: 1860 } };
+const SH24 = { X: { n: "24 ore", s: 480, e: 1920 } };
+const SHL = { L: { n: "Sera lunga", s: 1080, e: 1560 } };
+const irregolare = (() => { let r = 7; const c = "MPNR"; let out = ""; for (let i = 0; i < 35; i++) { r = (r * 1103515245 + 12345) % 2147483648; out += c[r % 4]; } return out.replace(/N(?=[MP])/g, "N").replace(/NM/g, "NR").replace(/NP/g, "NR"); })();
+const ROT_ESTREME = [["12 ore 2G 2N 4R", "GGNNSRRR", SH12], ["24 ore ogni 4 giorni", "XRRR", SH24], ["7 notti fisse, 7 riposi", "NNNNNNNSRRRRRR"],
+  ["Rientri rapidi P→M", "PMPMPRR"], ["Sere lunghe 18-02", "LLLLLRR", SHL], ["Irregolare 5 settimane", irregolare]];
+const ROT = process.env.ESTREME === "1" ? ROT_ESTREME : ROT_BASE;
+const GIORNI = 28, INIZIO = "2026-11-02", H = 4;
+const iso = d => d.toISOString().slice(0, 10);
+const giornoLuce = g => g >= 7 * 60 && g < 17 * 60;   // novembre
+
+function piani(pattern, turni = SH) {
+  const out = [];
+  for (let g = 0; g < GIORNI + H; g++) { const d = new Date(INIZIO + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + g);
+    const e = createEngine({ pattern, anchor: INIZIO, shifts: turni, repeat: true, focus: iso(d) + "T12:00:00", freeBed: "23:30", freeWake: "07:30" });
+    out.push(e.plan()); }
+  return out;
+}
+// minuto per minuto (passo 10): stato di base del giorno: 0 sonno, 1 lavoro, 2 sveglio
+function base(P) {
+  const N = (GIORNI + H + 1) * 1440 / DT, s = new Uint8Array(N).fill(2);
+  P.forEach((p, g) => { const o = g * 1440;
+    for (const z of p.sleeps.concat(p.naps)) for (let m = o + z.a; m < o + z.b; m += DT) if (m >= 0 && m / DT < N) s[Math.floor(m / DT)] = 0;
+    if (!p.b.rest) for (let m = o + p.b.start; m < o + p.b.end; m += DT) if (m / DT < N && s[Math.floor(m / DT)] !== 0) s[Math.floor(m / DT)] = 1; });
+  return s;
+}
+const luceBase = (st, i) => st === 0 ? 0 : st === 1 ? 300 : giornoLuce((i * DT) % 1440) ? 600 : 150;
+// una decisione per giorno: {c:[a,z]|null, e:[a,z]|null} in minuti assoluti
+function luce(st, dec, adesione) {
+  const L = new Float32Array(st.length);
+  for (let i = 0; i < st.length; i++) L[i] = luceBase(st[i], i);
+  dec.forEach((d, g) => { if (!d || !adesione[g]) return;
+    if (d.c) for (let m = d.c[0]; m < d.c[1]; m += DT) { const i = Math.floor(m / DT); if (i >= 0 && i < L.length && st[i] !== 0) L[i] = st[i] === 1 || !giornoLuce(m % 1440) ? 1000 : 3000; }
+    if (d.e) for (let m = d.e[0]; m < d.e[1]; m += DT) { const i = Math.floor(m / DT); if (i >= 0 && i < L.length && st[i] === 2) L[i] = 20; } });
+  return L;
+}
+function simula(y0, L, i0, i1) {   // minimi di x fra i campioni i0 e i1 (minuti assoluti), con interpolazione
+  let y = y0.slice(), p = null, p2 = null; const min = [];
+  for (let i = i0; i < i1; i++) { y = passo(y, L[i]); const x = F.H ? Math.cos(y[1]) : y[0];
+    if (p2 !== null && p < p2 && p <= x) { const d = p2 - 2 * p + x, v = d > 0 ? 0.5 * (p2 - x) / d : 0; min.push((i - 1 + v) * DT + DT); }
+    p2 = p; p = x; }
+  return { y, min };
+}
+// partenza: orario libero ripetuto 30 giorni; scarto di fase come nel motore (minimo 2 h prima della sveglia libera)
+const entra = () => { let y = F.H ? [0.82041911, 1.71383697, 0.52318122] : [-0.0843259, -1.09607546, 0.45584306]; const L = []; for (let i = 0; i < 1440 / DT; i++) { const m = i * DT; L.push(m >= 1410 || m < 450 ? 0 : giornoLuce(m) ? 600 : 150); }
+  let mins = []; for (let g = 0; g < 30; g++) { const r = simula(y, L, 0, L.length); y = r.y; if (g > 24) mins.push(...r.min.map(m => m % 1440)); }
+  const xm = mins.reduce((a, b) => a + b, 0) / mins.length; return { y, fase: (450 - 120) - xm }; };
+const lib = entra();                    // persona media: stato di partenza e calibrazione dell'app
+// ottimizzazione robusta («più individui»): tre orologi plausibili, τ 24,0 / 24,2 / 24,4, ognuno con il suo stato di partenza
+const ROBUSTO = process.env.ROBUSTO === "1";
+const MEMBRI = process.env.ROBUSTO === "2"
+  ? [{ ...NOM, taux: 24.0 }, { ...NOM, taux: 24.4 }, { ...NOM, H: { ...HN, tau: 23.64 } }, { ...NOM, H: { ...HN, tau: 24.04 } }]
+  : (ROBUSTO ? [24.0, 24.2, 24.4] : [24.2]).map(t => ({ ...NOM, taux: t }));
+const GRUPPO = MEMBRI.map(m => { const prima = F; F = m; const e = entra(); const r = { F, y: e.y, fase: e.fase }; F = prima; return r; });
+F = VERA; const libVera = entra(); F = NOM;   // persona vera: il suo stato di partenza (la calibrazione resta quella dell'app)
+const ideali = P => P.map((p, g) => g * 1440 + p.s.onset + p.s.dur - 120);
+function costo(min, ideale, g0, g1, fase = lib.fase) {
+  let c = 0; for (let g = g0; g < g1; g++) { const t = ideale[g]; let b = Infinity; for (const m of min) { const v = m + fase; if (Math.abs(v - t) < Math.abs(b - t)) b = v; } c += ((b - t) / 60) ** 2; }
+  return c;
+}
+// le regole attuali dell'app (scheda «Luce»), per confronto
+function regole(P) {
+  return P.map((p, g) => { const o = g * 1440, s = p.s, b = p.b;
+    if (p.night) { const f = s.strategy === "contieni" ? b.end : Math.min(p.cbt - 120, b.end); return { c: [o + b.start, o + f], e: [o + f, o + Math.max(s.onset, b.end)] }; }
+    if (p.shift < -20) return { c: [o + p.wake, o + p.wake + 180], e: [o + s.onset - 120, o + s.onset] };
+    return { c: [o + p.wake, o + p.wake + 120], e: [o + s.onset - 120, o + s.onset] }; });
+}
+// candidati di un giorno: inizio a passi di un'ora nelle ore da sveglio (o al lavoro per «cerca»), durate 1-4 h; nessuna finestra
+function candidati(st, g, tipo) {
+  const out = [null], lens = tipo === "c" ? [60, 120, 180, 240] : [60, 120, 180];
+  for (let a = g * 1440; a < (g + 1) * 1440 + 360; a += 60) { const i = Math.floor(a / DT); if (i >= st.length || st[i] === 0 || (tipo === "e" && st[i] === 1)) continue;
+    for (const l of lens) out.push([a, a + l]); }
+  return out;
+}
+function ottimizza(P, st, ideale) {
+  const dec = regole(P), tutti = new Array(P.length).fill(true);
+  let ys = GRUPPO.map(m => m.y.slice());
+  for (let g = 0; g < GIORNI; g++) {
+    const i0 = g * 1440 / DT, i1 = (g + H) * 1440 / DT;
+    const prova = () => { const L = luce(st, dec, tutti); let c = 0; GRUPPO.forEach((m, k) => { F = m.F; c += costo(simula(ys[k], L, i0, i1).min, ideale, g, g + H - 1, m.fase); }); F = NOM; return c; };
+    let migliore = prova();
+    for (let pass = 0; pass < 2; pass++) for (let d = g; d < g + H; d++) for (const t of ["c", "e"]) {
+      const prima = dec[d][t]; let best = prima;
+      for (const cand of candidati(st, d, t)) { dec[d][t] = cand; const c = prova(); if (c < migliore - 1e-9) { migliore = c; best = cand; } }
+      dec[d][t] = best; }
+    const L = luce(st, dec, tutti); ys = GRUPPO.map((m, k) => { F = m.F; const r = simula(ys[k], L, i0, i0 + 1440 / DT).y; F = NOM; return r; });   // si tiene la scelta di oggi, si va a domani
+  }
+  return dec;
+}
+const rnd = (() => { let s = 12345; return () => (s = (s * 1103515245 + 12345) % 2147483648) / 2147483648; })();
+const ris = [];
+for (const [nome, pattern, turni] of ROT) {
+  const P = piani(pattern, turni), st = base(P), ideale = ideali(P);
+  const ades = P.map(() => rnd() < ADES);
+  const valuta = dec => { F = VERA; const r = simula(libVera.y, luce(st, dec, ades), 0, GIORNI * 1440 / DT); F = NOM; let e = 0, n = 0;
+    for (let g = 7; g < GIORNI - 1; g++) { const t = ideale[g]; let b = Infinity; for (const m of r.min) { const v = m + lib.fase; if (Math.abs(v - t) < Math.abs(b - t)) b = v; } e += Math.abs(b - t) / 60; n++; } return e / n; };
+  const nulla = P.map(() => ({ c: null, e: null })), R = regole(P);
+  const t0 = Date.now(), O = ottimizza(P, st, ideale), ms = Date.now() - t0;
+  ris.push([nome, valuta(nulla), valuta(R), valuta(O), ms]);
+  if (OUT) for (const [k, dec] of [["nulla", nulla], ["regole", R], ["ottimo", O]]) writeFileSync(`${OUT}/${pattern}_${k}.json`, JSON.stringify(Array.from(luce(st, dec, ades)).slice(0, GIORNI * 1440 / DT)));
+  if (OUT) writeFileSync(`${OUT}/${pattern}_ideale.json`, JSON.stringify(ideale.slice(0, GIORNI)));
+}
+console.log(`τ ${TAU} h, adesione ${ADES * 100}% — scarto medio dal minimo ideale (dal 7° giorno)`);
+for (const [n, a, b, c, ms] of ris) console.log(`  ${n.padEnd(18)} senza consigli ${a.toFixed(2)} h · regole attuali ${b.toFixed(2)} h · ottimizzatore ${c.toFixed(2)} h  (${(ms / 1000).toFixed(1)} s)`);
