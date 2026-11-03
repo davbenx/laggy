@@ -3766,6 +3766,9 @@ function potaPisolini(P){
   if(cambiato && typeof store!=="undefined") store.set("pisolini",state.pisolini);
 }
 
+// I momenti di sonnolenza che toccano la giornata guardata: quello del sonno di stanotte (P.cbt) e, un giorno prima,
+// quello di stamattina. Una sola stima per la scheda, l'avviso arancione e «Adesso».
+function momentiSonnolenza(P){ return isFinite(P && P.cbt) ? [P.cbt-1440, P.cbt] : []; }
 function cards(P){
   potaPisolini(P);
   const {b,s,end,cut,cbt,wake,shift,naps,meals,night,lateStart}=P, out=[];
@@ -4064,7 +4067,14 @@ function cards(P){
   // cFrom, lo stesso margine già usato per "Rientro" e per calcolare
   // quando sei davvero libero): resta comunque un momento in cui sei
   // sveglio e attivo, non dentro il sonno — quello lo copre già "Dormi". ──
-  if(!b.rest && isFinite(cbt) && cbt>=b.start-state.cTo && cbt<=b.end+state.cFrom){
+  // Il momento di sonnolenza di oggi: quello stimato per il sonno di stanotte o, un giorno prima, quello di stamattina
+  // (l'orologio si sposta al massimo di circa un'ora al giorno). Senza il secondo, con un mattino alle 6 il punto più
+  // basso delle 5:30, sulla strada per il lavoro, non si vedeva.
+  const cbtOggi = momentiSonnolenza(P);
+  const cbtTurno = cbtOggi.find(m=>m>=b.start-state.cTo && m<=b.end+state.cFrom);
+  const cbtSveglia = cbtOggi.find(m=>isFinite(wake) && m>=wake-60 && m<b.start-state.cTo);   // fino a un'ora prima della sveglia: la finestra è ±1 h
+  if(!b.rest && cbtTurno!==undefined){
+    const cbt=cbtTurno;
     const oro=P.orologio||{}, mezza=Math.min(120, Math.max(60, Math.round((30+(oro.incertezza||30))/15)*15));
     const FONTE={salute:"stima dai dati di Salute", diario:"stima dal tuo diario del sonno", orari:"stima dai tuoi orari"};
     out.push({k:"cbt", lab:"Momento di sonnolenza",
@@ -4074,6 +4084,16 @@ function cards(P){
         (oro.fonte==="orari"?" La finestra è larga perché parte dagli orari del piano: con qualche giorno di sonno segnato (o da Salute) si stringe.":
          mezza>60?" La finestra è un po' larga: i modelli dell'orologio non sono del tutto d'accordo su di te.":""),
       at: cbt});
+  } else if(!b.rest && cbtSveglia!==undefined){
+    // Ti svegli vicino al punto più basso, prima di uscire: niente da rimandare, ma il risveglio è più lento del solito.
+    // Sulla luce non si dice niente qui: prima del minimo sposterebbe l'orologio più tardi, decide la voce «Luce».
+    out.push({k:"cbt", lab:"Momento di sonnolenza", val: hhmm(cbtSveglia-60)+"–"+hhmm(cbtSveglia+60), mezza:60,
+      small: "appena sveglio",
+      sub: "Oggi ti svegli vicino al tuo punto più basso: i primi 20-30 minuti sono i più lenti, ed è normale.",
+      rows: [["Per svegliarti","acqua fresca sul viso, qualche movimento e, se ti va, un caffè"],
+             ["Prima di uscire","concediti qualche minuto in più: se guidi, parti quando ti senti sveglio"]],
+      why: "Ogni notte il corpo attraversa un punto basso naturale, verso la fine del sonno. Quando la sveglia arriva prima o proprio lì, il risveglio è più faticoso del solito: non dipende da quanto hai dormito. È una stima dai tuoi orari.",
+      at: cbtSveglia});
   }
 
   // Con più di una persona in elenco, la card guarda quella scelta con la
@@ -6903,13 +6923,10 @@ function rischiAvanti(P, n){
   // ciascuno, molto più caro dei controlli leggeri qui sopra — e riguarda
   // prima di tutto il turno che si sta per affrontare, non uno fra molti.
   if(!flag.has(0) && !P.b.rest && isFinite(P.b.start) && isFinite(P.b.end) && P.sp && isFinite(P.sp.dur)){
-    // Il minimo corporeo resta ancorato al ritmo naturale dichiarato, non a
-    // qualunque sonno sia appena capitato — chi fa i turni raramente si
-    // riallinea del tutto (motivo per cui questo avviso ha senso). Stessa
-    // stima già usata altrove nel motore per lo stesso scopo (riga 2062),
-    // non un secondo calcolo da tenere allineato al primo.
-    const minimo = NT.naturalMid() + NT.CFG.cbtOffset;
-    const dentroTurno = minimo>=P.b.start && minimo<P.b.end;
+    // Il momento di sonnolenza è quello del modello dell'orologio (lo stesso della scheda e di «Adesso»): prima era la
+    // regola dei giorni liberi, e l'avviso poteva dire «il turno passa nel tuo punto più basso» mentre la scheda lo
+    // mostrava fuori dal turno.
+    const dentroTurno = momentiSonnolenza(P).some(m=>m>=P.b.start && m<P.b.end);
     const scoperto = P.sp.dur < state.need - 20;
     if(dentroTurno && scoperto) flag.set(0,{tipo:"minimo"});
   }
