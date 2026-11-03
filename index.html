@@ -491,11 +491,14 @@ body.primo-avvio #firstPlanBanner,body.primo-avvio #setupChecklist,body.primo-av
 .cal-sett{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
 .cal-gs{font-size:11px;font-weight:700;color:var(--faint);text-align:center;padding:2px 0}
 .ccell{display:flex;flex-direction:column;align-items:stretch;gap:2px;background:none;border:0;padding:3px 2px 4px;font:inherit;cursor:pointer;border-radius:10px;min-width:0;color:var(--ink)}
-.cnum.fest::after,.clab.fest::after{content:"";display:inline-block;width:5px;height:5px;margin-left:3px;border-radius:50%;background:var(--risk);vertical-align:2px}
+.cnum.fest,.clab.fest,.crow.on .clab.fest,.key-fest{color:var(--risk)}
+.key-fest{font-size:11px;font-weight:800;margin-right:4px}   /* i festivi: i «giorni rossi», come nel widget */
+.cnum.mod::after{content:"";display:inline-block;width:4px;height:4px;margin-left:3px;border-radius:50%;background:var(--ink);vertical-align:2px}   /* giorno modificato, come nella striscia e nel widget */
 .ccell.passato{opacity:.72}
 .ccell.oggi{box-shadow:inset 0 0 0 1.5px var(--ink)}
 .cnum{font-size:11px;text-align:center;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
 .cnum.altro{color:var(--blue)}
+.cnum.altro.fest{color:var(--risk)}   /* anche in un altro mese il festivo resta rosso, come nel widget */
 .cnum.uno{font-weight:800}
 .ctile{display:flex;align-items:center;justify-content:center;height:26px;border-radius:8px;font-size:13px;font-weight:700;background:var(--s2);color:var(--dim);overflow:hidden}
 .ctile.t-l,.ctile.t-p{background:var(--orange-soft);color:var(--orange)}
@@ -533,7 +536,7 @@ border-top:5px solid var(--ink)}
    che la striscia usava per conto suo (--orange-bar) —
    quei token restano dove servivano altrove (#band), qui la tinta è la
    stessa che l'utente vede già ovunque per "sonno" e "turno". */
-.fg.fest::after{content:"";position:absolute;top:3px;right:3px;width:5px;height:5px;border-radius:50%;background:var(--risk)}
+.fg.fest b{color:var(--risk)}
 .fg.gia{background:none;box-shadow:inset 0 0 0 1.5px var(--blue);color:var(--blue)}
 .cbar{position:absolute;top:0;bottom:0;border-radius:99px;background:var(--blue);z-index:2}
 .crows{position:relative}
@@ -927,6 +930,7 @@ justify-content:center;flex:none;width:44px;height:44px;border-radius:999px}
 .dq-riga b{color:var(--ink)}
 .dq-riga .kic{display:inline-flex;width:20px;height:20px}
 .drem-cmp{color:var(--dim);font-size:13px;font-weight:500}
+.tt-sigla{display:inline-block;min-width:22px;padding:1px 5px;margin-right:6px;border-radius:6px;background:var(--s2);color:var(--dim);font-size:12px;font-weight:700;text-align:center}
 .lib-tit{font-weight:600;color:var(--ink);margin:14px 0 4px}
 .drem-tx>.drem-cmp{display:block;padding-left:18px}
 .drem-done,.dq-riga{line-height:1.5}
@@ -1212,7 +1216,8 @@ body:not(.tab-turni) .solo-turni,body:not(.tab-oggi) .solo-oggi{display:none}
 .fg{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;width:30px;height:50px;border-radius:7px;background:var(--s2);color:var(--dim);font-size:11px;line-height:1.15}
 .fg b{font-size:12.5px;color:var(--ink)}
 .fg.ferie{background:var(--blue);color:var(--su-blu)}
-.fg.ferie b{color:var(--su-blu)}
+.fg.ferie b,.fg.ferie.fest b{color:var(--su-blu)}
+.fg.ferie.fest::after{content:"";position:absolute;top:3px;right:3px;width:5px;height:5px;border-radius:50%;background:var(--su-blu)}   /* sul blu delle ferie il rosso non si legge: lì resta il puntino */
 .fg i{font-style:normal;font-size:10.5px;font-weight:700;margin-top:1px;opacity:.85}
 .fg.smonto{background:transparent;border:1px dashed var(--dim)}
 .ferie-cosa{font-size:13.5px;color:var(--dim);line-height:1.5;margin:0 0 6px}
@@ -6315,7 +6320,7 @@ function renderEssenziale(P, CARDS){
     const dettLiberi='<div class="rows">'+liberi.map(w=>{ const c=tutta(w); return '<div class="row"><b>'+hhmm(w.a)+' → '+hhmm(w.b)+'</b><span>'+dur(w.b-w.a)+(c.length?', tutto con '+esc(c.join(" e ")):'')+'</span></div>'; }).join("")+'</div>'+
       liberiConsigli(P, liberi, ins.filter(i=>!liberi.some(w=>i.a===w.a && i.b===w.b)));
     voci.push({t:dSv(liberi[0].a)+0.1, html:riga("liberi","Libero",hhmm(liberi[0].a)+" → "+hhmm(liberi[0].b),
-      (altre ? "poi "+altre : "in tutto "+dur(tot))+(primo ? " · con "+primo.nome+(primo.a===liberi[0].a ? "" : " dalle "+hhmm(primo.a)) : ""), false, ICON.calendar, dettLiberi,
+      (altre ? "poi "+altre : "in tutto "+dur(tot))+(primo ? " · con "+esc(primo.nome)+(primo.a===liberi[0].a ? "" : " dalle "+hhmm(primo.a)) : ""), false, ICON.calendar, dettLiberi,
       {a:liberi[0].a, z:liberi[0].b, poi:"tempo libero dalle "+hhmm(liberi[0].a)})});
   }
 
@@ -6900,7 +6905,9 @@ function renderCalendarioCiclo(){
   const r0=CAL.primaRiga(rigaOggi, calSpost, CAL_RIGHE, CAL_TOT), mt=CAL.meseDellaRiga(m.da, r0), tit=CAL.titolo(m.da, r0, oggi.getFullYear());
   meseVista=[mt[0], mt[1]];
   const persona = pers && m.p.length ? m.p[Math.min(m.sel, m.p.length-1)] : null;
-  const leggi=s=>{ s=s||"?:?"; const k=s.lastIndexOf(":"); return {sig:k>0 ? s.slice(0,k) : s, t:k>=0 ? s.charAt(k+1) : "?"}; };
+  const leggi=s=>{ s=s||"?:?"; let segni=""; const u=s.lastIndexOf(":");
+    if(u>=2 && s.charAt(u-2)===":" && /^[fx]*$/.test(s.slice(u+1))){ segni=s.slice(u+1); s=s.slice(0,u); }
+    const k=s.lastIndexOf(":"); return {sig:k>0 ? s.slice(0,k) : s, t:k>=0 ? s.charAt(k+1) : "?", f:segni.includes("f"), x:segni.includes("x")}; };
   const TIPO={n:"notte", l:"lavoro", r:"riposo", m:"mattina", p:"pomeriggio", s:"sera"}, descr=c=>c.t==="?" ? "da impostare" : (c.sig===(TIPO[c.t]||"")||c.sig.length<=1 ? TIPO[c.t] : c.sig+", "+TIPO[c.t]);
   let griglia='<div class="cal-sett cal-gs-riga" aria-hidden="true">'+["L","M","M","G","V","S","D"].map(l=>'<span class="cal-gs">'+l+'</span>').join("")+'</div>';
   for(let r=0;r<CAL_RIGHE;r++){
@@ -6908,10 +6915,10 @@ function renderCalendarioCiclo(){
     for(let c=0;c<7;c++){
       const i=(r0+r)*7+c, d=CAL.dataDi(m.da,i), x=leggi(m.io[i]), pc=persona ? leggi(persona.g[i]) : null;
       const altro=d.anno!==mt[0]||d.mese!==mt[1], num=d.giorno===1 ? "1 "+CAL.MESI[d.mese-1].slice(0,3).toUpperCase() : d.giorno;
-      const fest=festivoVero(new Date(d.iso+"T12:00:00"));
-      const etic=new Date(d.iso+"T12:00:00").toLocaleDateString(LINGUA,{weekday:"long",day:"numeric",month:"long"})+(fest?" (festivo)":"")+": "+descr(x)+(pc ? ", "+(pers.nome)+": "+descr(pc) : "");
+      const fest=x.f;
+      const etic=new Date(d.iso+"T12:00:00").toLocaleDateString(LINGUA,{weekday:"long",day:"numeric",month:"long"})+(fest?" (festivo)":"")+": "+descr(x)+(x.x?", modificato":"")+(pc ? ", "+(pers.nome)+": "+descr(pc) : "");
       griglia+='<button type="button" class="ccell'+(i<iOggi?" passato":"")+(i===iOggi?" oggi":"")+'" data-cal-giorno="'+d.iso+'" aria-label="'+esc(etic)+'">'+
-        '<span class="cnum'+(altro?" altro":"")+(d.giorno===1?" uno":"")+(fest?" fest":"")+'">'+num+'</span>'+
+        '<span class="cnum'+(altro?" altro":"")+(d.giorno===1?" uno":"")+(fest?" fest":"")+(x.x?" mod":"")+'">'+num+'</span>'+
         '<span class="ctile t-'+(x.t==="?"?"q":x.t)+'">'+(x.t==="?" ? "·" : esc(x.sig))+'</span>'+
         (pc ? '<span class="ctile p t-'+(pc.t==="?"?"q":pc.t)+'">'+(pc.t==="?" ? "·" : esc(pc.sig))+'</span>' : '')+'</button>';
     }
@@ -6919,7 +6926,8 @@ function renderCalendarioCiclo(){
   }
   const ultima=CAL_TOT-CAL_RIGHE, sw=(c,x)=>'<span><i style="background:'+c+';'+(x||"")+'"></i>';
   // la legenda dice solo le fasce che si vedono in queste settimane: chi fa solo mattine e pomeriggi non legge «Sera» e «Notte»
-  const viste=new Set(); for(let r=0;r<CAL_RIGHE;r++) for(let c=0;c<7;c++) viste.add(leggi(m.io[(r0+r)*7+c]).t);
+  const viste=new Set(); let vFest=false, vMod=false;
+  for(let r=0;r<CAL_RIGHE;r++) for(let c=0;c<7;c++){ const y=leggi(m.io[(r0+r)*7+c]); viste.add(y.t); vFest=vFest||y.f; vMod=vMod||y.x; }
   const LEG=[["m","Mattina","var(--mattina)"],["p","Pomeriggio","var(--orange)"],["l","Turno","var(--orange)"],["s","Sera","var(--sera)"],["n","Notte","var(--notte)"],["r","Riposo","var(--s2);border:1px solid var(--line)"]];
   // il mese sta nel titolo della pagina («Turni ottobre»), le frecce e «Scegli giorno» sono quelle di sempre sotto il titolo
   const re=$("#cycRange"); if(re) re.textContent="Turni "+tit.charAt(0).toLowerCase()+tit.slice(1);
@@ -6927,7 +6935,8 @@ function renderCalendarioCiclo(){
   const bt=$("#cycToday"); if(bt){ const altrove=calSpost!==0; bt.textContent=altrove?"Torna a oggi":"Scegli giorno"; bt.classList.toggle("full", altrove); }
   const pv=$("#cycPrev"), nx=$("#cycNext"); if(pv) pv.disabled=r0<=0; if(nx) nx.disabled=r0>=ultima;
   el.innerHTML=selettoreVista("calendario")+griglia+
-    '<div class="key">'+LEG.filter(l=>viste.has(l[0])).map(l=>sw(l[2])+l[1]+'</span>').join("")+chipPersona(pers)+'</div>';
+    '<div class="key">'+LEG.filter(l=>viste.has(l[0])).map(l=>sw(l[2])+l[1]+'</span>').join("")+
+    (vFest ? '<span><b class="key-fest">1</b>festivo</span>' : '')+(vMod ? '<span><i class="key-mod"></i>giorno modificato</span>' : '')+chipPersona(pers)+'</div>';
   try{ renderMese(); }catch(e){}   // il mese dei numeri segue la pagina del calendario
 }
 // Le frecce e «Scegli giorno» di Turni, quando il ciclo è a calendario: pagine di settimane, e un giorno scelto porta alla sua settimana.
@@ -8140,7 +8149,9 @@ function meseWidget(prima=SETT_WIDGET_PRIMA, tot=SETT_WIDGET){   // settimane pr
       const d=day(lun,o); state.focus=d;
       let c="?"; try{ c=NT.codeAt(0); }catch(e){}
       const gs=state.giorni[iso(d)]||{};
-      io.push((SIGLA_SPECIALE[gs.t]||c)+":"+(c==="?"?"?":NT.fasciaDelGiorno(0)));
+      // segni del giorno, come nel calendario dell'app: «f» festivo (giorno rosso), «x» modificato (scambio, orari diversi)
+      const segni=(festivoVero(d)?"f":"")+(state.ecc[iso(d)]||gs.s!=null?"x":"");
+      io.push((SIGLA_SPECIALE[gs.t]||c)+":"+(c==="?"?"?":NT.fasciaDelGiorno(0))+(segni?":"+segni:""));
       scelte.forEach((pi,k)=>{
         let s="?:?";
         asPartner(()=>{ const pc=NT.codeAt(0); if(pc!=="?") s=pc+":"+NT.fasciaDelGiorno(0); }, tutte[pi]);
@@ -8517,20 +8528,28 @@ function renderQsOrari(){
   let salva="";
   if(g.s!=null && sh && g.t!=="formazione"){
     const nome=NT.nomeTurno(sh, g), esiste=Object.keys(state.shifts).some(k=>state.shifts[k] && state.shifts[k].s===g.s && state.shifts[k].e===g.e);
-    if(nome!==sh.n && !esiste) salva='<button type="button" class="qs-chip" data-qs-salva>Salva «'+esc(nome)+'» fra i tuoi turni</button>';
+    if(nome!==sh.n && !esiste) salva='<button type="button" class="qs-chip" data-qs-salva>Salva «'+esc(nomePerOrari(nome, g.s, g.e))+'» fra i tuoi turni</button>';
   }
   el.innerHTML=riga(b.start,b.end,g.t==="formazione"?"Orari":"Orari")+
     (g.s!=null && g.t!=="formazione" ? '<small class="hint" style="display:block;margin:2px 0 0">Diversi dal solito per questo giorno.</small>' : '')+salva;
 }
-// Un turno con questi orari fra i tuoi: se c'è già lo stesso, quello; se no se ne aggiunge uno con una sigla libera.
+// Un turno con questi orari fra i tuoi: se c'è già lo stesso, quello; se no se ne aggiunge uno.
+// Se hai già un turno con lo stesso nome (una «Giornata» con altri orari), il nuovo porta gli orari nel nome
+// («Giornata 8–16»): due «Giornata» uguali confondevano. La sigla: l'iniziale, se libera; poi le altre lettere del
+// nome, saltando quelle che sembrano un altro turno (N notte, M mattino, P pomeriggio, S smonto, R riposo, F ferie);
+// solo alla fine il resto dell'alfabeto (prima veniva subito «A», che non diceva niente).
+const oreCorte=m=>{ m=mod1440(m); const h=Math.floor(m/60), q=m%60; return h+(q?":"+String(q).padStart(2,"0"):""); };
+function nomePerOrari(nome, a, z){ return Object.values(state.shifts).some(x=>x && x.n===nome) ? (nome+" "+oreCorte(a)+"–"+oreCorte(z)).slice(0,20) : nome; }
 function turnoPerOrari(nome, a, z){
   let k=Object.keys(state.shifts).find(x=>state.shifts[x] && state.shifts[x].s===a && state.shifts[x].e===z);
   if(k) return k;
+  nome=nomePerOrari(nome, a, z);
   const usate=new Set(Object.keys(state.shifts).concat(["R","S"]));
-  const prima=nome.normalize("NFD").replace(/[^A-Za-z]/g,"").charAt(0).toUpperCase();
-  k=[prima].concat("ABCDEFGHIJKLMNOPQTUVWXYZ".split("")).find(c=>c && !usate.has(c));
+  const lettere=nome.normalize("NFD").replace(/[^A-Za-z]/g,"").toUpperCase().split("");
+  const altre=lettere.slice(1).filter(c=>!"NMPSRF".includes(c));
+  k=[lettere[0]].concat(altre, "ABCDEFGHIJKLMNOPQTUVWXYZ".split("")).find(c=>c && !usate.has(c));
   if(!k) return null;
-  state.shifts[k]={n:nome.slice(0,14), s:a, e:z}; return k;
+  state.shifts[k]={n:nome.slice(0,20), s:a, e:z}; return k;
 }
 if($("#qsOrari")) $("#qsOrari").addEventListener("click",e=>{
   if(!quickShiftTarget) return;
@@ -8625,7 +8644,7 @@ function renderQsOrariSalva(){
   if(g.s==null || !sh || g.t==="formazione") return;
   el.insertAdjacentHTML("beforeend",'<small class="hint" style="display:block;margin:2px 0 0">Diversi dal solito per questo giorno.</small>');
   const nome=NT.nomeTurno(sh,g), esiste=Object.keys(state.shifts).some(k=>state.shifts[k] && state.shifts[k].s===g.s && state.shifts[k].e===g.e);
-  if(nome!==sh.n && !esiste) el.insertAdjacentHTML("beforeend",'<button type="button" class="qs-chip" data-qs-salva>Salva «'+esc(nome)+'» fra i tuoi turni</button>');
+  if(nome!==sh.n && !esiste) el.insertAdjacentHTML("beforeend",'<button type="button" class="qs-chip" data-qs-salva>Salva «'+esc(nomePerOrari(nome, g.s, g.e))+'» fra i tuoi turni</button>');
 }
 if($("#qsClose")) $("#qsClose").addEventListener("click",chiudiQuickShift);
 if($("#quickShiftModal")) $("#quickShiftModal").addEventListener("click",e=>{
@@ -10055,7 +10074,7 @@ function renderTtOrari(turni){
   if(!turni.length || flussoInPagina){ el.hidden=true; el.innerHTML=""; return; }
   el.hidden=false;
   el.innerHTML='<span class="eyebrow" style="display:block;margin:var(--gap-sezione) 0 8px">Orari dei turni</span><div class="tt-orari-lista">'+
-    turni.map(k=>'<div class="qh-ore-riga"><b>'+esc(sh[k].n)+'</b>'+
+    turni.map(k=>'<div class="qh-ore-riga"><b><span class="tt-sigla" title="Sigla">'+esc(k)+'</span>'+esc(sh[k].n)+'</b>'+
       '<input type="time" data-tt-da="'+esc(k)+'" value="'+hhmm(mod1440(sh[k].s))+'" aria-label="Inizio '+esc(sh[k].n)+'">'+
       '<span>→</span><input type="time" data-tt-a="'+esc(k)+'" value="'+hhmm(mod1440(sh[k].e))+'" aria-label="Fine '+esc(sh[k].n)+'"></div>').join("")+'</div>';
 }

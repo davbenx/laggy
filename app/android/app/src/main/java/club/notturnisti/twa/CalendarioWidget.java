@@ -7,6 +7,8 @@ import android.graphics.Typeface;
 import android.net.Uri;
 import android.text.SpannableString;
 import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 import android.util.TypedValue;
 import android.view.View;
@@ -21,7 +23,8 @@ import java.util.Locale;
  * persona passa alla successiva, poi la nasconde (la scelta resta finché nell'app non sposti la stellina).
  * ‹ › sfogliano a pagine (tante settimane quante se ne vedono) e il titolo riporta a oggi; lo spostamento vale per il
  * giorno in cui è fatto. Il mese si legge dal titolo (quello del giovedì della prima riga) e dal colore dei numeri:
- * quelli di un altro mese sono in blu, il primo del mese è «1 NOV» in grassetto.
+ * quelli di un altro mese sono in blu, il primo del mese è «1 NOV» in grassetto. I festivi hanno il numero in rosso (i
+ * «giorni rossi»), i giorni modificati (scambio, orari diversi) un puntino accanto al numero, come nell'app.
  */
 final class CalendarioWidget {
     static final int RIGHE = 6, COLONNE = 7;
@@ -131,9 +134,19 @@ final class CalendarioWidget {
                     sp.setSpan(new StyleSpan(Typeface.BOLD), 0, sp.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                     numero = sp;
                 }
+                CalendarioModel.Cella mia = m.mio(i);
+                boolean festivo = mia != null && mia.festivo, modificato = mia != null && mia.modificato;
+                if (modificato) {
+                    // un pallino pieno staccato dal numero (non «27.»): lo stesso segno del calendario dell'app
+                    SpannableString sp = new SpannableString(numero + " ●");
+                    if (dt[2] == 1) sp.setSpan(new StyleSpan(Typeface.BOLD), 0, numero.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    sp.setSpan(new RelativeSizeSpan(0.75f), numero.length(), sp.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    if (!eOggi) sp.setSpan(new ForegroundColorSpan(ctx.getColor(R.color.w_ink)), numero.length(), sp.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    numero = sp;
+                }
                 rv.setTextViewText(id[1], numero);
                 rv.setInt(id[1], "setBackgroundResource", eOggi ? R.drawable.widget_oggi_tondo : 0);
-                rv.setTextColor(id[1], ctx.getColor(eOggi ? R.color.w_su_accento : altroMese ? R.color.w_accento : R.color.w_ink));
+                rv.setTextColor(id[1], ctx.getColor(eOggi ? R.color.w_su_accento : festivo ? R.color.w_festivo : altroMese ? R.color.w_accento : R.color.w_ink));
                 // oggi: una cornice sottile attorno a tutta la cella (data e sigle)
                 rv.setInt(id[0], "setBackgroundResource", eOggi ? R.drawable.widget_oggi_cornice : 0);
                 rv.setFloat(id[0], "setAlpha", passato ? 0.45f : 1f);
@@ -145,7 +158,7 @@ final class CalendarioWidget {
                 Intent gi = new Intent(Intent.ACTION_VIEW, Uri.parse("notturnisti://giorno/" + iso), ctx, MainActivity.class);
                 gi.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 rv.setOnClickPendingIntent(id[0], NotturnistiWidget.attivita(ctx, 400 + r * COLONNE + c, gi));
-                rv.setContentDescription(id[0], GIORNI[c] + " " + dt[2] + ": " + etichetta(m.mio(i)) + (persona >= 0 ? ", " + m.persone.get(persona).nome + ": " + etichetta(m.di(persona, i)) : ""));
+                rv.setContentDescription(id[0], GIORNI[c] + " " + dt[2] + (festivo ? ", festivo" : "") + ": " + etichetta(mia) + (modificato ? ", modificato" : "") + (persona >= 0 ? ", " + m.persone.get(persona).nome + ": " + etichetta(m.di(persona, i)) : ""));
             }
         }
     }

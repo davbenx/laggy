@@ -46,7 +46,7 @@ const TURNO={M:{n:"Mattino",s:420,e:840}};
   const a=new Date(oggi); a.setDate(a.getDate()-2);   // ancora non un lunedì: è un ciclo
   const p=await apri({turniConfigurati:true,pattern:"MMMMMMMR",anchor:iso(a),repeat:true,firstSeenAt:"2026-01-01",festivi:{extra:[mg]},shifts:{M:{n:"Mattino",s:420,e:840}}});
   const code=()=>p.evaluate(()=>document.querySelector('#cyc .crow[data-off="0"] .ccode').textContent.trim());
-  ok(await p.evaluate(()=>!!document.querySelector('#cyc .crow[data-off="0"] .clab.fest')), "striscia: il festivo ha il puntino");
+  ok(await p.evaluate(()=>!!document.querySelector('#cyc .crow[data-off="0"] .clab.fest')), "striscia: il festivo è in rosso");
   const prima=await code();
   ok(prima!=="R" && prima!=="Ri", "senza la scelta, il festivo resta giorno di lavoro ("+prima+")");
   await p.evaluate(()=>document.querySelector("#tEdit").click()); await p.waitForTimeout(200); await p.evaluate(()=>document.querySelector('[data-mod="festivi"]').click()); await p.waitForTimeout(250);

@@ -89,4 +89,16 @@ const imposta=async(p,sel,v)=>{ await p.evaluate(([sel,v])=>{ const i=document.q
   ok(/Modifica turni › «Segna i giorni del mese»/.test(t.hint) && /Festivi/.test(t.hint), "e dove si segnano ferie, cambi e festivi");
   await p.context().close(); }
 
+// Una «Giornata» c'è già (G, 9–18) e un giorno fai 8–16: il nuovo turno non è un secondo «Giornata» con una sigla
+// a caso («A»), ma «Giornata 8–16» con una lettera del nome; la sigla si vede accanto al nome in «Orari dei turni».
+{ const p=await apri(Object.assign({}, base, {shifts:Object.assign({}, SH, {G:{n:"Giornata",s:540,e:1080}})}));
+  await p.evaluate(()=>document.querySelector("#next").click()); await p.waitForTimeout(300);
+  await p.click("#shiftPill"); await p.waitForTimeout(300);
+  await imposta(p,'#qsOrari [data-qs-ora="s"]',"08:00"); await imposta(p,'#qsOrari [data-qs-ora="e"]',"16:00");
+  ok(await p.evaluate(()=>/Salva «Giornata 8–16» fra i tuoi turni/.test(document.querySelector("#qsOrari").textContent)), "il pulsante dice il nome vero: «Salva «Giornata 8–16» fra i tuoi turni»");
+  await p.click("#qsOrari [data-qs-salva]"); await p.waitForTimeout(400);
+  const st=await stato(p), k=Object.keys(st.shifts).find(x=>st.shifts[x].n==="Giornata 8–16");
+  ok(k==="I" && st.shifts.G.n==="Giornata" && st.ecc[iso(dom)]==="I", "nuovo turno «Giornata 8–16» con sigla I (dal nome, non «A»), la Giornata di prima resta G → "+k);
+  await p.context().close(); }
+
 console.log("errori", errs); ok(errs.length===0, "nessun errore di pagina"); await b.close();

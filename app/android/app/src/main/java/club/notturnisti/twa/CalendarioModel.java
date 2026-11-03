@@ -15,12 +15,15 @@ import org.json.JSONObject;
  * Senza Android: si prova con test sulla JVM.
  *
  * Forma pubblicata (index.html, meseWidget):
- *   { da: "2026-10-19" (un lunedì), io: ["N:n", …], p: [ { n: "Anna", g: ["M:l", …] }, … ], sel: 0, star: "0|Anna" }
+ *   { da: "2026-10-19" (un lunedì), io: ["N:n", "R:r:f", "M:m:x", …], p: [ { n: "Anna", g: ["M:l", …] }, … ], sel: 0, star: "0|Anna" }
+ * Il terzo campo, facoltativo, sono i segni del giorno: «f» festivo, «x» modificato (scambio, orari diversi). I dati
+ * senza terzo campo (app più vecchie) si leggono come prima.
  */
 final class CalendarioModel {
     static final class Cella {
-        final String sigla; final char tipo;
-        Cella(String sigla, char tipo) { this.sigla = sigla; this.tipo = tipo; }
+        final String sigla; final char tipo; final boolean festivo, modificato;
+        Cella(String sigla, char tipo) { this(sigla, tipo, false, false); }
+        Cella(String sigla, char tipo, boolean festivo, boolean modificato) { this.sigla = sigla; this.tipo = tipo; this.festivo = festivo; this.modificato = modificato; }
     }
     static final class Persona {
         final String nome; final List<Cella> giorni;
@@ -63,11 +66,15 @@ final class CalendarioModel {
         List<Cella> out = new ArrayList<>();
         if (a == null) return out;
         for (int i = 0; i < a.length(); i++) {
-            String s = a.optString(i, "?:?"); int k = s.lastIndexOf(':');
+            String s = a.optString(i, "?:?"), segni = "";
+            // «sigla:tipo:segni»: i segni sono solo lettere f/x dopo un tipo di una lettera (la sigla può contenere «:»)
+            int u = s.lastIndexOf(':');
+            if (u >= 2 && s.charAt(u - 2) == ':' && s.substring(u + 1).matches("[fx]*")) { segni = s.substring(u + 1); s = s.substring(0, u); }
+            int k = s.lastIndexOf(':');
             String sigla = k > 0 ? s.substring(0, k) : s;
             char tipo = k >= 0 && k + 1 < s.length() ? s.charAt(k + 1) : '?';
             if ("nlrmps".indexOf(tipo) < 0) tipo = '?';   // n notte, m mattina, p pomeriggio, s sera, l altro turno, r riposo
-            out.add(new Cella(sigla, tipo));
+            out.add(new Cella(sigla, tipo, segni.indexOf('f') >= 0, segni.indexOf('x') >= 0));
         }
         return out;
     }

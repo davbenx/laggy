@@ -2,7 +2,10 @@ package club.notturnisti.twa;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.Settings;
+import android.view.HapticFeedbackConstants;
+import android.view.View;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
@@ -33,6 +36,26 @@ public class DevicePlugin extends Plugin {
         } catch (Exception e) {
             call.reject("impronta non disponibile", e);
         }
+    }
+
+    /**
+     * Il «tocco» di sistema (feedback aptico), come nelle app native: segue le impostazioni del telefono (se l'aptica è
+     * spenta non vibra) e non chiede permessi, a differenza della vibrazione. «conferma» per un salvataggio, «scelta» per
+     * un chip o un interruttore.
+     */
+    @PluginMethod
+    public void tocco(PluginCall call) {
+        String tipo = call.getString("tipo", "scelta");
+        getActivity().runOnUiThread(() -> {
+            try {
+                View v = getBridge().getWebView();
+                int k = "conferma".equals(tipo)
+                        ? (Build.VERSION.SDK_INT >= 30 ? HapticFeedbackConstants.CONFIRM : HapticFeedbackConstants.VIRTUAL_KEY)
+                        : (Build.VERSION.SDK_INT >= 27 ? HapticFeedbackConstants.KEYBOARD_TAP : HapticFeedbackConstants.VIRTUAL_KEY);
+                v.performHapticFeedback(k);
+            } catch (Exception e) { /* niente aptica: nessun problema */ }
+            call.resolve();
+        });
     }
 
     /** Le impostazioni di questa app (permessi compresi): dopo un permesso negato Android non lo richiede più. */

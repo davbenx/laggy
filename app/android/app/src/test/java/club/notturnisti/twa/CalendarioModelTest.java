@@ -33,6 +33,16 @@ public class CalendarioModelTest {
         assertNull("oltre i dati", m.di(0, 5)); assertNull(m.mio(-1)); assertNull("persona che non c'è", m.di(3, 0));
     }
 
+    @Test public void leggeFestiviEGiorniModificati() throws Exception {
+        CalendarioModel m = CalendarioModel.leggi(new JSONObject("{\"da\":\"2026-10-19\",\"io\":[\"R:r:f\",\"M:m:x\",\"N:n:fx\",\"P:p\",\"A:b:c:l:x\",\"Q:z:f\"],\"p\":[]}"));
+        assertTrue(m.mio(0).festivo); assertFalse(m.mio(0).modificato); assertEquals("R", m.mio(0).sigla); assertEquals('r', m.mio(0).tipo);
+        assertTrue(m.mio(1).modificato); assertFalse(m.mio(1).festivo); assertEquals('m', m.mio(1).tipo);
+        assertTrue(m.mio(2).festivo && m.mio(2).modificato); assertEquals('n', m.mio(2).tipo);
+        assertFalse("senza segni, come le app più vecchie", m.mio(3).festivo || m.mio(3).modificato); assertEquals('p', m.mio(3).tipo);
+        assertEquals("sigla con i due punti", "A:b:c", m.mio(4).sigla); assertEquals('l', m.mio(4).tipo); assertTrue(m.mio(4).modificato);
+        assertEquals("tipo sconosciuto resta sconosciuto", '?', m.mio(5).tipo); assertTrue(m.mio(5).festivo);
+    }
+
     @Test public void datiRotti() throws Exception {
         assertNull(CalendarioModel.leggi(null));
         assertNull(CalendarioModel.leggi(new JSONObject("{}")));
