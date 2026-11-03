@@ -50,17 +50,18 @@ async function app(stato, extra = {}) {
 const clic = (p, s) => p.evaluate(s => document.querySelector(s).click(), s);
 const SCATTI = [
   ["01-oggi", "Il tuo piano di oggi,", "sul tuo turno", async () => app(BASE, QUIETI)],
-  ["02-turni", "Tutta la settimana", "a colpo d'occhio", async () => { const p = await app(BASE, QUIETI); await clic(p, '[data-tab="turni"]'); return p; }],
+  ["02-turni", "Tutto il mese", "a colpo d'occhio", async () => { const p = await app(BASE, QUIETI); await clic(p, '[data-tab="turni"]'); return p; }],
   ["03-onboarding", "Che turno fai oggi?", "Un tocco e hai il piano", async () => app(null, {})],
-  ["04-perche", "Ogni consiglio", "spiegato, senza misteri", async () => {
+  ["04-perche", "Ogni consiglio", "spiegato, con le fonti", async () => {
+    // il foglio di una voce: in breve, «Perché» aperto, le fonti in una riga
     const p = await app(BASE, QUIETI);
-    await p.evaluate(() => { const d = document.querySelector('#essenziale details[data-row="luce"]'); d.open = true;
-      window.scrollTo(0, d.getBoundingClientRect().top + scrollY - 70); });
+    await clic(p, '#essenziale .erow[data-row="luce"]'); await p.waitForTimeout(600);
+    await p.evaluate(() => document.querySelectorAll("#infoCorpo details.perche").forEach(d => d.open = true));
     return p; }],
   ["05-orologio", "Il tuo orologio,", "calcolato su di te", async () => {
     const p = await app({ ...BASE, freeBed:"00:30", freeWake:"09:00" }, QUIETI);
-    await clic(p, '[data-tab="turni"]'); await clic(p, "#doAndamenti");
-    await p.evaluate(() => { const o = document.querySelector("#orologio"); window.scrollTo(0, o.getBoundingClientRect().top + scrollY - 70); });
+    await clic(p, '[data-tab="turni"]'); await clic(p, "#doAndamenti"); await p.waitForTimeout(500);
+    await clic(p, '[data-and-sez="orologio"]'); await p.waitForTimeout(500);
     return p; }],
   ["06-liberi", "Il tuo tempo libero,", "per chi ti aspetta", async () => {
     const p = await app(BASE, QUIETI); await clic(p, '[data-tab="turni"]'); await clic(p, "#doPartner"); return p; }],
@@ -70,7 +71,7 @@ const SCATTI = [
     const ecc = {}, seq = ["M","M","P","R","N","N","R","P","M","R","R","P","P","N"];
     for (let i = -24; i <= 12; i++) ecc[fa(-i)] = seq[(i + 24) % seq.length];
     const p = await app({ ...BASE, pattern:"R", anchor:"2000-01-01", repeat:false, ecc }, QUIETI);
-    await clic(p, '[data-tab="turni"]'); await clic(p, "#tEdit");
+    await clic(p, '[data-tab="turni"]'); await clic(p, "#tEdit"); await p.waitForTimeout(400); await clic(p, '[data-mod="segna"]');
     return p; }],
 ];
 
