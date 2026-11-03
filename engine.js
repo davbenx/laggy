@@ -321,11 +321,6 @@ function dormitoVero(wakePianificato, durPianificata){
   return (d >= 15 && d <= 900) ? d : null;
 }
 
-function debitoVero(wakePianificato, durPianificata){
-  const d = dormitoVero(wakePianificato, durPianificata);
-  return d === null ? 0 : Math.min(Math.max(Math.round(durPianificata - d), 0), 480);
-}
-
 function saltatiIeri(){
   const v = (state.pisolini||{})[iso(day(state.focus,-1))];
   if(!v || typeof v !== "object") return 0;
