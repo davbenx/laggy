@@ -3734,8 +3734,8 @@ function nextDuty(P){
 function statusLine(P){
   const g=P.s.meta.gap;
   if(g>90 && !P.s.meta.gapNight)
-    return["warn","I giorni di riposo non erano abbastanza per spostarti del tutto: al primo turno sarai indietro di "+hm(g)+". "+
-      "I primi due giorni saranno pesanti: metti in conto un pisolino e, se hai sonno, non guidare."];
+    return["warn","I giorni di riposo non bastano a spostare del tutto l'orologio: al primo turno sarà ancora indietro di "+hm(g)+". "+
+      "I primi due giorni saranno più faticosi: tieni conto di un pisolino e, se hai sonno, non guidare."];
   return["",""];
 }
 function restOptions(P){
@@ -3743,14 +3743,14 @@ function restOptions(P){
   if(gap<25) return null;
   const pinDay=guardaAvanti(P,10).find(x=>x.pin);
   const runway=pinDay?pinDay.o:1, extra=Math.max(gap-state.maxAdvance*Math.max(runway-1,0),0), had=s.meta.gap||0;
-  const nd=nextDuty(P), gg=nd?nd.gg:"il prossimo turno";
+  const nd=nextDuty(P), gg=nd?nd.gg:"al prossimo turno";
   return[
     {pri:true,name:"Sonno consigliato",time:hhmm(rec),
      txt:"Ti alzi "+hm(gap)+" prima di quanto faresti. In cambio "+gg+
-       (had?" parti indietro di "+hm(had)+" invece che di "+hm(had+extra):" parti in pari")+"."},
+       (had?" l'orologio è indietro di "+hm(had)+" invece che di "+hm(had+extra):" arrivi al turno già in pari")+"."},
     {pri:false,name:"Sonno libero",time:hhmm(nat),
-     txt:"Dormi quanto ti chiede il corpo e la giornata è tua. Il conto arriva "+gg+": indietro di "+
-       hm(had+extra)+", cioè una o due mattine in salita. A volte ne vale la pena. Decidi tu."}];
+     txt:"Dormi quanto ti chiede il corpo e la giornata è tua. "+gg.charAt(0).toUpperCase()+gg.slice(1)+" l'orologio sarà indietro di "+
+       hm(had+extra)+": una o due mattine più faticose. A volte ne vale la pena, decidi tu."}];
 }
 
 function potaPisolini(P){
@@ -3879,7 +3879,7 @@ function cards(P){
     else{ lc.val="Luce forte fino alle "+hhmm(seekEnd); lc.small="poi abbassa";
       lc.rowsA.push(["In turno","più luce possibile fino alle "+hhmm(seekEnd)+": se puoi, esci o mettiti sotto la luce più forte che trovi"]);
       lc.rowsA.push(["Se non puoi","va bene anche quella che c'è, basta non stare al buio"]);
-      lc.rowsE.push(["Ultime ore","abbassa la luce: da lì in poi ti tirerebbe indietro"]); }
+      lc.rowsE.push(["Ultime ore","abbassa la luce: da quest'ora in poi sposterebbe l'orologio al contrario di quello che ti serve"]); }
     lc.rowsE.push(["Al rientro","occhiali da sole appena esci, anche col cielo coperto (se guidi, lenti adatte alla guida: categoria 2 o 3, mai 4)"]);
     lc.rowsE.push(["Camera","oscurante vero, non tende leggere, e sui 18-19°C: la temperatura conta quanto il buio"]);
     lc.why=whyLight;
@@ -3962,7 +3962,7 @@ function cards(P){
          :n.dopo?("Prima del turno non c'era spazio. Recuperi appena stacchi, invece di portarti il debito a domani.")
          :n.rec?(n.last?"L'ultimo è corto apposta: così stasera ti addormenti a un orario normale."
                        :"È la seconda metà del tuo riposo, non un extra.")
-         :n.lungo?("Oggi la veglia dura "+hm(n.ore)+" di fila, e le ultime ore cadono quando il corpo è al minimo. Dormire adesso ti toglie il pezzo peggiore: non è comodità, è quello che ti fa arrivare a casa intero.")
+         :n.lungo?("Oggi stai in piedi "+hm(n.ore)+" di fila, e le ultime ore cadono nel tuo momento di sonnolenza. Un pisolino adesso ti toglie il tratto più duro e ti fa tornare a casa più sicuro.")
          :n.debito?(debitoMotivo(n)+" Questo pisolino non è un extra: rimette a posto il conto prima che si sommi a domani.")
          :n.turno?("Nella pausa, prima del momento peggiore della notte. Finisce con largo margine dalla fine del turno: svegliarsi poco prima di salire in macchina peggiorerebbe proprio l'ora più rischiosa.")
          :((n.b-n.a)<40&&!n.rec&&!n.lungo&&!n.debito&&!n.turno)?("Hai dormito abbastanza, ma fra la sveglia di stamattina e il letto di stanotte passano "+hm(n.ore||0)+" di fila. Un pisolino corto prima di uscire non ti ruba il sonno di stanotte e ti rende più sicura la strada di casa.")
@@ -4011,16 +4011,18 @@ function cards(P){
     // controllo di duplicato in frase() — creava un'incongruenza visibile,
     // non solo un doppione.
     const testo = filate >= 1020
-      ? "Dopo il turno sei in piedi da "+hm(filate)+" filate: i riflessi valgono quanto "+
-        gl(filate)+" g/l di alcol, contro un limite legale di 0,5."
+      ? "Quando stacchi sei in piedi da "+hm(filate)+" di fila: i riflessi calano come con "+
+        gl(filate)+" g/l di alcol (il limite per guidare è 0,5)."
       : spezzata
-        ? "Dopo il turno sei in piedi da "+hm(filate)+" filate, invece delle "+hm(senzaPisolino)+" che faresti senza il pisolino: è quello che ti tiene sotto le 17 ore, dove i riflessi valgono quanto 0,5 g/l di alcol."
+        ? (senzaPisolino >= 1020
+          ? "Quando stacchi sei in piedi da "+hm(filate)+", non da "+hm(senzaPisolino)+": è il pisolino a tenerti sotto le 17 ore di veglia, oltre le quali i riflessi calano come con 0,5 g/l di alcol."
+          : "Quando stacchi sei in piedi da "+hm(filate)+" invece che da "+hm(senzaPisolino)+": il pisolino ti fa tornare a casa più riposato.")
         : filate < 60
         ? "Sono più di quante il corpo ne regga bene, e oggi non c'è spazio per un pisolino che aiuti davvero: mettilo in conto, e se hai sonno non guidare."
-        : "Dopo il turno sei in piedi da "+hm(filate)+" filate. Sotto le 17 ore il confronto con l'alcol non si applica, ma restano comunque tante ore di fila.";
+        : "Quando stacchi sei in piedi da "+hm(filate)+" di fila: non è ancora la soglia delle 17 ore, ma sono tante. Se hai sonno, meglio non guidare.";
     out.push({k:"t",
       lab: b.rest ? "Veglia lunga" : "Rientro",
-      val: b.rest ? "Oggi la veglia dura "+hm(piuLunga)+" di fila"
+      val: b.rest ? "Oggi stai in piedi "+hm(piuLunga)+" di fila"
                   : "In piedi da "+hm(filate)+" di fila",
       sub:testo,
       rows:[["Se hai sonno","fermati 20 minuti in auto e prendi un caffè prima di ripartire"],
@@ -4288,8 +4290,8 @@ function wakeSummary(){
       });
     } else {
       out.consigli.push({
-        text:"Quando il piano ti chiede di alzarti prima ci arrivi puntuale: "+
-          state.maxAdvance+" minuti al giorno è la tua misura.",
+        text:"Quando il piano anticipa la sveglia, ce la fai: "+
+          state.maxAdvance+" minuti al giorno è il tuo passo.",
         action:null
       });
     }
@@ -4890,7 +4892,7 @@ function renderOra(Pfocus){
     oraIc = m < 1200 ? ICON.sun : ICON.moon;
   } else if(risk && risk.severe && risk.at && risk.at.getTime() > now.getTime()){
     title = (A && A.t) ? A.t : "Lucidità ok";
-    sub = (A && A.s && !A.fallback) ? A.s : "Calo di vigilanza previsto verso le " + risk.hhmm + (r && r.peak && r.peak.at && r.peak.at.getTime() > now.getTime() ? " · picco verso le " + r.peak.hhmm : "");
+    sub = (A && A.s && !A.fallback) ? A.s : "Più stanchezza verso le " + risk.hhmm + (r && r.peak && r.peak.at && r.peak.at.getTime() > now.getTime() ? " · più energia verso le " + r.peak.hhmm : "");
     oraIc = (title && /caff/i.test(title)) ? ICON.coffee : ICON.eye;
   } else {
     title = (A && A.t) ? A.t : "Lucidità ottimale";
@@ -6108,7 +6110,7 @@ function adessoLine(P, riferimento){
       if((P.night||P.lateStart) && toEnd<=90) return {t:"Rientro tra "+hm(mancano),s:"occhiali da sole adatti alla guida, e se hai sonno meglio non guidare: è l'ora più delicata",inDuty:true,toEnd};
       return {
         t: "In turno fino alle " + hhmm(b.end),
-        s: "Mancano " + hm(mancano) + (P.night ? " · la parte dura arriva nelle ore piccole" : " · mantieni il ritmo"),
+        s: "Mancano " + hm(mancano) + (P.night ? " · la parte dura arriva nelle ore piccole" : ""),
         inDuty: true,
         toEnd
       };
@@ -6248,7 +6250,7 @@ function finestreDelGiorno(P){
 // restano accese, i momenti migliori sono una scelta.
 const PIANO_VOCI=[
   ["caffe","Caffeina","L'ora dell'ultima caffeina: caffè, tè, cola, energy drink. Spenta, sparisce anche dal pisolino",true],
-  ["luce","Luce","Quando prendere o evitare la luce per restare in fase",true],
+  ["luce","Luce","Quando prendere o evitare la luce per tenere l'orologio del corpo al passo",true],
   ["penombra","Luce bassa","Le luci basse prima di dormire",true],
   ["pasti","Pasti","Quando mangiare nei giorni di turno. Accesa, puoi segnare pasti abbondanti e alcol",true],
   ["liberi","Tempo libero","Le finestre libere fuori dal lavoro",true],
@@ -6607,14 +6609,14 @@ function renderEssenziale(P, CARDS){
             finoAlSonno ? dettPenombra : righeFase(cd.rowsE)+'<div class="why">In queste ore la luce sposterebbe il tuo orologio al contrario di quello che serve per i prossimi turni: tenerla bassa lo aiuta ad andare dove serve.</div>',
             {a:avoidBlk[1], z:avoidBlk[2], poi:"luci basse dalle "+hhmm(avoidBlk[1])})});
         }
-      } else if(P.s.meta && P.s.meta.ramp){
+      } else if(P.s.meta && P.s.meta.ramp && P.shift<0){
         // Non riapre le due schede complete (sarebbe la stessa logica dei
         // giorni di turno, fuori contesto qui) — solo una riga, e solo nel
         // caso specifico in cui il riposo sta davvero preparando le notti
         // in arrivo. Riusa lo stesso segnale già calcolato per "Dormi" in
         // questo stesso ramo (s.meta.ramp), non un rilevamento nuovo.
         const tSera = dSv(P.s.onset-180);
-        const dettSera = '<div class="why">Anche in un giorno libero, la luce di sera sposta l\'orologio nella direzione opposta se stai andando verso le notti — tenerla bassa nelle ultime ore aiuta ad arrivarci già un po\' spostato.</div>';
+        const dettSera = '<div class="why">Nei prossimi giorni il sonno si anticipa. La luce di sera sposta l\'orologio più tardi: tenerla bassa nelle ultime ore ti aiuta ad addormentarti prima, anche in un giorno libero.</div>';
         voci.push({t:tSera, html:riga("penombra","Luce bassa",hhmm(P.s.onset-180),"tieni la luce soffusa",false,ICON.dim,dettSera,
           {a:P.s.onset-180, poi:"luci basse dalle "+hhmm(P.s.onset-180)})});
       }
@@ -7347,15 +7349,15 @@ function perchéOggi(P){
   }
   // con un ritardo grosso è l'avviso in cima (statusLine) a spiegare la giornata
   if(m.gap>90) return "";
-  if(m.gap) return "I riposi non bastavano a spostarti del tutto: al primo turno sarai indietro di "+aVoce(m.gap)+". Il primo giorno sarà un po' duro, poi rientra.";
+  if(m.gap) return "I riposi non bastano a spostare del tutto l'orologio: al primo turno sarà ancora indietro di "+aVoce(m.gap)+". Il primo giorno sarà un po' più faticoso, poi passa.";
   if(m.reset) return "Giorno di rientro: stasera a letto al tuo orario, per tornare al ritmo del giorno.";
   if(m.preNight || s.kind==="pre-notte") return "Domani attacchi la notte: stanotte vai a letto e ti alzi più tardi del solito, così arrivi al turno più sveglio.";
-  if(s.kind==="pre-turno-bifasico" && attacco()) return "Domani attacchi alle "+attacco()+": stasera a letto a un'ora in cui ti addormenti, il resto con un pisolino dopo il turno.";
+  if(s.kind==="pre-turno-bifasico" && attacco()) return "Domani attacchi alle "+attacco()+": stasera a letto appena ti viene sonno, il resto con un pisolino dopo il turno.";
   if(s.kind==="pre-turno" && attacco()) return "Domani attacchi alle "+attacco()+": stasera a letto presto.";
   if(m.esteso>=20) return "Stanotte c'è spazio per "+aVoce(m.esteso)+" di sonno in più: "+(P.nb && P.nb.rest ? "recuperi quello perso nei turni." : "arrivi al prossimo turno con una riserva.");
   const nd=nextDuty(P);
   if(m.ramp && isFinite(P.shift) && Math.abs(P.shift)>=15)
-    return "Il sonno si sposta di "+aVoce(Math.abs(P.shift))+" più "+(P.shift>0?"tardi":"presto")+(nd?", per arrivare pronto al turno di "+nd.gg:"")+": un pezzo alla volta, di più il corpo non lo regge.";
+    return "Il sonno si sposta di "+aVoce(Math.abs(P.shift))+" più "+(P.shift>0?"tardi":"presto")+(nd?", per arrivare pronto al turno di "+nd.gg:"")+": un po' alla volta, perché il corpo non si sposta più in fretta di così.";
   if(b.rest) return "Giorno libero: tieni gli orari dei tuoi giorni liberi, così l'orologio resta dov'è.";
   return (b.name ? b.name+": " : "")+"niente da spostare"+(nd && nd.o>0 ? ", il turno di "+nd.gg+" non chiede anticipi." : ", il piano segue il tuo ritmo.");
 }
@@ -7365,8 +7367,8 @@ function rischioDelGiorno(P){
   const base = r0.tipo==="notti"
     ? "È la "+r0.n+"ª notte di fila: proteggi il sonno da qui in poi."
     : r0.tipo==="minimo"
-    ? "Il sonno di prima era corto, e il turno di oggi passa nel tuo punto più basso: vacci con più margine del solito."
-    : "Il ritorno al lavoro di oggi è ravvicinato: il sonno ne risentirà.";
+    ? "Hai dormito poco e oggi il turno attraversa il tuo momento di sonnolenza: fai una pausa quando puoi e prenditela con calma."
+    : "Oggi torni al lavoro dopo poche ore di riposo: proteggi il sonno che riesci a fare.";
   // Il rischio da solo basta; il diario lo rincalza solo se negli ultimi
   // giorni l'energia era già bassa.
   return votoRecenteBasso()!=null ? base+" E negli ultimi giorni hai segnato poca energia: quando i due segnali si sommano, vale la pena ascoltarli." : base;
@@ -7618,9 +7620,9 @@ function sonnoPerFasciaHtml(trend){
       '<span class="fbar"><i style="width:'+Math.max(3,Math.round(x.a/max*100))+'%;background:'+FASCE[x.f][1]+';opacity:'+(manca?1:.75)+'"></i></span>'+
       '<span class="fval" style="min-width:64px">'+hm(Math.round(x.a))+(d!=null && Math.abs(d)>=15 ? '<span class="hint" style="display:block;font-size:11.5px;font-weight:400">'+(d>0?'+':'–')+hm(Math.abs(d))+'</span>' : '')+(votoF(x.f)!=null ? '<span class="hint" style="display:block;font-size:11.5px;font-weight:400">voto '+votoF(x.f).toFixed(1).replace(".",",")+'</span>' : '')+'</span></div>'; }).join("");
   const frase = peggio ? 'Sui turni di '+FASCE[peggio.f][0].toLowerCase()+' dormi in media '+hm(Math.round(peggio.p-peggio.a))+' in meno rispetto al piano ('+peggio.n+' notti): è lì che conviene proteggere il sonno.'
-    : 'In ogni tipo di turno stai vicino al sonno previsto.';
+    : 'Dormi più o meno quanto previsto, in ogni tipo di turno.';
   return {riga: peggio ? "Meno sonno prima dei turni di "+FASCE[peggio.f][0].toLowerCase() : "Vicino al previsto in ogni turno",
-    corpo:'<p class="hint" style="margin:0 0 8px">Sonno medio della notte che precede il giorno di ciascun turno, da quelle che hai annotato; sotto, quanto in meno o in più rispetto al piano, e il voto medio da 1 a 5.</p>'+
+    corpo:'<p class="hint" style="margin:0 0 8px">Quanto dormi in media la notte prima di ogni tipo di turno (dalle notti che hai annotato); sotto, la differenza dal piano e il voto medio da 1 a 5.</p>'+
       righe+'<p class="fnota">'+esc(frase)+'</p>'};
 }
 function caricoHtml(aperta){
@@ -7636,7 +7638,7 @@ function caricoHtml(aperta){
   else if(noti(P) && P.brevi) frase=(P.brevi===1?"Una volta":P.brevi+" volte")+" nell'ultimo mese hai avuto meno di 11 ore fra un turno e l'altro.";
   else if(noti(P) || noti(F)) frase="Niente serie lunghe di notti né riposi sotto le 11 ore: un carico che si recupera bene.";
   else frase="Segna i turni in «I turni del mese» per vedere il carico.";
-  const rigaC = noti(F)||noti(P) ? (()=>{ const R=noti(F)?F:P, q=noti(F)?"in arrivo":"nell'ultimo mese"; return (R.serieMax? R.serieMax+" notti di fila al massimo": "Nessuna notte")+" · "+(R.brevi? R.brevi+(R.brevi===1?" riposo":" riposi")+" sotto le 11 ore":"nessun riposo breve")+" · "+q; })() : "Segna i turni per vederlo";
+  const rigaC = noti(F)||noti(P) ? (()=>{ const R=noti(F)?F:P, q=noti(F)?"in arrivo":"nell'ultimo mese"; return (R.serieMax? "al massimo "+(R.serieMax===1?"1 notte":R.serieMax+" notti di fila"): "Nessuna notte")+" · "+(R.brevi? R.brevi+(R.brevi===1?" riposo":" riposi")+" sotto le 11 ore":"nessun riposo breve")+" · "+q; })() : "Segna i turni per vederlo";
   return sezDet("Il carico dei turni", rigaC,
       strisciaCarico(P,F)+
       '<div class="car-r car-testa"><span></span><b>Passati</b><b>In arrivo</b></div>'+
@@ -7673,7 +7675,7 @@ function orologioHtml(){
       riga("Momento di sonnolenza", hhmm(o.cbt), "il punto più basso della notte: la luce prima ti sposta indietro, dopo in avanti")+
       (o.lucido ? riga("Più lucido", "verso le "+o.lucido, "per le cose che chiedono testa") : "")+
       '<p class="hint" style="margin:10px 0 0">'+(o.partenza
-        ? 'Per ora dagli orari di partenza: dimmi come dormi nei giorni liberi e diventa il tuo.'
+        ? 'Per ora parte da orari tipici: dimmi come dormi nei giorni liberi e diventa davvero tuo.'
         : 'Stime dai tuoi orari nei giorni liberi ('+esc(state.freeBed)+' → '+esc(state.freeWake)+'), che il diario può aggiornare. Nei giorni di turno l\'orologio si sposta con il sonno, e il piano lo segue giorno per giorno. Non sono una misura.')+
       '</p><button type="button" class="lnk" data-oro-cambia style="margin-top:8px">'+(o.partenza?'Dimmi come dormi nei giorni liberi':'Cambia come dormi nei giorni liberi')+' →</button>'+
       '', {id:"orologio", cls:"oro"});
@@ -7800,7 +7802,7 @@ function renderAndamenti(){
   const fondo='<div class="andamento-fondo">'+
       '<span class="eyebrow andamento-eyebrow">Per la visita dal medico</span>'+
       '<button type="button" class="btn g az-desc" data-riepilogo-medico>Riepilogo per il medico competente<small>PDF con turni, notti e riposi degli ultimi 12 mesi'+(sm?' e il sonno che hai annotato':'')+'.</small></button>'+
-      (sm?'<button type="button" class="btn g az-desc" id="doSum">Copia il riepilogo del diario<small>Il testo del sonno annotato, da incollare dove vuoi.</small></button>':'')+
+      (sm?'<button type="button" class="btn g az-desc" id="doSum">Copia il riepilogo del diario<small>Il sonno che hai annotato, in un testo da incollare dove vuoi.</small></button>':'')+
       (url && (heroHtml||capoHtml) ? '<p class="hint" style="margin-top:14px">Questa pagina, come tutta l\'app, resta gratis. Se ti è utile, <a href="'+esc(url)+'" target="_blank" rel="noopener">un contributo libero</a> è benvenuto, mai necessario.</p>' : '')+
     '</div>';
   el.innerHTML = capoHtml + (heroHtml || invito) + rowsHtml + fondo;

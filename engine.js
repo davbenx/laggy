@@ -1294,7 +1294,7 @@ function buildEvents(days){
     // La luce è la leva principale sull'orologio: senza, il piano si disfa.
     if(ICS.luce && isFinite(P.wake))
       ev(base,P.wake+15,P.wake+35,"luce","Luce",
-        "Luce forte adesso: è ciò che tiene agganciato l'orologio al turno.",true);
+        "Luce forte adesso: è quello che tiene l'orologio del corpo al passo con il turno.",true);
     if(ICS.pasti){
       const mm=(P.meals||[]).find(x=>x&&x.main);
       if(mm&&isFinite(mm.at)) ev(base,mm.at,mm.at+30,"pasti","Pasto principale",
@@ -1303,7 +1303,7 @@ function buildEvents(days){
     // Il rientro dalla notte è il momento di massimo rischio alla guida.
     if(ICS.rientro && !P.b.rest && (P.night||P.lateStart))
       ev(base,P.b.end,P.b.end+20,"rientro","Rientro: non guidare stanco",
-        "Occhiali da sole appena esci. Se sei stanco, fermati 20 minuti e un caffè prima di ripartire.",true);
+        "Occhiali da sole appena esci. Se hai sonno, fermati 20 minuti e prendi un caffè prima di ripartire.",true);
   }
   state.focus=f0;
   return out;

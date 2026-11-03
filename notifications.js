@@ -31,7 +31,7 @@ export const TIPI = [
   { k: "coffee",   nome: "Ultima caffeina",          desc: "L'ora oltre la quale caffè, tè, cola o energy drink disturbano il sonno",                     essenziale: false, canale: "caffe" },
   { k: "nap",      nome: "Pisolino",                 desc: "Solo nei giorni in cui il piano lo prevede",                             essenziale: false, canale: "pisolini" },
   { k: "prep",     nome: "Preparati per il turno",   desc: "Un'ora prima dell'inizio del turno",                                     essenziale: false, canale: "turni" },
-  { k: "luce",     nome: "Luce del mattino",         desc: "Quando prendere luce per restare in fase",                               essenziale: false, canale: "luce" },
+  { k: "luce",     nome: "Luce del mattino",         desc: "Quando prendere luce per tenere l'orologio del corpo al passo",                               essenziale: false, canale: "luce" },
   { k: "momenti",  nome: "Momenti buoni",            desc: "All'inizio di un momento per la testa, per muoverti o per allenarti: solo quelli che accendi in «Cosa vedi nel piano»", essenziale: false, canale: "momenti" },
   { k: "wake",     nome: "Ora di alzarti",           desc: "Fine del sonno pianificato. Non è una sveglia: per quella c'è la sveglia del telefono (nell'app Android, «Metti la sveglia» in Dormi)", essenziale: false, canale: "sveglie" },
   { k: "settimana",nome: "La tua settimana",         desc: "La domenica sera, i turni dei prossimi 7 giorni",                        essenziale: false, canale: "suggerimenti" },
@@ -124,7 +124,7 @@ export function buildSchedule(config, opts = {}) {
 
     if (want("wake") && P.s.dur > 0)
       push(base, P.s.onset + P.s.dur, "wake", "Ora di alzarti",
-        "Fine del sonno pianificato. In piedi per restare in fase.");
+        "È l'ora di alzarti: farlo più o meno sempre alla stessa ora tiene l'orologio del corpo al passo.");
 
     if (want("nap") && P.naps)
       P.naps.forEach((n, i) => push(base, n.a, "nap",
@@ -138,7 +138,7 @@ export function buildSchedule(config, opts = {}) {
     // 10 minuti prima della fine: lo leggi prima di uscire, non già alla guida.
     if (want("ret") && (P.night || P.lateStart) && !P.b.rest)
       push(base, P.b.end - 10, "ret", "Rientro dal turno",
-        "Tra poco l'ora più rischiosa per guidare. Occhiali da sole, e se hai sonno non guidare: 20 minuti di sosta e un caffè.");
+        "Tra poco il rientro, l'ora più delicata per guidare. Occhiali da sole; se hai sonno, prima di metterti al volante fermati 20 minuti e prendi un caffè.");
 
     // Giorni impegnativi: non un allarme nel momento del calo (al lavoro, o
     // alla guida, sarebbe solo una distrazione) ma un consiglio prima, quando
@@ -183,7 +183,7 @@ export function buildSchedule(config, opts = {}) {
 
     if (want("luce") && !P.night)
       push(base, P.wake + 15, "luce", "Luce del mattino",
-        "Esci o apri le tende entro un'ora: aiuta il corpo a restare in fase.");
+        "Esci o apri le tende entro un'ora: la luce del mattino tiene l'orologio del corpo al passo.");
 
     // Domani cambi turno: il giorno prima di un cambio che chiede di
     // spostare il sonno (a letto presto) o di prepararsi a una notte.
