@@ -1,7 +1,7 @@
 // La scelta «dopo la notte» su Oggi: solo nei giorni in cui il sonno
 // principale cade di giorno dopo un turno, con gli orari veri delle due
 // strade; cambia la stessa preferenza di Impostazioni; la spiegazione
-// sparisce dopo la prima scelta.
+// sta in una riga chiusa con la scelta in vigore e l'ora: le due strade si aprono al tocco.
 import pw from "./_pw.mjs";
 const ok=(c,m)=>console.log((c?"✔ ":"✘ ")+m);
 const b=await pw.chromium.launch(); const errs=[];
@@ -13,14 +13,14 @@ await ctx.addInitScript(a=>{ if(sessionStorage.getItem("x")) return; sessionStor
 const p=await ctx.newPage(); p.on("pageerror",e=>errs.push(e.message));
 await p.goto("http://localhost:8765/index.html"); await p.waitForTimeout(900);
 const leggi=()=>p.evaluate(()=>{ const e=document.querySelector(".dopo-notte"); if(!e) return null;
-  return {opz:[...e.querySelectorAll("[data-sonnod]")].map(x=>({t:x.querySelector("b").textContent, fine:x.querySelector("span").textContent, on:x.getAttribute("aria-pressed")})), hint:!!e.querySelector(".dn-hint"),
+  return {opz:[...e.querySelectorAll("[data-sonnod]")].map(x=>({t:x.querySelector("b").textContent, fine:x.querySelector("span").textContent, on:x.getAttribute("aria-pressed")})), hint:!!e.querySelector(".dn-hint"), sum:e.querySelector("summary").innerText.replace(/\s+/g," "), aperta:e.open,
     dormi:document.querySelector('[data-row="sonno"] .essrow').innerText.replace(/\s+/g," ")}; });
 let r=await leggi();
-ok(r && r.opz.map(o=>o.t).join("/")==="In due tempi/Tutto di fila" && r.opz[0].on==="true" && r.hint, "notte con un'altra notte dopo: In due tempi / Tutto di fila, con la spiegazione");
+ok(r && r.opz.map(o=>o.t).join("/")==="In due tempi/Tutto di fila" && r.opz[0].on==="true" && r.hint && !r.aperta && /In due tempi · dormi fino alle \d\d:\d\d/.test(r.sum), "notte con un'altra notte dopo: una riga chiusa («"+(r&&r.sum)+"»), dentro In due tempi / Tutto di fila e la spiegazione");
 ok(r && r.dormi.includes(r.opz[0].fine.match(/\d\d:\d\d$/)[0]) && r.opz[0].fine!==r.opz[1].fine, "gli orari mostrati sono quelli del piano ("+r.dormi+" · "+r.opz.map(o=>o.fine).join(" / ")+")");
-await p.click('[data-sonnod]:not(.on)'); await p.waitForTimeout(400);
+await p.click('.dopo-notte summary'); await p.click('[data-sonnod]:not(.on)'); await p.waitForTimeout(400);
 r=await leggi();
-ok(r.opz[1].on==="true" && r.dormi.includes(r.opz[1].fine.match(/\d\d:\d\d$/)[0]) && !r.hint, "scelto «Tutto di fila»: il piano si aggiorna, la spiegazione sparisce");
+ok(r.opz[1].on==="true" && r.dormi.includes(r.opz[1].fine.match(/\d\d:\d\d$/)[0]) && r.sum.includes("Tutto di fila") && r.sum.includes(r.opz[1].fine.match(/\d\d:\d\d$/)[0]), "scelto «Tutto di fila»: il piano si aggiorna, e la riga dice la scelta e l'ora");
 ok(await p.evaluate(()=>document.querySelector("#sonnoD").value==="unicoPisolino" && JSON.parse(localStorage.getItem("nt:state")).sonnoDiurno==="unicoPisolino"), "è la stessa preferenza di Impostazioni, salvata");
 await p.click("#next"); await p.waitForTimeout(300);
 r=await leggi();

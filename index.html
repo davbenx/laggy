@@ -927,14 +927,18 @@ justify-content:center;flex:none;width:44px;height:44px;border-radius:999px}
 .dq-riga b{color:var(--ink)}
 .dq-riga .kic{display:inline-flex;width:20px;height:20px}
 .drem-cmp{color:var(--dim);font-size:13px;font-weight:500}
+.drem-tx>.drem-cmp{display:block;padding-left:18px}
 .drem-done,.dq-riga{line-height:1.5}
 .drem-done .lnk,.dq-riga .lnk{min-height:0;padding:10px 6px;margin:-10px 0;vertical-align:baseline}
 .dopo-notte{margin:-2px 0 10px;padding:0 2px}
-.dn-comp>summary{display:flex;align-items:center;gap:4px;min-height:44px;cursor:pointer;list-style:none;font-size:13.5px;color:var(--dim)}
+.dn-comp>summary{display:flex;align-items:center;gap:4px;min-height:44px;cursor:pointer;list-style:none;font-size:13.5px;color:var(--dim);letter-spacing:0;text-transform:none}
+.dn-sum{display:flex;flex-direction:column;gap:1px}
+.dn-sum>small{font-size:12px;color:var(--dim)}
+.dn-sum>span{font-size:14px;color:var(--dim)}
 .dn-comp>summary::-webkit-details-marker{display:none}
 .dn-comp>summary b{color:var(--ink);font-weight:600}
 .dn-comp>summary::after{content:"›";margin-left:auto;font-size:20px;color:var(--faint);transition:transform .15s}
-.dn-comp[open]>summary::after{transform:rotate(90deg)}
+.dn-comp[open]>summary::after{transform:rotate(-90deg)}
 .dn-vale{font-size:12px;color:var(--faint);margin:6px 0 0}
 .dn-lab{display:block;font-size:12px;color:var(--dim);margin:0 0 6px}
 .dn-scelta{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--s2);border:1px solid var(--line);border-radius:var(--r);padding:2px}
@@ -1152,7 +1156,9 @@ color:var(--faint);margin-bottom:8px;display:flex;align-items:center;gap:10px}
 color:var(--blue);display:inline-flex;align-items:center;justify-content:center}
 .drem-q .dic .ei{width:16px;height:16px;display:block}
 .drem.done .drem-q .dic{background:var(--s2);color:var(--dim)}
-.drem-done{font-size:14px;color:var(--dim);line-height:1.5}
+.drem-done{font-size:14px;color:var(--dim);line-height:1.5;display:flex;align-items:center;gap:4px}
+.drem-tx{flex:1;min-width:0}
+.drem-done>.ibtn{flex:none;margin:-8px -8px -8px auto}
 .drem-done b{color:var(--ink)}
 .drem-ok{color:var(--ok);font-weight:700;margin-right:2px}
 .drem-rec{font-size:12.5px;color:var(--blue);line-height:1.5;margin-top:8px;border-left:2px solid var(--blue-lt);padding-left:9px}
@@ -4378,7 +4384,7 @@ function diaryReminder(P, CARDS){
       // Ora confronta la durata vera, la stessa cosa che decide "debt" qui
       // sopra: il testo e il comportamento non si contraddicono più.
       const dd = mins - pianoDur;
-      cmp = Math.abs(dd)<=10 ? "" : (dd>0 ? "(+" + hm(dd) + " sul piano)" : "(–" + hm(dd) + " sul piano)");   // in linea: niente da dire
+      cmp = Math.abs(dd)<=10 ? "" : (dd>0 ? hm(dd) + " in più del piano" : hm(dd) + " in meno del piano");   // in linea: niente da dire
     } }
   // Il cerchio si chiude a schermo: se hai annotato meno sonno e oggi il piano
   // prescrive un recupero, dillo — così vedi che il TUO dato ha cambiato il piano.
@@ -4431,9 +4437,9 @@ function diaryReminder(P, CARDS){
       '<div class="dq-az"><button class="dbtn pri" data-confirm-sleep="1" data-def-bed="'+esc(defBed)+'" data-def-wake="'+esc(defWake)+'">Sì, così</button>'+
       '<button class="dbtn" data-open="1">Altri orari</button></div>';
   } else {
-    x+='<div class="drem-done"><span class="drem-ok">✓</span> Sonno <b>'+esc(bd)+'–'+esc(wk)+'</b> · '+durTxt+
+    x+='<div class="drem-done"><span class="drem-tx"><span class="drem-ok">✓</span> Sonno <b>'+esc(bd)+'–'+esc(wk)+'</b> · '+durTxt+
        (cmp?' <span class="drem-cmp">'+cmp+'</span>':'')+
-       ' <button type="button" class="ibtn drem-edit" data-open="1" aria-label="Modifica gli orari del sonno" title="Modifica">'+ICON.pencil+'</button></div>'+
+       '</span><button type="button" class="ibtn drem-edit" data-open="1" aria-label="Modifica gli orari del sonno" title="Modifica">'+ICON.pencil+'</button></div>'+
        statoHtml+
        (_perchePer===key0?'<div class="perche" role="group" aria-label="Cosa ha cambiato il piano?"><span>Cosa ha cambiato il piano?</span><span class="perche-az">'+
          '<button type="button" class="btn g sm" data-perche="turno">Il turno era diverso</button><button type="button" class="btn g sm" data-perche="abitudine">Dormo così di solito</button>'+
@@ -4471,7 +4477,7 @@ function diaryReminder(P, CARDS){
         '<label>Fine<input type="time" class="ora-in" data-nap-in-b="1" aria-label="Fine del pisolino" value="'+esc(seg.b||fine)+'"></label></div>'+
         '<div class="dq-az"><button class="dbtn pri" data-nap-salva="'+esc(c.nap.k)+'" data-min="'+c.nap.min+'">Salva</button><button class="lnk dim" data-nap-annulla="'+esc(c.nap.k)+'">Annulla</button></div>';
     } else if(seg.si){
-      xNap+='<div class="drem-done"><span class="drem-ok">✓</span> Pisolino <b>'+esc(seg.a||c.nap.k)+'–'+esc(seg.b||fine)+'</b> '+
+      xNap+='<div class="drem-done"><span class="drem-tx"><span class="drem-ok">✓</span> Pisolino <b>'+esc(seg.a||c.nap.k)+'–'+esc(seg.b||fine)+'</b></span>'+
         '<button type="button" class="ibtn drem-edit" data-edit-nap="'+esc(c.nap.k)+'" aria-label="Modifica gli orari del pisolino" title="Modifica">'+ICON.pencil+'</button></div>';
       // Se il pisolino registrato è durato molto più del previsto, un avviso
       // subito — non solo un conto che si aggiusta domani in silenzio.
@@ -4482,7 +4488,7 @@ function diaryReminder(P, CARDS){
           xNap+='<div class="drem-rec">Più lungo del previsto ('+dur(dReale)+'): oltre una certa durata un pisolino rischia di scivolare in sonno profondo, con più intontimento al risveglio invece di meno.</div>';
       }
     } else if(seg.no){
-      xNap+='<div class="drem-done">Pisolino non fatto <button type="button" class="ibtn drem-edit" data-nap-riapri="'+esc(c.nap.k)+'" aria-label="Riapri il pisolino" title="Modifica">'+ICON.pencil+'</button></div>';
+      xNap+='<div class="drem-done"><span class="drem-tx">Pisolino non fatto</span><button type="button" class="ibtn drem-edit" data-nap-riapri="'+esc(c.nap.k)+'" aria-label="Riapri il pisolino" title="Modifica">'+ICON.pencil+'</button></div>';
     } else {
       xNap+='<p class="dq">Hai fatto il pisolino <b>'+esc(c.nap.k)+' → '+esc(fine)+'</b>?</p>'+
         '<div class="dq-az"><button class="dbtn pri" data-nap="si" data-k="'+esc(c.nap.k)+'" data-fine="'+esc(fine)+'" data-min="'+c.nap.min+'">Sì, così</button>'+
@@ -4503,7 +4509,7 @@ function diaryReminder(P, CARDS){
     extra.forEach(i=>{ const g=segG[i];
       if(state.diaryEditing.has("extra:"+key0+":"+i)) xExtra+=campiExtra(i,g.a,g.b);
       else {
-        xExtra+='<div class="drem-done"><span class="drem-ok">✓</span> Pisolino in più <b>'+esc(g.a)+'–'+esc(g.b)+'</b> '+
+        xExtra+='<div class="drem-done"><span class="drem-tx"><span class="drem-ok">✓</span> Pisolino in più <b>'+esc(g.a)+'–'+esc(g.b)+'</b></span>'+
           '<button type="button" class="ibtn drem-edit" data-extra-edit="'+esc(i)+'" aria-label="Modifica il pisolino" title="Modifica">'+ICON.pencil+'</button></div>';
         // un pisolino lungo e vicino al letto toglie sonno a stanotte: lo si dice una volta, senza giudicare
         const a0=NT.oraDi(g.a), b0=NT.oraDi(g.b);
@@ -4514,7 +4520,7 @@ function diaryReminder(P, CARDS){
     if(state.diaryEditing.has("extra:"+key0+":nuovo")){
       const fineD=isToday?hhmm(nowMin):"15:30", inD=isToday?hhmm(mod1440(nowMin-30)):"15:00";
       xExtra+=campiExtra("nuovo",inD,fineD);
-    } else if(!pend) xExtra+='<button type="button" class="lnk" data-extra-nuovo="1" style="margin-top:8px;min-height:44px">+ Hai fatto un altro pisolino?</button>';
+    } else if(!pend && logged && !sleepEditing) xExtra+='<button type="button" class="lnk" data-extra-nuovo="1" style="margin-top:8px;min-height:44px">+ Hai fatto un altro pisolino?</button>';
   }
   // L'ordine segue l'urgenza: un pisolino da confermare (il tempo scorre) prima dell'energia; altrimenti energia, poi i pisolini.
   x+= pend ? xNap+xEn : xEn+xNap;
@@ -6108,11 +6114,11 @@ function sceltaLettoPresto(P){
   if(!tutto || !diviso || tutto.a===diviso.a) return "";
   const on=!!state.mattinoBifasico;
   const opz=(v,nome,o,acceso)=>'<button type="button" class="vb'+(acceso?" on":"")+'" data-mattinobif="'+(v?1:0)+'" aria-pressed="'+acceso+'"><b>'+nome+'</b><span>a letto alle '+hhmm(o.a)+'</span></button>';
-  const spiega = store.get("lettoPrestoScelto", false) ? "" : '<p class="dn-hint">Tutto stanotte: le ore piene, ma prima delle 21 addormentarsi è difficile per molti. '+
+  const spiega='<p class="dn-hint">Tutto stanotte: le ore piene, ma prima delle 21 addormentarsi è difficile per molti. '+
     'Più tardi + pisolino: a letto a un\'ora normale, e il resto lo recuperi con un pisolino dopo il turno.</p>';
-  return '<div class="dopo-notte" role="group" aria-label="Prima di un turno molto presto, come dormi">'+
-    '<span class="dn-lab">Prima di un turno molto presto · vale per tutti</span>'+
-    '<div class="dn-scelta">'+opz(false,"Tutto stanotte",tutto,!on)+opz(true,"Più tardi + pisolino",diviso,on)+'</div>'+spiega+'</div>';
+  // Una riga sola (la scelta in vigore e l'ora di letto): le due strade e il perché si aprono al tocco. Prima erano sempre aperti.
+  return '<details class="dopo-notte dn-comp" aria-label="Prima di un turno molto presto, come dormi"><summary><span class="dn-sum"><small>Prima del turno presto</small><span><b>'+(on?"Più tardi + pisolino":"Tutto stanotte")+'</b> · a letto alle '+hhmm((on?diviso:tutto).a)+'</span></span></summary>'+
+    '<div class="dn-scelta">'+opz(false,"Tutto stanotte",tutto,!on)+opz(true,"Più tardi + pisolino",diviso,on)+'</div>'+spiega+'<p class="dn-vale">Vale per tutti i turni presto.</p></details>';
 }
 // Dopo una notte: sonno diviso o tutto insieme. È una preferenza sola
 // (state.sonnoDiurno, anche in Impostazioni), ma la si sceglie meglio qui,
@@ -6129,18 +6135,14 @@ function sceltaDopoNotte(P){
   if(eD==null || eU==null || eD===eU) return "";
   const corto=P.s.kind==="corto", diviso=cur==="diviso";
   const opz=(val,nome,fine,on,nota)=>'<button type="button" class="vb'+(on?" on":"")+'" data-sonnod="'+val+'" aria-pressed="'+on+'"><b>'+nome+'</b><span>fino alle '+hhmm(fine)+'</span><span class="dn-nota">'+nota+'</span></button>';
-  const spiega = store.get("smontoScelto", false) ? "" : '<p class="dn-hint">'+(corto
+  const spiega = '<p class="dn-hint">'+(corto
     ? 'Sonno breve: il pomeriggio è tuo e stanotte dormi bene. Sonno lungo: recuperi di più adesso, ma stasera il sonno arriva più tardi.'
     : 'In due tempi: un sonno più corto e un pisolino prima della prossima notte (di giorno si dorme più leggeri). Tutto di fila: un blocco solo, se di giorno dormi bene.')+'</p>';
   const scelte='<div class="dn-scelta">'+opz("diviso", corto?"Sonno breve":"In due tempi", eD, diviso, corto?"pomeriggio libero":"poi un pisolino")+opz(unito, corto?"Sonno lungo":"Tutto di fila", eU, !diviso, corto?"recuperi di più":"un blocco solo")+'</div>'+
     spiega+'<p class="dn-vale">Vale per tutte le notti.</p>';
-  // Scelta già fatta: una riga («In due tempi · cambia») che si apre solo se serve; la prima volta resta aperta.
-  if(store.get("smontoScelto", false)){
-    const nome=diviso ? (corto?"Sonno breve":"In due tempi") : (corto?"Sonno lungo":"Tutto di fila");
-    return '<details class="dopo-notte dn-comp"><summary>Dopo il turno: <b>'+nome+'</b> · cambia</summary>'+scelte+'</details>';
-  }
-  return '<div class="dopo-notte" role="group" aria-label="Dopo la notte, come dormi">'+
-    '<span class="dn-lab">Dopo il turno, come dormi?</span>'+scelte+'</div>';
+  // Una riga sola (la scelta in vigore e fino a che ora dormi): le due strade e il perché si aprono al tocco.
+  const nome=diviso ? (corto?"Sonno breve":"In due tempi") : (corto?"Sonno lungo":"Tutto di fila");
+  return '<details class="dopo-notte dn-comp" aria-label="Dopo la notte, come dormi"><summary><span class="dn-sum"><small>Dopo il turno</small><span><b>'+nome+'</b> · dormi fino alle '+hhmm(diviso?eD:eU)+'</span></span></summary>'+scelte+'</details>';
 }
 // Perché c'è un pisolino di recupero: il debito di debito.js. Una sola frase, usata in timeline e nel diario.
 function debitoMotivo(n){
