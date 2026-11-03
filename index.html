@@ -3898,8 +3898,9 @@ function cards(P){
         ["Al risveglio","per un quarto d'ora sei più impedito di prima del pisolino: non metterti subito alla guida"]]
         :(n.rec||n.dopo)?[]:[["Poi","mangi con calma ed esci: c'è tempo per svegliarti bene"],
         ["Al risveglio","per un quarto d'ora sei più impedito di prima del pisolino: non metterti subito alla guida né a fare cose delicate"]],
-      nap:{k:hhmm(n.a), fine:hhmm(n.b), min:n.b-n.a, turno:!!n.turno, livello:n.livello},
-      why:"Dormire prima di entrare riduce il crollo di attenzione nelle ore centrali della notte, quando gli errori costano di più. Un'ora e mezza copre un ciclo intero; se non hai tempo, venti minuti restano meglio di niente.",
+      nap:{k:hhmm(n.a), fine:hhmm(n.b), min:n.b-n.a, turno:!!n.turno, livello:n.livello, caffe:!!n.caffe, caffeNo:n.caffeNo||""},
+      why:(night ? "Dormire prima di entrare riduce il crollo di attenzione nelle ore centrali della notte, quando gli errori costano di più."
+                 : "Dormire prima di entrare ti fa arrivare al turno più lucido, e il sonno che manca pesa meno sulle ore di lavoro.")+" Un'ora e mezza copre un ciclo intero; se non hai tempo, venti minuti restano meglio di niente.",
       cite:"Rosekind e coll. 1995 (NASA) · Tassi & Muzet 2000", at:n.a});
   }
 
@@ -6409,9 +6410,12 @@ function renderEssenziale(P, CARDS){
     if(cd.nap){
       // Quello che si decide PRIMA del pisolino sta qui, nella sua riga; la
       // domanda «l'hai fatto?» arriva nel diario quando è cominciato.
-      const liv=cd.nap.livello, prima = (isFinite(liv) && liv<2 ? '<button type="button" class="lnk dim" data-skip-recupero="'+(liv+1)+'" style="margin-top:6px">Non riesco a farlo: proponimi un\'alternativa</button>' : '')+
-        (cd.nap.min<=30 ? '<p class="ed-sub" style="margin-top:8px">Se vuoi più lucidità, un caffè appena prima: l\'effetto arriva mentre dormi.'+(isFinite(P.cut)?' Dopo le '+hhmm(P.cut)+' meglio di no: disturba il sonno di stanotte.':'')+'</p>' : '');
-      voci.push({t, html:riga("nap"+cd.nap.k,"Pisolino",cd.val,cd.small||"",false,ICON.bed,dett(cd)+prima+
+      const liv=cd.nap.livello, napCaffe = (cd.nap.caffe
+          ? '<div class="rows"><div class="row"><b>Nappuccino</b><span>un caffè subito prima di sdraiarti, poi '+cd.nap.min+' minuti: la caffeina entra in circolo in 20-30 minuti, proprio quando ti svegli, e ti ritrovi più lucido che con il solo pisolino o il solo caffè. Anche se non ti addormenti del tutto, il riposo conta.</span></div></div>'+
+            '<div class="why">Lo propongo solo quando serve essere vigili dopo, il pisolino è breve e il caffè non arriva fino al tuo sonno di stanotte.<cite>Reyner &amp; Horne 1997 · Hayashi, Masuda &amp; Hori 2003</cite></div>'
+          : cd.nap.caffeNo==="soglia" && isFinite(P.cut) ? '<p class="ed-sub" style="margin-top:8px">Qui niente caffè prima: è dopo le '+hhmm(P.cut)+' e arriverebbe fino al tuo sonno. Va bene il pisolino da solo.</p>' : ''),
+        prima = (isFinite(liv) && liv<2 ? '<button type="button" class="lnk dim" data-skip-recupero="'+(liv+1)+'" style="margin-top:6px">Non riesco a farlo: proponimi un\'alternativa</button>' : '');
+      voci.push({t, html:riga("nap"+cd.nap.k,"Pisolino",cd.val,[cd.small||"", cd.nap.caffe?"con un caffè subito prima":""].filter(Boolean).join(" · "),false,ICON.bed,napCaffe+dett(cd)+prima+
         '<button type="button" class="lnk ed-cambia" data-cambia="4">Pisolini sul lavoro e altre impostazioni →</button>',
         {a:cd.at, z:cd.at+cd.nap.min, poi:"pisolino alle "+hhmm(cd.at)})});
     } else if(cd.k==="s"){

@@ -1042,6 +1042,17 @@ function plan(){
     if(d < CFG.napMin && d < (x.b - x.a)) naps.splice(k, 1);
     else if(a !== x.a || d !== x.b - x.a){ x.a = Math.round(a/5)*5; x.b = Math.round((a+d)/5)*5; }
   }
+  // Nappuccino: un caffè subito prima di un pisolino breve. La caffeina entra in circolo in 20-30 minuti, proprio al
+  // risveglio, e si somma al pisolino: più vigilanza di uno dei due da solo (Reyner & Horne 1997, al simulatore di guida;
+  // Hayashi, Masuda & Hori 2003). Solo quando è la scelta giusta: pisolino di 30 minuti al massimo (in uno lungo la
+  // caffeina arriverebbe a metà sonno), caffè entro la tua soglia dell'ultimo caffè (non ruba il sonno principale), e
+  // dopo serve essere vigili: pisolino in turno, giornata molto lunga, o fine del pisolino entro 4 ore dal turno.
+  for(const x of naps){
+    const corto = x.b - x.a <= 30, inSoglia = x.a <= cut;
+    const serve = !!x.turno || !!x.lungo || (!b.rest && b.start - x.b >= 0 && b.start - x.b <= 240);
+    x.caffe = corto && inSoglia && serve;
+    if(corto && serve && !inSoglia) x.caffeNo = "soglia";
+  }
   const busy = sleeps.concat(naps), meals = [];
   if(spansNight(b) && !startsInNight(b)){
     meals.push({at:place(b.start - state.cTo - CFG.mealGap, busy), main:true});
