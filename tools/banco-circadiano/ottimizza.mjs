@@ -30,10 +30,12 @@ const ROT_BASE = [["M-P-N-S-R", "MPNSR"], ["2M 2P 2N 4R", "MMPPNNSRRR"], ["5 not
 const SH12 = { G: { n: "Giorno 12h", s: 420, e: 1140 }, N: { n: "Notte 12h", s: 1140, e: 1860 } };
 const SH24 = { X: { n: "24 ore", s: 480, e: 1920 } };
 const SHL = { L: { n: "Sera lunga", s: 1080, e: 1560 } };
-const irregolare = (() => { let r = 7; const c = "MPNR"; let out = ""; for (let i = 0; i < 35; i++) { r = (r * 1103515245 + 12345) % 2147483648; out += c[r % 4]; } return out.replace(/N(?=[MP])/g, "N").replace(/NM/g, "NR").replace(/NP/g, "NR"); })();
+// irregolare: 35 giorni a caso (bit alti del generatore: i bassi si ripetono), dopo una notte mai un mattino o un pomeriggio
+const irregolare = (() => { let r = 7; const c = "MPNR"; let out = ""; for (let i = 0; i < 35; i++) { r = (r * 1103515245 + 12345) % 2147483648; out += c[(r >>> 16) % 4]; } return out.replace(/N[MP]/g, "NR"); })();
+if (process.env.SOLO) console.log("irregolare:", irregolare);
 const ROT_ESTREME = [["12 ore 2G 2N 4R", "GGNNSRRR", SH12], ["24 ore ogni 4 giorni", "XRRR", SH24], ["7 notti fisse, 7 riposi", "NNNNNNNSRRRRRR"],
   ["Rientri rapidi P→M", "PMPMPRR"], ["Sere lunghe 18-02", "LLLLLRR", SHL], ["Irregolare 5 settimane", irregolare]];
-const ROT = process.env.ESTREME === "1" ? ROT_ESTREME : ROT_BASE;
+const ROT = (process.env.ESTREME === "1" ? ROT_ESTREME : ROT_BASE).filter(r => !process.env.SOLO || r[0].startsWith(process.env.SOLO));
 const GIORNI = 28, INIZIO = "2026-11-02", H = 4;
 const iso = d => d.toISOString().slice(0, 10);
 const giornoLuce = g => g >= 7 * 60 && g < 17 * 60;   // novembre
@@ -102,7 +104,8 @@ function candidati(st, g, tipo) {
   return out;
 }
 function ottimizza(P, st, ideale) {
-  const dec = regole(P), tutti = new Array(P.length).fill(true);
+  const dec = regole(P), R = regole(P), tutti = new Array(P.length).fill(true);
+  const MINIMAX = process.env.MINIMAX === "1";
   let ys = GRUPPO.map(m => m.y.slice());
   for (let g = 0; g < GIORNI; g++) {
     const i0 = g * 1440 / DT, i1 = (g + H) * 1440 / DT;
@@ -112,6 +115,13 @@ function ottimizza(P, st, ideale) {
       const prima = dec[d][t]; let best = prima;
       for (const cand of candidati(st, d, t)) { dec[d][t] = cand; const c = prova(); if (c < migliore - 1e-9) { migliore = c; best = cand; } }
       dec[d][t] = best; }
+    // garanzia (minimax): la scelta ottimizzata di oggi resta solo se, sull'orizzonte, è migliore delle regole per OGNI orologio del gruppo
+    if (MINIMAX) {
+      const perMembro = d => { const L = luce(st, d, tutti); return GRUPPO.map((m, k) => { F = m.F; const c = costo(simula(ys[k], L, i0, i1).min, ideale, g, g + H - 1, m.fase); F = NOM; return c; }); };
+      const conRegole = dec.map((x, k) => k >= g && k < g + H ? R[k] : x);
+      const a = perMembro(dec), b = perMembro(conRegole);
+      if (a.some((c, k) => c > b[k])) dec[g] = R[g];
+    }
     const L = luce(st, dec, tutti); ys = GRUPPO.map((m, k) => { F = m.F; const r = simula(ys[k], L, i0, i0 + 1440 / DT).y; F = NOM; return r; });   // si tiene la scelta di oggi, si va a domani
   }
   return dec;

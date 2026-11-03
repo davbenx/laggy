@@ -658,19 +658,35 @@ function svegliaVera(wakePiano){
 // si sposta come sposterebbe il tuo orologio, poco nelle rotazioni rapide, di più nei blocchi lunghi di notti.
 // Nessun dato biologico: è un modello dai tuoi orari, come il resto del piano.
 const FJK = {taux:24.2, mu:0.23, k:0.55, G:33.75, a0:0.05, beta:0.0075, I0:9500, p:0.5};   // Forger 1999, come nella libreria circadian (Arcascope)
-const FJK_DT = 10/60;  // ore: passo di 10 minuti (Runge-Kutta 4; con 5 gli orari cambiano di meno di 5 minuti)
-function fjkDeriv(x, xc, n, I){
+const FJK_DT = 10/60;  // ore: passo di 10 minuti (Runge-Kutta 4)
+function forgerDer(x, xc, n, I){
   const a = I > 0 ? FJK.a0 * Math.pow(I / FJK.I0, FJK.p) : 0;
   const B = FJK.G * (1 - n) * a * (1 - 0.4*x) * (1 - 0.4*xc), w = Math.PI / 12;
   return [w * (xc + B),
           w * (FJK.mu * (xc - 4*xc*xc*xc/3) - x * ((24 / (0.99669 * FJK.taux)) ** 2 + FJK.k * B)),
           60 * (a * (1 - n) - FJK.beta * n)];
 }
+// Hannay, Booth & Forger 2019 (J Biol Rhythms), modello macroscopico a una popolazione, come nella libreria circadian:
+// ampiezza R e fase ψ dell'orologio; il minimo corporeo è dove ψ = π (il minimo di cos ψ).
+const HNY = {tau:23.84, K:0.06358, gamma:0.024, Beta1:-0.09318, A1:0.3855, A2:0.1977, BetaL1:-0.0026, BetaL2:-0.957756, sigma:0.0400692, G:33.75, a0:0.05, delta:0.0075, p:1.5, I0:9325};
+function hannayDer(R, Psi, n, I){
+  const Ip = I > 0 ? Math.pow(I, HNY.p) : 0, a = HNY.a0 * Ip / (Ip + HNY.I0), B = HNY.G * (1 - n) * a;
+  const R4 = R*R*R*R, R8 = R4*R4;
+  const amp = HNY.A1*0.5*B*(1 - R4)*Math.cos(Psi + HNY.BetaL1) + HNY.A2*0.5*B*R*(1 - R8)*Math.cos(2*Psi + HNY.BetaL2);
+  const fase = HNY.sigma*B - HNY.A1*B*0.5*(R*R*R + 1/R)*Math.sin(Psi + HNY.BetaL1) - HNY.A2*B*0.5*(1 + R8)*Math.sin(2*Psi + HNY.BetaL2);
+  return [-HNY.gamma*R + HNY.K*Math.cos(HNY.Beta1)/2*R*(1 - R4) + amp, 2*Math.PI/HNY.tau + HNY.K/2*Math.sin(HNY.Beta1)*(1 + R4) + fase, 60*(a*(1 - n) - HNY.delta*n)];
+}
+// Due modelli, verificati contro la libreria (tools/banco-circadiano): il minimo usato è la loro media, e la distanza fra
+// i due dice quanto è incerta la stima. Un consiglio deve reggere per entrambi, non dipendere dai difetti di uno.
+const MODELLI = [
+  {nome:"Forger 1999", der:forgerDer, y0:[-0.0843259, -1.09607546, 0.45584306], segno:y => y[0]},
+  {nome:"Hannay 2019", der:hannayDer, y0:[0.82041911, 1.71383697, 0.52318122], segno:y => Math.cos(y[1])}
+];
 // il minimo fra un passo e l'altro: parabola sui tre punti attorno al minimo (precisione di un minuto anche con passi di 10)
 const vertice = (a, b, c) => { const d = a - 2*b + c; return d > 0 ? 0.5 * (a - c) / d : 0; };
-function fjkPasso(y, I){
-  const h = FJK_DT, f = (a, d, c) => fjkDeriv(y[0] + c*d[0], y[1] + c*d[1], y[2] + c*d[2], I);
-  const k1 = fjkDeriv(y[0], y[1], y[2], I), k2 = f(0, k1, h/2), k3 = f(0, k2, h/2), k4 = f(0, k3, h);
+function fjkPasso(y, I, mod){
+  const der = (mod || MODELLI[0]).der, h = FJK_DT, f = (d, c) => der(y[0] + c*d[0], y[1] + c*d[1], y[2] + c*d[2], I);
+  const k1 = der(y[0], y[1], y[2], I), k2 = f(k1, h/2), k3 = f(k2, h/2), k4 = f(k3, h);
   return [0,1,2].map(i => y[i] + h/6 * (k1[i] + 2*k2[i] + 2*k3[i] + k4[i]));
 }
 // la luce del giorno per stagione (Italia, ~44°N): ore di luce e mezzogiorno vero, con l'ora legale
@@ -687,28 +703,30 @@ function luceStimata(minuto, dentro, alba, tramonto){
   return (minuto >= alba && minuto < tramonto) ? 600 : 150;
 }
 // orario libero ripetuto: lo stato del modello a mezzanotte e lo scarto per leggere il minimo come minimo corporeo
-let _fjkLibero = {chiave:null};
-function fjkLibero(d){
-  const chiave = state.freeBed + "|" + state.freeWake + "|" + state.need + "|" + d.getFullYear() + "-" + d.getMonth();
-  if(_fjkLibero.chiave === chiave) return _fjkLibero;
+const _fjkLibero = new Map();
+function fjkLibero(d, mi = 0){
+  const chiave = mi + "|" + state.freeBed + "|" + state.freeWake + "|" + state.need + "|" + d.getFullYear() + "-" + d.getMonth();
+  if(_fjkLibero.has(chiave)) return _fjkLibero.get(chiave);
+  const mod = MODELLI[mi];
   const [alba, tramonto] = luceDelGiorno(d);
   const fine = freeWakeUsata(), inizio = fine - state.need;
   const dorme = m => { const x = ((m - inizio) % 1440 + 1440) % 1440; return x < state.need; };
-  let y = [-0.5, -0.5, 0.2], prec = null, prec2 = null; const minimi = [];
+  let y = mod.y0.slice(), prec = null, prec2 = null; const minimi = [];
   const passi = Math.round(24 / FJK_DT);
   for(let g = 0; g < 30; g++) for(let i = 0; i < passi; i++){
     const m = i * FJK_DT * 60;
-    y = fjkPasso(y, luceStimata(m, dorme(m) ? "sonno" : "", alba, tramonto));
-    if(g >= 20 && prec2 !== null && prec < prec2 && prec <= y[0]) minimi.push(((m - FJK_DT*60*(1 - vertice(prec2, prec, y[0]))) % 1440 + 1440) % 1440);
-    prec2 = prec; prec = y[0];
+    y = fjkPasso(y, luceStimata(m, dorme(m) ? "sonno" : "", alba, tramonto), mod);
+    const x = mod.segno(y);
+    if(g >= 20 && prec2 !== null && prec < prec2 && prec <= x) minimi.push(((m - FJK_DT*60*(1 - vertice(prec2, prec, x))) % 1440 + 1440) % 1440);
+    prec2 = prec; prec = x;
   }
   // media circolare dei minimi degli ultimi giorni
   const ang = minimi.map(m => m / 1440 * 2 * Math.PI);
   const xm = ((Math.atan2(ang.reduce((a,b)=>a+Math.sin(b),0), ang.reduce((a,b)=>a+Math.cos(b),0)) / (2*Math.PI) * 1440) % 1440 + 1440) % 1440;
   const rif = ((naturalMid() + CFG.cbtOffset) % 1440 + 1440) % 1440;
   let fase = rif - xm; while(fase > 720) fase -= 1440; while(fase < -720) fase += 1440;
-  _fjkLibero = {chiave, y, fase};
-  return _fjkLibero;
+  const r = {chiave, y, fase}; _fjkLibero.set(chiave, r);
+  return r;
 }
 // I minimi corporei stimati dal modello, in minuti sulla scala del giorno guardato (0 = mezzanotte di oggi).
 // La simulazione parte da un giorno fisso della settimana (non dal giorno guardato) e ogni giornata simulata si ricorda
@@ -716,10 +734,10 @@ function fjkLibero(d){
 // giorno dopo, o ridisegnare, riusa il lavoro già fatto. Un sonno o un turno diverso cambia la chiave, e si ricalcola.
 const OROL_PRIMA = 10, OROL_DOPO = 2;
 const _orolGiorni = new Map();
-let _orologio = {chiave:null, minimi:null};
-function minimiOrologio(S){
+const _orologio = new Map();
+function minimiOrologio(S, mi = 0){
   try{
-    const oggi = dnum(state.focus), lib = fjkLibero(state.focus);
+    const oggi = dnum(state.focus), lib = fjkLibero(state.focus, mi), mod = MODELLI[mi];
     const inizio = Math.floor((oggi - OROL_PRIMA) / 7) * 7 - oggi;    // giorni dal giorno guardato: fra -16 e -10
     const sonni = [], lavoro = [];
     for(let o = inizio - 1; o <= OROL_DOPO; o++){
@@ -742,7 +760,7 @@ function minimiOrologio(S){
       if(migliore) sonni[migliore.i] = [migliore.a, migliore.z];
     }
     const chiaveTutto = oggi + "|" + lib.chiave + JSON.stringify(sonni) + JSON.stringify(lavoro);
-    if(_orologio.chiave === chiaveTutto) return _orologio.minimi;
+    const memo = _orologio.get(mi); if(memo && memo.chiave === chiaveTutto) return memo.minimi;
     if(_orolGiorni.size > 3000) _orolGiorni.clear();
     const taglia = (L, a, z) => L.filter(([p, q]) => q > a && p < z).map(([p, q]) => [Math.max(p, a) - a, Math.min(q, z) - a]);
     const dentro = (L, m) => { for(const [p, q] of L) if(m >= p && m < q) return true; return false; };
@@ -756,10 +774,11 @@ function minimiOrologio(S){
         const [alba, tramonto] = luceDelGiorno(day(state.focus, o));
         let y = st.y, prec = st.prec, prec2 = st.prec2; const mm = [];
         for(let m = 0; m < 1440; m += passo){
-          y = fjkPasso(y, luceStimata(m, dentro(sG, m) ? "sonno" : dentro(lG, m) ? "lavoro" : "", alba, tramonto));
-          if(!isFinite(y[0])) throw new Error("modello instabile");
-          if(prec2 !== null && prec < prec2 && prec <= y[0]) mm.push(m - passo*(1 - vertice(prec2, prec, y[0])));
-          prec2 = prec; prec = y[0];
+          y = fjkPasso(y, luceStimata(m, dentro(sG, m) ? "sonno" : dentro(lG, m) ? "lavoro" : "", alba, tramonto), mod);
+          const x = mod.segno(y);
+          if(!isFinite(x)) throw new Error("modello instabile");
+          if(prec2 !== null && prec < prec2 && prec <= x) mm.push(m - passo*(1 - vertice(prec2, prec, x)));
+          prec2 = prec; prec = x;
         }
         g = {y, prec, prec2, mm};
         _orolGiorni.set(chiave, g);
@@ -767,18 +786,21 @@ function minimiOrologio(S){
       for(const m of g.mm) minimi.push(a + m + lib.fase);
       st = g;
     }
-    _orologio = {chiave: chiaveTutto, minimi};
+    _orologio.set(mi, {chiave: chiaveTutto, minimi});
     return minimi;
   }catch(e){ return null; }
 }
 // Il minimo corporeo del modello più vicino a quello che la regola semplice si aspetterebbe (rif): lo stesso «quale
 // notte» di prima, ma all'ora in cui il tuo orologio sta davvero. Senza modello, la regola semplice.
-function minimoVicino(S, rif){
-  const L = minimiOrologio(S);
-  if(!L || !L.length) return rif;
-  let best = null; for(const m of L) if(best === null || Math.abs(m - rif) < Math.abs(best - rif)) best = m;
-  return Math.abs(best - rif) <= 720 ? Math.round(best) : rif;
+function stimaOrologio(S, rif){
+  const per = MODELLI.map((m, mi) => { const L = minimiOrologio(S, mi); if(!L || !L.length) return null;
+    let best = null; for(const v of L) if(best === null || Math.abs(v - rif) < Math.abs(best - rif)) best = v;
+    return Math.abs(best - rif) <= 720 ? best : null; }).filter(v => v !== null);
+  if(!per.length) return {cbt: rif, modelli: [], incertezza: null};
+  const media = per.reduce((a, b) => a + b, 0) / per.length;
+  return {cbt: Math.round(media), modelli: per.map(Math.round), incertezza: Math.max(30, Math.round((Math.max(...per) - Math.min(...per)) / 2))};
 }
+function minimoVicino(S, rif){ return stimaOrologio(S, rif).cbt; }
 // La soglia dell'ultimo caffè: quanto ti resta addosso (la tua scelta in Impostazioni) per quanto dura in te.
 function caffeinaFattore(){
   const f = state.caffFattori || {}, E = CFG.caffEmivita;
@@ -795,7 +817,7 @@ function plan(){
   const end = s.onset + s.dur, wakePiano = sp.onset + sp.dur - 1440;
   const wake = svegliaVera(wakePiano);
   const caff = caffeinaOre(), oreCaffe = caff.min;
-  const cbt = minimoVicino(S, s.mid + CFG.cbtOffset), shift = s.mid - sp.mid;
+  const orologio = stimaOrologio(S, s.mid + CFG.cbtOffset), cbt = orologio.cbt, shift = s.mid - sp.mid;
   // Nelle notti la caffeina serve anche a restare svegli: se la tua soglia cadrebbe prima del turno (caffeina che in te
   // dura molto), resta almeno un caffè a inizio turno. La sicurezza viene prima del sonno di domattina.
   let cut = s.onset - oreCaffe;
@@ -1031,7 +1053,7 @@ function plan(){
     meals.push({at:place(main, busy), main:true});
     meals.push({at:place(s.onset-180, busy), lt:true});
   }
-  return {b, pb, nb, s, sp, S, wake, end, cut, cbt, cbtRegola: s.mid + CFG.cbtOffset, caff, shift, sleeps, naps, meals, busy,
+  return {b, pb, nb, s, sp, S, wake, end, cut, cbt, cbtRegola: s.mid + CFG.cbtOffset, orologio, caff, shift, sleeps, naps, meals, busy,
           night:spansNight(b), lateStart:startsInNight(b), debitoScoperto, debitoMin:dd.haFino?dd.min:0,
           debitoNotti:dd.haFino ? dd.serie.filter(x=>x.manca>=30).sort((x,y)=>y.manca-x.manca).slice(0,3) : []};
 }
@@ -1330,7 +1352,7 @@ function buildIcs(days){
 
   normalizza();
   return {
-    state, plan, caffeinaOre, _orologioPasso: (y, I) => fjkPasso(y, I), buildIcs, buildCouple, buildEvents, buildCoupleEvents, codeAt, block, etichetta, tipoDelGiorno, fasciaDelGiorno, nomeTurno, nomeOre, fasciaOre, oreNotturne, eNotte,
+    state, plan, caffeinaOre, _orologioPasso: (y, I, mi = 0) => fjkPasso(y, I, MODELLI[mi]), buildIcs, buildCouple, buildEvents, buildCoupleEvents, codeAt, block, etichetta, tipoDelGiorno, fasciaDelGiorno, nomeTurno, nomeOre, fasciaOre, oreNotturne, eNotte,
     sharedDays, freeOverlap, asPartner,
     setIcs(o){ Object.assign(ICS, o||{}); return ICS; },
     // Esposti anche questi: prima privati alla closure, ma index.html (che

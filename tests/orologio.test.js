@@ -62,3 +62,12 @@ test("il diario sposta l'orologio: chi dorme davvero più tardi del piano ha il 
   const strano = motore("RRRRRRR", "2026-11-12", { beds: { "2026-11-10": "14:00" }, wakes: { "2026-11-10": "15:00" } }).plan().cbt;
   assert.equal(strano, senza, "un sonno del diario che non combacia con nessun sonno del piano non viene inventato");
 });
+
+test("due modelli: Forger 1999 e Hannay 2019 insieme, con l'incertezza della stima", () => {
+  const P = motore("MPNSR", "2026-11-14").plan();
+  assert.equal(P.orologio.modelli.length, 2, "un minimo per modello");
+  assert.ok(Math.abs(P.cbt - (P.orologio.modelli[0] + P.orologio.modelli[1]) / 2) <= 1, "il minimo usato è la media");
+  assert.ok(P.orologio.incertezza >= 30 && P.orologio.incertezza <= 240, "incertezza ragionevole: " + P.orologio.incertezza);
+  const R = motore("RRRRRRR", "2026-11-12").plan();
+  assert.ok(Math.abs(R.orologio.modelli[0] - R.orologio.modelli[1]) <= 20, "nei giorni regolari i due modelli coincidono");
+});
