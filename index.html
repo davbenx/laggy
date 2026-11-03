@@ -998,6 +998,8 @@ padding:12px 6px 12px 14px;margin:-6px 0 var(--gap-sezione);font-size:13.5px;lin
 .acasa svg{flex:none;color:var(--blue)}
 .acasa b{display:block;font-size:15px;font-weight:600}
 .acasa small{display:block;font-size:12.5px;color:var(--dim);margin-top:2px}
+.invito-zitto{display:none!important}
+.cornice{font-size:12px;color:var(--faint);text-align:center;margin:18px 8px 4px;line-height:1.5}
 .essnudge{font-size:12.5px;color:var(--faint);margin-top:14px;line-height:1.55}
 .esshint{font-size:13px;color:var(--dim);margin:0 2px 10px}
 .ed-cambia{display:block;margin-top:10px;font-size:13px;text-align:left}
@@ -1702,6 +1704,8 @@ header b{font-size:23px}
 </button>
 <!-- «Lo sapevi?»: una funzione mai usata, una volta sola, in fondo. -->
 <div class="sapevi solo-oggi" id="loSapevi" role="note" hidden></div>
+<!-- La cornice di tutto il piano, una riga in fondo: spunti, non compiti. Anche un giorno «fuori piano» va bene. -->
+<p class="cornice solo-oggi">Sono spunti, non regole: prendi quello che ti torna utile oggi. Non sono consigli medici.</p>
 
 <!-- Non più un titolo "Turni" separato sopra: l'intervallo del ciclo fa
      già da titolo ("Turni 13–27 settembre"), il nome della tab è già
@@ -3805,12 +3809,12 @@ function cards(P){
     cc.rows.push(["Come prenderlo","piccoli e distanziati: due caffè normali a distanza reggono meglio di un doppio, e disturbano meno il sonno dopo"]);
     cc.rows.push(["No","dopo le "+hhmm(cut)+": la caffeina è ancora in circolo quando provi a dormire"]);
   }else if(s.meta.ramp&&shift<0)
-    cc.sub="Stasera devi addormentarti prima del solito. Il caffè del pomeriggio è il primo sospettato.";
+    cc.sub="Stasera il sonno arriva prima del solito: il caffè del pomeriggio è la prima cosa da anticipare.";
   else cc.sub="Calcolato sull'ora in cui andrai a letto stasera.";
   out.push(cc);
 
   const lc={k:"l",lab:"Luce",rows:[],rowsA:[],rowsE:[],at:wake+15,cite:"Khalsa, Jewett, Cajochen & Czeisler, J Physiol 2003 · Smith, Fogg &amp; Eastman 2009 · Thompson, Jones, Gregson &amp; Atkinson, Eur J Appl Physiol 2014 (alba simulata) · Forger, Jewett &amp; Kronauer, J Biol Rhythms 1999 (modello dell'orologio)"};
-  const whyLight="La luce sposta l'orologio in due direzioni opposte, decise dall'ora in cui la prendi: il confine è il minimo corporeo, per te intorno alle "+hhmm(cbt)+" (lo stima un modello dell'orologio biologico dai tuoi ultimi giorni di turni e sonno). Prima di quell'ora ti spinge avanti e ti toglie il sonno; dopo ti tira indietro — per questo il sole della strada, dopo la notte, è il nemico numero uno del sonno diurno.";
+  const whyLight="La luce sposta l'orologio in due direzioni opposte, decise dall'ora in cui la prendi: il confine è il momento di sonnolenza, per te intorno alle "+hhmm(cbt)+" (lo stima un modello dell'orologio biologico dai tuoi ultimi giorni di turni e sonno). Prima di quell'ora ti spinge avanti e ti toglie il sonno; dopo ti tira indietro — per questo il sole della strada, dopo la notte, è il nemico numero uno del sonno diurno.";
   if(night){
     // Poche notti di fila («contieni»: l'orologio non si sposta, ed è giusto così): luce per restare vigili tutto il turno.
     // Blocco lungo: luce fino a due ore prima del minimo corporeo (il modello dell'orologio dice dov'è oggi), poi bassa.
@@ -3902,7 +3906,7 @@ function cards(P){
       sub:n.rep?("Oggi sei reperibile: se ti chiamano stanotte, la notte di sonno salta. Questo pisolino è una riserva messa da parte prima, lontano abbastanza dalla sera da non rubarti il sonno se non chiama nessuno.")
          :n.corto?("Prima non c'era spazio per un pisolino intero: venti minuti, presi appena puoi, valgono più di niente.")
          :n.dopo?("Prima del turno non c'era spazio. Recuperi appena stacchi, invece di portarti il debito a domani.")
-         :n.rec?(n.last?"L'ultimo è corto apposta: stasera devi dormire a un orario normale."
+         :n.rec?(n.last?"L'ultimo è corto apposta: così stasera ti addormenti a un orario normale."
                        :"È la seconda metà del tuo riposo, non un extra.")
          :n.lungo?("Oggi la veglia dura "+hm(n.ore)+" di fila, e le ultime ore cadono quando il corpo è al minimo. Dormire adesso ti toglie il pezzo peggiore: non è comodità, è quello che ti fa arrivare a casa intero.")
          :n.debito?(debitoMotivo(n)+" Questo pisolino non è un extra: rimette a posto il conto prima che si sommi a domani.")
@@ -3911,9 +3915,9 @@ function cards(P){
          :(n.first?"Il pisolino che rende di più in tutto il ciclo. Fallo anche senza sonno, prima di uscire di casa."
                   :"Recupera quello che il sonno del mattino non è riuscito a darti."),
       rows:n.rep?[["Se ti chiamano","un caffè appena esci va bene; dopo le 3 del mattino evitalo se poi torni a dormire. Al rientro, un sonno corto prima del resto della giornata"],
-        ["Al risveglio","per un quarto d'ora sei più impedito di prima del pisolino: non metterti subito alla guida"]]
+        ["Al risveglio","per un quarto d'ora sei più lento di prima del pisolino: concediti qualche minuto prima di guidare"]]
         :(n.rec||n.dopo)?[]:[["Poi","mangi con calma ed esci: c'è tempo per svegliarti bene"],
-        ["Al risveglio","per un quarto d'ora sei più impedito di prima del pisolino: non metterti subito alla guida né a fare cose delicate"]],
+        ["Al risveglio","per un quarto d'ora sei più lento di prima del pisolino: concediti qualche minuto prima di guidare o di fare cose delicate"]],
       nap:{k:hhmm(n.a), fine:hhmm(n.b), min:n.b-n.a, turno:!!n.turno, livello:n.livello, caffe:!!n.caffe, caffeNo:n.caffeNo||""},
       why:(night ? "Dormire prima di entrare riduce il crollo di attenzione nelle ore centrali della notte, quando gli errori costano di più."
                  : "Dormire prima di entrare ti fa arrivare al turno più lucido, e il sonno che manca pesa meno sulle ore di lavoro.")+" Un'ora e mezza copre un ciclo intero; se non hai tempo, venti minuti restano meglio di niente.",
@@ -4000,10 +4004,10 @@ function cards(P){
   // quando sei davvero libero): resta comunque un momento in cui sei
   // sveglio e attivo, non dentro il sonno — quello lo copre già "Dormi". ──
   if(!b.rest && isFinite(cbt) && cbt>=b.start-state.cTo && cbt<=b.end+state.cFrom){
-    out.push({k:"cbt", lab:"Finestra di sonnolenza prevista",
+    out.push({k:"cbt", lab:"Momento di sonnolenza",
       val: hhmm(cbt-60)+"–"+hhmm(cbt+60),
-      small: "minimo biologico (stima, non misurazione)",
-      why: "Il corpo ha un minimo naturale di attivazione, indipendente da quanto hai dormito: è il punto in cui la temperatura corporea tocca il fondo. Cadere in turno in quella finestra richiede massima cautela alla guida e nei compiti critici. È una stima circadiana, non una misurazione della tua vigilanza reale.",
+      small: "stima dai tuoi orari",
+      why: "Ogni notte il corpo attraversa un punto basso naturale, indipendente da quanto hai dormito: la temperatura profonda tocca il fondo e la palpebra pesa di più. È normale sentirlo. Se cade in turno, è il momento giusto per una pausa alla luce, e se puoi lascia i compiti più delicati a prima o a dopo. È una stima dai tuoi orari, non una misura di come stai davvero: conta quello che senti.",
       at: cbt});
   }
 
@@ -4395,6 +4399,7 @@ function render(){
   renderEssenziale(P, CARDS);          // si azzera da solo in dettaglio
   renderACasa();
   renderLoSapevi();
+  arbitroInviti();
   const tab = state.tab || (ess ? "oggi" : "ciclo");
   // "piu" (la vecchia terza tab, eliminata) non è più un valore raggiungibile
   // di state.tab/tab: oggi solo "oggi"/"turni"/"opzioni" lo sono davvero
@@ -4775,7 +4780,7 @@ function renderOra(Pfocus){
     // Dentro la finestra di sonno del piano il messaggio è «dormi»; il rischio resta in seconda riga
     // per chi è ancora sveglio (i primi 90 minuti dopo il turno restano il «Rientro»).
     title = A.t;
-    sub = A.s + (isSevere ? " · Se sei ancora sveglio: rischio alto, niente guida né decisioni critiche." : "");
+    sub = A.s + (isSevere ? " · Se non riesci a dormire, riposa al buio e rimanda la guida." : "");
     oraIc = ICON.moon;
   } else if(isSevere){
     accent = true;
@@ -4784,8 +4789,8 @@ function renderOra(Pfocus){
       sub = "Se devi guidare o decidere, fermati: 20 minuti e un caffè.";
       oraIc = ICON.warn;
     } else if(inNadir){
-      title = "Minimo biologico (WCOL)";
-      sub = "Finestra di massima sonnolenza circadiana: massima cautela nei compiti critici.";
+      title = "Momento di sonnolenza";
+      sub = "Il corpo è al suo punto più basso: se puoi, rimanda guida e compiti delicati, e prenditi una pausa alla luce.";
       oraIc = ICON.warn;
     } else if(inSmonto){
       title = "Rientro dal turno";
@@ -4793,8 +4798,8 @@ function renderOra(Pfocus){
       oraIc = ICON.car;
     } else {
       const riskFuture = (risk && risk.at && risk.at.getTime() > now.getTime());
-      title = riskFuture ? ("Rischio fatica alto verso le " + risk.hhmm) : "Rischio fatica elevato";
-      sub = "Evita compiti rischiosi e decisioni critiche; fai una pausa di recupero.";
+      title = riskFuture ? ("Più stanchezza verso le " + risk.hhmm) : "Stanchezza alta adesso";
+      sub = "Se puoi, fai una pausa e rimanda i compiti più delicati.";
       oraIc = ICON.warn;
     }
   } else if(A && !A.fallback){
@@ -4991,7 +4996,7 @@ function renderDemoEsempio(){
         ? '<button type="button" class="btn g" id="doRecuperaDati" style="display:block;width:100%;min-height:46px;margin-top:8px">Usavi Notturnisti dal browser? Porta qui i tuoi turni →</button>' : '')+
       // Una riga, al primo passo e prima di qualsiasi piano: cosa è (e cosa
       // no) e dove sono le regole. Non un muro da accettare, ma visibile.
-      '<p class="hint foot-links" style="margin:14px 0 0;text-align:center;font-size:12px">Indicazioni generali di benessere, non consigli medici. '+
+      '<p class="hint foot-links" style="margin:14px 0 0;text-align:center;font-size:12px">Spunti per stare un po\' meglio, non regole da seguire alla lettera né consigli medici. '+
         'Usando l\'app accetti i <a href="https://app.notturnisti.club/termini/" target="_blank" rel="noopener">Termini</a> · <a href="https://app.notturnisti.club/privacy/" target="_blank" rel="noopener">Privacy</a></p>';
   } else if(f === "orario" && turnoInScelta){
     const k=turnoInScelta, cur=sh[k]||ORARI_BASE[k];
@@ -5480,7 +5485,26 @@ async function gestisciFunzione(id){
   }
 }
 let attivazioneAperta=false;   // la lista compatta aperta in questa sessione
-function renderAttivazione(){
+// Un invito alla volta per canale in Oggi: in alto ciò che va fatto adesso, in fondo una cosa da scoprire.
+// Più card che chiedono qualcosa insieme diventano una lista di compiti, e la giornata finisce sotto. In ogni canale
+// vince il primo nell'ordine; gli altri tornano quando il primo è risolto o chiuso. «Dimmi i tuoi orari» è l'ultimo
+// del fondo: resta finché non li imposti, e davanti a «Lo sapevi?» (ogni qualche giorno) lo zittirebbe per sempre.
+// «Condividi i tuoi orari» non è un invito ma uno strumento: resta sempre.
+const INVITI=[["#firstPlanBanner","#setupChecklist","#adattaCard","#medicoCard","#setupNudge"],["#loSapevi","#essenziale .essnudge"]];
+function arbitroInviti(){
+  for(const canale of INVITI){
+    let preso=false;
+    for(const sel of canale){
+      const el=document.querySelector(sel); if(!el) continue;
+      el.classList.remove("invito-zitto");
+      if(el.hidden) continue;
+      if(preso) el.classList.add("invito-zitto"); else preso=true;
+    }
+  }
+}
+// chiamata anche fuori da render(): l'arbitro degli inviti va rifatto ogni volta
+function renderAttivazione(){ _renderAttivazione(); arbitroInviti(); }
+function _renderAttivazione(){
   const voci=vociAttivazione(), fatte=voci.filter(x=>x.ok).length;
   const el=$("#setupChecklist");
   if(el){
@@ -6107,7 +6131,7 @@ function renderFormaGiorno(P){
 
   const legenda=['<span class="fg-key"><i style="background:var(--blue)"></i>Sonno</span>'];
   if(!P.b.rest) legenda.push('<span class="fg-key"><i style="background:var(--orange-bar)"></i>Turno</span>');
-  if(cbtVisibile) legenda.push('<span class="fg-key"><i class="fg-picco"></i>Picco di sonnolenza</span>');
+  if(cbtVisibile) legenda.push('<span class="fg-key"><i class="fg-picco"></i>Momento di sonnolenza</span>');
 
   el.innerHTML =
     '<svg viewBox="0 0 '+W+' 44" style="width:100%;height:44px;display:block" role="img" aria-label="Forma della giornata, dalle '+hhmm(clo)+' alle '+hhmm(chi)+'">'+
@@ -6127,7 +6151,7 @@ function finestreDelGiorno(P){
 // restano accese, i momenti migliori sono una scelta.
 const PIANO_VOCI=[
   ["luce","Luce","Quando prendere o evitare la luce per restare in fase",true],
-  ["penombra","Penombra","Le luci basse prima di dormire",true],
+  ["penombra","Luce bassa","Le luci basse prima di dormire",true],
   ["pasti","Pasti","Quando mangiare nei giorni di turno. Accesa, puoi segnare pasti abbondanti e alcol",true],
   ["liberi","Tempo libero","Le finestre libere fuori dal lavoro",true],
   ["testa","Momento per la testa","Quando sei più lucido per pensare, studiare, decidere",false],
@@ -6473,8 +6497,8 @@ function renderEssenziale(P, CARDS){
           const dettPenombra = righeFase(cd.rowsE)+percheOmbra;
           // finisce quando vai a dormire: «poi buio»; altrimenti (ottimizzatore: luce bassa a metà giornata) dice fino a quando
           const finoAlSonno = avoidBlk[2] >= P.s.onset-15 && avoidBlk[2] <= P.s.onset+5;
-          voci.push({t:tAvoid, html:riga("penombra","Penombra",hhmm(avoidBlk[1]),finoAlSonno?"poi buio, per dormire":"luce bassa fino alle "+hhmm(avoidBlk[2]),false,ICON.dim,
-            finoAlSonno ? dettPenombra : righeFase(cd.rowsE)+'<div class="why">In queste ore la luce sposterebbe il tuo orologio nella direzione sbagliata per i prossimi turni: tenerla bassa lo aiuta ad andare dove serve.</div>',
+          voci.push({t:tAvoid, html:riga("penombra","Luce bassa",hhmm(avoidBlk[1]),finoAlSonno?"poi buio, per dormire":"luce bassa fino alle "+hhmm(avoidBlk[2]),false,ICON.dim,
+            finoAlSonno ? dettPenombra : righeFase(cd.rowsE)+'<div class="why">In queste ore la luce sposterebbe il tuo orologio al contrario di quello che serve per i prossimi turni: tenerla bassa lo aiuta ad andare dove serve.</div>',
             {a:avoidBlk[1], z:avoidBlk[2], poi:"luci basse dalle "+hhmm(avoidBlk[1])})});
         }
       } else if(P.s.meta && P.s.meta.ramp){
@@ -6485,7 +6509,7 @@ function renderEssenziale(P, CARDS){
         // questo stesso ramo (s.meta.ramp), non un rilevamento nuovo.
         const tSera = dSv(P.s.onset-180);
         const dettSera = '<div class="why">Anche in un giorno libero, la luce di sera sposta l\'orologio nella direzione opposta se stai andando verso le notti — tenerla bassa nelle ultime ore aiuta ad arrivarci già un po\' spostato.</div>';
-        voci.push({t:tSera, html:riga("penombra","Penombra",hhmm(P.s.onset-180),"tieni la luce soffusa",false,ICON.dim,dettSera,
+        voci.push({t:tSera, html:riga("penombra","Luce bassa",hhmm(P.s.onset-180),"tieni la luce soffusa",false,ICON.dim,dettSera,
           {a:P.s.onset-180, poi:"luci basse dalle "+hhmm(P.s.onset-180)})});
       }
     } else if(cd.k==="m"){
@@ -6509,8 +6533,8 @@ function renderEssenziale(P, CARDS){
       voci.push({t, html:riga("turno","Turno",cd.val,cd.small,false,ICON.alarm,dett(cd),
         {a:P.b.start, z:P.b.end, poi:"entri in turno alle "+hhmm(P.b.start)})});
     } else if(cd.k==="cbt"){
-      voci.push({t, html:riga("sonnolenza","Sonnolenza massima",cd.val,cd.small,true,ICON.warn,dett(cd),
-        {a:cd.at-60, z:cd.at+60, poi:"sonnolenza massima verso le "+hhmm(cd.at)})});
+      voci.push({t, html:riga("sonnolenza","Momento di sonnolenza",cd.val,cd.small,true,ICON.warn,dett(cd),
+        {a:cd.at-60, z:cd.at+60, poi:"momento di sonnolenza verso le "+hhmm(cd.at)})});
     }
   }
 
@@ -7276,7 +7300,7 @@ function statoSchema(sc){
   return {voti, segnati:segnati.size, abbinati:coppie.length, schema:{testo:sc.frase(venti(mL))}};
 }
 function cardInsight(icona, testo, id, extra){
-  return '<div class="andamento-insight"><span class="aic">'+icona+'</span><div><span class="andamento-insight-eyebrow">Insight</span>'+esc(testo)+
+  return '<div class="andamento-insight"><span class="aic">'+icona+'</span><div><span class="andamento-insight-eyebrow">Scoperta</span>'+esc(testo)+
     (extra?'<div>'+extra+'</div>':'')+' <button type="button" class="lnk dim" data-nascondi-insight="'+id+'" style="min-height:44px">Nascondi</button></div></div>';
 }
 // «I tuoi schemi»: una sola voce in Sonno e carico con tutto ciò che i dati dicono (e, per il resto, quanto manca per vederlo, in positivo).
@@ -7370,7 +7394,7 @@ function graficoNotti(trend){
   const yOf=m=>top+(Hb-top)*(1-m/massimo);
   let g='', sotto=0; const fasceViste=new Set();
   S.forEach((x,i)=>{
-    const cx=pad+i*step+step/2, bx=cx-bw/2, y=yOf(x.actual), manca=x.planned!=null && x.actual<x.planned-15;
+    const cx=pad+i*step+step/2, bx=cx-bw/2, y=yOf(x.actual), manca=x.planned!=null && x.actual<x.planned-30;
     if(manca) sotto++;
     g+='<rect class="g-notte'+(manca?' g-manca':'')+'" x="'+bx.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+(Hb-y).toFixed(1)+'" rx="2" fill="'+(manca?'var(--orange)':'var(--blue)')+'"/>';
     if(x.planned!=null){ const yp=yOf(x.planned).toFixed(1); g+='<line x1="'+(bx-1.5).toFixed(1)+'" x2="'+(bx+bw+1.5).toFixed(1)+'" y1="'+yp+'" y2="'+yp+'" stroke="var(--ink)" stroke-width="1.5" opacity=".8"/>'; }
@@ -7379,9 +7403,9 @@ function graficoNotti(trend){
   });
   g+='<line x1="'+pad+'" x2="'+(W-pad)+'" y1="'+Hb+'" y2="'+Hb+'" stroke="var(--line)" stroke-width="1"/>'+
      SVGT(pad,H-3,n+' notti fa')+SVGT(W-pad,H-3,'oggi',' text-anchor="end"');
-  const label='Ore dormite nelle ultime '+n+' notti: in media '+hm(trend.avgActual)+(trend.avgPlanned?' contro '+hm(trend.avgPlanned)+' previste':'')+'; '+sotto+' notti più corte del piano';
+  const label='Ore dormite nelle ultime '+n+' notti: in media '+hm(trend.avgActual)+(trend.avgPlanned?' contro '+hm(trend.avgPlanned)+' previste':'')+'; '+sotto+' notti più corte del piano di almeno mezz\'ora';
   return '<svg class="grf" viewBox="0 0 '+W+' '+H+'" style="height:'+H+'px" role="img" aria-label="'+label+'">'+g+'</svg>'+
-    '<div class="grf-leg"><span><i style="background:var(--blue)"></i>ore dormite</span><span><i style="background:var(--orange)"></i>più corta del piano</span><span><i style="background:var(--ink);height:2px;vertical-align:3px"></i>previste</span>'+["m","p","s","n"].filter(f=>fasceViste.has(f)).map(f=>'<span><i style="background:'+FASCE[f][1]+';border-radius:50%"></i>'+FASCE[f][0].toLowerCase()+'</span>').join("")+'</div>';
+    '<div class="grf-leg"><span><i style="background:var(--blue)"></i>ore dormite</span><span><i style="background:var(--orange)"></i>mezz\'ora o più sotto il piano</span><span><i style="background:var(--ink);height:2px;vertical-align:3px"></i>previste</span>'+["m","p","s","n"].filter(f=>fasceViste.has(f)).map(f=>'<span><i style="background:'+FASCE[f][1]+';border-radius:50%"></i>'+FASCE[f][0].toLowerCase()+'</span>').join("")+'</div>';
 }
 // Le 24 ore (dalle 18 alle 18, così la notte sta in mezzo): sonno, melatonina, minimo corporeo, momento più lucido.
 function fasciaOrologio(o){
@@ -7399,9 +7423,9 @@ function fasciaOrologio(o){
   g+='<line x1="'+X(o.mid).toFixed(1)+'" x2="'+X(o.mid).toFixed(1)+'" y1="'+(y0-6)+'" y2="'+y0+'" stroke="var(--ink)" stroke-width="2"/>';
   [[1080,"18:00"],[1440,"00:00"],[1800,"06:00"],[2160,"12:00"],[2520,"18:00"]].forEach(([m,l],i)=>{
     g+=SVGT((i===4?W-pad:X(m)).toFixed(1),H-3,l,' text-anchor="middle"'); });
-  const label='Le 24 ore nei giorni liberi: sonno '+state.freeBed+' → '+state.freeWake+', melatonina dalle '+hhmm(o.mel)+', minimo corporeo alle '+hhmm(o.cbt)+(o.lucido?', più lucido verso le '+o.lucido:'');
+  const label='Le 24 ore nei giorni liberi: sonno '+state.freeBed+' → '+state.freeWake+', melatonina dalle '+hhmm(o.mel)+', momento di sonnolenza alle '+hhmm(o.cbt)+(o.lucido?', più lucido verso le '+o.lucido:'');
   return '<svg class="grf" viewBox="0 0 '+W+' '+H+'" style="height:'+H+'px" role="img" aria-label="'+label+'">'+g+'</svg>'+
-    '<div class="grf-leg"><span><i style="background:var(--blue)"></i>sonno</span><span><i style="background:var(--faint);height:2px;vertical-align:3px"></i>melatonina</span><span><i style="background:var(--picco);border-radius:50%"></i>minimo corporeo</span><span><i style="border:2px solid var(--ink);border-radius:50%;background:none;width:9px;height:9px;box-sizing:border-box"></i>più lucido</span></div>';
+    '<div class="grf-leg"><span><i style="background:var(--blue)"></i>sonno</span><span><i style="background:var(--faint);height:2px;vertical-align:3px"></i>melatonina</span><span><i style="background:var(--picco);border-radius:50%"></i>momento di sonnolenza</span><span><i style="border:2px solid var(--ink);border-radius:50%;background:none;width:9px;height:9px;box-sizing:border-box"></i>più lucido</span></div>';
 }
 // 60 giorni (30 passati, 30 in arrivo), una colonna per settimana: turno, notte, riposo; il contorno rosso segna
 // meno di 11 ore fra due turni o la quarta notte di fila. Oggi è cerchiato.
@@ -7518,12 +7542,12 @@ function orologio(){
 function orologioHtml(){
   const o=orologio();
   const riga=(lab,ora,sub)=>'<div class="oro-riga"><div><b>'+lab+'</b><span>'+sub+'</span></div><span class="mono">'+ora+'</span></div>';
-  return sezDet("Il tuo orologio", o.tipo+" · minimo corporeo "+hhmm(o.cbt),
+  return sezDet("Il tuo orologio", o.tipo+" · momento di sonnolenza "+hhmm(o.cbt),
       '<p class="oro-tipo">'+esc(o.tipo)+'</p><p class="hint" style="margin:0 0 6px">Nei giorni liberi, quando niente ti sveglia.</p>'+
       fasciaOrologio(o)+
       riga("Metà del sonno", hhmm(o.mid), "il centro del sonno: dice se sei allodola o gufo")+
       riga("Melatonina", "dalle "+hhmm(o.mel), "il corpo comincia a preparare il sonno: luci basse")+
-      riga("Minimo corporeo", hhmm(o.cbt), "la sonnolenza più forte: la luce prima ti sposta indietro, dopo in avanti")+
+      riga("Momento di sonnolenza", hhmm(o.cbt), "il punto più basso della notte: la luce prima ti sposta indietro, dopo in avanti")+
       (o.lucido ? riga("Più lucido", "verso le "+o.lucido, "per le cose che chiedono testa") : "")+
       '<p class="hint" style="margin:10px 0 0">'+(o.partenza
         ? 'Per ora dagli orari di partenza: dimmi come dormi nei giorni liberi e diventa il tuo.'
@@ -7552,7 +7576,7 @@ function renderAndamenti(){
   let capoHtml="", heroHtml="", parteFascia=null, parteCiclo=null; const vociAnd={};
   if(capo){
     capoHtml='<div class="andamento-insight"><span class="aic">'+ICON.sun+'</span>'+
-      '<div><span class="andamento-insight-eyebrow">'+(capo.action?"Da provare questa settimana":"Insight")+'</span>'+esc(capo.testo)+
+      '<div><span class="andamento-insight-eyebrow">'+(capo.action?"Da provare questa settimana":"Scoperta")+'</span>'+esc(capo.testo)+
       (capo.action?'<div style="margin-top:8px"><button class="lnk" data-apply-field="'+esc(capo.action.field)+'" data-apply-value="'+esc(String(capo.action.value))+'">'+esc(capo.action.label)+' →</button></div>':'')+
       '</div></div>';
   }
@@ -7564,9 +7588,9 @@ function renderAndamenti(){
         const vals=trend.series.map(s=>s.debt);
         const tinta = d>0 ? "var(--orange)" : "var(--ok)";   // (il colore sta nelle barre: arancio dove manca sonno)
         heroHtml='<div class="andamento-hero">'+
-          '<span class="hint" style="display:block">'+(d>0?"Sonno da recuperare":"Sonno in pari")+' · ultimi 14 giorni</span>'+
+          '<span class="hint" style="display:block">'+(d>0?"Sonno da recuperare, con calma":"Sonno in pari")+' · ultimi 14 giorni</span>'+
           '<div class="andamento-num">'+(d>0?hm(d):"✓")+'</div>'+
-          (d>0?'<span class="hint" style="display:block">Cala solo dormendo: una notte lunga ne recupera metà, non azzera una settimana.</span>':'')+
+          (d>0?'<span class="hint" style="display:block">Si smaltisce dormendo: ogni notte normale ne recupera una parte, di solito bastano pochi giorni tranquilli.</span>':'')+
           '<span class="hint" style="display:block">Dormi in media '+hm(trend.avgActual)+
             (trend.avgPlanned?' contro '+hm(trend.avgPlanned)+' pianificate':'')+'</span>'+
           graficoNotti(trend)+
@@ -7576,7 +7600,7 @@ function renderAndamenti(){
       // consiglio in cima — stessa frase due volte sarebbe rumore, non conferma.
       if(corr && capo && capo.fonte!=="corr"){
         heroHtml+='<div class="andamento-insight"><span class="aic">'+ICON.sun+'</span>'+
-          '<div><span class="andamento-insight-eyebrow">Insight</span>'+esc(fraseCorrDebito(corr))+'</div></div>';
+          '<div><span class="andamento-insight-eyebrow">Scoperta</span>'+esc(fraseCorrDebito(corr))+'</div></div>';
       }
     }
   }catch(e){}
@@ -9374,7 +9398,7 @@ const CONSIGLI_FUNZIONE=[
     t:()=>"I tuoi turni stanno solo su questo telefono, in questo browser. Salva la copia in un file: se cambi telefono o il browser cancella i dati, la riapri e ritrovi tutto, anche il diario del sonno.",
     cta:()=>"Salva la copia", a:()=>salvaCopiaFile()},
   {k:"orologio", dopo:7, quando:()=>!(state.freeBed==="23:30" && state.freeWake==="07:30"),
-    t:()=>{ const o=orologio(); return "Il tuo orologio è pronto: "+o.tipo.toLowerCase()+", con il minimo corporeo verso le "+hhmm(o.cbt)+". Quando arriva la melatonina e quando sei più lucido, in «Sonno e carico»."; },
+    t:()=>{ const o=orologio(); return "Il tuo orologio è pronto: "+o.tipo.toLowerCase()+", con il momento di sonnolenza verso le "+hhmm(o.cbt)+". Quando arriva la melatonina e quando sei più lucido, in «Sonno e carico»."; },
     cta:()=>"Vedi il tuo orologio", a:()=>{ setTab("turni"); apriAndamenti("orologio"); usata("orologio"); }},
   {k:"mese", cta:()=>"Segna i turni", t:()=>"Puoi ricopiare il foglio turni in un minuto, un tocco per giorno, o importarlo da un file. Se ricopi almeno due cicli interi, l'app riconosce lo schema e lo continua da sola.", a:()=>{ setTab("turni"); apriSegna(); }},
   {k:"festivi", quando:()=>!state.festiviRiposo && !(state.festivi && ((state.festivi.extra||[]).length || state.festivi.dom===false)),
@@ -9438,7 +9462,9 @@ function consiglioFunzione(){
 // Elenco chiuso delle funzioni della domanda «quale ti mancherebbe di più» (id brevi: finiscono nelle statistiche aggregate).
 const FUNZIONI_UTILI=[["piano","Il piano del sonno"],["promemoria","I promemoria"],["calendario","Calendario e widget"],["ferie","Ferie e cambio turno"],
   ["riepilogo","Riepilogo e PDF"],["import","Importare i turni"],["persone","Le persone"],["andamenti","Sonno e carico"]];
-function renderLoSapevi(){
+// chiamata anche fuori da render(): l'arbitro degli inviti va rifatto ogni volta
+function renderLoSapevi(){ _renderLoSapevi(); arbitroInviti(); }
+function _renderLoSapevi(){
   const el=$("#loSapevi"); if(!el) return;
   let c=null;
   try{ if(iso(state.focus)===iso(giornoVero())) c=consiglioFunzione(); }catch(e){}
@@ -9658,7 +9684,7 @@ const NOVITA={ id:"2026-11-13", data:"Novembre 2026", righe:[
   ["Scegli quando allenarti","Il piano ti propone l'ora in cui il corpo rende di più, ma tu puoi preferire un'altra fascia. In Impostazioni › Cosa vedi nel piano › Momenti migliori: Il migliore, Mattina, Pomeriggio o Sera, per testa, movimento e allenamento.",false,"2026-10-31"],
   ["Turni più ordinati","Gli strumenti stanno in una griglia, ognuno con il suo stato. «Modifica turni» apre un foglio: ciclo e orari, segna i giorni, importa, festivi. «Condividi» raccoglie invio, QR e stampa. Il mese è una riga che si apre. In «Segna»: intervallo con due tocchi, «Come 7 giorni prima», «Annulla» e «Prossimo da segnare».",false,"2026-10-31"],
   ["Impostazioni e persone più semplici","Impostazioni è un elenco di sei voci con il valore di ciascuna; gli orari dei turni si cambiano sulla pagina, con «Annulla». Aggiungere una persona: un nome, una scelta (ha l'app, fa i tuoi turni, lun–ven, turni diversi) e solo quello che serve.",false,"2026-10-30"],
-  ["Il voto sull'energia, al momento giusto","Appena svegli c'è l'inerzia del sonno e il voto verrebbe più basso del vero: «Come ti senti?» arriva 90 minuti dopo la sveglia. E subito dopo il risveglio non compare più «Rischio fatica alto».",false,"2026-10-29"],
+  ["Il voto sull'energia, al momento giusto","Appena svegli c'è l'inerzia del sonno e il voto verrebbe più basso del vero: «Come ti senti?» arriva 90 minuti dopo la sveglia. E subito dopo il risveglio non compare più l'avviso di stanchezza.",false,"2026-10-29"],
   ["Un altro turno per un giorno","Devi fare una giornata al posto del pomeriggio? Dal foglio del giorno: «＋ Un altro turno», nome e orari. Poi lo ritrovi fra i tuoi turni. Con orari diversi il giorno prende il nome giusto (Giornata, Mattina, Sera…).",false,"2026-10-28"],
   ["Widget: il mese intero","Allungalo e vedi fino a sei settimane, anche con la persona che segui. Pulsante, voti e barra restano; le voci sono al massimo due.",true,"2026-10-28"],
   ["Un colore per ogni turno","Mattina, pomeriggio, sera e notte hanno ciascuno il suo colore, nel calendario del ciclo e nel widget. In Turni, con «Calendario», il mese è nel titolo e le frecce sfogliano le settimane.",false,"2026-10-27"],

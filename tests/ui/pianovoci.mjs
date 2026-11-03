@@ -1,4 +1,4 @@
-// Impostazioni › Cosa vedi nel piano: le voci facoltative (Luce, Penombra, Pasti, Tempo libero e i tre
+// Impostazioni › Cosa vedi nel piano: le voci facoltative (Luce, Luce bassa, Pasti, Tempo libero e i tre
 // momenti migliori) si accendono e spengono; quelle essenziali (Dormi, Turno…) ci sono sempre.
 // Predefinito: le voci di sempre accese, i momenti migliori spenti.
 import pw from "./_pw.mjs";
@@ -32,6 +32,6 @@ const voci=p=>p.evaluate(()=>[...document.querySelectorAll("#essenziale .tl")].m
   ok((await p.evaluate(()=>JSON.parse(localStorage.getItem("nt:state")).piano))?.luce===false, "la scelta si salva con le altre impostazioni");
   await p.context().close(); }
 { const p=await apri({piano:{pasti:false,liberi:false,penombra:false}}), v=await voci(p);
-  ok(!v.includes("Pasti") && !v.includes("Libero") && !v.includes("Penombra") && v.includes("Luce"), "pasti, tempo libero e penombra spenti → "+v.join(", "));
+  ok(!v.includes("Pasti") && !v.includes("Libero") && !v.includes("Luce bassa") && v.includes("Luce"), "pasti, tempo libero e luce bassa spenti → "+v.join(", "));
   await p.context().close(); }
 console.log("errori", errs); await b.close();

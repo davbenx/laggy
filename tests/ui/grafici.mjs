@@ -73,7 +73,7 @@ const gr=await p.evaluate(()=>({
   punti:document.querySelectorAll("svg.grf circle.g-punto").length, voti:document.querySelectorAll(".vrow .vdot").length }));
 ok(gr.barre===30 && gr.manca>0 && gr.manca<gr.barre && gr.turni>0, "Sonno che ti manca: una barra per notte ("+gr.barre+"), alcune sotto il previsto ("+gr.manca+"), i puntini dei turni ("+gr.turni+")");
 ok(/Ore dormite nelle ultime 30 notti: in media .* contro .* previste; \d+ notti più corte del piano/.test(gr.etBarre||""), "Sonno che ti manca: il grafico ha un testo per chi legge lo schermo → "+gr.etBarre);
-ok(/melatonina dalle \d\d:\d\d, minimo corporeo alle \d\d:\d\d/.test(gr.oro||"") && gr.oroTesti===5, "Il tuo orologio: la fascia delle 24 ore con le 5 ore di riferimento e il testo → "+gr.oro);
+ok(/melatonina dalle \d\d:\d\d, momento di sonnolenza alle \d\d:\d\d/.test(gr.oro||"") && gr.oroTesti===5, "Il tuo orologio: la fascia delle 24 ore con le 5 ore di riferimento e il testo → "+gr.oro);
 ok(gr.celle===60 && gr.oggi===1 && /notti, \d+ altri turni/.test(gr.etCar||""), "Carico: 60 giorni (30 passati, 30 in arrivo), oggi cerchiato → "+gr.etCar);
 ok(gr.punti===48, "Orari del sonno: un punto per notte, letto e sveglia, solo per il gruppo più numeroso: le notti di giorno stanno a parte ("+gr.punti+")");
 ok(gr.voti===30, "Come stai: un puntino per ogni voto ("+gr.voti+")");

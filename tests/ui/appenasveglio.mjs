@@ -19,7 +19,7 @@ const apri=async(ora, svegliato)=>{
 };
 const ora=p=>p.evaluate(()=>document.querySelector("#ora").innerText.replace(/\s+/g," "));
 { const p=await apri([7,16],"07:00"); const t=await ora(p);
-  ok(!/Rischio fatica/.test(t), "7:16, sveglio alle 7:00 dopo 7 ore di sonno: niente «Rischio fatica» → "+t.slice(0,90)); await p.context().close(); }
+  ok(!/Rischio fatica|Stanchezza alta|Più stanchezza/.test(t), "7:16, sveglio alle 7:00 dopo 7 ore di sonno: niente avviso di stanchezza → "+t.slice(0,90)); await p.context().close(); }
 // «Come ti senti?» si chiede da 90 minuti dopo la sveglia: l'inerzia del sonno falsa il voto
 const facce=p=>p.evaluate(()=>({n:document.querySelectorAll("#essenziale .drem [data-diary]").length, presto:!!document.querySelector("#essenziale .drem [data-voto-presto]"), testo:(document.querySelector("#essenziale .drem [data-voto-presto]")||{}).textContent||""}));
 { const p=await apri([7,16],"07:00"); const f=await facce(p);
