@@ -34,31 +34,36 @@ await p.context().close();
   const q=await apri({turniConfigurati:true,pattern:"MMNRR",anchor:tra(0),shifts:SH,repeat:true,firstSeenAt:tra(-30),
     people:[{name:"Anna",pattern:"MMRR",anchor:gi(0)}], ecc:{[tra(3)]:"N"}, giorni:{[tra(1)]:{t:"ferie"}}});
   const M=(await q.evaluate(()=>window.__widget)).mese;
-  const lun=new Date(); lun.setHours(12,0,0,0); lun.setDate(lun.getDate()-((lun.getDay()+6)%7)-28);
-  const o=Math.round((new Date(tra(0)+"T12:00:00")-lun)/864e5);   // dov'è oggi nei dati
+  const o=Math.round((new Date(tra(0)+"T12:00:00")-new Date(M.da+"T12:00:00"))/864e5);   // dov'è oggi nei dati (da M.da)
   ok(M.io[o+1].startsWith("Fe:") && M.io[o+3].startsWith("N:"), "le mie ferie (giorno 1) e il mio cambio in N (giorno 3) ci sono per me → "+M.io.slice(o,o+5).join(" "));
   ok(M.p[0].g.slice(o,o+6).join(" ")==="M:m M:m R:r R:r M:m M:m", "per Anna contano solo i suoi turni, non i miei cambi → "+M.p[0].g.slice(o,o+6).join(" "));
   await q.context().close(); }
 
-// il calendario: da quattro lunedì fa per 20 settimane (140 giorni), la mia sigla e quella delle persone (la stellina sempre dentro, al massimo 4)
+// il calendario: a mesi interi, dal lunedì della settimana del 1° del mese scorso alla domenica della settimana dell'ultimo
+// giorno fra dodici mesi; la mia sigla e quella delle persone (la stellina sempre dentro, al massimo 4)
+const lunDi=d=>{ const x=new Date(d); x.setHours(12,0,0,0); x.setDate(x.getDate()-((x.getDay()+6)%7)); return x; };
+const ATTESO=(()=>{ const o=new Date(); const da=lunDi(new Date(o.getFullYear(),o.getMonth()-1,1,12)), a=lunDi(new Date(o.getFullYear(),o.getMonth()+13,0,12));
+  return {da, n:Math.round((a-da)/864e5)+7}; })();
 { const gi=n=>{ const d=new Date(); d.setHours(12,0,0,0); d.setDate(d.getDate()+n); return iso(d); };
   const pers=[0,1,2,3,4,5].map(i=>({name:"P"+i, pattern:["MMRR","NNRR","MPRR","RRMM","PPNR","MRMR"][i], anchor:gi(i)}));
   const q=await apri({turniConfigurati:true,pattern:"MMNRR",anchor:tra(0),shifts:SH,repeat:true,firstSeenAt:tra(-30),people:pers,personaGlance:5,giorni:{[tra(1)]:{t:"ferie"}}});
   const M=(await q.evaluate(()=>window.__widget)).mese;
-  const lun=new Date(); lun.setHours(12,0,0,0); lun.setDate(lun.getDate()-((lun.getDay()+6)%7)-28);
-  ok(M && M.da===iso(lun) && M.io.length===140, "calendario: da quattro lunedì fa, 20 settimane (140 giorni)");
-  ok(Math.round((new Date(tra(0)+"T12:00:00")-lun)/864e5)===28+((new Date().getDay()+6)%7), "calendario: oggi cade nella quinta settimana (quattro prima, quindici dopo)");
+  const lun=ATTESO.da;
+  ok(M && M.da===iso(lun) && M.io.length===ATTESO.n && ATTESO.n%7===0, "calendario: dal mese scorso a dodici mesi avanti, a settimane intere → "+(M&&M.da)+", "+(M&&M.io.length)+" giorni");
+  const fine=new Date(lun); fine.setDate(fine.getDate()+M.io.length-1);
+  const ultimo=new Date(new Date().getFullYear(), new Date().getMonth()+13, 0, 12);
+  ok(fine.getDay()===0 && fine>=ultimo && fine-ultimo<7*864e5, "calendario: finisce la domenica della settimana dell'ultimo giorno fra dodici mesi (nessun mese a metà) → "+iso(fine));
   ok(M.io.every(x=>/^[^:]+:[nlrmps?](:[fx]+)?$/.test(x)), "calendario: ogni giorno è «sigla:tipo», più i segni facoltativi (f festivo, x modificato) → "+M.io.slice(0,7).join(" "));
 ok(M.io.some(x=>/:f$|:fx$/.test(x)), "calendario: i festivi nazionali arrivano al widget come «f» (in 20 settimane ce n'è sempre almeno uno)");
   const i1=Math.round((new Date(tra(1)+"T12:00:00")-lun)/864e5);
   ok(/^Fe:/.test(M.io[i1]), "calendario: le mie ferie compaiono con la sigla Fe");
   ok(M.p.length===4 && M.p.some(x=>x.n==="P5"), "calendario: al massimo 4 persone e la stellina (P5) c'è sempre → "+M.p.map(x=>x.n));
   ok(M.p[M.sel].n==="P5" && M.star==="5|P5", "calendario: sel punta alla stellina e la chiave la riconosce → "+M.sel+" "+M.star);
-  ok(M.p.every(x=>x.g.length===140 && x.g.every(y=>/^[^:]+:[nlrmps?]$/.test(y))), "calendario: ogni persona ha 140 giorni");
+  ok(M.p.every(x=>x.g.length===M.io.length && x.g.every(y=>/^[^:]+:[nlrmps?]$/.test(y))), "calendario: ogni persona ha gli stessi giorni");
   await q.context().close();
   const r=await apri({turniConfigurati:true,pattern:"MMNRR",anchor:tra(0),shifts:SH,repeat:true,firstSeenAt:tra(-30)});
   const M2=(await r.evaluate(()=>window.__widget)).mese;
-  ok(M2 && M2.p.length===0 && M2.star==="" && M2.io.length===140, "calendario senza persone: solo le mie sigle");
+  ok(M2 && M2.p.length===0 && M2.star==="" && M2.io.length===ATTESO.n, "calendario senza persone: solo le mie sigle");
   await r.context().close();
 }
 // risposte dal widget: sonno e energia arrivano nel diario

@@ -99,7 +99,7 @@ final class CalendarioWidget {
         Calendar adesso = Calendar.getInstance(); adesso.setTimeInMillis(ora);
         int annoOggi = adesso.get(Calendar.YEAR), meseOggi = adesso.get(Calendar.MONTH) + 1;
         // il mese mostrato: quello di oggi spostato con ‹ › (in mesi); se non è nei dati, si torna a oggi
-        if (m.righeMese(CalendarioModel.meseSpostato(annoOggi, meseOggi, spostamento)[0], CalendarioModel.meseSpostato(annoOggi, meseOggi, spostamento)[1]) == null) spostamento = 0;
+        if (spostamento != 0 && !m.meseIntero(CalendarioModel.meseSpostato(annoOggi, meseOggi, spostamento)[0], CalendarioModel.meseSpostato(annoOggi, meseOggi, spostamento)[1])) spostamento = 0;
         int[] meseTitolo = CalendarioModel.meseSpostato(annoOggi, meseOggi, spostamento);
         int[] rm = m.righeMese(meseTitolo[0], meseTitolo[1]);
         if (rm == null) rm = new int[]{ Math.max(rigaOggi, 0), Math.max(rigaOggi, 0) };
@@ -110,8 +110,8 @@ final class CalendarioWidget {
         rv.setTextViewText(R.id.w_cal_mese, titolo);
         rv.setContentDescription(R.id.w_cal_mese, titolo + ". Tocca per tornare a oggi");
         rv.setOnClickPendingIntent(R.id.w_cal_mese, pagina(ctx, idWidget, 2, 0, righe));
-        freccia(rv, R.id.w_cal_prec, m.righeMese(mp[0], mp[1]) != null, pagina(ctx, idWidget, 0, spostamento - 1, righe), "Mese precedente");
-        freccia(rv, R.id.w_cal_succ, m.righeMese(ms[0], ms[1]) != null, pagina(ctx, idWidget, 1, spostamento + 1, righe), "Mese successivo");
+        freccia(rv, R.id.w_cal_prec, (spostamento - 1 == 0 || m.meseIntero(mp[0], mp[1])), pagina(ctx, idWidget, 0, spostamento - 1, righe), "Mese precedente");
+        freccia(rv, R.id.w_cal_succ, (spostamento + 1 == 0 || m.meseIntero(ms[0], ms[1])), pagina(ctx, idWidget, 1, spostamento + 1, righe), "Mese successivo");
         boolean conPersone = !m.persone.isEmpty();
         // il nome: persona mostrata (verde) oppure «+ Anna» se nascosta; un tocco passa alla successiva
         String nome = persona >= 0 ? m.persone.get(persona).nome : m.persone.isEmpty() ? "" : m.persone.get(m.sel).nome;

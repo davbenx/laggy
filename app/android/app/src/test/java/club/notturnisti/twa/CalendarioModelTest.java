@@ -76,6 +76,10 @@ public class CalendarioModelTest {
         assertArrayEquals("novembre 2026: dalla settimana del 26 ottobre a quella del 30 novembre", new int[]{ 5, 10 }, m.righeMese(2026, 11));
         assertArrayEquals("settembre comincia prima dei dati", new int[]{ 0, 1 }, m.righeMese(2026, 9));
         assertNull("fuori dai dati", m.righeMese(2027, 6));
+        // ‹ › solo sui mesi interi (come calendario.js): 140 giorni dal 21/9/2026 finiscono il 7/2/2027
+        assertTrue("ottobre è tutto dentro", m.meseIntero(2026, 10));
+        assertFalse("settembre comincia prima dei dati", m.meseIntero(2026, 9));
+        assertFalse("febbraio 2027 è a metà", m.meseIntero(2027, 2));
         int[] nov = m.righeMese(2026, 11);
         assertEquals("6 righe: novembre intero", 5, CalendarioModel.primaRigaMese(nov, 7, true, 6, 20));
         assertEquals("3 righe, mese di oggi: dalla settimana di oggi", 7, CalendarioModel.primaRigaMese(nov, 7, true, 3, 20));

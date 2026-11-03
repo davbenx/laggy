@@ -1041,9 +1041,10 @@ padding:12px 6px 12px 14px;margin:-6px 0 var(--gap-sezione);font-size:13.5px;lin
 .tt-g{min-width:34px;min-height:40px;padding:4px 6px;border-radius:9px;background:var(--bg);border:1px solid var(--line);font:inherit;font-size:13px;font-weight:700;text-align:center;color:var(--dim);cursor:pointer}
 .tt-g.oggi{background:var(--blue-fill);border-color:var(--blue-fill);color:#fff}
 .tt-orari-lista{margin-bottom:var(--sp-3);background:var(--s1);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
-.tt-orari .qh-ore-riga{grid-template-columns:minmax(78px,92px) minmax(0,1fr) auto minmax(0,1fr);gap:var(--sp-2);margin:0;padding:var(--sp-2) var(--sp-3);border-top:1px solid var(--line)}
+/* Nome sopra, orari sotto: in una riga sola «Pomeriggio» non stava accanto alla sigla e la sigla finiva sopra il nome. */
+.tt-orari .qh-ore-riga{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:6px var(--sp-2);margin:0;padding:var(--sp-2) var(--sp-3) var(--sp-3);border-top:1px solid var(--line)}
 .tt-orari .qh-ore-riga:first-child{border-top:0}
-.tt-orari .qh-ore-riga>:first-child{grid-column:auto;font-size:15px}
+.tt-orari .qh-ore-riga>:first-child{grid-column:1/-1;font-size:15px;display:flex;align-items:center;gap:8px;min-width:0}
 .tt-orari .qh-ore-riga input{background:var(--bg)}
 #tuoiTurniPagina.tt-flusso #ttOrari,#tuoiTurniPagina.tt-flusso #ttOggiNota{display:none}
 #tuoiTurniPagina.tt-festivi #ttRiepilogo,#tuoiTurniPagina.tt-festivi #ttOrari,#tuoiTurniPagina.tt-festivi #ttOggiNota,#tuoiTurniPagina.tt-festivi #ttMese,#tuoiTurniPagina.tt-festivi #ttRighe,#tuoiTurniPagina.tt-festivi #ttNota,#tuoiTurniPagina.tt-festivi #ttFatto{display:none}
@@ -7106,7 +7107,8 @@ function barraPersona(x, cpx){
 // Un calendario da muro, lo stesso del widget Android: il mese intero dal lunedì della settimana del giorno 1 (sempre
 // 6 righe, l'altezza non salta), i giorni degli altri mesi attenuati, oggi su un cerchio, frecce di mese in mese.
 // Le regole stanno in calendario.js; i dati (sigla:tipo per giorno) sono quelli del widget, da meseWidget().
-const CAL_PRIMA=13, CAL_TOT=53, CAL_RIGHE=6;
+// Il calendario del ciclo copre mesi interi: da tre mesi fa a dodici mesi avanti (vedi settimaneMesi).
+const CAL_MESI=[3,12], CAL_RIGHE=6;
 let calMese=0, calCtx=null;   // mesi da quello di oggi (le frecce); non si salva: ogni volta si riparte da oggi
 // La vista principale è il calendario; «Ore» è l'alternativa (chi l'aveva scelta la ritrova)
 const vistaCiclo=()=> (state.piano||{}).vistaCiclo==="ore" ? "ore" : "calendario";
@@ -7117,14 +7119,14 @@ function selettoreVista(v){
 function renderCalendarioCiclo(){
   const el=$("#cyc"), pers=personaStriscia();
   el.classList.remove("con-pers");
-  const m=meseWidget(CAL_PRIMA, CAL_TOT);
+  const m=meseWidget(...settimaneMesi(...CAL_MESI)), N=m ? m.io.length : 0;
   if(!m){ el.innerHTML=selettoreVista("calendario")+'<p class="hint">Il calendario non è disponibile: controlla i turni in «Modifica».</p>'; return; }
-  const oggi=giornoVero(), iOggi=CAL.indiceDi(m.da, 7*CAL_TOT, iso(oggi)), rigaOggi=iOggi<0 ? -1 : Math.floor(iOggi/7);
-  const meseDi=k=>CAL.meseSpostato(oggi.getFullYear(), oggi.getMonth()+1, k), neiDati=k=>{ const x=meseDi(k); return !!CAL.righeMese(m.da, 7*CAL_TOT, x[0], x[1]); };
+  const oggi=giornoVero(), iOggi=CAL.indiceDi(m.da, N, iso(oggi)), rigaOggi=iOggi<0 ? -1 : Math.floor(iOggi/7);
+  const meseDi=k=>CAL.meseSpostato(oggi.getFullYear(), oggi.getMonth()+1, k), neiDati=k=>{ if(k===0) return true; const x=meseDi(k); return CAL.meseIntero(m.da, N, x[0], x[1]); };
   if(!neiDati(calMese)) calMese=0;
-  calCtx={da:m.da, rigaOggi, neiDati, meseDi};
-  const mt=meseDi(calMese), rm=CAL.righeMese(m.da, 7*CAL_TOT, mt[0], mt[1]) || [Math.max(rigaOggi,0), Math.max(rigaOggi,0)];
-  const r0=CAL.primaRigaMese(rm, rigaOggi, calMese===0, CAL_RIGHE, CAL_TOT), tit=CAL.titoloMese(mt[0], mt[1], oggi.getFullYear());
+  calCtx={da:m.da, n:N, rigaOggi, neiDati, meseDi};
+  const mt=meseDi(calMese), rm=CAL.righeMese(m.da, N, mt[0], mt[1]) || [Math.max(rigaOggi,0), Math.max(rigaOggi,0)];
+  const r0=CAL.primaRigaMese(rm, rigaOggi, calMese===0, CAL_RIGHE, N/7), tit=CAL.titoloMese(mt[0], mt[1], oggi.getFullYear());
   meseVista=[mt[0], mt[1]];
   const persona = pers && m.p.length ? m.p[Math.min(m.sel, m.p.length-1)] : null;
   const leggi=s=>{ s=s||"?:?"; let segni=""; const u=s.lastIndexOf(":");
@@ -7162,7 +7164,7 @@ function renderCalendarioCiclo(){
 }
 // Le frecce e «Scegli giorno» di Turni, quando il ciclo è a calendario: pagine di settimane, e un giorno scelto porta alla sua settimana.
 function calVaiA(d){
-  if(!calCtx) return; const i=CAL.indiceDi(calCtx.da, 7*CAL_TOT, iso(d)); if(i<0){ toast("Quel giorno è fuori dal calendario"); return; }
+  if(!calCtx) return; const i=CAL.indiceDi(calCtx.da, calCtx.n, iso(d)); if(i<0){ toast("Quel giorno è fuori dal calendario"); return; }
   const o=giornoVero(); calMese=(d.getFullYear()-o.getFullYear())*12+(d.getMonth()-o.getMonth()); renderCalendarioCiclo();
 }
 
@@ -8427,7 +8429,18 @@ platform.onResume(aggiornaLuceOttima);
 // Widget Android: le prossime 48 ore del piano, già calcolate. Si aggiorna a
 // ogni cambio, a ogni apertura e a ogni ritorno nell'app; da lì il widget
 // si ridisegna da solo al prossimo cambio di attività.
-const SETT_WIDGET_PRIMA=4, SETT_WIDGET=20;   // settimane del calendario del widget: quante prima di questa, quante in tutto
+// Il calendario del widget: dal mese scorso a dodici mesi avanti, sempre a mesi interi. Con un numero fisso di settimane
+// (erano 20) l'ultimo mese restava a metà e il widget, per riempire le righe, mostrava le settimane del mese prima.
+const WIDGET_MESI=[1,12];
+// Settimane [prima di questa, in tutto] perché i dati partano dal lunedì della settimana del giorno 1 di `prima` mesi fa
+// e finiscano con la domenica della settimana dell'ultimo giorno fra `dopo` mesi: ogni mese mostrato è intero.
+function settimaneMesi(prima, dopo){
+  const oggi=giornoVero(), lun=d=>day(d, -((d.getDay()+6)%7));
+  const da=lun(new Date(oggi.getFullYear(), oggi.getMonth()-prima, 1, 12));
+  const a=lun(new Date(oggi.getFullYear(), oggi.getMonth()+dopo+1, 0, 12));   // il lunedì della settimana dell'ultimo giorno
+  const p=Math.round((dnum(lun(oggi))-dnum(da))/7);
+  return [p, p+Math.round((dnum(a)-dnum(lun(oggi)))/7)+1];
+}
 function ntWidget(){
   if(!platform.widget.available) return;
   if(!state.turniConfigurati){ platform.widget.publish([]); return; }   // niente piano di esempio sul widget
@@ -8455,7 +8468,8 @@ function ntWidget(){
 // Il calendario del widget: da quattro lunedì fa per 20 settimane (il widget si sfoglia a pagine), la mia sigla e quella di al massimo quattro
 // persone (la stellina sempre dentro). Sigle e tipi («n» notte, «l» lavoro, «r» riposo) arrivano dal motore; il widget le mostra
 // e basta. `sel` = la stellina fra quelle pubblicate, `star` la identifica: se nell'app cambia, il widget riparte da lei.
-function meseWidget(prima=SETT_WIDGET_PRIMA, tot=SETT_WIDGET){   // settimane prima di questa e in tutto: il widget ne tiene 20, il calendario del ciclo di più
+function meseWidget(prima, tot){   // settimane prima di questa e in tutto (settimaneMesi): il widget a mesi interi, il calendario del ciclo di più
+  if(prima===undefined) [prima, tot]=settimaneMesi(...WIDGET_MESI);
   const f=state.focus;
   try{
     const oggi=giornoVero(), lun=day(oggi, -((oggi.getDay()+6)%7) - 7*prima), N=7*tot;
