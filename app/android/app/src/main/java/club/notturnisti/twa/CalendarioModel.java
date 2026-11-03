@@ -8,8 +8,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
- * Il calendario del widget, già calcolato dalla pagina: da un lunedì per 20 settimane (quattro prima di quella di oggi,
- * il resto dopo: il widget si sfoglia a pagine), la tua sigla e il tipo
+ * Il calendario del widget, già calcolato dalla pagina: da un lunedì a una domenica, a mesi interi (dal mese scorso a
+ * dodici mesi avanti; ‹ › sfogliano solo i mesi interi), la tua sigla e il tipo
  * («n» notte, «l» lavoro, «r» riposo, «?» da impostare) e quelli delle persone che segui (al massimo quattro, con
  * la stellina dell'app sempre dentro). Qui nessun calcolo di turni, solo lettura, date e scelta della persona.
  * Senza Android: si prova con test sulla JVM.
@@ -117,6 +117,12 @@ final class CalendarioModel {
         if (a < 0) a = 0;
         if (z < 0) z = giorni() - 1;
         return new int[]{ a / 7, z / 7 };
+    }
+
+    /** Il mese è tutto nei dati (dal giorno 1 all'ultimo)? Solo i mesi interi si raggiungono con ‹ ›: uno a metà sembra un errore. */
+    boolean meseIntero(int anno, int mese) {
+        int ultimo = new GregorianCalendar(anno, mese - 1, 1).getActualMaximum(Calendar.DAY_OF_MONTH);
+        return indice(anno, mese, 1) >= 0 && indice(anno, mese, ultimo) >= 0;
     }
 
     /**

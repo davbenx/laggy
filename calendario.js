@@ -29,6 +29,11 @@ export function righeMese(da, giorni, anno, mese) {
   if (a < 0) a = 0; if (z < 0) z = giorni - 1;
   return [Math.floor(a / 7), Math.floor(z / 7)];
 }
+/** Il mese è tutto nei dati (dal giorno 1 all'ultimo)? Solo i mesi interi si raggiungono con ‹ ›: uno a metà sembra un errore. */
+export function meseIntero(da, giorni, anno, mese) {
+  const ultimo = new Date(anno, mese, 0).getDate(), iso = g => anno + "-" + String(mese).padStart(2, "0") + "-" + String(g).padStart(2, "0");
+  return indiceDi(da, giorni, iso(1)) >= 0 && indiceDi(da, giorni, iso(ultimo)) >= 0;
+}
 /** Prima riga per mostrare il mese con `righe` righe: la settimana del giorno 1; se il mese di oggi non entra tutto, la settimana di oggi. */
 export function primaRigaMese(rm, rigaOggi, meseDiOggi, righe, settimane) {
   let r = rm[0];

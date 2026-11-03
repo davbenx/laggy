@@ -1,0 +1,38 @@
+// Turni nuovi: nome unico e sigla proposta ma modificabile (R e S riservate). Caffeina: voce facoltativa, non solo caffè.
+import pw from "./_pw.mjs";
+const ok=(c,m)=>console.log((c?"✔ ":"✘ ")+m);
+const b=await pw.chromium.launch(); const errs=[];
+const nuovo=async()=>{ const ctx=await b.newContext({viewport:{width:390,height:844},locale:"it-IT"}); const p=await ctx.newPage(); p.on("pageerror",e=>errs.push(e.message)); return p; };
+let p=await nuovo();
+await p.goto("http://localhost:8765/index.html"); await p.waitForTimeout(700);
+await p.click("text=Conosco già il mio schema"); await p.click("#doCustomRot"); await p.waitForTimeout(200);
+await p.click("#qhNuovoTurno"); await p.fill("#qhNtNome","Giorno 12h");
+ok(await p.inputValue("#qhNtSigla")==="G", "la sigla si propone mentre scrivi il nome: «G»");
+await p.fill("#qhNtSigla","x"); ok(await p.inputValue("#qhNtSigla")==="X", "la sigla si può cambiare (maiuscola da sola)");
+await p.fill("#qhNtNome","Giorno 12 ore"); ok(await p.inputValue("#qhNtSigla")==="X", "scritta a mano, la sigla resta quella scelta");
+await p.fill("#qhNtSigla","R"); await p.click("#qhNtSalva"); await p.waitForTimeout(150);
+ok(/riservata/.test(await p.textContent("#qhNtNota")), "R è riservata al riposo → "+(await p.textContent("#qhNtNota")));
+await p.fill("#qhNtSigla","M"); await p.click("#qhNtSalva"); await p.waitForTimeout(150);
+ok(/già di «Mattino»/.test(await p.textContent("#qhNtNota")), "una sigla già usata non passa → "+(await p.textContent("#qhNtNota")));
+await p.fill("#qhNtSigla","X"); await p.fill("#qhNtDa","08:00"); await p.fill("#qhNtA","20:00"); await p.click("#qhNtSalva"); await p.waitForTimeout(200);
+ok(await p.evaluate(()=>!!document.querySelector('[data-aggiungi="X"]')), "salvato con la sigla scelta: X");
+await p.click("#qhNuovoTurno"); await p.fill("#qhNtNome","giorno 12 ORE "); await p.click("#qhNtSalva"); await p.waitForTimeout(150);
+ok(/Hai già un turno/.test(await p.textContent("#qhNtNota")), "lo stesso nome (maiuscole e spazi a parte) non si può usare due volte → "+(await p.textContent("#qhNtNota")));
+await p.fill("#qhNtNome","Mattino lungo"); ok(!/Hai già/.test(await p.textContent("#qhNtNota")), "scrivendo, l'avviso sparisce");
+await p.context().close();
+// Caffeina: voce del piano, accesa di default; spenta sparisce dal piano e dai promemoria
+const ST={turniConfigurati:true,pattern:"NNRR",anchor:"2026-11-02",shifts:{N:{n:"Notte",s:1320,e:1800}},repeat:true,firstSeenAt:"2026-09-01"};
+const apri=async st=>{ const q=await nuovo();
+  await q.addInitScript(st=>{ if(sessionStorage.getItem("x")) return; sessionStorage.setItem("x","1"); localStorage.setItem("nt:state",JSON.stringify(st)); localStorage.setItem("nt:turniConfigurati","true"); localStorage.setItem("nt:firstPlanBannerChiuso","true"); localStorage.setItem("nt:novitaViste",JSON.stringify("2099")); }, st);
+  await q.clock.install({time:new Date(2026,10,2,15,0)}); await q.goto("http://localhost:8765/index.html"); await q.clock.runFor(2000); return q; };
+p=await apri(ST);
+const riga=await p.evaluate(()=>{ const r=document.querySelector('#essenziale [data-row="caffe"]'); return r ? r.innerText.replace(/\s+/g," ") : ""; });
+ok(/Caffeina/.test(riga) && /tè/.test(riga) && /energy drink/.test(riga), "la voce è «Caffeina», con tè, cola ed energy drink → "+riga);
+await p.click('#essenziale [data-row="caffe"]'); await p.clock.runFor(500);
+const f=await p.evaluate(()=>{ const c=document.querySelector("#infoCorpo"); c.querySelectorAll("details").forEach(d=>d.open=true); return c.innerText; });
+ok(/Conta anche/.test(f) && /energy drink \(250 ml\)/.test(f) && /EFSA 2015/.test(f), "il foglio dice quanta caffeina c'è nelle altre bevande, con la fonte");
+await p.context().close();
+p=await apri({...ST, piano:{caffe:false}});
+ok(await p.evaluate(()=>!document.querySelector('#essenziale [data-row="caffe"]')), "spenta: la voce non c'è più");
+await p.context().close();
+console.log("errori", errs); ok(errs.length===0, "nessun errore di pagina"); await b.close();

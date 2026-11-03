@@ -216,7 +216,7 @@ const CANALI = [
   { id: "turni",        name: "Cambi di turno",            importance: 4 },
   { id: "sicurezza",    name: "Rientro e giorni impegnativi", importance: 4 },
   { id: "sonno",        name: "Sonno",                     importance: 3 },
-  { id: "caffe",        name: "Ultimo caffè",              importance: 3 },
+  { id: "caffe",        name: "Ultima caffeina",              importance: 3 },
   { id: "pisolini",     name: "Pisolini",                  importance: 3 },
   { id: "luce",         name: "Luce",                      importance: 2 },
   { id: "momenti",      name: "Momenti buoni",             importance: 2 },

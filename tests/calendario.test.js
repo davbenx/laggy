@@ -1,7 +1,7 @@
 // Il calendario del ciclo a mese (calendario.js, le stesse regole di CalendarioModel.java nel widget).
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { dataDi, indiceDi, meseSpostato, righeMese, primaRigaMese, titoloMese } from "../calendario.js";
+import { dataDi, indiceDi, meseSpostato, righeMese, meseIntero, primaRigaMese, titoloMese } from "../calendario.js";
 
 const DA = "2026-09-21", GIORNI = 140, SETT = 20;   // 20 settimane da lunedì 21 settembre, come le pubblica la pagina
 
@@ -34,4 +34,12 @@ test("prima riga: il mese intero se entra, altrimenti dalla settimana di oggi (s
 test("titolo del mese", () => {
   assert.equal(titoloMese(2026, 11, 2026), "Novembre");
   assert.equal(titoloMese(2027, 1, 2026), "Gennaio 2027");
+});
+
+test("‹ › solo sui mesi interi: un mese a metà nei dati non si raggiunge", () => {
+  // 140 giorni da lunedì 21 settembre 2026: fino a domenica 7 febbraio 2027
+  assert.equal(meseIntero(DA, GIORNI, 2026, 10), true, "ottobre è tutto dentro");
+  assert.equal(meseIntero(DA, GIORNI, 2026, 9), false, "settembre comincia prima dei dati");
+  assert.equal(meseIntero(DA, GIORNI, 2027, 2), false, "febbraio 2027 finisce dopo i dati");
+  assert.equal(meseIntero(DA, GIORNI, 2027, 6), false, "fuori dai dati");
 });

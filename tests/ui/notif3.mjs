@@ -35,7 +35,7 @@ ok(await p.evaluate(()=>window.__pend.some(n=>n.extra.kind==="coffee")), "accend
 await p.locator("#opzFunzioni").screenshot({path:SP+"/n-opz.png"});
 // widget: il calendario nel payload (la striscia di 7 giorni `giorni` resta vuota dalla 1.3.0)
 const pub=await p.evaluate(()=>window.__pub);
-ok(pub && pub.v===3 && pub.mese && pub.mese.io.length===140 && (pub.giorni||[]).length===0, "widget: calendario di 20 settimane nel payload "+JSON.stringify(pub&&{v:pub.v,k:Object.keys(pub),n:pub.mese&&pub.mese.io.length}));
+ok(pub && pub.v===3 && pub.mese && pub.mese.io.length>=400 && pub.mese.io.length%7===0 && (pub.giorni||[]).length===0, "widget: calendario a mesi interi (più di un anno) nel payload "+JSON.stringify(pub&&{v:pub.v,k:Object.keys(pub),n:pub.mese&&pub.mese.io.length}));
 // tocco su "Che turno fai domani?" → pannello di domani
 await p.evaluate(()=>window.__fire("LN:localNotificationActionPerformed",{notification:{extra:{tab:"domani"}}})); await p.waitForTimeout(800);
 ok(await p.evaluate(()=>!document.querySelector("#quickShiftModal").hidden && /Domani/i.test(document.querySelector("#qsDateTitle").innerText)), "tocco su 'Che turno fai domani?' apre il pannello di domani");
