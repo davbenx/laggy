@@ -333,14 +333,15 @@ display:flex;align-items:center;justify-content:center;cursor:pointer}
 .qs-hd-az{display:flex;align-items:center;gap:10px}
 .qs-orari{display:flex;flex-direction:column;gap:8px;align-items:flex-start;margin:10px 0 0}
 .qs-orari .qs-ore{width:100%}
-.qs-piede{display:flex;justify-content:space-between;gap:12px;margin:12px 0 0}
+.qs-piede{display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px 12px;margin:6px 0 0}
+.qs-guida{font-size:13px;color:var(--dim);margin:-4px 0 10px}
 .qs-piede .lnk{font-size:13px;padding:8px 0}
 .qs-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
 .qs-btn{background:var(--bg);border:1.5px solid var(--line);border-radius:var(--r);padding:11px 13px;font-family:inherit;
 font-size:14.5px;font-weight:600;color:var(--ink);cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;
 gap:3px;transition:all .15s ease}
 .qs-btn:hover{border-color:var(--blue);background:var(--blue-soft);color:var(--blue)}
-.qs-btn.active{border-color:var(--blue-fill);background:var(--blue-fill);color:var(--su-blu)}
+.qs-btn.active{border-color:var(--blue-fill);background:var(--blue-fill);color:#fff}
 .qs-shift-time{font-size:12px;font-weight:400;opacity:.8}
 .qs-spec{display:flex;flex-direction:column;gap:8px}
 .lucidita-card{display:flex;align-items:center;gap:10px;background:var(--blue-soft);border:1px solid var(--blue-lt);border-radius:var(--r);padding:10px 12px 10px 14px;margin-bottom:var(--gap-sezione)}
@@ -353,7 +354,7 @@ gap:3px;transition:all .15s ease}
 .qs-chips{display:flex;flex-wrap:wrap;gap:7px}
 .qs-chip{background:var(--bg);border:1.5px solid var(--line);border-radius:999px;padding:0 13px;min-height:38px;font:inherit;
 font-size:13.5px;font-weight:600;color:var(--ink);cursor:pointer}
-.qs-chip[aria-pressed="true"]{border-color:var(--blue-fill);background:var(--blue-fill);color:var(--su-blu)}
+.qs-chip[aria-pressed="true"]{border-color:var(--blue-fill);background:var(--blue-fill);color:#fff}
 .qs-ore{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13.5px;color:var(--dim)}
 .qs-ore input{min-height:40px;font:inherit;font-size:15px;width:auto!important;flex:1 1 0;min-width:0}
 .qs-ore>span:first-child{flex-basis:100%}
@@ -1040,9 +1041,9 @@ padding:12px 6px 12px 14px;margin:-6px 0 var(--gap-sezione);font-size:13.5px;lin
 .tt-riepilogo>span{display:block;font-size:13.5px;color:var(--dim);margin-top:3px}
 .tt-seq{display:flex;flex-wrap:wrap;gap:4px;margin-top:10px}
 .tt-seq i{font-style:normal;min-width:26px;padding:4px 6px;border-radius:7px;background:var(--bg);border:1px solid var(--line);font-size:12.5px;font-weight:700;text-align:center;color:var(--dim)}
-.tt-seq i.oggi{background:var(--blue-fill);border-color:var(--blue-fill);color:var(--su-blu)}
+.tt-seq i.oggi{background:var(--blue-fill);border-color:var(--blue-fill);color:#fff}
 .tt-g{min-width:34px;min-height:40px;padding:4px 6px;border-radius:9px;background:var(--bg);border:1px solid var(--line);font:inherit;font-size:13px;font-weight:700;text-align:center;color:var(--dim);cursor:pointer}
-.tt-g.oggi{background:var(--blue-fill);border-color:var(--blue-fill);color:var(--su-blu)}
+.tt-g.oggi{background:var(--blue-fill);border-color:var(--blue-fill);color:#fff}
 .tt-orari-lista{margin-bottom:var(--sp-3);background:var(--s1);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
 .tt-orari .qh-ore-riga{grid-template-columns:minmax(78px,92px) minmax(0,1fr) auto minmax(0,1fr);gap:var(--sp-2);margin:0;padding:var(--sp-2) var(--sp-3);border-top:1px solid var(--line)}
 .tt-orari .qh-ore-riga:first-child{border-top:0}
@@ -2219,12 +2220,16 @@ header b{font-size:23px}
         <button type="button" class="qs-close" id="qsClose" aria-label="Chiudi">✕</button>
       </div>
     </div>
+    <!-- Qui non c'è niente da confermare: ogni scelta si salva subito. Lo dice la riga sopra i turni, e «Fatto» chiude
+         (senza, l'unico bottone in fondo era «Cambio turno», che sembrava la conferma e invece apre lo scambio). -->
+    <p class="qs-guida" id="qsGuida" aria-live="polite">Tocca il turno o cambia gli orari: si salva subito.</p>
     <div class="qs-grid" id="qsGrid"></div>
     <div class="qs-orari" id="qsOrari"></div>
     <div class="qs-spec" id="qsSpec"></div>
+    <button type="button" class="btn pri" id="qsFatto" style="width:100%;min-height:46px;margin-top:16px">Fatto</button>
     <div class="qs-piede">
-      <button type="button" class="lnk" id="qsVaiPiano" hidden>Piano del giorno</button>
-      <button type="button" class="lnk" id="qsVaiScambio">Cambio turno</button>
+      <button type="button" class="lnk dim" id="qsVaiPiano" hidden>Piano del giorno →</button>
+      <button type="button" class="lnk dim" id="qsVaiScambio">Scambio con un collega →</button>
     </div>
   </div>
 </div>
@@ -8698,6 +8703,7 @@ function apriQuickShift(d){
   // Da Turni il giorno toccato si apre qui: si cambia il turno o si va al suo piano.
   if($("#qsVaiPiano")) $("#qsVaiPiano").hidden=!document.body.classList.contains("tab-turni");
   $("#qsDateSub").textContent=isOggi?"Cosa fai davvero":"Turno per";
+  if($("#qsGuida")) $("#qsGuida").textContent="Tocca il turno o cambia gli orari: si salva subito.";
 
   const targetIso=iso(quickShiftTarget);
   const eccAttuale=state.ecc[targetIso];
@@ -8917,6 +8923,7 @@ if($("#qsOrari")) $("#qsOrari").addEventListener("change",e=>{
   // il campo resta com'è (chi scrive l'ora a mano lo perderebbe); si ridisegna il resto e si può annullare
   salva(); render();
   if($("#qsReset")) $("#qsReset").hidden=false;
+  if($("#qsGuida")) $("#qsGuida").textContent="Salvato ✓ Puoi chiudere con «Fatto».";
   const nome=NT.etichetta(off);
   toastUndo(nome+" "+hhmm(s0)+"–"+hhmm(e0), ()=>{ if(prima) state.giorni[d]=prima; else delete state.giorni[d]; salva(); render(); if(quickShiftTarget) apriQuickShift(quickShiftTarget); });
   renderQsOrariSalva();
@@ -8933,6 +8940,7 @@ function renderQsOrariSalva(){
   if(nome!==sh.n && !esiste) el.insertAdjacentHTML("beforeend",'<button type="button" class="qs-chip" data-qs-salva>Salva «'+esc(nomePerOrari(nome, g.s, g.e))+'» fra i tuoi turni</button>');
 }
 if($("#qsClose")) $("#qsClose").addEventListener("click",chiudiQuickShift);
+if($("#qsFatto")) $("#qsFatto").addEventListener("click",()=>{ haptic(6); chiudiQuickShift(); });
 if($("#quickShiftModal")) $("#quickShiftModal").addEventListener("click",e=>{
   if(e.target===$("#quickShiftModal")) chiudiQuickShift();
 });

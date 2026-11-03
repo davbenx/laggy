@@ -64,7 +64,8 @@ const imposta=async(p,sel,v)=>{ await p.evaluate(([sel,v])=>{ const i=document.q
   ok(await p.evaluate(()=>{ const c=[...document.querySelectorAll("#qsSpec .qs-chip")].map(x=>x.textContent.trim()); return c.length===3 && /Ferie/.test(c[0]) && /Malattia/.test(c[1]) && /Altro/.test(c[2]); }), "giorni speciali: Ferie, Malattia, «Altro»");
   await p.click("#qsSpec [data-qs-altro]"); await p.waitForTimeout(150);
   ok(await p.evaluate(()=>{ const c=[...document.querySelectorAll("#qsSpec .qs-chip")].map(x=>x.textContent.trim()).join("|"); return /Reperibil/.test(c) && /Formazione/.test(c) && /extra/i.test(c); }), "«Altro» apre reperibilità, formazione e turno extra");
-  ok(await p.evaluate(()=>/Cambio turno/.test(document.querySelector("#qsVaiScambio").textContent) && !/mi conviene/.test(document.querySelector("#qsVaiScambio").textContent)), "in fondo: «Cambio turno»");
+  ok(await p.evaluate(()=>/Scambio con un collega/.test(document.querySelector("#qsVaiScambio").textContent) && !/mi conviene/.test(document.querySelector("#qsVaiScambio").textContent)), "in fondo: «Fatto» e «Scambio con un collega», non più «Cambio turno» che sembrava la conferma");
+  ok(await p.evaluate(()=>/si salva subito/.test(document.querySelector("#qsGuida").textContent) && document.querySelector("#qsFatto").offsetParent!==null), "una riga dice che si salva subito, e c'è «Fatto»");
   await p.context().close(); }
 
 // orari diversi: il nome segue la fascia
