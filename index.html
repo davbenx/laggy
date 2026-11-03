@@ -8581,7 +8581,7 @@ if($("#opzPianoVoci")) $("#opzPianoVoci").addEventListener("change", e=>{
   if(k==="_essenziale"){
     const via=e.target.checked, pr=Object.assign({}, state.piano);
     PIANO_ESSENZIALE.forEach(x=>{ pr[x] = via ? false : PIANO_VOCI.find(y=>y[0]===x)[3]; });
-    state.piano=pr; salva(); haptic(4); track("setup_item", {item:via?"piano_essenziale":"piano_completo"}); renderPianoVoci(); render(); ntNotifiche(); return;
+    state.piano=pr; salva(); haptic(4); track("setup_item", {item:via?"piano_essenziale":"piano_completo"}); if(via) usata("essenziale"); renderPianoVoci(); render(); ntNotifiche(); return;
   }
   state.piano=Object.assign({}, state.piano, {[k]:e.target.checked}); salva(); renderPianoVoci();
   if(e.target.checked){ track("setup_item", {item:"piano_"+k}); if(["testa","leggera","intensa"].includes(k)) usata("momenti"); }
@@ -9572,7 +9572,23 @@ const CONSIGLI_FUNZIONE=[
     t:()=> donateUrl() ? "Notturnisti resta gratis, senza account né pubblicità: se ti è utile, un contributo libero lo tiene in piedi. Su notturnisti.club trovi anche guide su sonno, luce e alimentazione."
       : "Su notturnisti.club trovi guide pratiche su sonno, luce e alimentazione da chi i turni li fa da sempre.",
     link:()=> donateUrl() ? [[donateUrl(),"Offrimi un caffè"],["https://notturnisti.club/planner/","Le guide"]] : [["https://notturnisti.club/planner/","Le guide su notturnisti.club"]]},
-  {k:"medico", dopo:60, cta:()=>"Apri il riepilogo", t:()=>"Per la visita del medico competente c'è un riepilogo di 12 mesi: turni, notti, riposi.", a:()=>{ setTab("turni"); apriAndamenti(); }}
+  {k:"medico", dopo:60, cta:()=>"Apri il riepilogo", t:()=>"Per la visita del medico competente c'è un riepilogo di 12 mesi: turni, notti, riposi.", a:()=>{ setTab("turni"); apriAndamenti(); }},
+  // Le funzioni nuove, ognuna solo a chi può servire e mai dopo che l'ha usata (usata(k) dove si accende).
+  {k:"salute", dopo:10, quando:()=>platform.salute.available && !saluteCfg().sonno && !saluteCfg().passi,
+    t:()=>"Hai un orologio o un'app del sonno (Samsung Health, Fitbit…)? Con Health Connect il piano usa il sonno vero. Lo accendi tu, un tipo alla volta, e i dati restano sul telefono.",
+    cta:()=>"Collega Health Connect", a:()=>{ apriOpzioni("promemoria"); setTimeout(()=>{ const x=$("#saluteBox"); if(x && x.scrollIntoView) x.scrollIntoView({behavior:"smooth",block:"center"}); },120); }},
+  {k:"scuola", quando:()=>tuttePersone().length>0 && !tuttePersone().some(x=>x.shifts && x.shifts.A && x.shifts.A.n==="Scuola"),
+    t:()=>"Hai figli a scuola o all'asilo? Aggiungili in un tocco: vedi i pomeriggi e i fine settimana liberi insieme.",
+    cta:()=>"Aggiungi", a:()=>{ apriOpzioni("persone"); setTimeout(()=>{ const x=$('[data-pvia="scuola"]'); if(x && x.scrollIntoView) x.scrollIntoView({behavior:"smooth",block:"center"}); },120); }},
+  {k:"settimana", quando:()=>state.repeat===false || Object.keys(state.ecc||{}).length>=7,
+    t:()=>"Turni che cambiano di settimana in settimana? In «Segna i turni», «Copia una settimana» ripete quella prima in due tocchi.",
+    cta:()=>"Segna i turni", a:()=>{ setTab("turni"); apriSegna(); }},
+  {k:"guida", dopo:14, quando:()=>!state.guidaLavoro,
+    t:()=>"Guidi per lavoro (camion, autobus)? Accendilo e nel turno trovi le pause di guida e come usarle se hai sonno.",
+    cta:()=>"Accendi", a:()=>{ apriOpzioni("abitudini"); apriSezioneInline(4, true); setTimeout(()=>{ const x=$("#guidaL"); if(x && x.scrollIntoView) x.scrollIntoView({behavior:"smooth",block:"center"}); },150); }},
+  {k:"essenziale", dopo:21, quando:()=>!PIANO_ESSENZIALE.every(x=>!pianoVoce(x)),
+    t:()=>"Ti bastano le cose principali? «Piano essenziale» lascia nel piano solo sonno, turno, pisolino, caffè, rientro e luce.",
+    cta:()=>"Scegli cosa vedere", a:()=>apriOpzioni("voci")},
 ];
 // Chi aveva già chiuso uno dei vecchi inviti non lo rivede come consiglio.
 function vistiLoSapevi(S){
@@ -10517,7 +10533,7 @@ if($("#segnaOut")) $("#segnaOut").addEventListener("click", e=>{
   const p=e.target.closest("[data-pen]");
   if(p){ sgPennello=p.dataset.pen; sgDa=null; haptic(4); renderSegna(); return; }
   if(e.target.closest("[data-sg-intervallo]")){ sgIntervallo=!sgIntervallo; sgDa=null; haptic(4); renderSegna(); return; }
-  if(e.target.closest("[data-sg-settimana]")){ const on=!(sgIntervallo && sgPennello==="copia"); sgPennello=on?"copia":pennelliSegna()[0].k; sgIntervallo=on; sgDa=null; haptic(4); renderSegna(); if(on) track("setup_item", {item:"copia_settimana"}); return; }
+  if(e.target.closest("[data-sg-settimana]")){ const on=!(sgIntervallo && sgPennello==="copia"); sgPennello=on?"copia":pennelliSegna()[0].k; sgIntervallo=on; sgDa=null; haptic(4); renderSegna(); if(on){ track("setup_item", {item:"copia_settimana"}); usata("settimana"); } return; }
   if(e.target.closest("[data-sg-annulla]")){ sgAnnulla(); return; }
   if(e.target.closest("[data-sg-prossimo]")){ sgProssimoDaSegnare(); return; }
   const c=e.target.closest("[data-sg]"); if(c) pennella(c.dataset.sg);
@@ -11209,7 +11225,7 @@ $("#napT").addEventListener("change",e=>{
 });
 $("#sonnoD").addEventListener("change",e=>{ state.sonnoDiurno=e.target.value; salva(); render(); });
 if($("#mattinoBif")) $("#mattinoBif").addEventListener("change",e=>{ state.mattinoBifasico=e.target.checked; salva(); render(); });
-if($("#guidaL")) $("#guidaL").addEventListener("change",e=>{ state.guidaLavoro=e.target.checked; salva(); render(); if(e.target.checked) track("setup_item", {item:"guida_lavoro"}); });
+if($("#guidaL")) $("#guidaL").addEventListener("change",e=>{ state.guidaLavoro=e.target.checked; salva(); render(); if(e.target.checked){ track("setup_item", {item:"guida_lavoro"}); usata("guida"); } });
 
 // Unico elenco dei campi numerici, con i loro limiti [min, max, default].
 // Serve sia a convertire l'input (un menu restituisce testo) sia a ripulire
@@ -11312,7 +11328,7 @@ if($("#doConfirmPersona")) $("#doConfirmPersona").onclick=()=>{
     } else if(modo==="scuola"){
       // Lo stesso, con gli orari di scuola e il sonno di un bambino: le ore libere insieme sono il pomeriggio e il weekend.
       const oggi=new Date(); oggi.setDate(oggi.getDate()-((oggi.getDay()+6)%7));
-      per={pattern:"AAAAARR", anchor:iso(oggi), shifts:{A:{n:"Scuola",s:480,e:810}}, wake:"07:00", bed:"21:00"}; track("setup_item", {item:"persona_scuola"});
+      per={pattern:"AAAAARR", anchor:iso(oggi), shifts:{A:{n:"Scuola",s:480,e:810}}, wake:"07:00", bed:"21:00"}; track("setup_item", {item:"persona_scuola"}); usata("scuola");
     } else if(modo==="mine"){
       // Il caso utile non è "identico a me" (sarei io) ma "stesso sistema
       // di turni, partito in un giorno diverso": sequenza e orari sono una
