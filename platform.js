@@ -521,7 +521,11 @@ export const dispositivo = {
   async id() { const D = plugin("NTDispositivo"); if (!D) return ""; try { const r = await D.id(); return (r && r.id) || ""; } catch (e) { return ""; } },
   dimentica() { try { localStorage.removeItem(CAL_KEY); localStorage.removeItem("nt:widgetN"); } catch (e) {} },
   // Le impostazioni dell'app (permessi): dopo un rifiuto Android non rifà la domanda.
-  async apriImpostazioni() { const D = plugin("NTDispositivo"); if (!D || !D.apriImpostazioni) return false; try { await D.apriImpostazioni(); return true; } catch (e) { return false; } }
+  async apriImpostazioni() { const D = plugin("NTDispositivo"); if (!D || !D.apriImpostazioni) return false; try { await D.apriImpostazioni(); return true; } catch (e) { return false; } },
+  // Il «tocco» di sistema (feedback aptico): solo nell'app Android con un plugin che lo conosce; altrove la pagina usa la vibrazione.
+  tocco: isNative && name === "android" && plugin("NTDispositivo") && plugin("NTDispositivo").tocco
+    ? (tipo) => { try { plugin("NTDispositivo").tocco({ tipo }).catch(() => {}); } catch (e) {} }
+    : null
 };
 
 export const alarm = {

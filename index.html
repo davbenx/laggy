@@ -297,18 +297,29 @@ border-bottom:2px solid currentColor;transform:rotate(45deg);margin-left:2px;mar
 .shiftpill.warn{background:var(--risk-soft);color:var(--risk);border:1px solid var(--risk-lt)}
 
 /* Quick Shift Switcher */
+/* Movimento (novembre 2026): tre durate e le curve standard del Material 3, in un posto solo. «Riduci movimento» le spegne
+   (la regola in fondo toglie tutte le transizioni). I fogli entrano ed escono con transizioni sul display (allow-discrete):
+   dove il browser non le conosce, si aprono e chiudono come prima, senza movimento. */
+:root{--dur-1:150ms;--dur-2:250ms;--dur-3:350ms;--ease-std:cubic-bezier(.2,0,0,1);--ease-entra:cubic-bezier(.05,.7,.1,1);--ease-esce:cubic-bezier(.3,0,.8,.15)}
 .qs-backdrop{position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
-z-index:999;display:flex;align-items:flex-end;justify-content:center;animation:qsFadeIn .18s ease}
-.qs-backdrop[hidden]{display:none !important}
+z-index:999;display:flex;align-items:flex-end;justify-content:center;opacity:1;
+transition:opacity var(--dur-2) var(--ease-std),display var(--dur-2) allow-discrete}
+.qs-backdrop[hidden]{display:none !important;opacity:0;pointer-events:none;transition-duration:var(--dur-1)}
+@starting-style{.qs-backdrop{opacity:0}}
 @media(min-width:600px){.qs-backdrop{align-items:center}}
 .qs-sheet{background:var(--s1);border:1px solid var(--line);border-radius:18px;width:calc(100% - 24px);max-width:440px;
 margin:0 12px calc(72px + var(--sab));padding:18px 20px 20px;box-shadow:0 8px 32px rgba(0,0,0,0.4);
-animation:qsSlideUp .2s ease;display:flex;flex-direction:column;gap:13px;position:relative;z-index:1000;
+transition:transform var(--dur-3) var(--ease-entra);display:flex;flex-direction:column;gap:13px;position:relative;z-index:1000;
 max-height:calc(100vh - 88px - var(--sab));max-height:calc(100dvh - 88px - var(--sab));overflow-y:auto;overscroll-behavior:contain}
 .qs-header{position:sticky;top:-18px;background:var(--s1);margin-top:-18px;padding-top:18px;z-index:1}
 @media(min-width:600px){.qs-sheet{margin:0;border-radius:var(--r);box-shadow:var(--shadow-card)}}
-@keyframes qsFadeIn{from{opacity:0}to{opacity:1}}
-@keyframes qsSlideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+@starting-style{.qs-sheet{transform:translateY(40px)}}
+.qs-backdrop[hidden] .qs-sheet{transform:translateY(40px);transition:transform var(--dur-1) var(--ease-esce)}
+.qs-sheet.trascina{transition:none}
+@media(max-width:599px){.qs-sheet::before{content:"";position:sticky;top:-12px;display:block;width:36px;height:4px;border-radius:2px;background:var(--line);margin:-8px auto -6px;flex:none;z-index:2}}
+/* Pagine interne: entrano da destra, brevi (lo scorrimento laterale dice «sei andato avanti») */
+#andamentiPagina,#vederciPagina,#scambioPagina,#feriePagina,#segnaPagina,#tuoiTurniPagina,body.tab-opzioni #opzioni{transition:opacity var(--dur-3) var(--ease-entra),translate var(--dur-3) var(--ease-entra)}
+@starting-style{#andamentiPagina,#vederciPagina,#scambioPagina,#feriePagina,#segnaPagina,#tuoiTurniPagina,body.tab-opzioni #opzioni{opacity:0;translate:28px 0}}
 .qs-header{display:flex;justify-content:space-between;align-items:center}
 .qs-title{display:block;font-family:var(--serif);font-size:18px;color:var(--ink)}
 .qs-close{box-sizing:content-box;padding:7px;margin:-7px;background-clip:content-box;background-color:var(--s2);border:none;color:var(--dim);width:30px;height:30px;border-radius:50%;font-size:14px;
@@ -820,14 +831,17 @@ font:inherit;font-weight:700;letter-spacing:.02em;min-height:44px;padding:0 0 0 
    principali, non ripetuto su ognuno. .tabbtn resta fuori: ha già un suo
    :active dedicato sull'icona (.tabbtn:active svg) più avanti — sommare
    anche questo raddoppiava lo schiacciamento solo lì. */
-.tool,.btn,.dbtn,.tsec,button.lnk,.skip,.qh-btn,.qh-opt-btn{
+.tool,.btn,.dbtn,.tsec,button.lnk,.skip,.qh-btn,.qh-opt-btn,.qs-chip,.qs-btn,.vb,.sg-pen,.ccell,.kface{
   transition:transform .1s ease, opacity .1s ease;
 }
 .tool:active,.btn:active,.dbtn:active,
 .tsec:active,button.lnk:active,.skip:active,
-.qh-btn:active,.qh-opt-btn:active{
+.qh-btn:active,.qh-opt-btn:active,.qs-chip:active,.qs-btn:active,.vb:active,.sg-pen:active,.ccell:active,.kface:active{
   transform:scale(.97); opacity:.85;
 }
+/* le righe della timeline e degli elenchi: si scuriscono un attimo al tocco, senza rimpicciolire testo lungo */
+.erow,.opz-hub-r{transition:background-color var(--dur-1) var(--ease-std)}
+.erow:active,.opz-hub-r:active{background-color:var(--s2)}
 @media (prefers-reduced-motion:reduce){
   .tool,.btn,.dbtn,.tsec,button.lnk,.skip,.qh-btn,.qh-opt-btn{transition:none}
   .tool:active,.btn:active,.dbtn:active,
@@ -1164,6 +1178,12 @@ color:var(--blue);display:inline-flex;align-items:center;justify-content:center}
 .drem-done{font-size:14px;color:var(--dim);line-height:1.5;display:flex;align-items:center;gap:4px}
 .drem-tx{flex:1;min-width:0}
 .drem-done>.ibtn{flex:none;margin:-8px -8px -8px auto}
+.drem-done>.drem-en{margin-right:0}
+.drem-done>.drem-en+.ibtn{margin-left:0}
+.drem-done>.drem-en .kic{display:inline-flex;width:22px;height:22px}
+.entra{animation:entra var(--dur-2) var(--ease-entra) both}
+@keyframes entra{from{opacity:0;transform:translateY(6px)}}
+@media (prefers-reduced-motion:reduce){.entra{animation:none}}
 .drem-done b{color:var(--ink)}
 .drem-ok{color:var(--ok);font-weight:700;margin-right:2px}
 .drem-rec{font-size:12.5px;color:var(--blue);line-height:1.5;margin-top:8px;border-left:2px solid var(--blue-lt);padding-left:9px}
@@ -3360,6 +3380,8 @@ state.attivita = store.mappa("attivita");   // movimento fatto, per giorno: [{t:
 state.backupDone = store.get("backupDone", false);
 const wakes = state.wakes;   // stesso oggetto: il motore lo legge da state
 function haptic(ms){
+  // nell'app Android il «tocco» di sistema (segue le impostazioni del telefono, niente permessi); sul sito la vibrazione
+  if(platform.dispositivo.tocco){ platform.dispositivo.tocco((ms||8)>=12 ? "conferma" : "scelta"); return; }
   try{ if("vibrate" in navigator) navigator.vibrate(ms||8); }catch(e){}
 }
 
@@ -4439,13 +4461,13 @@ function diaryReminder(P, CARDS){
       '<button class="dbtn pri" data-confirm-sleep="1">Salva</button>',
       '<button class="lnk dim" data-annulla-sleep="1">Annulla</button>');
   } else if(!logged){
-    x+='<p class="dq">Hai dormito <b>'+esc(defBed)+' → '+esc(defWake)+'</b>?</p>'+
+    x+='<p class="dq" data-k="s-q">Hai dormito <b>'+esc(defBed)+' → '+esc(defWake)+'</b>?</p>'+
       '<div class="dq-az"><button class="dbtn pri" data-confirm-sleep="1" data-def-bed="'+esc(defBed)+'" data-def-wake="'+esc(defWake)+'">Sì, così</button>'+
       '<button class="dbtn" data-open="1">Altri orari</button></div>';
   } else {
-    x+='<div class="drem-done"><span class="drem-tx"><span class="drem-ok">✓</span> Sonno <b>'+esc(bd)+'–'+esc(wk)+'</b> · '+durTxt+
+    x+='<div class="drem-done" data-k="s-fatto"><span class="drem-tx"><span class="drem-ok">✓</span> Sonno <b>'+esc(bd)+'–'+esc(wk)+'</b> · '+durTxt+'\u0001EN\u0001'+
        (cmp?' <span class="drem-cmp">'+cmp+'</span>':'')+
-       '</span><button type="button" class="ibtn drem-edit" data-open="1" aria-label="Modifica gli orari del sonno" title="Modifica">'+ICON.pencil+'</button></div>'+
+       '</span>\u0002EN\u0002<button type="button" class="ibtn drem-edit" data-open="1" aria-label="Modifica gli orari del sonno" title="Modifica">'+ICON.pencil+'</button></div>'+
        statoHtml+
        (_perchePer===key0?'<div class="perche" role="group" aria-label="Cosa ha cambiato il piano?"><span>Cosa ha cambiato il piano?</span><span class="perche-az">'+
          '<button type="button" class="btn g sm" data-perche="turno">Il turno era diverso</button><button type="button" class="btn g sm" data-perche="abitudine">Dormo così di solito</button>'+
@@ -4458,15 +4480,16 @@ function diaryReminder(P, CARDS){
   let xEn="";
   if(logged && !sleepEditing){
     const v=VOTI.find(o=>o[0]===+val), votoEditing=state.diaryEditing.has("voto:"+key0);
-    if(v && !votoEditing)
-      xEn+='<div class="dq-riga"><i class="kic" style="color:'+v[3]+'">'+v[2]+'</i> Energia: <b>'+v[1]+'</b> <button type="button" class="ibtn drem-edit" data-voto-edit="1" aria-label="Cambia il voto dell\'energia" title="Cambia">'+ICON.pencil+'</button></div>';
+    if(v && !votoEditing){
+      x=x.replace("\u0001EN\u0001", ' · <b>'+v[1]+'</b>').replace("\u0002EN\u0002",
+        '<button type="button" class="ibtn drem-en" data-voto-edit="1" aria-label="Energia: '+v[1]+'. Cambia il voto" title="Energia: '+v[1]+'"><i class="kic" style="color:'+v[3]+'">'+v[2]+'</i></button>'); }
     else if(energiaPresto(key0, wk))
       xEn+='<div class="dq-sez">Come ti senti?</div><p class="hint" data-voto-presto="1" style="margin:2px 0 6px">Fra poco: appena svegli il voto non è affidabile, c\'è ancora l\'inerzia del sonno. Te lo chiedo alle '+esc(energiaDalle(key0, wk))+'.</p>';
     else
-      xEn+='<div class="dq-sez">Come ti senti? <span>(facoltativo)</span></div><div class="ora-kss kcompat" style="margin-top:0">'+
+      xEn+='<div data-k="en-q"><div class="dq-sez">Come ti senti? <span>(facoltativo)</span></div><div class="ora-kss kcompat" style="margin-top:0">'+
         VOTI.map(o=>'<button class="dbtn kface'+(+val===o[0]?" on":"")+'" data-diary="'+o[0]+'" aria-label="'+o[1]+'" title="'+o[1]+'" aria-pressed="'+(+val===o[0])+'" style="--tone:'+o[3]+'">'+
           '<i class="kic" style="color:'+o[3]+'">'+o[2]+'</i></button>').join("")+'</div>'+
-        '<div class="kleg" aria-hidden="true"><span>Senza energie</span><span>Al meglio</span></div>';
+        '<div class="kleg" aria-hidden="true"><span>Senza energie</span><span>Al meglio</span></div></div>';
   }
   // Il pisolino: la domanda solo quando è cominciato (prima non c'è niente da
   // dire: «Fatto?» per un pisolino delle 17 alle 9 del mattino non ha senso).
@@ -4476,14 +4499,14 @@ function diaryReminder(P, CARDS){
     const seg=((state.pisolini||{})[key0]||{})[c.nap.k]||{};
     const fine=c.nap.fine, napEditing=state.diaryEditing.has("nap:"+key0+":"+c.nap.k);
     if(napEditing || !(seg.si || seg.no)) pend=true;
-    if(napEditing || !(seg.si || seg.no)) xNap+='<div class="dq-sez" data-nap-q="'+esc(c.nap.k)+'">Pisolino</div>';
+    if(napEditing || !(seg.si || seg.no)) xNap+='<div class="dq-sez" data-nap-q="'+esc(c.nap.k)+'" data-k="n-q-'+esc(c.nap.k)+'">Pisolino</div>';
     else xNap+='<div class="dq-sez" data-nap-q="'+esc(c.nap.k)+'" style="padding-top:0;border-top:0;margin:0"></div>';
     if(napEditing){
       xNap+='<div class="dq-campi"><label>Inizio<input type="time" class="ora-in" data-nap-in-a="1" aria-label="Inizio del pisolino" value="'+esc(seg.a||c.nap.k)+'"></label>'+
         '<label>Fine<input type="time" class="ora-in" data-nap-in-b="1" aria-label="Fine del pisolino" value="'+esc(seg.b||fine)+'"></label></div>'+
         '<div class="dq-az"><button class="dbtn pri" data-nap-salva="'+esc(c.nap.k)+'" data-min="'+c.nap.min+'">Salva</button><button class="lnk dim" data-nap-annulla="'+esc(c.nap.k)+'">Annulla</button></div>';
     } else if(seg.si){
-      xNap+='<div class="drem-done"><span class="drem-tx"><span class="drem-ok">✓</span> Pisolino <b>'+esc(seg.a||c.nap.k)+'–'+esc(seg.b||fine)+'</b></span>'+
+      xNap+='<div class="drem-done" data-k="n-f-'+esc(c.nap.k)+'"><span class="drem-tx"><span class="drem-ok">✓</span> Pisolino <b>'+esc(seg.a||c.nap.k)+'–'+esc(seg.b||fine)+'</b></span>'+
         '<button type="button" class="ibtn drem-edit" data-edit-nap="'+esc(c.nap.k)+'" aria-label="Modifica gli orari del pisolino" title="Modifica">'+ICON.pencil+'</button></div>';
       // Se il pisolino registrato è durato molto più del previsto, un avviso
       // subito — non solo un conto che si aggiusta domani in silenzio.
@@ -4529,6 +4552,7 @@ function diaryReminder(P, CARDS){
     } else if(!pend && logged && !sleepEditing) xExtra+='<button type="button" class="lnk" data-extra-nuovo="1" style="margin-top:8px;min-height:44px">+ Hai fatto un altro pisolino?</button>';
   }
   // L'ordine segue l'urgenza: un pisolino da confermare (il tempo scorre) prima dell'energia; altrimenti energia, poi i pisolini.
+  x=x.replace("\u0001EN\u0001","").replace("\u0002EN\u0002","");
   x+= pend ? xNap+xEn : xEn+xNap;
   x+=xExtra;
   x+='</div>';
@@ -6191,6 +6215,14 @@ function liberiConsigli(P, liberi, ins){
   if(!pianoVoce("leggera") && !pianoVoce("intensa")) x+='<button type="button" class="lnk ed-cambia" data-vai="momenti">Vedi il momento migliore per muoverti →</button>';
   return x;
 }
+// Le parti della scheda «Il tuo sonno» che compaiono adesso (la riga fatta dopo «Sì, così», la domanda sull'energia)
+// entrano con un piccolo movimento; quelle che c'erano già restano ferme, anche se la pagina si ridisegna.
+var _kVisti=null, _kGiorno="";
+function animaNuovi(el){
+  const g=iso(state.focus), ks=[...el.querySelectorAll("[data-k]")];
+  if(_kVisti && _kGiorno===g && typeof _movimentoPronto!=="undefined" && _movimentoPronto) ks.forEach(x=>{ if(!_kVisti.has(x.dataset.k)) x.classList.add("entra"); });
+  _kVisti=new Set(ks.map(x=>x.dataset.k)); _kGiorno=g;
+}
 function renderEssenziale(P, CARDS){
   const el=$("#essenziale"); if(!el) return;
   infoVoci.clear();
@@ -6487,7 +6519,7 @@ function renderEssenziale(P, CARDS){
     h += '<div class="essnudge">Il piano parte da un sonno tipico, 23:30 → 07:30. '+
       'Nei giorni liberi dormi in altri orari? Dimmi i tuoi e il piano si adatta a te.<button type="button" class="btn g sm" data-act="finestra" style="display:block;margin-top:8px">Dimmi i tuoi orari</button></div>';
 
-  el.innerHTML=h;
+  el.innerHTML=h; animaNuovi(el);
 }
 
 /* --- disegno: ciascuna funzione riempie un solo riquadro --- */
@@ -9309,11 +9341,12 @@ if($("#doPrint")) $("#doPrint").onclick=()=>{
 // body.sottopagina: c'è una pagina di Turni aperta (una regola CSS sola le copre tutte)
 function segnaSottopagina(){
   const aperte=["andamenti-aperta","vederci-aperta","scambio-aperta","ferie-aperta","segna-aperta","turni-aperta"].some(c=>document.body.classList.contains(c));
+  if(!aperte && document.body.classList.contains("sottopagina")) dissolvi();   // tornando indietro da una pagina
   document.body.classList.toggle("sottopagina", aperte);
 }
 var andSez=null;   // la voce di «Sonno e carico» aperta (null = l'elenco)
-function andIndietro(){ if(andSez){ andSez=null; renderAndamenti(); try{ window.scrollTo(0,0); }catch(e){} } else chiudiAndamenti(); }
-document.addEventListener("click",e=>{ const b=e.target.closest("[data-and-sez]"); if(!b) return; haptic(6); andSez=b.dataset.andSez; renderAndamenti(); try{ window.scrollTo(0,0); }catch(e){} });
+function andIndietro(){ if(andSez){ andSez=null; dissolvi(); renderAndamenti(); try{ window.scrollTo(0,0); }catch(e){} } else chiudiAndamenti(); }
+document.addEventListener("click",e=>{ const b=e.target.closest("[data-and-sez]"); if(!b) return; haptic(6); andSez=b.dataset.andSez; dissolvi(); renderAndamenti(); try{ window.scrollTo(0,0); }catch(e){} });
 function apriAndamenti(sez){
   andSez=sez||null;
   chiudiVederci(); chiudiScambio(); chiudiFerie(); chiudiSegna(); chiudiTuoiTurni(true);
@@ -11489,8 +11522,17 @@ window.ntChiediPermesso = ntChiediPermesso;
 // Nessuno spostamento nel DOM: mostra/nasconde le sezioni per destinazione.
 // Oggi = il giorno (glance + "La giornata" a scomparsa). Turni = ciclo, liberi,
 // partner, modifica. Più = calendario automatico ed extra.
+// Dissolvenza breve del contenuto quando cambi scheda o torni indietro (Material «fade through», solo opacità:
+// un transform sul contenitore sposterebbe i fogli fissi che ci stanno dentro). Non all'avvio, mai con «Riduci movimento».
+var _movimentoPronto=false; setTimeout(()=>{ _movimentoPronto=true; }, 1200);
+function dissolvi(){
+  if(!_movimentoPronto) return;
+  try{ if(matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const w=document.querySelector(".wrap"); if(w && w.animate) w.animate([{opacity:0},{opacity:1}],{duration:220,easing:"cubic-bezier(.2,0,0,1)"}); }catch(e){}
+}
 function setTab(t){
   const tab = (t==="turni"||t==="opzioni") ? t : "oggi";
+  if(!document.body.classList.contains("tab-"+tab)) dissolvi();
   document.body.classList.remove("tab-oggi","tab-turni","tab-opzioni","giornata");
   chiudiAndamenti();
   chiudiVederci();
@@ -11569,7 +11611,7 @@ function renderOpzHub(){
 }
 document.addEventListener("click",e=>{ const b=e.target.closest("[data-opzg-vai]"); if(b){ haptic(6); apriGruppoOpz(b.dataset.opzgVai); } });
 function chiudiOpzioniPagina(){
-  if(_opzGruppo){ _opzGruppo=null; applicaGruppoOpz(); return; }
+  if(_opzGruppo){ _opzGruppo=null; dissolvi(); applicaGruppoOpz(); return; }
   setTab(tabPrimaDiOpzioni);
 }
 if($("#doOpzioni")) $("#doOpzioni").onclick=apriOpzioni;
@@ -11599,6 +11641,23 @@ if($("#chiudiOpzioni")) $("#chiudiOpzioni").onclick=chiudiOpzioniPagina;
 function apriFoglio(id,su){ const m=document.getElementById(id); if(!m) return; m.hidden=!su; m.setAttribute("aria-hidden",String(!su));
   if(su) m.querySelectorAll("[data-ic]").forEach(x=>{ if(!x.innerHTML) x.innerHTML=ICON[x.dataset.ic]||""; }); }
 if($("#tEdit")) $("#tEdit").onclick=()=>apriFoglio("modificaModal",true);
+// Un foglio si chiude anche trascinandolo in basso, come nelle app native. Parte solo se il contenuto è già in cima
+// (altrimenti si scorre) e solo per un gesto verticale; oltre 90 px, o con un colpo veloce, chiude con la sua ✕.
+document.addEventListener("touchstart", e=>{
+  const sh=e.target.closest && e.target.closest(".qs-backdrop:not([hidden]) > .qs-sheet"); if(!sh || sh.scrollTop>0 || e.touches.length!==1) return;
+  if(e.target.closest("input,select,textarea,[contenteditable]")) return;
+  const y0=e.touches[0].clientY, x0=e.touches[0].clientX, t0=Date.now(); let dy=0, attivo=false;
+  const muovi=ev=>{ const t=ev.touches[0]; dy=t.clientY-y0; const dx=t.clientX-x0;
+    if(!attivo){ if(dy>8 && dy>Math.abs(dx)*1.5 && sh.scrollTop<=0){ attivo=true; sh.classList.add("trascina"); } else if(Math.abs(dx)>12 || dy<-8){ fine(); return; } else return; }
+    sh.style.transform="translateY("+Math.max(0,dy)+"px)"; };
+  const fine=()=>{ sh.removeEventListener("touchmove",muovi); sh.removeEventListener("touchend",fine); sh.removeEventListener("touchcancel",fine);
+    if(!attivo) return; sh.classList.remove("trascina");
+    const veloce=dy>40 && dy/(Date.now()-t0)>0.6;
+    if(dy>90 || veloce){ const x=sh.querySelector(".qs-close"), m=sh.parentElement; sh.style.transform="";
+      if(x) x.click(); else m.dispatchEvent(new MouseEvent("click",{bubbles:true})); haptic(6); }
+    else sh.style.transform=""; };
+  sh.addEventListener("touchmove",muovi,{passive:true}); sh.addEventListener("touchend",fine); sh.addEventListener("touchcancel",fine);
+}, {passive:true});
 function apriCondividi(){
   const o=giornoVero(), d=new Date(o.getFullYear(), o.getMonth()+meseOff, 1, 12), n=d.toLocaleDateString(LINGUA,{month:"long"});
   const t=$("#riepMeseT"); if(t) t.textContent="Riepilogo di "+n;

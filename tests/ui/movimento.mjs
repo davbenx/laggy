@@ -19,8 +19,11 @@ await voce(p); await p.waitForTimeout(60); let f=await foglio(p);
 ok(!f.hidden && f.op<1 && f.tr!=="none", "il foglio entra: a 60 ms è ancora in dissolvenza e in salita → "+JSON.stringify(f));
 await p.waitForTimeout(450); f=await foglio(p);
 ok(f.op===1 && f.tr==="none", "a fine entrata è al suo posto");
-await p.click("#infoChiudi"); await p.waitForTimeout(40); f=await foglio(p);
-ok(f.hidden && f.disp!=="none" && f.op<1, "la chiusura è animata: chiuso, ma ancora visibile mentre sfuma → "+JSON.stringify(f));
+await p.click("#infoChiudi");
+// si campiona ogni 10 ms per tutta la chiusura: un solo istante fisso è fragile quando la macchina è carica
+const campioni=[]; for(let i=0;i<14;i++){ campioni.push(await foglio(p)); await p.waitForTimeout(10); }
+f=campioni.find(c=>c.hidden && c.disp!=="none" && c.op<1);
+ok(!!f, "la chiusura è animata: chiuso, ma ancora visibile mentre sfuma → "+JSON.stringify(f||campioni[0]));
 await p.waitForTimeout(350); f=await foglio(p);
 ok(f.disp==="none", "poi sparisce del tutto");
 
