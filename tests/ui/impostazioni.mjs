@@ -21,7 +21,7 @@ ok(await p.evaluate(()=>document.documentElement.scrollHeight<=window.innerHeigh
 ok(!(await vis("#opzFunzioni")) && !(await vis("#opzPianoVoci")) && !(await vis("#doCancellaTutto")), "i gruppi non si vedono finché non li apri");
 await p.click('[data-opzg-vai="voci"]'); await p.waitForTimeout(200);
 ok(await vis("#opzPianoVoci") && !(await vis("#opzHub")) && await p.evaluate(()=>document.querySelector("#opzioni .tab-title").textContent==="Cosa vedi nel piano"), "«Cosa vedi nel piano»: il titolo cambia, l'elenco si nasconde");
-ok(await p.evaluate(()=>document.querySelectorAll("#opzPianoVoci > .riga-sw:not(.pv-ess)").length===4 && !!document.querySelector("#opzPianoVoci > .pv-ess") && !!document.querySelector("#opzPianoVoci .pv-momenti") && !document.querySelector("#opzPianoVoci .pv-momenti").open), "quattro voci in vista e «Momenti migliori» chiuso");
+ok(await p.evaluate(()=>document.querySelectorAll("#opzPianoVoci > .riga-sw:not(.pv-ess)").length===5 && !!document.querySelector("#opzPianoVoci > .pv-ess") && !!document.querySelector("#opzPianoVoci .pv-momenti") && !document.querySelector("#opzPianoVoci .pv-momenti").open), "cinque voci in vista (con Caffeina) e «Momenti migliori» chiuso");
 await p.click("#opzPianoVoci .pv-momenti summary"); await p.waitForTimeout(100);
 ok(await p.evaluate(()=>document.querySelectorAll("#opzPianoVoci .pv-momenti .riga-sw").length===3), "«Momenti migliori»: testa, movimento, allenamento");
 await p.click("#chiudiOpzioni"); await p.waitForTimeout(200);

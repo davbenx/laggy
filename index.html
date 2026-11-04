@@ -1055,6 +1055,8 @@ padding:12px 6px 12px 14px;margin:-6px 0 var(--gap-sezione);font-size:13.5px;lin
 .tt-orari .qh-ore-riga{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:6px var(--sp-2);margin:0;padding:var(--sp-2) var(--sp-3) var(--sp-3);border-top:1px solid var(--line)}
 .tt-orari .qh-ore-riga:first-child{border-top:0}
 .tt-orari .qh-ore-riga>:first-child{grid-column:1/-1;font-size:15px;display:flex;align-items:center;gap:8px;min-width:0}
+.tt-orari .tt-elimina{margin-left:auto;font-size:13px;min-height:40px;padding:0 4px}
+.tt-orari .tt-nel{margin-left:auto;font-size:12px;font-weight:400;color:var(--dim)}
 .tt-orari .qh-ore-riga input{background:var(--bg)}
 #tuoiTurniPagina.tt-flusso #ttOrari,#tuoiTurniPagina.tt-flusso #ttOggiNota{display:none}
 #tuoiTurniPagina.tt-festivi #ttRiepilogo,#tuoiTurniPagina.tt-festivi #ttOrari,#tuoiTurniPagina.tt-festivi #ttOggiNota,#tuoiTurniPagina.tt-festivi #ttMese,#tuoiTurniPagina.tt-festivi #ttRighe,#tuoiTurniPagina.tt-festivi #ttNota,#tuoiTurniPagina.tt-festivi #ttFatto{display:none}
@@ -3461,6 +3463,16 @@ state.wakes = store.mappa("wakes");
 try{ state.hcSonno = store.get("hcSonno", []); state.hcPassi = store.get("hcPassi", []); }catch(e){ state.hcSonno = []; state.hcPassi = []; }
 state.beds  = store.mappa("beds");
 state.pisolini = store.mappa("pisolini");
+// Due turni con lo stesso nome (creati prima che i nomi fossero unici): il secondo prende gli orari nel nome, così
+// pennelli, calendario e fogli li distinguono. Quello nel ciclo resta com'è. Chiamata a ogni render (pochi turni: costa nulla).
+function sistemaNomiDoppi(){
+  const sh=state.shifts||{}, visti={}, ciclo=String(state.pattern||"");
+  const chiavi=Object.keys(sh).filter(k=>sh[k] && sh[k].n).sort((a,b)=>(ciclo.includes(b)-ciclo.includes(a)));
+  const ore=m=>{ m=((m%1440)+1440)%1440; const h=Math.floor(m/60), q=m%60; return h+(q?":"+String(q).padStart(2,"0"):""); };
+  for(const k of chiavi){ const c=String(sh[k].n).trim().toLowerCase();
+    if(visti[c]){ let n=(sh[k].n+" "+ore(sh[k].s)+"–"+ore(sh[k].e)).slice(0,20); if(visti[n.toLowerCase()]) n=(sh[k].n+" ("+k+")").slice(0,20); sh[k]={...sh[k], n}; }
+    visti[String(sh[k].n).trim().toLowerCase()]=true; }
+}
 state.attivita = store.mappa("attivita");   // movimento fatto, per giorno: [{t:"leggera"|"intensa", fine:"HH:MM"}]
 state.backupDone = store.get("backupDone", false);
 const wakes = state.wakes;   // stesso oggetto: il motore lo legge da state
@@ -4452,6 +4464,7 @@ function summaryText(){
 }
 var _primoDisegno=false;   // lo splash di sistema (app Android) resta finché la pagina non ha disegnato una volta
 function render(){
+  sistemaNomiDoppi();
   _pianiDelGiro = new Map();   // gli occupati delle persone no: valgono finché i dati non cambiano (firmaDati)
   // salva() qui, non solo nei singoli gestori: trovati (in questa sessione,
   // da segnalazioni reali) SEI punti diversi che cambiano preferenze vere
@@ -10548,7 +10561,8 @@ function renderTuoiTurni(){
   vis('[data-tt="riposi"]', tipo==="fisso");
   { const f=$("#ttFatto"); if(f) f.hidden = tipo!=="variabili" || flussoInPagina; }
   const usati=new Set(String(state.pattern||"").split(""));
-  const turni=Object.keys(sh).filter(k=>sh[k] && !sh[k].rest && (tipo==="variabili" || usati.has(k)));
+  // Tutti i tipi di turno: anche quelli creati per un giorno solo (prima non comparivano, e non si potevano togliere)
+  const turni=Object.keys(sh).filter(k=>sh[k] && !sh[k].rest).sort((a,b)=>(usati.has(b)-usati.has(a)) || (sh[a].s-sh[b].s));
   const voOld=$("#ttValOrari"); const vo=voOld; if(vo) vo.textContent=turni.map(k=>sh[k].n+" "+hhmm(sh[k].s)+"–"+hhmm(sh[k].e)).join(" · ");
   { const vf=$("#ttValFestivi"); if(vf) vf.textContent=festiviRiga().replace(/\.$/,""); }
   const rie=$("#ttRiepilogo");
@@ -10571,6 +10585,17 @@ function renderTuoiTurni(){
     const vr=$("#ttValRiposi"); if(vr) vr.textContent=riposiAttuali().map(i=>GIORNI_SETT[i]).join(", ");
   }
 }
+const usatoNelCiclo=k=>String(state.pattern||"").includes(k);
+// Togliere un tipo di turno che non è nel ciclo: i giorni dove l'avevi messo tornano al ciclo. Con «Annulla».
+function eliminaTurno(k){
+  if(!state.shifts[k] || (state.repeat!==false && usatoNelCiclo(k))) return;
+  const prima={shift:state.shifts[k], ecc:Object.assign({}, state.ecc)};
+  const giorni=Object.keys(state.ecc||{}).filter(d=>state.ecc[d]===k);
+  delete state.shifts[k]; giorni.forEach(d=>{ delete state.ecc[d]; });
+  salva(); render(); renderTuoiTurni();
+  toastUndo("«"+prima.shift.n+"» eliminato"+(giorni.length?" · "+giorni.length+(giorni.length===1?" giorno torna":" giorni tornano")+" al ciclo":""),
+    ()=>{ state.shifts[k]=prima.shift; state.ecc=prima.ecc; salva(); render(); renderTuoiTurni(); });
+}
 // Gli orari dei turni, sulla pagina: cambi un'ora e vale subito, con «Annulla». «Oggi è qui»: un tocco sulla striscia.
 function renderTtOrari(turni){
   const el=$("#ttOrari"); if(!el) return;
@@ -10578,10 +10603,12 @@ function renderTtOrari(turni){
   if(!turni.length || flussoInPagina){ el.hidden=true; el.innerHTML=""; return; }
   el.hidden=false;
   el.innerHTML='<span class="eyebrow" style="display:block;margin:var(--gap-sezione) 0 8px">Orari dei turni</span><div class="tt-orari-lista">'+
-    turni.map(k=>'<div class="qh-ore-riga"><b><span class="tt-sigla" title="Sigla">'+esc(k)+'</span>'+esc(sh[k].n)+'</b>'+
+    turni.map(k=>'<div class="qh-ore-riga"><b><span class="tt-sigla" title="Sigla">'+esc(k)+'</span>'+esc(sh[k].n)+
+      (tipoTurni()==="variabili" || !usatoNelCiclo(k) ? '<button type="button" class="lnk dim tt-elimina" data-tt-elimina="'+esc(k)+'" aria-label="Elimina il turno '+esc(sh[k].n)+'">Elimina</button>' : '<small class="tt-nel">nel tuo ciclo</small>')+'</b>'+
       '<input type="time" data-tt-da="'+esc(k)+'" value="'+hhmm(mod1440(sh[k].s))+'" aria-label="Inizio '+esc(sh[k].n)+'">'+
       '<span>→</span><input type="time" data-tt-a="'+esc(k)+'" value="'+hhmm(mod1440(sh[k].e))+'" aria-label="Fine '+esc(sh[k].n)+'"></div>').join("")+'</div>';
 }
+if($("#ttOrari")) $("#ttOrari").addEventListener("click", e=>{ const x=e.target.closest("[data-tt-elimina]"); if(x){ haptic(10); eliminaTurno(x.dataset.ttElimina); } });
 if($("#ttOrari")) $("#ttOrari").addEventListener("change", e=>{
   const inp=e.target.closest("[data-tt-da],[data-tt-a]"); if(!inp) return;
   const k=inp.dataset.ttDa||inp.dataset.ttA, da=document.querySelector('[data-tt-da="'+k+'"]'), a=document.querySelector('[data-tt-a="'+k+'"]');
