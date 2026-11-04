@@ -68,6 +68,15 @@ Spunti di benessere e organizzazione basati sulla letteratura scientifica sul so
 
 Progetto indipendente, nato da chi i turni li fa. Segnalazioni: Impostazioni → Segnala cosa non torna.
 
+## Note di versione 1.4.2 (max 500)
+Novità 1.4.2
+• Laggy, il gufo di Notturnisti, in «Sonno e carico»: cresce quando segni come dormi. Niente punti, niente serie.
+• Turni nel calendario del telefono fino a un anno (o 3 o 6 mesi), aggiornati senza riscrivere tutto.
+• All'apertura il logo, e un tocco più fluido.
+• Health Connect: vedi cosa ha letto e quali dati usa il piano.
+• Turni: elimina quelli che non usi; «Risveglio lento» appena svegli.
+• Più veloce con molti dati.
+
 ## Note di versione 1.4.1 (max 500)
 Novità 1.4.1
 • All'apertura il logo, non la pagina che si riempie; tocco più fluido.

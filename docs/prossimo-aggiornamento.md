@@ -20,6 +20,11 @@ Fatto nella 1.1.1 (non serve più): tolto il vecchio wizard nascosto; suggerimen
 - **Nuove funzioni**: «Guidi per lavoro» (pause del Reg. CE 561/2006 nel turno, con caffè + pisolino breve); idea del «compromesso» nei giorni liberi con le notti fisse (Smith, Fogg & Eastman 2009); figlio «a scuola o all'asilo» (lun–ven 8–13:30; le vacanze scolastiche non ci sono: si segnano a mano); «Copia una settimana» in Segna; la foto del foglio turni per prima fra le importazioni; il primo piano spiega l'app in tre punti.
 - **Novità** con id `2026-11-14`.
 
+## Ottimizzazione prima della 1.4.2 (04/11/2026)
+- Il calendario del ciclo (15 mesi, te e le persone) si ricorda finché i dati non cambiano (`_meseMemo` in `meseWidget`, chiave `firmaDati()` + identità di ecc/giorni/turni + persone). Un disegno di Turni con due anni di dati e otto colleghi: da circa 80 a 58 ms (CPU 4×).
+- `firmaDati()` si ricorda per 250 ms a versione dei dati invariata (era chiamata centinaia di volte a disegno).
+- Controllati di nuovo: nessun codice morto (gli «inutilizzati» sono esportazioni dei moduli), nessun errore su 240 schermate, nessun ascoltatore che si accumula.
+
 ## Dopo la 1.4.1 (04/11/2026, PWA; per l'app serve la 1.4.2)
 - **Laggy** in «Sonno e carico» (`LAGGY`, `laggyStato`, `laggyHtml`): quattro stadi (`img/laggy-*.webp`, 512 px, trasparenti; il terzo scontornato a mano da Davide).
   - Si cresce con le notti annotate in tutto (7, 30 con almeno 2 funzioni scoperte, 90) e lo stadio più alto raggiunto resta (`nt:laggy` {max, visto}).
