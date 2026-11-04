@@ -28,7 +28,7 @@ await p.evaluate(()=>{ const i=document.querySelector("[data-qs-impegno-h]"); i.
 await p.waitForTimeout(200);
 const ev=await p.evaluate(()=>JSON.parse(localStorage.getItem("nt:state")).evento);
 await p.click("#qsClose"); await p.waitForTimeout(200);
-ok(ev && ev.h==="08:30" && /Mente lucida alle 08:30/.test(await p.evaluate(()=>document.querySelector("#luciditaGiornoWrap").innerText)), "impegno su domani alle 08:30: salvato, e Oggi lo ricorda quel giorno → "+JSON.stringify(ev));
+ok(ev && ev.h==="08:30" && /Impegno alle 08:30/.test(await p.evaluate(()=>document.querySelector("#luciditaGiornoWrap").innerText)), "impegno su domani alle 08:30: salvato, e Oggi lo ricorda quel giorno → "+JSON.stringify(ev));
 await p.click("[data-lucidita-cambia]"); await p.waitForTimeout(200);
 await p.click("[data-qs-impegno]"); await p.waitForTimeout(200); await p.click("#qsClose");
 ok(await p.evaluate(()=>!JSON.parse(localStorage.getItem("nt:state")).evento && document.querySelector("#luciditaGiornoWrap").innerText.trim()===""), "«Cambia» riapre la scheda; un altro tocco lo toglie");

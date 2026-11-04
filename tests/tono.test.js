@@ -17,7 +17,11 @@ const VIETATE = [/stasera devi/i, /rischio alto/i, /impedit/i, /sospettat/i, /sb
   // lucidità, le soglie di sicurezza, il debito che si chiude in fretta, gli effetti dati per certi
   /fermati\W+20/i, /qualche minuto[^.]*guid/i, /tornare a casa più/i, /strada di casa/i, /lucidità ottimale|picco di lucidità|lucidità ok/i,
   /(?<!di solito )sei più lucid/i, /più rischios/i, /pochi giorni tranquilli/i, /migliora sia/i, /soglia delle 17/i,
-  /con un revisore/i, /anche col cielo coperto/i, /per i più è/i];
+  /con un revisore/i, /anche col cielo coperto/i, /per i più è/i,
+  // giro 5: l'inerzia che «passa in pochi minuti» prima di guidare, il debito dato per recuperato tutto,
+  // l'alba simulata come certezza, le promesse di risultato («arrivarci in forma», «mente lucida»)
+  /(pochi|qualche) minut[^.]*(guid|ripart)/i, /rimette a posto il conto|recuperi quello perso|portare il conto a domani/i,
+  /molto meno intontit/i, /arrivarci in forma/i, /mente lucida/i];
 
 // La scheda di Google Play è testo semplice: ogni riga conta.
 const SCHEDA = "docs/play/scheda.md";

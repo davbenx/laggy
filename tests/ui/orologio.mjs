@@ -103,4 +103,17 @@ for (const [bed, wake, atteso] of [["08:00","16:00","Gufo"],["04:00","12:00","Gu
   ok(tipo===atteso && (atteso!=="Gufo" || !consiglio), "liberi "+bed+"–"+wake+": "+atteso+(atteso==="Gufo"?", senza il consiglio da mattiniero":"")+" → "+tipo);
   await p.context().close(); }
 
+// Lo stesso caso estremo dal DIARIO (revisore, giro 5): notturnista fisso che nei liberi dorme di giorno,
+// a volte dalle 11:45 e a volte dalle 12:15. Le metà del sonno vanno mediate vicine (16:00), non 16:00 e 04:00.
+{ const wakes={}, beds={};
+  [1,8,15,22,29,36].forEach((i,j)=>{ beds[fa(i)] = j%2 ? "12:15" : "11:45"; wakes[fa(i)] = j%2 ? "20:15" : "19:45"; });   // il 2° riposo di NNNNNRR
+  const p=await apri({turniConfigurati:true,pattern:"NNNNNRR",anchor:fa(0),repeat:true,firstSeenAt:"2026-01-01",freeBed:"23:00",freeWake:"07:00",need:480,shifts:{N:{n:"Notte",s:1320,e:1800}},wakes,beds});
+  await p.evaluate(()=>document.querySelector("[data-tab=turni]")?.click()); await p.waitForTimeout(300);
+  await p.evaluate(()=>document.querySelector("#doAndamenti").click()); await p.waitForTimeout(300);
+  await p.evaluate(()=>document.querySelector("[data-and-sez=orologio]").click()); await p.waitForTimeout(400);
+  const tx=await p.evaluate(()=>document.querySelector("#orologio")?.innerText||"");
+  ok(/^Gufo/.test(tx) && /da 6 giorni liberi del tuo diario/.test(tx) && !/mattiniero/.test(tx),
+    "diario con liberi 11:45/12:15 → Gufo, da 6 giorni, senza il consiglio da mattiniero → "+tx.slice(0,120).replace(/\s+/g," "));
+  await p.context().close(); }
+
 console.log("errori", errs); await b.close();
