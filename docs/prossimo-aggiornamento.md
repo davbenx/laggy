@@ -20,6 +20,15 @@ Fatto nella 1.1.1 (non serve più): tolto il vecchio wizard nascosto; suggerimen
 - **Nuove funzioni**: «Guidi per lavoro» (pause del Reg. CE 561/2006 nel turno, con caffè + pisolino breve); idea del «compromesso» nei giorni liberi con le notti fisse (Smith, Fogg & Eastman 2009); figlio «a scuola o all'asilo» (lun–ven 8–13:30; le vacanze scolastiche non ci sono: si segnano a mano); «Copia una settimana» in Segna; la foto del foglio turni per prima fra le importazioni; il primo piano spiega l'app in tre punti.
 - **Novità** con id `2026-11-14`.
 
+## 1.4.1 (04/11/2026)
+- **Avvio**: nell'app Android lo splash di sistema (`installSplashScreen`, sfondo `avvio_sfondo` chiaro/scuro) resta finché la pagina chiama `NTDispositivo.pronta` al primo disegno (al massimo 2,5 s). Nella web app c'è `#avvio`, il logo finché arriva `nt:rendered` (al massimo 3 s).
+- **Touch & feel**: gli `:hover` solo in `@media (hover:hover)` (test `tocco` sul CSSOM); `:active` anche su celle, frecce e scelte; `user-select:none` sull'interfaccia; corpo fermo dietro i fogli (`body:has(.qs-backdrop:not([hidden]))`); tab già aperta → in cima.
+- **Health Connect**: lo stato di cosa ha letto (`hcInfo`), «Leggi adesso», e in «Il tuo orologio» i dati usati (`datiUsatiTesto`).
+- **Momento di sonnolenza**: una sola stima (`momentiSonnolenza`, anche il punto basso di stamattina); «Risveglio lento» entro un'ora dalla sveglia; voce ordinata dall'inizio della finestra.
+- **Turni**: sigla scelta dall'utente, nomi unici (`sistemaNomiDoppi` per i dati vecchi), «Elimina» per i tipi fuori dal ciclo.
+- **Caffeina** facoltativa e non solo caffè; calendario a mesi interi (widget 1+12 mesi, app 3+12); testi più naturali.
+- **Ambiente di sviluppo**: git passa dal contenitore distrobox «mobile-dev»; se `podman` dà «unable to create a new pause process», manca `conmon.pid` in `/run/user/1000/containers/overlay-containers/<id>/userdata` (la pulizia dei file temporanei lo cancella): va ricreato con il pid di `conmon`, o si riavvia il contenitore.
+
 ## Revisione del codice (03/11/2026)
 - **Velocità**: con due anni di diario e otto colleghi, un disegno di Turni passa da circa 356 a 80 ms (CPU 4×). Le cache degli occupati delle persone, delle finestre libere e dell'anteprima di «Sonno e carico» valgono fra un disegno e l'altro e si buttano quando cambiano i dati (`_versioneDati`, cresce a ogni `store.set`), il giorno o ogni 15 minuti (`firmaDati()`); le simulazioni che scambiano `ecc`/`giorni` hanno chiavi proprie (`idDi`). I 90 piani di «Il piano si adatta» si calcolano dopo il primo disegno (`requestIdleCallback`).
 - **Dati mobili**: il service worker controlla i file con `no-cache` (ETag, 304) invece di riscaricarli tutti ogni 20 minuti (circa 1,5 MB).

@@ -522,6 +522,8 @@ export const dispositivo = {
   dimentica() { try { localStorage.removeItem(CAL_KEY); localStorage.removeItem("nt:widgetN"); } catch (e) {} },
   // Le impostazioni dell'app (permessi): dopo un rifiuto Android non rifà la domanda.
   async apriImpostazioni() { const D = plugin("NTDispositivo"); if (!D || !D.apriImpostazioni) return false; try { await D.apriImpostazioni(); return true; } catch (e) { return false; } },
+  // La pagina ha disegnato: lo splash di sistema può andare via (resta al massimo 2,5 secondi comunque).
+  pronta() { const D = plugin("NTDispositivo"); if (D && D.pronta) D.pronta().catch(() => {}); },
   // Il «tocco» di sistema (feedback aptico): solo nell'app Android con un plugin che lo conosce; altrove la pagina usa la vibrazione.
   tocco: isNative && name === "android" && plugin("NTDispositivo") && plugin("NTDispositivo").tocco
     ? (tipo) => { try { plugin("NTDispositivo").tocco({ tipo }).catch(() => {}); } catch (e) {} }

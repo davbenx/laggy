@@ -68,6 +68,15 @@ Spunti di benessere e organizzazione basati sulla letteratura scientifica sul so
 
 Progetto indipendente, nato da chi i turni li fa. Segnalazioni: Impostazioni → Segnala cosa non torna.
 
+## Note di versione 1.4.1 (max 500)
+Novità 1.4.1
+• All'apertura il logo, non la pagina che si riempie; tocco più fluido.
+• Health Connect: vedi cosa ha letto, da quale app e quando, e quali dati usa il piano.
+• Caffeina, non solo caffè: tè, cola, energy drink. E si può togliere dal piano.
+• Calendario di Turni e del widget fino a dodici mesi, sempre a mesi interi.
+• Turni: sigla a scelta, nomi unici, «Elimina» per quelli che non usi.
+• Testi più chiari e «Risveglio lento» appena svegli.
+
 ## Note di versione 1.4.0 (max 500)
 Novità 1.4.0
 • Salute di Android, solo se vuoi: sonno e passi rendono il piano più preciso. Restano sul telefono.

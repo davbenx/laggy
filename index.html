@@ -223,7 +223,7 @@ body.tab-opzioni .appbar,body.sottopagina .appbar,body.primo-avvio .appbar{displ
 .daynav .shiftpill{font-size:14px;min-height:44px;padding:0 18px;max-width:62vw;overflow:hidden;text-overflow:ellipsis}
 .themebtn{flex:none;background:none;border:none;padding:12px;margin:-12px;color:var(--dim);
 cursor:pointer;display:flex;border-radius:999px}
-.themebtn:hover{color:var(--ink);background:var(--s1)}
+@media (hover:hover){ .themebtn:hover{color:var(--ink);background:var(--s1)} }
 /* Bersagli di tocco da almeno 44px anche per i link dentro il testo: il
    padding verticale di un elemento in riga allarga l'area toccabile senza
    spostare le righe. */
@@ -262,7 +262,7 @@ cursor:pointer;display:flex;border-radius:999px}
 #jumpDate{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;border:0}
 .nav{background:var(--s1);border:1px solid var(--line);color:var(--ink);width:40px;height:40px;font-size:18px;line-height:1;
 border-radius:var(--r);font-size:16px;cursor:pointer;display:grid;place-items:center;flex:none}
-.nav:hover{border-color:var(--blue);color:var(--blue)}
+@media (hover:hover){ .nav:hover{border-color:var(--blue);color:var(--blue)} }
 /* Il bottone centrale c'è sempre (stesse dimensioni), non solo quando
    ci si è allontanati da oggi: sul giorno vero diventa "Naviga" con lo
    stesso stile neutro delle frecce; altrove è "Torna a oggi" e prende
@@ -273,9 +273,9 @@ border-radius:var(--r);font-size:16px;cursor:pointer;display:grid;place-items:ce
 .today{background:var(--s1);border:1px solid var(--line);color:var(--ink);height:40px;padding:0 13px;
 min-width:118px;text-align:center;
 border-radius:var(--r);font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;flex:none}
-.today:hover{border-color:var(--blue);color:var(--blue)}
+@media (hover:hover){ .today:hover{border-color:var(--blue);color:var(--blue)} }
 .today.full{background:var(--blue);border:1px solid var(--blue);color:var(--su-blu)}
-.today.full:hover{background:var(--blue-fill)}
+@media (hover:hover){ .today.full:hover{background:var(--blue-fill)} }
 /* iPhone: Safari non apre il selettore della data da codice (showPicker su
    un campo nascosto non fa niente). Sopra il bottone c'è allora un campo
    data vero e trasparente: il tocco arriva a lui e iOS apre il suo
@@ -287,13 +287,18 @@ html.ios .today-pick{display:block;position:absolute;top:0;right:0;bottom:0;left
 html.ios .today-wrap:has(.today.full) .today-pick{display:none}
 /* iPhone: niente zoom col doppio tocco (resta lo zoom con due dita) e
    niente zoom automatico entrando in un campo: Safari lo fa sotto i 16px. */
-html{touch-action:manipulation}
+html{touch-action:manipulation;-webkit-tap-highlight-color:transparent}   /* il riquadro grigio di Android al tocco: c'è già il nostro stato «premuto» */
+button,img,svg,[role=button]{-webkit-touch-callout:none}   /* tocco lungo su pulsanti e icone: niente menu «salva immagine» */
+#avvio{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:var(--bg);pointer-events:none;transition:opacity .2s ease}
+#avvio img{border-radius:22px;box-shadow:0 8px 30px rgba(0,0,0,.25)}
+#avvio.via{opacity:0}
+@media (prefers-reduced-motion:reduce){ #avvio{transition:none} }
 html.ios input,html.ios select,html.ios textarea{font-size:max(16px,1em)}
 /* pillola del turno: affordance interattiva, hover, active, chevron rotante all'apertura */
 .shiftpill{display:inline-flex;align-items:center;gap:5px;background:var(--blue-soft);color:var(--blue);font-size:12px;
 font-weight:700;padding:5px 11px;border-radius:999px;white-space:nowrap;cursor:pointer;border:1px solid transparent;
 transition:all .15s ease;user-select:none}
-.shiftpill:hover{filter:brightness(1.08);border-color:var(--blue-lt);transform:translateY(-1px)}
+@media (hover:hover){ .shiftpill:hover{filter:brightness(1.08);border-color:var(--blue-lt);transform:translateY(-1px)} }
 .shiftpill:active{transform:translateY(0);filter:brightness(0.96)}
 .shiftpill::after{content:"";display:inline-block;width:5px;height:5px;border-right:2px solid currentColor;
 border-bottom:2px solid currentColor;transform:rotate(45deg);margin-left:2px;margin-bottom:2px;opacity:.75;transition:transform .2s ease}
@@ -329,7 +334,7 @@ max-height:calc(100vh - 88px - var(--sab));max-height:calc(100dvh - 88px - var(-
 .qs-title{display:block;font-family:var(--serif);font-size:18px;color:var(--ink)}
 .qs-close{box-sizing:content-box;padding:7px;margin:-7px;background-clip:content-box;background-color:var(--s2);border:none;color:var(--dim);width:30px;height:30px;border-radius:50%;font-size:14px;
 display:flex;align-items:center;justify-content:center;cursor:pointer}
-.qs-close:hover{color:var(--ink);background-color:var(--line)}   /* area di tocco da 44 px (padding trasparente), il disco resta da 30 */
+@media (hover:hover){ .qs-close:hover{color:var(--ink);background-color:var(--line)}   /* area di tocco da 44 px (padding trasparente), il disco resta da 30 */ }
 .qs-hd-az{display:flex;align-items:center;gap:10px}
 .qs-orari{display:flex;flex-direction:column;gap:8px;align-items:flex-start;margin:10px 0 0}
 .qs-orari .qs-ore{width:100%}
@@ -340,7 +345,7 @@ display:flex;align-items:center;justify-content:center;cursor:pointer}
 .qs-btn{background:var(--bg);border:1.5px solid var(--line);border-radius:var(--r);padding:11px 13px;font-family:inherit;
 font-size:14.5px;font-weight:600;color:var(--ink);cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;
 gap:3px;transition:all .15s ease}
-.qs-btn:hover{border-color:var(--blue);background:var(--blue-soft);color:var(--blue)}
+@media (hover:hover){ .qs-btn:hover{border-color:var(--blue);background:var(--blue-soft);color:var(--blue)} }
 .qs-btn.active{border-color:var(--blue-fill);background:var(--blue-fill);color:#fff}
 .qs-shift-time{font-size:12px;font-weight:400;opacity:.8}
 .qs-spec{display:flex;flex-direction:column;gap:8px}
@@ -388,7 +393,7 @@ padding:16px 18px;margin:2px 0 var(--gap-sezione);box-shadow:0 4px 20px rgba(45,
 .qh-sub{font-size:13px;color:var(--dim);margin:0 0 14px;line-height:1.4}
 .qh-flow-options{display:flex;flex-direction:column;gap:8px;margin-top:12px}
 .qh-opt-btn{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:12px;text-align:left;transition:all .15s;font:inherit;width:100%}
-.qh-opt-btn:hover{border-color:var(--blue);background:var(--s2);transform:translateX(2px)}
+@media (hover:hover){ .qh-opt-btn:hover{border-color:var(--blue);background:var(--s2);transform:translateX(2px)} }
 .qh-opt-ic{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;color:var(--blue);flex:none}
 .qh-opt-ic svg{width:24px;height:24px}
 .qh-opt-tx{flex:1;min-width:0}
@@ -467,7 +472,7 @@ padding:16px 18px;margin:2px 0 var(--gap-sezione);box-shadow:0 4px 20px rgba(45,
    toccarne i bordi. 15cqi ≈ dieci lettere nella larghezza del bottone. */
 .qh-pos-btn{container-type:inline-size;min-width:0}
 .qh-pos-btn b{display:block;max-width:100%;text-align:center;font-size:min(1em,15cqi);overflow-wrap:anywhere}
-.qh-pos-btn:hover{border-color:var(--blue);background:var(--s2)}
+@media (hover:hover){ .qh-pos-btn:hover{border-color:var(--blue);background:var(--s2)} }
 /* Primo avvio (e scelta del ciclo dal banner): solo la domanda. Il piano
    sotto e gli altri inviti non servono finché non si sa che turno fai. */
 body.primo-avvio .daynav,body.primo-avvio #ora,
@@ -475,12 +480,12 @@ body.primo-avvio #status,body.primo-avvio #formaGiorno,body.primo-avvio #essenzi
 body.primo-avvio #luciditaGiornoWrap,body.primo-avvio #tabbar,
 body.primo-avvio #firstPlanBanner,body.primo-avvio #setupChecklist,body.primo-avvio #adattaCard,body.primo-avvio #medicoCard,body.primo-avvio #setupNudge,body.primo-avvio #aCasa,body.primo-avvio #loSapevi{display:none!important}
 .qh-btn{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:12px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;min-height:74px;transition:all .15s;font:inherit}
-.qh-btn:hover{border-color:var(--blue);transform:translateY(-1px);background:var(--s2)}
+@media (hover:hover){ .qh-btn:hover{border-color:var(--blue);transform:translateY(-1px);background:var(--s2)} }
 .qh-btn .qh-ic{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;color:var(--blue);margin-bottom:2px}
 .qh-btn .qh-ic svg{width:22px;height:22px}
 .qh-btn b{font-size:14px;color:var(--ink);font-weight:700}
 .qh-btn small{font-size:12px;color:var(--dim);font-weight:500}
-.crow:hover .crail{background:var(--s2)}
+@media (hover:hover){ .crow:hover .crail{background:var(--s2)} }
 /* pillola, come nel mockup: bordo pieno invece di uno shadow interno, e
    un filo più alta (10px contro 8px) — lo stesso trattamento che lì
    distingue la riga "oggi" da tutte le altre. */
@@ -579,7 +584,7 @@ border-top:5px solid var(--ink)}
 .cbar.pers{top:auto;bottom:-6px;height:3px;background:var(--persona);border-radius:99px}
 .lnk{background:none;border:none;padding:6px 0;color:var(--blue);font-family:inherit;
 font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;min-height:44px}   /* sottolineati restano solo i veri collegamenti (Termini, Privacy…): un'azione dentro l'app non è un link */
-.lnk:hover{color:var(--ink)}
+@media (hover:hover){ .lnk:hover{color:var(--ink)} }
 .lnk:active{opacity:.65}
 .lnk.dim{color:var(--dim);font-weight:500}   /* chiudere, rimandare, annullare: testo semplice, mai in evidenza */
 a.btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
@@ -712,10 +717,10 @@ display:flex;flex-direction:column;align-items:center;justify-content:center;gap
 .invito .attiva-head{display:flex}
 .invito>p.hint{font-size:13.5px;line-height:1.5;margin:5px 0 12px!important}
 .invito .x{position:absolute;top:2px;right:2px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:none;border:0;color:var(--faint);font-size:22px;line-height:1;cursor:pointer;padding:0;float:none;min-height:0}
-.invito .x:hover{color:var(--ink)}
+@media (hover:hover){ .invito .x:hover{color:var(--ink)} }
 .btn.pri{background:var(--blue-fill);border-color:var(--blue-fill);color:#fff;font-weight:600}
 .btn.azione{display:inline-flex;align-items:center;justify-content:center;background:var(--blue-fill);border:1px solid var(--blue-fill);color:#fff;font-weight:600;font-size:14px;min-height:42px;padding:8px 16px;text-decoration:none;text-align:center}
-.btn.azione:hover{background:var(--blue-fill);color:#fff;filter:brightness(1.1)}
+@media (hover:hover){ .btn.azione:hover{background:var(--blue-fill);color:#fff;filter:brightness(1.1)} }
 .adatta-azioni .lnk{min-height:44px;padding:0 6px}
 #chiudiBenvenuto{float:right;background:none;border:none;color:var(--faint);
 font-size:22px;line-height:1;cursor:pointer;padding:0 0 4px 10px;min-height:0}
@@ -748,28 +753,28 @@ summary{cursor:pointer;font-size:12px;letter-spacing:.07em;color:var(--faint);
 font-weight:600;list-style:none;display:inline-flex;gap:6px;align-items:center;padding:4px 0}
 summary::-webkit-details-marker{display:none}
 summary::after{content:"›";display:inline-block;margin-left:6px;transform:rotate(90deg);transition:transform .15s}details[open]>summary::after{transform:rotate(-90deg)}
-summary:hover{color:var(--blue)}
+@media (hover:hover){ summary:hover{color:var(--blue)} }
 .why{font-size:14px;color:var(--dim);line-height:1.6;margin-top:8px;padding-left:12px;border-left:2px solid var(--line)}
 .why cite{display:block;margin-top:7px;font-style:normal;font-size:12.5px;color:var(--faint)}
 .btn{background:var(--bg);border:1px solid var(--blue);color:var(--blue);padding:8px 13px;
 border-radius:var(--r);font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;flex:none;min-height:44px}
-.btn:hover{background:var(--blue);color:var(--su-blu)}
+@media (hover:hover){ .btn:hover{background:var(--blue);color:var(--su-blu)} }
 .btn.g{border-color:var(--line);color:var(--dim)}
-.btn.g:hover{background:var(--s2);color:var(--ink);border-color:var(--dim)}
+@media (hover:hover){ .btn.g:hover{background:var(--s2);color:var(--ink);border-color:var(--dim)} }
 .btn.sm{min-height:40px;padding:6px 14px;font-size:13.5px}
 .btn.danger{border-color:var(--risk-line);color:var(--risk)}
-.btn.danger:hover{background:var(--risk-soft);color:var(--risk);border-color:var(--risk)}
+@media (hover:hover){ .btn.danger:hover{background:var(--risk-soft);color:var(--risk);border-color:var(--risk)} }
 .ibtn{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;flex:none;border:0;border-radius:50%;background:none;color:var(--dim);cursor:pointer}
-.ibtn:hover{background:var(--s2);color:var(--ink)}
+@media (hover:hover){ .ibtn:hover{background:var(--s2);color:var(--ink)} }
 .ibtn svg{width:20px;height:20px}
 .diary{display:flex;gap:6px;margin-top:11px;flex-wrap:wrap;align-items:center}
 .dbtn{flex:1;min-width:52px;min-height:46px;background:var(--s2);border:1px solid var(--line);
 padding:6px 8px;border-radius:var(--r);font-size:14px;font-weight:500;line-height:1.25;
 cursor:pointer;font-family:inherit;color:var(--ink)}
-.dbtn:hover{border-color:var(--blue)}
+@media (hover:hover){ .dbtn:hover{border-color:var(--blue)} }
 /* azione primaria: piena, per essere trovata anche da stanchi */
 .dbtn.pri{background:var(--blue);border-color:var(--blue);color:var(--su-blu);font-weight:600;box-shadow:var(--shadow-btn)}
-.dbtn.pri:hover{filter:brightness(1.08)}
+@media (hover:hover){ .dbtn.pri:hover{filter:brightness(1.08)} }
 .dbtn.on{background:var(--blue-soft);border-color:var(--blue);color:var(--blue);font-weight:600}
 /* display in una classe, non inline: uno stile inline su display batte
    SEMPRE le regole "body.tab-x #id{display:none}" che nascondono gli
@@ -815,7 +820,7 @@ overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .q .hint{display:block;margin-top:5px}
 .skip{display:block;margin-top:12px;min-height:44px;font-size:14px;color:var(--faint);text-align:center;
 background:none;border:none;width:100%;cursor:pointer;font-family:inherit}
-.skip:hover{color:var(--blue)}
+@media (hover:hover){ .skip:hover{color:var(--blue)} }
 .onboard b{font-family:var(--serif);font-size:19px;display:block;margin-bottom:6px}
 .onboard>p{font-size:14px;color:var(--dim);line-height:1.55;margin-bottom:18px}
 
@@ -846,14 +851,23 @@ font:inherit;font-weight:700;letter-spacing:.02em;min-height:44px;padding:0 0 0 
    principali, non ripetuto su ognuno. .tabbtn resta fuori: ha già un suo
    :active dedicato sull'icona (.tabbtn:active svg) più avanti — sommare
    anche questo raddoppiava lo schiacciamento solo lì. */
-.tool,.btn,.dbtn,.tsec,button.lnk,.skip,.qh-btn,.qh-opt-btn,.qs-chip,.qs-btn,.vb,.sg-pen,.ccell,.kface{
+.tool,.btn,.dbtn,.tsec,button.lnk,.skip,.qh-btn,.qh-opt-btn,.qs-chip,.qs-btn,.vb,.sg-pen,.ccell,.kface,
+.sg-g,.tt-g,.pers-via,.themebtn,.nav,.shiftpill,.today,.qh-pos-btn,.ibtn,.qs-close,.pv-gg,.pv-pen{
   transition:transform .1s ease, opacity .1s ease;
 }
 .tool:active,.btn:active,.dbtn:active,
 .tsec:active,button.lnk:active,.skip:active,
-.qh-btn:active,.qh-opt-btn:active,.qs-chip:active,.qs-btn:active,.vb:active,.sg-pen:active,.ccell:active,.kface:active{
+.qh-btn:active,.qh-opt-btn:active,.qs-chip:active,.qs-btn:active,.vb:active,.sg-pen:active,.ccell:active,.kface:active,
+.sg-g:active,.tt-g:active,.pers-via:active,.themebtn:active,.nav:active,.shiftpill:active,.today:active,.qh-pos-btn:active,.ibtn:active,.qs-close:active,.pv-gg:active,.pv-pen:active{
   transform:scale(.97); opacity:.85;
 }
+/* Come in un'app: un tocco lungo sulle parti dell'interfaccia non seleziona il testo (il testo dei fogli sì: si può copiare),
+   le immagini non si trascinano, la pagina dietro un foglio aperto resta ferma, la fila dei pennelli si ferma su un pennello. */
+.erow,.tl,.tabbtn,.appbar,.daynav,.cycbar,.ccell,.sg-g,.tt-g,.riga-sw,.opz-hub-r,.pers-via,.shiftpill,.fg-legend,.cal-sett,.crow{-webkit-user-select:none;user-select:none}
+img{-webkit-user-drag:none}
+body:has(.qs-backdrop:not([hidden])){overflow:hidden}
+#segnaOut .sg-pennelli{scroll-snap-type:x proximity}
+#segnaOut .sg-pennelli>*{scroll-snap-align:start;scroll-margin-left:16px}
 /* le righe della timeline e degli elenchi: si scuriscono un attimo al tocco, senza rimpicciolire testo lungo */
 .erow,.opz-hub-r{transition:background-color var(--dur-1) var(--ease-std)}
 .erow:active,.opz-hub-r:active{background-color:var(--s2)}
@@ -1009,7 +1023,7 @@ padding:12px 6px 12px 14px;margin:-6px 0 var(--gap-sezione);font-size:13.5px;lin
 .perche{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-size:13.5px;color:var(--dim)}
 .perche-az{display:flex;flex-wrap:wrap;gap:6px 10px;margin-top:6px;align-items:center}
 .sapevi .x{flex:none;width:44px;height:44px;margin:-10px 0 -10px;border:0;background:none;color:var(--faint);font-size:20px;cursor:pointer;border-radius:50%}
-.acasa:hover{border-color:var(--blue-lt)}
+@media (hover:hover){ .acasa:hover{border-color:var(--blue-lt)} }
 .acasa svg{flex:none;color:var(--blue)}
 .acasa b{display:block;font-size:15px;font-weight:600}
 .acasa small{display:block;font-size:12.5px;color:var(--dim);margin-top:2px}
@@ -1050,6 +1064,8 @@ padding:12px 6px 12px 14px;margin:-6px 0 var(--gap-sezione);font-size:13.5px;lin
 .tt-orari .qh-ore-riga{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:6px var(--sp-2);margin:0;padding:var(--sp-2) var(--sp-3) var(--sp-3);border-top:1px solid var(--line)}
 .tt-orari .qh-ore-riga:first-child{border-top:0}
 .tt-orari .qh-ore-riga>:first-child{grid-column:1/-1;font-size:15px;display:flex;align-items:center;gap:8px;min-width:0}
+.tt-orari .tt-elimina{margin-left:auto;font-size:13px;min-height:40px;padding:0 4px}
+.tt-orari .tt-nel{margin-left:auto;font-size:12px;font-weight:400;color:var(--dim)}
 .tt-orari .qh-ore-riga input{background:var(--bg)}
 #tuoiTurniPagina.tt-flusso #ttOrari,#tuoiTurniPagina.tt-flusso #ttOggiNota{display:none}
 #tuoiTurniPagina.tt-festivi #ttRiepilogo,#tuoiTurniPagina.tt-festivi #ttOrari,#tuoiTurniPagina.tt-festivi #ttOggiNota,#tuoiTurniPagina.tt-festivi #ttMese,#tuoiTurniPagina.tt-festivi #ttRighe,#tuoiTurniPagina.tt-festivi #ttNota,#tuoiTurniPagina.tt-festivi #ttFatto{display:none}
@@ -1111,7 +1127,7 @@ body.sg-segna-solo .sg-importa{display:none}
 .tsec{display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:var(--s1);
 border:1px solid var(--line);border-radius:var(--r);padding:13px 15px;font:inherit;color:inherit;
 cursor:pointer;min-height:52px;margin-top:12px;box-shadow:var(--shadow-card)}
-.tsec:hover{border-color:var(--blue-lt)}
+@media (hover:hover){ .tsec:hover{border-color:var(--blue-lt)} }
 .tgruppo{margin-top:var(--gap-sezione)}
 .tgruppo>.eyebrow{display:block;margin:0 0 8px}
 .tgruppo-box{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow-card);overflow:hidden}
@@ -1331,7 +1347,7 @@ body.tab-oggi #scambioPagina,body.tab-opzioni #scambioPagina{display:none}
 .tool{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;background:var(--s1);border:1px solid var(--line);
 border-radius:var(--r);padding:13px 15px;font:inherit;cursor:pointer;color:inherit;min-height:44px;
 box-shadow:var(--shadow-card)}
-.tool:hover{border-color:var(--blue-lt)}
+@media (hover:hover){ .tool:hover{border-color:var(--blue-lt)} }
 /* selezionato: stesso trattamento di .dbtn.on, per i preset del passo 1 del wizard */
 .tool.on{border-color:var(--blue);background:var(--blue-soft)}
 .tool.on .tool-ic{background:var(--blue);color:var(--su-blu)}
@@ -1555,6 +1571,17 @@ header b{font-size:23px}
 </style>
 </head>
 <body>
+<!-- Avvio: il logo sul colore della pagina finché il primo disegno non è completo. Senza, per mezzo secondo si vedeva
+     la pagina vuota («Turni», «—», barre vuote) riempirsi. Nell'app Android lo fa lo splash di sistema: qui si toglie subito. -->
+<div id="avvio" aria-hidden="true"><img src="./icon-192.png" alt="" width="88" height="88"></div>
+<script>
+(function(){
+  var v=document.getElementById("avvio"), via=function(){ if(!v || !v.parentNode) return; v.classList.add("via"); setTimeout(function(){ if(v.parentNode) v.parentNode.removeChild(v); }, 220); };
+  try{ if(window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform()){ v.parentNode.removeChild(v); return; } }catch(e){}
+  window.addEventListener("nt:rendered", via, {once:true});
+  setTimeout(via, 3000);   // rete di sicurezza: mai più di 3 secondi
+})();
+</script>
 <div class="wrap">
 
 <header class="appbar">
@@ -3445,6 +3472,16 @@ state.wakes = store.mappa("wakes");
 try{ state.hcSonno = store.get("hcSonno", []); state.hcPassi = store.get("hcPassi", []); }catch(e){ state.hcSonno = []; state.hcPassi = []; }
 state.beds  = store.mappa("beds");
 state.pisolini = store.mappa("pisolini");
+// Due turni con lo stesso nome (creati prima che i nomi fossero unici): il secondo prende gli orari nel nome, così
+// pennelli, calendario e fogli li distinguono. Quello nel ciclo resta com'è. Chiamata a ogni render (pochi turni: costa nulla).
+function sistemaNomiDoppi(){
+  const sh=state.shifts||{}, visti={}, ciclo=String(state.pattern||"");
+  const chiavi=Object.keys(sh).filter(k=>sh[k] && sh[k].n).sort((a,b)=>(ciclo.includes(b)-ciclo.includes(a)));
+  const ore=m=>{ m=((m%1440)+1440)%1440; const h=Math.floor(m/60), q=m%60; return h+(q?":"+String(q).padStart(2,"0"):""); };
+  for(const k of chiavi){ const c=String(sh[k].n).trim().toLowerCase();
+    if(visti[c]){ let n=(sh[k].n+" "+ore(sh[k].s)+"–"+ore(sh[k].e)).slice(0,20); if(visti[n.toLowerCase()]) n=(sh[k].n+" ("+k+")").slice(0,20); sh[k]={...sh[k], n}; }
+    visti[String(sh[k].n).trim().toLowerCase()]=true; }
+}
 state.attivita = store.mappa("attivita");   // movimento fatto, per giorno: [{t:"leggera"|"intensa", fine:"HH:MM"}]
 state.backupDone = store.get("backupDone", false);
 const wakes = state.wakes;   // stesso oggetto: il motore lo legge da state
@@ -4091,12 +4128,13 @@ function cards(P){
     // Ti svegli vicino al punto più basso, prima di uscire: niente da rimandare, ma il risveglio è più lento del solito.
     // Sulla luce non si dice niente qui: prima del minimo sposterebbe l'orologio più tardi, decide la voce «Luce».
     const da=Math.max(cbtSveglia-60, wake), a=cbtSveglia+60;
-    out.push({k:"cbt", lab:"Momento di sonnolenza", val: hhmm(da)+"–"+hhmm(a), mezza:60, da, a,
-      small: "appena sveglio",
+    out.push({k:"cbt", lab:"Risveglio lento", sveglia:true, val: hhmm(da)+"–"+hhmm(a), mezza:60, da, a,
+      small: "sei vicino al tuo punto più basso",
       sub: "Oggi ti svegli vicino al tuo punto più basso: i primi 20-30 minuti sono i più lenti, ed è normale.",
       rows: [["Per svegliarti","acqua fresca sul viso, qualche movimento e, se ti va, un caffè"],
              ["Prima di uscire","concediti qualche minuto in più: se guidi, parti quando ti senti sveglio"]],
-      why: "Ogni notte il corpo attraversa un punto basso naturale, verso la fine del sonno. Quando la sveglia arriva prima o proprio lì, il risveglio è più faticoso del solito: non dipende da quanto hai dormito. È una stima dai tuoi orari.",
+      why: "Appena sveglio la stanchezza accumulata è al minimo, perché il sonno l'ha appena smaltita: non è il crollo di fine notte. Resta l'inerzia del sonno, cioè la lentezza dei primi minuti, che è più forte quando ti svegli vicino al punto più basso dell'orologio. Passa da sola; è una stima dai tuoi orari.",
+      cite: "Scheer, Shea, Hilton & Shea, J Biol Rhythms 2008 (inerzia del sonno e orologio) · Tassi & Muzet 2000",
       at: cbtSveglia});
   }
 
@@ -4433,7 +4471,9 @@ function summaryText(){
     .concat(sm.verdict?[sm.verdict]:["Su "+sm.tot+" notti annotate"]) : [];
   return testa.concat(seDebito).concat(seRegolarita).concat(seCiclo).concat(seSveglia).concat(seDiario).join("\n");
 }
+var _primoDisegno=false;   // lo splash di sistema (app Android) resta finché la pagina non ha disegnato una volta
 function render(){
+  sistemaNomiDoppi();
   _pianiDelGiro = new Map();   // gli occupati delle persone no: valgono finché i dati non cambiano (firmaDati)
   // salva() qui, non solo nei singoli gestori: trovati (in questa sessione,
   // da segnalazioni reali) SEI punti diversi che cambiano preferenze vere
@@ -4499,6 +4539,7 @@ function render(){
   renderOpzSummaries();
   try{ history.replaceState(null,"","#"+toHash()); }catch(e){}
   try{ window.dispatchEvent(new Event("nt:rendered")); }catch(e){}
+  if(!_primoDisegno){ _primoDisegno=true; try{ platform.dispositivo.pronta && platform.dispositivo.pronta(); }catch(e){} }
 }
 // Un modulo non aggancia le sue dichiarazioni top-level a window da solo
 // (uno script classico lo faceva gratis) — paid.js (script classico a
@@ -6679,7 +6720,7 @@ function renderEssenziale(P, CARDS){
       // In ordine dall'inizio della finestra (l'ora che si legge a sinistra), non dal centro: prima finiva dopo voci
       // con un orario successivo («Luce 04:55» sopra «Momento di sonnolenza 04:20»).
       const da=isFinite(cd.da) ? cd.da : cd.at-(cd.mezza||60), a=isFinite(cd.a) ? cd.a : cd.at+(cd.mezza||60);
-      voci.push({t:dSv(da), html:riga("sonnolenza","Momento di sonnolenza",cd.val,cd.small,true,ICON.warn,dett(cd),
+      voci.push({t:dSv(da), html:riga("sonnolenza",cd.sveglia?"Risveglio lento":"Momento di sonnolenza",cd.val,cd.small,!cd.sveglia,cd.sveglia?ICON.bed:ICON.warn,dett(cd),
         {a:da, z:a, poi:"momento di sonnolenza verso le "+hhmm(cd.at)})});
     }
   }
@@ -7699,6 +7740,27 @@ function orologio(){
   } }catch(e){}
   return {tipo, mid, cbt, mel:mod1440(bed-120), lucido, partenza: state.freeBed==="23:30" && state.freeWake==="07:30"};
 }
+// Da cosa è stimato l'orologio nelle ultime due settimane: notti del diario, notti di Health Connect (e da quale app),
+// notti interrotte dai passi. Così si vede che i dati non solo arrivano, ma entrano nel calcolo.
+function datiUsatiTesto(){
+  const oggi=giornoVero(), da=day(oggi,-14), dms=da.getTime(), ams=oggi.getTime()+864e5;
+  const notti=[];   // [inizio, fine] in ms
+  let diario=0;
+  for(let o=-13;o<=0;o++){ const k=iso(day(oggi,o)), w=(state.wakes||{})[k], bd=(state.beds||{})[k];
+    if(!/^\d\d:\d\d$/.test(w||"") || !/^\d\d:\d\d$/.test(bd||"")) continue;
+    const fine=new Date(k+"T"+w+":00").getTime(); let ini=new Date(k+"T"+bd+":00").getTime(); if(ini>=fine) ini-=864e5;
+    if(fine-ini<60*6e4) continue; diario++; notti.push([ini,fine]); }
+  const hc=(Array.isArray(state.hcSonno)?state.hcSonno:[]).filter(v=>v[1]-v[0]>=60*6e4 && v[1]>dms && v[0]<ams);
+  hc.forEach(v=>notti.push(v));
+  const attivi=(Array.isArray(state.hcPassi)?state.hcPassi:[]).filter(v=>+v[1]>=50).map(v=>+v[0]);
+  const interrotte=saluteCfg().passi ? notti.filter(([a,z])=>attivi.some(t=>t>a+10*6e4 && t<z-10*6e4)).length : 0;
+  const info=store.get("hcInfo",null)||{}, parti=[];
+  if(diario) parti.push(diario+(diario===1?" notte":" notti")+" dal diario");
+  if(hc.length) parti.push(hc.length+(hc.length===1?" notte":" notti")+" da Health Connect"+(info.fonte?" ("+nomeAppSalute(info.fonte)+")":""));
+  if(saluteCfg().passi && attivi.length) parti.push("passi: "+(interrotte ? interrotte+(interrotte===1?" notte interrotta":" notti interrotte") : "nessuna notte interrotta"));
+  return parti.length ? "Dati usati nelle ultime due settimane: "+parti.join(" · ")+"."
+    : "Per ora la stima usa solo gli orari del piano: segna come dormi (o collega Health Connect) e diventa tua.";
+}
 function orologioHtml(){
   const o=orologio();
   const riga=(lab,ora,sub)=>'<div class="oro-riga"><div><b>'+lab+'</b><span>'+sub+'</span></div><span class="mono">'+ora+'</span></div>';
@@ -7712,7 +7774,8 @@ function orologioHtml(){
       '<p class="hint" style="margin:10px 0 0">'+(o.partenza
         ? 'Per ora parte da orari tipici: dimmi come dormi nei giorni liberi e diventa davvero tuo.'
         : 'Stime dai tuoi orari nei giorni liberi ('+esc(state.freeBed)+' → '+esc(state.freeWake)+'), che il diario può aggiornare. Nei giorni di turno l\'orologio si sposta con il sonno, e il piano lo segue giorno per giorno. Non sono una misura.')+
-      '</p><button type="button" class="lnk" data-oro-cambia style="margin-top:8px">'+(o.partenza?'Dimmi come dormi nei giorni liberi':'Cambia come dormi nei giorni liberi')+' →</button>'+
+      '</p><p class="hint oro-dati" style="margin:8px 0 0">'+esc(datiUsatiTesto())+'</p>'+
+      '<button type="button" class="lnk" data-oro-cambia style="margin-top:8px">'+(o.partenza?'Dimmi come dormi nei giorni liberi':'Cambia come dormi nei giorni liberi')+' →</button>'+
       '', {id:"orologio", cls:"oro"});
 }
 function renderAndamenti(){
@@ -9935,7 +9998,11 @@ if($("#cycToday")) $("#cycToday").onclick=()=>{
    Si scrivono a mano a ogni versione con una funzione che si vede: poche righe, in italiano di tutti i giorni.
    `id` cambia solo quando c'è qualcosa da dire; chi aggiorna la vede una volta. Chi installa adesso non la vede
    (non è una novità per lui), ma la trova sempre in Impostazioni › Novità. «app:true» = solo nell'app Android. */
-const NOVITA={ id:"2026-11-15", data:"Novembre 2026", righe:[
+const NOVITA={ id:"2026-11-16", data:"Novembre 2026", righe:[
+  ["Più fluida al tocco","All'apertura c'è il logo invece della pagina vuota che si riempie. I pulsanti rispondono al tocco e non restano evidenziati, la pagina dietro un foglio resta ferma, e toccare la tab già aperta riporta in cima.",false,"2026-11-16"],
+  ["Turni in ordine","In «Ciclo e orari» trovi tutti i tipi di turno, con «Elimina» per quelli che non usi più; due turni con lo stesso nome si distinguono dagli orari. «Adesso», prima del turno, dice solo cosa viene prima.",false,"2026-11-16"],
+  ["Risveglio lento","Se ti svegli vicino al tuo punto più basso, il piano lo dice con calma e qualche consiglio per i primi minuti.",false,"2026-11-16"],
+  ["Health Connect: cosa ha letto","Sotto gli interruttori vedi quante notti e quanti giorni di passi ha letto, da quale app e quando, o perché non c'è niente. In «Il tuo orologio», i dati che usa davvero.",true,"2026-11-16"],
   ["Caffeina, non solo caffè","La voce del piano ora si chiama «Caffeina»: vale anche per tè, cola ed energy drink, con quanta ce n'è in ognuno. Se non ne prendi, la togli da Impostazioni › Cosa vedi nel piano.",false,"2026-11-15"],
   ["Turni più tuoi, calendario più lungo","Un turno nuovo ha un nome tutto suo e la sigla la scegli tu. Il calendario di Turni e del widget arriva a dodici mesi, sempre a mesi interi. In «Ore», le settimane senza turni non sembrano più tutte sonno.",false,"2026-11-15"],
   ["Più leggero e più gentile","In Oggi un invito alla volta. Nomi più chiari: «Momento di sonnolenza», «Luce bassa». Nei fogli prima la cosa da fare, poi «Perché» (si apre se vuoi) e le fonti in una riga. In Impostazioni › Cosa vedi nel piano c'è «Piano essenziale»: solo sonno, turno, pisolino, caffè, rientro e luce.",false,"2026-11-14"],
@@ -10529,7 +10596,8 @@ function renderTuoiTurni(){
   vis('[data-tt="riposi"]', tipo==="fisso");
   { const f=$("#ttFatto"); if(f) f.hidden = tipo!=="variabili" || flussoInPagina; }
   const usati=new Set(String(state.pattern||"").split(""));
-  const turni=Object.keys(sh).filter(k=>sh[k] && !sh[k].rest && (tipo==="variabili" || usati.has(k)));
+  // Tutti i tipi di turno: anche quelli creati per un giorno solo (prima non comparivano, e non si potevano togliere)
+  const turni=Object.keys(sh).filter(k=>sh[k] && !sh[k].rest).sort((a,b)=>(usati.has(b)-usati.has(a)) || (sh[a].s-sh[b].s));
   const voOld=$("#ttValOrari"); const vo=voOld; if(vo) vo.textContent=turni.map(k=>sh[k].n+" "+hhmm(sh[k].s)+"–"+hhmm(sh[k].e)).join(" · ");
   { const vf=$("#ttValFestivi"); if(vf) vf.textContent=festiviRiga().replace(/\.$/,""); }
   const rie=$("#ttRiepilogo");
@@ -10552,6 +10620,17 @@ function renderTuoiTurni(){
     const vr=$("#ttValRiposi"); if(vr) vr.textContent=riposiAttuali().map(i=>GIORNI_SETT[i]).join(", ");
   }
 }
+const usatoNelCiclo=k=>String(state.pattern||"").includes(k);
+// Togliere un tipo di turno che non è nel ciclo: i giorni dove l'avevi messo tornano al ciclo. Con «Annulla».
+function eliminaTurno(k){
+  if(!state.shifts[k] || (state.repeat!==false && usatoNelCiclo(k))) return;
+  const prima={shift:state.shifts[k], ecc:Object.assign({}, state.ecc)};
+  const giorni=Object.keys(state.ecc||{}).filter(d=>state.ecc[d]===k);
+  delete state.shifts[k]; giorni.forEach(d=>{ delete state.ecc[d]; });
+  salva(); render(); renderTuoiTurni();
+  toastUndo("«"+prima.shift.n+"» eliminato"+(giorni.length?" · "+giorni.length+(giorni.length===1?" giorno torna":" giorni tornano")+" al ciclo":""),
+    ()=>{ state.shifts[k]=prima.shift; state.ecc=prima.ecc; salva(); render(); renderTuoiTurni(); });
+}
 // Gli orari dei turni, sulla pagina: cambi un'ora e vale subito, con «Annulla». «Oggi è qui»: un tocco sulla striscia.
 function renderTtOrari(turni){
   const el=$("#ttOrari"); if(!el) return;
@@ -10559,10 +10638,12 @@ function renderTtOrari(turni){
   if(!turni.length || flussoInPagina){ el.hidden=true; el.innerHTML=""; return; }
   el.hidden=false;
   el.innerHTML='<span class="eyebrow" style="display:block;margin:var(--gap-sezione) 0 8px">Orari dei turni</span><div class="tt-orari-lista">'+
-    turni.map(k=>'<div class="qh-ore-riga"><b><span class="tt-sigla" title="Sigla">'+esc(k)+'</span>'+esc(sh[k].n)+'</b>'+
+    turni.map(k=>'<div class="qh-ore-riga"><b><span class="tt-sigla" title="Sigla">'+esc(k)+'</span>'+esc(sh[k].n)+
+      (tipoTurni()==="variabili" || !usatoNelCiclo(k) ? '<button type="button" class="lnk dim tt-elimina" data-tt-elimina="'+esc(k)+'" aria-label="Elimina il turno '+esc(sh[k].n)+'">Elimina</button>' : '<small class="tt-nel">nel tuo ciclo</small>')+'</b>'+
       '<input type="time" data-tt-da="'+esc(k)+'" value="'+hhmm(mod1440(sh[k].s))+'" aria-label="Inizio '+esc(sh[k].n)+'">'+
       '<span>→</span><input type="time" data-tt-a="'+esc(k)+'" value="'+hhmm(mod1440(sh[k].e))+'" aria-label="Fine '+esc(sh[k].n)+'"></div>').join("")+'</div>';
 }
+if($("#ttOrari")) $("#ttOrari").addEventListener("click", e=>{ const x=e.target.closest("[data-tt-elimina]"); if(x){ haptic(10); eliminaTurno(x.dataset.ttElimina); } });
 if($("#ttOrari")) $("#ttOrari").addEventListener("change", e=>{
   const inp=e.target.closest("[data-tt-da],[data-tt-a]"); if(!inp) return;
   const k=inp.dataset.ttDa||inp.dataset.ttA, da=document.querySelector('[data-tt-da="'+k+'"]'), a=document.querySelector('[data-tt-a="'+k+'"]');
@@ -12029,7 +12110,12 @@ function setTab(t){
   try{ window.scrollTo(0,0); }catch(e){}
 }
 if($("#tabbar")) $("#tabbar").addEventListener("click", e=>{
-  const b=e.target.closest("[data-tab]"); if(b) setTab(b.dataset.tab);
+  const b=e.target.closest("[data-tab]"); if(!b) return;
+  const giaQui=document.body.classList.contains("tab-"+b.dataset.tab) && !document.body.classList.contains("sottopagina");
+  haptic(4);
+  // Come nelle app: sulla tab già aperta, in cima con un movimento morbido (senza ridisegnare); altrimenti la tab.
+  if(giaQui && window.scrollY>0){ try{ window.scrollTo({top:0, behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"}); }catch(x){ window.scrollTo(0,0); } return; }
+  setTab(b.dataset.tab);
 });
 // Opzioni: icona in header, non più una tab — "torna indietro" riporta
 // alla tab da cui si è aperta (Oggi o Turni), non sempre a Oggi.

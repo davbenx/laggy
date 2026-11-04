@@ -46,7 +46,8 @@ const avanti=async p=>{ await p.click("#next"); await p.waitForTimeout(150); };
   ok(/^🎯 In vista dell'impegno/.test(st) && !!(await riga(p)), "impegno in vista: l'avviso dice solo dell'impegno, il perché resta nella riga → "+st.slice(0,40));
   await p.context().close(); }
 
-{ const p=await apri({turniConfigurati:true,pattern:"NNNNNRR",anchor:fa(3),repeat:true,firstSeenAt:"2026-01-01",shifts:{N:{n:"Notte",s:1320,e:1800}}});
+// alle 10 si dorme ancora dopo la notte di ieri: con il ciclo partito 4 giorni fa, «ieri» è la 4ª notte di fila
+{ const p=await apri({turniConfigurati:true,pattern:"NNNNNRR",anchor:fa(4),repeat:true,firstSeenAt:"2026-01-01",shifts:{N:{n:"Notte",s:1320,e:1800}}});
   const r=await p.evaluate(()=>[!!document.querySelector(".essrischio"), !!document.querySelector(".essperche")]);
   ok(r[0] && !r[1], "con l'avviso di rischio (4ª notte) la riga del perché non si ripete");
   await p.context().close(); }

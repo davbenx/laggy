@@ -16,7 +16,10 @@
     </style>
 
 
+    <!-- Splash: il logo sul colore di sfondo della pagina (chiaro o scuro come il telefono), poi il tema dell'app. -->
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
-        <item name="android:background">@drawable/splash</item>
+        <item name="windowSplashScreenBackground">@color/avvio_sfondo</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+        <item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>
     </style>
 </resources>
