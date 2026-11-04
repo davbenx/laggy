@@ -3414,8 +3414,14 @@ function dopoDiario(){ clearTimeout(_dopoDiarioT); _dopoDiarioT = setTimeout(()=
 // Versione dei dati: cresce a ogni scrittura (store.set è l'unica via). Le cache che valgono fra un disegno e l'altro
 // (occupati delle persone, andamento del sonno) si buttano quando cambia, quando cambia il giorno o ogni 15 minuti.
 var _versioneDati = 0, _trendAnteprima = {firma:"", v:null};
+// Chiamata centinaia di volte a disegno: si ricorda per un quarto di secondo, finché la versione dei dati è la stessa
+// (giornoVero() costa, e in 250 ms il giorno non cambia).
+var _firma={v:-1, t:0, s:""};
 function firmaDati(){
-  return _versioneDati+"|"+dnum(giornoVero())+"|"+Math.floor(Date.now()/9e5);
+  const ora=Date.now();
+  if(_firma.v===_versioneDati && ora-_firma.t<250) return _firma.s;
+  _firma={v:_versioneDati, t:ora, s:_versioneDati+"|"+dnum(giornoVero())+"|"+Math.floor(ora/9e5)};
+  return _firma.s;
 }
 const store = {
   get(k,d){ try{ const v=localStorage.getItem("nt:"+k); return v?JSON.parse(v):d; }catch(e){ return d; } },
@@ -8679,8 +8685,18 @@ function ntWidget(){
 // Il calendario del widget: da quattro lunedì fa per 20 settimane (il widget si sfoglia a pagine), la mia sigla e quella di al massimo quattro
 // persone (la stellina sempre dentro). Sigle e tipi («n» notte, «l» lavoro, «r» riposo) arrivano dal motore; il widget le mostra
 // e basta. `sel` = la stellina fra quelle pubblicate, `star` la identifica: se nell'app cambia, il widget riparte da lei.
+// Ricordato finché i dati non cambiano (come gli occupati delle persone): il calendario del ciclo copre 15 mesi, e
+// ricalcolarli a ogni disegno per te e per ogni persona costava più del resto di Turni.
+const _meseMemo=new Map();
 function meseWidget(prima, tot){   // settimane prima di questa e in tutto (settimaneMesi): il widget a mesi interi, il calendario del ciclo di più
   if(prima===undefined) [prima, tot]=settimaneMesi(...WIDGET_MESI);
+  const k=firmaDati()+"|"+prima+"|"+tot+"|"+idDi(state.ecc)+"."+idDi(state.giorni)+"."+idDi(state.shifts)+"|"+JSON.stringify(tuttePersone())+"|"+state.personaGlance+"|"+state.festiviRiposo;
+  if(_meseMemo.has(k)) return _meseMemo.get(k);
+  if(_meseMemo.size>6) _meseMemo.clear();
+  const r=calcolaMeseWidget(prima, tot); if(r) _meseMemo.set(k, r);
+  return r;
+}
+function calcolaMeseWidget(prima, tot){
   const f=state.focus;
   try{
     const oggi=giornoVero(), lun=day(oggi, -((oggi.getDay()+6)%7) - 7*prima), N=7*tot;
