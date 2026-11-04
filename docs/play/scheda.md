@@ -79,6 +79,12 @@ Spunti di benessere basati sulla letteratura scientifica sul sonno e sul lavoro 
 
 Progetto indipendente. Segnalazioni e idee: Impostazioni › Segnala cosa non torna.
 
+## Note di versione 1.4.3 (max 500)
+Novità 1.4.3
+• Testi del piano più precisi, ricontrollati frase per frase sugli studi da cui vengono.
+• Occhiali al rientro: se guidi, lenti di categoria da 1 a 3, mai la 4.
+• Notti di fila, pisolino con caffè, risveglio: spiegazioni più chiare.
+
 ## Note di versione 1.4.2 (max 500)
 Novità 1.4.2
 • Laggy, il gufo di Notturnisti, in «Sonno e carico»: cresce quando segni come dormi. Niente punti, niente serie.

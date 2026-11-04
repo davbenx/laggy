@@ -102,3 +102,21 @@ export function json(data, status, origin) {
   });
 }
 export const err = (status, msg, origin) => json({ error: msg }, status, origin);
+
+// Il codice di /stats (Authorization: Bearer …), mai nell'URL: finirebbe nei log.
+// Il Worker conosce solo la sua impronta (STATS_TOKEN_SHA256) o il codice come
+// secret (STATS_TOKEN). null = autorizzato, altrimenti { status, error }.
+async function sha256hex(s) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
+}
+export async function statsAutorizzato(env, request) {
+  if (!env.STATS_TOKEN && !env.STATS_TOKEN_SHA256) return { status: 503, error: "codice delle statistiche non impostato sul Worker" };
+  const auth = request.headers.get("authorization") || "";
+  const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
+  const valido = !!token && (
+    (env.STATS_TOKEN && ctEqual(token, env.STATS_TOKEN)) ||
+    (env.STATS_TOKEN_SHA256 && ctEqual(await sha256hex(token), String(env.STATS_TOKEN_SHA256).toLowerCase()))
+  );
+  return valido ? null : { status: 401, error: "token mancante o errato" };
+}
