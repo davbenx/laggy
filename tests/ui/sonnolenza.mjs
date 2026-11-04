@@ -13,7 +13,7 @@ const BASE={turniConfigurati:true,repeat:true,firstSeenAt:"2026-09-01",anchor:"2
 // mattino alle 6: sveglia verso le 5, il punto più basso (circa 5:30) prima di uscire
 let p=await apri({...BASE, pattern:"MMMMMRR", shifts:{M:{n:"Mattino",s:360,e:840}}}, new Date(2026,10,4,4,30));
 let t=await riga(p);
-ok(/Momento di sonnolenza/.test(t) && /appena sveglio/.test(t), "mattino presto: il punto basso appena sveglio, prima di uscire → "+t);
+ok(/Risveglio lento/.test(t) && /punto più basso/.test(t) && !/Momento di sonnolenza/.test(t), "mattino presto: «Risveglio lento», non un allarme di sonnolenza → "+t);
 // le ore a sinistra sono in ordine (prima la voce finiva dopo «Luce» con un orario precedente)
 const ore=await p.evaluate(()=>[...document.querySelectorAll("#essenziale .tl:not(.tl-stessa) .essrow > .en")].map(e=>e.textContent.trim()).filter(x=>/^\d\d:\d\d$/.test(x)));
 const min=ore.map(x=>+x.slice(0,2)*60+ +x.slice(3)), ordinate=min.every((m,i)=>i===0 || m>=min[i-1] || min[i-1]-m>720);
@@ -23,7 +23,7 @@ const dormi=await p.evaluate(()=>(document.querySelector("#essenziale .drem")||d
 ok(dormi && sveglia>=dormi[2], "«appena sveglio» comincia quando ti svegli, non mentre dormi → "+sveglia+" (sveglia "+(dormi&&dormi[2])+")");
 await p.click('#essenziale [data-row="sonnolenza"]'); await p.clock.runFor(500);
 const f=await p.evaluate(()=>document.querySelector("#infoCorpo").innerText);
-ok(/i primi 20-30 minuti sono i più lenti/.test(f) && /acqua fresca/.test(f) && !/luce forte/i.test(f), "consigli pratici per svegliarsi, senza dire della luce (decide la voce «Luce»)");
+ok(/i primi 20-30 minuti sono i più lenti/.test(f) && /acqua fresca/.test(f) && !/luce forte/i.test(f) && /Scheer/.test(f), "consigli pratici per svegliarsi, senza dire della luce (decide la voce «Luce»)");
 await p.context().close();
 // «Adesso» prima del turno: solo quello che viene prima, in ordine, e «Poi» non ripete il turno
 p=await apri({...BASE, pattern:"MMMMMRR", shifts:{M:{n:"Mattino",s:360,e:840}}}, new Date(2026,10,4,5,0));
@@ -32,7 +32,7 @@ ok(/Tra 1h entri in turno|Tra 1 ora entri in turno|entri in turno/.test(ad) && /
 await p.context().close();
 // notte: il punto basso in turno, come prima
 p=await apri({...BASE, pattern:"MPNSRR", shifts:{M:{n:"Mattino",s:360,e:840},P:{n:"Pomeriggio",s:840,e:1320},N:{n:"Notte",s:1320,e:1800}}}, new Date(2026,10,5,3,0));
-t=await riga(p); ok(/Momento di sonnolenza/.test(t) && !/appena sveglio/.test(t), "notte: la scheda in turno → "+t);
+t=await riga(p); ok(/Momento di sonnolenza/.test(t) && !/Risveglio lento/.test(t), "notte: la scheda in turno → "+t);
 await p.context().close();
 // giorno libero: niente scheda
 p=await apri({...BASE, pattern:"RRRRRRR", shifts:{}}, new Date(2026,10,4,10,0));

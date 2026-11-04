@@ -4091,12 +4091,13 @@ function cards(P){
     // Ti svegli vicino al punto più basso, prima di uscire: niente da rimandare, ma il risveglio è più lento del solito.
     // Sulla luce non si dice niente qui: prima del minimo sposterebbe l'orologio più tardi, decide la voce «Luce».
     const da=Math.max(cbtSveglia-60, wake), a=cbtSveglia+60;
-    out.push({k:"cbt", lab:"Momento di sonnolenza", val: hhmm(da)+"–"+hhmm(a), mezza:60, da, a,
-      small: "appena sveglio",
+    out.push({k:"cbt", lab:"Risveglio lento", sveglia:true, val: hhmm(da)+"–"+hhmm(a), mezza:60, da, a,
+      small: "sei vicino al tuo punto più basso",
       sub: "Oggi ti svegli vicino al tuo punto più basso: i primi 20-30 minuti sono i più lenti, ed è normale.",
       rows: [["Per svegliarti","acqua fresca sul viso, qualche movimento e, se ti va, un caffè"],
              ["Prima di uscire","concediti qualche minuto in più: se guidi, parti quando ti senti sveglio"]],
-      why: "Ogni notte il corpo attraversa un punto basso naturale, verso la fine del sonno. Quando la sveglia arriva prima o proprio lì, il risveglio è più faticoso del solito: non dipende da quanto hai dormito. È una stima dai tuoi orari.",
+      why: "Appena sveglio la stanchezza accumulata è al minimo, perché il sonno l'ha appena smaltita: non è il crollo di fine notte. Resta l'inerzia del sonno, cioè la lentezza dei primi minuti, che è più forte quando ti svegli vicino al punto più basso dell'orologio. Passa da sola; è una stima dai tuoi orari.",
+      cite: "Scheer, Shea, Hilton & Shea, J Biol Rhythms 2008 (inerzia del sonno e orologio) · Tassi & Muzet 2000",
       at: cbtSveglia});
   }
 
@@ -6679,7 +6680,7 @@ function renderEssenziale(P, CARDS){
       // In ordine dall'inizio della finestra (l'ora che si legge a sinistra), non dal centro: prima finiva dopo voci
       // con un orario successivo («Luce 04:55» sopra «Momento di sonnolenza 04:20»).
       const da=isFinite(cd.da) ? cd.da : cd.at-(cd.mezza||60), a=isFinite(cd.a) ? cd.a : cd.at+(cd.mezza||60);
-      voci.push({t:dSv(da), html:riga("sonnolenza","Momento di sonnolenza",cd.val,cd.small,true,ICON.warn,dett(cd),
+      voci.push({t:dSv(da), html:riga("sonnolenza",cd.sveglia?"Risveglio lento":"Momento di sonnolenza",cd.val,cd.small,!cd.sveglia,cd.sveglia?ICON.bed:ICON.warn,dett(cd),
         {a:da, z:a, poi:"momento di sonnolenza verso le "+hhmm(cd.at)})});
     }
   }
