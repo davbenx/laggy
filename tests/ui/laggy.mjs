@@ -1,0 +1,32 @@
+// Laggy: cresce con le notti annotate (in tutto, mai di fila) e le funzioni scoperte; uno stadio raggiunto non si perde;
+// «Nuovo» una volta sola; si spegne in Cosa vedi nel piano. Mai punti sul dormire bene.
+import pw from "./_pw.mjs";
+const ok=(c,m)=>console.log((c?"✔ ":"✘ ")+m);
+const b=await pw.chromium.launch(); const errs=[];
+const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const fa=n=>{ const d=new Date(); d.setDate(d.getDate()-n); return iso(d); };
+const ST={turniConfigurati:true,pattern:"MMPPNNRR",anchor:fa(3),shifts:{M:{n:"Mattino",s:360,e:840},P:{n:"Pomeriggio",s:840,e:1320},N:{n:"Notte",s:1320,e:1800}},repeat:true,firstSeenAt:"2026-09-01"};
+const notti=n=>{ const w={}, bd={}; for(let i=1;i<=n;i++){ const k=fa(i*2); w[k]="07:00"; bd[k]="23:00"; } return {w,bd}; };   // a giorni alterni: contano lo stesso
+const apri=async(st, extra={})=>{ const ctx=await b.newContext({locale:"it-IT",viewport:{width:390,height:844}});
+  await ctx.addInitScript(([st,extra])=>{ if(sessionStorage.getItem("x")) return; sessionStorage.setItem("x","1");
+    localStorage.setItem("nt:state",JSON.stringify(st)); localStorage.setItem("nt:turniConfigurati","true"); localStorage.setItem("nt:firstPlanBannerChiuso","true"); localStorage.setItem("nt:novitaViste",JSON.stringify("2099"));
+    for(const k in extra) localStorage.setItem("nt:"+k, JSON.stringify(extra[k])); }, [st,extra]);
+  const p=await ctx.newPage(); p.on("pageerror",e=>errs.push(e.message)); await p.goto("http://localhost:8765/index.html"); await p.waitForTimeout(900);
+  await p.evaluate(()=>document.querySelector('[data-tab="turni"]').click()); await p.waitForTimeout(300);
+  await p.evaluate(()=>document.querySelector("#doAndamenti").click()); await p.waitForTimeout(500); return p; };
+const card=p=>p.evaluate(()=>{ const c=document.querySelector(".laggy-card"); return c ? {t:c.innerText.replace(/\s+/g," "), img:c.querySelector("img").getAttribute("src"), nuovo:c.classList.contains("nuovo"), caricata:c.querySelector("img").naturalWidth>0} : null; });
+let p=await apri(ST); let c=await card(p);
+ok(c && /Laggy pulcino · 1 di 4/i.test(c.t) && /ancora 7 notti annotate/.test(c.t) && /laggy-1-pulcino/.test(c.img), "all'inizio: Laggy pulcino, e quanto manca → "+(c&&c.t));
+await p.waitForTimeout(300); c=await card(p); ok(c && c.caricata, "l'immagine si carica");
+await p.context().close();
+const n8=notti(8);
+p=await apri({...ST, wakes:undefined}, {wakes:n8.w, beds:n8.bd}); c=await card(p);
+ok(c && /Nuovo · Laggy · 2 di 4/i.test(c.t) && c.nuovo && /notti, non solo sugli orari/.test(c.t), "8 notti annotate (a giorni alterni): Laggy, con «Nuovo» → "+(c&&c.t));
+await p.evaluate(()=>{ document.querySelector("#chiudiAndamenti")?.click(); document.querySelector("#doAndamenti").click(); }); await p.waitForTimeout(500);
+c=await card(p); ok(c && !c.nuovo && !/Nuovo/i.test(c.t), "«Nuovo» una volta sola");
+await p.context().close();
+p=await apri(ST, {laggy:{max:3, visto:3}}); c=await card(p);
+ok(c && /Laggy notturnista · 4 di 4/i.test(c.t) && !/Prossimo/.test(c.t), "uno stadio raggiunto non si perde (anche senza notti adesso), e all'ultimo niente «Prossimo»");
+await p.context().close();
+p=await apri({...ST, piano:{laggy:false}}); ok(!(await card(p)), "spento in Cosa vedi nel piano: non c'è"); await p.context().close();
+console.log("errori", errs); ok(errs.length===0, "nessun errore di pagina"); await b.close();

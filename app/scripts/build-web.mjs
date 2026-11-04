@@ -17,6 +17,8 @@ const FILES = [
   "manifest.webmanifest",
   "icon-180.png", "icon-192.png", "icon-512.png", "icon-maskable-512.png", "owl-mark.png", "badge-96.png",
   "fonts/inter-latin.woff2", "fonts/noto-serif-latin.woff2",
+  // Laggy, la mascotte in «Sonno e carico»: quattro stadi
+  "img/laggy-1-pulcino.webp", "img/laggy-2.webp", "img/laggy-3-esperto.webp", "img/laggy-4-notturnista.webp",
   // Avvisi delle licenze: MIT e OFL chiedono che accompagnino le copie
   // distribuite, quindi stanno anche dentro l'app, non solo sul sito.
   "licenze/index.html", "fonts/OFL-Inter.txt", "fonts/OFL-NotoSerif.txt"

@@ -286,21 +286,36 @@ async function calEsiste(id) {
 // salva(ids) dopo ogni evento creato: se la scrittura si interrompe a metà
 // (permesso revocato, app chiusa), gli eventi già creati restano registrati
 // e la volta dopo vengono cancellati, invece di restare duplicati per sempre.
-async function calScrivi(id, vecchi, eventi, salva) {
+// Scrive solo quello che cambia: per ogni evento si ricorda id e impronta (orari, titolo, testo). Prima si cancellava e
+// riscriveva tutto a ogni cambio: con un anno di turni erano centinaia di scritture al giorno. Gli eventi passati che non
+// sono più nella lista restano nel calendario (sono la tua storia) e l'app smette solo di seguirli.
+// mappa: {uid: {id, h, fine}}. «vecchi» (elenco di id del formato di prima): si cancellano una volta e si riparte.
+const _impronta = e => [+e.start, +e.end, e.title, e.desc || "", e.tipo, !!e.allDay].join("|");
+async function calScrivi(id, mappa, eventi, salva, vecchi) {
   const C = plugin("CapacitorCalendar");
   if (vecchi && vecchi.length) { try { await C.deleteEventsById({ ids: vecchi }); } catch (e) {} }
-  const nuovi = [];
-  salva(nuovi);
+  const ora = Date.now(), per = new Map(eventi.map(e => [e.uid, e])), nuova = {}, via = [];
+  for (const uid in (mappa || {})) {
+    const m = mappa[uid], e = per.get(uid);
+    if (e && m.h === _impronta(e)) nuova[uid] = m;               // uguale: resta com'è
+    else if (!e && m.fine < ora) continue;                        // passato: resta nel calendario, non lo seguo più
+    else via.push(m.id);                                          // cambiato o tolto: si riscrive
+  }
+  if (via.length) { try { await C.deleteEventsById({ ids: via }); } catch (e) {} }
+  salva(nuova);
+  let n = 0;
   for (const e of eventi) {
+    if (nuova[e.uid]) continue;
     // Occupato solo il turno; sonno, caffè, luce e riposi in comune non
     // devono far risultare "impegnato" a chi guarda la tua disponibilità.
     const opt = { calendarId: String(id), title: e.title, startDate: e.start.getTime(), endDate: e.end.getTime(),
       isAllDay: !!e.allDay, availability: e.tipo === "turno" ? 0 : 1 };
     if (e.desc) opt.description = e.desc;
     const r = await C.createEvent(opt);
-    if (r && r.id) { nuovi.push(String(r.id)); salva(nuovi); }
+    if (r && r.id) { nuova[e.uid] = { id: String(r.id), h: _impronta(e), fine: +e.end }; if (++n % 20 === 0) salva(nuova); }
   }
-  return nuovi;
+  salva(nuova);
+  return nuova;
 }
 
 export const calendar = {
@@ -336,14 +351,16 @@ export const calendar = {
         const coppia = st.coppia ? (coupleEvents || []) : [];
         const sig = JSON.stringify([events.map(e => [e.uid, +e.start, +e.end, e.title]), coppia.map(e => [e.uid, e.desc])]);
         if (sig === st.sig && await calEsiste(st.id)) return true;
-        if (!(await calEsiste(st.id))) { st.id = await calCrea("Notturnisti", "#3D7BE0"); st.ids = []; }
-        st.ids = await calScrivi(st.id, st.ids, events, ids => { st.ids = ids.slice(); st.sig = null; calSave(st); });
+        if (!(await calEsiste(st.id))) { st.id = await calCrea("Notturnisti", "#3D7BE0"); st.ids = []; st.mappa = {}; }
+        const vecchi = st.mappa ? null : st.ids; delete st.ids;
+        st.mappa = await calScrivi(st.id, st.mappa || {}, events, m => { st.mappa = m; st.sig = null; calSave(st); }, vecchi);
         if (st.coppia) {
-          if (!(await calEsiste(st.idCoppia))) { st.idCoppia = await calCrea("Notturnisti · insieme", "#E0913D"); st.idsCoppia = []; }
-          st.idsCoppia = await calScrivi(st.idCoppia, st.idsCoppia, coppia, ids => { st.idsCoppia = ids.slice(); st.sig = null; calSave(st); });
+          if (!(await calEsiste(st.idCoppia))) { st.idCoppia = await calCrea("Notturnisti · insieme", "#E0913D"); st.idsCoppia = []; st.mappaCoppia = {}; }
+          const vecchiC = st.mappaCoppia ? null : st.idsCoppia; delete st.idsCoppia;
+          st.mappaCoppia = await calScrivi(st.idCoppia, st.mappaCoppia || {}, coppia, m => { st.mappaCoppia = m; st.sig = null; calSave(st); }, vecchiC);
         } else if (st.idCoppia) {
           try { await plugin("CapacitorCalendar").deleteCalendar({ id: String(st.idCoppia) }); } catch (e) {}
-          st.idCoppia = null; st.idsCoppia = [];
+          st.idCoppia = null; st.idsCoppia = []; st.mappaCoppia = null;
         }
         st.sig = sig; st.at = Date.now(); calSave(st);
         return true;
@@ -386,7 +403,11 @@ export const calendar = {
     return { permesso: true, calendari, eventi };
   },
   // Riscrive tutto alla prossima sincronizzazione (dimentica la firma).
-  riscrivi() { const st = calState(); st.sig = null; calSave(st); }
+  // «Riscrivili ora»: si cancella quello che l'app ricorda e si riscrive tutto da capo (gli eventi possono essere stati tolti a mano).
+  riscrivi() { const st = calState(); st.sig = null;
+    if (st.mappa) { st.ids = Object.values(st.mappa).map(m => m.id); st.mappa = null; }
+    if (st.mappaCoppia) { st.idsCoppia = Object.values(st.mappaCoppia).map(m => m.id); st.mappaCoppia = null; }
+    calSave(st); }
 };
 
 /* ── Widget ────────────────────────────────────────────────────────────── */

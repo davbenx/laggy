@@ -555,3 +555,15 @@ test("un ciclo intero di pisolino solo a distanza dal sonno principale: sotto le
   }
   assert.ok(controllati > 0, "almeno un pisolino prima del turno controllato");
 });
+
+test("calendario del telefono: i turni per un anno, il piano completo solo per sei settimane", () => {
+  const e = createEngine({ pattern: "MMPPNNRR", anchor: "2026-11-02", repeat: true, focus: "2026-11-02T12:00:00",
+    shifts: { M: { n: "Mattino", s: 360, e: 840 }, P: { n: "Pomeriggio", s: 840, e: 1320 }, N: { n: "Notte", s: 1320, e: 1800 } } });
+  e.setIcs({ turni: true, sonno: true, pisolini: true, caffe: true, luce: true, rientro: true, pasti: false, avviso: 0 });
+  const ev = e.buildEvents(366, 43), giorno = x => Math.round((x.start - new Date(2026, 10, 2)) / 864e5);
+  const turni = ev.filter(x => x.tipo === "turno"), altri = ev.filter(x => x.tipo !== "turno");
+  assert.ok(Math.max(...turni.map(giorno)) >= 360, "turni fino a un anno: ultimo al giorno " + Math.max(...turni.map(giorno)));
+  assert.ok(turni.length > 250, "circa 6 turni ogni 8 giorni per un anno: " + turni.length);
+  assert.ok(altri.length > 0 && Math.max(...altri.map(giorno)) <= 44, "sonno, caffè, luce solo nelle prime sei settimane");
+  assert.ok(new Set(ev.map(x => x.uid)).size === ev.length, "ogni evento ha il suo uid (serve a riscrivere solo quello che cambia)");
+});

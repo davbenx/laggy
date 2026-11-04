@@ -50,11 +50,14 @@ await p.waitForTimeout(2500);
 let cal = await p.evaluate(()=>({ cals:Object.values(window.__cal.cals), n:Object.keys(window.__cal.ev).length, ui:document.querySelector('#opzFunzioni [data-gestisci="calendario"]').innerText.slice(0,90), turno:Object.values(window.__cal.ev).find(e=>/Turno/.test(e.title)) }));
 ok(cal.cals.includes("Notturnisti") && cal.n>0 && /telefono/.test(cal.ui), "calendario creato sul telefono: "+JSON.stringify(cal.cals)+", "+cal.n+" eventi, UI "+JSON.stringify(cal.ui));
 ok(cal.turno && cal.turno.availability===0 && !cal.turno.alerts, "turno = occupato, nessun promemoria doppio");
+const nPrima = await p.evaluate(()=>window.__cal.next);
 // cambio turno → riscrittura
 await p.evaluate(()=>{ [...document.querySelectorAll("#tabbar button")].find(b=>/Oggi/.test(b.textContent)).click(); });
 await p.click("#shiftPill"); await p.waitForTimeout(300); await p.click("#qsGrid [data-qs=M]"); await p.waitForTimeout(3500);
-l = await lg(); const cal2 = await p.evaluate(()=>Object.values(window.__cal.ev).filter(e=>/Turno/.test(e.title)).map(e=>e.title));
-ok(l.some(x=>x.startsWith("Cal.deleteEventsById")) && cal2[0]==="Turno Mattino", "cambio turno → calendario riscritto: "+cal2.slice(0,2).join(", "));
+l = await lg(); const cal2 = await p.evaluate(()=>{ const a=new Date(); a.setHours(0,0,0,0); const z=+a+864e5; return Object.values(window.__cal.ev).filter(e=>/Turno/.test(e.title) && e.startDate>=+a && e.startDate<z).map(e=>e.title); });
+const scritti = await p.evaluate(n=>window.__cal.next-n, nPrima);
+ok(l.some(x=>x.startsWith("Cal.deleteEventsById")) && cal2[0]==="Turno Mattino", "cambio turno → il turno di oggi nel calendario è «Turno Mattino»: "+cal2.join(", "));
+ok(scritti>0 && scritti<60, "riscrive solo quello che cambia: "+scritti+" eventi scritti, non tutto l'anno");
 // tasto indietro
 await p.click("#shiftPill"); await p.waitForTimeout(300);
 await p.evaluate(()=>window.__fire("App:backButton", {canGoBack:false})); await p.waitForTimeout(200);
