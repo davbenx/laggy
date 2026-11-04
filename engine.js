@@ -1266,7 +1266,9 @@ function localAt(base, mins){
 //   uid     stabile per giorno+tipo: risincronizzare aggiorna, non duplica
 //   start/end  Date locali;  base/a/b  gli stessi valori in minuti (per l'ICS)
 //   avvisa  preavviso in minuti (0 = nessuno);  sveglia  promemoria a fine evento
-function buildEvents(days){
+// pianoGiorni: per quanti giorni c'è il piano completo (sonno, pisolini, caffè, luce…); oltre, fino a «days», solo i turni,
+// che vengono dal ciclo e non costano un piano al giorno (il calendario del telefono li vuole per mesi).
+function buildEvents(days, pianoGiorni=days){
   const out=[];
   const f0=state.focus;
   const ev=(base,a,b,tipo,title,desc,avvisa,sveglia)=>{
@@ -1280,6 +1282,10 @@ function buildEvents(days){
   for(let o=0;o<days;o++){
     state.focus=day(f0,o);
     if(codeAt(0)==="?") continue;
+    if(o>=pianoGiorni){
+      if(ICS.turni){ const b=block(0); if(!b.rest) ev(day(f0,o),b.start,b.end,"turno",b.tipo==="formazione"?b.name:"Turno "+(b.name||b.c),"",false); }
+      continue;
+    }
     let P; try{ P=plan(); }catch(e){ continue; }
     const base=day(f0,o);
     // il turno lo sai già: evento sì, sveglia no

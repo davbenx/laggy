@@ -263,6 +263,9 @@ cursor:pointer;display:flex;border-radius:999px}
 .laggy-card p{margin:2px 0 4px;font-size:14px;line-height:1.45;color:var(--ink)}
 .laggy-card small{display:block;font-size:12.5px;color:var(--dim)}
 .laggy-card.nuovo{border-color:var(--blue-lt)}
+.cal-mesi{padding:10px 15px 12px;border-top:1px solid var(--line);display:grid;gap:6px}
+.cal-mesi .pv-quando{grid-template-columns:repeat(3,1fr);display:grid}
+.cal-mesi>span{font-weight:600;font-size:14px}.cal-mesi small{font-size:12px;color:var(--dim)}
 .ancora-nota{font-size:12.5px;color:var(--dim);margin:-4px 0 10px;line-height:1.4}   /* area di tocco da 44 px senza spostare nulla */
 #jumpDate{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;border:0}
 .nav{background:var(--s1);border:1px solid var(--line);color:var(--ink);width:40px;height:40px;font-size:18px;line-height:1;
@@ -5701,7 +5704,12 @@ function renderOpzFunzioni(voci){
     if(platform.calendar.available && platform.calendar.attivo()){
       prove.push('<button type="button" class="btn g sm" data-cal-apri>Apri il calendario</button>');
       prove.push('<button type="button" class="btn g sm" data-cal-controlla>Controlla</button>'); }
-    op.innerHTML=htmlVociGestione(v2)+(promemoriaAttivi()?htmlTipiNotifiche():'')+(prove.length?'<div style="display:flex;gap:16px;flex-wrap:wrap;padding:2px 15px 8px;border-top:1px solid var(--line)">'+prove.join("")+'</div><p class="hint" id="opzCalStato" hidden style="margin:0;padding:0 15px 10px"></p><div class="hint" id="opzProssimi" hidden style="margin:0;padding:0 15px 10px"></div>':'');
+    const mesiCal=[3,6,12].includes(+state.calMesi) ? +state.calMesi : 12;
+    const sceltaMesi = platform.calendar.available && platform.calendar.attivo()
+      ? '<div class="cal-mesi"><span>Turni nel calendario del telefono</span><div class="pv-quando" role="radiogroup" aria-label="Per quanto tempo">'+
+          [[3,"3 mesi"],[6,"6 mesi"],[12,"1 anno"]].map(([v,t])=>'<button type="button" role="radio" data-cal-mesi="'+v+'" aria-checked="'+(mesiCal===v)+'">'+t+'</button>').join("")+
+        '</div><small>Sonno, pisolini, caffeina e luce: sempre le prossime sei settimane.</small></div>' : '';
+    op.innerHTML=htmlVociGestione(v2)+sceltaMesi+(promemoriaAttivi()?htmlTipiNotifiche():'')+(prove.length?'<div style="display:flex;gap:16px;flex-wrap:wrap;padding:2px 15px 8px;border-top:1px solid var(--line)">'+prove.join("")+'</div><p class="hint" id="opzCalStato" hidden style="margin:0;padding:0 15px 10px"></p><div class="hint" id="opzProssimi" hidden style="margin:0;padding:0 15px 10px"></div>':'');
   }
 }
 async function eseguiAttivazione(id){
@@ -8415,7 +8423,9 @@ function eventiCalendario(){
     // Si parte da ieri: il sonno e il rientro dopo una notte stanno nel piano del giorno prima, e alle 06:38
     // sono ancora da venire. Gli eventi già finiti prima di oggi non servono.
     state.focus=day(oggi,-1);
-    ev=NT.buildEvents(43).filter(e=>+e.end>=+oggi);
+    // il piano completo per sei settimane; i turni fin dove hai scelto (di norma un anno)
+    const mesi=[3,6,12].includes(+state.calMesi) ? +state.calMesi : 12;
+    ev=NT.buildEvents(Math.round(mesi*30.5)+1, 43).filter(e=>+e.end>=+oggi);
     state.focus=new Date();
     if(state.pPattern) cp=NT.buildCoupleEvents(60);
   }catch(e){}
@@ -8462,6 +8472,7 @@ document.addEventListener("click", e=>{
   }
   if(e.target.closest("[data-prova-notifica]")){ platform.notify.prova().then(ok=>toast(ok ? (platform.isNative ? "Notifica di prova inviata: guarda in alto" : "Tra qualche secondo arriva una notifica di prova") : "Prima accendi i promemoria")).catch(()=>toast("Notifica di prova non riuscita")); }
   if(e.target.closest("[data-cal-apri]")){ platform.calendar.apri(); return; }
+  { const cm=e.target.closest("[data-cal-mesi]"); if(cm){ state.calMesi=+cm.dataset.calMesi; salva(); haptic(6); renderAttivazione(); toast("Aggiorno il calendario…"); ntCalendarioNativo(true); track("setup_item",{item:"cal_mesi_"+state.calMesi}); return; } }
   if(e.target.closest("[data-cal-controlla]")){ const el=$("#opzCalStato"); if(el){ el.hidden=false; el.textContent="Controllo…"; statoCalendario(el); } }
 });
 // Il permesso al calendario è stato negato: Android non lo richiede più, la scheda lo dice e porta alle impostazioni.
@@ -11869,7 +11880,7 @@ function salva(){
     maxAdvance:state.maxAdvance,pPattern:state.pPattern,pAnchor:state.pAnchor,
     pShifts:state.pShifts,pWake:state.pWake,pBed:state.pBed,pName:state.pName,people:state.people,personaGlance:state.personaGlance,piano:state.piano,
     repeat:state.repeat,ecc:state.ecc,giorni:state.giorni,evento:state.evento,festivi:state.festivi,festiviRiposo:state.festiviRiposo,
-    napTurno:state.napTurno,sonnoDiurno:state.sonnoDiurno,mattinoBifasico:state.mattinoBifasico,avvisoBifasicoOff:state.avvisoBifasicoOff,guidaLavoro:state.guidaLavoro,firstSeenAt:state.firstSeenAt,pausa:state.pausa,caffSens:state.caffSens,caffFattori:state.caffFattori,salute:state.salute,vista:state.vista};
+    napTurno:state.napTurno,sonnoDiurno:state.sonnoDiurno,mattinoBifasico:state.mattinoBifasico,avvisoBifasicoOff:state.avvisoBifasicoOff,guidaLavoro:state.guidaLavoro,calMesi:state.calMesi,firstSeenAt:state.firstSeenAt,pausa:state.pausa,caffSens:state.caffSens,caffFattori:state.caffFattori,salute:state.salute,vista:state.vista};
   const testo=JSON.stringify(dati);
   if(testo!==_ultimoSalvato){
     store.set("turniConfigurati", !!state.turniConfigurati);
