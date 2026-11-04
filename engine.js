@@ -1309,7 +1309,7 @@ function buildEvents(days, pianoGiorni=days){
     // Il rientro dalla notte è il momento di massimo rischio alla guida.
     if(ICS.rientro && !P.b.rest && (P.night||P.lateStart))
       ev(base,P.b.end,P.b.end+20,"rientro","Rientro: non guidare stanco",
-        "Occhiali da sole appena esci. Se hai sonno, fermati 20 minuti e prendi un caffè prima di ripartire.",true);
+        "Occhiali da sole appena esci. Se hai sonno, meglio non guidare: se devi, un caffè e subito un pisolino di 15–20 minuti.",true);
   }
   state.focus=f0;
   return out;

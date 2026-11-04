@@ -138,7 +138,7 @@ export function buildSchedule(config, opts = {}) {
     // 10 minuti prima della fine: lo leggi prima di uscire, non già alla guida.
     if (want("ret") && (P.night || P.lateStart) && !P.b.rest)
       push(base, P.b.end - 10, "ret", "Rientro dal turno",
-        "Tra poco il rientro, l'ora più delicata per guidare. Occhiali da sole; se hai sonno, prima di metterti al volante fermati 20 minuti e prendi un caffè.");
+        "Tra poco il rientro, l'ora più delicata per guidare. Occhiali da sole; se hai sonno, meglio non guidare: se devi, un caffè e subito un pisolino di 15–20 minuti.");
 
     // Giorni impegnativi: non un allarme nel momento del calo (al lavoro, o
     // alla guida, sarebbe solo una distrazione) ma un consiglio prima, quando

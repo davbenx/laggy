@@ -8,7 +8,11 @@ import { readFileSync } from "node:fs";
 const FILE = ["index.html", "engine.js", "alertness.js", "notifications.js", "debito.js", "luce-ottima.js"];
 const VIETATE = [/stasera devi/i, /rischio alto/i, /impedit/i, /sospettat/i, /sbagliat/i, /\bcolpa\b/i, /fallit/i, /massima cautela/i,
   /\bWCOL\b/, /minimo biologico/i, /minimo corporeo/i, /sonnolenza massima/i, /picco di sonnolenza/i, /\bPenombra\b/, /\bInsight\b/,
-  /rischio fatica/i, /non hai rispettato/i, /\bobbligatori/i];
+  /rischio fatica/i, /non hai rispettato/i, /\bobbligatori/i,
+  // revisione scientifica del 04/11/2026 (secondo giro): promesse sulla sicurezza, divieti assoluti,
+  // «riflessi» (gli studi misurano la coordinazione), momenti «per la testa» che sembrano buoni per guidare,
+  // e il caffè alla guida a fine notte proposto senza pisolino
+  /più sicur/i, /per quanto costi/i, /\briflessi\b/i, /chiedono testa/i, /fermati 20 minuti/i, /nemico numero uno/i];
 
 // Solo il testo dentro le virgolette, senza i commenti (// … e /* … */, <!-- … -->).
 function stringhe(src) {

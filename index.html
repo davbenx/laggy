@@ -2207,7 +2207,7 @@ header b{font-size:23px}
   <summary>Come funziona, limiti e avvertenze</summary>
   <div class="piu-info-in">
     <p><b>Come ragiona.</b> Non guarda la sigla del turno ma dove cade rispetto al tuo sonno naturale. Un turno che comincia prima della notte e la attraversa vuole il sonno dopo; uno che comincia alle due di notte lo vuole prima, più un recupero al rientro. Poi usa i riposi come rincorsa: circa un'ora al giorno per alzarsi prima, un'ora e mezza per fare più tardi. Dove la rincorsa non basta, lo dice.</p>
-    <p><b>Limiti dichiarati.</b> Il cronotipo segue il principio del questionario MCTQ (Roenneberg e coll. 2003; per i turnisti Juda e coll. 2013): metà del sonno nei giorni liberi, senza il sonno di recupero. È una stima dai tuoi orari, non il questionario completo. La curva della luce viene da studi di laboratorio, non da un reparto. L'adattamento completo alla notte riguarda meno del 3% dei notturnisti fissi (Folkard 2008), e questo strumento non lo promette. Nessuna validazione clinica: è un motore di pianificazione basato sulla letteratura.</p>
+    <p><b>Limiti dichiarati.</b> Il cronotipo usa il metodo di calcolo dell'MCTQ (Roenneberg e coll. 2003), adattato ai turni: metà del sonno nei giorni liberi, senza il sonno di recupero. È una stima dai tuoi orari e dal diario, non il questionario; le soglie fra allodola e gufo sono una scelta dell'app. La curva della luce viene da studi di laboratorio, non da un reparto. L'adattamento completo alla notte riguarda meno del 3% dei notturnisti fissi (Folkard 2008), e questo strumento non lo promette. Nessuna validazione clinica: è un motore di pianificazione basato sulla letteratura.</p>
     <p><b>Attenzione.</b> Indicazioni generali di benessere e organizzazione per chi lavora su turni. Non è un dispositivo medico, non diagnostica e non cura nulla, e non sostituisce il parere di un medico.</p>
     <p><b>Melatonina.</b> Non ne parliamo qui perché i dosaggi degli studi sul jet lag e sui turni non coincidono con quelli in vendita come integratore in Italia — proporre un numero sarebbe fuorviante. Se pensi possa servirti, parlane con un medico o un farmacista: possono valutare il tuo caso, non un piano generico.</p>
   </div>
@@ -3860,7 +3860,7 @@ function cards(P){
     rows:[]};
   if(!(s.dur > 0)){
     sc.val="Nessun tempo per dormire"; sc.small="fra questo turno e il prossimo";
-    sc.sub="Fra questo turno e il prossimo, con il viaggio, non c'è tempo per un sonno vero. Riposa appena puoi e, se si può, chiedi un cambio: è il momento più delicato per guidare.";
+    sc.sub="Fra questo turno e il prossimo, con il viaggio, non c'è tempo per un sonno vero. Riposa appena puoi e, se si può, chiedi un cambio: è un momento delicato per guidare, e se hai sonno meglio non guidare.";
   }
   else if(s.kind==="diurno"){
     sc.sub="A letto appena rientri, senza fermate. Di giorno si dorme meno, è normale: le ore che mancano le recuperi col pisolino del pomeriggio.";
@@ -3869,10 +3869,10 @@ function cards(P){
     sc.cite="Rosekind e coll. 1995 (NASA)";
   }else if(s.kind==="corto"){
     sc.small=dur(s.dur)+" · corto apposta";
-    sc.sub="È lo smonto. Dormi poco stamattina e poi resta sveglio fino a sera: costa una giornata, ma domani sei già sugli orari di tutti.";
-    sc.rows.push(["Nel pomeriggio","niente pisolini dopo lo smonto, per quanto costi"]);
-    sc.rows.push(["Stasera","a letto verso "+hhmm(NT.at(P.S,1).onset)+", anche senza sonno"]);
-    sc.rows.push(["Sveglia","sempre alla stessa ora nei giorni di smonto, con luce appena sveglio: è ciò che riallinea meglio l'orologio"]);
+    sc.sub="È lo smonto. Dormi poco stamattina e poi resta sveglio fino a sera: costa una giornata, ma di solito domani sei già sugli orari di tutti.";
+    sc.rows.push(["Nel pomeriggio","meglio niente pisolini dopo lo smonto; se nel pomeriggio devi guidare e hai sonno, la sicurezza viene prima: un pisolino di 20 minuti"]);
+    sc.rows.push(["Stasera","a letto verso "+hhmm(NT.at(P.S,1).onset)]);
+    sc.rows.push(["Sveglia","sempre alla stessa ora nei giorni di smonto, con luce appena sveglio: aiuta a riallineare l'orologio"]);
     sc.why="Dormire fino al pomeriggio dopo l'ultima notte sembra giusto, ma sposta l'orologio ancora più in là: la notte dopo non dormi e perdi anche il secondo giorno di riposo.";
     sc.cite="Minors & Waterhouse 1981 · Smith, Fogg & Eastman 2009";
   }else if(lateStart){
@@ -3900,7 +3900,7 @@ function cards(P){
 
   const cc={k:"c",lab:"Ultima caffeina",val:hhmm(cut),small:"poi basta: caffè, tè, cola, energy drink",rows:[],at:cut,
     cambia:4, cambiaTxt:"Cambia la soglia della caffeina",
-    why:"Nello studio di riferimento, 400 mg di caffeina (circa quattro caffè) sei ore prima di dormire accorciavano ancora il sonno, spesso senza che ce ne si accorgesse. Da qui le sei ore. Ognuno smaltisce la caffeina a modo suo: la soglia la cambi in Impostazioni.",
+    why:"Nello studio di riferimento, 400 mg di caffeina (circa quattro tazze grandi di caffè) sei ore prima di dormire accorciavano ancora il sonno, spesso senza che ce ne si accorgesse. Da qui le sei ore. Ognuno smaltisce la caffeina a modo suo: la soglia la cambi in Impostazioni.",
     cite:"Drake, Roehrs, Shambroom & Roth, J Clin Sleep Med 2013"};
   if(P.caff && P.caff.fattore!==1){
     cc.why+=" Con quello che hai indicato (fumo, contraccettivi ormonali, gravidanza) la caffeina nel tuo corpo dura "+(P.caff.fattore>1?"di più":"di meno")+" della media: per questo l'ultima caffeina è "+dur(P.caff.min)+" prima di dormire."+
@@ -3925,7 +3925,7 @@ function cards(P){
   out.push(cc);
 
   const lc={k:"l",lab:"Luce",rows:[],rowsA:[],rowsE:[],at:wake+15,cite:"Khalsa, Jewett, Cajochen & Czeisler, J Physiol 2003 · Smith, Fogg &amp; Eastman 2009 · Thompson, Jones, Gregson &amp; Atkinson, Eur J Appl Physiol 2014 (alba simulata) · Forger, Jewett &amp; Kronauer, J Biol Rhythms 1999 (modello dell'orologio)"};
-  const whyLight="La luce sposta l'orologio in avanti o indietro secondo l'ora in cui la prendi. Il confine è il momento di sonnolenza, per te verso le "+hhmm(cbt)+" (stima dai tuoi turni e dal tuo sonno). Per questo, dopo la notte, il sole della strada è quello che più disturba il sonno di giorno.";
+  const whyLight="La luce sposta l'orologio in avanti o indietro secondo l'ora in cui la prendi. Il confine è il momento di sonnolenza, per te verso le "+hhmm(cbt)+" (stima dai tuoi turni e dal tuo sonno). Per questo, dopo la notte, il sole della strada sposta l'orologio verso il giorno e rende più difficile il sonno di giorno.";
   if(night){
     // Poche notti di fila («contieni»: l'orologio non si sposta, ed è giusto così): luce per restare vigili tutto il turno.
     // Blocco lungo: luce fino a due ore prima del minimo corporeo (il modello dell'orologio dice dov'è oggi), poi bassa.
@@ -4020,16 +4020,16 @@ function cards(P){
          :n.dopo?("Prima del turno non c'era spazio. Recuperi appena stacchi, invece di portarti il debito a domani.")
          :n.rec?(n.last?"L'ultimo è corto apposta: così stasera ti addormenti a un orario normale."
                        :"È la seconda metà del tuo riposo, non un extra.")
-         :n.lungo?("Oggi stai in piedi "+hm(n.ore)+" di fila, e le ultime ore cadono nel tuo momento di sonnolenza. Un pisolino adesso ti toglie il tratto più duro e ti fa tornare a casa più sicuro.")
+         :n.lungo?("Oggi stai in piedi "+hm(n.ore)+" di fila, e le ultime ore cadono nel tuo momento di sonnolenza. Un pisolino adesso ti toglie il tratto più duro e di solito ti fa arrivare a fine turno più lucido.")
          :n.debito?(debitoMotivo(n)+" Questo pisolino non è un extra: rimette a posto il conto prima che si sommi a domani.")
          :n.turno?("Nella pausa, prima del momento peggiore della notte. Finisce con largo margine dalla fine del turno: svegliarsi poco prima di salire in macchina peggiorerebbe proprio l'ora più rischiosa.")
-         :((n.b-n.a)<40&&!n.rec&&!n.lungo&&!n.debito&&!n.turno)?("Hai dormito abbastanza, ma fra la sveglia di stamattina e il letto di stanotte passano "+hm(n.ore||0)+" di fila. Un pisolino corto prima di uscire non ti ruba il sonno di stanotte e ti rende più sicura la strada di casa.")
+         :((n.b-n.a)<40&&!n.rec&&!n.lungo&&!n.debito&&!n.turno)?("Hai dormito abbastanza, ma fra la sveglia di stamattina e il letto di stanotte passano "+hm(n.ore||0)+" di fila. Un pisolino corto prima di uscire non ti ruba il sonno di stanotte e di solito ti fa arrivare a fine turno più lucido.")
          :(n.first?"Il pisolino che rende di più in tutto il ciclo. Fallo anche senza sonno, prima di uscire di casa."
                   :"Recupera quello che il sonno del mattino non è riuscito a darti."),
       rows:n.rep?[["Se ti chiamano","un caffè appena esci va bene; dopo le 3 del mattino evitalo se poi torni a dormire. Al rientro, un sonno corto prima del resto della giornata"],
-        ["Al risveglio","per un quarto d'ora sei più lento di prima del pisolino: concediti qualche minuto prima di guidare"]]
+        ["Al risveglio","per circa un quarto d'ora sei più lento: se puoi, aspetta quel quarto d'ora prima di guidare"]]
         :(n.rec||n.dopo)?[]:[["Poi","mangi con calma ed esci: c'è tempo per svegliarti bene"],
-        ["Al risveglio","per un quarto d'ora sei più lento di prima del pisolino: concediti qualche minuto prima di guidare o di fare cose delicate"]],
+        ["Al risveglio","per circa un quarto d'ora sei più lento: se puoi, aspetta quel quarto d'ora prima di guidare o di fare cose delicate"]],
       nap:{k:hhmm(n.a), fine:hhmm(n.b), min:n.b-n.a, turno:!!n.turno, livello:n.livello, caffe:!!n.caffe, caffeNo:n.caffeNo||""},
       why:(night ? "Dormire prima di entrare riduce il crollo di attenzione nelle ore centrali della notte, quando gli errori costano di più."
                  : "Dormire prima di entrare ti fa arrivare al turno più lucido, e il sonno che manca pesa meno sulle ore di lavoro.")+" Un'ora e mezza di solito lascia finire un ciclo di sonno e ci si sveglia meno intontiti; se non hai tempo, venti minuti sono meglio di niente.",
@@ -4069,11 +4069,11 @@ function cards(P){
     // controllo di duplicato in frase() — creava un'incongruenza visibile,
     // non solo un doppione.
     const testo = filate >= 1020
-      ? "Quando stacchi sei in piedi da "+hm(filate)+" di fila: i riflessi calano come con "+
-        gl(filate)+" g/l di alcol (il limite per guidare è 0,5)."
+      ? "Quando stacchi sei in piedi da "+hm(filate)+" di fila: la coordinazione cala come con "+
+        gl(filate)+" g/l di alcol."
       : spezzata
         ? (senzaPisolino >= 1020
-          ? "Quando stacchi sei in piedi da "+hm(filate)+", non da "+hm(senzaPisolino)+": è il pisolino a tenerti sotto le 17 ore di veglia, oltre le quali i riflessi calano come con 0,5 g/l di alcol."
+          ? "Quando stacchi sei in piedi da "+hm(filate)+", non da "+hm(senzaPisolino)+": è il pisolino a tenerti sotto le 17 ore di veglia, oltre le quali la coordinazione cala come con 0,5 g/l di alcol."
           : "Quando stacchi sei in piedi da "+hm(filate)+" invece che da "+hm(senzaPisolino)+": il pisolino ti fa tornare a casa più riposato.")
         : filate < 60
         ? "Sono più di quante il corpo ne regga bene, e oggi non c'è spazio per un pisolino che aiuti davvero: mettilo in conto, e se hai sonno non guidare."
@@ -4083,10 +4083,10 @@ function cards(P){
       val: b.rest ? "Oggi stai in piedi "+hm(piuLunga)+" di fila"
                   : "In piedi da "+hm(filate)+" di fila",
       sub:testo,
-      rows:[["Se hai sonno","fermati 20 minuti in auto e prendi un caffè prima di ripartire"],
+      rows:[["Se hai sonno","meglio non guidare; se devi, un caffè e subito un pisolino di 15–20 minuti"],
             ["Sempre","occhiali da sole: proteggono il sonno che stai per fare"],
             ["Se guidi","lenti adatte alla guida, categoria 1–3, mai la 4, e solo con buona luce: con l'alba ancora scura, pioggia o nebbia toglile. Per la luce del mattino meglio la 2 o la 3"]],
-      why:"Uno studio ha confrontato 28 ore di veglia con dosi crescenti di alcol: ogni ora sveglio in più pesava sulla coordinazione come circa 0,004% di alcol nel sangue.",
+      why:"Uno studio ha confrontato 28 ore di veglia continuata con dosi crescenti di alcol: ogni ora sveglio in più pesava sulla coordinazione come circa 0,004% di alcol nel sangue.",
       cite:"Dawson &amp; Reid, Nature 1997 · Arnedt e coll. 2000 (simulatore di guida)",
       at: b.rest ? wake+600 : b.end});
   }
@@ -4101,7 +4101,7 @@ function cards(P){
       sub:"Per il viaggio contiamo "+state.cTo+" minuti all'andata e "+state.cFrom+" al ritorno: decidono quando ti prepari e da quando sei di nuovo libero.",
       ...(state.guidaLavoro ? {
         rows:[["Pause di guida","dopo 4 ore e mezza di guida, 45 minuti di pausa (anche in due: prima 15, poi 30)"],
-              ["Se hai sonno","nella pausa un caffè e subito un pisolino di 15-20 minuti, poi qualche minuto all'aria prima di ripartire: l'intontimento del risveglio passa presto"]],
+              ["Se hai sonno","nella pausa un caffè e subito un pisolino di 15–20 minuti; di solito l'intontimento passa in pochi minuti: riparti quando ti senti sveglio"]],
         why:"Per camion e autobus le pause sono quelle delle regole europee (le stesse del tachigrafo). Il sonno al volante non avvisa: al simulatore, caffè più pisolino breve funziona meglio dei due da soli; finestrino aperto e radio alta no.",
         cite:"Reg. (CE) 561/2006, art. 7 · Reyner &amp; Horne 1997 (simulatore di guida)" } : {}),
       cambia:4, cambiaTxt:"Cambia il tuo tragitto",
@@ -4136,7 +4136,7 @@ function cards(P){
     out.push({k:"cbt", lab:"Momento di sonnolenza",
       val: hhmm(cbt-mezza)+"–"+hhmm(cbt+mezza), mezza,
       small: FONTE[oro.fonte]||FONTE.orari,
-      why: "Ogni notte il corpo passa da un punto basso, anche se hai dormito bene: è normale sentirlo. Se cade in turno, fai una pausa alla luce e lascia i compiti delicati a prima o a dopo. È una stima dai tuoi orari: conta quello che senti."+
+      why: "Ogni notte il corpo passa da un punto basso, anche se hai dormito bene: è normale sentirlo. Se cade in turno, se puoi fai una pausa alla luce e rimanda i compiti delicati. È una stima dai tuoi orari: conta quello che senti."+
         (oro.fonte==="orari"?" La finestra è larga perché parte dagli orari del piano: con qualche giorno di sonno segnato (o da Salute) si stringe.":
          mezza>60?" La finestra è un po' larga: i modelli dell'orologio non sono del tutto d'accordo su di te.":""),
       at: cbt});
@@ -4645,7 +4645,7 @@ function diaryReminder(P, CARDS){
     // le notti che pesano di più: il «Perché?» mostra da dove viene il numero
     const notti=(P.debitoNotti||[]).map(x=>{ const g=new Date(x.date+"T12:00:00").toLocaleDateString(LINGUA,{weekday:"short",day:"numeric",month:"short"});
       return '<div class="row"><b>'+esc(g.charAt(0).toUpperCase()+g.slice(1))+'</b><span>'+hm(x.totale)+' su '+hm(x.meta)+' (–'+hm(x.manca)+')</span></div>'; }).join("");
-    if(stato) infoVoci.set("debito",{t:"Il tuo conto del sonno",h:'<p class="ed-sub">'+esc(statoPerche)+'</p>'+(notti?'<p class="ed-sub" style="margin-bottom:4px">Le notti che pesano di più, rispetto al sonno che il piano proponeva:</p><div class="rows">'+notti+'</div>':'')+'<p class="ed-sub" style="margin-top:10px"><b>Come si recupera.</b> Non un\'ora per un\'ora: dopo una notte corta il sonno si fa più profondo, e già una notte normale ne recupera una parte. Una notte corta si recupera in 1–2 notti; più notti corte di fila chiedono da 4 a 9 giorni di sonno regolare. Il recupero del weekend ridà lucidità, ma non tutto il resto (per esempio sul metabolismo): per questo contano anche la sveglia regolare e la luce.</p><p class="ed-sub" style="margin-top:10px">Sono stime: il conto usa le notti che annoti degli ultimi 14 giorni.</p>'});
+    if(stato) infoVoci.set("debito",{t:"Il tuo conto del sonno",h:'<p class="ed-sub">'+esc(statoPerche)+'</p>'+(notti?'<p class="ed-sub" style="margin-bottom:4px">Le notti che pesano di più, rispetto al sonno che il piano proponeva:</p><div class="rows">'+notti+'</div>':'')+'<p class="ed-sub" style="margin-top:10px"><b>Come si recupera.</b> Non un\'ora per un\'ora: dopo una notte corta il sonno si fa più profondo, e già una notte normale ne recupera una parte. Dopo più notti corte di fila, in laboratorio tre notti normali non sono bastate a tornare lucidi come prima, e il recupero del weekend non ha rimesso a posto il metabolismo. Per questo contano anche la sveglia regolare e la luce.</p><p class="ed-sub" style="margin-top:10px">Sono stime: il conto usa le notti che annoti degli ultimi 14 giorni.</p>'});
   }
   const statoHtml = stato ? '<div class="drem-rec drem-stato"><span>'+esc(stato)+'</span><button type="button" class="lnk" data-info-debito="1">Perché?</button></div>' : "";
   if(dnum(f)===dnum(giornoVero())) setBadge(logged?0:1);
@@ -7751,15 +7751,16 @@ function caricoHtml(aperta){
 function orologio(){
   const mid=mod1440(NT.naturalMid()), cbt=mod1440(NT.naturalMid()+NT.CFG.cbtOffset);
   const bed=t(state.freeBed), wake=NT.freeWakeUsata();
-  // Cronotipo come nell'MCTQ (Roenneberg 2003; per i turnisti Juda, Vetter & Roenneberg 2013):
-  // metà del sonno nei giorni liberi senza sveglia, corretta per il sonno di recupero.
-  // Se nei liberi dormi più della tua media, metà dell'eccesso è recupero, non preferenza
-  // (MSFsc = MSF − (SDf − SDmedia)/2). Serve solo all'etichetta e ai consigli: il piano usa i tuoi orari veri.
-  // Come nell'MCTQ^Shift: se il diario ha abbastanza giorni liberi «puliti», si parte da quelli; altrimenti dagli orari dichiarati.
+  // Cronotipo con il metodo di calcolo dell'MCTQ (Roenneberg 2003), adattato ai turni — NON è l'MCTQ^Shift,
+  // che usa i liberi dopo i turni serali e corregge per blocco di turno (Juda, Vetter & Roenneberg 2013).
+  // Metà del sonno nei giorni liberi senza sveglia; se nei liberi dormi più della tua media, metà dell'eccesso
+  // è recupero (MSFsc = MSF − (SDf − SDmedia)/2). La media usa solo le notti fra giorni non di notte, e con meno
+  // di 5 notti non si corregge. Serve solo all'etichetta e ai consigli: il piano usa i tuoi orari veri.
   const lp=liberiPuliti();
   const sdF=lp ? lp.sd : (((wake-bed)%1440+1440)%1440 || +state.need || 480);
-  const sdMedia=sonnoMedioDiario() || +state.need || 480;
-  const msf=lp ? lp.msf : bed+sdF/2, msfsc=mod1440(sdF>sdMedia ? msf-(sdF-sdMedia)/2 : msf);
+  const sdMedia=sonnoMedioDiario();
+  const corr=sdMedia!=null && sdF>sdMedia;
+  const msf=lp ? lp.msf : bed+sdF/2, msfsc=mod1440(corr ? msf-(sdF-sdMedia)/2 : msf);
   const h=(msfsc<720 ? msfsc : msfsc-1440)/60;   // le 23:30 sono «prima di mezzanotte», non le 23 ore
   const tipo = h<2.5 ? "Allodola" : h<3.5 ? "Un po' allodola" : h<5 ? "Né allodola né gufo" : h<6 ? "Un po' gufo" : "Gufo";
   let lucido=null;
@@ -7769,9 +7770,9 @@ function orologio(){
     const r=window.NTAlert.alertness({now:sv, freeWake:hhmm(wake), freeBed:state.freeBed, lastSleepEnd:sv, nextSleepStart:letto, nadir:cbt});
     if(r && r.peak) lucido=r.peak.hhmm;
   } }catch(e){}
-  return {tipo, h, mid, msf:msfsc, recupero: sdF>sdMedia+15, liberiDiario: lp ? lp.n : 0, cbt, mel:mod1440(bed-120), lucido, partenza: state.freeBed==="23:30" && state.freeWake==="07:30"};
+  return {tipo, h, mid, msf:msfsc, recupero: corr && sdF>sdMedia+15, liberiDiario: lp ? lp.n : 0, cbt, mel:mod1440(bed-120), lucido, partenza: state.freeBed==="23:30" && state.freeWake==="07:30"};
 }
-// I giorni liberi «puliti» del diario, come nell'MCTQ^Shift (Juda, Vetter & Roenneberg 2013): il sonno che finisce
+// I giorni liberi «puliti» del diario (principio dell'MCTQ, adattato ai turni): il sonno che finisce
 // in un giorno di riposo (niente sveglia per il lavoro) e non viene dopo una notte di lavoro (quello è recupero).
 // Ultime 8 settimane, almeno 4 giorni; altrimenti null e si usano gli orari dichiarati.
 function liberiPuliti(){
@@ -7787,14 +7788,16 @@ function liberiPuliti(){
   const m=v=>v.reduce((a,b)=>a+b,0)/v.length;
   return {n:mids.length, msf:mod1440(m(mids)), sd:m(durs)};
 }
-// Sonno medio per notte dal diario e da Health Connect, ultime 4 settimane (almeno 5 notti, altrimenti null).
+// Sonno medio per notte dal diario, ultime 4 settimane, solo le notti fra giorni non di notte: niente sonno di giorno
+// né recupero dopo le notti, che abbasserebbero la media e farebbero sembrare tutti più mattinieri.
+// Almeno 5 notti, altrimenti null (e niente correzione).
 function sonnoMedioDiario(){
-  const oggi=giornoVero(), dur=[];
-  for(let o=-27;o<=0;o++){ const k=iso(day(oggi,o)), w=(state.wakes||{})[k], bd=(state.beds||{})[k];
+  const oggi=giornoVero(), f=dnum(state.focus), dur=[];
+  for(let o=-27;o<=0;o++){ const g=day(oggi,o), k=iso(g), w=(state.wakes||{})[k], bd=(state.beds||{})[k];
     if(!/^\d\d:\d\d$/.test(w||"") || !/^\d\d:\d\d$/.test(bd||"")) continue;
-    const d=((t(w)-t(bd))%1440+1440)%1440; if(d>=180 && d<=840) dur.push(d); }
-  if(dur.length<5){ const da=day(oggi,-28).getTime();
-    (Array.isArray(state.hcSonno)?state.hcSonno:[]).forEach(v=>{ const d=(v[1]-v[0])/6e4; if(v[1]>da && d>=180 && d<=840) dur.push(d); }); }
+    const d=((t(w)-t(bd))%1440+1440)%1440; if(d<180 || d>840) continue;
+    let ok=false; try{ const off=dnum(g)-f; ok = NT.tipoDelGiorno(off)!=="n" && NT.tipoDelGiorno(off-1)!=="n"; }catch(e){}
+    if(ok) dur.push(d); }
   return dur.length>=5 ? dur.reduce((a,b)=>a+b,0)/dur.length : null;
 }
 // Cosa vuol dire il cronotipo per i tuoi turni: chi è mattiniero dorme meno intorno alle notti,
@@ -7802,8 +7805,8 @@ function sonnoMedioDiario(){
 function cronotipoTurni(o){
   const usati=[...new Set(String(state.pattern||"").split(""))].filter(c=>state.shifts && state.shifts[c]);
   const notti=usati.some(isNightCode), mattini=usati.some(c=>state.shifts[c].s>=240 && state.shifts[c].s<=420);
-  if(o.h<3.5 && notti) return "Per un orologio mattiniero di solito pesano di più le notti: il pisolino prima e il buio per il sonno di giorno contano ancora di più.";
-  if(o.h>=5 && mattini) return "Per un orologio serotino di solito pesano di più i mattini presto: la sera prima luci basse presto, e appena sveglio luce.";
+  if(o.h<3.5 && notti) return "Chi ha un orologio mattiniero in media dorme meno nelle notti: il pisolino prima e il buio per il sonno di giorno possono aiutare.";
+  if(o.h>=5 && mattini) return "Chi ha un orologio serotino in media dorme meno prima dei mattini presto: luci basse presto la sera prima e luce appena sveglio possono aiutare.";
   return "";
 }
 // Da cosa è stimato l'orologio nelle ultime due settimane: notti del diario, notti di Health Connect (e da quale app),
@@ -7831,16 +7834,16 @@ function orologioHtml(){
   const o=orologio();
   const riga=(lab,ora,sub)=>'<div class="oro-riga"><div><b>'+lab+'</b><span>'+sub+'</span></div><span class="mono">'+ora+'</span></div>';
   return sezDet("Il tuo orologio", o.tipo+" · momento di sonnolenza "+hhmm(o.cbt),
-      '<p class="oro-tipo">'+esc(o.tipo)+'</p><p class="hint" style="margin:0 0 6px">Nei giorni liberi, quando niente ti sveglia'+(o.recupero ? ', senza contare il sonno di recupero' : '')+(o.liberiDiario ? ' · da '+o.liberiDiario+' giorni liberi del tuo diario' : '')+'.</p>'+
+      '<p class="oro-tipo">'+esc(o.tipo)+'</p><p class="hint" style="margin:0 0 6px">Stima dai giorni liberi, quando niente ti sveglia'+(o.recupero ? ', senza contare il sonno di recupero' : '')+(o.liberiDiario ? ' · da '+o.liberiDiario+' giorni liberi del tuo diario' : '')+'.</p>'+
       fasciaOrologio(o)+
       (cronotipoTurni(o) ? '<p class="hint oro-turni" style="margin:0 0 8px">'+esc(cronotipoTurni(o))+'</p>' : '')+
-      riga("Metà del sonno", hhmm(o.mid), "il centro del sonno: dice se sei allodola o gufo")+
+      riga("Metà del sonno", hhmm(o.mid), o.recupero || o.liberiDiario ? "il centro del sonno nei liberi; l\'etichetta toglie il recupero e usa il diario" : "il centro del sonno: dice se sei allodola o gufo")+
       riga("Melatonina", "dalle "+hhmm(o.mel), "il corpo comincia a preparare il sonno: luci basse")+
       riga("Momento di sonnolenza", hhmm(o.cbt), "il punto più basso della notte: la luce prima ti sposta indietro, dopo in avanti")+
-      (o.lucido ? riga("Più vigile", "verso le "+o.lucido, "stima: per le cose che chiedono testa") : "")+
+      (o.lucido ? riga("Più vigile", "verso le "+o.lucido, "stima: di solito è più difficile addormentarsi") : "")+
       '<p class="hint" style="margin:10px 0 0">'+(o.partenza
         ? 'Per ora parte da orari tipici: dimmi come dormi nei giorni liberi e diventa davvero tuo.'
-        : 'Stime dai tuoi orari nei giorni liberi ('+esc(state.freeBed)+' → '+esc(state.freeWake)+'), che il diario può aggiornare. Nei giorni di turno l\'orologio si sposta con il sonno, e il piano lo segue giorno per giorno. Non sono una misura.')+
+        : (o.liberiDiario ? 'Il tipo viene dal tuo diario; se nei liberi usi la sveglia, la stima è meno precisa. Le ore qui sopra vengono dagli orari dei giorni liberi ('+esc(state.freeBed)+' → '+esc(state.freeWake)+').' : 'Stime dai tuoi orari nei giorni liberi ('+esc(state.freeBed)+' → '+esc(state.freeWake)+'), che il diario può aggiornare.')+' Nei giorni di turno l\'orologio si sposta con il sonno, e il piano lo segue giorno per giorno. Non sono una misura.')+
       '</p><p class="hint oro-dati" style="margin:8px 0 0">'+esc(datiUsatiTesto())+'</p>'+
       '<button type="button" class="lnk" data-oro-cambia style="margin-top:8px">'+(o.partenza?'Dimmi come dormi nei giorni liberi':'Cambia come dormi nei giorni liberi')+' →</button>'+
       '', {id:"orologio", cls:"oro"});
