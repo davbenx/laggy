@@ -55,7 +55,7 @@ const avanti=async p=>{ await p.click("#next"); await p.waitForTimeout(150); };
 { const p=await apri({turniConfigurati:true,pattern:"MPNSR",anchor:fa(0),repeat:true,firstSeenAt:fa(10),freeBed:"01:00",freeWake:"09:30",shifts:TURNI,pPattern:"MPNSR",backupDone:true},
     {"nt:analytics-consent":"false","nt:backupDone":"true"});
   const sap=await p.evaluate(()=>{ const e=document.querySelector("#loSapevi"); return e && !e.hidden ? e.dataset.k+" | "+e.textContent : null; });
-  ok(sap && sap.startsWith("orologio |") && /un po' gufo, con il momento di sonnolenza verso le 07:15/.test(sap), "dopo una settimana, «Lo sapevi?»: il tuo orologio è pronto → "+sap);
+  ok(sap && sap.startsWith("orologio |") && /un po' gufo \(stima\), con il momento di sonnolenza verso le 07:15/.test(sap), "dopo una settimana, «Lo sapevi?»: il tuo orologio è pronto → "+sap);
   await p.click("[data-sapevi-prova]"); await p.waitForTimeout(400);
   const o=await p.evaluate(()=>{ const e=document.querySelector("#orologio"); if(!e) return null; const r=e.getBoundingClientRect();
     return {vis:document.body.classList.contains("andamenti-aperta"), top:Math.round(r.top), testo:e.innerText}; });
@@ -89,6 +89,18 @@ const avanti=async p=>{ await p.click("#next"); await p.waitForTimeout(150); };
   const tx=await p.evaluate(()=>document.querySelector("#orologio")?.innerText||"");
   ok(/^Un po' gufo/.test(tx) && /da 6 giorni liberi del tuo diario/.test(tx) && /senza contare il sonno di recupero/.test(tx),
     "il diario vince sugli orari dichiarati (allodola): un po' gufo, da 6 liberi puliti, senza il recupero → "+tx.slice(0,140).replace(/\s+/g," "));
+  await p.context().close(); }
+
+// Casi estremi del cronotipo (revisore, giro 4): chi anche nei liberi dorme 08–16 ha la metà del sonno alle 12:00
+// ed è un gufo estremo, non un'allodola (il taglio era a mezzogiorno); chi dorme 22–06 resta allodola.
+for (const [bed, wake, atteso] of [["08:00","16:00","Gufo"],["04:00","12:00","Gufo"],["22:00","06:00","Allodola"],["23:00","07:00","Un po' allodola"]]) {
+  const p=await apri({turniConfigurati:true,pattern:"NNNNNRR",anchor:fa(0),repeat:true,firstSeenAt:"2026-01-01",freeBed:bed,freeWake:wake,need:480,shifts:{N:{n:"Notte",s:1320,e:1800}}});
+  await p.evaluate(()=>document.querySelector("[data-tab=turni]")?.click()); await p.waitForTimeout(300);
+  await p.evaluate(()=>document.querySelector("#doAndamenti").click()); await p.waitForTimeout(300);
+  await p.evaluate(()=>document.querySelector("[data-and-sez=orologio]").click()); await p.waitForTimeout(400);
+  const tipo=await p.evaluate(()=>document.querySelector("#orologio .oro-tipo")?.textContent||"");
+  const consiglio=await p.evaluate(()=>/mattiniero/.test(document.querySelector("#orologio")?.innerText||""));
+  ok(tipo===atteso && (atteso!=="Gufo" || !consiglio), "liberi "+bed+"–"+wake+": "+atteso+(atteso==="Gufo"?", senza il consiglio da mattiniero":"")+" → "+tipo);
   await p.context().close(); }
 
 console.log("errori", errs); await b.close();

@@ -1241,9 +1241,10 @@ function tipoPisolino(n){
 function foldLine(line){
   const enc = new TextEncoder();
   if(enc.encode(line).length<=75) return line;
+  // La prima riga ha 75 ottetti; le continuazioni cominciano con lo spazio, che conta: 74.
   let out="", cur="";
   for(const ch of line){
-    if(enc.encode(cur+ch).length>75){ out += (out?"\r\n ":"")+cur; cur=ch; }
+    if(enc.encode(cur+ch).length>(out?74:75)){ out += (out?"\r\n ":"")+cur; cur=ch; }
     else cur+=ch;
   }
   return out + (out?"\r\n ":"")+cur;
@@ -1309,7 +1310,7 @@ function buildEvents(days, pianoGiorni=days){
     // Il rientro dalla notte è il momento di massimo rischio alla guida.
     if(ICS.rientro && !P.b.rest && (P.night||P.lateStart))
       ev(base,P.b.end,P.b.end+20,"rientro","Rientro: non guidare stanco",
-        "Occhiali da sole appena esci. Se hai sonno, meglio non guidare: se devi, un caffè e subito un pisolino di 15–20 minuti.",true);
+        "Occhiali da sole appena esci, solo con buona luce (se guidi: categoria 1–3, mai la 4; con l'alba scura toglili). Se hai sonno, meglio non guidare: se devi, un caffè e subito un pisolino di 15–20 minuti.",true);
   }
   state.focus=f0;
   return out;

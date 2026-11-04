@@ -24,7 +24,7 @@ const hhmm = d => String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinu
 // "essenziale" = acceso nella scelta "Essenziali" (2–3 al giorno).
 export const TIPI = [
   { k: "cambio",   nome: "Domani cambi turno",       desc: "Il giorno prima di un cambio: a che ora andare a letto e come prepararti", essenziale: true,  canale: "turni" },
-  { k: "ret",      nome: "Rientro dopo la notte",    desc: "Alla fine delle notti: l'ora più rischiosa per guidare",                essenziale: true,  canale: "sicurezza" },
+  { k: "ret",      nome: "Rientro dopo la notte",    desc: "Alla fine delle notti: l'ora più delicata per guidare",                essenziale: true,  canale: "sicurezza" },
   { k: "rischio",  nome: "Giorni impegnativi",       desc: "Prima della terza notte di fila o di un rientro con meno di 11 ore di riposo: cosa fare per arrivarci meglio", essenziale: true, canale: "sicurezza" },
   { k: "bedtime",  nome: "Preparati a dormire",      desc: "Mezz'ora prima del sonno pianificato",                                   essenziale: true,  canale: "sonno" },
   { k: "domani",   nome: "Che turno fai domani?",    desc: "Solo se domani non è segnato: senza turno il piano non c'è",             essenziale: true,  canale: "turni" },
@@ -138,7 +138,7 @@ export function buildSchedule(config, opts = {}) {
     // 10 minuti prima della fine: lo leggi prima di uscire, non già alla guida.
     if (want("ret") && (P.night || P.lateStart) && !P.b.rest)
       push(base, P.b.end - 10, "ret", "Rientro dal turno",
-        "Tra poco il rientro, l'ora più delicata per guidare. Occhiali da sole; se hai sonno, meglio non guidare: se devi, un caffè e subito un pisolino di 15–20 minuti.");
+        "Tra poco il rientro, l'ora più delicata per guidare. Occhiali da sole solo con buona luce (se guidi: categoria 1–3, mai la 4; con l'alba scura toglili); se hai sonno, meglio non guidare: se devi, un caffè e subito un pisolino di 15–20 minuti.");
 
     // Giorni impegnativi: non un allarme nel momento del calo (al lavoro, o
     // alla guida, sarebbe solo una distrazione) ma un consiglio prima, quando
