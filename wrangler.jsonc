@@ -59,7 +59,11 @@
     // non permette di risalirci. Per cambiare codice: nuova stringa casuale,
     // sha256sum, sostituisci qui (e nelle anteprime sotto).
     "STATS_TOKEN_SHA256": "9a8cbeb84f8db05fa450ae7ded9ebc004af915aac34b437c0efc91e491240813",
-    "SITE_ORIGIN": "https://app.notturnisti.club"
+    "SITE_ORIGIN": "https://app.notturnisti.club",
+    // /go/<codice> (functions/_go.js): "1" manda Android sulla scheda di Google
+    // Play; finché il test è chiuso la scheda non si apre a tutti, quindi "0" =
+    // tutti sull'app web.
+    "GO_PLAY": "0"
   },
   // Deploy di anteprima (una per PR, via Workers Builds "wrangler preview"):
   // stesse variabili non sensibili di sopra (nessuna è davvero segreta), ma
@@ -70,7 +74,8 @@
   "previews": {
     "vars": {
       "STATS_TOKEN_SHA256": "9a8cbeb84f8db05fa450ae7ded9ebc004af915aac34b437c0efc91e491240813",
-      "SITE_ORIGIN": "https://app.notturnisti.club"
+      "SITE_ORIGIN": "https://app.notturnisti.club",
+      "GO_PLAY": "0"
     },
     "kv_namespaces": [
       { "binding": "SUBS", "id": "a7e988fb98ab45368a14d1031188aaaf" }

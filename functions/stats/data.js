@@ -4,25 +4,14 @@
 // (STATS_TOKEN_SHA256, in wrangler.jsonc) oppure, in alternativa, il codice
 // stesso come secret (STATS_TOKEN).
 import { readStats } from "../_analytics.js";
-import { ctEqual } from "../_lib.js";
+import { statsAutorizzato } from "../_lib.js";
 
 const H = { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", "x-robots-tag": "noindex, nofollow" };
 const out = (status, data) => new Response(JSON.stringify(data), { status, headers: H });
 
-async function sha256hex(s) {
-  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
-  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
-}
-
 export async function onRequestGet({ env, request }) {
-  if (!env.STATS_TOKEN && !env.STATS_TOKEN_SHA256) return out(503, { error: "codice delle statistiche non impostato sul Worker" });
-  const auth = request.headers.get("authorization") || "";
-  const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
-  const valido = !!token && (
-    (env.STATS_TOKEN && ctEqual(token, env.STATS_TOKEN)) ||
-    (env.STATS_TOKEN_SHA256 && ctEqual(await sha256hex(token), String(env.STATS_TOKEN_SHA256).toLowerCase()))
-  );
-  if (!valido) return out(401, { error: "token mancante o errato" });
+  const a = await statsAutorizzato(env, request);
+  if (a) return out(a.status, { error: a.error });
   if (!env.DB) return out(503, { error: "database D1 (binding DB) non collegato" });
 
   const days = Math.min(Math.max(parseInt(new URL(request.url).searchParams.get("days"), 10) || 30, 1), 400);

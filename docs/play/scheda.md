@@ -37,14 +37,14 @@ Varianti per un esperimento sulla scheda (Play Console → Esperimenti sulla sch
 - C (74): `Calendario turni gratis: widget, WhatsApp e quando dormire, sul tuo turno.`
 - Precedente (68): `Turni di lavoro e sonno: quando dormire, il caffè e la luce. Gratis.`
 
-## Descrizione completa (max 4000) — 2760 caratteri
+## Descrizione completa (max 4000) — 2752 caratteri
 Il calendario turni gratis, senza pubblicità e senza account. Segni il tuo ciclo una volta e hai turni, widget e calendario del telefono per un anno. In più, ogni giorno ti dice quando dormire, fino a che ora prendere il caffè e quando cercare la luce, sul tuo turno vero.
 
 Fatta da chi lavora a ciclo continuo da sedici anni, per chi fa le notti, i mattini e i pomeriggi.
 
 I TUOI TURNI, IN UN MINUTO
 • Il tuo ciclo con un tocco: quinta, 12 ore, mattino-pomeriggio-notte, sempre lo stesso turno o turni che cambiano ogni settimana.
-• Hai il foglio turni in un file Excel, nel calendario o in una foto? Lo importi.
+• Hai i turni in un file Excel o nel calendario del telefono? Li importi.
 • Cambi, ferie, malattia, straordinari: tocchi il giorno e cambia solo quello. Per i turni che cambiano c'è «Copia una settimana».
 • Il mese a colpo d'occhio, con i festivi in rosso e le ore, le notti e le domeniche del mese.
 
@@ -78,6 +78,12 @@ COSA NON È
 Spunti di benessere basati sulla letteratura scientifica sul sonno e sul lavoro a turni, non regole da seguire alla lettera. Non è un dispositivo medico e non sostituisce il parere di un medico. Le notifiche non sono una sveglia.
 
 Progetto indipendente. Segnalazioni e idee: Impostazioni › Segnala cosa non torna.
+
+## Note di versione 1.4.3 (max 500)
+Novità 1.4.3
+• Testi del piano più precisi, ricontrollati frase per frase sugli studi da cui vengono.
+• Occhiali al rientro: se guidi, lenti di categoria da 1 a 3, mai la 4.
+• Notti di fila, pisolino con caffè, risveglio: spiegazioni più chiare.
 
 ## Note di versione 1.4.2 (max 500)
 Novità 1.4.2

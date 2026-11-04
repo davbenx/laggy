@@ -3883,7 +3883,7 @@ function cards(P){
     sc.why="Con un turno che parte nelle ore piccole, un blocco unico non regge: otto ore filate prima vorrebbero dire a letto nel tardo pomeriggio, perdendo la serata. Dividere in due — la parte principale prima del turno — è il compromesso a cui molte persone arrivano da sé dopo mesi di tentativi.";
     sc.cite="Sonno diviso: Minors & Waterhouse 1981 (sonno d'ancoraggio)";
   }else if(b.rest){
-    sc.sub=s.meta.reset?"Stasera a letto presto anche senza sonno: ci penserà la stanchezza ad addormentarti."
+    sc.sub=s.meta.reset?"Stasera a letto presto: dopo le notti la stanchezza accumulata aiuta ad addormentarti."
       :s.meta.ramp?"Non è un riposo qualunque: da come dormi stanotte dipende quanto ti peseranno le prossime notti."
       :(!P.nb.rest && /^pre-turno/.test(s.kind)) ? "Stanotte la sveglia è alle "+hhmm(s.onset+s.dur)+", contata all'indietro dal turno di domani."
       :"Riposo pieno. Non c'è niente da preparare: dormi senza guardare l'orologio.";
@@ -3937,7 +3937,7 @@ function cards(P){
       lc.rowsA.push(["In turno","più luce possibile fino alle "+hhmm(seekEnd)+": se puoi, esci o mettiti sotto la luce più forte che trovi"]);
       lc.rowsA.push(["Se non puoi","va bene anche quella che c'è, basta non stare al buio"]);
       lc.rowsE.push(["Ultime ore","abbassa la luce: da quest'ora in poi sposterebbe l'orologio al contrario di quello che ti serve"]); }
-    lc.rowsE.push(["Al rientro","occhiali da sole appena esci, anche col cielo coperto (se guidi, lenti adatte alla guida: categoria 2 o 3, mai 4)"]);
+    lc.rowsE.push(["Al rientro","occhiali da sole appena esci, anche col cielo coperto (se guidi, lenti adatte alla guida: categoria 1–3, mai la 4; per schermare la luce del mattino meglio la 2 o la 3)"]);
     lc.rowsE.push(["Camera","oscurante vero, non tende leggere, e sui 18-19°C: la temperatura conta quanto il buio"]);
     lc.why=whyLight;
   }else if(shift<-20){
@@ -3970,7 +3970,7 @@ function cards(P){
       const c=ott.cerca, inizioL=!b.rest && c[0]<b.start && c[1]>b.start;
       lc.rowsA.push(["Luce forte", fmt(c)+(inizioL ? ": prima di uscire tutte le luci accese, poi al lavoro le luci più forti che trovi" : alLavoro(c) ? ": al lavoro, le luci più forti che trovi" : ": fuori se c'è il sole, o alla finestra; altrimenti tutte le luci accese")]); }
     else if(ott.evita){ lc.val="Luce bassa "+fmt(ott.evita); lc.at=ott.evita[0]; }   // oggi conta solo il buio: la riga dice quello
-    if(ott.evita) lc.rowsE.push(["Luce bassa", fmt(ott.evita)+(night && ott.evita[0]>=b.end-15 && ott.evita[0]<=b.end+120 ? ": occhiali da sole per tornare a casa (se guidi, lenti adatte alla guida: categoria 2 o 3, mai 4), poi buio" : ": luci basse, schermi al minimo")]);
+    if(ott.evita) lc.rowsE.push(["Luce bassa", fmt(ott.evita)+(night && ott.evita[0]>=b.end-15 && ott.evita[0]<=b.end+120 ? ": occhiali da sole per tornare a casa (se guidi, lenti adatte alla guida: categoria 1–3, mai la 4; per schermare la luce del mattino meglio la 2 o la 3), poi buio" : ": luci basse, schermi al minimo")]);
     if(night) lc.rowsE.push(["Camera","oscurante vero, non tende leggere, e sui 18-19°C: la temperatura conta quanto il buio"]);
     lc.why="Le ore della luce le sceglie l'ottimizzatore dell'app: guarda i tuoi prossimi 4 giorni di turni e mette la luce dove porta il tuo orologio più vicino ai tuoi sonni, senza toglierti vigilanza al lavoro o alla guida. "+whyLight;
     lc.cite+=" · Serkh &amp; Forger, PLoS Comput Biol 2014 (luce ottimale)";
@@ -4083,7 +4083,7 @@ function cards(P){
                   : "In piedi da "+hm(filate)+" di fila",
       sub:testo,
       rows:[["Se hai sonno","fermati 20 minuti in auto e prendi un caffè prima di ripartire"],
-            ["Sempre","occhiali da sole: proteggono il sonno che stai per fare (se guidi, lenti adatte alla guida: categoria 2 o 3, mai 4)"]],
+            ["Sempre","occhiali da sole: proteggono il sonno che stai per fare (se guidi, lenti adatte alla guida: categoria 1–3, mai la 4; per schermare la luce del mattino meglio la 2 o la 3)"]],
       why:"L'equivalenza con l'alcol viene da uno studio che ha misurato la coordinazione occhio-mano durante 28 ore di veglia continuata, confrontandola con dosi crescenti di alcol: ogni ora di veglia in più vale circa 0,004% di alcolemia.",
       cite:"Dawson &amp; Reid, Nature 1997 · Arnedt e coll. 2000 (simulatore di guida)",
       at: b.rest ? wake+600 : b.end});
@@ -4181,7 +4181,7 @@ function cards(P){
       why:"Il conteggio è solo aritmetica dei due cicli, nessuna scienza: due rotazioni di lunghezza diversa possono non incrociarsi per mesi. Le ore svegli insieme si calcolano togliendo da entrambe le giornate i turni e il sonno previsto.", at:Infinity});
   }
   sc.rows.push(["Se non ti addormenti","resta al buio a occhi chiusi: per l'orologio il buio conta quasi quanto il sonno"]);
-  sc.rows.push(["Se ti svegli poco prima","alzati invece di riaddormentarti: venti minuti in più ti farebbero rientrare in un ciclo e svegliare peggio"]);
+  sc.rows.push(["Se ti svegli poco prima","puoi alzarti già, oppure riaddormentarti: va bene in tutti e due i casi"]);
   sc.rows.push(["Se farai diversamente","nessun problema: domattina lo dici in «Come hai dormito», qui non devi segnare niente"]);
   sc.at = s.onset;
   out.push(sc);
@@ -6447,7 +6447,7 @@ function sceltaDopoNotte(P){
   const corto=P.s.kind==="corto", diviso=cur==="diviso";
   const opz=(val,nome,fine,on,nota)=>'<button type="button" class="vb'+(on?" on":"")+'" data-sonnod="'+val+'" aria-pressed="'+on+'"><b>'+nome+'</b><span>fino alle '+hhmm(fine)+'</span><span class="dn-nota">'+nota+'</span></button>';
   const spiega = '<p class="dn-hint">'+(corto
-    ? 'Sonno breve: il pomeriggio è tuo e stanotte dormi bene. Sonno lungo: recuperi di più adesso, ma stasera il sonno arriva più tardi.'
+    ? 'Sonno breve: il pomeriggio è tuo e stasera il sonno arriva prima. Sonno lungo: recuperi di più adesso, ma stasera il sonno arriva più tardi.'
     : 'In due tempi: un sonno più corto e un pisolino prima della prossima notte (di giorno si dorme più leggeri). Tutto di fila: un blocco solo, se di giorno dormi bene.')+'</p>';
   const scelte='<div class="dn-scelta">'+opz("diviso", corto?"Sonno breve":"In due tempi", eD, diviso, corto?"pomeriggio libero":"poi un pisolino")+opz(unito, corto?"Sonno lungo":"Tutto di fila", eU, !diviso, corto?"recuperi di più":"un blocco solo")+'</div>'+
     spiega+'<p class="dn-vale">Vale per tutte le notti.</p>';
@@ -6656,7 +6656,7 @@ function renderEssenziale(P, CARDS){
       // Quello che si decide PRIMA del pisolino sta qui, nella sua riga; la
       // domanda «l'hai fatto?» arriva nel diario quando è cominciato.
       const liv=cd.nap.livello, napCaffe = (cd.nap.caffe && pianoVoce("caffe")
-          ? '<div class="rows"><div class="row"><b>Nappuccino</b><span>un caffè subito prima di sdraiarti, poi '+cd.nap.min+' minuti: la caffeina entra in circolo in 20-30 minuti, proprio quando ti svegli, e ti ritrovi più lucido che con il solo pisolino o il solo caffè. Anche se non ti addormenti del tutto, il riposo conta.</span></div></div>'+
+          ? '<div class="rows"><div class="row"><b>Nappuccino</b><span>un caffè subito prima di sdraiarti, poi '+cd.nap.min+' minuti: la caffeina entra in circolo in 20-30 minuti, proprio quando ti svegli, e ti ritrovi più lucido che con il solo pisolino o il solo caffè. Anche se non ti addormenti del tutto, la caffeina arriva lo stesso.</span></div></div>'+
             '<div class="why">Lo propongo solo quando serve essere vigili dopo, il pisolino è breve e il caffè non arriva fino al tuo sonno di stanotte.<cite>Reyner &amp; Horne 1997 · Hayashi, Masuda &amp; Hori 2003</cite></div>'
           : cd.nap.caffeNo==="soglia" && isFinite(P.cut) && pianoVoce("caffe") ? '<p class="ed-sub" style="margin-top:8px">Qui niente caffè prima: è dopo le '+hhmm(P.cut)+' e arriverebbe fino al tuo sonno. Va bene il pisolino da solo.</p>' : ''),
         prima = (isFinite(liv) && liv<2 ? '<button type="button" class="lnk dim" data-skip-recupero="'+(liv+1)+'" style="margin-top:6px">Non riesco a farlo: proponimi un\'alternativa</button>' : '');
@@ -7728,9 +7728,9 @@ function caricoHtml(aperta){
   // una frase sola: la cosa più utile da sapere, prima su quello che arriva
   const noti=R=>R.ignoti<25;
   let frase="";
-  if(noti(F) && F.serieMax>=4) frase="Nei prossimi 30 giorni arrivi a "+F.serieMax+" notti di fila: dopo la terza la stanchezza cresce di più [Folkard & Tucker 2003]. Fai i pisolini prima del turno.";
+  if(noti(F) && F.serieMax>=4) frase="Nei prossimi 30 giorni arrivi a "+F.serieMax+" notti di fila: dalla quarta il rischio di errori sale di più [Folkard & Tucker 2003]. Fai i pisolini prima del turno.";
   else if(noti(F) && F.brevi) frase=(F.brevi===1?"Una volta":F.brevi+" volte")+" nei prossimi 30 giorni stacchi e riattacchi in meno di 11 ore: in quei giorni il sonno va protetto più del solito.";
-  else if(noti(P) && P.serieMax>=4) frase="Nell'ultimo mese hai fatto fino a "+P.serieMax+" notti di fila: dopo la terza la stanchezza cresce di più [Folkard & Tucker 2003].";
+  else if(noti(P) && P.serieMax>=4) frase="Nell'ultimo mese hai fatto fino a "+P.serieMax+" notti di fila: dalla quarta il rischio di errori sale di più [Folkard & Tucker 2003].";
   else if(noti(P) && P.brevi) frase=(P.brevi===1?"Una volta":P.brevi+" volte")+" nell'ultimo mese hai avuto meno di 11 ore fra un turno e l'altro.";
   else if(noti(P) || noti(F)) frase="Niente serie lunghe di notti né riposi sotto le 11 ore: un carico che si recupera bene.";
   else frase="Segna i turni in «I turni del mese» per vedere il carico.";
