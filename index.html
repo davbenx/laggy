@@ -4087,7 +4087,8 @@ function cards(P){
   } else if(!b.rest && cbtSveglia!==undefined){
     // Ti svegli vicino al punto più basso, prima di uscire: niente da rimandare, ma il risveglio è più lento del solito.
     // Sulla luce non si dice niente qui: prima del minimo sposterebbe l'orologio più tardi, decide la voce «Luce».
-    out.push({k:"cbt", lab:"Momento di sonnolenza", val: hhmm(cbtSveglia-60)+"–"+hhmm(cbtSveglia+60), mezza:60,
+    const da=Math.max(cbtSveglia-60, wake), a=cbtSveglia+60;
+    out.push({k:"cbt", lab:"Momento di sonnolenza", val: hhmm(da)+"–"+hhmm(a), mezza:60, da, a,
       small: "appena sveglio",
       sub: "Oggi ti svegli vicino al tuo punto più basso: i primi 20-30 minuti sono i più lenti, ed è normale.",
       rows: [["Per svegliarti","acqua fresca sul viso, qualche movimento e, se ti va, un caffè"],
@@ -6661,8 +6662,11 @@ function renderEssenziale(P, CARDS){
       voci.push({t, html:riga("turno","Turno",cd.val,cd.small,false,ICON.alarm,dett(cd),
         {a:P.b.start, z:P.b.end, poi:"entri in turno alle "+hhmm(P.b.start)})});
     } else if(cd.k==="cbt"){
-      voci.push({t, html:riga("sonnolenza","Momento di sonnolenza",cd.val,cd.small,true,ICON.warn,dett(cd),
-        {a:cd.at-(cd.mezza||60), z:cd.at+(cd.mezza||60), poi:"momento di sonnolenza verso le "+hhmm(cd.at)})});
+      // In ordine dall'inizio della finestra (l'ora che si legge a sinistra), non dal centro: prima finiva dopo voci
+      // con un orario successivo («Luce 04:55» sopra «Momento di sonnolenza 04:20»).
+      const da=isFinite(cd.da) ? cd.da : cd.at-(cd.mezza||60), a=isFinite(cd.a) ? cd.a : cd.at+(cd.mezza||60);
+      voci.push({t:dSv(da), html:riga("sonnolenza","Momento di sonnolenza",cd.val,cd.small,true,ICON.warn,dett(cd),
+        {a:da, z:a, poi:"momento di sonnolenza verso le "+hhmm(cd.at)})});
     }
   }
 
