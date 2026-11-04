@@ -20,6 +20,14 @@ Fatto nella 1.1.1 (non serve più): tolto il vecchio wizard nascosto; suggerimen
 - **Nuove funzioni**: «Guidi per lavoro» (pause del Reg. CE 561/2006 nel turno, con caffè + pisolino breve); idea del «compromesso» nei giorni liberi con le notti fisse (Smith, Fogg & Eastman 2009); figlio «a scuola o all'asilo» (lun–ven 8–13:30; le vacanze scolastiche non ci sono: si segnano a mano); «Copia una settimana» in Segna; la foto del foglio turni per prima fra le importazioni; il primo piano spiega l'app in tre punti.
 - **Novità** con id `2026-11-14`.
 
+## Dopo la 1.4.1 (04/11/2026, PWA; per l'app serve la 1.4.2)
+- **Laggy** in «Sonno e carico» (`LAGGY`, `laggyStato`, `laggyHtml`): quattro stadi (`img/laggy-*.webp`, 512 px, trasparenti; il terzo scontornato a mano da Davide).
+  - Si cresce con le notti annotate in tutto (7, 30 con almeno 2 funzioni scoperte, 90) e lo stadio più alto raggiunto resta (`nt:laggy` {max, visto}).
+  - «Nuovo» compare una volta; si spegne in Cosa vedi nel piano (`laggy`); `setup_item` `laggy_N`. Le immagini sono in `build-web.mjs`.
+- **Calendario del telefono**: turni per 3, 6 o 12 mesi (`state.calMesi`, di norma 12), piano completo per 43 giorni (`buildEvents(giorni, pianoGiorni)`).
+  - Scrittura per differenze (`calScrivi` con `mappa` {uid: {id, impronta, fine}}); gli eventi passati restano nel calendario.
+  - «Riscrivili ora» cancella quelli noti e riscrive tutto. Al primo aggiornamento il vecchio elenco `ids` si cancella una volta.
+
 ## 1.4.1 (04/11/2026)
 - **Avvio**: nell'app Android lo splash di sistema (`installSplashScreen`, sfondo `avvio_sfondo` chiaro/scuro) resta finché la pagina chiama `NTDispositivo.pronta` al primo disegno (al massimo 2,5 s). Nella web app c'è `#avvio`, il logo finché arriva `nt:rendered` (al massimo 3 s).
 - **Touch & feel**: gli `:hover` solo in `@media (hover:hover)` (test `tocco` sul CSSOM); `:active` anche su celle, frecce e scelte; `user-select:none` sull'interfaccia; corpo fermo dietro i fogli (`body:has(.qs-backdrop:not([hidden]))`); tab già aperta → in cima.
