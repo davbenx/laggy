@@ -124,7 +124,7 @@ export function buildSchedule(config, opts = {}) {
 
     if (want("wake") && P.s.dur > 0)
       push(base, P.s.onset + P.s.dur, "wake", "Ora di alzarti",
-        "È l'ora di alzarti: farlo più o meno sempre alla stessa ora tiene l'orologio del corpo al passo.");
+        "È l'ora di alzarti: farlo più o meno sempre alla stessa ora aiuta a tenere l'orologio del corpo al passo.");
 
     if (want("nap") && P.naps)
       P.naps.forEach((n, i) => push(base, n.a, "nap",
@@ -183,7 +183,7 @@ export function buildSchedule(config, opts = {}) {
 
     if (want("luce") && !P.night)
       push(base, P.wake + 15, "luce", "Luce del mattino",
-        "Esci o apri le tende entro un'ora: la luce del mattino tiene l'orologio del corpo al passo.");
+        "Esci o apri le tende entro un'ora: la luce del mattino aiuta a tenere l'orologio del corpo al passo.");
 
     // Domani cambi turno: il giorno prima di un cambio che chiede di
     // spostare il sonno (a letto presto) o di prepararsi a una notte.

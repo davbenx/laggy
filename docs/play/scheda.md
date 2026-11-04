@@ -79,10 +79,16 @@ Spunti di benessere basati sulla letteratura scientifica sul sonno e sul lavoro 
 
 Progetto indipendente. Segnalazioni e idee: Impostazioni › Segnala cosa non torna.
 
+## Note di versione 1.4.4 (max 500)
+Novità 1.4.4
+• Testi del piano ricontrollati frase per frase sugli studi da cui vengono, con un revisore.
+• Rientro in auto: lenti di categoria da 1 a 3, mai la 4, e solo con buona luce. Con l'alba ancora scura, pioggia o nebbia toglile.
+• Reperibilità: dopo il pisolino, se puoi, aspetta un quarto d'ora prima di guidare.
+
 ## Note di versione 1.4.3 (max 500)
 Novità 1.4.3
 • Testi del piano più precisi, ricontrollati frase per frase sugli studi da cui vengono.
-• Occhiali al rientro: se guidi, lenti di categoria da 1 a 3, mai la 4.
+• Occhiali al rientro: se guidi, lenti di categoria da 1 a 3, mai la 4, e solo con buona luce.
 • Notti di fila, pisolino con caffè, risveglio: spiegazioni più chiare.
 
 ## Note di versione 1.4.2 (max 500)

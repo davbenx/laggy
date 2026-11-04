@@ -22,3 +22,14 @@ test("nessuna frase punitiva o allarmista nei testi", () => {
     for (const r of VIETATE) if (r.test(s)) trovate.push(f + ": " + r + " in «" + s.slice(0, 90) + "»");
   assert.deepEqual(trovate, []);
 });
+
+// Sicurezza alla guida (revisione scientifica del 04/11/2026): ogni frase che parla di
+// lenti o occhiali da sole per chi guida dice anche «solo con buona luce», come il sito.
+// Da novembre a febbraio al rientro dalla notte è ancora buio.
+test("lenti per la guida: sempre con «solo con buona luce»", () => {
+  const trovate = [];
+  for (const f of FILE) for (const s of stringhe(readFileSync(new URL("../" + f, import.meta.url), "utf8")))
+    if (/(lenti|occhiali)[^.;]*guid|guid[^.;]*(lenti|occhiali)/i.test(s) && /categoria/i.test(s) && !/solo con buona luce/i.test(s))
+      trovate.push(f + ": «" + s.slice(0, 120) + "»");
+  assert.deepEqual(trovate, []);
+});

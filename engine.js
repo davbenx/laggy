@@ -1294,13 +1294,13 @@ function buildEvents(days, pianoGiorni=days){
       "Pianificato da notturnisti.club",true,true);
     if(ICS.pisolini) P.naps.forEach(n=>ev(base,n.a,n.b,"pisolino-"+tipoPisolino(n),
       (n.rec||n.debito)?"Pisolino di recupero":n.rep?"Pisolino preventivo":((n.b-n.a)<40?"Pisolino breve":"Pisolino"),
-      n.rep?"Sei reperibile: una riserva di sonno se ti chiamano stanotte.":"",true));
+      n.rep?"Sei reperibile: un pisolino ora è una riserva se ti chiamano. Al risveglio, se puoi, aspetta un quarto d'ora prima di guidare.":"",true));
     if(ICS.caffe) ev(base,P.cut,P.cut+15,"caffe","Ultima caffeina",
       "Dopo quest'ora la caffeina è ancora in circolo quando provi a dormire.",true);
     // La luce è la leva principale sull'orologio: senza, il piano si disfa.
     if(ICS.luce && isFinite(P.wake))
       ev(base,P.wake+15,P.wake+35,"luce","Luce",
-        "Luce forte adesso: è quello che tiene l'orologio del corpo al passo con il turno.",true);
+        "Luce forte adesso: aiuta a tenere l'orologio del corpo al passo con il turno.",true);
     if(ICS.pasti){
       const mm=(P.meals||[]).find(x=>x&&x.main);
       if(mm&&isFinite(mm.at)) ev(base,mm.at,mm.at+30,"pasti","Pasto principale",
