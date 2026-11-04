@@ -223,7 +223,7 @@ body.tab-opzioni .appbar,body.sottopagina .appbar,body.primo-avvio .appbar{displ
 .daynav .shiftpill{font-size:14px;min-height:44px;padding:0 18px;max-width:62vw;overflow:hidden;text-overflow:ellipsis}
 .themebtn{flex:none;background:none;border:none;padding:12px;margin:-12px;color:var(--dim);
 cursor:pointer;display:flex;border-radius:999px}
-.themebtn:hover{color:var(--ink);background:var(--s1)}
+@media (hover:hover){ .themebtn:hover{color:var(--ink);background:var(--s1)} }
 /* Bersagli di tocco da almeno 44px anche per i link dentro il testo: il
    padding verticale di un elemento in riga allarga l'area toccabile senza
    spostare le righe. */
@@ -262,7 +262,7 @@ cursor:pointer;display:flex;border-radius:999px}
 #jumpDate{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;border:0}
 .nav{background:var(--s1);border:1px solid var(--line);color:var(--ink);width:40px;height:40px;font-size:18px;line-height:1;
 border-radius:var(--r);font-size:16px;cursor:pointer;display:grid;place-items:center;flex:none}
-.nav:hover{border-color:var(--blue);color:var(--blue)}
+@media (hover:hover){ .nav:hover{border-color:var(--blue);color:var(--blue)} }
 /* Il bottone centrale c'è sempre (stesse dimensioni), non solo quando
    ci si è allontanati da oggi: sul giorno vero diventa "Naviga" con lo
    stesso stile neutro delle frecce; altrove è "Torna a oggi" e prende
@@ -273,9 +273,9 @@ border-radius:var(--r);font-size:16px;cursor:pointer;display:grid;place-items:ce
 .today{background:var(--s1);border:1px solid var(--line);color:var(--ink);height:40px;padding:0 13px;
 min-width:118px;text-align:center;
 border-radius:var(--r);font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;flex:none}
-.today:hover{border-color:var(--blue);color:var(--blue)}
+@media (hover:hover){ .today:hover{border-color:var(--blue);color:var(--blue)} }
 .today.full{background:var(--blue);border:1px solid var(--blue);color:var(--su-blu)}
-.today.full:hover{background:var(--blue-fill)}
+@media (hover:hover){ .today.full:hover{background:var(--blue-fill)} }
 /* iPhone: Safari non apre il selettore della data da codice (showPicker su
    un campo nascosto non fa niente). Sopra il bottone c'è allora un campo
    data vero e trasparente: il tocco arriva a lui e iOS apre il suo
@@ -298,7 +298,7 @@ html.ios input,html.ios select,html.ios textarea{font-size:max(16px,1em)}
 .shiftpill{display:inline-flex;align-items:center;gap:5px;background:var(--blue-soft);color:var(--blue);font-size:12px;
 font-weight:700;padding:5px 11px;border-radius:999px;white-space:nowrap;cursor:pointer;border:1px solid transparent;
 transition:all .15s ease;user-select:none}
-.shiftpill:hover{filter:brightness(1.08);border-color:var(--blue-lt);transform:translateY(-1px)}
+@media (hover:hover){ .shiftpill:hover{filter:brightness(1.08);border-color:var(--blue-lt);transform:translateY(-1px)} }
 .shiftpill:active{transform:translateY(0);filter:brightness(0.96)}
 .shiftpill::after{content:"";display:inline-block;width:5px;height:5px;border-right:2px solid currentColor;
 border-bottom:2px solid currentColor;transform:rotate(45deg);margin-left:2px;margin-bottom:2px;opacity:.75;transition:transform .2s ease}
@@ -334,7 +334,7 @@ max-height:calc(100vh - 88px - var(--sab));max-height:calc(100dvh - 88px - var(-
 .qs-title{display:block;font-family:var(--serif);font-size:18px;color:var(--ink)}
 .qs-close{box-sizing:content-box;padding:7px;margin:-7px;background-clip:content-box;background-color:var(--s2);border:none;color:var(--dim);width:30px;height:30px;border-radius:50%;font-size:14px;
 display:flex;align-items:center;justify-content:center;cursor:pointer}
-.qs-close:hover{color:var(--ink);background-color:var(--line)}   /* area di tocco da 44 px (padding trasparente), il disco resta da 30 */
+@media (hover:hover){ .qs-close:hover{color:var(--ink);background-color:var(--line)}   /* area di tocco da 44 px (padding trasparente), il disco resta da 30 */ }
 .qs-hd-az{display:flex;align-items:center;gap:10px}
 .qs-orari{display:flex;flex-direction:column;gap:8px;align-items:flex-start;margin:10px 0 0}
 .qs-orari .qs-ore{width:100%}
@@ -345,7 +345,7 @@ display:flex;align-items:center;justify-content:center;cursor:pointer}
 .qs-btn{background:var(--bg);border:1.5px solid var(--line);border-radius:var(--r);padding:11px 13px;font-family:inherit;
 font-size:14.5px;font-weight:600;color:var(--ink);cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;
 gap:3px;transition:all .15s ease}
-.qs-btn:hover{border-color:var(--blue);background:var(--blue-soft);color:var(--blue)}
+@media (hover:hover){ .qs-btn:hover{border-color:var(--blue);background:var(--blue-soft);color:var(--blue)} }
 .qs-btn.active{border-color:var(--blue-fill);background:var(--blue-fill);color:#fff}
 .qs-shift-time{font-size:12px;font-weight:400;opacity:.8}
 .qs-spec{display:flex;flex-direction:column;gap:8px}
@@ -393,7 +393,7 @@ padding:16px 18px;margin:2px 0 var(--gap-sezione);box-shadow:0 4px 20px rgba(45,
 .qh-sub{font-size:13px;color:var(--dim);margin:0 0 14px;line-height:1.4}
 .qh-flow-options{display:flex;flex-direction:column;gap:8px;margin-top:12px}
 .qh-opt-btn{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:12px;text-align:left;transition:all .15s;font:inherit;width:100%}
-.qh-opt-btn:hover{border-color:var(--blue);background:var(--s2);transform:translateX(2px)}
+@media (hover:hover){ .qh-opt-btn:hover{border-color:var(--blue);background:var(--s2);transform:translateX(2px)} }
 .qh-opt-ic{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;color:var(--blue);flex:none}
 .qh-opt-ic svg{width:24px;height:24px}
 .qh-opt-tx{flex:1;min-width:0}
@@ -472,7 +472,7 @@ padding:16px 18px;margin:2px 0 var(--gap-sezione);box-shadow:0 4px 20px rgba(45,
    toccarne i bordi. 15cqi ≈ dieci lettere nella larghezza del bottone. */
 .qh-pos-btn{container-type:inline-size;min-width:0}
 .qh-pos-btn b{display:block;max-width:100%;text-align:center;font-size:min(1em,15cqi);overflow-wrap:anywhere}
-.qh-pos-btn:hover{border-color:var(--blue);background:var(--s2)}
+@media (hover:hover){ .qh-pos-btn:hover{border-color:var(--blue);background:var(--s2)} }
 /* Primo avvio (e scelta del ciclo dal banner): solo la domanda. Il piano
    sotto e gli altri inviti non servono finché non si sa che turno fai. */
 body.primo-avvio .daynav,body.primo-avvio #ora,
@@ -480,12 +480,12 @@ body.primo-avvio #status,body.primo-avvio #formaGiorno,body.primo-avvio #essenzi
 body.primo-avvio #luciditaGiornoWrap,body.primo-avvio #tabbar,
 body.primo-avvio #firstPlanBanner,body.primo-avvio #setupChecklist,body.primo-avvio #adattaCard,body.primo-avvio #medicoCard,body.primo-avvio #setupNudge,body.primo-avvio #aCasa,body.primo-avvio #loSapevi{display:none!important}
 .qh-btn{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:12px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;min-height:74px;transition:all .15s;font:inherit}
-.qh-btn:hover{border-color:var(--blue);transform:translateY(-1px);background:var(--s2)}
+@media (hover:hover){ .qh-btn:hover{border-color:var(--blue);transform:translateY(-1px);background:var(--s2)} }
 .qh-btn .qh-ic{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;color:var(--blue);margin-bottom:2px}
 .qh-btn .qh-ic svg{width:22px;height:22px}
 .qh-btn b{font-size:14px;color:var(--ink);font-weight:700}
 .qh-btn small{font-size:12px;color:var(--dim);font-weight:500}
-.crow:hover .crail{background:var(--s2)}
+@media (hover:hover){ .crow:hover .crail{background:var(--s2)} }
 /* pillola, come nel mockup: bordo pieno invece di uno shadow interno, e
    un filo più alta (10px contro 8px) — lo stesso trattamento che lì
    distingue la riga "oggi" da tutte le altre. */
@@ -584,7 +584,7 @@ border-top:5px solid var(--ink)}
 .cbar.pers{top:auto;bottom:-6px;height:3px;background:var(--persona);border-radius:99px}
 .lnk{background:none;border:none;padding:6px 0;color:var(--blue);font-family:inherit;
 font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;min-height:44px}   /* sottolineati restano solo i veri collegamenti (Termini, Privacy…): un'azione dentro l'app non è un link */
-.lnk:hover{color:var(--ink)}
+@media (hover:hover){ .lnk:hover{color:var(--ink)} }
 .lnk:active{opacity:.65}
 .lnk.dim{color:var(--dim);font-weight:500}   /* chiudere, rimandare, annullare: testo semplice, mai in evidenza */
 a.btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
@@ -717,10 +717,10 @@ display:flex;flex-direction:column;align-items:center;justify-content:center;gap
 .invito .attiva-head{display:flex}
 .invito>p.hint{font-size:13.5px;line-height:1.5;margin:5px 0 12px!important}
 .invito .x{position:absolute;top:2px;right:2px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:none;border:0;color:var(--faint);font-size:22px;line-height:1;cursor:pointer;padding:0;float:none;min-height:0}
-.invito .x:hover{color:var(--ink)}
+@media (hover:hover){ .invito .x:hover{color:var(--ink)} }
 .btn.pri{background:var(--blue-fill);border-color:var(--blue-fill);color:#fff;font-weight:600}
 .btn.azione{display:inline-flex;align-items:center;justify-content:center;background:var(--blue-fill);border:1px solid var(--blue-fill);color:#fff;font-weight:600;font-size:14px;min-height:42px;padding:8px 16px;text-decoration:none;text-align:center}
-.btn.azione:hover{background:var(--blue-fill);color:#fff;filter:brightness(1.1)}
+@media (hover:hover){ .btn.azione:hover{background:var(--blue-fill);color:#fff;filter:brightness(1.1)} }
 .adatta-azioni .lnk{min-height:44px;padding:0 6px}
 #chiudiBenvenuto{float:right;background:none;border:none;color:var(--faint);
 font-size:22px;line-height:1;cursor:pointer;padding:0 0 4px 10px;min-height:0}
@@ -753,28 +753,28 @@ summary{cursor:pointer;font-size:12px;letter-spacing:.07em;color:var(--faint);
 font-weight:600;list-style:none;display:inline-flex;gap:6px;align-items:center;padding:4px 0}
 summary::-webkit-details-marker{display:none}
 summary::after{content:"›";display:inline-block;margin-left:6px;transform:rotate(90deg);transition:transform .15s}details[open]>summary::after{transform:rotate(-90deg)}
-summary:hover{color:var(--blue)}
+@media (hover:hover){ summary:hover{color:var(--blue)} }
 .why{font-size:14px;color:var(--dim);line-height:1.6;margin-top:8px;padding-left:12px;border-left:2px solid var(--line)}
 .why cite{display:block;margin-top:7px;font-style:normal;font-size:12.5px;color:var(--faint)}
 .btn{background:var(--bg);border:1px solid var(--blue);color:var(--blue);padding:8px 13px;
 border-radius:var(--r);font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;flex:none;min-height:44px}
-.btn:hover{background:var(--blue);color:var(--su-blu)}
+@media (hover:hover){ .btn:hover{background:var(--blue);color:var(--su-blu)} }
 .btn.g{border-color:var(--line);color:var(--dim)}
-.btn.g:hover{background:var(--s2);color:var(--ink);border-color:var(--dim)}
+@media (hover:hover){ .btn.g:hover{background:var(--s2);color:var(--ink);border-color:var(--dim)} }
 .btn.sm{min-height:40px;padding:6px 14px;font-size:13.5px}
 .btn.danger{border-color:var(--risk-line);color:var(--risk)}
-.btn.danger:hover{background:var(--risk-soft);color:var(--risk);border-color:var(--risk)}
+@media (hover:hover){ .btn.danger:hover{background:var(--risk-soft);color:var(--risk);border-color:var(--risk)} }
 .ibtn{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;flex:none;border:0;border-radius:50%;background:none;color:var(--dim);cursor:pointer}
-.ibtn:hover{background:var(--s2);color:var(--ink)}
+@media (hover:hover){ .ibtn:hover{background:var(--s2);color:var(--ink)} }
 .ibtn svg{width:20px;height:20px}
 .diary{display:flex;gap:6px;margin-top:11px;flex-wrap:wrap;align-items:center}
 .dbtn{flex:1;min-width:52px;min-height:46px;background:var(--s2);border:1px solid var(--line);
 padding:6px 8px;border-radius:var(--r);font-size:14px;font-weight:500;line-height:1.25;
 cursor:pointer;font-family:inherit;color:var(--ink)}
-.dbtn:hover{border-color:var(--blue)}
+@media (hover:hover){ .dbtn:hover{border-color:var(--blue)} }
 /* azione primaria: piena, per essere trovata anche da stanchi */
 .dbtn.pri{background:var(--blue);border-color:var(--blue);color:var(--su-blu);font-weight:600;box-shadow:var(--shadow-btn)}
-.dbtn.pri:hover{filter:brightness(1.08)}
+@media (hover:hover){ .dbtn.pri:hover{filter:brightness(1.08)} }
 .dbtn.on{background:var(--blue-soft);border-color:var(--blue);color:var(--blue);font-weight:600}
 /* display in una classe, non inline: uno stile inline su display batte
    SEMPRE le regole "body.tab-x #id{display:none}" che nascondono gli
@@ -820,7 +820,7 @@ overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .q .hint{display:block;margin-top:5px}
 .skip{display:block;margin-top:12px;min-height:44px;font-size:14px;color:var(--faint);text-align:center;
 background:none;border:none;width:100%;cursor:pointer;font-family:inherit}
-.skip:hover{color:var(--blue)}
+@media (hover:hover){ .skip:hover{color:var(--blue)} }
 .onboard b{font-family:var(--serif);font-size:19px;display:block;margin-bottom:6px}
 .onboard>p{font-size:14px;color:var(--dim);line-height:1.55;margin-bottom:18px}
 
@@ -851,14 +851,23 @@ font:inherit;font-weight:700;letter-spacing:.02em;min-height:44px;padding:0 0 0 
    principali, non ripetuto su ognuno. .tabbtn resta fuori: ha già un suo
    :active dedicato sull'icona (.tabbtn:active svg) più avanti — sommare
    anche questo raddoppiava lo schiacciamento solo lì. */
-.tool,.btn,.dbtn,.tsec,button.lnk,.skip,.qh-btn,.qh-opt-btn,.qs-chip,.qs-btn,.vb,.sg-pen,.ccell,.kface{
+.tool,.btn,.dbtn,.tsec,button.lnk,.skip,.qh-btn,.qh-opt-btn,.qs-chip,.qs-btn,.vb,.sg-pen,.ccell,.kface,
+.sg-g,.tt-g,.pers-via,.themebtn,.nav,.shiftpill,.today,.qh-pos-btn,.ibtn,.qs-close,.pv-gg,.pv-pen{
   transition:transform .1s ease, opacity .1s ease;
 }
 .tool:active,.btn:active,.dbtn:active,
 .tsec:active,button.lnk:active,.skip:active,
-.qh-btn:active,.qh-opt-btn:active,.qs-chip:active,.qs-btn:active,.vb:active,.sg-pen:active,.ccell:active,.kface:active{
+.qh-btn:active,.qh-opt-btn:active,.qs-chip:active,.qs-btn:active,.vb:active,.sg-pen:active,.ccell:active,.kface:active,
+.sg-g:active,.tt-g:active,.pers-via:active,.themebtn:active,.nav:active,.shiftpill:active,.today:active,.qh-pos-btn:active,.ibtn:active,.qs-close:active,.pv-gg:active,.pv-pen:active{
   transform:scale(.97); opacity:.85;
 }
+/* Come in un'app: un tocco lungo sulle parti dell'interfaccia non seleziona il testo (il testo dei fogli sì: si può copiare),
+   le immagini non si trascinano, la pagina dietro un foglio aperto resta ferma, la fila dei pennelli si ferma su un pennello. */
+.erow,.tl,.tabbtn,.appbar,.daynav,.cycbar,.ccell,.sg-g,.tt-g,.riga-sw,.opz-hub-r,.pers-via,.shiftpill,.fg-legend,.cal-sett,.crow{-webkit-user-select:none;user-select:none}
+img{-webkit-user-drag:none}
+body:has(.qs-backdrop:not([hidden])){overflow:hidden}
+#segnaOut .sg-pennelli{scroll-snap-type:x proximity}
+#segnaOut .sg-pennelli>*{scroll-snap-align:start;scroll-margin-left:16px}
 /* le righe della timeline e degli elenchi: si scuriscono un attimo al tocco, senza rimpicciolire testo lungo */
 .erow,.opz-hub-r{transition:background-color var(--dur-1) var(--ease-std)}
 .erow:active,.opz-hub-r:active{background-color:var(--s2)}
@@ -1014,7 +1023,7 @@ padding:12px 6px 12px 14px;margin:-6px 0 var(--gap-sezione);font-size:13.5px;lin
 .perche{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-size:13.5px;color:var(--dim)}
 .perche-az{display:flex;flex-wrap:wrap;gap:6px 10px;margin-top:6px;align-items:center}
 .sapevi .x{flex:none;width:44px;height:44px;margin:-10px 0 -10px;border:0;background:none;color:var(--faint);font-size:20px;cursor:pointer;border-radius:50%}
-.acasa:hover{border-color:var(--blue-lt)}
+@media (hover:hover){ .acasa:hover{border-color:var(--blue-lt)} }
 .acasa svg{flex:none;color:var(--blue)}
 .acasa b{display:block;font-size:15px;font-weight:600}
 .acasa small{display:block;font-size:12.5px;color:var(--dim);margin-top:2px}
@@ -1118,7 +1127,7 @@ body.sg-segna-solo .sg-importa{display:none}
 .tsec{display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:var(--s1);
 border:1px solid var(--line);border-radius:var(--r);padding:13px 15px;font:inherit;color:inherit;
 cursor:pointer;min-height:52px;margin-top:12px;box-shadow:var(--shadow-card)}
-.tsec:hover{border-color:var(--blue-lt)}
+@media (hover:hover){ .tsec:hover{border-color:var(--blue-lt)} }
 .tgruppo{margin-top:var(--gap-sezione)}
 .tgruppo>.eyebrow{display:block;margin:0 0 8px}
 .tgruppo-box{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow-card);overflow:hidden}
@@ -1338,7 +1347,7 @@ body.tab-oggi #scambioPagina,body.tab-opzioni #scambioPagina{display:none}
 .tool{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;background:var(--s1);border:1px solid var(--line);
 border-radius:var(--r);padding:13px 15px;font:inherit;cursor:pointer;color:inherit;min-height:44px;
 box-shadow:var(--shadow-card)}
-.tool:hover{border-color:var(--blue-lt)}
+@media (hover:hover){ .tool:hover{border-color:var(--blue-lt)} }
 /* selezionato: stesso trattamento di .dbtn.on, per i preset del passo 1 del wizard */
 .tool.on{border-color:var(--blue);background:var(--blue-soft)}
 .tool.on .tool-ic{background:var(--blue);color:var(--su-blu)}
@@ -12075,7 +12084,12 @@ function setTab(t){
   try{ window.scrollTo(0,0); }catch(e){}
 }
 if($("#tabbar")) $("#tabbar").addEventListener("click", e=>{
-  const b=e.target.closest("[data-tab]"); if(b) setTab(b.dataset.tab);
+  const b=e.target.closest("[data-tab]"); if(!b) return;
+  const giaQui=document.body.classList.contains("tab-"+b.dataset.tab) && !document.body.classList.contains("sottopagina");
+  haptic(4);
+  // Come nelle app: sulla tab già aperta, in cima con un movimento morbido (senza ridisegnare); altrimenti la tab.
+  if(giaQui && window.scrollY>0){ try{ window.scrollTo({top:0, behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"}); }catch(x){ window.scrollTo(0,0); } return; }
+  setTab(b.dataset.tab);
 });
 // Opzioni: icona in header, non più una tab — "torna indietro" riporta
 // alla tab da cui si è aperta (Oggi o Turni), non sempre a Oggi.
