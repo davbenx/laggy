@@ -25,6 +25,11 @@ await p.click('#essenziale [data-row="sonnolenza"]'); await p.clock.runFor(500);
 const f=await p.evaluate(()=>document.querySelector("#infoCorpo").innerText);
 ok(/i primi 20-30 minuti sono i più lenti/.test(f) && /acqua fresca/.test(f) && !/luce forte/i.test(f), "consigli pratici per svegliarsi, senza dire della luce (decide la voce «Luce»)");
 await p.context().close();
+// «Adesso» prima del turno: solo quello che viene prima, in ordine, e «Poi» non ripete il turno
+p=await apri({...BASE, pattern:"MMMMMRR", shifts:{M:{n:"Mattino",s:360,e:840}}}, new Date(2026,10,4,5,0));
+const ad=await p.evaluate(()=>document.querySelector("#ora").innerText.replace(/\s+/g," "));
+ok(/Tra 1h entri in turno|Tra 1 ora entri in turno|entri in turno/.test(ad) && /Esci alle 05:30 · turno alle 06:00/.test(ad) && !/caffeina|pisolino prima/.test(ad) && !/Poi · entri in turno/.test(ad), "prima del turno: «Esci alle 05:30 · turno alle 06:00», senza il pomeriggio né il «Poi» doppio → "+ad);
+await p.context().close();
 // notte: il punto basso in turno, come prima
 p=await apri({...BASE, pattern:"MPNSRR", shifts:{M:{n:"Mattino",s:360,e:840},P:{n:"Pomeriggio",s:840,e:1320},N:{n:"Notte",s:1320,e:1800}}}, new Date(2026,10,5,3,0));
 t=await riga(p); ok(/Momento di sonnolenza/.test(t) && !/appena sveglio/.test(t), "notte: la scheda in turno → "+t);

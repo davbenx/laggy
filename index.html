@@ -452,6 +452,7 @@ padding:16px 18px;margin:2px 0 var(--gap-sezione);box-shadow:0 4px 20px rgba(45,
 .qh-seq-chip.riposo{border-color:var(--line);color:var(--dim)}
 .qh-add{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .qh-nuovo{margin-top:10px;padding:12px;border:1px solid var(--line);border-radius:14px;display:grid;gap:8px}
+#saluteBox .lnk{display:block;min-height:44px;text-align:left}
 .qh-nome-sigla{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:end}
 .qh-sigla{display:grid;gap:2px;font-size:12px;color:var(--dim);text-align:center}
 .qh-sigla input{width:52px;text-align:center;text-transform:uppercase;font-weight:700}
@@ -1991,6 +1992,8 @@ header b{font-size:23px}
     <label class="riga-sw" for="hcSonno"><span><b>Sonno</b><small>quando hai dormito davvero; nel diario ti propone quegli orari</small></span><span class="switch"><input type="checkbox" id="hcSonno" data-hc="sonno"><span class="slider"></span></span></label>
     <label class="riga-sw" for="hcPassi"><span><b>Passi</b><small>per capire quando eri sveglio anche se il piano diceva sonno</small></span><span class="switch"><input type="checkbox" id="hcPassi" data-hc="passi"><span class="slider"></span></span></label>
     <p class="hint" id="hcNota" aria-live="polite"></p>
+    <div class="hc-stato" id="hcStato" aria-live="polite" hidden></div>
+    <button type="button" class="lnk" data-hc-leggi hidden>Leggi adesso</button>
     <button type="button" class="lnk" data-hc-apri>Permessi in Health Connect →</button>
     <p class="hint">Spegnendo un interruttore l'app dimentica i dati letti di quel tipo. I permessi li togli anche da Health Connect: l'app se ne accorge.</p>
   </div>
@@ -6137,7 +6140,18 @@ function adessoLine(P, riferimento){
       };
     }
     const toStart=mod1440(b.start-m);
-    if(toStart>0 && toStart<=6*60) return {t:"Tra "+hm(toStart)+" entri in turno",s:"ultima caffeina entro le "+hhmm(P.cut)+(P.naps.length?", e c'è un pisolino prima":"")};
+    if(toStart>0 && toStart<=6*60){
+      // Solo quello che viene PRIMA del turno, in ordine: il pisolino (se c'è prima), quando uscire, la caffeina se conta a
+      // inizio turno (le notti). Poi l'ora del turno: così «Poi» non ripete il titolo. Prima diceva «c'è un pisolino prima»
+      // anche per il pisolino dopo il turno, e l'ultima caffeina del pomeriggio a chi stava per uscire alle 5.
+      const inizio=m+toStart, esci=inizio-(+state.cTo||0), passi=[];
+      const napPrima=(P.naps||[]).find(x=>x.b<=b.start+5 && mod1440(x.a-m)<toStart);
+      if(napPrima) passi.push("pisolino alle "+hhmm(napPrima.a));
+      if(esci>m+5) passi.push("esci alle "+hhmm(esci));
+      if(isFinite(P.cut) && P.night && pianoVoce("caffe")) passi.push("ultima caffeina entro le "+hhmm(P.cut));
+      passi.push("turno alle "+hhmm(b.start));
+      return {t:"Tra "+hm(toStart)+" entri in turno", s:passi.join(" · ").replace(/^./,c=>c.toUpperCase())};
+    }
     const afterEnd=mod1440(m-b.end);
     if((P.night||P.lateStart) && afterEnd<=2*60) return {t:"Appena smontato",s:"è l'ora più rischiosa: se hai sonno, non guidare"};
   }
@@ -8387,6 +8401,30 @@ function saluteCfg(){ const s=state.salute||{}; return {sonno:s.sonno===true, pa
 function renderSalute(){
   const box=$("#saluteBox"); if(!box) return; box.hidden=!platform.salute.available; if(box.hidden) return;
   const c=saluteCfg(); $("#hcSonno").checked=c.sonno; $("#hcPassi").checked=c.passi;
+  // Cosa ha letto davvero, da quale app e quando: senza, non si capiva se funzionava.
+  const el=$("#hcStato"), bt=$("[data-hc-leggi]"), info=store.get("hcInfo", null), acceso=c.sonno||c.passi;
+  if(bt) bt.hidden=!acceso;
+  if(!el) return;
+  if(!acceso || !info){ el.hidden=true; return; }
+  const righe=[];
+  if(c.sonno) righe.push(info.errSonno ? "<b>Sonno:</b> non sono riuscito a leggerlo. Riprova con «Leggi adesso»."
+    : info.notti ? "<b>Sonno:</b> "+info.notti+(info.notti===1?" notte":" notti")+" nelle ultime 3 settimane"+(info.fonte?" (da "+esc(nomeAppSalute(info.fonte))+")":"")+
+        (info.ultima?". L'ultima: "+hhmm(new Date(info.ultima[0]).getHours()*60+new Date(info.ultima[0]).getMinutes())+" → "+hhmm(new Date(info.ultima[1]).getHours()*60+new Date(info.ultima[1]).getMinutes()):"")+"."
+    : "<b>Sonno:</b> in Health Connect non c'è nessuna notte delle ultime 3 settimane. Serve un orologio o un'app che registri il sonno (Samsung Health, Fitbit, Google Fit…) e lo condivida con Health Connect. Finché non c'è, il diario usa gli orari del piano.");
+  if(c.passi) righe.push(info.errPassi ? "<b>Passi:</b> non sono riuscito a leggerli. Riprova con «Leggi adesso»."
+    : info.giorniPassi ? "<b>Passi:</b> dati di "+info.giorniPassi+(info.giorniPassi===1?" giorno":" giorni")+" nelle ultime 3 settimane."
+    : "<b>Passi:</b> nessun dato. Di solito li scrive in Health Connect l'app che conta i passi del telefono (Samsung Health, Google Fit): controlla che sia collegata.");
+  const d=new Date(info.quando);
+  el.innerHTML=righe.map(x=>'<p class="hint" style="margin:4px 0">'+x+'</p>').join("")+'<p class="hint" style="margin:4px 0;font-size:12px">Letto '+(iso(d)===iso(new Date())?"oggi":"il "+d.getDate()+"/"+(d.getMonth()+1))+" alle "+hhmm(d.getHours()*60+d.getMinutes())+'.</p>';
+  el.hidden=false;
+}
+// Il nome dell'app che ha scritto il sonno in Health Connect (dal suo pacchetto Android).
+function nomeAppSalute(pk){
+  const N={"com.sec.android.app.shealth":"Samsung Health","com.google.android.apps.fitness":"Google Fit","com.fitbit.FitbitMobile":"Fitbit",
+    "com.garmin.android.apps.connectmobile":"Garmin Connect","com.ouraring.oura":"Oura","com.withings.wiscale2":"Withings",
+    "com.huawei.health":"Huawei Salute","com.xiaomi.wearable":"Mi Fitness","com.mi.health":"Mi Fitness","com.sleep.android":"Sleep as Android",
+    "com.urbandroid.sleep":"Sleep as Android","com.google.android.apps.healthdata":"Health Connect"};
+  return N[pk] || "un'altra app";
 }
 function dimenticaSalute(tipo){
   if(tipo==="sonno"){ state.hcSonno=[]; store.set("hcSonno", []); }
@@ -8398,10 +8436,16 @@ async function leggiSalute(){
   const st=await platform.salute.stato(); if(st.stato!=="ok") return;
   let cambiato=false;
   for(const tipo of ["sonno","passi"]) if(c[tipo] && !st[tipo]){ state.salute={...saluteCfg(), [tipo]:false}; dimenticaSalute(tipo); cambiato=true; }   // permesso tolto da Android
-  const a=Date.now(), da=a-21*864e5, cc=saluteCfg();
-  try{ if(cc.sonno){ const s=await platform.salute.sonno(da, a); state.hcSonno=s.map(x=>[+x.inizio, +x.fine]).filter(v=>v[1]>v[0]); store.set("hcSonno", state.hcSonno); cambiato=true; } }catch(e){}
-  try{ if(cc.passi){ const p=await platform.salute.passi(da, a); state.hcPassi=p.map(x=>[+x.t, +x.n]); store.set("hcPassi", state.hcPassi); cambiato=true; } }catch(e){}
-  if(cambiato){ salva(); render(); renderSalute(); aggiornaLuceOttima(); }
+  const a=Date.now(), da=a-21*864e5, cc=saluteCfg(), info={quando:a};
+  try{ if(cc.sonno){ const s=await platform.salute.sonno(da, a); state.hcSonno=s.map(x=>[+x.inizio, +x.fine]).filter(v=>v[1]>v[0]); store.set("hcSonno", state.hcSonno); cambiato=true;
+    const lunghe=s.filter(x=>+x.fine-+x.inizio>=60*6e4), conta={}; lunghe.forEach(x=>{ conta[x.fonte]=(conta[x.fonte]||0)+1; });
+    const ult=lunghe.slice().sort((x,y)=>+x.fine-+y.fine).pop();
+    info.notti=lunghe.length; info.ultima=ult?[+ult.inizio,+ult.fine]:null; info.fonte=Object.keys(conta).sort((x,y)=>conta[y]-conta[x])[0]||""; } }catch(e){ info.errSonno=true; }
+  try{ if(cc.passi){ const p=await platform.salute.passi(da, a); state.hcPassi=p.map(x=>[+x.t, +x.n]); store.set("hcPassi", state.hcPassi); cambiato=true;
+    info.giorniPassi=new Set(state.hcPassi.map(v=>iso(new Date(v[0])))).size; } }catch(e){ info.errPassi=true; }
+  store.set("hcInfo", info);
+  if(cambiato){ salva(); render(); aggiornaLuceOttima(); }
+  renderSalute();
 }
 // gli orari del sonno da Health Connect per la domanda del diario: la sessione che combacia di più con il sonno previsto
 function sonnoHcDel(giorno, bedPiano, wakePiano){
@@ -8425,7 +8469,8 @@ if($("#saluteBox")){
     if(r && r[tipo]){ state.salute={...saluteCfg(), [tipo]:true}; salva(); haptic(10); if(nota) nota.textContent="Acceso: leggo "+(tipo==="sonno"?"il sonno":"i passi")+" delle ultime 3 settimane."; track("setup_item",{item:"salute_"+tipo}); leggiSalute(); }
     else { x.checked=false; if(nota) nota.textContent="Permesso non concesso. Puoi darlo quando vuoi da Health Connect."; }
   });
-  $("#saluteBox").addEventListener("click", e=>{ if(e.target.closest("[data-hc-apri]")) platform.salute.apri(); });
+  $("#saluteBox").addEventListener("click", e=>{ if(e.target.closest("[data-hc-apri]")) platform.salute.apri();
+    if(e.target.closest("[data-hc-leggi]")){ haptic(6); const n=$("#hcNota"); if(n) n.textContent="Leggo…"; leggiSalute().then(()=>{ if(n) n.textContent=""; }); } });
 }
 if(platform.salute.available){
   addEventListener("load", ()=>setTimeout(()=>{ renderSalute(); leggiSalute(); }, 2000));
