@@ -58,6 +58,13 @@ public class DevicePlugin extends Plugin {
         });
     }
 
+    /** La pagina ha disegnato la prima volta: lo splash di sistema può andare via (vedi MainActivity). */
+    @PluginMethod
+    public void pronta(PluginCall call) {
+        MainActivity.paginaPronta = true;
+        call.resolve();
+    }
+
     /** Le impostazioni di questa app (permessi compresi): dopo un permesso negato Android non lo richiede più. */
     @PluginMethod
     public void apriImpostazioni(PluginCall call) {

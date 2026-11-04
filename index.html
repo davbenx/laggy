@@ -287,7 +287,12 @@ html.ios .today-pick{display:block;position:absolute;top:0;right:0;bottom:0;left
 html.ios .today-wrap:has(.today.full) .today-pick{display:none}
 /* iPhone: niente zoom col doppio tocco (resta lo zoom con due dita) e
    niente zoom automatico entrando in un campo: Safari lo fa sotto i 16px. */
-html{touch-action:manipulation}
+html{touch-action:manipulation;-webkit-tap-highlight-color:transparent}   /* il riquadro grigio di Android al tocco: c'è già il nostro stato «premuto» */
+button,img,svg,[role=button]{-webkit-touch-callout:none}   /* tocco lungo su pulsanti e icone: niente menu «salva immagine» */
+#avvio{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:var(--bg);pointer-events:none;transition:opacity .2s ease}
+#avvio img{border-radius:22px;box-shadow:0 8px 30px rgba(0,0,0,.25)}
+#avvio.via{opacity:0}
+@media (prefers-reduced-motion:reduce){ #avvio{transition:none} }
 html.ios input,html.ios select,html.ios textarea{font-size:max(16px,1em)}
 /* pillola del turno: affordance interattiva, hover, active, chevron rotante all'apertura */
 .shiftpill{display:inline-flex;align-items:center;gap:5px;background:var(--blue-soft);color:var(--blue);font-size:12px;
@@ -1555,6 +1560,17 @@ header b{font-size:23px}
 </style>
 </head>
 <body>
+<!-- Avvio: il logo sul colore della pagina finché il primo disegno non è completo. Senza, per mezzo secondo si vedeva
+     la pagina vuota («Turni», «—», barre vuote) riempirsi. Nell'app Android lo fa lo splash di sistema: qui si toglie subito. -->
+<div id="avvio" aria-hidden="true"><img src="./icon-192.png" alt="" width="88" height="88"></div>
+<script>
+(function(){
+  var v=document.getElementById("avvio"), via=function(){ if(!v || !v.parentNode) return; v.classList.add("via"); setTimeout(function(){ if(v.parentNode) v.parentNode.removeChild(v); }, 220); };
+  try{ if(window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform()){ v.parentNode.removeChild(v); return; } }catch(e){}
+  window.addEventListener("nt:rendered", via, {once:true});
+  setTimeout(via, 3000);   // rete di sicurezza: mai più di 3 secondi
+})();
+</script>
 <div class="wrap">
 
 <header class="appbar">
@@ -4434,6 +4450,7 @@ function summaryText(){
     .concat(sm.verdict?[sm.verdict]:["Su "+sm.tot+" notti annotate"]) : [];
   return testa.concat(seDebito).concat(seRegolarita).concat(seCiclo).concat(seSveglia).concat(seDiario).join("\n");
 }
+var _primoDisegno=false;   // lo splash di sistema (app Android) resta finché la pagina non ha disegnato una volta
 function render(){
   _pianiDelGiro = new Map();   // gli occupati delle persone no: valgono finché i dati non cambiano (firmaDati)
   // salva() qui, non solo nei singoli gestori: trovati (in questa sessione,
@@ -4500,6 +4517,7 @@ function render(){
   renderOpzSummaries();
   try{ history.replaceState(null,"","#"+toHash()); }catch(e){}
   try{ window.dispatchEvent(new Event("nt:rendered")); }catch(e){}
+  if(!_primoDisegno){ _primoDisegno=true; try{ platform.dispositivo.pronta && platform.dispositivo.pronta(); }catch(e){} }
 }
 // Un modulo non aggancia le sue dichiarazioni top-level a window da solo
 // (uno script classico lo faceva gratis) — paid.js (script classico a

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Lo sfondo dello splash: lo stesso della pagina, così il passaggio non si vede. -->
+<resources>
+    <color name="avvio_sfondo">#FFFFFF</color>
+</resources>
