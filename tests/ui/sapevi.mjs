@@ -55,7 +55,7 @@ await p.context().close();
 // senza copia di sicurezza, dopo una settimana: il consiglio di salvarla
 p=await apri(Object.assign({firstSeenAt:fa(10)}, ST), {backupDone:false});
 t=await tip(p);
-ok(/^copia:.*solo su questo telefono.*Salva la copia/.test(t), "senza copia di sicurezza: il consiglio di salvarla → "+t);
+ok(/^copia:.*solo in questo browser.*Salva la copia/.test(t), "senza copia di sicurezza: il consiglio di salvarla → "+t);
 await p.context().close();
 p=await apri(Object.assign({firstSeenAt:fa(5)}, ST), {backupDone:false});
 ok(!/^copia:/.test(await tip(p)), "non prima di una settimana");

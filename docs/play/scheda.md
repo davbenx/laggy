@@ -84,6 +84,8 @@ Novità 1.4.4
 • Testi del piano ricontrollati frase per frase sugli studi da cui vengono, con un revisore.
 • Rientro in auto: lenti di categoria da 1 a 3, mai la 4, e solo con buona luce. Con l'alba ancora scura, pioggia o nebbia toglile.
 • Reperibilità: dopo il pisolino, se puoi, aspetta un quarto d'ora prima di guidare.
+• Il tuo orologio: il cronotipo come nel questionario MCTQ, senza il sonno di recupero, e quali turni ti pesano di più.
+• Testi più corti e diretti.
 
 ## Note di versione 1.4.3 (max 500)
 Novità 1.4.3
