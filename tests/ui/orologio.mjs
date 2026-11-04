@@ -77,4 +77,18 @@ const avanti=async p=>{ await p.click("#next"); await p.waitForTimeout(150); };
   ok(!(await p.evaluate(()=>JSON.parse(localStorage.getItem("nt:funzioniUsate")||"{}").orologio)), "con gli orari di partenza l'orologio non conta come visto: l'invito arriverà quando sarà suo");
   await p.context().close(); }
 
+// Cronotipo come nell'MCTQ^Shift: dal diario, solo i liberi «puliti» (non lo smonto dopo le notti), corretto per il recupero.
+{ const wakes={}, beds={};
+  for(let i=1;i<=27;i++){ wakes[fa(i)]="06:45"; beds[fa(i)]="23:45"; }
+  for(const i of [1,2,10,11,19,20]){ wakes[fa(i)]="10:30"; beds[fa(i)]="02:00"; }   // i riposi R di MMPPNNSRR partito oggi
+  wakes[fa(3)]="13:00"; beds[fa(3)]="07:00";                                       // lo smonto: recupero, non conta
+  const p=await apri({turniConfigurati:true,pattern:"MMPPNNSRR",anchor:fa(0),repeat:true,firstSeenAt:"2026-01-01",freeBed:"22:00",freeWake:"06:00",shifts:TURNI,wakes,beds});
+  await p.click("#tabTurni").catch(()=>p.evaluate(()=>document.querySelector("[data-tab=turni]")?.click())); await p.waitForTimeout(300);
+  await p.evaluate(()=>document.querySelector("#doAndamenti").click()); await p.waitForTimeout(300);
+  await p.evaluate(()=>document.querySelector("[data-and-sez=orologio]").click()); await p.waitForTimeout(400);
+  const tx=await p.evaluate(()=>document.querySelector("#orologio")?.innerText||"");
+  ok(/^Un po' gufo/.test(tx) && /da 6 giorni liberi del tuo diario/.test(tx) && /senza contare il sonno di recupero/.test(tx),
+    "il diario vince sugli orari dichiarati (allodola): un po' gufo, da 6 liberi puliti, senza il recupero → "+tx.slice(0,140).replace(/\s+/g," "));
+  await p.context().close(); }
+
 console.log("errori", errs); await b.close();

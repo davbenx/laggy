@@ -7755,9 +7755,11 @@ function orologio(){
   // metà del sonno nei giorni liberi senza sveglia, corretta per il sonno di recupero.
   // Se nei liberi dormi più della tua media, metà dell'eccesso è recupero, non preferenza
   // (MSFsc = MSF − (SDf − SDmedia)/2). Serve solo all'etichetta e ai consigli: il piano usa i tuoi orari veri.
-  const sdF=((wake-bed)%1440+1440)%1440 || +state.need || 480;
+  // Come nell'MCTQ^Shift: se il diario ha abbastanza giorni liberi «puliti», si parte da quelli; altrimenti dagli orari dichiarati.
+  const lp=liberiPuliti();
+  const sdF=lp ? lp.sd : (((wake-bed)%1440+1440)%1440 || +state.need || 480);
   const sdMedia=sonnoMedioDiario() || +state.need || 480;
-  const msf=bed+sdF/2, msfsc=mod1440(sdF>sdMedia ? msf-(sdF-sdMedia)/2 : msf);
+  const msf=lp ? lp.msf : bed+sdF/2, msfsc=mod1440(sdF>sdMedia ? msf-(sdF-sdMedia)/2 : msf);
   const h=(msfsc<720 ? msfsc : msfsc-1440)/60;   // le 23:30 sono «prima di mezzanotte», non le 23 ore
   const tipo = h<2.5 ? "Allodola" : h<3.5 ? "Un po' allodola" : h<5 ? "Né allodola né gufo" : h<6 ? "Un po' gufo" : "Gufo";
   let lucido=null;
@@ -7767,7 +7769,23 @@ function orologio(){
     const r=window.NTAlert.alertness({now:sv, freeWake:hhmm(wake), freeBed:state.freeBed, lastSleepEnd:sv, nextSleepStart:letto, nadir:cbt});
     if(r && r.peak) lucido=r.peak.hhmm;
   } }catch(e){}
-  return {tipo, h, mid, msf:msfsc, recupero: sdF>sdMedia+15, cbt, mel:mod1440(bed-120), lucido, partenza: state.freeBed==="23:30" && state.freeWake==="07:30"};
+  return {tipo, h, mid, msf:msfsc, recupero: sdF>sdMedia+15, liberiDiario: lp ? lp.n : 0, cbt, mel:mod1440(bed-120), lucido, partenza: state.freeBed==="23:30" && state.freeWake==="07:30"};
+}
+// I giorni liberi «puliti» del diario, come nell'MCTQ^Shift (Juda, Vetter & Roenneberg 2013): il sonno che finisce
+// in un giorno di riposo (niente sveglia per il lavoro) e non viene dopo una notte di lavoro (quello è recupero).
+// Ultime 8 settimane, almeno 4 giorni; altrimenti null e si usano gli orari dichiarati.
+function liberiPuliti(){
+  const oggi=giornoVero(), f=dnum(state.focus), mids=[], durs=[];
+  for(let o=-55;o<=0;o++){ const g=day(oggi,o), k=iso(g), w=(state.wakes||{})[k], bd=(state.beds||{})[k];
+    if(!/^\d\d:\d\d$/.test(w||"") || !/^\d\d:\d\d$/.test(bd||"")) continue;
+    const d=((t(w)-t(bd))%1440+1440)%1440; if(d<180 || d>840) continue;
+    let libero=false;
+    try{ const off=dnum(g)-f, b=NT.block(off); libero = b.rest && NT.tipoDelGiorno(off-1)!=="n"; }catch(e){}
+    if(!libero) continue;
+    const b0=t(bd); mids.push((b0<720 ? b0+1440 : b0)+d/2); durs.push(d); }
+  if(mids.length<4) return null;
+  const m=v=>v.reduce((a,b)=>a+b,0)/v.length;
+  return {n:mids.length, msf:mod1440(m(mids)), sd:m(durs)};
 }
 // Sonno medio per notte dal diario e da Health Connect, ultime 4 settimane (almeno 5 notti, altrimenti null).
 function sonnoMedioDiario(){
@@ -7813,7 +7831,7 @@ function orologioHtml(){
   const o=orologio();
   const riga=(lab,ora,sub)=>'<div class="oro-riga"><div><b>'+lab+'</b><span>'+sub+'</span></div><span class="mono">'+ora+'</span></div>';
   return sezDet("Il tuo orologio", o.tipo+" · momento di sonnolenza "+hhmm(o.cbt),
-      '<p class="oro-tipo">'+esc(o.tipo)+'</p><p class="hint" style="margin:0 0 6px">Nei giorni liberi, quando niente ti sveglia'+(o.recupero ? ', senza contare il sonno di recupero' : '')+'.</p>'+
+      '<p class="oro-tipo">'+esc(o.tipo)+'</p><p class="hint" style="margin:0 0 6px">Nei giorni liberi, quando niente ti sveglia'+(o.recupero ? ', senza contare il sonno di recupero' : '')+(o.liberiDiario ? ' · da '+o.liberiDiario+' giorni liberi del tuo diario' : '')+'.</p>'+
       fasciaOrologio(o)+
       (cronotipoTurni(o) ? '<p class="hint oro-turni" style="margin:0 0 8px">'+esc(cronotipoTurni(o))+'</p>' : '')+
       riga("Metà del sonno", hhmm(o.mid), "il centro del sonno: dice se sei allodola o gufo")+
