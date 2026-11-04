@@ -81,11 +81,10 @@ Progetto indipendente. Segnalazioni e idee: Impostazioni › Segnala cosa non to
 
 ## Note di versione 1.4.4 (max 500)
 Novità 1.4.4
-• Testi del piano ricontrollati frase per frase sugli studi da cui vengono, con un revisore.
-• Rientro in auto: lenti di categoria da 1 a 3, mai la 4, e solo con buona luce. Con l'alba ancora scura, pioggia o nebbia toglile.
-• Reperibilità: dopo il pisolino, se puoi, aspetta un quarto d'ora prima di guidare.
-• Il tuo orologio: una stima del cronotipo dai tuoi giorni liberi, con il metodo di calcolo dell'MCTQ (non è il questionario), e quali turni di solito pesano di più per un orologio come il tuo.
-• Testi più corti e diretti.
+• Testi del piano ricontrollati sugli studi da cui vengono, con un revisore, e più corti.
+• Rientro in auto: lenti di categoria da 1 a 3, mai la 4, e solo con buona luce.
+• Dopo il pisolino, se puoi, aspetta un quarto d'ora prima di guidare.
+• Il tuo orologio: una stima del cronotipo dai tuoi giorni liberi, con il metodo di calcolo dell'MCTQ, e quali turni di solito pesano di più per te.
 
 ## Note di versione 1.4.3 (max 500)
 Novità 1.4.3
