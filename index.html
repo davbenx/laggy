@@ -7740,6 +7740,27 @@ function orologio(){
   } }catch(e){}
   return {tipo, mid, cbt, mel:mod1440(bed-120), lucido, partenza: state.freeBed==="23:30" && state.freeWake==="07:30"};
 }
+// Da cosa è stimato l'orologio nelle ultime due settimane: notti del diario, notti di Health Connect (e da quale app),
+// notti interrotte dai passi. Così si vede che i dati non solo arrivano, ma entrano nel calcolo.
+function datiUsatiTesto(){
+  const oggi=giornoVero(), da=day(oggi,-14), dms=da.getTime(), ams=oggi.getTime()+864e5;
+  const notti=[];   // [inizio, fine] in ms
+  let diario=0;
+  for(let o=-13;o<=0;o++){ const k=iso(day(oggi,o)), w=(state.wakes||{})[k], bd=(state.beds||{})[k];
+    if(!/^\d\d:\d\d$/.test(w||"") || !/^\d\d:\d\d$/.test(bd||"")) continue;
+    const fine=new Date(k+"T"+w+":00").getTime(); let ini=new Date(k+"T"+bd+":00").getTime(); if(ini>=fine) ini-=864e5;
+    if(fine-ini<60*6e4) continue; diario++; notti.push([ini,fine]); }
+  const hc=(Array.isArray(state.hcSonno)?state.hcSonno:[]).filter(v=>v[1]-v[0]>=60*6e4 && v[1]>dms && v[0]<ams);
+  hc.forEach(v=>notti.push(v));
+  const attivi=(Array.isArray(state.hcPassi)?state.hcPassi:[]).filter(v=>+v[1]>=50).map(v=>+v[0]);
+  const interrotte=saluteCfg().passi ? notti.filter(([a,z])=>attivi.some(t=>t>a+10*6e4 && t<z-10*6e4)).length : 0;
+  const info=store.get("hcInfo",null)||{}, parti=[];
+  if(diario) parti.push(diario+(diario===1?" notte":" notti")+" dal diario");
+  if(hc.length) parti.push(hc.length+(hc.length===1?" notte":" notti")+" da Health Connect"+(info.fonte?" ("+nomeAppSalute(info.fonte)+")":""));
+  if(saluteCfg().passi && attivi.length) parti.push("passi: "+(interrotte ? interrotte+(interrotte===1?" notte interrotta":" notti interrotte") : "nessuna notte interrotta"));
+  return parti.length ? "Dati usati nelle ultime due settimane: "+parti.join(" · ")+"."
+    : "Per ora la stima usa solo gli orari del piano: segna come dormi (o collega Health Connect) e diventa tua.";
+}
 function orologioHtml(){
   const o=orologio();
   const riga=(lab,ora,sub)=>'<div class="oro-riga"><div><b>'+lab+'</b><span>'+sub+'</span></div><span class="mono">'+ora+'</span></div>';
@@ -7753,7 +7774,8 @@ function orologioHtml(){
       '<p class="hint" style="margin:10px 0 0">'+(o.partenza
         ? 'Per ora parte da orari tipici: dimmi come dormi nei giorni liberi e diventa davvero tuo.'
         : 'Stime dai tuoi orari nei giorni liberi ('+esc(state.freeBed)+' → '+esc(state.freeWake)+'), che il diario può aggiornare. Nei giorni di turno l\'orologio si sposta con il sonno, e il piano lo segue giorno per giorno. Non sono una misura.')+
-      '</p><button type="button" class="lnk" data-oro-cambia style="margin-top:8px">'+(o.partenza?'Dimmi come dormi nei giorni liberi':'Cambia come dormi nei giorni liberi')+' →</button>'+
+      '</p><p class="hint oro-dati" style="margin:8px 0 0">'+esc(datiUsatiTesto())+'</p>'+
+      '<button type="button" class="lnk" data-oro-cambia style="margin-top:8px">'+(o.partenza?'Dimmi come dormi nei giorni liberi':'Cambia come dormi nei giorni liberi')+' →</button>'+
       '', {id:"orologio", cls:"oro"});
 }
 function renderAndamenti(){
@@ -9976,7 +9998,11 @@ if($("#cycToday")) $("#cycToday").onclick=()=>{
    Si scrivono a mano a ogni versione con una funzione che si vede: poche righe, in italiano di tutti i giorni.
    `id` cambia solo quando c'è qualcosa da dire; chi aggiorna la vede una volta. Chi installa adesso non la vede
    (non è una novità per lui), ma la trova sempre in Impostazioni › Novità. «app:true» = solo nell'app Android. */
-const NOVITA={ id:"2026-11-15", data:"Novembre 2026", righe:[
+const NOVITA={ id:"2026-11-16", data:"Novembre 2026", righe:[
+  ["Più fluida al tocco","All'apertura c'è il logo invece della pagina vuota che si riempie. I pulsanti rispondono al tocco e non restano evidenziati, la pagina dietro un foglio resta ferma, e toccare la tab già aperta riporta in cima.",false,"2026-11-16"],
+  ["Turni in ordine","In «Ciclo e orari» trovi tutti i tipi di turno, con «Elimina» per quelli che non usi più; due turni con lo stesso nome si distinguono dagli orari. «Adesso», prima del turno, dice solo cosa viene prima.",false,"2026-11-16"],
+  ["Risveglio lento","Se ti svegli vicino al tuo punto più basso, il piano lo dice con calma e qualche consiglio per i primi minuti.",false,"2026-11-16"],
+  ["Health Connect: cosa ha letto","Sotto gli interruttori vedi quante notti e quanti giorni di passi ha letto, da quale app e quando, o perché non c'è niente. In «Il tuo orologio», i dati che usa davvero.",true,"2026-11-16"],
   ["Caffeina, non solo caffè","La voce del piano ora si chiama «Caffeina»: vale anche per tè, cola ed energy drink, con quanta ce n'è in ognuno. Se non ne prendi, la togli da Impostazioni › Cosa vedi nel piano.",false,"2026-11-15"],
   ["Turni più tuoi, calendario più lungo","Un turno nuovo ha un nome tutto suo e la sigla la scegli tu. Il calendario di Turni e del widget arriva a dodici mesi, sempre a mesi interi. In «Ore», le settimane senza turni non sembrano più tutte sonno.",false,"2026-11-15"],
   ["Più leggero e più gentile","In Oggi un invito alla volta. Nomi più chiari: «Momento di sonnolenza», «Luce bassa». Nei fogli prima la cosa da fare, poi «Perché» (si apre se vuoi) e le fonti in una riga. In Impostazioni › Cosa vedi nel piano c'è «Piano essenziale»: solo sonno, turno, pisolino, caffè, rientro e luce.",false,"2026-11-14"],

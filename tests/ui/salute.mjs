@@ -52,6 +52,11 @@ ok(/Sonno: 1 notte nelle ultime 3 settimane/.test(stato) && /L'ultima: 23:40 →
 ok(await p.evaluate(()=>{ const x=document.querySelector("[data-hc-leggi]"); return !!x && !x.hidden; }), "c'è «Leggi adesso» per controllare subito");
 await p.evaluate(()=>{ localStorage.removeItem("nt:hcInfo"); document.querySelector("[data-hc-leggi]").click(); }); await p.waitForTimeout(600);
 ok(await p.evaluate(()=>!!localStorage.getItem("nt:hcInfo")), "«Leggi adesso» rilegge e aggiorna lo stato");
+await p.evaluate(()=>{ document.querySelector('[data-tab="turni"]').click(); }); await p.waitForTimeout(300);
+await p.evaluate(()=>document.querySelector("#doAndamenti").click()); await p.waitForTimeout(500);
+await p.evaluate(()=>document.querySelector('[data-and-sez="orologio"]').click()); await p.waitForTimeout(500);
+const usati=await p.evaluate(()=>{ const x=document.querySelector(".oro-dati"); return x ? x.textContent : ""; });
+ok(/1 notte da Health Connect/.test(usati), "«Il tuo orologio» dice quali dati usa → "+usati);
 await p.evaluate(()=>document.querySelector('[data-tab="oggi"]').click()); await p.waitForTimeout(500);
 const d=await p.evaluate(()=>{ const x=document.querySelector("#essenziale .drem .dq"); return x ? x.innerText.replace(/\s+/g," ") : ""; });
 ok(/Hai dormito 23:40 → 06:50\? da Health Connect/.test(d), "il diario propone gli orari letti, e dice da dove vengono → «"+d+"»");
