@@ -48,30 +48,33 @@ async function app(stato, extra = {}) {
   return p;
 }
 const clic = (p, s) => p.evaluate(s => document.querySelector(s).click(), s);
+// L'ordine conta: i primi tre si vedono senza scorrere. Prima ciò che si cerca (il calendario turni), poi ciò che ci
+// distingue (il piano del sonno), poi il widget, che chi lavora a turni chiede più di tutto.
+const DIARIO = (() => { const w = {}, b = {}; for (let i = 1; i <= 12; i++) { const k = fa(i); w[k] = "07:" + String(10 + i).padStart(2, "0"); b[k] = "23:" + String(20 + i).padStart(2, "0"); } return { w, b }; })();
 const SCATTI = [
-  ["01-oggi", "Il tuo piano di oggi,", "sul tuo turno", async () => app(BASE, QUIETI)],
-  ["02-turni", "Tutto il mese", "a colpo d'occhio", async () => { const p = await app(BASE, QUIETI); await clic(p, '[data-tab="turni"]'); return p; }],
-  ["03-onboarding", "Che turno fai oggi?", "Un tocco e hai il piano", async () => app(null, {})],
-  ["04-perche", "Ogni consiglio", "spiegato, con le fonti", async () => {
-    // il foglio di una voce: in breve, «Perché» aperto, le fonti in una riga
-    const p = await app(BASE, QUIETI);
-    await clic(p, '#essenziale .erow[data-row="luce"]'); await p.waitForTimeout(600);
-    await p.evaluate(() => document.querySelectorAll("#infoCorpo details.perche").forEach(d => d.open = true));
-    return p; }],
-  ["05-orologio", "Il tuo orologio,", "calcolato su di te", async () => {
-    const p = await app({ ...BASE, freeBed:"00:30", freeWake:"09:00" }, QUIETI);
-    await clic(p, '[data-tab="turni"]'); await clic(p, "#doAndamenti"); await p.waitForTimeout(500);
-    await clic(p, '[data-and-sez="orologio"]'); await p.waitForTimeout(500);
-    return p; }],
-  ["06-liberi", "Il tuo tempo libero,", "per chi ti aspetta", async () => {
-    const p = await app(BASE, QUIETI); await clic(p, '[data-tab="turni"]'); await clic(p, "#doPartner"); return p; }],
-  ["07-scambio", "Cambio turno:", "ti conviene?", async () => {
-    const p = await app(BASE, QUIETI); await clic(p, '[data-tab="turni"]'); await clic(p, "#doScambioTurno"); return p; }],
-  ["08-mese", "Turni che cambiano?", "Li segni in un minuto", async () => {
+  ["01-calendario", "I tuoi turni,", "tutto il mese a colpo d'occhio", async () => { const p = await app(BASE, QUIETI); await clic(p, '[data-tab="turni"]'); return p; }],
+  ["02-oggi", "E ogni giorno ti dice", "quando dormire", async () => app(BASE, QUIETI)],
+  ["03-widget", "Il widget:", "turno e sonno senza aprire l'app", null],
+  ["04-segna", "Turni che cambiano?", "Li segni in un minuto", async () => {
     const ecc = {}, seq = ["M","M","P","R","N","N","R","P","M","R","R","P","P","N"];
     for (let i = -24; i <= 12; i++) ecc[fa(-i)] = seq[(i + 24) % seq.length];
     const p = await app({ ...BASE, pattern:"R", anchor:"2000-01-01", repeat:false, ecc }, QUIETI);
     await clic(p, '[data-tab="turni"]'); await clic(p, "#tEdit"); await p.waitForTimeout(400); await clic(p, '[data-mod="segna"]');
+    return p; }],
+  ["05-liberi", "Liberi insieme,", "senza doverlo chiedere", async () => {
+    const p = await app(BASE, QUIETI); await clic(p, '[data-tab="turni"]'); await clic(p, "#doPartner"); return p; }],
+  ["06-scambio", "Cambio turno:", "ti conviene?", async () => {
+    const p = await app(BASE, QUIETI); await clic(p, '[data-tab="turni"]'); await clic(p, "#doScambioTurno"); return p; }],
+  ["07-perche", "Ogni consiglio", "spiegato, con le fonti", async () => {
+    const p = await app(BASE, QUIETI);
+    await clic(p, '#essenziale .erow[data-row="luce"]'); await p.waitForTimeout(600);
+    await p.evaluate(() => document.querySelectorAll("#infoCorpo details.perche").forEach(d => d.open = true));
+    return p; }],
+  ["08-laggy", "Laggy cresce", "quando segni come dormi", async () => {
+    const p = await app(BASE, { ...QUIETI, "nt:wakes": JSON.stringify(DIARIO.w), "nt:beds": JSON.stringify(DIARIO.b), "nt:laggy": JSON.stringify({ max: 1, visto: 1 }) });
+    await clic(p, '[data-tab="turni"]'); await clic(p, "#doAndamenti"); await p.waitForTimeout(600);
+    await p.evaluate(() => { const c = document.querySelector(".laggy-card"); if (c) window.scrollTo(0, c.getBoundingClientRect().top + scrollY - 260); });
+    await p.waitForTimeout(400);
     return p; }],
 ];
 
@@ -89,8 +92,20 @@ box-shadow:0 40px 90px rgba(0,0,0,.55);background:#0B1626}
 <script>/* Titolo sempre su due righe: se una riga sfora, carattere più piccolo. */
 const h=document.querySelector("h1"); let f=86; while(h.scrollWidth>1000 && f>50){ f-=2; h.style.fontSize=f+"px"; }</script></body></html>`;
 
+// La schermata Home con il widget vero (immagine dall'anteprima del widget, tools/anteprima-widget): sfondo, ora, icone.
+const WIDGET = join(ROOT, "docs", "play", "img", "widget-anteprima.png");
+async function home() {
+  const w = (await readFile(WIDGET)).toString("base64");
+  const ctx = await b.newContext({ viewport: { width: 390, height: 693 }, deviceScaleFactor: 2 }); const p = await ctx.newPage();
+  await p.setContent(`<html><body style="margin:0;width:390px;height:693px;overflow:hidden;font-family:sans-serif;color:#fff;
+background:radial-gradient(120% 80% at 20% 10%,#2c4d7a 0%,#13233c 45%,#0b1626 100%)">
+<div style="text-align:center;margin:26px 0 16px"><div style="font-size:50px;font-weight:300;letter-spacing:1px">20:43</div><div style="font-size:14px;opacity:.85">sabato 24 ottobre</div></div>
+<img src="data:image/png;base64,${w}" style="display:block;width:330px;margin:0 auto;border-radius:22px;box-shadow:0 10px 30px rgba(0,0,0,.35)">
+</body></html>`);
+  await p.waitForTimeout(300); return p;
+}
 for (const [nome, r1, r2, fai] of SCATTI) {
-  const p = await fai(); await p.waitForTimeout(500);
+  const p = fai ? await fai() : await home(); await p.waitForTimeout(500);
   const png = (await p.screenshot()).toString("base64");
   await p.context().close();
   const q = await b.newPage({ viewport:{ width:1080, height:1920 } });
