@@ -6689,7 +6689,10 @@ function renderEssenziale(P, CARDS){
         const percheOmbra = '<div class="why">È la stessa leva della luce, nella sua metà serale: quello che prendi adesso è ciò che tira indietro l\'orologio, non ciò che lo sposta avanti.</div>';
         const avoidBlk = (cd.blocks||[]).find(bl=>bl[0]==="avoid");
         let splitOra=false, tAvoid=null;
-        if(avoidBlk){ tAvoid=dSv(avoidBlk[1]); splitOra = Math.abs(tAvoid-t) >= 180; }
+        // Le finestre dell'ottimizzatore sono della giornata scelta: una «luce bassa» che comincia prima della sveglia
+        // (08:00 → 11:00 con la sveglia alle 10:30) è di stamattina, in testa alla giornata. dSv la portava a domani,
+        // in fondo dopo «Dormi», e la linea «adesso» finiva dopo di lei (bug del 05/11/2026).
+        if(avoidBlk){ tAvoid = avoidBlk[1] < P.wake && avoidBlk[2] > P.wake - 720 ? -0.5 : dSv(avoidBlk[1]); splitOra = Math.abs(tAvoid-t) >= 180; }
         const dettLuce = splitOra ? righeFase(cd.rowsA)+percheLuce : dett(cd);
         // cd.val ripeteva la parola "Luce" già nell'etichetta della riga
         // ("Luce" + "Luce forte fino alle..."), e cd.small (il seguito

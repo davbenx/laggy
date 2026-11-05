@@ -79,6 +79,14 @@ Spunti di benessere basati sulla letteratura scientifica sul sonno e sul lavoro 
 
 Progetto indipendente. Segnalazioni e idee: Impostazioni › Segnala cosa non torna.
 
+## Note di versione 1.4.5 (max 500)
+Novità 1.4.5
+• Testi del piano ricontrollati sugli studi da cui vengono, e più corti.
+• Rientro in auto: lenti di categoria da 1 a 3, mai la 4, e solo con buona luce; con l'alba scura toglile.
+• Dopo il pisolino, se puoi, aspetta un quarto d'ora prima di guidare.
+• Il tuo orologio: una stima del cronotipo dai tuoi giorni liberi, con il metodo di calcolo dell'MCTQ adattato ai turni.
+• Corretto: la linea «adesso» del piano a volte finiva in fondo.
+
 ## Note di versione 1.4.4 (max 500)
 Novità 1.4.4
 • Testi del piano ricontrollati sugli studi da cui vengono, e più corti.

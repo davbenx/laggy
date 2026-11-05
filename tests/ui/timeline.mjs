@@ -81,4 +81,42 @@ const base={turniConfigurati:true,pattern:"MPNSR",anchor:iso(new Date()),repeat:
   await chiudiVoce(p); ok(await p.evaluate(()=>document.querySelector("#infoModal").hidden), "✕ chiude il foglio");
   await p.context().close(); }
 
+// La linea «adesso» fra passato e futuro su molti giorni e ore (bug del 05/11/2026: alle 15:42 di un giorno libero
+// la «Luce bassa» delle 08:00 di domattina risultava «passata» e la linea finiva in fondo, dopo «Dormi»).
+// Il caso del 05/11/2026 riprodotto: il calcolo della luce (worker finto) dice per oggi luce forte 18:00–22:00 e
+// luce bassa 08:00–11:00, cioè stamattina appena sveglio. Alle 15:42 la «Luce bassa» va in testa (passata), non dopo «Dormi».
+{ const ctx=await b.newContext({locale:"it-IT",viewport:{width:360,height:740}});
+  await ctx.route("**/luce-worker.js", r=>r.fulfill({contentType:"text/javascript",
+    body:"self.onmessage=e=>postMessage({chiave:e.data.chiave, giorni:[{g:0, cerca:[1080,1320], evita:[480,660]}]});"}));
+  await ctx.addInitScript(st=>{ if(sessionStorage.getItem("x")) return; sessionStorage.setItem("x","1");
+    localStorage.setItem("nt:state",JSON.stringify(st)); localStorage.setItem("nt:turniConfigurati","true");
+    localStorage.setItem("nt:firstPlanBannerChiuso","true"); localStorage.setItem("nt:attivazioneNascosta","true"); },
+    {...base,pattern:"RRNNNN",anchor:iso(new Date()),freeBed:"23:20",freeWake:"09:20",piano:{luce:true,penombra:true,pasti:true,liberi:true}});
+  const p=await ctx.newPage(); p.on("pageerror",e=>errs.push(e.message));
+  const d=new Date(); d.setHours(15,42,0,0); await p.clock.setFixedTime(d);
+  await p.goto("http://localhost:8765/index.html"); await p.waitForTimeout(6000);
+  const r=await p.evaluate(()=>[...document.querySelectorAll("#essenziale .tl, #essenziale .tl-adesso")].map(x=>x.classList.contains("tl-adesso")?"ADESSO":(x.dataset.row||x.querySelector("[data-row]")?.dataset.row||"?")+(x.classList.contains("past")?"·p":"")));
+  const iO=r.findIndex(x=>x.startsWith("penombra")), iA=r.indexOf("ADESSO"), iS=r.findIndex(x=>x.startsWith("sonno"));
+  ok(iO>=0 && iO<iA && iO<iS && r[iO].endsWith("·p"), "luce bassa di stamattina (08:00–11:00) in testa e passata, la linea «adesso» prima di Luce e Dormi → "+r.join(" "));
+  await ctx.close(); }
+
+// Invariante: prima della linea solo voci passate o in corso, dopo nessuna voce passata.
+{ const fa=n=>{ const d=new Date(); d.setDate(d.getDate()+n); return iso(d); };
+  const casi=[]; 
+  for (const [pat,anc] of [["MPNSR",0],["MPNSR",-3],["MPNSR",-4],["NNNRR",-3],["NNNRR",-4],["RRRRR",0]])
+    for (const ora of [9,12,15.7,19,22]) casi.push([pat,anc,ora]);
+  const male=[];
+  for (const [pat,anc,ora] of casi){
+    const p=await apri({...base,pattern:pat,anchor:fa(anc),freeBed:"23:20",freeWake:"09:20"}, Math.floor(ora));
+    if(ora%1){ const d=new Date(); d.setHours(Math.floor(ora),Math.round(ora%1*60),0,0); await p.clock.setFixedTime(d); await p.reload(); await p.waitForTimeout(1000); }
+    const r=await p.evaluate(()=>{ const el=[...document.querySelectorAll("#essenziale .tl, #essenziale .tl-adesso")];
+      const k=el.findIndex(x=>x.classList.contains("tl-adesso")); if(k<0) return null;
+      const prima=el.slice(0,k).filter(x=>!x.classList.contains("past") && !x.classList.contains("ora")).map(x=>x.querySelector(".en")?.textContent);
+      const dopo=el.slice(k+1).filter(x=>x.classList.contains("past")).map(x=>x.querySelector(".en")?.textContent);
+      return {prima,dopo}; });
+    if(r && (r.prima.length || r.dopo.length)) male.push(pat+"/"+anc+" "+ora+": "+JSON.stringify(r));
+    await p.context().close(); }
+  ok(!male.length, "la linea «adesso» sta fra passato e futuro in "+casi.length+" casi (giorni del ciclo × ore) → "+male.slice(0,3).join(" | "));
+}
+
 console.log("errori", errs); await b.close();
