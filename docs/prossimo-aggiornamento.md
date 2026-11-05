@@ -3,6 +3,60 @@
 Fatto nella 1.1.1 (non serve più): tolto il vecchio wizard nascosto; suggerimenti d'uso solo app
 (sveglia, voto dal widget); il giorno di Oggi segue il tempo; cambio d'ora.
 
+## Prossimo giro (valutato con Davide il 05–06/11/2026)
+
+### Subito (piccoli, già chiari)
+- [x] «Copia il riepilogo del diario» non copiava: il tocco sulla riga piccola dentro il bottone non era riconosciuto (`e.target.id` → `closest("#doSum")`). Corretto sul ramo, da pubblicare.
+- [ ] Popup troppo alti: nell'app Android finiscono sotto la barra di stato. Nell'altezza massima di `.qs-sheet` togliere anche `--sat` più un margine.
+- [ ] Fonti dentro «Perché»: la riga «Fonti …» va in fondo al riquadro che si apre.
+- [ ] «Il tuo ciclo»: il selettore «Persona» sulla stessa riga di «Calendario / Ore», a destra, compatto (nome + freccia).
+- [ ] «Per la visita dal medico»: stesso stile di «Condividi e riepiloghi» (righe con icona, titolo e descrizione corta), non due bottoni grandi.
+- [ ] Laggy: l'interruttore esce da «Cosa vedi nel piano» e va in Impostazioni › «Cosa vedi nell'app». Laggy compare anche in Oggi, sotto il diario, dopo che annoti («2 di 4: ancora 3 notti»), con un foglio una tantum quando cresce di stadio.
+- [ ] «Sonno e carico»: le due «Scoperta» diventano un solo riquadro «Cosa emerge dai tuoi dati».
+  - Al massimo 2 righe, ognuna con un fatto tuo, quanto è solido (per esempio «8 notti su 11») e cosa provare.
+  - Se non c'è niente di solido (meno di 6–8 notti per confronto), il riquadro non compare.
+- [ ] Spiegazioni lunghe nella ⓘ (lo stesso foglio della timeline, niente tooltip al passaggio del mouse): sotto il comando resta una riga sola.
+  - Casi: notifiche (sveglia, risparmio batteria, server), Health Connect, file .ics e Google Calendar su Android, statistiche anonime, Smonto, sensibilità alla caffeina, Diviso/Unico, import con l'AI, persone, ferie e festivi, «Il tuo orologio».
+  - Ne ho contate 28 con `class="hint"` oltre i 120 caratteri, più quelle scritte dal codice (per esempio `#notifHint`).
+  - Prima mostrare a Davide gli screenshot di 3 casi (notifiche, Health Connect, Smonto).
+- [x] Testi da incollare in Play Console (note di versione, scheda): un «•» per riga, in un blocco di codice.
+
+### Dopo il test aperto
+- [ ] **Tag sul sonno** (latte caldo, stretching, yoga, cena tardi…): una ✓ da un elenco, al mattino. Alimenta «Cosa emerge»; le correlazioni si mostrano solo con abbastanza notti, e dette come correlazioni.
+- [ ] **Giorno di paga**: un giorno del mese scelto dall'utente; nel calendario, con una notifica facoltativa.
+- [ ] **Icone dei turni** (sole, tramonto, luna…), scelte da un set piccolo, oltre a colore e sigla: anche nel PDF e nel widget.
+- [ ] **Calcolatrice dello stipendio**, non busta paga.
+  - L'utente inserisce le maggiorazioni del suo contratto (notte %, festivo %, straordinario %) con una guida «dove trovi questi numeri»; l'app moltiplica ore per tariffe.
+  - Sempre con la scritta «stima, non è la busta paga».
+- [ ] **Impegni dal calendario del telefono** (solo app Android):
+  - interruttore spento di default; si scelgono i calendari da leggere;
+  - si leggono solo inizio e fine, niente titoli né luoghi, solo i prossimi 7 giorni; niente esce dal telefono;
+  - in Turni e in «Tempo libero» compaiono come fasce «occupato»; nel piano una riga avvisa se un impegno cade nel sonno o nel pisolino, senza spostarlo da solo;
+  - serve il permesso `READ_CALENDAR`: aggiornare informativa privacy e dichiarazioni Play;
+  - prima guardare se gli «impegni» inseriti a mano vengono usati.
+- [ ] **Registrazioni veloci** (caffeina, pasto, luce presa) anche dal widget e dalle notifiche («Preso ✓»).
+- [ ] **Finestra dei pasti** come voce facoltativa («mangia fra le X e le Y»), senza promesse metaboliche.
+- [ ] **La luce presa davvero** entra nel modello dell'orologio del giorno dopo (oggi lo aggiorna solo il sonno).
+- [ ] **Il voto sull'energia per tarare la vigilanza:** con abbastanza voti, spostare un po' la fase del modello per quella persona (ciclo chiuso senza wearable).
+- [ ] **Pressione del sonno residua al risveglio** (`alertness.js`). Oggi `S = 1 − e^(−t/8)` riparte sempre da zero, e un sonno di 4 ore dopo la notte vale come uno di 8.
+  - Farla dipendere dal sonno fatto davvero (diario, Health Connect o piano): salita in veglia e discesa in sonno, con le costanti del **modello a tre processi** che dichiariamo (Åkerstedt & Folkard; non quelle di Borbély mescolate al nostro ritmo).
+  - Ritarare il peso pressione/ritmo con test fissi: con un sonno normale calo e picco restano dove sono; dopo 4 ore di sonno la stanchezza arriva prima e più forte.
+  - Nuova riga del dossier (C) e passaggio dal revisore prima di ogni testo che la usa.
+  - Dopo qualche settimana, confronto fra modello vecchio e nuovo con i voti sull'energia («Il modello sul campo»).
+  - Mai scrivere «grado clinico».
+- [ ] Test che usano la data vera: fissare l'ora (come in `speciali`), perché prima della sveglia per l'app è ancora «ieri» e di notte falliscono.
+
+### Valutati e scartati (con il motivo)
+- Suoni rilassanti: fuori missione, pesanti (audio, licenze, riproduzione ad app chiusa).
+- Fasi del sonno: senza wearable sarebbero inventate; con Health Connect sono poco affidabili e creano ansia.
+- Sveglia intelligente: Health Connect non dà i dati in tempo reale, e la sveglia del telefono c'è già («Metti la sveglia»).
+- Melatonina con dosi: è un'indicazione medica (dispositivo medico, MDR).
+- Tono imperativo («esposizione massima richiesta», «rischio insulino-resistenza»): contro il tono e la revisione scientifica.
+- Test di vigilanza (PVT) con semaforo che blocca: un risultato «buono» verrebbe letto come «puoi guidare»; se mai, solo come strumento di consapevolezza, senza soglia.
+- Frequenza cardiaca, sua variabilità e temperatura della pelle come segnali di adattamento: non c'è una base solida.
+- Sensore di luce del telefono: misura la luce verso lo schermo, non quella che arriva agli occhi.
+- Domotica (lampadine e termostato smart): di nicchia e cara da mantenere.
+
 ## Subito, sul telefono vero (nessun codice)
 - **1.3.10** (icona, palette blu notte, debito di sonno, pisolino in più): provare su un dispositivo vero l'icona del launcher (adattiva e a tema) e lo splash, i colori nei due temi, il calcolo del debito su qualche giorno di diario e «+ Hai fatto un altro pisolino?».
 - Sveglia nell'Orologio dal piano («Metti la sveglia» sotto Dormi) e voto del sonno dal widget: mai provati su un dispositivo.

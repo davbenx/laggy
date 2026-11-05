@@ -9350,10 +9350,11 @@ function diaryClick(e){
     if($("#mattinoBif")) $("#mattinoBif").checked=state.mattinoBifasico;
     haptic(8); salva(); render(); track("setup_item", {item:"presto_"+(state.mattinoBifasico?"diviso":"tutto")}); return; }
   if(e.target.closest("[data-off-bifasico]")){ state.avvisoBifasicoOff=true; salva(); render(); return; }
-  if(e.target.id==="doSum"){
+  if(e.target.closest("#doSum")){   // closest: il tocco sulla riga piccola dentro il bottone prima non faceva niente
     const txt=summaryText();
-    if(txt) navigator.clipboard.writeText(txt).then(()=>toast("Riepilogo copiato"),
-      ()=>prompt("Copia il riepilogo:",txt));
+    if(!txt){ toast("Ancora niente da copiare: annota qualche notte"); return; }
+    const scrivi = navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(txt) : Promise.reject();
+    scrivi.then(()=>toast("Riepilogo copiato"), ()=>prompt("Copia il riepilogo:",txt));
     return;
   }
   if(e.target.closest("[data-wake]") || e.target.closest("[data-bed]")
