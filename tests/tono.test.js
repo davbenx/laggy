@@ -21,7 +21,10 @@ const VIETATE = [/stasera devi/i, /rischio alto/i, /impedit/i, /sospettat/i, /sb
   // giro 5: l'inerzia che «passa in pochi minuti» prima di guidare, il debito dato per recuperato tutto,
   // l'alba simulata come certezza, le promesse di risultato («arrivarci in forma», «mente lucida»)
   /(pochi|qualche) minut[^.]*(guid|ripart)/i, /rimette a posto il conto|recuperi quello perso|portare il conto a domani/i,
-  /molto meno intontit/i, /arrivarci in forma/i, /mente lucida/i];
+  /molto meno intontit/i, /arrivarci in forma/i, /mente lucida/i,
+  // giro 6: il sonno al volante che «non avvisa», le certezze sulla caffeina, il recupero completo, «al meglio»
+  /non avvisa/i, /oltre la quale[^.]*disturbano/i, /recupera quello che|il resto lo recuperi/i, /sono al meglio/i,
+  /ti fa stare meglio/i, /si recupera bene/i];
 
 // La scheda di Google Play è testo semplice: ogni riga conta.
 const SCHEDA = "docs/play/scheda.md";

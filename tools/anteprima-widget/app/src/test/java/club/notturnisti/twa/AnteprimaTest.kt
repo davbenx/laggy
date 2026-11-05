@@ -25,10 +25,11 @@ class AnteprimaTest {
     private fun calendario(persone: Boolean): JSONObject {
         val pat = "NNNRRRPPPRRMMMR"; val mie = JSONArray(); val sue = JSONArray()
         fun cella(c: Char) = "$c:" + (if (c == 'N') "n" else if (c == 'R') "r" else "l")
-        // 20 settimane da lunedì 21 settembre (quattro prima di quella di oggi), come le pubblica la pagina
+        // 20 settimane da lunedì 21 settembre (quattro prima di quella di oggi), come le pubblica la pagina.
+        // Oggi (sabato 24 ottobre, indice 33) è la prima notte del ciclo, come dicono le voci: niente «R» sotto «Turno Notte».
         // segni del giorno: 1 novembre festivo (giorno rosso), 27 e 30 ottobre modificati (puntino)
         fun segni(i: Int) = if (i == 41) ":f" else if (i == 36 || i == 39) ":x" else ""
-        for (i in 0 until 140) { mie.put((if (i == 52) "Fe:r" else cella(pat[(i + 4 - 28 + 150) % pat.length])) + segni(i)); sue.put(cella(pat[(i + 6 - 28 + 150) % pat.length])) }
+        for (i in 0 until 140) { mie.put((if (i == 52) "Fe:r" else cella(pat[(i + 12) % pat.length])) + segni(i)); sue.put(cella(pat[(i + 3) % pat.length])) }
         val o = JSONObject().put("da", "2026-09-21").put("io", mie).put("sel", 0).put("star", "0|Anna")
         o.put("p", if (persone) JSONArray().put(JSONObject().put("n", "Anna").put("g", sue)) else JSONArray())
         return o
@@ -52,8 +53,8 @@ class AnteprimaTest {
         p.snapshot(box, nome)
     }
 
-    private fun sera() = listOf(voce(t(0, 22, 0), t(1, 6, 15), "Turno Notte", "turno"), voce(t(1, 3, 10), t(1, 9, 55), "Sonno", "sonno"), voce(t(1, 9, 55), t(1, 10, 15), "Luce", "luce"))
-    private fun pomeriggio() = listOf(voce(t(0, 19, 5), t(0, 19, 50), "Pisolino di recupero", "pisolino-recupero"), voce(t(0, 19, 10), t(0, 19, 25), "Ultimo caffè", "caffe"), voce(t(0, 22, 0), t(1, 6, 15), "Turno Notte", "turno"), voce(t(1, 3, 10), t(1, 9, 55), "Sonno", "sonno"))
+    private fun sera() = listOf(voce(t(0, 22, 0), t(1, 6, 15), "Turno Notte", "turno"), voce(t(1, 7, 15), t(1, 14, 15), "Sonno", "sonno"), voce(t(1, 14, 15), t(1, 14, 45), "Luce", "luce"))
+    private fun pomeriggio() = listOf(voce(t(0, 19, 5), t(0, 19, 50), "Pisolino", "pisolino"), voce(t(0, 19, 10), t(0, 19, 25), "Ultima caffeina", "caffe"), voce(t(0, 22, 0), t(1, 6, 15), "Turno Notte", "turno"), voce(t(1, 7, 15), t(1, 14, 15), "Sonno", "sonno"))
     private fun diario() = JSONObject().put("d", "2026-10-24").put("bed", "23:30").put("wake", "07:10").put("da", t(0, 7, 10)).put("a", t(0, 21, 10))
 
     private fun tutte(nome: String, ora: Long, voci: List<JSONObject>, diario: JSONObject? = null, persone: Boolean = true) {

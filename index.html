@@ -3914,7 +3914,7 @@ function cards(P){
   }else if(night){
     cc.sub="Di notte serve, ma va concentrata a inizio turno.";
     cc.rows.push(["Sì",hhmm(b.start)+" appena entri, un altro entro le "+hhmm(cut)]);
-    cc.rows.push(["Come prenderlo","piccoli e distanziati: due caffè normali a distanza reggono meglio di un doppio, e disturbano meno il sonno dopo"]);
+    cc.rows.push(["Come prenderlo","piccoli e distanziati: di solito due caffè normali a distanza reggono meglio di un doppio e pesano meno sul sonno dopo"]);
     cc.rows.push(["No","dopo le "+hhmm(cut)+": la caffeina è ancora in circolo quando provi a dormire"]);
   }else if(s.meta.ramp&&shift<0)
     cc.sub="Stasera vai a letto prima del solito: il caffè del pomeriggio è la prima cosa da anticipare.";
@@ -4025,13 +4025,13 @@ function cards(P){
          :n.turno?("Nella pausa, prima del momento peggiore della notte. Finisce con largo margine dalla fine del turno: svegliarsi poco prima di salire in macchina peggiorerebbe proprio l'ora più delicata.")
          :((n.b-n.a)<40&&!n.rec&&!n.lungo&&!n.debito&&!n.turno)?("Hai dormito abbastanza, ma fra la sveglia di stamattina e il letto di stanotte passano "+hm(n.ore||0)+" di fila. Un pisolino corto prima di uscire non ti ruba il sonno di stanotte e di solito ti fa arrivare a fine turno più lucido.")
          :(n.first?"Di solito è il pisolino che aiuta di più in tutto il ciclo. Fallo anche senza sonno, prima di uscire di casa."
-                  :"Recupera quello che il sonno del mattino non è riuscito a darti."),
+                  :"Ti fa recuperare una parte del sonno che la mattina non è riuscita a darti."),
       rows:n.rep?[["Se ti chiamano","un caffè appena esci va bene; dopo le 3 del mattino evitalo se poi torni a dormire. Al rientro, un sonno corto prima del resto della giornata"],
         ["Al risveglio","per circa un quarto d'ora sei più lento: se puoi, aspetta quel quarto d'ora prima di guidare"]]
         :(n.rec||n.dopo)?[]:[["Poi","mangi con calma ed esci: c'è tempo per svegliarti bene"],
         ["Al risveglio","per circa un quarto d'ora sei più lento: se puoi, aspetta quel quarto d'ora prima di guidare o di fare cose delicate"]],
       nap:{k:hhmm(n.a), fine:hhmm(n.b), min:n.b-n.a, turno:!!n.turno, livello:n.livello, caffe:!!n.caffe, caffeNo:n.caffeNo||""},
-      why:(night ? "Dormire prima di entrare riduce il crollo di attenzione nelle ore centrali della notte, quando gli errori costano di più."
+      why:(night ? "Dormire prima di entrare di solito riduce il crollo di attenzione nelle ore centrali della notte, quando gli errori costano di più."
                  : "Dormire prima di entrare di solito ti fa arrivare al turno più lucido, e il sonno che manca pesa meno sulle ore di lavoro.")+" Un'ora e mezza di solito lascia finire un ciclo di sonno e ci si sveglia meno intontiti; se non hai tempo, venti minuti sono meglio di niente.",
       cite:"Rosekind e coll. 1995 (NASA) · Tassi & Muzet 2000", at:n.a});
   }
@@ -4076,7 +4076,7 @@ function cards(P){
           ? "Quando stacchi sei in piedi da "+hm(filate)+", non da "+hm(senzaPisolino)+": senza il pisolino, dopo 17 ore di veglia la coordinazione cala come con circa 0,5 g/l di alcol."
           : "Quando stacchi sei in piedi da "+hm(filate)+" invece che da "+hm(senzaPisolino)+": di solito il pisolino ti fa arrivare a fine turno più lucido.")
         : filate < 60
-        ? "Sono più di quante il corpo ne regga bene, e oggi non c'è spazio per un pisolino che aiuti davvero: mettilo in conto, e se hai sonno non guidare."
+        ? "Sono tante ore di fila, e oggi non c'è spazio per un pisolino: mettilo in conto, e se hai sonno non guidare."
         : "Quando stacchi sei in piedi da "+hm(filate)+" di fila: sono tante ore. Se hai sonno, meglio non guidare.";
     out.push({k:"t",
       lab: b.rest ? "Veglia lunga" : "Rientro",
@@ -4100,9 +4100,9 @@ function cards(P){
       small: "<b>"+esc(b.name||nameOf(b.c))+"</b>",
       sub:"Per il viaggio contiamo "+state.cTo+" minuti all'andata e "+state.cFrom+" al ritorno: decidono quando ti prepari e da quando sei di nuovo libero.",
       ...(state.guidaLavoro ? {
-        rows:[["Pause di guida","dopo 4 ore e mezza di guida, 45 minuti di pausa (anche in due: prima 15, poi 30)"],
+        rows:[["Pause di guida","dopo 4 ore e mezza di guida, almeno 45 minuti di pausa (anche in due: prima 15, poi 30)"],
               ["Se hai sonno","nella pausa un caffè e subito un pisolino di 15–20 minuti; al risveglio riparti solo quando ti senti sveglio"]],
-        why:"Per camion e autobus le pause sono quelle delle regole europee (le stesse del tachigrafo). Il sonno al volante non avvisa: al simulatore, caffè più pisolino breve funziona meglio dei due da soli; finestrino aperto e radio alta no.",
+        why:"Per camion e autobus di linea oltre i 50 km valgono le regole europee (le stesse del tachigrafo); per le linee urbane decidono le regole nazionali e il contratto. Di solito il sonno al volante si fa sentire prima (palpebre pesanti, sbadigli): è il momento di fermarsi. Al simulatore, caffè più pisolino breve funziona meglio dei due da soli; finestrino aperto e radio alta no.",
         cite:"Reg. (CE) 561/2006, art. 7 · Reyner &amp; Horne 1997 (simulatore di guida)" } : {}),
       cambia:4, cambiaTxt:"Cambia il tuo tragitto",
       at: b.start});
@@ -4635,11 +4635,11 @@ function diaryReminder(P, CARDS){
   if(logged && P){
     const extraN=P.s && P.s.meta && P.s.meta.debitoExtra;
     if(extraN){ stato="Da recuperare: "+hm(P.debitoMin)+" di sonno · stanotte +"+extraN+" min";
-      statoPerche="Con più di tre ore di debito un pisolino non basta, e accorcerebbe il sonno di stanotte: per questo il piano anticipa di "+extraN+" minuti l'ora di letto. La sveglia resta la stessa, perché spostarla sposterebbe anche l'orologio del corpo."; }
+      statoPerche="Con più di tre ore di debito il piano preferisce allungare la notte: un pisolino lungo accorcerebbe il sonno di stanotte. Per questo il piano anticipa di "+extraN+" minuti l'ora di letto. La sveglia resta la stessa, perché spostarla sposterebbe anche l'orologio del corpo."; }
     else if(napRec){ stato="Da recuperare: "+hm(napRec.debito)+" di sonno · pisolino alle "+hhmm(napRec.a);
       statoPerche=debitoMotivo(napRec)+" Il pisolino non è un extra: ne recupera una parte prima che si sommi a domani. Quando comincia ti chiedo se l'hai fatto."; }
     else if(P.debitoScoperto>0){ stato="Da recuperare: "+hm(P.debitoScoperto)+" di sonno · oggi non c'è spazio per un pisolino";
-      statoPerche="Oggi non c'è spazio per un pisolino, né prima né dopo il turno. Il conto resta aperto: recupera stanotte e, se hai sonno, evita di guidare."; }
+      statoPerche="Oggi non c'è spazio per un pisolino, né prima né dopo il turno. Il conto resta aperto: stanotte ne recuperi una parte e, se hai sonno, evita di guidare."; }
     else if(napRecDebt){ stato="Per recuperare, il piano propone un pisolino alle "+hhmm(napRecDebt.a);
       statoPerche="La notte è stata più corta di quella che il piano proponeva: un pisolino di recupero ne toglie una parte."; }
     // le notti che pesano di più: il «Perché?» mostra da dove viene il numero
@@ -6410,8 +6410,8 @@ function attivitaHtml(k){
 }
 const VOCI_FIN=[
   ["testa","Testa",ICON.mente,"pensare, studiare","Le ore in cui di solito sei più lucido: almeno 90 minuti dopo il risveglio e 2 ore prima di dormire, fuori dal turno, dal viaggio e dai pasti. "+STIMA_FIN],
-  ["leggera","Movimento",ICON.passo,"camminare, stretching","45 minuti leggeri quando il corpo è più pronto: almeno 45 minuti dopo il risveglio e un'ora prima di dormire, lontano dai pasti. "+STIMA_FIN],
-  ["intensa","Allenamento",ICON.peso,"più impegnativo","60 minuti più impegnativi, quando forza e coordinazione sono al meglio: almeno 2 ore dopo il risveglio, lontano dai pasti, finiti 3 ore prima di dormire. "+STIMA_FIN]
+  ["leggera","Movimento",ICON.passo,"camminare, stretching","45 minuti leggeri quando di solito il corpo è più pronto: almeno 45 minuti dopo il risveglio e un'ora prima di dormire, lontano dai pasti. "+STIMA_FIN],
+  ["intensa","Allenamento",ICON.peso,"più impegnativo","60 minuti più impegnativi, quando di solito forza e coordinazione rendono di più: almeno 2 ore dopo il risveglio, lontano dai pasti, finiti 3 ore prima di dormire. "+STIMA_FIN]
 ];
 // A letto molto presto prima di un mattino: le due strade con gli orari veri,
 // nel giorno in cui servono (prima era una nota con un rimando a Impostazioni,
@@ -6428,7 +6428,7 @@ function sceltaLettoPresto(P){
   const on=!!state.mattinoBifasico;
   const opz=(v,nome,o,acceso)=>'<button type="button" class="vb'+(acceso?" on":"")+'" data-mattinobif="'+(v?1:0)+'" aria-pressed="'+acceso+'"><b>'+nome+'</b><span>a letto alle '+hhmm(o.a)+'</span></button>';
   const spiega='<p class="dn-hint">Tutto stanotte: le ore piene, ma prima delle 21 addormentarsi è difficile per molti. '+
-    'Più tardi + pisolino: a letto a un\'ora normale, e il resto lo recuperi con un pisolino dopo il turno.</p>';
+    'Più tardi + pisolino: a letto a un\'ora normale, e una parte di quello che manca la recuperi con un pisolino dopo il turno.</p>';
   // Una riga sola (la scelta in vigore e l'ora di letto): le due strade e il perché si aprono al tocco. Prima erano sempre aperti.
   return '<details class="dopo-notte dn-comp" aria-label="Prima di un turno molto presto, come dormi"><summary><span class="dn-sum"><small>Prima del turno presto</small><span><b>'+(on?"Più tardi + pisolino":"Tutto stanotte")+'</b> · a letto alle '+hhmm((on?diviso:tutto).a)+'</span></span></summary>'+
     '<div class="dn-scelta">'+opz(false,"Tutto stanotte",tutto,!on)+opz(true,"Più tardi + pisolino",diviso,on)+'</div>'+spiega+'<p class="dn-vale">Vale per tutti i turni presto.</p></details>';
@@ -6449,7 +6449,7 @@ function sceltaDopoNotte(P){
   const corto=P.s.kind==="corto", diviso=cur==="diviso";
   const opz=(val,nome,fine,on,nota)=>'<button type="button" class="vb'+(on?" on":"")+'" data-sonnod="'+val+'" aria-pressed="'+on+'"><b>'+nome+'</b><span>fino alle '+hhmm(fine)+'</span><span class="dn-nota">'+nota+'</span></button>';
   const spiega = '<p class="dn-hint">'+(corto
-    ? 'Sonno breve: il pomeriggio è tuo e stasera, di solito, il sonno arriva prima. Sonno lungo: recuperi di più adesso, ma stasera il sonno arriva più tardi.'
+    ? 'Sonno breve: il pomeriggio è tuo e stasera, di solito, il sonno arriva prima. Sonno lungo: recuperi di più adesso, ma di solito stasera il sonno arriva più tardi.'
     : 'In due tempi: un sonno più corto e un pisolino prima della prossima notte (di giorno si dorme più leggeri). Tutto di fila: un blocco solo, se di giorno dormi bene.')+'</p>';
   const scelte='<div class="dn-scelta">'+opz("diviso", corto?"Sonno breve":"In due tempi", eD, diviso, corto?"pomeriggio libero":"poi un pisolino")+opz(unito, corto?"Sonno lungo":"Tutto di fila", eU, !diviso, corto?"recuperi di più":"un blocco solo")+'</div>'+
     spiega+'<p class="dn-vale">Vale per tutte le notti.</p>';
@@ -7435,7 +7435,7 @@ function perchéOggi(P){
   const aVoce=x=>{ x=Math.round(x/15)*15; const h=Math.floor(x/60), r=x%60, q={15:"un quarto d'ora",30:"mezz'ora",45:"tre quarti d'ora"};
     if(!h) return q[r]||"";
     return (["","un'ora","due ore","tre ore","quattro ore","cinque ore","sei ore"][h]||h+" ore")+({15:" e un quarto",30:" e mezza",45:" e tre quarti"}[r]||""); };
-  if(P.lateStart) return "Attacchi nel cuore della notte: si dorme prima del turno"+((P.naps||[]).some(n=>n.rec) ? " e si recupera dopo, con un pisolino." : ".");
+  if(P.lateStart) return "Attacchi nel cuore della notte: si dorme prima del turno"+((P.naps||[]).some(n=>n.rec) ? " e una parte si recupera dopo, con un pisolino." : ".");
   if(P.night){
     const n=s.nIdx||1, L=s.nLen||1;
     if(n===1 && m.gap && m.gapNight) return "Prima notte: il tuo orologio non è ancora sulla notte, ed è normale. Ci pensano il pisolino di oggi e la luce in turno.";
@@ -7734,7 +7734,7 @@ function caricoHtml(aperta){
   else if(noti(F) && F.brevi) frase=(F.brevi===1?"Una volta":F.brevi+" volte")+" nei prossimi 30 giorni stacchi e riattacchi in meno di 11 ore: in quei giorni il sonno va protetto più del solito.";
   else if(noti(P) && P.serieMax>=4) frase="Nell'ultimo mese hai fatto fino a "+P.serieMax+" notti di fila: il rischio di infortuni cresce a ogni notte, di più alla quarta [Folkard & Tucker 2003].";
   else if(noti(P) && P.brevi) frase=(P.brevi===1?"Una volta":P.brevi+" volte")+" nell'ultimo mese hai avuto meno di 11 ore fra un turno e l'altro.";
-  else if(noti(P) || noti(F)) frase="Niente serie lunghe di notti né riposi sotto le 11 ore: un carico che si recupera bene.";
+  else if(noti(P) || noti(F)) frase="Niente serie lunghe di notti né riposi sotto le 11 ore: un carico più leggero.";
   else frase="Segna i turni in «I turni del mese» per vedere il carico.";
   const rigaC = noti(F)||noti(P) ? (()=>{ const R=noti(F)?F:P, q=noti(F)?"in arrivo":"nell'ultimo mese"; return (R.serieMax? "al massimo "+(R.serieMax===1?"1 notte":R.serieMax+" notti di fila"): "Nessuna notte")+" · "+(R.brevi? R.brevi+(R.brevi===1?" riposo":" riposi")+" sotto le 11 ore":"nessun riposo breve")+" · "+q; })() : "Segna i turni per vederlo";
   return sezDet("Il carico dei turni", rigaC,
@@ -7757,12 +7757,16 @@ function orologio(){
   // è recupero (MSFsc = MSF − (SDf − SDmedia)/2). La media usa solo le notti fra giorni non di notte, e con meno
   // di 5 notti non si corregge. Serve solo all'etichetta e ai consigli: il piano usa i tuoi orari veri.
   const lp=liberiPuliti();
-  const sdF=lp ? lp.sd : (((wake-bed)%1440+1440)%1440 || +state.need || 480);
+  // L'etichetta usa la sveglia dichiarata vera: il motore la limita alle 04:00–12:00 per il piano (freeWakeUsata),
+  // e con quella chi dorme 14–22 risultava dormire 22 ore. Una durata non plausibile torna al bisogno di sonno.
+  const sveglia=isFinite(t(state.freeWake)) ? t(state.freeWake) : wake, sdDich=((sveglia-bed)%1440+1440)%1440;
+  const sdF=lp ? lp.sd : (sdDich>=180 && sdDich<=840 ? sdDich : (+state.need || 480));
   const sdMedia=sonnoMedioDiario();
   const corr=sdMedia!=null && sdF>sdMedia;
   const msf=lp ? lp.msf : bed+sdF/2, msfsc=mod1440(corr ? msf-(sdF-sdMedia)/2 : msf);
-  // Taglio alle 18:00: le 23:30 sono «prima di mezzanotte» (−0,5), le 12:00 di chi dorme 08–16 restano 12 (gufo), non −12.
-  const h=(msfsc<1080 ? msfsc : msfsc-1440)/60;
+  // Taglio alle 21:00: le 23:30 sono «prima di mezzanotte» (−0,5); le 12:00 di chi dorme 08–16 e le 18:00 di chi
+  // dorme 14–22 restano 12 e 18 (gufo), non −12 e −6.
+  const h=(msfsc<1260 ? msfsc : msfsc-1440)/60;
   const tipo = h<2.5 ? "Allodola" : h<3.5 ? "Un po' allodola" : h<5 ? "Né allodola né gufo" : h<6 ? "Un po' gufo" : "Gufo";
   let lucido=null;
   try{ if(window.NTAlert){
@@ -7784,9 +7788,9 @@ function liberiPuliti(){
     let libero=false;
     try{ const off=dnum(g)-f, b=NT.block(off); libero = b.rest && NT.tipoDelGiorno(off-1)!=="n"; }catch(e){}
     if(!libero) continue;
-    // Stesso taglio delle 18:00 dell'etichetta: chi va a letto a volte alle 11:45 e a volte alle 12:15
+    // Stesso taglio delle 21:00 dell'etichetta: chi va a letto a volte alle 11:45 e a volte alle 12:15
     // deve dare due metà vicine (16:00), non 16:00 e 04:00.
-    const b0=t(bd); mids.push((b0<1080 ? b0+1440 : b0)+d/2); durs.push(d); }
+    const b0=t(bd); mids.push((b0<1260 ? b0+1440 : b0)+d/2); durs.push(d); }
   if(mids.length<4) return null;
   const m=v=>v.reduce((a,b)=>a+b,0)/v.length;
   return {n:mids.length, msf:mod1440(m(mids)), sd:m(durs)};
@@ -7993,7 +7997,7 @@ function renderAndamenti(){
   const VOCI=[["carico","calendar","Il carico dei turni","Segna i turni per vederlo","Notti di fila, riposi brevi, festivi e ore dei prossimi 30 giorni, calcolati dai tuoi turni."],
     ["dormi","bed","Come dormi e come stai","Dopo qualche notte annotata","Quanto dormi e come ti senti prima di ogni tipo di turno: compare dopo almeno 4 notti annotate."],
     ["orari","alarm","Gli orari del tuo sonno","Servono 5 notti annotate","Quanto sono regolari gli orari a cui vai a letto e ti svegli: servono almeno 5 notti con i tuoi orari veri."],
-    ["schemi","sparkles","I tuoi schemi","Si vedono con i giorni","Cosa ti fa stare meglio, dai tuoi dati: movimento, luce, caffè, alcol, pasto."],
+    ["schemi","sparkles","I tuoi schemi","Si vedono con i giorni","Cosa va insieme ai giorni in cui stai meglio, dai tuoi dati: movimento, luce, caffè, alcol, pasto."],
     ["orologio","sun","Il tuo orologio","—","Il tuo ritmo stimato dagli orari dei giorni liberi."]]
     .map(([id,ic,t,vuoto,spiega])=>Object.assign({ic}, vociAnd[id] || {id, t, r:vuoto, c:'<p class="hint" style="margin:0">'+esc(spiega)+'</p>', vuota:true}));
   const voceAperta=VOCI.find(v=>v.id===andSez);

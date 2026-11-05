@@ -92,8 +92,8 @@ const avanti=async p=>{ await p.click("#next"); await p.waitForTimeout(150); };
   await p.context().close(); }
 
 // Casi estremi del cronotipo (revisore, giro 4): chi anche nei liberi dorme 08–16 ha la metà del sonno alle 12:00
-// ed è un gufo estremo, non un'allodola (il taglio era a mezzogiorno); chi dorme 22–06 resta allodola.
-for (const [bed, wake, atteso] of [["08:00","16:00","Gufo"],["04:00","12:00","Gufo"],["22:00","06:00","Allodola"],["23:00","07:00","Un po' allodola"]]) {
+// ed è un gufo estremo, non un'allodola (il taglio era a mezzogiorno, poi alle 18); chi dorme 22–06 resta allodola.
+for (const [bed, wake, atteso] of [["08:00","16:00","Gufo"],["04:00","12:00","Gufo"],["14:00","22:00","Gufo"],["22:00","06:00","Allodola"],["23:00","07:00","Un po' allodola"]]) {
   const p=await apri({turniConfigurati:true,pattern:"NNNNNRR",anchor:fa(0),repeat:true,firstSeenAt:"2026-01-01",freeBed:bed,freeWake:wake,need:480,shifts:{N:{n:"Notte",s:1320,e:1800}}});
   await p.evaluate(()=>document.querySelector("[data-tab=turni]")?.click()); await p.waitForTimeout(300);
   await p.evaluate(()=>document.querySelector("#doAndamenti").click()); await p.waitForTimeout(300);
