@@ -1241,9 +1241,10 @@ function tipoPisolino(n){
 function foldLine(line){
   const enc = new TextEncoder();
   if(enc.encode(line).length<=75) return line;
+  // La prima riga ha 75 ottetti; le continuazioni cominciano con lo spazio, che conta: 74.
   let out="", cur="";
   for(const ch of line){
-    if(enc.encode(cur+ch).length>75){ out += (out?"\r\n ":"")+cur; cur=ch; }
+    if(enc.encode(cur+ch).length>(out?74:75)){ out += (out?"\r\n ":"")+cur; cur=ch; }
     else cur+=ch;
   }
   return out + (out?"\r\n ":"")+cur;
@@ -1294,13 +1295,13 @@ function buildEvents(days, pianoGiorni=days){
       "Pianificato da notturnisti.club",true,true);
     if(ICS.pisolini) P.naps.forEach(n=>ev(base,n.a,n.b,"pisolino-"+tipoPisolino(n),
       (n.rec||n.debito)?"Pisolino di recupero":n.rep?"Pisolino preventivo":((n.b-n.a)<40?"Pisolino breve":"Pisolino"),
-      n.rep?"Sei reperibile: una riserva di sonno se ti chiamano stanotte.":"",true));
+      n.rep?"Sei reperibile: un pisolino ora è una riserva se ti chiamano. Al risveglio, se puoi, aspetta un quarto d'ora prima di guidare.":"",true));
     if(ICS.caffe) ev(base,P.cut,P.cut+15,"caffe","Ultima caffeina",
-      "Dopo quest'ora la caffeina è ancora in circolo quando provi a dormire.",true);
+      "Dopo quest'ora una parte della caffeina è ancora in circolo quando provi a dormire.",true);
     // La luce è la leva principale sull'orologio: senza, il piano si disfa.
     if(ICS.luce && isFinite(P.wake))
       ev(base,P.wake+15,P.wake+35,"luce","Luce",
-        "Luce forte adesso: è quello che tiene l'orologio del corpo al passo con il turno.",true);
+        "Luce forte adesso: aiuta a tenere l'orologio del corpo al passo con il turno.",true);
     if(ICS.pasti){
       const mm=(P.meals||[]).find(x=>x&&x.main);
       if(mm&&isFinite(mm.at)) ev(base,mm.at,mm.at+30,"pasti","Pasto principale",
@@ -1309,7 +1310,7 @@ function buildEvents(days, pianoGiorni=days){
     // Il rientro dalla notte è il momento di massimo rischio alla guida.
     if(ICS.rientro && !P.b.rest && (P.night||P.lateStart))
       ev(base,P.b.end,P.b.end+20,"rientro","Rientro: non guidare stanco",
-        "Occhiali da sole appena esci. Se hai sonno, fermati 20 minuti e prendi un caffè prima di ripartire.",true);
+        "Occhiali da sole appena esci, solo con buona luce (se guidi: categoria 1–3, mai la 4; con l'alba scura toglili). Se hai sonno, meglio non guidare: se devi, un caffè e subito un pisolino di 15–20 minuti.",true);
   }
   state.focus=f0;
   return out;

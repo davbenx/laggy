@@ -24,11 +24,11 @@ const hhmm = d => String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinu
 // "essenziale" = acceso nella scelta "Essenziali" (2–3 al giorno).
 export const TIPI = [
   { k: "cambio",   nome: "Domani cambi turno",       desc: "Il giorno prima di un cambio: a che ora andare a letto e come prepararti", essenziale: true,  canale: "turni" },
-  { k: "ret",      nome: "Rientro dopo la notte",    desc: "Alla fine delle notti: l'ora più rischiosa per guidare",                essenziale: true,  canale: "sicurezza" },
+  { k: "ret",      nome: "Rientro dopo la notte",    desc: "Alla fine delle notti: l'ora più delicata per guidare",                essenziale: true,  canale: "sicurezza" },
   { k: "rischio",  nome: "Giorni impegnativi",       desc: "Prima della terza notte di fila o di un rientro con meno di 11 ore di riposo: cosa fare per arrivarci meglio", essenziale: true, canale: "sicurezza" },
   { k: "bedtime",  nome: "Preparati a dormire",      desc: "Mezz'ora prima del sonno pianificato",                                   essenziale: true,  canale: "sonno" },
   { k: "domani",   nome: "Che turno fai domani?",    desc: "Solo se domani non è segnato: senza turno il piano non c'è",             essenziale: true,  canale: "turni" },
-  { k: "coffee",   nome: "Ultima caffeina",          desc: "L'ora oltre la quale caffè, tè, cola o energy drink disturbano il sonno",                     essenziale: false, canale: "caffe" },
+  { k: "coffee",   nome: "Ultima caffeina",          desc: "L'ora oltre la quale caffè, tè, cola o energy drink possono disturbare il sonno",                     essenziale: false, canale: "caffe" },
   { k: "nap",      nome: "Pisolino",                 desc: "Solo nei giorni in cui il piano lo prevede",                             essenziale: false, canale: "pisolini" },
   { k: "prep",     nome: "Preparati per il turno",   desc: "Un'ora prima dell'inizio del turno",                                     essenziale: false, canale: "turni" },
   { k: "luce",     nome: "Luce del mattino",         desc: "Quando prendere luce per tenere l'orologio del corpo al passo",                               essenziale: false, canale: "luce" },
@@ -124,7 +124,7 @@ export function buildSchedule(config, opts = {}) {
 
     if (want("wake") && P.s.dur > 0)
       push(base, P.s.onset + P.s.dur, "wake", "Ora di alzarti",
-        "È l'ora di alzarti: farlo più o meno sempre alla stessa ora tiene l'orologio del corpo al passo.");
+        "È l'ora di alzarti: farlo più o meno sempre alla stessa ora aiuta a tenere l'orologio del corpo al passo.");
 
     if (want("nap") && P.naps)
       P.naps.forEach((n, i) => push(base, n.a, "nap",
@@ -133,12 +133,12 @@ export function buildSchedule(config, opts = {}) {
 
     if (want("coffee"))
       push(base, P.cut, "coffee", "Ultima caffeina",
-        "Dopo quest'ora la caffeina resta in circolo quando provi a dormire.");
+        "Dopo quest'ora una parte della caffeina resta in circolo quando provi a dormire.");
 
     // 10 minuti prima della fine: lo leggi prima di uscire, non già alla guida.
     if (want("ret") && (P.night || P.lateStart) && !P.b.rest)
       push(base, P.b.end - 10, "ret", "Rientro dal turno",
-        "Tra poco il rientro, l'ora più delicata per guidare. Occhiali da sole; se hai sonno, prima di metterti al volante fermati 20 minuti e prendi un caffè.");
+        "Tra poco il rientro, l'ora più delicata per guidare. Occhiali da sole solo con buona luce (se guidi: categoria 1–3, mai la 4; con l'alba scura toglili); se hai sonno, meglio non guidare: se devi, un caffè e subito un pisolino di 15–20 minuti.");
 
     // Giorni impegnativi: non un allarme nel momento del calo (al lavoro, o
     // alla guida, sarebbe solo una distrazione) ma un consiglio prima, quando
@@ -183,7 +183,7 @@ export function buildSchedule(config, opts = {}) {
 
     if (want("luce") && !P.night)
       push(base, P.wake + 15, "luce", "Luce del mattino",
-        "Esci o apri le tende entro un'ora: la luce del mattino tiene l'orologio del corpo al passo.");
+        "Esci o apri le tende entro un'ora: la luce del mattino aiuta a tenere l'orologio del corpo al passo.");
 
     // Domani cambi turno: il giorno prima di un cambio che chiede di
     // spostare il sonno (a letto presto) o di prepararsi a una notte.

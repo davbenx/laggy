@@ -63,7 +63,7 @@ PER CHI TI ASPETTA A CASA
 E TI DICE QUANDO DORMIRE
 • Il piano del giorno, sul tuo turno: quando andare a letto, il pisolino, l'ultima caffeina (caffè, tè, energy drink), quando cercare la luce e quando abbassarla.
 • Prima delle notti ti prepara; dopo l'ultima ti aiuta a tornare al ritmo del giorno.
-• Il tuo orologio biologico, stimato sui tuoi turni e sul tuo sonno: il momento di sonnolenza, quando sei più lucido.
+• Il tuo orologio biologico, stimato sui tuoi turni e sul tuo sonno: il momento di sonnolenza e le ore in cui di solito è più difficile addormentarsi (stima).
 • Ogni consiglio ha il suo perché, in parole semplici, con gli studi da cui viene.
 • Se vuoi, sonno e passi da Salute di Android (Health Connect).
 • Laggy, il gufo di Notturnisti, cresce quando segni come dormi. Niente punti, niente serie da non perdere.
@@ -79,10 +79,17 @@ Spunti di benessere basati sulla letteratura scientifica sul sonno e sul lavoro 
 
 Progetto indipendente. Segnalazioni e idee: Impostazioni › Segnala cosa non torna.
 
+## Note di versione 1.4.4 (max 500)
+Novità 1.4.4
+• Testi del piano ricontrollati sugli studi da cui vengono, e più corti.
+• Rientro in auto: lenti di categoria da 1 a 3, mai la 4, e solo con buona luce; con l'alba scura toglile.
+• Dopo il pisolino, se puoi, aspetta un quarto d'ora prima di guidare.
+• Il tuo orologio: una stima del cronotipo dai tuoi giorni liberi, con il metodo di calcolo dell'MCTQ adattato ai turni (non è il questionario), e in quali turni, in media, chi ha un orologio come il tuo dorme meno.
+
 ## Note di versione 1.4.3 (max 500)
 Novità 1.4.3
 • Testi del piano più precisi, ricontrollati frase per frase sugli studi da cui vengono.
-• Occhiali al rientro: se guidi, lenti di categoria da 1 a 3, mai la 4.
+• Occhiali al rientro: se guidi, lenti di categoria da 1 a 3, mai la 4, e solo con buona luce; con l'alba scura toglile.
 • Notti di fila, pisolino con caffè, risveglio: spiegazioni più chiare.
 
 ## Note di versione 1.4.2 (max 500)

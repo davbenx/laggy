@@ -55,15 +55,16 @@ const avanti=async p=>{ await p.click("#next"); await p.waitForTimeout(150); };
 { const p=await apri({turniConfigurati:true,pattern:"MPNSR",anchor:fa(0),repeat:true,firstSeenAt:fa(10),freeBed:"01:00",freeWake:"09:30",shifts:TURNI,pPattern:"MPNSR",backupDone:true},
     {"nt:analytics-consent":"false","nt:backupDone":"true"});
   const sap=await p.evaluate(()=>{ const e=document.querySelector("#loSapevi"); return e && !e.hidden ? e.dataset.k+" | "+e.textContent : null; });
-  ok(sap && sap.startsWith("orologio |") && /un po' gufo, con il momento di sonnolenza verso le 07:15/.test(sap), "dopo una settimana, «Lo sapevi?»: il tuo orologio è pronto → "+sap);
+  ok(sap && sap.startsWith("orologio |") && /un po' gufo \(stima\), con il momento di sonnolenza verso le 07:15/.test(sap), "dopo una settimana, «Lo sapevi?»: il tuo orologio è pronto → "+sap);
   await p.click("[data-sapevi-prova]"); await p.waitForTimeout(400);
   const o=await p.evaluate(()=>{ const e=document.querySelector("#orologio"); if(!e) return null; const r=e.getBoundingClientRect();
     return {vis:document.body.classList.contains("andamenti-aperta"), top:Math.round(r.top), testo:e.innerText}; });
   ok(o && o.vis && o.top<200, "il tocco apre Sonno e carico sull'orologio → top "+(o&&o.top));
   const usate=await p.evaluate(()=>JSON.parse(localStorage.getItem("nt:funzioniUsate")||"{}"));
   ok(usate.orologio && usate.sonno, "aperta la pagina, né «Sonno e carico» né l'orologio tornano come «Lo sapevi?»");
-  ok(o && /Un po' gufo/.test(o.testo) && /Metà del sonno\s+[\s\S]*05:15/.test(o.testo) && /Momento di sonnolenza[\s\S]*07:15/.test(o.testo) && /dalle 23:00/.test(o.testo) && /Più lucido[\s\S]*verso le \d\d:\d\d/.test(o.testo),
-    "orologio: tipo, metà del sonno 05:15, melatonina dalle 23:00, minimo 07:15, più lucido");
+  ok(o && /Un po' gufo/.test(o.testo) && /Metà del sonno\s+[\s\S]*05:15/.test(o.testo) && /Momento di sonnolenza[\s\S]*07:15/.test(o.testo) && /dalle 23:00/.test(o.testo) && /Più vigile[\s\S]*verso le \d\d:\d\d/.test(o.testo),
+    "orologio: tipo, metà del sonno 05:15, melatonina dalle 23:00, minimo 07:15, più vigile → "+(o&&o.testo.replace(/\s+/g," ").slice(0,400)));
+  ok(o && /serotino in media dorme meno prima dei mattini presto/.test(o.testo), "con i mattini alle 6 nel ciclo, cosa vuol dire il cronotipo per i turni (Juda 2013)");
   ok(/01:00 → 09:30/.test(o.testo) && /Non sono una misura/.test(o.testo), "dice da dove vengono i numeri e che sono stime");
   await p.click("[data-oro-cambia]"); await p.waitForTimeout(400);
   ok(await p.evaluate(()=>document.body.classList.contains("tab-opzioni") && !document.querySelector("#opzBox3").hidden), "«Cambia come dormi» porta alla sezione giusta di Impostazioni");
@@ -74,6 +75,57 @@ const avanti=async p=>{ await p.click("#next"); await p.waitForTimeout(150); };
   const t=await p.evaluate(()=>{ document.querySelector('[data-and-sez="orologio"]').click(); return document.querySelector("#orologio").innerText; });
   ok(/parte da orari tipici/.test(t) && /Dimmi come dormi/.test(t), "con gli orari di partenza lo dice, e invita a renderlo tuo");
   ok(!(await p.evaluate(()=>JSON.parse(localStorage.getItem("nt:funzioniUsate")||"{}").orologio)), "con gli orari di partenza l'orologio non conta come visto: l'invito arriverà quando sarà suo");
+  await p.context().close(); }
+
+// Cronotipo come nell'MCTQ^Shift: dal diario, solo i liberi «puliti» (non lo smonto dopo le notti), corretto per il recupero.
+{ const wakes={}, beds={};
+  for(let i=1;i<=27;i++){ wakes[fa(i)]="06:45"; beds[fa(i)]="23:45"; }
+  for(const i of [1,2,10,11,19,20]){ wakes[fa(i)]="10:30"; beds[fa(i)]="02:00"; }   // i riposi R di MMPPNNSRR partito oggi
+  wakes[fa(3)]="13:00"; beds[fa(3)]="07:00";                                       // lo smonto: recupero, non conta
+  const p=await apri({turniConfigurati:true,pattern:"MMPPNNSRR",anchor:fa(0),repeat:true,firstSeenAt:"2026-01-01",freeBed:"22:00",freeWake:"06:00",shifts:TURNI,wakes,beds});
+  await p.click("#tabTurni").catch(()=>p.evaluate(()=>document.querySelector("[data-tab=turni]")?.click())); await p.waitForTimeout(300);
+  await p.evaluate(()=>document.querySelector("#doAndamenti").click()); await p.waitForTimeout(300);
+  await p.evaluate(()=>document.querySelector("[data-and-sez=orologio]").click()); await p.waitForTimeout(400);
+  const tx=await p.evaluate(()=>document.querySelector("#orologio")?.innerText||"");
+  ok(/^Un po' gufo/.test(tx) && /da 6 giorni liberi del tuo diario/.test(tx) && /senza contare il sonno di recupero/.test(tx),
+    "il diario vince sugli orari dichiarati (allodola): un po' gufo, da 6 liberi puliti, senza il recupero → "+tx.slice(0,140).replace(/\s+/g," "));
+  await p.context().close(); }
+
+// Casi estremi del cronotipo (revisore, giro 4): chi anche nei liberi dorme 08–16 ha la metà del sonno alle 12:00
+// ed è un gufo estremo, non un'allodola (il taglio era a mezzogiorno, poi alle 18); chi dorme 22–06 resta allodola.
+for (const [bed, wake, atteso] of [["08:00","16:00","Gufo"],["04:00","12:00","Gufo"],["14:00","22:00","Gufo"],["22:00","06:00","Allodola"],["23:00","07:00","Un po' allodola"]]) {
+  const p=await apri({turniConfigurati:true,pattern:"NNNNNRR",anchor:fa(0),repeat:true,firstSeenAt:"2026-01-01",freeBed:bed,freeWake:wake,need:480,shifts:{N:{n:"Notte",s:1320,e:1800}}});
+  await p.evaluate(()=>document.querySelector("[data-tab=turni]")?.click()); await p.waitForTimeout(300);
+  await p.evaluate(()=>document.querySelector("#doAndamenti").click()); await p.waitForTimeout(300);
+  await p.evaluate(()=>document.querySelector("[data-and-sez=orologio]").click()); await p.waitForTimeout(400);
+  const tipo=await p.evaluate(()=>document.querySelector("#orologio .oro-tipo")?.textContent||"");
+  const consiglio=await p.evaluate(()=>/mattiniero/.test(document.querySelector("#orologio")?.innerText||""));
+  ok(tipo===atteso && (atteso!=="Gufo" || !consiglio), "liberi "+bed+"–"+wake+": "+atteso+(atteso==="Gufo"?", senza il consiglio da mattiniero":"")+" → "+tipo);
+  await p.context().close(); }
+
+// Lo stesso caso estremo dal DIARIO (revisore, giro 5): notturnista fisso che nei liberi dorme di giorno,
+// a volte dalle 11:45 e a volte dalle 12:15. Le metà del sonno vanno mediate vicine (16:00), non 16:00 e 04:00.
+{ const wakes={}, beds={};
+  [1,8,15,22,29,36].forEach((i,j)=>{ beds[fa(i)] = j%2 ? "12:15" : "11:45"; wakes[fa(i)] = j%2 ? "20:15" : "19:45"; });   // il 2° riposo di NNNNNRR
+  const p=await apri({turniConfigurati:true,pattern:"NNNNNRR",anchor:fa(0),repeat:true,firstSeenAt:"2026-01-01",freeBed:"23:00",freeWake:"07:00",need:480,shifts:{N:{n:"Notte",s:1320,e:1800}},wakes,beds});
+  await p.evaluate(()=>document.querySelector("[data-tab=turni]")?.click()); await p.waitForTimeout(300);
+  await p.evaluate(()=>document.querySelector("#doAndamenti").click()); await p.waitForTimeout(300);
+  await p.evaluate(()=>document.querySelector("[data-and-sez=orologio]").click()); await p.waitForTimeout(400);
+  const tx=await p.evaluate(()=>document.querySelector("#orologio")?.innerText||"");
+  ok(/^Gufo/.test(tx) && /da 6 giorni liberi del tuo diario/.test(tx) && !/mattiniero/.test(tx),
+    "diario con liberi 11:45/12:15 → Gufo, da 6 giorni, senza il consiglio da mattiniero → "+tx.slice(0,120).replace(/\s+/g," "));
+  await p.context().close(); }
+
+// Media circolare (revisore, giro 7): liberi annotati con letto a volte alle 20:45 e a volte alle 21:15 (sveglia 04:45/05:15)
+// → metà del sonno 00:45 e 01:15, media 01:00: «Allodola». Con un taglio fisso alle 21:00 la media veniva 13:00 («Gufo»).
+{ const wakes={}, beds={};
+  [1,8,15,22,29,36].forEach((i,j)=>{ beds[fa(i)] = j%2 ? "21:15" : "20:45"; wakes[fa(i)] = j%2 ? "05:15" : "04:45"; });
+  const p=await apri({turniConfigurati:true,pattern:"MMMMMRR",anchor:fa(0),repeat:true,firstSeenAt:"2026-01-01",freeBed:"23:00",freeWake:"07:00",need:480,shifts:{M:{n:"Mattino",s:360,e:840}},wakes,beds});
+  await p.evaluate(()=>document.querySelector("[data-tab=turni]")?.click()); await p.waitForTimeout(300);
+  await p.evaluate(()=>document.querySelector("#doAndamenti").click()); await p.waitForTimeout(300);
+  await p.evaluate(()=>document.querySelector("[data-and-sez=orologio]").click()); await p.waitForTimeout(400);
+  const tx=await p.evaluate(()=>document.querySelector("#orologio")?.innerText||"");
+  ok(/^Allodola/.test(tx) && /da 6 giorni liberi del tuo diario/.test(tx), "diario con letto 20:45/21:15 → Allodola, da 6 giorni (media circolare) → "+tx.slice(0,90).replace(/\s+/g," "));
   await p.context().close(); }
 
 console.log("errori", errs); await b.close();

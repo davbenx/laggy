@@ -13,11 +13,20 @@ await ctx.addInitScript(st=>{ if(sessionStorage.getItem("x")) return; sessionSto
   localStorage.setItem("nt:state",JSON.stringify(st)); localStorage.setItem("nt:turniConfigurati","true"); localStorage.setItem("nt:firstPlanBannerChiuso","true"); },
   {turniConfigurati:true,pattern:"MPNSR",anchor:iso(oggi),shifts:SH,repeat:true,firstSeenAt:"2026-01-01"});
 const p=await ctx.newPage(); p.on("pageerror",e=>errs.push(e.message));
+// A mezzogiorno: fra mezzanotte e la sveglia per l'app è ancora «ieri» (la giornata finisce quando vai a dormire),
+// e le date calcolate qui sotto non coinciderebbero più.
+await p.clock.setFixedTime(oggi);
 await p.goto("http://localhost:8765/index.html"); await p.waitForTimeout(900);
 await p.click('[data-tab="turni"]'); await p.waitForTimeout(300);
 await p.click('[data-vista="ore"]'); await p.waitForTimeout(300);   // la striscia oraria (il calendario è la vista principale)
 const stato=()=>p.evaluate(()=>JSON.parse(localStorage.getItem("nt:state")));
-const apri=async off=>{ await p.click('#cyc .crow[data-off="'+off+'"]'); await p.waitForTimeout(250); };
+// La striscia mostra la settimana (lunedì–domenica) del giorno scelto: se il giorno è nella settimana dopo o prima,
+// la sfoglia (prima il test passava solo in certi giorni della settimana).
+const apri=async off=>{ const sel='#cyc .crow[data-off="'+off+'"]';
+  for(let i=0;i<3 && !(await p.$(sel));i++){
+    const offs=await p.evaluate(()=>[...document.querySelectorAll("#cyc .crow")].map(x=>+x.dataset.off));
+    await p.click(off>Math.max(...offs) ? "#cycNext" : "#cycPrev"); await p.waitForTimeout(200); }
+  await p.click(sel); await p.waitForTimeout(250); };
 const chip=async t=>{ if(!(await p.$('[data-qs-spec="'+t+'"]'))){ await p.click("[data-qs-altro]"); await p.waitForTimeout(150); } await p.click('[data-qs-spec="'+t+'"]'); await p.waitForTimeout(250); };
 const d2=iso(new Date(oggi.getTime()+2*864e5)), d0=iso(oggi), d1=iso(new Date(oggi.getTime()+864e5));
 // 1. ferie sulla notte (giorno +2): riposo, sigla nella striscia; toglierla riporta la notte
