@@ -3914,8 +3914,8 @@ function cards(P){
   }else if(night){
     cc.sub="Di notte serve, ma va concentrata a inizio turno.";
     cc.rows.push(["Sì",hhmm(b.start)+" appena entri, un altro entro le "+hhmm(cut)]);
-    cc.rows.push(["Come prenderlo","piccoli e distanziati: di solito due caffè normali a distanza reggono meglio di un doppio e pesano meno sul sonno dopo"]);
-    cc.rows.push(["No","dopo le "+hhmm(cut)+": la caffeina è ancora in circolo quando provi a dormire"]);
+    cc.rows.push(["Come prenderlo","uno normale alla volta; l'ultimo entro le "+hhmm(cut)]);
+    cc.rows.push(["No","dopo le "+hhmm(cut)+": una parte della caffeina è ancora in circolo quando provi a dormire"]);
   }else if(s.meta.ramp&&shift<0)
     cc.sub="Stasera vai a letto prima del solito: il caffè del pomeriggio è la prima cosa da anticipare.";
   else cc.sub="Calcolato sull'ora in cui andrai a letto stasera.";
@@ -4100,10 +4100,10 @@ function cards(P){
       small: "<b>"+esc(b.name||nameOf(b.c))+"</b>",
       sub:"Per il viaggio contiamo "+state.cTo+" minuti all'andata e "+state.cFrom+" al ritorno: decidono quando ti prepari e da quando sei di nuovo libero.",
       ...(state.guidaLavoro ? {
-        rows:[["Pause di guida","dopo 4 ore e mezza di guida, almeno 45 minuti di pausa (anche in due: prima 15, poi 30)"],
+        rows:[["Pause di guida (regole UE: camion, autobus oltre 50 km)","dopo 4 ore e mezza di guida, almeno 45 minuti di pausa (anche in due: prima 15, poi 30)"],
               ["Se hai sonno","nella pausa un caffè e subito un pisolino di 15–20 minuti; al risveglio riparti solo quando ti senti sveglio"]],
         why:"Per camion e autobus di linea oltre i 50 km valgono le regole europee (le stesse del tachigrafo); per le linee urbane decidono le regole nazionali e il contratto. Di solito il sonno al volante si fa sentire prima (palpebre pesanti, sbadigli): è il momento di fermarsi. Al simulatore, caffè più pisolino breve funziona meglio dei due da soli; finestrino aperto e radio alta no.",
-        cite:"Reg. (CE) 561/2006, art. 7 · Reyner &amp; Horne 1997 (simulatore di guida)" } : {}),
+        cite:"Reg. (CE) 561/2006, art. 3 e 7 · Reyner &amp; Horne 1997 (simulatore di guida) · Reyner &amp; Horne 1998 (sonnolenza al volante)" } : {}),
       cambia:4, cambiaTxt:"Cambia il tuo tragitto",
       at: b.start});
   } else if(b.c==="?"){
@@ -7438,7 +7438,7 @@ function perchéOggi(P){
   if(P.lateStart) return "Attacchi nel cuore della notte: si dorme prima del turno"+((P.naps||[]).some(n=>n.rec) ? " e una parte si recupera dopo, con un pisolino." : ".");
   if(P.night){
     const n=s.nIdx||1, L=s.nLen||1;
-    if(n===1 && m.gap && m.gapNight) return "Prima notte: il tuo orologio non è ancora sulla notte, ed è normale. Ci pensano il pisolino di oggi e la luce in turno.";
+    if(n===1 && m.gap && m.gapNight) return "Prima notte: il tuo orologio non è ancora sulla notte, ed è normale. Il pisolino di oggi e la luce in turno possono aiutarti.";
     const dove = L<=1 ? "Una notte sola" : n===1 ? "Prima notte di "+L : n===L ? "Ultima notte" : "Notte "+n+" di "+L;
     const blocco = L<=1 ? "" : s.strategy==="contieni" ? " Blocco corto: l'orologio resta dov'è, si protegge il sonno."
       : s.strategy==="compromesso" ? " Blocco lungo: l'orologio si sposta di qualche ora, senza ribaltarlo." : "";
@@ -7788,12 +7788,12 @@ function liberiPuliti(){
     let libero=false;
     try{ const off=dnum(g)-f, b=NT.block(off); libero = b.rest && NT.tipoDelGiorno(off-1)!=="n"; }catch(e){}
     if(!libero) continue;
-    // Stesso taglio delle 21:00 dell'etichetta: chi va a letto a volte alle 11:45 e a volte alle 12:15
-    // deve dare due metà vicine (16:00), non 16:00 e 04:00.
-    const b0=t(bd); mids.push((b0<1260 ? b0+1440 : b0)+d/2); durs.push(d); }
+    mids.push(mod1440(t(bd)+d/2)); durs.push(d); }
   if(mids.length<4) return null;
-  const m=v=>v.reduce((a,b)=>a+b,0)/v.length;
-  return {n:mids.length, msf:mod1440(m(mids)), sd:m(durs)};
+  // Media circolare (Fisher, come in regolaritaSonno): le 23:45 e le 00:15 hanno media 00:00, e così le 15:45 e le 16:15
+  // o le 00:45 e le 01:15, qualunque sia l'ora. Un taglio fisso falliva sempre per chi va a letto vicino al taglio.
+  const ang=mids.map(x=>x/1440*2*Math.PI), cx=ang.reduce((a,x)=>a+Math.cos(x),0), sy=ang.reduce((a,x)=>a+Math.sin(x),0);
+  return {n:mids.length, msf:mod1440(Math.round(Math.atan2(sy,cx)/(2*Math.PI)*1440)), sd:durs.reduce((a,b)=>a+b,0)/durs.length};
 }
 // Sonno medio per notte dal diario, ultime 4 settimane, solo le notti fra giorni non di notte: niente sonno di giorno
 // né recupero dopo le notti, che abbasserebbero la media e farebbero sembrare tutti più mattinieri.

@@ -24,7 +24,9 @@ const VIETATE = [/stasera devi/i, /rischio alto/i, /impedit/i, /sospettat/i, /sb
   /molto meno intontit/i, /arrivarci in forma/i, /mente lucida/i,
   // giro 6: il sonno al volante che «non avvisa», le certezze sulla caffeina, il recupero completo, «al meglio»
   /non avvisa/i, /oltre la quale[^.]*disturbano/i, /recupera quello che|il resto lo recuperi/i, /sono al meglio/i,
-  /ti fa stare meglio/i, /si recupera bene/i];
+  /ti fa stare meglio/i, /si recupera bene/i,
+  // giro 7: confronti senza fonte sul modo di prendere il caffè
+  /reggono meglio di un doppio|meglio di un doppio/i];
 
 // La scheda di Google Play è testo semplice: ogni riga conta.
 const SCHEDA = "docs/play/scheda.md";

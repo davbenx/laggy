@@ -116,4 +116,16 @@ for (const [bed, wake, atteso] of [["08:00","16:00","Gufo"],["04:00","12:00","Gu
     "diario con liberi 11:45/12:15 → Gufo, da 6 giorni, senza il consiglio da mattiniero → "+tx.slice(0,120).replace(/\s+/g," "));
   await p.context().close(); }
 
+// Media circolare (revisore, giro 7): liberi annotati con letto a volte alle 20:45 e a volte alle 21:15 (sveglia 04:45/05:15)
+// → metà del sonno 00:45 e 01:15, media 01:00: «Allodola». Con un taglio fisso alle 21:00 la media veniva 13:00 («Gufo»).
+{ const wakes={}, beds={};
+  [1,8,15,22,29,36].forEach((i,j)=>{ beds[fa(i)] = j%2 ? "21:15" : "20:45"; wakes[fa(i)] = j%2 ? "05:15" : "04:45"; });
+  const p=await apri({turniConfigurati:true,pattern:"MMMMMRR",anchor:fa(0),repeat:true,firstSeenAt:"2026-01-01",freeBed:"23:00",freeWake:"07:00",need:480,shifts:{M:{n:"Mattino",s:360,e:840}},wakes,beds});
+  await p.evaluate(()=>document.querySelector("[data-tab=turni]")?.click()); await p.waitForTimeout(300);
+  await p.evaluate(()=>document.querySelector("#doAndamenti").click()); await p.waitForTimeout(300);
+  await p.evaluate(()=>document.querySelector("[data-and-sez=orologio]").click()); await p.waitForTimeout(400);
+  const tx=await p.evaluate(()=>document.querySelector("#orologio")?.innerText||"");
+  ok(/^Allodola/.test(tx) && /da 6 giorni liberi del tuo diario/.test(tx), "diario con letto 20:45/21:15 → Allodola, da 6 giorni (media circolare) → "+tx.slice(0,90).replace(/\s+/g," "));
+  await p.context().close(); }
+
 console.log("errori", errs); await b.close();
