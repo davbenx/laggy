@@ -79,6 +79,11 @@ Spunti di benessere basati sulla letteratura scientifica sul sonno e sul lavoro 
 
 Progetto indipendente. Segnalazioni e idee: Impostazioni › Segnala cosa non torna.
 
+## Note di versione 1.4.6 (max 500)
+Novità 1.4.6
+• Corretto: il giorno della prima notte, al mattino, «Adesso» diceva «Appena smontato».
+• Corretto: «Copia il riepilogo del diario» a volte non copiava.
+
 ## Note di versione 1.4.5 (max 500)
 Novità 1.4.5
 • Testi del piano ricontrollati sugli studi da cui vengono, e più corti.
