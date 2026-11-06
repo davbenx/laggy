@@ -6214,8 +6214,11 @@ function adessoLine(P, riferimento){
       passi.push("turno alle "+hhmm(b.start));
       return {t:"Tra "+hm(toStart)+" entri in turno", s:passi.join(" · ").replace(/^./,c=>c.toUpperCase())};
     }
-    const afterEnd=mod1440(m-b.end);
-    if((P.night||P.lateStart) && afterEnd<=2*60) return {t:"Appena smontato",s:"è l'ora più delicata: se hai sonno, non guidare"};
+    // m conta dalla mezzanotte della giornata (oltre 1440 dopo mezzanotte, finché non si va a dormire): senza modulo.
+    // Con mod1440 la notte di STASERA (fine domattina alle 06:00) risultava finita stamattina, e alle 08:07 del giorno
+    // della prima notte compariva «Appena smontato» (bug del 06/11/2026).
+    const afterEnd=m-b.end;
+    if((P.night||P.lateStart) && afterEnd>=0 && afterEnd<=2*60) return {t:"Appena smontato",s:"è l'ora più delicata: se hai sonno, non guidare"};
   }
 
   // "Ora" non deve mai restare vuoto: se non c'è nulla di urgente, dice
@@ -9350,10 +9353,11 @@ function diaryClick(e){
     if($("#mattinoBif")) $("#mattinoBif").checked=state.mattinoBifasico;
     haptic(8); salva(); render(); track("setup_item", {item:"presto_"+(state.mattinoBifasico?"diviso":"tutto")}); return; }
   if(e.target.closest("[data-off-bifasico]")){ state.avvisoBifasicoOff=true; salva(); render(); return; }
-  if(e.target.id==="doSum"){
+  if(e.target.closest("#doSum")){   // closest: il tocco sulla riga piccola dentro il bottone prima non faceva niente
     const txt=summaryText();
-    if(txt) navigator.clipboard.writeText(txt).then(()=>toast("Riepilogo copiato"),
-      ()=>prompt("Copia il riepilogo:",txt));
+    if(!txt){ toast("Ancora niente da copiare: annota qualche notte"); return; }
+    const scrivi = navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(txt) : Promise.reject();
+    scrivi.then(()=>toast("Riepilogo copiato"), ()=>prompt("Copia il riepilogo:",txt));
     return;
   }
   if(e.target.closest("[data-wake]") || e.target.closest("[data-bed]")
