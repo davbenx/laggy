@@ -4109,7 +4109,10 @@ function cards(P){
       small: "<b>"+esc(b.name||nameOf(b.c))+"</b>",
       sub:"Per il viaggio contiamo "+state.cTo+" minuti all'andata e "+state.cFrom+" al ritorno: decidono quando ti prepari e da quando sei di nuovo libero.",
       rows: state.guidaLavoro ? [["Pause di guida (regole UE: camion, autobus oltre 50 km)","dopo 4 ore e mezza di guida, almeno 45 minuti di pausa (anche in due: prima 15, poi 30)"],
-            ["Se hai sonno","nella pausa un caffè e subito un pisolino di 15–20 minuti; al risveglio riparti solo quando ti senti sveglio"]] : [],
+            ["Se hai sonno","nella pausa un caffè e subito un pisolino di 15–20 minuti; al risveglio riparti solo quando ti senti sveglio"]] : [
+            ["Prima di iniziare","prenditi 10–15 minuti di decompressione dal tragitto prima di prendere servizio"],
+            ["In turno","idratati con regolarità; se senti cali, muoviti o fai una breve pausa alla luce"],
+            ["A fine turno","fai il passaggio consegne con calma; se hai sonno, aspetta di sentirti lucido prima di metterti in strada"]],
       why: state.guidaLavoro ? "Per camion e autobus di linea oltre i 50 km valgono le regole europee (le stesse del tachigrafo); per le linee urbane decidono le regole nazionali e il contratto. Di solito il sonno al volante si fa sentire prima (palpebre pesanti, sbadigli): è il momento di fermarsi. Al simulatore, caffè più pisolino breve funziona meglio dei due da soli; finestrino aperto e radio alta no."
             : "Gli orari del turno e i tempi di tragitto definiscono l'architettura della giornata: decidono quando prepararsi, quando mangiare e quando il corpo può iniziare la fase di decompressione.",
       cite: state.guidaLavoro ? "Reg. (CE) 561/2006, art. 3 e 7 · Reyner &amp; Horne 1997 (simulatore di guida) · Reyner &amp; Horne 1998 (sonnolenza al volante)"
@@ -4146,6 +4149,12 @@ function cards(P){
     out.push({k:"cbt", lab:"Momento di sonnolenza",
       val: hhmm(cbt-mezza)+"–"+hhmm(cbt+mezza), mezza,
       small: FONTE[oro.fonte]||FONTE.orari,
+      rows: [
+        ["Cosa fare","fai una pausa alla luce più viva che trovi, muoviti un po' e bevi acqua fresca"],
+        ["Compiti delicati","se puoi, rimanda a dopo questa finestra decisioni critiche, calcoli o mansioni ad alto rischio di errore"],
+        ["Se hai sonno","non restare fermo a lottare contro il sonno: alzati, cammina o cambia attività. Se hai una pausa, un pisolino di 15–20 minuti aiuta"],
+        ["Fine turno","se stacchi vicino a quest'ora, aspetta di sentirti vigile prima di metterti alla guida"]
+      ],
       why: "Ogni notte il corpo passa da un punto basso, anche se hai dormito bene: è normale sentirlo. Se cade in turno, se puoi fai una pausa alla luce e rimanda i compiti delicati. È una stima dai tuoi orari: conta quello che senti."+
         (oro.fonte==="orari"?" La finestra è larga perché parte dagli orari del piano: con qualche giorno di sonno segnato (o da Salute) si stringe.":
          mezza>60?" La finestra è un po' larga: i modelli dell'orologio non sono del tutto d'accordo su di te.":""),
@@ -6457,11 +6466,17 @@ function attivitaHtml(k){
 }
 const VOCI_FIN=[
   ["testa","Testa",ICON.mente,"pensare, studiare","Le ore in cui di solito sei più lucido: almeno 90 minuti dopo il risveglio e 2 ore prima di dormire, fuori dal turno, dal viaggio e dai pasti. "+STIMA_FIN,
-   "Monk, Buysse, Reynolds & Kupfer, Chronobiol Int 1997 · Dijk, Duffy & Czeisler, J Sleep Res 1992"],
+   "Monk, Buysse, Reynolds & Kupfer, Chronobiol Int 1997 · Dijk, Duffy & Czeisler, J Sleep Res 1992",
+   [["Ideale per","studio, pratiche burocratiche, decisioni importanti o lavoro di precisione"],
+    ["Come sfruttarlo","elimina le distrazioni: l'inerzia del sonno è smaltita e la memoria di lavoro è al massimo"]]],
   ["leggera","Movimento",ICON.passo,"camminare, stretching","45 minuti leggeri quando di solito il corpo è più pronto: almeno 45 minuti dopo il risveglio e un'ora prima di dormire, lontano dai pasti. "+STIMA_FIN,
-   "Youngstedt, Sports Med 2005 · Atkinson & Reilly, Sports Med 1996"],
+   "Youngstedt, Sports Med 2005 · Atkinson & Reilly, Sports Med 1996",
+   [["Ideale per","camminare all'aperto, stretching, yoga o faccende attive"],
+    ["Vantaggi","riattiva la circolazione senza affaticare il corpo né alzare il cortisolo prima del riposo"]]],
   ["intensa","Allenamento",ICON.peso,"più impegnativo","60 minuti più impegnativi, quando di solito forza e coordinazione rendono di più: almeno 2 ore dopo il risveglio, lontano dai pasti, finiti 3 ore prima di dormire. "+STIMA_FIN,
-   "Chtourou & Souissi, Sports Med 2012 · Reilly & Waterhouse, Lancet 2009 · Teo, Newton & McGuigan, Sports Med 2011"]
+   "Chtourou & Souissi, Sports Med 2012 · Reilly & Waterhouse, Lancet 2009 · Teo, Newton & McGuigan, Sports Med 2011",
+   [["Ideale per","palestra, corsa, pesi o sport ad alta intensità"],
+    ["Consiglio","la forza e la temperatura corporea sono al picco; chiudi almeno 3 ore prima di dormire per facilitare l'addormentamento"]]]
 ];
 // A letto molto presto prima di un mattino: le due strade con gli orari veri,
 // nel giorno in cui servono (prima era una nota con un rimando a Impostazioni,
@@ -6664,8 +6679,9 @@ function renderEssenziale(P, CARDS){
   // attaccate a «Dormi»: sono decisioni su quella voce, non voci del programma.
   // I momenti migliori (testa, movimento, allenamento) come voci del piano.
   try{ const fin=finestreDelGiorno(P);
-    if(fin) for(const [k,lab,ic,sub,perche,cite] of VOCI_FIN){ const w=fin[k]; if(!w || !pianoVoce(k)) continue;
-      voci.push({t:dSv(w.a), html:riga("fin-"+k, lab, hhmm(w.a)+" → "+hhmm(w.z), sub, false, ic, '<div class="why">'+esc(perche)+(cite?'<cite>'+cite+'</cite>':'')+'</div>'+(k==="testa"?"":attivitaHtml(k))+linkVai("momenti","Scegli quando preferisci"), {a:w.a, z:w.z, poi:lab.toLowerCase()+" dalle "+hhmm(w.a)})}); } }catch(e){}
+    if(fin) for(const [k,lab,ic,sub,perche,cite,rows] of VOCI_FIN){ const w=fin[k]; if(!w || !pianoVoce(k)) continue;
+      const rHtml = rows && rows.length ? '<div class="rows">'+rows.map(r=>'<div class="row"><b>'+esc(r[0])+'</b><span>'+esc(r[1])+'</span></div>').join("")+'</div>' : '';
+      voci.push({t:dSv(w.a), html:riga("fin-"+k, lab, hhmm(w.a)+" → "+hhmm(w.z), sub, false, ic, rHtml+'<div class="why">'+esc(perche)+(cite?'<cite>'+cite+'</cite>':'')+'</div>'+(k==="testa"?"":attivitaHtml(k))+linkVai("momenti","Scegli quando preferisci"), {a:w.a, z:w.z, poi:lab.toLowerCase()+" dalle "+hhmm(w.a)})}); } }catch(e){}
   const dn=sceltaDopoNotte(P);
 
   // Letto troppo presto prima di un turno di mattina: stessa soglia della
@@ -6767,7 +6783,9 @@ function renderEssenziale(P, CARDS){
         // in arrivo. Riusa lo stesso segnale già calcolato per "Dormi" in
         // questo stesso ramo (s.meta.ramp), non un rilevamento nuovo.
         const tSera = dSv(P.s.onset-180);
-        const dettSera = '<div class="why">Nei prossimi giorni il sonno si anticipa. La luce di sera sposta l\'orologio più tardi: tenerla bassa nelle ultime ore ti aiuta ad addormentarti prima, anche in un giorno libero.<cite>Gooley e coll., J Clin Endocrinol Metab 2011 · Zeitzer e coll., J Physiol 2000</cite></div>';
+        const righeSera = '<div class="rows"><div class="row"><b>In casa</b><span>luci calde e soffuse, evita lampadari diretti e luce fredda</span></div>'+
+          '<div class="row"><b>Schermi</b><span>luminosità al minimo o filtro luce blu; se riesci, spegni mezz\'ora prima di coricarti</span></div></div>';
+        const dettSera = righeSera+'<div class="why">Nei prossimi giorni il sonno si anticipa. La luce di sera sposta l\'orologio più tardi: tenerla bassa nelle ultime ore ti aiuta ad addormentarti prima, anche in un giorno libero.<cite>Gooley e coll., J Clin Endocrinol Metab 2011 · Zeitzer e coll., J Physiol 2000</cite></div>';
         voci.push({t:tSera, html:riga("penombra","Luce bassa",hhmm(P.s.onset-180),"tieni la luce soffusa",false,ICON.dim,dettSera,
           {a:P.s.onset-180, poi:"luci basse dalle "+hhmm(P.s.onset-180)})});
       }
