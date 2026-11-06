@@ -565,6 +565,10 @@ body.primo-avvio #firstPlanBanner,body.primo-avvio #setupChecklist,body.primo-av
 .tag-chip.on{background:var(--blue-soft);color:var(--blue);border-color:var(--blue)}
 .sleep-tags-summary{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
 .sleep-tag-pill{display:inline-block;padding:1px 7px;border-radius:999px;font-size:11px;background:var(--s2);color:var(--dim)}
+.att-box-quick{margin:6px 0 10px}
+.att-box-quick .att-riga{display:block;margin:6px 0}
+.att-btn-quick{width:100%;display:inline-flex;align-items:center;justify-content:center;padding:9px 12px;border-radius:8px;font-size:13px;font-weight:600;background:var(--s2);color:var(--ink);border:1px solid var(--line);cursor:pointer;transition:background .15s ease}
+.att-btn-quick:hover{background:var(--s1);border-color:var(--dim)}
 .cyc.con-pers .caxis .crail span{font-size:10px}   /* con la colonna della persona la rotaia si stringe: ore più piccole */
 .crow.spec .ccode{font-size:10.5px;color:var(--dim)}
 .crow.rep .ccode::after{content:"";position:absolute;top:-1px;right:-3px;width:5px;height:5px;border-radius:50%;background:var(--orange-fill)}
@@ -4808,7 +4812,7 @@ function diaryReminder(P, CARDS){
   x+= pend ? xNap+xEn : xEn+xNap;
   x+=xExtra;
   if(logged && !sleepEditing){
-    const curTags = ((state.diaryTags||{})[key0]) || [];
+    const curTags = tagPreselezionati(key0);
     x+='<div class="dq-sez" style="margin-top:10px">Cosa ha accompagnato il sonno? <span class="hint" style="display:inline;font-weight:400">(facoltativo)</span></div>'+
       '<div class="tag-chips" role="group" aria-label="Cosa ha accompagnato il sonno">'+
       SLEEP_TAGS.map(t=>{
@@ -4891,6 +4895,30 @@ const SLEEP_TAGS = [
   { id: "rumore", label: "Rumore / Luce" },
   { id: "buio", label: "Buio totale" }
 ];
+
+function tagPreselezionati(dayKey){
+  if(state.diaryTags && state.diaryTags[dayKey] !== undefined) {
+    return state.diaryTags[dayKey] || [];
+  }
+  const auto = [];
+  try {
+    const dObj = new Date(dayKey + "T12:00:00");
+    const prevKey = iso(day(dObj, -1));
+    const attsPrev = typeof attGiorno==="function" ? attGiorno(prevKey) : [];
+    const attsOggi = typeof attGiorno==="function" ? attGiorno(dayKey) : [];
+    const atts = attsPrev.concat(attsOggi);
+
+    if (atts.some(a => a.t === "alcol")) auto.push("alcol");
+    if (atts.some(a => a.t === "pasto")) auto.push("cena_tardi");
+    if (atts.some(a => {
+      if (a.t !== "caffe") return false;
+      const m = typeof t==="function" ? t(a.fine) : NaN;
+      return isFinite(m) && (m >= 840 || m <= 360);
+    })) auto.push("caffe_serale");
+    if (atts.some(a => a.t === "leggera")) auto.push("stretching");
+  } catch(e) {}
+  return auto;
+}
 
 // Blocco unico "Ora": un solo eroe in cima che, a seconda del momento, mostra IL
 // rischio fatica OPPURE l'azione del momento. Fonde i due moduli che prima
@@ -6482,21 +6510,30 @@ const STIMA_FIN="Una stima dai tuoi orari di sonno, non una misura né un consig
 // (durata, quante tazze, una nota) stanno in un riquadro chiuso, per chi vuole essere più preciso. Non cambia il piano di oggi:
 // servono a due cose, un'informazione al momento e, con i giorni, vedere i tuoi schemi in Andamenti.
 // Le voci segnate di un giorno, solo quelle valide: un file ripristinato o un valore rotto non deve mai fermare il piano.
-const attGiorno=k=>{ const v=(state.attivita||{})[k]; return Array.isArray(v) ? v.filter(a=>a && typeof a==="object" && typeof a.t==="string" && /^\d\d:\d\d$/.test(a.fine||"")) : []; };
+function attGiorno(k){ const v=(state.attivita||{})[k]; return Array.isArray(v) ? v.filter(a=>a && typeof a==="object" && typeof a.t==="string" && /^\d\d:\d\d$/.test(a.fine||"")) : []; }
 function attSalva(sv){
-  const k=sv.dataset.attSalva, box=sv.closest("[data-att-box]")||document, ora=(box.querySelector("[data-att-ora]")||{}).value;
-  if(!/^\d\d:\d\d$/.test(ora||"")){ toast("Metti l'ora"); return; }
+  const k=sv.dataset.attSalva, box=sv.closest("[data-att-box]")||document;
+  let ora=(box.querySelector("[data-att-ora]")||{}).value;
+  if(!/^\d\d:\d\d$/.test(ora||"")){
+    if(k==="pasto" || k==="alcol"){
+      const n=new Date();
+      ora = hhmm(n.getHours()*60+n.getMinutes());
+    } else {
+      toast("Metti l'ora"); return;
+    }
+  }
   const voce={t:k, fine:ora};
   const mi=+(box.querySelector("[data-att-min]")||{}).value, nz=+(box.querySelector("[data-att-n]")||{}).value, nota=((box.querySelector("[data-att-nota]")||{}).value||"").trim().slice(0,80);
   if(mi>=5 && mi<=300) voce.min=Math.round(mi); if(nz>=1 && nz<=4) voce.n=nz; if(nota) voce.nota=nota;
   const key=iso(state.focus), lista=attGiorno(key).filter(a=>a.t!==k); lista.push(voce); state.attivita[key]=lista;
   store.set("attivita",state.attivita); apriFoglio("infoModal",false); render();
   // Solo un'informazione, mai un giudizio: vicino al letto un allenamento intenso, un caffè o un pasto abbondante possono rallentare l'addormentamento.
-  let msg="Segnato";
+  let msg=k==="pasto"?"Pasto registrato":k==="alcol"?"Alcol registrato":"Segnato";
   try{ const P=NT.plan(), prima=(((P.s.onset-t(ora))%1440)+1440)%1440;
     if(k==="intensa" && prima<60) msg="Segnato. Un allenamento intenso vicino al letto può rallentare l'addormentamento: luce soffusa e qualche minuto di calma aiutano.";
     else if(k==="caffe" && prima<360) msg="Segnato. Un caffè a meno di 6 ore dal letto può rallentare l'addormentamento: dipende da persona a persona, e con i giorni vedrai il tuo schema.";
-    else if(k==="pasto" && prima<180) msg="Segnato. Un pasto abbondante vicino al letto può rendere il sonno meno riposante: una passeggiata leggera aiuta."; }catch(x){}
+    else if(k==="pasto" && prima<180) msg="Pasto registrato. Un pasto abbondante vicino al letto può rendere il sonno meno riposante: una passeggiata leggera aiuta.";
+    else if(k==="alcol" && prima<240) msg="Alcol registrato. L'alcol vicino al sonno frammenta la seconda metà della notte: bevi acqua per idratarti."; }catch(x){}
   toast(msg);
 }
 function attAnnulla(an){
@@ -6524,6 +6561,16 @@ function attivitaHtml(k){
     : c.det==="n"
     ? '<label>'+c.nLab+'<select class="ora-in" data-att-n aria-label="'+c.nLab+'"><option value="">facoltativo</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4 o più</option></select></label>'
     : '';
+  if(k==="pasto" || k==="alcol"){
+    const btnLabel = k==="pasto" ? "+ Segna pasto tardivo o abbondante" : "+ Ho bevuto alcol stasera";
+    return '<div data-att-box class="att-box-quick">'+
+      '<div class="att-riga"><button type="button" class="dbtn pri att-btn-quick" data-att-salva="'+k+'" aria-label="'+esc(btnLabel)+'">'+esc(btnLabel)+'</button>'+
+      '<input type="time" class="ora-in" data-att-ora value="'+adesso+'" style="display:none" aria-hidden="true"></div>'+
+      '<details class="att-det"><summary>Personalizza orario o dettagli</summary>'+
+      '<label>Orario <input type="time" class="ora-in" value="'+adesso+'" oninput="const b=this.closest(\'[data-att-box]\');if(b){const h=b.querySelector(\'[data-att-ora]\');if(h)h.value=this.value;}" onchange="const b=this.closest(\'[data-att-box]\');if(b){const h=b.querySelector(\'[data-att-ora]\');if(h)h.value=this.value;}"></label>'+
+      det+'<label>Una nota<input type="text" maxlength="80" class="ora-in" data-att-nota placeholder="facoltativo" aria-label="Una nota"></label></details>'+
+      '</div>';
+  }
   return '<div data-att-box><div class="att-riga"><label>'+c.ora+' <input type="time" class="ora-in" data-att-ora value="'+adesso+'" aria-label="'+c.ora+'"></label><button type="button" class="dbtn pri" data-att-salva="'+k+'">'+c.btn+'</button></div>'+
     '<details class="att-det"><summary>Aggiungi dettagli</summary>'+det+'<label>Una nota<input type="text" maxlength="80" class="ora-in" data-att-nota placeholder="facoltativo" aria-label="Una nota"></label></details></div>';
 }
@@ -7708,19 +7755,23 @@ function fraseCorrDebito(corr){
 // niente da fare a riguardo). "fonte" dice a renderAndamenti() quale
 // sezione, più sotto, deve evitare di ripetere la stessa frase.
 function tagInsight(){
-  const tags = state.diaryTags || {};
   const diary = store.get("diary",{})||{};
-  const days = Object.keys(tags);
-  if(days.length < 6) return null;
+  const diaryDays = Object.keys(diary).filter(d => {
+    const v = +diary[d];
+    return v >= 1 && v <= 5;
+  });
+  const daysWithTags = diaryDays.filter(d => {
+    return (state.diaryTags && state.diaryTags[d] !== undefined) || tagPreselezionati(d).length > 0;
+  });
+  if(daysWithTags.length < 6) return null;
   for(const stag of SLEEP_TAGS){
     const id = stag.id;
     const withTag = [], withoutTag = [];
-    for(const d in diary){
+    for(const d of diaryDays){
       const v = +diary[d];
-      if(!v || v < 1 || v > 5) continue;
-      const list = tags[d] || [];
+      const list = tagPreselezionati(d);
       if(list.includes(id)) withTag.push(v);
-      else if(days.includes(d)) withoutTag.push(v);
+      else if(daysWithTags.includes(d)) withoutTag.push(v);
     }
     if(withTag.length >= 6 && withoutTag.length >= 6){
       const avgW = withTag.reduce((a,b)=>a+b,0) / withTag.length;
@@ -9599,11 +9650,10 @@ function diaryClick(e){
     const tid=tagBtn.dataset.sleepTag, dayKey=tagBtn.dataset.sleepDay;
     if(dayKey && tid){
       state.diaryTags = state.diaryTags || {};
-      let list = (state.diaryTags[dayKey] || []).slice();
+      let list = (state.diaryTags[dayKey] !== undefined ? state.diaryTags[dayKey] : tagPreselezionati(dayKey)).slice();
       if(list.includes(tid)) list = list.filter(x => x !== tid);
       else list.push(tid);
-      if(list.length) state.diaryTags[dayKey] = list;
-      else delete state.diaryTags[dayKey];
+      state.diaryTags[dayKey] = list;
       haptic(6);
       salva(); render();
     }
@@ -9643,7 +9693,12 @@ function diaryClick(e){
   if(ap){ const k=iso(state.focus), c=cards(NT.plan()).find(x=>x.k==="d");
     if(c){ state.beds[k]=c.bedPiano; state.wakes[k]=c.wakePiano; segnaSonnoPiano(k,true); track("piano_esito",{esito:"in_linea"});
       state.diaryEditing.delete("sleep:"+k);
-      store.set("beds",state.beds); store.set("wakes",state.wakes);
+      state.diaryTags = state.diaryTags || {};
+      if(state.diaryTags[k] === undefined){
+        const preTags = tagPreselezionati(k);
+        if(preTags.length) state.diaryTags[k] = preTags;
+      }
+      store.set("beds",state.beds); store.set("wakes",state.wakes); salva();
       toast("Sonno registrato come da piano");
       render();
       controllaLaggyCrescita(); }
@@ -9668,6 +9723,11 @@ function diaryClick(e){
     store.set("beds",state.beds);
     store.set("wakes",wakes);
     state.diaryEditing.delete("sleep:"+k);
+    state.diaryTags = state.diaryTags || {};
+    if(state.diaryTags[k] === undefined){
+      const preTags = tagPreselezionati(k);
+      if(preTags.length){ state.diaryTags[k] = preTags; salva(); }
+    }
     toast("Sonno registrato");
     render();
     controllaLaggyCrescita();
@@ -9732,6 +9792,11 @@ function diaryClick(e){
   if(d){ const k=iso(state.focus), v=+d.dataset.diary;
     if(diary[k]===v){ delete diary[k]; delete diaryAt[k]; }
     else { diary[k]=v; diaryAt[k]=Date.now();
+      state.diaryTags = state.diaryTags || {};
+      if(state.diaryTags[k] === undefined){
+        const preTags = tagPreselezionati(k);
+        if(preTags.length){ state.diaryTags[k] = preTags; salva(); }
+      }
       if(_stimaOra && _stimaOra.livello && _stimaOra.giorno===k && k===iso(giornoVero()))
         track("energia_modello", {incrocio:_stimaOra.livello+"_"+(v<=2?"giu":v===3?"meh":"su")+"_"+(_stimaOra.fonte||"orari")}); }
     state.diaryEditing.delete("voto:"+k);
