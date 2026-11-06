@@ -6214,8 +6214,11 @@ function adessoLine(P, riferimento){
       passi.push("turno alle "+hhmm(b.start));
       return {t:"Tra "+hm(toStart)+" entri in turno", s:passi.join(" · ").replace(/^./,c=>c.toUpperCase())};
     }
-    const afterEnd=mod1440(m-b.end);
-    if((P.night||P.lateStart) && afterEnd<=2*60) return {t:"Appena smontato",s:"è l'ora più delicata: se hai sonno, non guidare"};
+    // m conta dalla mezzanotte della giornata (oltre 1440 dopo mezzanotte, finché non si va a dormire): senza modulo.
+    // Con mod1440 la notte di STASERA (fine domattina alle 06:00) risultava finita stamattina, e alle 08:07 del giorno
+    // della prima notte compariva «Appena smontato» (bug del 06/11/2026).
+    const afterEnd=m-b.end;
+    if((P.night||P.lateStart) && afterEnd>=0 && afterEnd<=2*60) return {t:"Appena smontato",s:"è l'ora più delicata: se hai sonno, non guidare"};
   }
 
   // "Ora" non deve mai restare vuoto: se non c'è nulla di urgente, dice

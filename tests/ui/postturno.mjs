@@ -59,4 +59,18 @@ const stato=p=>p.evaluate(()=>({titolo:document.querySelector("#dateLabel").text
     await p.goto("http://localhost:8765/index.html"); await p.waitForTimeout(900); out.push([ora, await p.evaluate(()=>document.querySelector("#dateLabel").textContent)]); await p.close(); }
   ok(/^Ancora /.test(out[0][1]) && /^Ancora /.test(out[1][1]) && /^Oggi/.test(out[2][1]), "letto all'01:00: alle 00:30 (prima di dormire) e alle 03:00 ancora ieri, alle 09:30 oggi → "+JSON.stringify(out));
   await ctx.close(); }
+// Bug del 06/11/2026: il giorno della PRIMA notte (turno stasera alle 22:00), alle 08:07 «Adesso» diceva «Appena
+// smontato»: la fine della notte di stasera (domattina alle 06:00) col modulo 1440 sembrava di stamattina.
+{ const ctx=await b.newContext({locale:"it-IT",viewport:{width:360,height:740}});
+  await ctx.addInitScript(a=>{ if(sessionStorage.getItem("x")) return; sessionStorage.setItem("x","1");
+    localStorage.setItem("nt:state",JSON.stringify({turniConfigurati:true,pattern:"NNNRR",anchor:a,shifts:{N:{n:"Notte",s:1320,e:1800}},repeat:true,firstSeenAt:"2026-01-01"}));
+    localStorage.setItem("nt:turniConfigurati","true"); localStorage.setItem("nt:firstPlanBannerChiuso","true"); localStorage.setItem("nt:attivazioneNascosta","true"); }, iso(new Date()));
+  const p=await ctx.newPage(); p.on("pageerror",e=>errs.push(e.message));
+  for (const ora of ["06:30","07:30","08:07"]) {
+    const [h,m]=ora.split(":").map(Number); const d=new Date(); d.setHours(h,m,0,0); await p.clock.setFixedTime(d);
+    await p.goto("http://localhost:8765/index.html"); await p.waitForTimeout(1000);
+    const s=await stato(p);
+    ok(!/Appena smontato/.test(s.ora), "giorno della prima notte, alle "+ora+": niente «Appena smontato» → "+s.ora.slice(0,80)); }
+  await ctx.close(); }
+
 console.log("errori", errs); await b.close();
