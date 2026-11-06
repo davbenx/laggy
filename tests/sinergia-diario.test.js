@@ -5,12 +5,56 @@ import { readFileSync } from "node:fs";
 
 const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
 
-test("index.html contiene la funzione tagPreselezionati e lo stile dei bottoni rapidi", () => {
+test("index.html contiene la funzione tagPreselezionati, tagsPerOrario e lo stile dei bottoni rapidi", () => {
   assert.ok(html.includes("function tagPreselezionati(dayKey)"), "tagPreselezionati definita");
+  assert.ok(html.includes("function tagsPerOrario(isDaySleep, curTags)"), "tagsPerOrario definita");
   assert.ok(html.includes(".att-box-quick"), "stile .att-box-quick presente");
   assert.ok(html.includes(".att-btn-quick"), "stile .att-btn-quick presente");
   assert.ok(html.includes("+ Segna pasto tardivo o abbondante"), "pulsante rapido pasto presente");
   assert.ok(html.includes("+ Ho bevuto alcol stasera"), "pulsante rapido alcol presente");
+});
+
+test("tagsPerOrario adatta le chip in modo lean e contestuale (giorno vs notte)", () => {
+  const SLEEP_TAGS = [
+    { id: "cena_tardi", label: "Cena tardi", labelDay: "Pasto prima di dormire" },
+    { id: "alcol", label: "Alcol" },
+    { id: "caffe_serale", label: "Caffè serale", labelDay: "Caffè a fine turno" },
+    { id: "rumore", label: "Rumore / Luce" },
+    { id: "buio", label: "Mascherina / Buio" },
+    { id: "schermi", label: "Schermi a letto" },
+    { id: "stretching", label: "Stretching / Yoga" },
+    { id: "tisana", label: "Tisana / Caldo" }
+  ];
+
+  function tagsPerOrario(isDaySleep, curTags) {
+    const primari = isDaySleep
+      ? ["rumore", "buio", "cena_tardi", "caffe_serale", "schermi"]
+      : ["cena_tardi", "alcol", "caffe_serale", "rumore", "schermi"];
+    const out = [];
+    primari.forEach(id => {
+      const t = SLEEP_TAGS.find(x => x.id === id);
+      if (t && !out.includes(t)) out.push(t);
+    });
+    (curTags || []).forEach(id => {
+      const t = SLEEP_TAGS.find(x => x.id === id);
+      if (t && !out.includes(t)) out.push(t);
+    });
+    return out;
+  }
+
+  // 1. Sonno notturno standard
+  const notte = tagsPerOrario(false, []);
+  assert.equal(notte.length, 5, "esattamente 5 chip snelle di notte");
+  assert.deepEqual(notte.map(x => x.id), ["cena_tardi", "alcol", "caffe_serale", "rumore", "schermi"]);
+
+  // 2. Sonno diurno (smonto notte): rumore e buio in testa, alcol sostituito da mascherina/buio
+  const giorno = tagsPerOrario(true, []);
+  assert.equal(giorno.length, 5, "esattamente 5 chip snelle di giorno");
+  assert.deepEqual(giorno.map(x => x.id), ["rumore", "buio", "cena_tardi", "caffe_serale", "schermi"]);
+
+  // 3. Se un tag secondario o non primario è pre-selezionato, viene incluso per trasparenza
+  const giornoConAlcol = tagsPerOrario(true, ["alcol"]);
+  assert.ok(giornoConAlcol.some(x => x.id === "alcol"), "alcol mostrato perché presente nei curTags");
 });
 
 test("tagPreselezionati estrae correttamente i tag dalle attività serali e della notte", () => {
@@ -126,6 +170,11 @@ test("tagInsight calcola correttamente l'impatto sul sonno tenendo conto dei tag
 
       if (atts.some(a => a.t === "alcol")) auto.push("alcol");
       if (atts.some(a => a.t === "pasto")) auto.push("cena_tardi");
+      if (atts.some(a => {
+        if (a.t !== "caffe") return false;
+        const m = typeof t === "function" ? t(a.fine) : NaN;
+        return isFinite(m) && (m >= 840 || m <= 360);
+      })) auto.push("caffe_serale");
       if (atts.some(a => a.t === "leggera")) auto.push("stretching");
     } catch (e) {}
     return auto;

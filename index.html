@@ -4633,6 +4633,57 @@ function energiaPresto(key, wk){
   const d=parseIso(key); d.setHours(+wk.slice(0,2), +wk.slice(3,5), 0, 0);
   return Date.now() < d.getTime()+ENERGIA_DOPO*60e3;
 }
+
+const SLEEP_TAGS = [
+  { id: "cena_tardi", label: "Cena tardi", labelDay: "Pasto prima di dormire" },
+  { id: "alcol", label: "Alcol" },
+  { id: "caffe_serale", label: "Caffè serale", labelDay: "Caffè a fine turno" },
+  { id: "rumore", label: "Rumore / Luce" },
+  { id: "buio", label: "Mascherina / Buio" },
+  { id: "schermi", label: "Schermi a letto" },
+  { id: "stretching", label: "Stretching / Yoga" },
+  { id: "tisana", label: "Tisana / Caldo" }
+];
+
+function tagsPerOrario(isDaySleep, curTags){
+  const primari = isDaySleep
+    ? ["rumore", "buio", "cena_tardi", "caffe_serale", "schermi"]
+    : ["cena_tardi", "alcol", "caffe_serale", "rumore", "schermi"];
+  const out = [];
+  primari.forEach(id => {
+    const t = SLEEP_TAGS.find(x => x.id === id);
+    if(t && !out.includes(t)) out.push(t);
+  });
+  (curTags || []).forEach(id => {
+    const t = SLEEP_TAGS.find(x => x.id === id);
+    if(t && !out.includes(t)) out.push(t);
+  });
+  return out;
+}
+
+function tagPreselezionati(dayKey){
+  if(state.diaryTags && state.diaryTags[dayKey] !== undefined) {
+    return state.diaryTags[dayKey] || [];
+  }
+  const auto = [];
+  try {
+    const dObj = new Date(dayKey + "T12:00:00");
+    const prevKey = iso(day(dObj, -1));
+    const attsPrev = typeof attGiorno==="function" ? attGiorno(prevKey) : [];
+    const attsOggi = typeof attGiorno==="function" ? attGiorno(dayKey) : [];
+    const atts = attsPrev.concat(attsOggi);
+
+    if (atts.some(a => a.t === "alcol")) auto.push("alcol");
+    if (atts.some(a => a.t === "pasto")) auto.push("cena_tardi");
+    if (atts.some(a => {
+      if (a.t !== "caffe") return false;
+      const m = typeof t==="function" ? t(a.fine) : NaN;
+      return isFinite(m) && (m >= 840 || m <= 360);
+    })) auto.push("caffe_serale");
+    if (atts.some(a => a.t === "leggera")) auto.push("stretching");
+  } catch(e) {}
+  return auto;
+}
 function diaryReminder(P, CARDS){
   const f=state.focus;
   // Usava la data letterale invece del giorno vero — la stessa incoerenza
@@ -4729,6 +4780,19 @@ function diaryReminder(P, CARDS){
          '<button type="button" class="btn g sm" data-perche="turno">Il turno era diverso</button><button type="button" class="btn g sm" data-perche="abitudine">Dormo così di solito</button>'+
          '<button type="button" class="btn g sm" data-perche="altro">Altro</button><button type="button" class="lnk dim" data-perche="no">No, grazie</button></span></div>':'');
   }
+  if(logged && !sleepEditing){
+    const curTags = tagPreselezionati(key0);
+    const bedMin = t(bd || defBed);
+    const isDaySleep = isFinite(bedMin) && bedMin >= 300 && bedMin <= 960;
+    const listTags = tagsPerOrario(isDaySleep, curTags);
+    x+='<div class="dq-sez" style="margin-top:8px">Cosa ha accompagnato questo sonno? <span class="hint" style="display:inline;font-weight:400">(facoltativo)</span></div>'+
+      '<div class="tag-chips" role="group" aria-label="Cosa ha accompagnato questo sonno">'+
+      listTags.map(t=>{
+        const on=curTags.includes(t.id);
+        const label = (isDaySleep && t.labelDay) ? t.labelDay : t.label;
+        return '<button type="button" class="tag-chip'+(on?' on':'')+'" data-sleep-tag="'+t.id+'" data-sleep-day="'+esc(key0)+'" aria-pressed="'+on+'">'+label+'</button>';
+      }).join("")+'</div>';
+  }
   // Come ti senti: una scelta, si salva al tocco. Solo dopo il sonno, e poi
   // resta la riga con la scelta fatta (i grafici di «Come sto dormendo» la usano).
   const VOTI=[[1,"Senza energie",ICON.faceTerrible,"var(--risk)"],[2,"Poca energia",ICON.faceLow,"var(--orange)"],
@@ -4811,21 +4875,6 @@ function diaryReminder(P, CARDS){
   x=x.replace("\u0001EN\u0001","").replace("\u0002EN\u0002","");
   x+= pend ? xNap+xEn : xEn+xNap;
   x+=xExtra;
-  if(logged && !sleepEditing){
-    const curTags = tagPreselezionati(key0);
-    x+='<div class="dq-sez" style="margin-top:10px">Cosa ha accompagnato il sonno? <span class="hint" style="display:inline;font-weight:400">(facoltativo)</span></div>'+
-      '<div class="tag-chips" role="group" aria-label="Cosa ha accompagnato il sonno">'+
-      SLEEP_TAGS.map(t=>{
-        const on=curTags.includes(t.id);
-        return '<button type="button" class="tag-chip'+(on?' on':'')+'" data-sleep-tag="'+t.id+'" data-sleep-day="'+esc(key0)+'" aria-pressed="'+on+'">'+t.label+'</button>';
-      }).join("")+'</div>';
-  }
-  if(logged && !sleepEditing && pianoVoce("laggy") && state.turniConfigurati){
-    try{
-      const ls=laggyStato(), Lg=LAGGY[ls.max];
-      x+='<button type="button" class="drem-laggy" data-apri-laggy="1" aria-label="Laggy: livello '+(ls.max+1)+' di 4"><img src="./img/'+Lg.img+'.webp" alt="'+esc(Lg.nome)+'" width="22" height="22" loading="lazy"><span>Laggy · '+(ls.max+1)+' di 4'+(ls.prossimo?': '+esc(ls.prossimo):'')+'</span></button>';
-    }catch(e){}
-  }
   x+='</div>';
   return x;
 }
@@ -4882,43 +4931,7 @@ const SHIFT_WIDGET_MAP = {
   moon: "🌙",
   sparkles: "✨",
   alarm: "⏰",
-  briefcase: "💼"
 };
-
-const SLEEP_TAGS = [
-  { id: "stretching", label: "Stretching / Yoga" },
-  { id: "tisana", label: "Tisana / Caldo" },
-  { id: "cena_tardi", label: "Cena tardi" },
-  { id: "alcol", label: "Alcol" },
-  { id: "caffe_serale", label: "Caffè serale" },
-  { id: "schermi", label: "Schermi a letto" },
-  { id: "rumore", label: "Rumore / Luce" },
-  { id: "buio", label: "Buio totale" }
-];
-
-function tagPreselezionati(dayKey){
-  if(state.diaryTags && state.diaryTags[dayKey] !== undefined) {
-    return state.diaryTags[dayKey] || [];
-  }
-  const auto = [];
-  try {
-    const dObj = new Date(dayKey + "T12:00:00");
-    const prevKey = iso(day(dObj, -1));
-    const attsPrev = typeof attGiorno==="function" ? attGiorno(prevKey) : [];
-    const attsOggi = typeof attGiorno==="function" ? attGiorno(dayKey) : [];
-    const atts = attsPrev.concat(attsOggi);
-
-    if (atts.some(a => a.t === "alcol")) auto.push("alcol");
-    if (atts.some(a => a.t === "pasto")) auto.push("cena_tardi");
-    if (atts.some(a => {
-      if (a.t !== "caffe") return false;
-      const m = typeof t==="function" ? t(a.fine) : NaN;
-      return isFinite(m) && (m >= 840 || m <= 360);
-    })) auto.push("caffe_serale");
-    if (atts.some(a => a.t === "leggera")) auto.push("stretching");
-  } catch(e) {}
-  return auto;
-}
 
 // Blocco unico "Ora": un solo eroe in cima che, a seconda del momento, mostra IL
 // rischio fatica OPPURE l'azione del momento. Fonde i due moduli che prima
@@ -6802,7 +6815,20 @@ function renderEssenziale(P, CARDS){
   const lp=sceltaLettoPresto(P);
   // Le scelte sul sonno e la sveglia stanno nella scheda «Il tuo sonno», in testa: «Dormi» resta solo informazione.
   { const azioni=(dn||"")+(lp||"")+svR;
-    const blocco = azioni ? (drem ? drem.replace(/<\/div>$/, azioni+'</div>') : '<div class="drem done"><div class="drem-q"><span class="dic">'+ICON.moon+'</span>Il tuo sonno</div>'+azioni+'</div>') : drem;
+    let blocco = azioni ? (drem ? drem.replace(/<\/div>$/, azioni+'</div>') : '<div class="drem done"><div class="drem-q"><span class="dic">'+ICON.moon+'</span>Il tuo sonno</div>'+azioni+'</div>') : drem;
+    if(blocco && state.turniConfigurati && pianoVoce("laggy")){
+      const key0=iso(state.focus), wk=wakes[key0]||"", bd=(state.beds||{})[key0]||"";
+      const cd=CARDS.find(c=>c.k==="d");
+      const logged = cd && ((bd===cd.bedPiano && wk===cd.wakePiano) || ((bd||wk) && (bd!==cd.bedPiano || wk!==cd.wakePiano)));
+      const sleepEditing = state.diaryEditing.has("sleep:"+key0);
+      if(logged && !sleepEditing){
+        try{
+          const ls=laggyStato(), Lg=LAGGY[ls.max];
+          const laggyBtn = '<button type="button" class="drem-laggy" data-apri-laggy="1" aria-label="Laggy: livello '+(ls.max+1)+' di 4"><img src="./img/'+Lg.img+'.webp" alt="'+esc(Lg.nome)+'" width="22" height="22" loading="lazy"><span>Laggy · '+(ls.max+1)+' di 4'+(ls.prossimo?': '+esc(ls.prossimo):'')+'</span></button>';
+          blocco = blocco.replace(/<\/div>$/, laggyBtn+'</div>');
+        }catch(e){}
+      }
+    }
     if(blocco) voci.push({t:-2, html:blocco}); }
 
   // Tempo libero: le ore da sveglio fuori da turno, viaggio, sonno e pisolini.
