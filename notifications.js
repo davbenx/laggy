@@ -33,6 +33,7 @@ export const TIPI = [
   { k: "prep",     nome: "Preparati per il turno",   desc: "Un'ora prima dell'inizio del turno",                                     essenziale: false, canale: "turni" },
   { k: "luce",     nome: "Luce del mattino",         desc: "Quando prendere luce per tenere l'orologio del corpo al passo",                               essenziale: false, canale: "luce" },
   { k: "momenti",  nome: "Momenti buoni",            desc: "All'inizio di un momento per la testa, per muoverti o per allenarti: solo quelli che accendi in «Cosa vedi nel piano»", essenziale: false, canale: "momenti" },
+  { k: "paga",     nome: "Giorno di paga",           desc: "La mattina del giorno di paga impostato",                                essenziale: false, canale: "suggerimenti" },
   { k: "wake",     nome: "Ora di alzarti",           desc: "Fine del sonno pianificato. Non è una sveglia: per quella c'è la sveglia del telefono (nell'app Android, «Metti la sveglia» in Dormi)", essenziale: false, canale: "sveglie" },
   { k: "settimana",nome: "La tua settimana",         desc: "La domenica sera, i turni dei prossimi 7 giorni",                        essenziale: false, canale: "suggerimenti" },
   // Questi due li prepara index.html (servono il diario e le impostazioni),
@@ -49,7 +50,7 @@ export const TIPI_TUTTI = TIPI.map(t => t.k);
 // cancellava il primo).
 const KIND = { bedtime: 1, wake: 2, nap: 3, coffee: 4, ret: 5, prep: 6, cambio: 7, domani: 8, luce: 9, settimana: 0 };
 // Priorità quando un giorno ne avrebbe troppe (si tengono le prime).
-const PRIO = ["cambio", "ret", "rischio", "bedtime", "domani", "nap", "coffee", "prep", "luce", "wake", "settimana", "momenti"];
+const PRIO = ["cambio", "ret", "rischio", "bedtime", "domani", "nap", "coffee", "prep", "luce", "wake", "settimana", "paga", "momenti"];
 // «momenti»: tre al giorno al massimo, in una fascia di id sua (come «rischio»), fra 970000 e 979999
 const MOMENTI = [["testa", "Buon momento per pensare", "la testa"], ["leggera", "Buon momento per muoverti", "il movimento leggero"], ["intensa", "Buon momento per allenarti", "l'allenamento"]];
 const MAX_AL_GIORNO = 4, UNISCI_ENTRO = 20 * MIN;
@@ -76,8 +77,8 @@ export function buildSchedule(config, opts = {}) {
     const dayIdx = Math.round((localMidnight(base) - localMidnight(f0)) / (1440 * MIN));
     const k = dayIdx + ":" + kind, n = seq[k] = (seq[k] || 0) + 1;   // contato anche se nel passato: id stabili
     if (when.getTime() <= now) return;            // solo futuro
-    // "rischio" non ha una cifra libera in KIND (0–9 usate): una sua fascia di id
-    const id = kind === "rischio" ? 980000 + (dayIdx + 1) * 10 + (n - 1) : kind === "momenti" ? 970000 + (dayIdx + 1) * 10 + (n - 1) : dayIdx * 100 + KIND[kind] * 10 + (n - 1);
+    // "rischio", "momenti", "paga" non hanno una cifra libera in KIND (0–9 usate): fascie di id dedicate
+    const id = kind === "rischio" ? 980000 + (dayIdx + 1) * 10 + (n - 1) : kind === "momenti" ? 970000 + (dayIdx + 1) * 10 + (n - 1) : kind === "paga" ? 960000 + (dayIdx + 1) * 10 + (n - 1) : dayIdx * 100 + KIND[kind] * 10 + (n - 1);
     out.push({ id, kind, title, body, at: when, extra });
   };
   const fb = /^(\d\d):(\d\d)$/.exec(String(e.state.freeBed || "23:30"));
@@ -214,6 +215,15 @@ export function buildSchedule(config, opts = {}) {
       }
       e.state.focus = base;
       push(base, 19 * 60, "settimana", "La tua settimana", righe.join(" · "), { tab: "turni" });
+    }
+
+    // Giorno di paga: alle 09:00, oppure dopo il risveglio se a quell'ora si dorme dopo la notte
+    if (want("paga") && config.giornoPaga && base.getDate() === +config.giornoPaga) {
+      let minPaga = 9 * 60;
+      if (P && P.s && P.s.dur > 0 && minPaga >= P.s.onset && minPaga < P.s.onset + P.s.dur) {
+        minPaga = Math.min(21 * 60, P.s.onset + P.s.dur + 30);
+      }
+      push(base, minPaga, "paga", "Giorno di paga", "Oggi è il tuo giorno di paga impostato.", { tab: "turni" });
     }
   }
   e.state.focus = f0;

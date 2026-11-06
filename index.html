@@ -552,6 +552,17 @@ body.primo-avvio #firstPlanBanner,body.primo-avvio #setupChecklist,body.primo-av
 .ctile.t-q{background:none;border:1px dashed var(--line)}
 .ctile.p{height:19px;font-size:11px;border-radius:999px}
 .ctile.p.t-l,.ctile.p.t-n,.ctile.p.t-m,.ctile.p.t-p,.ctile.p.t-s{background:var(--persona-soft);color:var(--persona)}
+.cnum-paga{font-size:9.5px;margin-left:2px;vertical-align:baseline;line-height:1}
+.ctile-ic{display:inline-flex;align-items:center;margin-right:2px;vertical-align:middle}
+.ctile-ic svg{width:12px;height:12px;vertical-align:middle}
+.tt-icon-btn{display:inline-flex;align-items:center;justify-content:center;background:var(--s2);border:1px solid var(--line);border-radius:6px;width:28px;height:28px;cursor:pointer;color:var(--ink);padding:0;flex:none;margin-right:4px}
+.tt-icon-btn svg{width:16px;height:16px}
+.tag-chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.tag-chip{display:inline-flex;align-items:center;background:var(--s1);border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:12.5px;font-weight:600;color:var(--dim);cursor:pointer;transition:all .15s ease}
+.tag-chip:hover{background:var(--s2)}
+.tag-chip.on{background:var(--blue-soft);color:var(--blue);border-color:var(--blue)}
+.sleep-tags-summary{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.sleep-tag-pill{display:inline-block;padding:1px 7px;border-radius:999px;font-size:11px;background:var(--s2);color:var(--dim)}
 .cyc.con-pers .caxis .crail span{font-size:10px}   /* con la colonna della persona la rotaia si stringe: ore più piccole */
 .crow.spec .ccode{font-size:10.5px;color:var(--dim)}
 .crow.rep .ccode::after{content:"";position:absolute;top:-1px;right:-3px;width:5px;height:5px;border-radius:50%;background:var(--orange-fill)}
@@ -954,6 +965,9 @@ display:flex;align-items:center;justify-content:center;position:relative;z-index
 .erow:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 .einfo{flex:none;align-self:center;display:inline-flex;color:var(--faint);padding-left:6px}
 .einfo svg{width:18px;height:18px}
+.btn-i{display:inline-flex;align-items:center;justify-content:center;background:none;border:none;padding:2px 4px;margin:-2px 0 -2px 2px;cursor:pointer;color:var(--dim);vertical-align:middle;border-radius:50%}
+.btn-i svg{width:15px;height:15px;vertical-align:middle}
+@media (hover:hover){ .btn-i:hover{color:var(--blue);background:var(--s1)} }
 .ed{padding:2px 0 16px}
 .ed-sub{font-size:14px;color:var(--dim);line-height:1.55;margin:0 0 9px}
 .ed .why{font-size:14px;color:var(--dim);line-height:1.6;border-left:2px solid var(--line);padding-left:11px;margin-top:9px}
@@ -1812,6 +1826,8 @@ header b{font-size:23px}
     <button type="button" class="tool tool-1line" data-mod="festivi"><span class="tool-ic" data-ic="eye"></span><span class="tool-tx"><b>Festivi</b><span>Quali giorni contano come festivi</span></span></button>
   </div></div></div>
 <div id="laggyModal" class="qs-backdrop" hidden aria-hidden="true"><div class="qs-sheet" role="dialog" aria-modal="true" aria-label="Laggy"><div class="qs-header"><div><b class="qs-title">Laggy</b></div><div class="qs-hd-az"><button type="button" class="qs-close" id="laggyChiudi" aria-label="Chiudi">✕</button></div></div><div class="ed" id="laggyCorpo" style="text-align:center;padding:16px 20px 24px"></div></div></div>
+<div id="pagaModal" class="qs-backdrop" hidden aria-hidden="true"><div class="qs-sheet" role="dialog" aria-modal="true" aria-labelledby="pagaTitolo"><div class="qs-header"><div><b class="qs-title" id="pagaTitolo">Giorno di paga</b></div><div class="qs-hd-az"><button type="button" class="qs-close" id="pagaChiudi" aria-label="Chiudi">✕</button></div></div><div class="ed" style="padding:10px 16px 20px"><p class="ed-sub">Mostra il giorno dello stipendio nel calendario con l'icona 💰 e ricevi un promemoria facoltativo alle 09:00.</p><div class="q"><label for="pagaGiornoSel">Giorno del mese</label><select id="pagaGiornoSel"><option value="">Nessuno (disattivato)</option></select></div><label class="riga-sw" for="pagaNotifSw" style="margin-top:14px"><span><b>Promemoria alle 09:00</b><small>Notifica la mattina del giorno di paga</small></span><span class="switch"><input type="checkbox" id="pagaNotifSw" checked><span class="slider"></span></span></label><button type="button" class="btn pri" id="pagaSalva" style="width:100%;min-height:46px;margin-top:16px">Salva</button></div></div></div>
+<div id="shiftIconModal" class="qs-backdrop" hidden aria-hidden="true"><div class="qs-sheet" role="dialog" aria-modal="true" aria-labelledby="shiftIconTitolo"><div class="qs-header"><div><b class="qs-title" id="shiftIconTitolo">Icona del turno</b></div><div class="qs-hd-az"><button type="button" class="qs-close" id="shiftIconChiudi" aria-label="Chiudi">✕</button></div></div><div class="ed" style="padding:10px 16px 20px"><p class="ed-sub" id="shiftIconSub">Scegli un'icona per identificare a colpo d'occhio questo turno nel calendario e nelle stampe.</p><div class="tag-chips" id="shiftIconChips" style="gap:8px;margin-top:12px"></div><button type="button" class="btn g qs-close" style="width:100%;min-height:42px;margin-top:14px" id="shiftIconRimuovi">Nessuna icona</button></div></div></div>
 <!-- I turni del mese (un tocco per giorno, o dal foglio turni): si apre
      dal riquadro del mese, qui sopra. -->
 <div id="segnaPagina" class="solo-turni" hidden>
@@ -1851,6 +1867,7 @@ header b{font-size:23px}
     <button type="button" class="tool tool-1line va" data-tt="posizione" hidden><span class="tool-ic" data-ic="calendar"></span><span class="tool-tx"><b>Oggi dove sei nel ciclo</b><span>Se il ciclo risulta sfasato di qualche giorno</span></span></button>
     <button type="button" class="tool tool-1line va" data-tt="riposi"><span class="tool-ic" data-ic="bed"></span><span class="tool-tx"><b>Giorni di riposo</b><span><span id="ttValRiposi"></span></span></span></button>
     <button type="button" class="tool tool-1line va" data-tt="festivi"><span class="tool-ic" data-ic="sparkles"></span><span class="tool-tx"><b>Festivi</b><span><span id="ttValFestivi"></span></span></span></button>
+    <button type="button" class="tool tool-1line va" data-tt="paga"><span class="tool-ic">💰</span><span class="tool-tx"><b>Giorno di paga</b><span><span id="ttValPaga"></span></span></span></button>
     <button type="button" class="tool tool-1line va" data-tt="schema"><span class="tool-ic" data-ic="cycle"></span><span class="tool-tx"><b>Cambia tipo di turni</b><span>In quinta, 12 ore, sempre lo stesso turno, turni che cambiano…</span></span></button>
   </div>
   <div id="ttFlusso"></div>
@@ -2029,18 +2046,18 @@ header b{font-size:23px}
   <div id="opzFunzioni"></div>
   <div class="ecc" id="saluteBox" hidden>
     <b>Health Connect</b>
-    <p class="hint">Facoltativo. Se usi un orologio o un'app del sonno, il piano può leggere il sonno vero e i passi: l'orologio biologico si stima meglio. Solo lettura, tutto resta sul telefono. Ogni tipo lo accendi tu, e il permesso si chiede solo allora.</p>
+    <p class="hint">Leggi sonno e passi dal tuo orologio o app della salute. <button type="button" class="btn-i" data-spiega="salute" aria-label="Maggiori informazioni su Health Connect"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button></p>
     <label class="riga-sw" for="hcSonno"><span><b>Sonno</b><small>quando hai dormito davvero; nel diario ti propone quegli orari</small></span><span class="switch"><input type="checkbox" id="hcSonno" data-hc="sonno"><span class="slider"></span></span></label>
     <label class="riga-sw" for="hcPassi"><span><b>Passi</b><small>per capire quando eri sveglio anche se il piano diceva sonno</small></span><span class="switch"><input type="checkbox" id="hcPassi" data-hc="passi"><span class="slider"></span></span></label>
     <p class="hint" id="hcNota" aria-live="polite"></p>
     <div class="hc-stato" id="hcStato" aria-live="polite" hidden></div>
     <button type="button" class="lnk" data-hc-leggi hidden>Leggi adesso</button>
     <button type="button" class="lnk" data-hc-apri>Permessi in Health Connect →</button>
-    <p class="hint">Spegnendo un interruttore l'app dimentica i dati letti di quel tipo. I permessi li togli anche da Health Connect: l'app se ne accorge.</p>
+    <p class="hint">I permessi sono sempre revocabili. <button type="button" class="btn-i" data-spiega="salute_revoca" aria-label="Come revocare i permessi"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button></p>
   </div>
   <div class="ecc" id="icsBox" hidden>
       <b>Il calendario come file</b>
-      <p class="hint">Per chi non vuole il calendario automatico: 4 settimane in un file da aprire con il calendario. Non si aggiorna da solo, quando cambia qualcosa va riscaricato. Il turno non ha promemoria (lo sai già); gli altri solo dove l'orario conta.</p>
+      <p class="hint">4 settimane in un file per il tuo calendario. <button type="button" class="btn-i" data-spiega="ics" aria-label="Maggiori informazioni sul file calendario"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button></p>
       <label class="p1"><input type="checkbox" id="icsT" checked> Turni</label>
       <label class="p1"><input type="checkbox" id="icsS" checked> Sonno</label>
       <label class="p1"><input type="checkbox" id="icsN" checked> Pisolini</label>
@@ -2061,7 +2078,7 @@ header b{font-size:23px}
       <button class="btn" id="icsVai" style="width:100%;min-height:44px;margin-top:4px">Scarica 4 settimane</button>
   </div>
 
-  <p class="hint" id="notifHint" style="margin:8px 2px 0">I promemoria arrivano finché il browser li tiene attivi: riapri l'app ogni giorno o due. Non sostituiscono la sveglia.</p>
+  <p class="hint" id="notifHint" style="margin:8px 2px 0">Promemoria per sonno, pause e caffeina. <button type="button" class="btn-i" data-spiega="notifiche" aria-label="Dettagli sui promemoria"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button></p>
   </section>
   <section class="opz-g" data-opzg="abitudini" aria-label="Le tue abitudini">
   <span class="eyebrow opz-eb" style="margin-top:0">Le tue abitudini</span>
@@ -2077,7 +2094,7 @@ header b{font-size:23px}
   </div>
   </section>
   <section class="opz-g" data-opzg="persone" aria-label="Persone">
-  <p class="hint" style="margin:0 2px 8px"><b>Trova i momenti liberi in comune.</b> Partner, famiglia, amicizie, chi lavora con te: aggiungili e vedi in Turni › Tempo libero i giorni e le ore in comune. I loro turni restano solo su questo telefono.</p>
+  <p class="hint" style="margin:0 2px 8px">Trova i momenti liberi in comune con partner o colleghi. <button type="button" class="btn-i" data-spiega="persone" aria-label="Maggiori informazioni sulla condivisione con altre persone"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button></p>
   <div class="ecc" id="opzBoxPersone">
     <!-- Due strade, dalla più facile: chi ha Notturnisti ti manda il suo
          link (un tocco per chiederglielo), chi non ce l'ha si inserisce a
@@ -2220,12 +2237,12 @@ header b{font-size:23px}
     <p><b>Melatonina.</b> Non ne parliamo qui perché i dosaggi degli studi sul jet lag e sui turni non coincidono con quelli in vendita come integratore in Italia — proporre un numero sarebbe fuorviante. Se pensi possa servirti, parlane con un medico o un farmacista: possono valutare il tuo caso, non un piano generico.</p>
   </div>
 </details>
-    <p class="hint" style="margin:12px 0 0" id="privacyNota">Turni e diario restano sul telefono e il piano si calcola lì. Nessuna pubblicità, nessuna profilazione.<span id="privacyNotaAbbonato" hidden> Se hai attivato il calendario che si aggiorna da solo, i turni restano comunque anche sul server che lo tiene aggiornato — solo quelli, il resto no.</span></p>
+    <p class="hint" style="margin:12px 0 0" id="privacyNota">I tuoi dati restano sul tuo telefono. Nessuna profilazione. <button type="button" class="btn-i" data-spiega="privacy" aria-label="Maggiori informazioni sulla privacy"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button><span id="privacyNotaAbbonato" hidden> Con il calendario automatico, solo i turni sincronizzati sono sul server.</span></p>
     <label class="riga-sw" style="margin:12px 0 0">
       <span>Statistiche d'uso anonime</span>
       <span class="switch"><input type="checkbox" id="optStats" aria-label="Statistiche d'uso anonime" aria-describedby="optStatsHint"><span class="slider"></span></span>
     </label>
-    <p class="hint" id="optStatsHint" style="margin:2px 0 0">Ci aiutano a migliorare l'app: contano in forma anonima cosa si usa, per esempio quanti accendono i promemoria o su che tipo di telefono. Niente turni, orari o diario, e niente che dica chi sei. Spente finché non le accendi.</p>
+    <p class="hint" id="optStatsHint" style="margin:2px 0 0">Statistiche anonime per migliorare l'app. Niente turni o dati personali. <button type="button" class="btn-i" data-spiega="stats" aria-label="Maggiori informazioni sulle statistiche anonime"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button></p>
     <p class="hint" style="margin:14px 0 0"><button class="btn danger" type="button" id="doCancellaTutto" style="width:100%;min-height:46px">Cancella tutti i dati</button></p>
     </div>
   </section>
@@ -3173,7 +3190,13 @@ Object.assign(state, {
   personaGlance:0,
   // Le voci facoltative del piano che si vedono o no: {luce:false, testa:true…}. Quel che manca
   // vale il predefinito (vedi PIANO_VOCI): le voci di sempre accese, i momenti migliori spenti.
-  piano:{}
+  piano:{},
+  // Giorno del mese (1-31 o null) in cui si riceve lo stipendio
+  giornoPaga:null,
+  // Se inviare promemoria la mattina del giorno di paga alle 09:00
+  giornoPagaNotif:true,
+  // Tag opzionali annotati al risveglio: { "YYYY-MM-DD": ["stretching", "alcol", ...] }
+  diaryTags:{}
 });
 
 const t = s => (+s.slice(0,2))*60 + (+s.slice(3,5));
@@ -3987,34 +4010,29 @@ function cards(P){
   lc.rows=lc.rowsA.concat(lc.rowsE);   // combinato: usato quando le due fasi restano una sola riga
   out.push(lc);
 
-  const mc={k:"m",lab:"Pasti",rows:[]}, main=meals.find(m=>m.main)||meals[1];
+  const mc={k:"m",lab:"Finestra dei pasti",rows:[]}, main=meals.find(m=>m.main)||meals[1];
   // .at deve coincidere col pasto citato in .val, non col primo pasto della
   if(night){
-    mc.val="Pasto pieno alle "+hhmm(main.at); mc.small="prima di uscire";
-    mc.rows.push(["Principale",hhmm(main.at)+", non a metà notte"]);
-    mc.rows.push(["In turno",hhmm(meals[1].at)+" · leggero"]);
-    mc.rows.push(["02:00-06:00","niente di pesante né molto zuccherino"]);
-    // Era scritta per la notte ma finiva dentro un ramo che sapeva già di
-    // non essere notte: non compariva mai. Qui è raggiungibile davvero, ed
-    // è la più utile delle tre righe che c'erano — le altre due (un'ora
-    // limite per la cucina, una ricompensa non alimentare) le ho lasciate
-    // fuori: la riga sotto già dice cosa fare al rientro, bastava una volta.
-    mc.rows.push(["Prima di uscire","qualcosa con proteine: torni a casa senza la fame che fa svuotare il frigo"]);
+    const inizioPasto = meals[0] ? meals[0].at : main.at;
+    const finePasto = meals[1] ? meals[1].at : (main.at + 300);
+    mc.val="Mangia fra le "+hhmm(inizioPasto)+" e le "+hhmm(finePasto); mc.small="finestra per il cibo solido";
+    mc.rows.push(["Principale",hhmm(main.at)+", prima di uscire (pasto completo)"]);
+    if(meals[1]) mc.rows.push(["In turno",hhmm(meals[1].at)+" · spuntino leggero"]);
+    mc.rows.push(["02:00–06:00","evita pasti pesanti e molto zuccherini"]);
+    mc.rows.push(["Prima di uscire","qualcosa con proteine: torni a casa senza fame"]);
     mc.rows.push(["Al rientro","poco o niente, poi a letto"]);
-    mc.why="Di notte lo stesso pasto alza la glicemia più che di giorno. Le linee guida per chi fa turni propongono tre pasti: uno vero prima, uno leggero durante, uno piccolo al rientro.";
+    mc.why="Nelle ore notturne la sensibilità insulinica e lo svuotamento gastrico calano fisiologicamente. Concentrare l'apporto energetico prima della notte ed evitare cibi pesanti nel cuore della notte (02:00–06:00) riduce sonnolenza e reflusso, migliorando il riposo diurno.";
   }else{
-    mc.val="Cena entro le "+hhmm(meals[2].at); mc.small="tre ore prima di dormire";
-    // Prima "colazione" non compariva qui (ridondante col risveglio, si
-    // pensava) — ma il grafico mostra comunque le sue 3 icone reali, e un
-    // pasto visibile lì senza nome qui era un disallineamento più fastidioso
-    // della piccola ridondanza. Restano nominati tutti e tre, come le icone.
-    mc.rows.push(["Colazione",hhmm(meals[0].at)]);
+    const inizioPasto = meals[0] ? meals[0].at : (main.at - 240);
+    const finePasto = meals[2] ? meals[2].at : (main.at + 240);
+    mc.val="Mangia fra le "+hhmm(inizioPasto)+" e le "+hhmm(finePasto); mc.small="chiudi 3 ore prima di dormire";
+    if(meals[0]) mc.rows.push(["Colazione",hhmm(meals[0].at)]);
     mc.rows.push(["Principale",hhmm(main.at)]);
-    mc.rows.push(["Cena","entro le "+hhmm(meals[2].at)+", leggera"]);
+    if(meals[2]) mc.rows.push(["Cena","entro le "+hhmm(meals[2].at)+", leggera"]);
     if(s.meta.ramp) mc.rows.push(["Nota","sposta anche i pasti, non solo il sonno: anche loro fanno da segnale"]);
-    mc.why="Concentrare le calorie nelle ore di luce e chiudere qualche ora prima di coricarsi può aiutare il sonno e la glicemia. Anche gli orari dei pasti fanno da segnale per l'orologio.";
+    mc.why="Concentrare le calorie nelle ore di luce e chiudere qualche ora prima di coricarsi facilita la digestione e aiuta l'orologio biologico.";
   }
-  mc.cite="Scheer, Hilton, Mantzoros & Shea, PNAS 2009 · Lowden et al., linee guida CDC/NIOSH";
+  mc.cite="Lowden et al. 2010, Scand J Work Environ Health · Scheer et al., PNAS 2009";
   // .at deve indicare lo STESSO pasto nominato in mc.val, altrimenti il glance
   // mostra un orario e la frase ne cita un altro (era il bug: pasto sbagliato).
   mc.at = night ? (main?main.at:wake) : (meals[2]?meals[2].at:(meals.length?meals[0].at:wake));
@@ -4787,6 +4805,15 @@ function diaryReminder(P, CARDS){
   x=x.replace("\u0001EN\u0001","").replace("\u0002EN\u0002","");
   x+= pend ? xNap+xEn : xEn+xNap;
   x+=xExtra;
+  if(logged && !sleepEditing){
+    const curTags = ((state.diaryTags||{})[key0]) || [];
+    x+='<div class="dq-sez" style="margin-top:10px">Cosa ha accompagnato il sonno? <span class="hint" style="display:inline;font-weight:400">(facoltativo)</span></div>'+
+      '<div class="tag-chips" role="group" aria-label="Cosa ha accompagnato il sonno">'+
+      SLEEP_TAGS.map(t=>{
+        const on=curTags.includes(t.id);
+        return '<button type="button" class="tag-chip'+(on?' on':'')+'" data-sleep-tag="'+t.id+'" data-sleep-day="'+esc(key0)+'" aria-pressed="'+on+'">'+t.label+'</button>';
+      }).join("")+'</div>';
+  }
   if(logged && !sleepEditing && pianoVoce("laggy") && state.turniConfigurati){
     try{
       const ls=laggyStato(), Lg=LAGGY[ls.max];
@@ -4829,8 +4856,30 @@ const ICON={
   calendar: ICO('<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>'),
   sparkles: ICO('<path d="M12 3l1.9 4.8 4.8 1.9-4.8 1.9L12 16.4l-1.9-4.8L5.3 9.7l4.8-1.9z"/>'),
   check: ICO('<path d="M20 6L9 17l-5-5"/>'),
-  zap:   ICO('<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>')
+  zap:   ICO('<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>'),
+  briefcase: ICO('<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2M2 12h20"/>')
 };
+
+const SHIFT_ICONS = [
+  { id: "sun", label: "Sole", svg: ICON.sun },
+  { id: "dim", label: "Tramonto", svg: ICON.dim },
+  { id: "moon", label: "Luna", svg: ICON.moon },
+  { id: "sparkles", label: "Stella", svg: ICON.sparkles },
+  { id: "alarm", label: "Sveglia", svg: ICON.alarm },
+  { id: "briefcase", label: "Borsa", svg: ICON.briefcase }
+];
+const SHIFT_ICONS_MAP = Object.fromEntries(SHIFT_ICONS.map(x => [x.id, x.svg]));
+
+const SLEEP_TAGS = [
+  { id: "stretching", label: "Stretching / Yoga" },
+  { id: "tisana", label: "Tisana / Caldo" },
+  { id: "cena_tardi", label: "Cena tardi" },
+  { id: "alcol", label: "Alcol" },
+  { id: "caffe_serale", label: "Caffè serale" },
+  { id: "schermi", label: "Schermi a letto" },
+  { id: "rumore", label: "Rumore / Luce" },
+  { id: "buio", label: "Buio totale" }
+];
 
 // Blocco unico "Ora": un solo eroe in cima che, a seconda del momento, mostra IL
 // rischio fatica OPPURE l'azione del momento. Fonde i due moduli che prima
@@ -6406,7 +6455,7 @@ const PIANO_VOCI=[
   ["caffe","Caffeina","L'ora dell'ultima caffeina: caffè, tè, cola, energy drink. Spenta, sparisce anche dal pisolino",true],
   ["luce","Luce","Quando prendere o evitare la luce per tenere l'orologio del corpo al passo",true],
   ["penombra","Luce bassa","Le luci basse prima di dormire",true],
-  ["pasti","Pasti","Quando mangiare nei giorni di turno. Accesa, puoi segnare pasti abbondanti e alcol",true],
+  ["pasti","Finestra dei pasti","Quando mangiare nei giorni di turno. Accesa, puoi segnare pasti abbondanti e alcol",true],
   ["liberi","Tempo libero","Le finestre libere fuori dal lavoro",true],
   ["testa","Momento per la testa","Quando di solito sei più lucido per pensare, studiare, decidere (stima)",false],
   ["leggera","Momento per muoverti","45 minuti leggeri: camminare, stretching. Accesa, puoi segnare quando l'hai fatto",false],
@@ -6793,11 +6842,8 @@ function renderEssenziale(P, CARDS){
           {a:P.s.onset-180, poi:"luci basse dalle "+hhmm(P.s.onset-180)})});
       }
     } else if(cd.k==="m"){
-      // cd.val ripeteva l'orario due volte ("21:30" come valore, "Pasto
-      // pieno alle 21:30" come sottotitolo): cd.small dice la stessa cosa
-      // senza il doppione ("prima di uscire").
-      voci.push({t, html:riga("pasti","Pasti",ora||cd.val,cd.small||"",false,ICON.plate,dett(cd)+'<div class="att-tit">Pasto abbondante</div>'+attivitaHtml("pasto")+'<div class="att-tit">Alcol</div>'+attivitaHtml("alcol"),
-        {a:cd.at, poi:"pasto alle "+hhmm(cd.at)})});
+      voci.push({t, html:riga("pasti","Finestra dei pasti",ora||cd.val,cd.small||"",false,ICON.plate,dett(cd)+'<div class="att-tit">Pasto abbondante</div>'+attivitaHtml("pasto")+'<div class="att-tit">Alcol</div>'+attivitaHtml("alcol"),
+        {a:cd.at, poi:"pasti dalle "+hhmm(cd.at)})});
     } else if(cd.k==="t"){
       voci.push({t, html:riga("rientro",cd.lab,ora||cd.val,frase(cd.val,ora)||cd.small||"",!P.b.rest,ICON.car,dett(cd),
         {a:cd.at, poi:(P.b.rest?"veglia lunga":"rientro")+" alle "+hhmm(cd.at)})});
@@ -7348,10 +7394,14 @@ function renderCalendarioCiclo(){
       const i=(r0+r)*7+c, d=CAL.dataDi(m.da,i), x=leggi(m.io[i]), pc=persona ? leggi(persona.g[i]) : null;
       const altro=d.anno!==mt[0]||d.mese!==mt[1], num=d.giorno;   // il mese è nel titolo: il giorno 1 è solo «1», in grassetto (anche col testo grande sta nella cella)
       const fest=x.f;
-      const etic=new Date(d.iso+"T12:00:00").toLocaleDateString(LINGUA,{weekday:"long",day:"numeric",month:"long"})+(fest?" (festivo)":"")+": "+descr(x)+(x.x?", modificato":"")+(pc ? ", "+(pers.nome)+": "+descr(pc) : "");
+      const isPaga = state.giornoPaga && d.giorno === +state.giornoPaga;
+      const shX = (state.shifts||{})[x.sig];
+      const icX = shX && shX.icon && SHIFT_ICONS_MAP[shX.icon];
+      const tileContent = x.t==="?" ? "·" : (icX ? '<span class="ctile-ic">'+icX+'</span><span class="ctile-sig">'+esc(x.sig)+'</span>' : esc(x.sig));
+      const etic=new Date(d.iso+"T12:00:00").toLocaleDateString(LINGUA,{weekday:"long",day:"numeric",month:"long"})+(fest?" (festivo)":"")+(isPaga?", giorno di paga":"")+": "+descr(x)+(x.x?", modificato":"")+(pc ? ", "+(pers.nome)+": "+descr(pc) : "");
       griglia+='<button type="button" class="ccell'+(i<iOggi?" passato":"")+(i===iOggi?" oggi":"")+(altro?" fuori":"")+'" data-cal-giorno="'+d.iso+'" aria-label="'+esc(etic)+'">'+
-        '<span class="cnum'+(altro?" altro":"")+(d.giorno===1?" uno":"")+(fest?" fest":"")+(x.x?" mod":"")+'">'+num+'</span>'+
-        '<span class="ctile t-'+(x.t==="?"?"q":x.t)+'">'+(x.t==="?" ? "·" : esc(x.sig))+'</span>'+
+        '<span class="cnum'+(altro?" altro":"")+(d.giorno===1?" uno":"")+(fest?" fest":"")+(x.x?" mod":"")+'">'+num+(isPaga?'<span class="cnum-paga" title="Giorno di paga" aria-hidden="true">💰</span>':'')+'</span>'+
+        '<span class="ctile t-'+(x.t==="?"?"q":x.t)+'">'+tileContent+'</span>'+
         (pc ? '<span class="ctile p t-'+(pc.t==="?"?"q":pc.t)+'">'+(pc.t==="?" ? "·" : esc(pc.sig))+'</span>' : '')+'</button>';
     }
     griglia+='</div>';
@@ -7367,7 +7417,8 @@ function renderCalendarioCiclo(){
   const pv=$("#cycPrev"), nx=$("#cycNext"); if(pv) pv.disabled=!neiDati(calMese-1); if(nx) nx.disabled=!neiDati(calMese+1);
   el.innerHTML=selettoreVista("calendario")+griglia+
     '<div class="key">'+LEG.filter(l=>viste.has(l[0])).map(l=>sw(l[2])+l[1]+'</span>').join("")+
-    (vFest ? '<span><b class="key-fest">1</b>festivo</span>' : '')+(vMod ? '<span><i class="key-mod"></i>giorno modificato</span>' : '')+'</div>';
+    (vFest ? '<span><b class="key-fest">1</b>festivo</span>' : '')+(vMod ? '<span><i class="key-mod"></i>giorno modificato</span>' : '')+
+    (state.giornoPaga ? '<span>💰 giorno di paga</span>' : '')+'</div>';
   try{ renderMese(); }catch(e){}   // il mese dei numeri segue la pagina del calendario
 }
 // Le frecce e «Scegli giorno» di Turni, quando il ciclo è a calendario: pagine di settimane, e un giorno scelto porta alla sua settimana.
@@ -7642,6 +7693,36 @@ function fraseCorrDebito(corr){
 // senza azione, infine la correlazione umore/debito (interessante, ma senza
 // niente da fare a riguardo). "fonte" dice a renderAndamenti() quale
 // sezione, più sotto, deve evitare di ripetere la stessa frase.
+function tagInsight(){
+  const tags = state.diaryTags || {};
+  const diary = store.get("diary",{})||{};
+  const days = Object.keys(tags);
+  if(days.length < 6) return null;
+  for(const stag of SLEEP_TAGS){
+    const id = stag.id;
+    const withTag = [], withoutTag = [];
+    for(const d in diary){
+      const v = +diary[d];
+      if(!v || v < 1 || v > 5) continue;
+      const list = tags[d] || [];
+      if(list.includes(id)) withTag.push(v);
+      else if(days.includes(d)) withoutTag.push(v);
+    }
+    if(withTag.length >= 6 && withoutTag.length >= 6){
+      const avgW = withTag.reduce((a,b)=>a+b,0) / withTag.length;
+      const avgWo = withoutTag.reduce((a,b)=>a+b,0) / withoutTag.length;
+      const diff = avgW - avgWo;
+      if(Math.abs(diff) >= 0.5){
+        const meglio = diff > 0;
+        const phrase = meglio
+          ? 'Nelle '+withTag.length+' volte con '+stag.label.toLowerCase()+', energia al risveglio in media più alta ('+avgW.toFixed(1)+' contro '+avgWo.toFixed(1)+').'
+          : 'Nelle '+withTag.length+' volte con '+stag.label.toLowerCase()+', energia al risveglio in media più bassa ('+avgW.toFixed(1)+' contro '+avgWo.toFixed(1)+').';
+        return { testo: phrase, action: null, fonte: "tags" };
+      }
+    }
+  }
+  return null;
+}
 function insightSettimana(cs, ws, sm, corr){
   // Le proposte che cambiano il piano hanno una fonte sola, la stessa della
   // card «Il piano si adatta a te» in Oggi (suggerimentoAdatta): qui resta
@@ -7649,6 +7730,8 @@ function insightSettimana(cs, ws, sm, corr){
   // pagina ripescava anche le proposte già rifiutate.
   const sg=suggerimentoAdatta();
   if(sg) return {testo:sg.text, action:sg.action, fonte:"ws", chiave:sg};
+  const ti=tagInsight();
+  if(ti) return ti;
   if(cs && cs.frase) return {testo:cs.frase, action:null, fonte:"cs"};
   if(sm && sm.verdict) return {testo:sm.verdict, action:null, fonte:"sm"};
   const senzaAzione = ws && ws.consigli.find(c=>!c.action);
@@ -9477,6 +9560,21 @@ function diaryChange(e){
   segnaSonnoPiano(k,false); store.set("wakes",wakes); render();
 }
 function diaryClick(e){
+  const tagBtn=e.target.closest("[data-sleep-tag]");
+  if(tagBtn){
+    const tid=tagBtn.dataset.sleepTag, dayKey=tagBtn.dataset.sleepDay;
+    if(dayKey && tid){
+      state.diaryTags = state.diaryTags || {};
+      let list = (state.diaryTags[dayKey] || []).slice();
+      if(list.includes(tid)) list = list.filter(x => x !== tid);
+      else list.push(tid);
+      if(list.length) state.diaryTags[dayKey] = list;
+      else delete state.diaryTags[dayKey];
+      haptic(6);
+      salva(); render();
+    }
+    return;
+  }
   const sv=e.target.closest("[data-att-salva]"); if(sv){ attSalva(sv); return; }
   const an=e.target.closest("[data-att-annulla]"); if(an){ attAnnulla(an); return; }
   const nas=e.target.closest("[data-nascondi-insight]");
@@ -9628,6 +9726,41 @@ function strutturaPerche(el){
   else det.addEventListener("toggle", ()=>{ if(!det.open) return; try{ const g=isoOggi(); if(store.get("percheGiorno","")!==g){ store.set("percheGiorno", g); track("setup_item", {item:"perche_aperto"}); } }catch(e){} });
   if(fonti.length){ const f=document.createElement("p"); f.className="fonti"; f.innerHTML='<b>Fonti</b> '+fonti.join(" · "); det.appendChild(f); }
 }
+const SPIEGAZIONI = {
+  salute: {
+    t: "Health Connect",
+    h: '<p class="ed-sub">Integrazione con orologi e app della salute.</p><div class="why"><p>Facoltativo. Se usi uno smartwatch o un\'app del sonno compatibile, il piano può leggere il sonno vero e i passi registrati: in questo modo la stima dell\'orologio biologico e dell\'adattamento circadiano risulta più precisa.</p><p>Tutto funziona solo in lettura e nessun dato lascia il tuo telefono. Ogni categoria va abilitata singolarmente e il permesso di sistema viene chiesto solo quando attivi l\'interruttore corrispondente.</p></div>'
+  },
+  salute_revoca: {
+    t: "Revoca dei permessi",
+    h: '<p class="ed-sub">Controllo totale sui tuoi dati sanitari.</p><div class="why"><p>Spegnendo un interruttore nell\'app, i dati già letti di quella categoria vengono immediatamente dimenticati.</p><p>Puoi anche revocare i permessi in qualsiasi momento direttamente dall\'app Health Connect o dalle impostazioni di sistema di Android: Notturnisti rileverà automaticamente la revoca.</p></div>'
+  },
+  ics: {
+    t: "Il calendario come file",
+    h: '<p class="ed-sub">Esportazione per app calendario esterne.</p><div class="why"><p>Ideale per chi non desidera la sincronizzazione continua del calendario automatico: esporta 4 settimane di turni, sonno e pisolini in un file standard (.ics) compatibile con Google Calendar, Apple Calendario e Outlook.</p><p>Il file non si aggiorna da solo; se i tuoi turni cambiano, ti basterà scaricarlo di nuovo. I turni non hanno promemoria sonori superflui, mentre le notifiche sono presenti solo per gli eventi dove il rispetto dell\'orario è critico.</p></div>'
+  },
+  notifiche: {
+    t: "Promemoria e notifiche",
+    h: '<p class="ed-sub">Come funzionano i promemoria del piano.</p><div class="why"><p>I promemoria arrivano puntuali finché il sistema operativo mantiene attivo il processo dell\'app o del browser: per garantire la puntualità nei giorni successivi, apri l\'app una volta ogni giorno o due.</p><p>Non sostituiscono la sveglia del mattino, ma ti guidano su quando prepararti al sonno, l\'ultima caffeina utile e le pause strategiche per non arrivare a fine turno a pezzi.</p></div>'
+  },
+  persone: {
+    t: "Momenti in comune",
+    h: '<p class="ed-sub">Trova quando sei libero insieme a chi ami.</p><div class="why"><p>Aggiungi partner, familiari, amici o colleghi di reparto: l\'app calcolerà in automatico i momenti e i giorni liberi in cui i vostri orari coincidono, mostrandoli in <i>Turni › Tempo libero</i>.</p><p>Tutti i loro turni rimangono memorizzati esclusivamente nella memoria locale di questo telefono: niente server, niente cloud, zero profilazione.</p></div>'
+  },
+  privacy: {
+    t: "Privacy e zero-knowledge",
+    h: '<p class="ed-sub">I tuoi orari appartengono solo a te.</p><div class="why"><p>Turni, schemi di lavoro, sonno e diario non lasciano mai il telefono. L\'intero algoritmo circadiano gira in locale nel browser o nell\'app.</p><p>Nessuna pubblicità, nessun tracciamento commerciale, nessuna vendita di dati. Se attivi il calendario sincronizzato online, solo i turni di quel feed restano temporaneamente sul server per permettere la sincronizzazione con il tuo calendario, nient\'altro.</p></div>'
+  },
+  stats: {
+    t: "Statistiche anonime",
+    h: '<p class="ed-sub">Migliorare l\'app nel rispetto dell\'anonimato.</p><div class="why"><p>Le statistiche aggregate ci aiutano a capire quali funzioni vengono effettivamente utilizzate (ad esempio se le notifiche sono attive o quale sia il sistema operativo più diffuso) per prioritizzare lo sviluppo.</p><p>Non inviano mai orari, turni, note del diario né alcun identificativo che possa risalire alla tua persona. Restano completamente spente fino a quando non scegli espressamente di attivarle.</p></div>'
+  }
+};
+document.addEventListener("click", e=>{
+  const b=e.target.closest("[data-spiega]"); if(!b) return;
+  const sp=SPIEGAZIONI[b.dataset.spiega];
+  if(sp){ $("#infoTitolo").textContent=sp.t; $("#infoCorpo").innerHTML=sp.h; strutturaPerche($("#infoCorpo")); apriFoglio("infoModal",true); }
+});
 // Il «perché» di una voce si apre in un foglio (come «Modifica turni»), non dentro la timeline: la lista resta ferma.
 function apriInfo(id){
   const v=infoVoci.get(id); if(!v) return;
@@ -9692,9 +9825,12 @@ function buildPrintSheet(){
     let P=null; try{ P=NT.plan(); }catch(e){}
     if(!P){ continue; }
     const b=P.b;
+    const shObj = !b.rest && state.shifts && state.shifts[b.c];
+    const shIc = shObj && shObj.icon && SHIFT_ICONS_MAP[shObj.icon];
+    const icPrefix = shIc ? '<span class="ctile-ic" style="display:inline-block;vertical-align:middle;margin-right:4px">'+shIc+'</span>' : '';
     righe.push('<tr'+(o===0?' class="oggi"':'')+'>'+
       '<td>'+esc(d.toLocaleDateString(LINGUA,{weekday:"short",day:"numeric",month:"short"}))+'</td>'+
-      '<td><b>'+esc(b.rest?"Riposo":(b.name||b.c))+'</b>'+
+      '<td><b>'+icPrefix+esc(b.rest?"Riposo":(b.name||b.c))+'</b>'+
         (b.rest?"":'<br><span>'+hhmm(b.start)+"–"+hhmm(b.end)+'</span>')+'</td>'+
       '<td><b>'+hhmm(P.s.onset)+" → "+hhmm(P.end)+'</b><br><span>'+dur(P.s.dur)+'</span></td>'+
       '<td>'+((P.naps||[]).length?P.naps.map(n=>hhmm(n.a)+"–"+hhmm(n.b)).join("<br>"):"—")+'</td>'+
@@ -9725,10 +9861,14 @@ function paginaCalendario(oggi){
     let c="?"; try{ c=NT.codeAt(0); }catch(e){}
     let P=null; if(c!=="?"){ try{ P=NT.plan(); }catch(e){} }
     const tipo = !P ? "vuoto" : P.b.rest ? "riposo" : P.night ? "notte" : "lavoro";
-    const num = d.getDate()+(d.getDate()===1||i===0 ? " "+d.toLocaleDateString(LINGUA,{month:"short"}) : "");
+    const isPaga = state.giornoPaga && d.getDate() === +state.giornoPaga;
+    const num = d.getDate()+(d.getDate()===1||i===0 ? " "+d.toLocaleDateString(LINGUA,{month:"short"}) : "")+(isPaga ? " 💰" : "");
+    const shObj = P && !P.b.rest && state.shifts && state.shifts[P.b.c];
+    const shIc = shObj && shObj.icon && SHIFT_ICONS_MAP[shObj.icon];
+    const icPrefix = shIc ? '<span class="ctile-ic" style="display:inline-block;vertical-align:middle;margin-right:3px">'+shIc+'</span>' : '';
     celle.push('<div class="pc-g pc-'+tipo+(passato?' pc-pass':'')+(dnum(d)===dnum(oggi)?' pc-oggi':'')+'">'+
       '<span class="pc-n">'+esc(num)+'</span>'+
-      (P ? '<b>'+esc(P.b.rest?(P.b.tipo==="ferie"?"Ferie":"Riposo"):(P.b.name||P.b.c))+'</b>'+
+      (P ? '<b>'+icPrefix+esc(P.b.rest?(P.b.tipo==="ferie"?"Ferie":"Riposo"):(P.b.name||P.b.c))+'</b>'+
         (P.b.rest?'':'<span>'+hhmm(P.b.start)+'–'+hhmm(P.b.end)+'</span>')+
         '<span class="pc-s">dormi '+hhmm(P.s.onset)+'</span>' : '')+
       '</div>');
@@ -10884,6 +11024,7 @@ function renderTuoiTurni(){
   const turni=Object.keys(sh).filter(k=>sh[k] && !sh[k].rest).sort((a,b)=>(usati.has(b)-usati.has(a)) || (sh[a].s-sh[b].s));
   const voOld=$("#ttValOrari"); const vo=voOld; if(vo) vo.textContent=turni.map(k=>sh[k].n+" "+hhmm(sh[k].s)+"–"+hhmm(sh[k].e)).join(" · ");
   { const vf=$("#ttValFestivi"); if(vf) vf.textContent=festiviRiga().replace(/\.$/,""); }
+  { const vp=$("#ttValPaga"); if(vp) vp.textContent=state.giornoPaga ? (state.giornoPaga + " del mese" + (state.giornoPagaNotif !== false ? " · avviso alle 09:00" : "")) : "Non impostato"; }
   const rie=$("#ttRiepilogo");
   if(tipo==="variabili"){
     { const o=$("#ttOrari"); if(o){ o.hidden=true; o.innerHTML=""; } const on=$("#ttOggiNota"); if(on) on.hidden=true; }
@@ -10922,12 +11063,18 @@ function renderTtOrari(turni){
   if(!turni.length || flussoInPagina){ el.hidden=true; el.innerHTML=""; return; }
   el.hidden=false;
   el.innerHTML='<span class="eyebrow" style="display:block;margin:var(--gap-sezione) 0 8px">Orari dei turni</span><div class="tt-orari-lista">'+
-    turni.map(k=>'<div class="qh-ore-riga"><b><span class="tt-sigla" title="Sigla">'+esc(k)+'</span>'+esc(sh[k].n)+
+    turni.map(k=>{
+      const ic=(sh[k].icon && SHIFT_ICONS_MAP[sh[k].icon]) ? SHIFT_ICONS_MAP[sh[k].icon] : '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>';
+      return '<div class="qh-ore-riga"><b><button type="button" class="tt-icon-btn" data-tt-icon-k="'+esc(k)+'" title="Scegli icona per '+esc(sh[k].n)+'" aria-label="Icona per '+esc(sh[k].n)+'">'+ic+'</button><span class="tt-sigla" title="Sigla">'+esc(k)+'</span>'+esc(sh[k].n)+
       (tipoTurni()==="variabili" || !usatoNelCiclo(k) ? '<button type="button" class="lnk dim tt-elimina" data-tt-elimina="'+esc(k)+'" aria-label="Elimina il turno '+esc(sh[k].n)+'">Elimina</button>' : '<small class="tt-nel">nel tuo ciclo</small>')+'</b>'+
       '<input type="time" data-tt-da="'+esc(k)+'" value="'+hhmm(mod1440(sh[k].s))+'" aria-label="Inizio '+esc(sh[k].n)+'">'+
-      '<span>→</span><input type="time" data-tt-a="'+esc(k)+'" value="'+hhmm(mod1440(sh[k].e))+'" aria-label="Fine '+esc(sh[k].n)+'"></div>').join("")+'</div>';
+      '<span>→</span><input type="time" data-tt-a="'+esc(k)+'" value="'+hhmm(mod1440(sh[k].e))+'" aria-label="Fine '+esc(sh[k].n)+'"></div>';
+    }).join("")+'</div>';
 }
-if($("#ttOrari")) $("#ttOrari").addEventListener("click", e=>{ const x=e.target.closest("[data-tt-elimina]"); if(x){ haptic(10); eliminaTurno(x.dataset.ttElimina); } });
+if($("#ttOrari")) $("#ttOrari").addEventListener("click", e=>{
+  const ic=e.target.closest("[data-tt-icon-k]"); if(ic){ haptic(6); apriShiftIconModal(ic.dataset.ttIconK); return; }
+  const x=e.target.closest("[data-tt-elimina]"); if(x){ haptic(10); eliminaTurno(x.dataset.ttElimina); }
+});
 if($("#ttOrari")) $("#ttOrari").addEventListener("change", e=>{
   const inp=e.target.closest("[data-tt-da],[data-tt-a]"); if(!inp) return;
   const k=inp.dataset.ttDa||inp.dataset.ttA, da=document.querySelector('[data-tt-da="'+k+'"]'), a=document.querySelector('[data-tt-a="'+k+'"]');
@@ -10981,6 +11128,7 @@ if($("#ttRighe")) $("#ttRighe").addEventListener("click", e=>{
   const k=b.dataset.tt; haptic(6);
   if(k==="schema"){ passo("cambia_schema"); cambiaSchema=true; apriFlussoPagina("prossimi"); return; }
   if(k==="festivi"){ apriFestivi(); return; }
+  if(k==="paga"){ apriPaga(); return; }
   if(k==="orari"){ apriFlussoPagina("orari", "orari"); return; }
   if(k==="riposi"){
     turnoInScelta=[...new Set(String(state.pattern).split("").filter(c=>c!=="R"&&c!=="S"))][0]||null;
@@ -10989,6 +11137,62 @@ if($("#ttRighe")) $("#ttRighe").addEventListener("click", e=>{
     schemaInScelta={nome:($("#ttRiepilogo b")||{}).textContent||"Il tuo ciclo", p:state.pattern, s:JSON.parse(JSON.stringify(state.shifts||{}))};
     turnoInScelta=null;
     apriFlussoPagina("posizione", "posizione"); return; }
+});
+function apriPaga(){
+  const sel=$("#pagaGiornoSel");
+  if(sel && sel.options.length <= 1){
+    for(let g=1; g<=31; g++){
+      const opt=document.createElement("option");
+      opt.value=String(g);
+      opt.textContent=g + "° del mese";
+      sel.appendChild(opt);
+    }
+  }
+  if(sel) sel.value = state.giornoPaga ? String(state.giornoPaga) : "";
+  const sw=$("#pagaNotifSw");
+  if(sw) sw.checked = state.giornoPagaNotif !== false;
+  apriFoglio("pagaModal", true);
+}
+if($("#pagaSalva")) $("#pagaSalva").addEventListener("click", ()=>{
+  const sel=$("#pagaGiornoSel"), sw=$("#pagaNotifSw");
+  state.giornoPaga = (sel && sel.value) ? +sel.value : null;
+  state.giornoPagaNotif = sw ? sw.checked : true;
+  salva(); render(); renderTuoiTurni();
+  apriFoglio("pagaModal", false);
+  toast(state.giornoPaga ? "Giorno di paga impostato al " + state.giornoPaga + " del mese" : "Giorno di paga disattivato");
+});
+let _shiftIconTargetK = null;
+function apriShiftIconModal(k){
+  _shiftIconTargetK = k;
+  const sh = (state.shifts||{})[k];
+  if(!sh) return;
+  const tit=$("#shiftIconTitolo"), sub=$("#shiftIconSub"), chips=$("#shiftIconChips");
+  if(tit) tit.textContent = "Icona per " + (sh.n || k);
+  if(sub) sub.textContent = "Scegli l'icona per «" + (sh.n || k) + "» (" + k + "): comparirà nel calendario e nelle stampe.";
+  if(chips){
+    chips.innerHTML = SHIFT_ICONS.map(ic => {
+      const sel = sh.icon === ic.id;
+      return '<button type="button" class="tag-chip'+(sel?' on':'')+'" data-shift-ic-choose="'+ic.id+'" style="display:inline-flex;align-items:center;gap:6px">'+
+        '<span style="display:inline-flex;vertical-align:middle">'+ic.svg+'</span> <span>'+ic.label+'</span></button>';
+    }).join("");
+  }
+  apriFoglio("shiftIconModal", true);
+}
+if($("#shiftIconChips")) $("#shiftIconChips").addEventListener("click", e=>{
+  const b=e.target.closest("[data-shift-ic-choose]"); if(!b || !_shiftIconTargetK) return;
+  const icId = b.dataset.shiftIcChoose;
+  if(state.shifts[_shiftIconTargetK]){
+    state.shifts[_shiftIconTargetK].icon = icId;
+    salva(); render(); renderTuoiTurni();
+  }
+  apriFoglio("shiftIconModal", false);
+});
+if($("#shiftIconRimuovi")) $("#shiftIconRimuovi").addEventListener("click", ()=>{
+  if(_shiftIconTargetK && state.shifts[_shiftIconTargetK]){
+    delete state.shifts[_shiftIconTargetK].icon;
+    salva(); render(); renderTuoiTurni();
+  }
+  apriFoglio("shiftIconModal", false);
 });
 function chiudiSegna(){
   sgIntervallo=false; sgDa=null; sgStorico=[];
@@ -12108,7 +12312,8 @@ function salva(){
     maxAdvance:state.maxAdvance,pPattern:state.pPattern,pAnchor:state.pAnchor,
     pShifts:state.pShifts,pWake:state.pWake,pBed:state.pBed,pName:state.pName,people:state.people,personaGlance:state.personaGlance,piano:state.piano,
     repeat:state.repeat,ecc:state.ecc,giorni:state.giorni,evento:state.evento,festivi:state.festivi,festiviRiposo:state.festiviRiposo,
-    napTurno:state.napTurno,sonnoDiurno:state.sonnoDiurno,mattinoBifasico:state.mattinoBifasico,avvisoBifasicoOff:state.avvisoBifasicoOff,guidaLavoro:state.guidaLavoro,calMesi:state.calMesi,firstSeenAt:state.firstSeenAt,pausa:state.pausa,caffSens:state.caffSens,caffFattori:state.caffFattori,salute:state.salute,vista:state.vista};
+    napTurno:state.napTurno,sonnoDiurno:state.sonnoDiurno,mattinoBifasico:state.mattinoBifasico,avvisoBifasicoOff:state.avvisoBifasicoOff,guidaLavoro:state.guidaLavoro,calMesi:state.calMesi,firstSeenAt:state.firstSeenAt,pausa:state.pausa,caffSens:state.caffSens,caffFattori:state.caffFattori,salute:state.salute,vista:state.vista,
+    giornoPaga:state.giornoPaga,giornoPagaNotif:state.giornoPagaNotif,diaryTags:state.diaryTags};
   const testo=JSON.stringify(dati);
   if(testo!==_ultimoSalvato){
     store.set("turniConfigurati", !!state.turniConfigurati);
@@ -12130,7 +12335,8 @@ function salva(){
     const sig=JSON.stringify([!!state.turniConfigurati,state.pattern,state.shifts,state.anchor,state.repeat,
       state.freeWake,state.freeBed,state.cTo,state.cFrom,state.need,state.prep,state.maxAdvance,
       state.pPattern,state.pAnchor,state.pShifts,state.pWake,state.pBed,state.pName,state.people,state.personaGlance,
-      state.ecc,state.giorni,state.evento,state.napTurno,state.pausa,state.caffSens,state.caffFattori,state.salute]);
+      state.ecc,state.giorni,state.evento,state.napTurno,state.pausa,state.caffSens,state.caffFattori,state.salute,
+      state.giornoPaga,state.giornoPagaNotif]);
     if(_cfgSig!==null && sig!==_cfgSig) dispatchEvent(new Event("nt:config-changed"));
     _cfgSig=sig;
   }catch(e){}

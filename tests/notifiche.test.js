@@ -112,3 +112,18 @@ test("momenti buoni: senza interruttore nel piano non parte nulla, anche con il 
   assert.equal(buildSchedule({ ...base, piano: { testa: true } }, { days: 14, types: ["cambio"] }).filter(n => n.kind === "momenti").length, 0, "tipo spento");
   assert.ok(!TIPI_ESSENZIALI.includes("momenti"), "non è fra gli essenziali");
 });
+
+test("giorno di paga: notifica alle 09:00 il giorno del mese impostato", () => {
+  const oggi = new Date();
+  const giornoTarget = new Date(oggi);
+  giornoTarget.setDate(oggi.getDate() + 3);
+  const giornoMese = giornoTarget.getDate();
+  const cfg = { pattern: "MMMMMRR", anchor: iso(oggi), shifts: SH, giornoPaga: giornoMese };
+  const L = buildSchedule(cfg, { days: 7, types: ["paga"] });
+  const paga = L.filter(n => n.kind === "paga");
+  assert.equal(paga.length, 1, "esattamente una notifica di paga");
+  assert.equal(paga[0].at.getDate(), giornoMese);
+  assert.equal(paga[0].at.getHours(), 9);
+  assert.equal(paga[0].at.getMinutes(), 0);
+  assert.ok(paga[0].id >= 960000 && paga[0].id < 970000, "nella fascia id 960000");
+});
