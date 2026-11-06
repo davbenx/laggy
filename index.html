@@ -552,7 +552,8 @@ body.primo-avvio #firstPlanBanner,body.primo-avvio #setupChecklist,body.primo-av
 .ctile.t-q{background:none;border:1px dashed var(--line)}
 .ctile.p{height:19px;font-size:11px;border-radius:999px}
 .ctile.p.t-l,.ctile.p.t-n,.ctile.p.t-m,.ctile.p.t-p,.ctile.p.t-s{background:var(--persona-soft);color:var(--persona)}
-.cnum-paga{font-size:9.5px;margin-left:2px;vertical-align:baseline;line-height:1}
+.cnum-paga{display:inline-flex;align-items:center;margin-left:2px;vertical-align:middle;line-height:1}
+.cnum-paga svg{width:11px;height:11px;vertical-align:middle;color:inherit;stroke-width:1.8}
 .ctile-ic{display:inline-flex;align-items:center;margin-right:2px;vertical-align:middle}
 .ctile-ic svg{width:12px;height:12px;vertical-align:middle}
 .tt-icon-btn{display:inline-flex;align-items:center;justify-content:center;background:var(--s2);border:1px solid var(--line);border-radius:6px;width:28px;height:28px;cursor:pointer;color:var(--ink);padding:0;flex:none;margin-right:4px}
@@ -1826,7 +1827,7 @@ header b{font-size:23px}
     <button type="button" class="tool tool-1line" data-mod="festivi"><span class="tool-ic" data-ic="eye"></span><span class="tool-tx"><b>Festivi</b><span>Quali giorni contano come festivi</span></span></button>
   </div></div></div>
 <div id="laggyModal" class="qs-backdrop" hidden aria-hidden="true"><div class="qs-sheet" role="dialog" aria-modal="true" aria-label="Laggy"><div class="qs-header"><div><b class="qs-title">Laggy</b></div><div class="qs-hd-az"><button type="button" class="qs-close" id="laggyChiudi" aria-label="Chiudi">✕</button></div></div><div class="ed" id="laggyCorpo" style="text-align:center;padding:16px 20px 24px"></div></div></div>
-<div id="pagaModal" class="qs-backdrop" hidden aria-hidden="true"><div class="qs-sheet" role="dialog" aria-modal="true" aria-labelledby="pagaTitolo"><div class="qs-header"><div><b class="qs-title" id="pagaTitolo">Giorno di paga</b></div><div class="qs-hd-az"><button type="button" class="qs-close" id="pagaChiudi" aria-label="Chiudi">✕</button></div></div><div class="ed" style="padding:10px 16px 20px"><p class="ed-sub">Mostra il giorno dello stipendio nel calendario con l'icona 💰 e ricevi un promemoria facoltativo alle 09:00.</p><div class="q"><label for="pagaGiornoSel">Giorno del mese</label><select id="pagaGiornoSel"><option value="">Nessuno (disattivato)</option></select></div><label class="riga-sw" for="pagaNotifSw" style="margin-top:14px"><span><b>Promemoria alle 09:00</b><small>Notifica la mattina del giorno di paga</small></span><span class="switch"><input type="checkbox" id="pagaNotifSw" checked><span class="slider"></span></span></label><button type="button" class="btn pri" id="pagaSalva" style="width:100%;min-height:46px;margin-top:16px">Salva</button></div></div></div>
+<div id="pagaModal" class="qs-backdrop" hidden aria-hidden="true"><div class="qs-sheet" role="dialog" aria-modal="true" aria-labelledby="pagaTitolo"><div class="qs-header"><div><b class="qs-title" id="pagaTitolo">Giorno di paga</b></div><div class="qs-hd-az"><button type="button" class="qs-close" id="pagaChiudi" aria-label="Chiudi">✕</button></div></div><div class="ed" style="padding:10px 16px 20px"><p class="ed-sub">Mostra il giorno dello stipendio nel calendario con un'icona e ricevi un promemoria facoltativo alle 09:00.</p><div class="q"><label for="pagaGiornoSel">Giorno del mese</label><select id="pagaGiornoSel"><option value="">Nessuno (disattivato)</option></select></div><label class="riga-sw" for="pagaNotifSw" style="margin-top:14px"><span><b>Promemoria alle 09:00</b><small>Notifica la mattina del giorno di paga</small></span><span class="switch"><input type="checkbox" id="pagaNotifSw" checked><span class="slider"></span></span></label><button type="button" class="btn pri" id="pagaSalva" style="width:100%;min-height:46px;margin-top:16px">Salva</button></div></div></div>
 <div id="shiftIconModal" class="qs-backdrop" hidden aria-hidden="true"><div class="qs-sheet" role="dialog" aria-modal="true" aria-labelledby="shiftIconTitolo"><div class="qs-header"><div><b class="qs-title" id="shiftIconTitolo">Icona del turno</b></div><div class="qs-hd-az"><button type="button" class="qs-close" id="shiftIconChiudi" aria-label="Chiudi">✕</button></div></div><div class="ed" style="padding:10px 16px 20px"><p class="ed-sub" id="shiftIconSub">Scegli un'icona per identificare a colpo d'occhio questo turno nel calendario e nelle stampe.</p><div class="tag-chips" id="shiftIconChips" style="gap:8px;margin-top:12px"></div><button type="button" class="btn g qs-close" style="width:100%;min-height:42px;margin-top:14px" id="shiftIconRimuovi">Nessuna icona</button></div></div></div>
 <!-- I turni del mese (un tocco per giorno, o dal foglio turni): si apre
      dal riquadro del mese, qui sopra. -->
@@ -1867,7 +1868,7 @@ header b{font-size:23px}
     <button type="button" class="tool tool-1line va" data-tt="posizione" hidden><span class="tool-ic" data-ic="calendar"></span><span class="tool-tx"><b>Oggi dove sei nel ciclo</b><span>Se il ciclo risulta sfasato di qualche giorno</span></span></button>
     <button type="button" class="tool tool-1line va" data-tt="riposi"><span class="tool-ic" data-ic="bed"></span><span class="tool-tx"><b>Giorni di riposo</b><span><span id="ttValRiposi"></span></span></span></button>
     <button type="button" class="tool tool-1line va" data-tt="festivi"><span class="tool-ic" data-ic="sparkles"></span><span class="tool-tx"><b>Festivi</b><span><span id="ttValFestivi"></span></span></span></button>
-    <button type="button" class="tool tool-1line va" data-tt="paga"><span class="tool-ic">💰</span><span class="tool-tx"><b>Giorno di paga</b><span><span id="ttValPaga"></span></span></span></button>
+    <button type="button" class="tool tool-1line va" data-tt="paga"><span class="tool-ic" data-ic="paga"></span><span class="tool-tx"><b>Giorno di paga</b><span><span id="ttValPaga"></span></span></span></button>
     <button type="button" class="tool tool-1line va" data-tt="schema"><span class="tool-ic" data-ic="cycle"></span><span class="tool-tx"><b>Cambia tipo di turni</b><span>In quinta, 12 ore, sempre lo stesso turno, turni che cambiano…</span></span></button>
   </div>
   <div id="ttFlusso"></div>
@@ -4857,7 +4858,8 @@ const ICON={
   sparkles: ICO('<path d="M12 3l1.9 4.8 4.8 1.9-4.8 1.9L12 16.4l-1.9-4.8L5.3 9.7l4.8-1.9z"/>'),
   check: ICO('<path d="M20 6L9 17l-5-5"/>'),
   zap:   ICO('<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>'),
-  briefcase: ICO('<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2M2 12h20"/>')
+  briefcase: ICO('<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2M2 12h20"/>'),
+  paga: ICO('<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/>')
 };
 
 const SHIFT_ICONS = [
@@ -7400,7 +7402,7 @@ function renderCalendarioCiclo(){
       const tileContent = x.t==="?" ? "·" : (icX ? '<span class="ctile-ic">'+icX+'</span><span class="ctile-sig">'+esc(x.sig)+'</span>' : esc(x.sig));
       const etic=new Date(d.iso+"T12:00:00").toLocaleDateString(LINGUA,{weekday:"long",day:"numeric",month:"long"})+(fest?" (festivo)":"")+(isPaga?", giorno di paga":"")+": "+descr(x)+(x.x?", modificato":"")+(pc ? ", "+(pers.nome)+": "+descr(pc) : "");
       griglia+='<button type="button" class="ccell'+(i<iOggi?" passato":"")+(i===iOggi?" oggi":"")+(altro?" fuori":"")+'" data-cal-giorno="'+d.iso+'" aria-label="'+esc(etic)+'">'+
-        '<span class="cnum'+(altro?" altro":"")+(d.giorno===1?" uno":"")+(fest?" fest":"")+(x.x?" mod":"")+'">'+num+(isPaga?'<span class="cnum-paga" title="Giorno di paga" aria-hidden="true">💰</span>':'')+'</span>'+
+        '<span class="cnum'+(altro?" altro":"")+(d.giorno===1?" uno":"")+(fest?" fest":"")+(x.x?" mod":"")+'">'+num+(isPaga?'<span class="cnum-paga" title="Giorno di paga" aria-hidden="true">'+ICON.paga+'</span>':'')+'</span>'+
         '<span class="ctile t-'+(x.t==="?"?"q":x.t)+'">'+tileContent+'</span>'+
         (pc ? '<span class="ctile p t-'+(pc.t==="?"?"q":pc.t)+'">'+(pc.t==="?" ? "·" : esc(pc.sig))+'</span>' : '')+'</button>';
     }
@@ -7418,7 +7420,7 @@ function renderCalendarioCiclo(){
   el.innerHTML=selettoreVista("calendario")+griglia+
     '<div class="key">'+LEG.filter(l=>viste.has(l[0])).map(l=>sw(l[2])+l[1]+'</span>').join("")+
     (vFest ? '<span><b class="key-fest">1</b>festivo</span>' : '')+(vMod ? '<span><i class="key-mod"></i>giorno modificato</span>' : '')+
-    (state.giornoPaga ? '<span>💰 giorno di paga</span>' : '')+'</div>';
+    (state.giornoPaga ? '<span><span class="cnum-paga" style="margin-left:0;margin-right:4px">'+ICON.paga+'</span>giorno di paga</span>' : '')+'</div>';
   try{ renderMese(); }catch(e){}   // il mese dei numeri segue la pagina del calendario
 }
 // Le frecce e «Scegli giorno» di Turni, quando il ciclo è a calendario: pagine di settimane, e un giorno scelto porta alla sua settimana.
@@ -9862,12 +9864,13 @@ function paginaCalendario(oggi){
     let P=null; if(c!=="?"){ try{ P=NT.plan(); }catch(e){} }
     const tipo = !P ? "vuoto" : P.b.rest ? "riposo" : P.night ? "notte" : "lavoro";
     const isPaga = state.giornoPaga && d.getDate() === +state.giornoPaga;
-    const num = d.getDate()+(d.getDate()===1||i===0 ? " "+d.toLocaleDateString(LINGUA,{month:"short"}) : "")+(isPaga ? " 💰" : "");
+    const num = d.getDate()+(d.getDate()===1||i===0 ? " "+d.toLocaleDateString(LINGUA,{month:"short"}) : "");
+    const pagaIc = isPaga ? '<span class="cnum-paga" style="display:inline-block;vertical-align:middle;margin-left:3px">'+ICON.paga+'</span>' : '';
     const shObj = P && !P.b.rest && state.shifts && state.shifts[P.b.c];
     const shIc = shObj && shObj.icon && SHIFT_ICONS_MAP[shObj.icon];
     const icPrefix = shIc ? '<span class="ctile-ic" style="display:inline-block;vertical-align:middle;margin-right:3px">'+shIc+'</span>' : '';
     celle.push('<div class="pc-g pc-'+tipo+(passato?' pc-pass':'')+(dnum(d)===dnum(oggi)?' pc-oggi':'')+'">'+
-      '<span class="pc-n">'+esc(num)+'</span>'+
+      '<span class="pc-n">'+esc(num)+pagaIc+'</span>'+
       (P ? '<b>'+icPrefix+esc(P.b.rest?(P.b.tipo==="ferie"?"Ferie":"Riposo"):(P.b.name||P.b.c))+'</b>'+
         (P.b.rest?'':'<span>'+hhmm(P.b.start)+'–'+hhmm(P.b.end)+'</span>')+
         '<span class="pc-s">dormi '+hhmm(P.s.onset)+'</span>' : '')+
