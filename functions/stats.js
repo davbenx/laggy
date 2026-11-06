@@ -377,9 +377,16 @@ function render(){
   var feedDistinct=0, coupleDistinct=0;
   D.feeds.forEach(function(f){ if(f.day==="periodo"){ if(f.kind==="feed") feedDistinct=f.n; else coupleDistinct=f.n; } });
 
+  var esitiTot=total(rows,"piano_esito"), inLinea=total(rows,"piano_esito","esito=in_linea");
+  var pctInLinea=esitiTot? Math.round(100*inLinea/esitiTot)+"%" : "—";
+  var soddTot=total(rows,"soddisfazione"), soddSu=total(rows,"soddisfazione","voto=su");
+  var pctSodd=soddTot? Math.round(100*soddSu/soddTot)+"%" : "—";
+
   $("#kpis").innerHTML=
     kpi(fmt(Math.round(actTot/D.days)), "Dispositivi attivi, media al giorno", "oggi: "+fmt((act.find(function(p){return p.day===today;})||{n:0}).n))+
     kpi(fmt(total(rows,"plan_generated")), "Piani generati", "nel periodo")+
+    kpi(pctInLinea, "Notti in linea col piano", esitiTot? fmt(inLinea)+" su "+fmt(esitiTot)+" notti annotate" : "nessuna notte annotata")+
+    kpi(pctSodd, "Utenti soddisfatti", soddTot? fmt(soddSu)+" «su» su "+fmt(soddTot)+" voti" : "nessun voto")+
     kpi(fmt(total(rows,"notifications_enabled")), "Notifiche attivate", "nel periodo")+
     kpi(fmt(total(rows,"recensione_chiesta")), "Richieste di recensione", "riquadro Play aperto (Google decide se mostrarlo)")+
     kpi(fmt(total(rows,"share_opened")), "Link aperti da chi li riceve", "su "+fmt(total(rows,"share_created"))+" mandati")+
@@ -413,8 +420,15 @@ function render(){
   var VOCI={perche_aperto:"«Perché» aperto in un foglio",copia_settimana:"Segna: copia una settimana",persona_scuola:"Persona a scuola o all'asilo",guida_lavoro:"Guida per lavoro",piano_essenziale:"Piano essenziale acceso",piano_completo:"Piano essenziale spento",
     turni:"Turni dei prossimi giorni",notifiche:"Promemoria",calendario:"Calendario del telefono",widget:"Widget",file_ics:"File .ics scaricato",play:"Dal web a Google Play",
     mese_aperto:"Il mio mese aperto",import_ciclo:"Import: ciclo riconosciuto e applicato",ferie_aperte:"Ferie: pianificatore aperto",ferie_segnate:"Ferie: segnate",ferie_con:"Ferie: scelto «a casa con»",
-    festivi_riposo:"Festivi contati come riposo",medico_visto:"Riepilogo medico aperto",medico_pdf:"Riepilogo medico in PDF",diario_widget:"Voto dal widget",tuoi_turni:"Pagina «I tuoi turni» aperta",telefono_nuovo:"Telefono nuovo: dati ritrovati dal backup",festivi_extra:"Festivi: aggiunto il proprio",orologio_tuo:"Orari di sonno personalizzati"};
-  var SAP={momenti:"Momenti migliori",riepilogo:"Riepilogo del mese",sveglia:"Sveglia nell'Orologio",votowidget:"Voto dal widget",widgetmese:"Widget con il mese",coppia:"Calendario di coppia (proposta)",orologio:"Il tuo orologio",mese:"Il mio mese",festivi:"Festivi",dormi:"Dormi (scelte sul sonno)",acasa:"Orari a casa",ferie:"Ferie",colleghi:"Colleghi",calendario:"Calendario",scambio:"Scambio turno",sonno:"Sonno e carico",medico:"Medico",copia:"Copia di sicurezza",installa:"Installa",statistiche:"Statistiche",grazie:"Grazie",tester:"Tester"};
+    festivi_riposo:"Festivi contati come riposo",medico_visto:"Riepilogo medico aperto",medico_pdf:"Riepilogo medico in PDF",diario_widget:"Voto dal widget",tuoi_turni:"Pagina «I tuoi turni» aperta",telefono_nuovo:"Telefono nuovo: dati ritrovati dal backup",festivi_extra:"Festivi: aggiunto il proprio",orologio_tuo:"Orari di sonno personalizzati",
+    laggy_1:"Laggy: sbloccato Pulcino (stadio 1)",laggy_2:"Laggy: sbloccato Laggy (stadio 2)",laggy_3:"Laggy: sbloccato Esperto (stadio 3)",laggy_4:"Laggy: sbloccato Notturnista (stadio 4)",
+    salute_sonno:"Health Connect: sonno collegato",salute_passi:"Health Connect: passi collegati",
+    cal_mesi_3:"Calendario telefono: 3 mesi",cal_mesi_6:"Calendario telefono: 6 mesi",cal_mesi_12:"Calendario telefono: 1 anno",
+    smonto_diviso:"Smonto notte: sonno diviso (pisolino + notte)",smonto_unito:"Smonto notte: sonno unito (lungo di giorno)",
+    presto_diviso:"Mattino presto: sonno bifasico (sera + pisolino)",presto_tutto:"Mattino presto: tutto la sera",
+    piano_letto:"Piano: orario letto",piano_sveglia:"Piano: orario sveglia",piano_pisolino:"Piano: pisolino",piano_caffe:"Piano: caffeina",piano_luce:"Piano: luce e occhiali",piano_testa:"Piano: momenti per pensare",piano_leggera:"Piano: attività leggera",piano_intensa:"Piano: attività intensa"};
+  var SAP={momenti:"Momenti migliori",riepilogo:"Riepilogo del mese",sveglia:"Sveglia nell'Orologio",votowidget:"Voto dal widget",widgetmese:"Widget con il mese",coppia:"Calendario di coppia (proposta)",orologio:"Il tuo orologio",mese:"Il mio mese",festivi:"Festivi",dormi:"Dormi (scelte sul sonno)",acasa:"Orari a casa",ferie:"Ferie",colleghi:"Colleghi",calendario:"Calendario",scambio:"Scambio turno",sonno:"Sonno e carico",medico:"Medico",copia:"Copia di sicurezza",installa:"Installa",statistiche:"Statistiche",grazie:"Grazie",tester:"Tester",
+    salute:"Health Connect (salute)",scuola:"Figli a scuola",settimana:"Copia una settimana",guida:"Guida per lavoro",essenziale:"Piano essenziale"};
   function voce(k){ var m=/^sapevi_(si|no)_(.+)$/.exec(k); if(m) return "Lo sapevi «"+(SAP[m[2]]||m[2])+"»: "+(m[1]==="si"?"provato":"chiuso"); m=/^voce_(.+)$/.exec(k); if(m) return "Voce del piano aperta: "+m[1]; return VOCI[k]||k; }
   $("#setup").innerHTML=rowsHtml(byProp(rows,"setup_item").map(function(x){ return {k:voce(x.k), n:x.n}; }));
 
@@ -463,7 +477,7 @@ function render(){
     conv("share_opened","share_accepted","Link del ciclo aperti → usati")
   ]);
   $("#patterns").innerHTML=rowsHtml(byProp(rows,"plan_generated"));
-  $("#returns").innerHTML=rowsHtml([["return_d1","Dopo 1 giorno"],["return_d7","Dopo 7 giorni"],["return_d30","Dopo 30 giorni"]].map(function(e){ return {k:e[1], n:total(rows,e[0])}; }));
+  $("#returns").innerHTML=rowsHtml([["return_d1","Dopo 1 giorno"],["return_d7","Dopo 7 giorni"],["return_d14","Dopo 14 giorni"],["return_d30","Dopo 30 giorni"]].map(function(e){ return {k:e[1], n:total(rows,e[0])}; }));
 
   $("#feeds").innerHTML=rowsHtml([
     {k:"Feed personali distinti", n:feedDistinct},
