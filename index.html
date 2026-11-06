@@ -4021,9 +4021,7 @@ function cards(P){
   out.push(mc);
 
   for(const n of naps){
-    out.push({k:"s",lab:n.turno?"Pisolino in turno":n.rep?"Pisolino preventivo":n.corto?"Pisolino breve, prima di uscire":n.dopo?"Recupero dopo il turno":(n.rec||n.debito)?"Pisolino di recupero":((n.b-n.a)<40?"Pisolino breve":(n.b-n.a)>=60?"Pisolino lungo":"Pisolino"),
-      val:hhmm(n.a)+" → "+hhmm(n.b), small:dur(n.b-n.a)+(n.rep?" · sei reperibile":""),
-      sub:n.rep?("Oggi sei reperibile: se ti chiamano, la notte di sonno salta. Questo pisolino è una riserva, abbastanza lontano dalla sera da non rubarti il sonno se non chiama nessuno.")
+    const mot = n.rep?("Oggi sei reperibile: se ti chiamano, la notte di sonno salta. Questo pisolino è una riserva, abbastanza lontano dalla sera da non rubarti il sonno se non chiama nessuno.")
          :n.corto?("Prima non c'era spazio per un pisolino intero: venti minuti, presi appena puoi, valgono più di niente.")
          :n.dopo?("Prima del turno non c'era spazio. Appena stacchi ne recuperi una parte, invece di portarti tutto il debito a domani.")
          :n.rec?(n.last?"L'ultimo è corto apposta: così stasera ti addormenti a un orario normale."
@@ -4033,14 +4031,17 @@ function cards(P){
          :n.turno?("Nella pausa, prima del momento peggiore della notte. Finisce con largo margine dalla fine del turno: svegliarsi poco prima di salire in macchina peggiorerebbe proprio l'ora più delicata.")
          :((n.b-n.a)<40&&!n.rec&&!n.lungo&&!n.debito&&!n.turno)?("Hai dormito abbastanza, ma fra la sveglia di stamattina e il letto di stanotte passano "+hm(n.ore||0)+" di fila. Un pisolino corto prima di uscire non ti ruba il sonno di stanotte e di solito ti fa arrivare a fine turno più lucido.")
          :(n.first?"Di solito è il pisolino che aiuta di più in tutto il ciclo. Fallo anche senza sonno, prima di uscire di casa."
-                  :"Ti fa recuperare una parte del sonno che la mattina non è riuscita a darti."),
+                  :"Ti fa recuperare una parte del sonno che la mattina non è riuscita a darti.");
+    out.push({k:"s",lab:n.turno?"Pisolino in turno":n.rep?"Pisolino preventivo":n.corto?"Pisolino breve, prima di uscire":n.dopo?"Recupero dopo il turno":(n.rec||n.debito)?"Pisolino di recupero":((n.b-n.a)<40?"Pisolino breve":(n.b-n.a)>=60?"Pisolino lungo":"Pisolino"),
+      val:hhmm(n.a)+" → "+hhmm(n.b), small:dur(n.b-n.a)+(n.rep?" · sei reperibile":""),
+      sub:"",
       rows:n.rep?[["Se ti chiamano","un caffè appena esci va bene; dopo le 3 del mattino evitalo se poi torni a dormire. Al rientro, un sonno corto prima del resto della giornata"],
         ["Al risveglio","per circa un quarto d'ora sei più lento: se puoi, aspetta quel quarto d'ora prima di guidare"]]
         :(n.rec||n.dopo)?[]:[["Poi","mangi con calma ed esci: c'è tempo per svegliarti bene"],
         ["Al risveglio","per circa un quarto d'ora sei più lento: se puoi, aspetta quel quarto d'ora prima di guidare o di fare cose delicate"]],
       nap:{k:hhmm(n.a), fine:hhmm(n.b), min:n.b-n.a, turno:!!n.turno, livello:n.livello, caffe:!!n.caffe, caffeNo:n.caffeNo||""},
-      why:(night ? "Dormire prima di entrare di solito riduce il crollo di attenzione nelle ore centrali della notte, quando gli errori costano di più."
-                 : "Dormire prima di entrare di solito ti fa arrivare al turno più lucido, e il sonno che manca pesa meno sulle ore di lavoro.")+" Un'ora e mezza di solito lascia finire un ciclo di sonno e ci si sveglia meno intontiti; se non hai tempo, venti minuti sono meglio di niente.",
+      why:mot+" "+(night ? "Dormire prima di entrare di solito riduce il crollo di attenzione nelle ore centrali della notte, quando gli errori costano di più."
+                         : "Dormire prima di entrare di solito ti fa arrivare al turno più lucido, e il sonno che manca pesa meno sulle ore di lavoro.")+" Un'ora e mezza di solito lascia finire un ciclo di sonno e ci si sveglia meno intontiti; se non hai tempo, venti minuti sono meglio di niente.",
       cite:"Rosekind e coll. 1995 (NASA) · Tassi & Muzet 2000", at:n.a});
   }
 
@@ -4107,11 +4108,12 @@ function cards(P){
       val: hhmm(b.start)+" → "+hhmm(b.end),
       small: "<b>"+esc(b.name||nameOf(b.c))+"</b>",
       sub:"Per il viaggio contiamo "+state.cTo+" minuti all'andata e "+state.cFrom+" al ritorno: decidono quando ti prepari e da quando sei di nuovo libero.",
-      ...(state.guidaLavoro ? {
-        rows:[["Pause di guida (regole UE: camion, autobus oltre 50 km)","dopo 4 ore e mezza di guida, almeno 45 minuti di pausa (anche in due: prima 15, poi 30)"],
-              ["Se hai sonno","nella pausa un caffè e subito un pisolino di 15–20 minuti; al risveglio riparti solo quando ti senti sveglio"]],
-        why:"Per camion e autobus di linea oltre i 50 km valgono le regole europee (le stesse del tachigrafo); per le linee urbane decidono le regole nazionali e il contratto. Di solito il sonno al volante si fa sentire prima (palpebre pesanti, sbadigli): è il momento di fermarsi. Al simulatore, caffè più pisolino breve funziona meglio dei due da soli; finestrino aperto e radio alta no.",
-        cite:"Reg. (CE) 561/2006, art. 3 e 7 · Reyner &amp; Horne 1997 (simulatore di guida) · Reyner &amp; Horne 1998 (sonnolenza al volante)" } : {}),
+      rows: state.guidaLavoro ? [["Pause di guida (regole UE: camion, autobus oltre 50 km)","dopo 4 ore e mezza di guida, almeno 45 minuti di pausa (anche in due: prima 15, poi 30)"],
+            ["Se hai sonno","nella pausa un caffè e subito un pisolino di 15–20 minuti; al risveglio riparti solo quando ti senti sveglio"]] : [],
+      why: state.guidaLavoro ? "Per camion e autobus di linea oltre i 50 km valgono le regole europee (le stesse del tachigrafo); per le linee urbane decidono le regole nazionali e il contratto. Di solito il sonno al volante si fa sentire prima (palpebre pesanti, sbadigli): è il momento di fermarsi. Al simulatore, caffè più pisolino breve funziona meglio dei due da soli; finestrino aperto e radio alta no."
+            : "Gli orari del turno e i tempi di tragitto definiscono l'architettura della giornata: decidono quando prepararsi, quando mangiare e quando il corpo può iniziare la fase di decompressione.",
+      cite: state.guidaLavoro ? "Reg. (CE) 561/2006, art. 3 e 7 · Reyner &amp; Horne 1997 (simulatore di guida) · Reyner &amp; Horne 1998 (sonnolenza al volante)"
+            : "Costa, G., Scand J Work Environ Health 2003 · Folkard & Tucker, Occup Environ Med 2003",
       cambia:4, cambiaTxt:"Cambia il tuo tragitto",
       at: b.start});
   } else if(b.c==="?"){
@@ -4147,6 +4149,7 @@ function cards(P){
       why: "Ogni notte il corpo passa da un punto basso, anche se hai dormito bene: è normale sentirlo. Se cade in turno, se puoi fai una pausa alla luce e rimanda i compiti delicati. È una stima dai tuoi orari: conta quello che senti."+
         (oro.fonte==="orari"?" La finestra è larga perché parte dagli orari del piano: con qualche giorno di sonno segnato (o da Salute) si stringe.":
          mezza>60?" La finestra è un po' larga: i modelli dell'orologio non sono del tutto d'accordo su di te.":""),
+      cite: "Dijk & Czeisler, J Neurosci 1995 · Åkerstedt & Folkard, Sleep 1997 · Forger, Jewett & Kronauer, J Biol Rhythms 1999",
       at: cbt});
   } else if(!b.rest && cbtSveglia!==undefined){
     // Ti svegli vicino al punto più basso, prima di uscire: niente da rimandare, ma il risveglio è più lento del solito.
@@ -6216,17 +6219,29 @@ function adessoLine(P, riferimento){
       };
     }
     const toStart=mod1440(b.start-m);
-    if(toStart>0 && toStart<=6*60){
-      // Solo quello che viene PRIMA del turno, in ordine: il pisolino (se c'è prima), quando uscire, la caffeina se conta a
-      // inizio turno (le notti). Poi l'ora del turno: così «Poi» non ripete il titolo. Prima diceva «c'è un pisolino prima»
-      // anche per il pisolino dopo il turno, e l'ultima caffeina del pomeriggio a chi stava per uscire alle 5.
+    // Soglia pre-turno: il countdown scatta solo se il turno è imminente (<= 2h o tempo di tragitto + 45 min)
+    // E non ci sono attività intermedie (allenamento, pisolino, pasto) ancora da svolgere prima di uscire.
+    const sogliaPreTurno = Math.max(120, (+state.cTo||0) + 45);
+    let haIntermedi = false;
+    if(toStart > 0 && toStart <= 6*60){
+      const napPrima = (P.naps||[]).find(x=>x.a>=m && x.a<b.start);
+      let finPrima = false;
+      try{
+        const fin = finestreDelGiorno(P);
+        if(fin) finPrima = ["testa","leggera","intensa"].some(k=>pianoVoce(k) && fin[k] && ((fin[k].a>=m && fin[k].a<b.start) || (m>=fin[k].a && m<fin[k].z)));
+      }catch(e){}
+      const pastoPrima = (P.meals||[]).some(mm=>mm.at>=m && mm.at<b.start-45);
+      haIntermedi = !!(napPrima || finPrima || pastoPrima);
+    }
+    if(toStart>0 && toStart<=sogliaPreTurno && !haIntermedi){
       const inizio=m+toStart, esci=inizio-(+state.cTo||0), passi=[];
-      const napPrima=(P.naps||[]).find(x=>x.b<=b.start+5 && mod1440(x.a-m)<toStart);
-      if(napPrima) passi.push("pisolino alle "+hhmm(napPrima.a));
-      if(esci>m+5) passi.push("esci alle "+hhmm(esci));
-      if(isFinite(P.cut) && P.night && pianoVoce("caffe")) passi.push("ultima caffeina entro le "+hhmm(P.cut));
-      passi.push("turno alle "+hhmm(b.start));
-      return {t:"Tra "+hm(toStart)+" entri in turno", s:passi.join(" · ").replace(/^./,c=>c.toUpperCase())};
+      const napPrima=(P.naps||[]).find(x=>x.b<=b.start+5 && x.a>=m && x.a<b.start);
+      if(napPrima) passi.push({t:napPrima.a, txt:"pisolino alle "+hhmm(napPrima.a)});
+      if(esci>m+5) passi.push({t:esci, txt:"esci alle "+hhmm(esci)});
+      passi.push({t:b.start, txt:"turno alle "+hhmm(b.start)});
+      if(isFinite(P.cut) && P.night && pianoVoce("caffe") && P.cut>=m) passi.push({t:P.cut, txt:"ultima caffeina entro le "+hhmm(P.cut)});
+      passi.sort((p1,p2)=>p1.t-p2.t);
+      return {t:"Tra "+hm(toStart)+" entri in turno", s:passi.map(p=>p.txt).join(" · ").replace(/^./,c=>c.toUpperCase())};
     }
     // m conta dalla mezzanotte della giornata (oltre 1440 dopo mezzanotte, finché non si va a dormire): senza modulo.
     // Con mod1440 la notte di STASERA (fine domattina alle 06:00) risultava finita stamattina, e alle 08:07 del giorno
@@ -6234,6 +6249,19 @@ function adessoLine(P, riferimento){
     const afterEnd=m-b.end;
     if((P.night||P.lateStart) && afterEnd>=0 && afterEnd<=2*60) return {t:"Appena smontato",s:"è l'ora più delicata: se hai sonno, non guidare"};
   }
+
+  // Se c'è una finestra attiva o imminente (allenamento, movimento, testa) o un pisolino vicino:
+  try{
+    const fin=finestreDelGiorno(P);
+    if(fin){
+      const vCorso=[["testa","pensare e studiare"],["leggera","muoverti piano"],["intensa","allenarti"]].find(([k])=>pianoVoce(k) && fin[k] && m>=fin[k].a && m<fin[k].z);
+      if(vCorso) return {t:"Buon momento per "+vCorso[1], s:"fino alle "+hhmm(fin[vCorso[0]].z), fallback:true};
+      const vProssimo=[["testa","momento per la testa"],["leggera","momento per muoverti"],["intensa","allenamento"]].find(([k])=>pianoVoce(k) && fin[k] && fin[k].a>m && fin[k].a-m<=45);
+      if(vProssimo) return {t:"Tra poco: "+vProssimo[1], s:"dalle "+hhmm(fin[vProssimo[0]].a)+" alle "+hhmm(fin[vProssimo[0]].z), fallback:true};
+    }
+  }catch(e){}
+  const napVicino=(P.naps||[]).find(n=>n.a>m && n.a-m<=45);
+  if(napVicino) return {t:"Tra poco: pisolino", s:"dalle "+hhmm(napVicino.a)+" alle "+hhmm(napVicino.b), fallback:true};
 
   // "Ora" non deve mai restare vuoto: se non c'è nulla di urgente, dice
   // comunque qualcosa. Il caffè resta in cima perché tocca il sonno di
@@ -6428,9 +6456,12 @@ function attivitaHtml(k){
     '<details class="att-det"><summary>Aggiungi dettagli</summary>'+det+'<label>Una nota<input type="text" maxlength="80" class="ora-in" data-att-nota placeholder="facoltativo" aria-label="Una nota"></label></details></div>';
 }
 const VOCI_FIN=[
-  ["testa","Testa",ICON.mente,"pensare, studiare","Le ore in cui di solito sei più lucido: almeno 90 minuti dopo il risveglio e 2 ore prima di dormire, fuori dal turno, dal viaggio e dai pasti. "+STIMA_FIN],
-  ["leggera","Movimento",ICON.passo,"camminare, stretching","45 minuti leggeri quando di solito il corpo è più pronto: almeno 45 minuti dopo il risveglio e un'ora prima di dormire, lontano dai pasti. "+STIMA_FIN],
-  ["intensa","Allenamento",ICON.peso,"più impegnativo","60 minuti più impegnativi, quando di solito forza e coordinazione rendono di più: almeno 2 ore dopo il risveglio, lontano dai pasti, finiti 3 ore prima di dormire. "+STIMA_FIN]
+  ["testa","Testa",ICON.mente,"pensare, studiare","Le ore in cui di solito sei più lucido: almeno 90 minuti dopo il risveglio e 2 ore prima di dormire, fuori dal turno, dal viaggio e dai pasti. "+STIMA_FIN,
+   "Monk, Buysse, Reynolds & Kupfer, Chronobiol Int 1997 · Dijk, Duffy & Czeisler, J Sleep Res 1992"],
+  ["leggera","Movimento",ICON.passo,"camminare, stretching","45 minuti leggeri quando di solito il corpo è più pronto: almeno 45 minuti dopo il risveglio e un'ora prima di dormire, lontano dai pasti. "+STIMA_FIN,
+   "Youngstedt, Sports Med 2005 · Atkinson & Reilly, Sports Med 1996"],
+  ["intensa","Allenamento",ICON.peso,"più impegnativo","60 minuti più impegnativi, quando di solito forza e coordinazione rendono di più: almeno 2 ore dopo il risveglio, lontano dai pasti, finiti 3 ore prima di dormire. "+STIMA_FIN,
+   "Chtourou & Souissi, Sports Med 2012 · Reilly & Waterhouse, Lancet 2009 · Teo, Newton & McGuigan, Sports Med 2011"]
 ];
 // A letto molto presto prima di un mattino: le due strade con gli orari veri,
 // nel giorno in cui servono (prima era una nota con un rimando a Impostazioni,
@@ -6633,8 +6664,8 @@ function renderEssenziale(P, CARDS){
   // attaccate a «Dormi»: sono decisioni su quella voce, non voci del programma.
   // I momenti migliori (testa, movimento, allenamento) come voci del piano.
   try{ const fin=finestreDelGiorno(P);
-    if(fin) for(const [k,lab,ic,sub,perche] of VOCI_FIN){ const w=fin[k]; if(!w || !pianoVoce(k)) continue;
-      voci.push({t:dSv(w.a), html:riga("fin-"+k, lab, hhmm(w.a)+" → "+hhmm(w.z), sub, false, ic, '<div class="why">'+esc(perche)+'</div>'+(k==="testa"?"":attivitaHtml(k))+linkVai("momenti","Scegli quando preferisci"), {a:w.a, z:w.z, poi:lab.toLowerCase()+" dalle "+hhmm(w.a)})}); } }catch(e){}
+    if(fin) for(const [k,lab,ic,sub,perche,cite] of VOCI_FIN){ const w=fin[k]; if(!w || !pianoVoce(k)) continue;
+      voci.push({t:dSv(w.a), html:riga("fin-"+k, lab, hhmm(w.a)+" → "+hhmm(w.z), sub, false, ic, '<div class="why">'+esc(perche)+(cite?'<cite>'+cite+'</cite>':'')+'</div>'+(k==="testa"?"":attivitaHtml(k))+linkVai("momenti","Scegli quando preferisci"), {a:w.a, z:w.z, poi:lab.toLowerCase()+" dalle "+hhmm(w.a)})}); } }catch(e){}
   const dn=sceltaDopoNotte(P);
 
   // Letto troppo presto prima di un turno di mattina: stessa soglia della
@@ -6705,7 +6736,7 @@ function renderEssenziale(P, CARDS){
         // "Penombra" ha ora la sua spiegazione, più corta e specifica alla
         // sua metà della leva — non una copia dell'altra.
         const percheLuce = cd.why ? '<div class="why">'+cd.why+(cd.cite?'<cite>'+cd.cite+'</cite>':'')+'</div>' : "";
-        const percheOmbra = '<div class="why">È la stessa leva della luce, nella sua metà serale: quello che prendi adesso è ciò che tira indietro l\'orologio, non ciò che lo sposta avanti.</div>';
+        const percheOmbra = '<div class="why">È la stessa leva della luce, nella sua metà serale: quello che prendi adesso è ciò che tira indietro l\'orologio, non ciò che lo sposta avanti.<cite>Gooley e coll., J Clin Endocrinol Metab 2011 · Zeitzer e coll., J Physiol 2000</cite></div>';
         const avoidBlk = (cd.blocks||[]).find(bl=>bl[0]==="avoid");
         let splitOra=false, tAvoid=null;
         // Le finestre dell'ottimizzatore sono della giornata scelta: una «luce bassa» che comincia prima della sveglia
@@ -6726,7 +6757,7 @@ function renderEssenziale(P, CARDS){
           // finisce quando vai a dormire: «poi buio»; altrimenti (ottimizzatore: luce bassa a metà giornata) dice fino a quando
           const finoAlSonno = avoidBlk[2] >= P.s.onset-15 && avoidBlk[2] <= P.s.onset+5;
           voci.push({t:tAvoid, html:riga("penombra","Luce bassa",hhmm(avoidBlk[1]),finoAlSonno?"poi buio, per dormire":"luce bassa fino alle "+hhmm(avoidBlk[2]),false,ICON.dim,
-            finoAlSonno ? dettPenombra : righeFase(cd.rowsE)+'<div class="why">In queste ore la luce sposterebbe il tuo orologio al contrario di quello che serve per i prossimi turni: tenerla bassa lo aiuta ad andare dove serve.</div>',
+            finoAlSonno ? dettPenombra : righeFase(cd.rowsE)+'<div class="why">In queste ore la luce sposterebbe il tuo orologio al contrario di quello che serve per i prossimi turni: tenerla bassa lo aiuta ad andare dove serve.<cite>Gooley e coll., J Clin Endocrinol Metab 2011 · Zeitzer e coll., J Physiol 2000</cite></div>',
             {a:avoidBlk[1], z:avoidBlk[2], poi:"luci basse dalle "+hhmm(avoidBlk[1])})});
         }
       } else if(P.s.meta && P.s.meta.ramp && P.shift<0){
@@ -6736,7 +6767,7 @@ function renderEssenziale(P, CARDS){
         // in arrivo. Riusa lo stesso segnale già calcolato per "Dormi" in
         // questo stesso ramo (s.meta.ramp), non un rilevamento nuovo.
         const tSera = dSv(P.s.onset-180);
-        const dettSera = '<div class="why">Nei prossimi giorni il sonno si anticipa. La luce di sera sposta l\'orologio più tardi: tenerla bassa nelle ultime ore ti aiuta ad addormentarti prima, anche in un giorno libero.</div>';
+        const dettSera = '<div class="why">Nei prossimi giorni il sonno si anticipa. La luce di sera sposta l\'orologio più tardi: tenerla bassa nelle ultime ore ti aiuta ad addormentarti prima, anche in un giorno libero.<cite>Gooley e coll., J Clin Endocrinol Metab 2011 · Zeitzer e coll., J Physiol 2000</cite></div>';
         voci.push({t:tSera, html:riga("penombra","Luce bassa",hhmm(P.s.onset-180),"tieni la luce soffusa",false,ICON.dim,dettSera,
           {a:P.s.onset-180, poi:"luci basse dalle "+hhmm(P.s.onset-180)})});
       }
@@ -6817,12 +6848,19 @@ function renderEssenziale(P, CARDS){
     // «Poi»: il prossimo passo, se «Adesso» non lo dice già
     const card=$("#ora .ora-card");
     if(card && !card.querySelector(".ora-poi")){
-      const next=voci.find(v=>eVoce(v) && !/^<div class="tl[^"]*\b(past|ora)\b/.test(v.html) && dammi(v,"poi"));
+      const cardTimes = (card.textContent.match(/\b\d{1,2}:\d{2}\b/g)||[]).map(t=>{ const [h,min]=t.split(":").map(Number); return h*60+min; });
+      const next=voci.find(v=>{
+        if(!eVoce(v) || /^<div class="tl[^"]*\b(past|ora)\b/.test(v.html)) return false;
+        const a=+dammi(v,"a"), testo=dammi(v,"poi");
+        if(!testo || !isFinite(a)) return false;
+        if(card.textContent.includes(hhmm(a))) return false;
+        // Non proporre come "Poi" un orario precedente agli orari già citati nella card Adesso
+        if(cardTimes.length && cardTimes.some(ct => ct > a && (ct - a) < 720)) return false;
+        return true;
+      });
       if(next){
-        const a=+dammi(next,"a"), testo=dammi(next,"poi");
-        if(!card.textContent.includes(hhmm(a))){
-          const sp=document.createElement("span"); sp.className="ora-poi"; sp.textContent="Poi · "+testo; card.appendChild(sp);
-        }
+        const testo=dammi(next,"poi");
+        const sp=document.createElement("span"); sp.className="ora-poi"; sp.textContent="Poi · "+testo; card.appendChild(sp);
       }
     }
   }
@@ -7925,7 +7963,7 @@ function apriLaggyFoglio(isLevelUp){
     '<span class="eyebrow" style="display:inline-block;margin-bottom:10px">'+esc(L.nome)+' · livello '+(s.max+1)+' di 4</span>'+
     '<p style="margin:0 auto 12px;max-width:320px;line-height:1.45;color:var(--ink)">'+esc(L.frase)+'</p>'+
     (s.prossimo ? '<p class="hint" style="margin:0 auto;max-width:300px">Prossimo traguardo: '+esc(s.prossimo)+'.</p>' : '<p class="hint" style="margin:0">Hai raggiunto il massimo livello di Laggy!</p>')+
-    '<button type="button" class="btn pri" style="margin-top:18px;width:100%" data-laggy-ok>'+(isLevelUp ? 'Evviva!' : 'Chiudi')+'</button>';
+    '<button type="button" class="btn pri qs-close" style="margin-top:18px;width:100%" data-laggy-ok>'+(isLevelUp ? 'Evviva!' : 'Chiudi')+'</button>';
   if(isLevelUp) haptic(12);
   apriFoglio("laggyModal", true);
 }
@@ -12182,7 +12220,7 @@ platform.onBackButton(()=>{
   if($("#pf-modal")){ $("#pf-modal").remove(); return true; }
   const qs=$("#quickShiftModal"); if(qs && !qs.hidden){ chiudiQuickShift(); return true; }
   if($("#qrModal") && !$("#qrModal").hidden){ mostraQR(false); return true; }
-  for(const id of ["infoModal","modificaModal","condividiModal"]){ const m=$("#"+id); if(m && !m.hidden){ apriFoglio(id,false); return true; } }
+  for(const id of ["infoModal","modificaModal","condividiModal","laggyModal"]){ const m=$("#"+id); if(m && !m.hidden){ apriFoglio(id,false); return true; } }
   if($("#novitaModal") && !$("#novitaModal").hidden){ mostraNovita(false,true); return true; }
   if(document.body.classList.contains("andamenti-aperta")){ andIndietro(); return true; }
   if(document.body.classList.contains("vederci-aperta")){ chiudiVederci(); return true; }
@@ -12458,7 +12496,7 @@ if($("#condividiRiepiloghi")) $("#condividiRiepiloghi").addEventListener("click"
   else if(b.matches("[data-riepilogo-medico]")) stampaRiepilogoMedico();
 });
 ["modificaModal","condividiModal","infoModal","laggyModal"].forEach(id=>{ const m=document.getElementById(id); if(!m) return;
-  m.addEventListener("click",e=>{ if(e.target===m || e.target.closest(".qs-close")) apriFoglio(id,false); }); });
+  m.addEventListener("click",e=>{ if(e.target===m || e.target.closest(".qs-close") || e.target.closest("[data-laggy-ok]")) apriFoglio(id,false); }); });
 if($("#condividiCorpo")) $("#condividiCorpo").addEventListener("click",e=>{ if(e.target.closest("button")) setTimeout(()=>apriFoglio("condividiModal",false),60); });
 if($("#modificaModal")) $("#modificaModal").addEventListener("click",e=>{
   const b=e.target.closest("[data-mod]"); if(!b) return; haptic(6); apriFoglio("modificaModal",false);
