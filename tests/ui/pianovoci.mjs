@@ -21,7 +21,8 @@ const voci=p=>p.evaluate(()=>[...document.querySelectorAll("#essenziale .tl")].m
   ok(["Luce","Pasti","Turno","Dormi"].every(x=>v.includes(x)) && !v.some(x=>/Testa|Movimento|Allenamento/.test(x)), "predefinito: le voci di sempre ci sono, i momenti migliori no → "+v.join(", "));
   await p.click("#doOpzioni"); await p.waitForTimeout(400); await p.click('[data-opzg-vai="voci"]'); await p.waitForTimeout(200);
   const sw=await p.evaluate(()=>[...document.querySelectorAll("#opzPianoVoci input[data-pv]:not([data-pv='_essenziale'])")].map(i=>i.dataset.pv+":"+i.checked));
-  ok(sw.length===9 && sw.slice(0,6).every(x=>x.endsWith("true")) && sw.slice(6).every(x=>x.endsWith("false")), "Impostazioni: nove interruttori (con Caffeina e Laggy), sei accesi e tre spenti → "+sw.join(" "));
+  ok(sw.length===8 && sw.slice(0,5).every(x=>x.endsWith("true")) && sw.slice(5).every(x=>x.endsWith("false")), "Impostazioni: otto interruttori nel piano, cinque accesi e tre spenti → "+sw.join(" "));
+  ok(await p.evaluate(()=>document.querySelector("#opzLaggy input[data-pv-laggy]").checked), "Laggy acceso nella sezione Mascotte");
   ok(await p.evaluate(()=>/Dormi, Turno, Pisolino e Rientro ci sono sempre/.test(document.querySelector("#opzioni").innerText)), "dice quali voci ci sono sempre");
   await p.click('label[for="pv-luce"]'); await p.click("#opzPianoVoci .pv-momenti summary"); await p.click('label[for="pv-testa"]'); await p.waitForTimeout(300);
   await p.click("#doOpzioni").catch(()=>{}); await p.evaluate(()=>document.querySelector('[data-tab="oggi"]').click()); await p.waitForTimeout(400);

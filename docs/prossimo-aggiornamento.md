@@ -7,12 +7,12 @@ Fatto nella 1.1.1 (non serve più): tolto il vecchio wizard nascosto; suggerimen
 
 ### Subito (piccoli, già chiari)
 - [x] «Copia il riepilogo del diario» non copiava: il tocco sulla riga piccola dentro il bottone non era riconosciuto (`e.target.id` → `closest("#doSum")`). Corretto sul ramo, da pubblicare.
-- [ ] Popup troppo alti: nell'app Android finiscono sotto la barra di stato. Nell'altezza massima di `.qs-sheet` togliere anche `--sat` più un margine.
-- [ ] Fonti dentro «Perché»: la riga «Fonti …» va in fondo al riquadro che si apre.
-- [ ] «Il tuo ciclo»: il selettore «Persona» sulla stessa riga di «Calendario / Ore», a destra, compatto (nome + freccia).
-- [ ] «Per la visita dal medico»: stesso stile di «Condividi e riepiloghi» (righe con icona, titolo e descrizione corta), non due bottoni grandi.
-- [ ] Laggy: l'interruttore esce da «Cosa vedi nel piano» e va in Impostazioni › «Cosa vedi nell'app». Laggy compare anche in Oggi, sotto il diario, dopo che annoti («2 di 4: ancora 3 notti»), con un foglio una tantum quando cresce di stadio.
-- [ ] «Sonno e carico»: le due «Scoperta» diventano un solo riquadro «Cosa emerge dai tuoi dati».
+- [x] Popup troppo alti: nell'app Android finiscono sotto la barra di stato. Nell'altezza massima di `.qs-sheet` togliere anche `--sat` più un margine.
+- [x] Fonti dentro «Perché»: la riga «Fonti …» va in fondo al riquadro che si apre.
+- [x] «Il tuo ciclo»: il selettore «Persona» sulla stessa riga di «Calendario / Ore», a destra, compatto (nome + freccia).
+- [x] «Per la visita dal medico»: stesso stile di «Condividi e riepiloghi» (righe con icona, titolo e descrizione corta), non due bottoni grandi.
+- [x] Laggy: l'interruttore esce da «Cosa vedi nel piano» e va in Impostazioni › «Cosa vedi nell'app». Laggy compare anche in Oggi, sotto il diario, dopo che annoti («2 di 4: ancora 3 notti»), con un foglio una tantum quando cresce di stadio.
+- [x] «Sonno e carico»: le due «Scoperta» diventano un solo riquadro «Cosa emerge dai tuoi dati».
   - Al massimo 2 righe, ognuna con un fatto tuo, quanto è solido (per esempio «8 notti su 11») e cosa provare.
   - Se non c'è niente di solido (meno di 6–8 notti per confronto), il riquadro non compare.
 - [ ] Spiegazioni lunghe nella ⓘ (lo stesso foglio della timeline, niente tooltip al passaggio del mouse): sotto il comando resta una riga sola.
