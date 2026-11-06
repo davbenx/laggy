@@ -186,7 +186,9 @@ final class CalendarioWidget {
         rv.setTextColor(id, ctx.getColor(testo));
         // i turni si leggono prima dei riposi (che sono la maggior parte dei giorni): lettera più grande contro più piccola
         boolean lavoro = !ignoto && c.tipo != 'r';
-        rv.setTextViewTextSize(id, TypedValue.COMPLEX_UNIT_SP, persona ? (lavoro ? 11f : 10f) : (lavoro ? 13f : 11f));
+        boolean haIcona = !ignoto && c.sigla != null && c.sigla.length() > 2;
+        float sz = persona ? (lavoro ? (haIcona ? 9.5f : 11f) : 10f) : (lavoro ? (haIcona ? 11f : 13f) : 11f);
+        rv.setTextViewTextSize(id, TypedValue.COMPLEX_UNIT_SP, sz);
     }
 
     private static String etichetta(CalendarioModel.Cella c) {

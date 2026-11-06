@@ -66,6 +66,27 @@ ok(M.io.some(x=>/:f$|:fx$/.test(x)), "calendario: i festivi nazionali arrivano a
   ok(M2 && M2.p.length===0 && M2.star==="" && M2.io.length===ATTESO.n, "calendario senza persone: solo le mie sigle");
   await r.context().close();
 }
+// icone dei turni nel widget calendario: prefisso emoji vicino alla sigla
+{ const gi=n=>{ const d=new Date(); d.setHours(12,0,0,0); d.setDate(d.getDate()+n); return iso(d); };
+  const shIcone = {
+    M: { n: "Mattino", s: 420, e: 840, icon: "sun" },
+    P: { n: "Pomeriggio", s: 840, e: 1260, icon: "dim" },
+    N: { n: "Notte", s: 1260, e: 1860, icon: "moon" }
+  };
+  const partnerShifts = {
+    P: { n: "Pomeriggio", s: 840, e: 1260, icon: "dim" },
+    R: { n: "Riposo", s: 0, e: 0 }
+  };
+  const q=await apri({turniConfigurati:true,pattern:"MPNSR",anchor:tra(0),shifts:shIcone,repeat:true,firstSeenAt:tra(-30),
+    people:[{name:"Marco",pattern:"PRPR",anchor:gi(0),shifts:partnerShifts}],personaGlance:0});
+  const M=(await q.evaluate(()=>window.__widget)).mese;
+  const o=Math.round((new Date(tra(0)+"T12:00:00")-new Date(M.da+"T12:00:00"))/864e5);
+  ok(M.io[o].startsWith("☀️ M:"), "turno M con icona sun nel widget calendario ha prefisso ☀️ → "+M.io[o]);
+  ok(M.io[o+1].startsWith("🌅 P:"), "turno P con icona dim nel widget calendario ha prefisso 🌅 → "+M.io[o+1]);
+  ok(M.io[o+2].startsWith("🌙 N:"), "turno N con icona moon nel widget calendario ha prefisso 🌙 → "+M.io[o+2]);
+  ok(M.p[0].g[o].startsWith("🌅 P:"), "partner Marco turno P con icona dim ha prefisso 🌅 → "+M.p[0].g[o]);
+  await q.context().close();
+}
 // risposte dal widget: sonno e energia arrivano nel diario
 const k=tra(0);
 p=await apri({turniConfigurati:true,pattern:"MPNSR",anchor:tra(-2),shifts:SH,repeat:true,firstSeenAt:tra(-30)}, {}, {[k]:{sonno:true,bed:"23:10",wake:"06:40",voto:4,at:Date.now()}});

@@ -556,6 +556,7 @@ body.primo-avvio #firstPlanBanner,body.primo-avvio #setupChecklist,body.primo-av
 .cnum-paga svg{width:11px;height:11px;vertical-align:middle;color:inherit;stroke-width:1.8}
 .ctile-ic{display:inline-flex;align-items:center;margin-right:2px;vertical-align:middle}
 .ctile-ic svg{width:12px;height:12px;vertical-align:middle}
+.ctile.p .ctile-ic svg{width:10px;height:10px}
 .tt-icon-btn{display:inline-flex;align-items:center;justify-content:center;background:var(--s2);border:1px solid var(--line);border-radius:6px;width:28px;height:28px;cursor:pointer;color:var(--ink);padding:0;flex:none;margin-right:4px}
 .tt-icon-btn svg{width:16px;height:16px}
 .tag-chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
@@ -4871,6 +4872,14 @@ const SHIFT_ICONS = [
   { id: "briefcase", label: "Borsa", svg: ICON.briefcase }
 ];
 const SHIFT_ICONS_MAP = Object.fromEntries(SHIFT_ICONS.map(x => [x.id, x.svg]));
+const SHIFT_WIDGET_MAP = {
+  sun: "☀️",
+  dim: "🌅",
+  moon: "🌙",
+  sparkles: "✨",
+  alarm: "⏰",
+  briefcase: "💼"
+};
 
 const SLEEP_TAGS = [
   { id: "stretching", label: "Stretching / Yoga" },
@@ -7400,11 +7409,14 @@ function renderCalendarioCiclo(){
       const shX = (state.shifts||{})[x.sig];
       const icX = shX && shX.icon && SHIFT_ICONS_MAP[shX.icon];
       const tileContent = x.t==="?" ? "·" : (icX ? '<span class="ctile-ic">'+icX+'</span><span class="ctile-sig">'+esc(x.sig)+'</span>' : esc(x.sig));
+      const shPc = pers && pc && (pers.p.shifts||{})[pc.sig];
+      const icPc = shPc && shPc.icon && SHIFT_ICONS_MAP[shPc.icon];
+      const pTileContent = pc ? (pc.t==="?" ? "·" : (icPc ? '<span class="ctile-ic">'+icPc+'</span><span class="ctile-sig">'+esc(pc.sig)+'</span>' : esc(pc.sig))) : "";
       const etic=new Date(d.iso+"T12:00:00").toLocaleDateString(LINGUA,{weekday:"long",day:"numeric",month:"long"})+(fest?" (festivo)":"")+(isPaga?", giorno di paga":"")+": "+descr(x)+(x.x?", modificato":"")+(pc ? ", "+(pers.nome)+": "+descr(pc) : "");
       griglia+='<button type="button" class="ccell'+(i<iOggi?" passato":"")+(i===iOggi?" oggi":"")+(altro?" fuori":"")+'" data-cal-giorno="'+d.iso+'" aria-label="'+esc(etic)+'">'+
         '<span class="cnum'+(altro?" altro":"")+(d.giorno===1?" uno":"")+(fest?" fest":"")+(x.x?" mod":"")+'">'+num+(isPaga?'<span class="cnum-paga" title="Giorno di paga" aria-hidden="true">'+ICON.paga+'</span>':'')+'</span>'+
         '<span class="ctile t-'+(x.t==="?"?"q":x.t)+'">'+tileContent+'</span>'+
-        (pc ? '<span class="ctile p t-'+(pc.t==="?"?"q":pc.t)+'">'+(pc.t==="?" ? "·" : esc(pc.sig))+'</span>' : '')+'</button>';
+        (pc ? '<span class="ctile p t-'+(pc.t==="?"?"q":pc.t)+'">'+pTileContent+'</span>' : '')+'</button>';
     }
     griglia+='</div>';
   }
@@ -8952,15 +8964,16 @@ function ntWidget(){
 // Ricordato finché i dati non cambiano (come gli occupati delle persone): il calendario del ciclo copre 15 mesi, e
 // ricalcolarli a ogni disegno per te e per ogni persona costava più del resto di Turni.
 const _meseMemo=new Map();
-function meseWidget(prima, tot){   // settimane prima di questa e in tutto (settimaneMesi): il widget a mesi interi, il calendario del ciclo di più
+function meseWidget(prima, tot, perWidget){   // settimane prima di questa e in tutto (settimaneMesi): il widget a mesi interi, il calendario del ciclo di più
+  const eWidget = prima===undefined || !!perWidget;
   if(prima===undefined) [prima, tot]=settimaneMesi(...WIDGET_MESI);
-  const k=firmaDati()+"|"+prima+"|"+tot+"|"+idDi(state.ecc)+"."+idDi(state.giorni)+"."+idDi(state.shifts)+"|"+JSON.stringify(tuttePersone())+"|"+state.personaGlance+"|"+state.festiviRiposo;
+  const k=firmaDati()+"|"+prima+"|"+tot+"|"+(eWidget?"w|":"")+idDi(state.ecc)+"."+idDi(state.giorni)+"."+idDi(state.shifts)+"|"+JSON.stringify(tuttePersone())+"|"+state.personaGlance+"|"+state.festiviRiposo;
   if(_meseMemo.has(k)) return _meseMemo.get(k);
   if(_meseMemo.size>6) _meseMemo.clear();
-  const r=calcolaMeseWidget(prima, tot); if(r) _meseMemo.set(k, r);
+  const r=calcolaMeseWidget(prima, tot, eWidget); if(r) _meseMemo.set(k, r);
   return r;
 }
-function calcolaMeseWidget(prima, tot){
+function calcolaMeseWidget(prima, tot, perWidget){
   const f=state.focus;
   try{
     const oggi=giornoVero(), lun=day(oggi, -((oggi.getDay()+6)%7) - 7*prima), N=7*tot;
@@ -8973,10 +8986,29 @@ function calcolaMeseWidget(prima, tot){
       const gs=state.giorni[iso(d)]||{};
       // segni del giorno, come nel calendario dell'app: «f» festivo (giorno rosso), «x» modificato (scambio, orari diversi)
       const segni=(festivoVero(d)?"f":"")+(state.ecc[iso(d)]||gs.s!=null?"x":"");
-      io.push((SIGLA_SPECIALE[gs.t]||c)+":"+(c==="?"?"?":NT.fasciaDelGiorno(0))+(segni?":"+segni:""));
+      let sig=SIGLA_SPECIALE[gs.t]||c;
+      if(perWidget && !gs.t && c!=="?"){
+        const sh=(state.shifts||{})[c];
+        if(sh && sh.icon && SHIFT_WIDGET_MAP[sh.icon]){
+          sig=SHIFT_WIDGET_MAP[sh.icon]+" "+sig;
+        }
+      }
+      io.push(sig+":"+(c==="?"?"?":NT.fasciaDelGiorno(0))+(segni?":"+segni:""));
       scelte.forEach((pi,k)=>{
         let s="?:?";
-        asPartner(()=>{ const pc=NT.codeAt(0); if(pc!=="?") s=pc+":"+NT.fasciaDelGiorno(0); }, tutte[pi]);
+        asPartner(()=>{
+          const pc=NT.codeAt(0);
+          if(pc!=="?"){
+            let psig=pc;
+            if(perWidget){
+              const shp=((tutte[pi]&&tutte[pi].shifts)||{})[pc];
+              if(shp && shp.icon && SHIFT_WIDGET_MAP[shp.icon]){
+                psig=SHIFT_WIDGET_MAP[shp.icon]+" "+pc;
+              }
+            }
+            s=psig+":"+NT.fasciaDelGiorno(0);
+          }
+        }, tutte[pi]);
         p[k].g.push(s);
       });
     }
