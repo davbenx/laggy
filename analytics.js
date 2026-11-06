@@ -53,6 +53,7 @@
 
     return_d1: [],
     return_d7: [],
+    return_d14: [],
     return_d30: [],
 
 
@@ -203,7 +204,7 @@
       }
       var days = Math.round((new Date(today) - new Date(first)) / 86400000);
       var fired = readJSON(LS_RETURNFIRED, {});
-      [[1, "return_d1"], [7, "return_d7"], [30, "return_d30"]].forEach(function (pair) {
+      [[1, "return_d1"], [7, "return_d7"], [14, "return_d14"], [30, "return_d30"]].forEach(function (pair) {
         var threshold = pair[0], event = pair[1];
         if (days >= threshold && !fired[event]) { track(event); fired[event] = true; }
       });

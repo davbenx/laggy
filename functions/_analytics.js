@@ -36,6 +36,7 @@ export const ALLOWED = {
 
   return_d1: [],
   return_d7: [],
+  return_d14: [],
   return_d30: [],
 
 

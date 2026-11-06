@@ -54,6 +54,19 @@ test("ALLOWED lato server coincide con quello di analytics.js", () => {
   assert.deepEqual(ALLOWED, clientAllowed());
 });
 
+test("checkReturns: attiva le pietre miliari d1, d7, d14 e non d30", () => {
+  const d15Ago = new Date(Date.now() - 15 * 86400000).toISOString().slice(0, 10);
+  const { A, store, sent } = loadClient({
+    "nt:analytics-consent": "true",
+    "nt:state": JSON.stringify({ firstSeenAt: d15Ago })
+  });
+  const events = sent.map(b => JSON.parse(b).event);
+  assert.ok(events.includes("return_d1"));
+  assert.ok(events.includes("return_d7"));
+  assert.ok(events.includes("return_d14"));
+  assert.equal(events.includes("return_d30"), false);
+});
+
 test("sanitizeEvent: evento sconosciuto scartato", () => {
   assert.equal(sanitizeEvent({ event: "qualcosa_di_nuovo" }), null);
   assert.equal(sanitizeEvent({ event: "__proto__" }), null);
