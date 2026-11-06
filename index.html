@@ -4992,6 +4992,9 @@ function renderOra(Pfocus){
       : (/caff/i.test(title)) ? ICON.coffee
       : (/insieme/i.test(title)) ? ICON.duo
       : (/pasto/i.test(title)) ? ICON.plate
+      : (/allen/i.test(title) || (A && A.finKey==="intensa")) ? ICON.peso
+      : (/muov/i.test(title) || (A && A.finKey==="leggera")) ? ICON.passo
+      : (/testa|pensar/i.test(title) || (A && A.finKey==="testa")) ? ICON.mente
       : ICON.eye;
   } else if(b.rest){
     title = (A && A.t) ? A.t : "Giorno di riposo";
@@ -5011,9 +5014,9 @@ function renderOra(Pfocus){
   let momenti="";
   if(!isMissing && !isSevere && !inSmonto && !inDuty && !sleeping){
     try{ const fin=finestreDelGiorno(P);
-      if(fin){ const v=[["testa","pensare"],["leggera","muoverti piano"],["intensa","allenarti"]].filter(([k])=>pianoVoce(k) && fin[k] && m>=fin[k].a && m<fin[k].z)
+      if(fin){ const v=[["testa","pensare"],["leggera","muoverti"],["intensa","allenarti"]].filter(([k])=>pianoVoce(k) && fin[k] && m>=fin[k].a && m<fin[k].z)
           .map(([k,verbo])=>verbo+" fino alle "+hhmm(fin[k].z));
-        if(v.length) momenti='<span class="ora-fin">Buon momento per '+esc(v.join(" · "))+'</span>'; } }catch(e){}
+        if(v.length && (!A || !A.finKey)) momenti='<span class="ora-fin">Buon momento per '+esc(v.join(" · "))+'</span>'; } }catch(e){}
   }
   el.innerHTML = '<div class="ora-card' + (accent ? " risk" : "") + '"' + (isMissing ? ' style="cursor:pointer" title="Tocca per inserire il turno di oggi"' : "") + '>' +
     '<div class="ora-h"><span class="ora-ic">' + oraIc + '</span>' +
@@ -6263,14 +6266,14 @@ function adessoLine(P, riferimento){
   try{
     const fin=finestreDelGiorno(P);
     if(fin){
-      const vCorso=[["testa","pensare e studiare"],["leggera","muoverti piano"],["intensa","allenarti"]].find(([k])=>pianoVoce(k) && fin[k] && m>=fin[k].a && m<fin[k].z);
-      if(vCorso) return {t:"Buon momento per "+vCorso[1], s:"fino alle "+hhmm(fin[vCorso[0]].z), fallback:true};
+      const vCorso=[["testa","pensare"],["leggera","muoverti"],["intensa","allenarti"]].find(([k])=>pianoVoce(k) && fin[k] && m>=fin[k].a && m<fin[k].z);
+      if(vCorso) return {t:"Buon momento per "+vCorso[1], s:"Fino alle "+hhmm(fin[vCorso[0]].z), finKey:vCorso[0], fallback:false};
       const vProssimo=[["testa","momento per la testa"],["leggera","momento per muoverti"],["intensa","allenamento"]].find(([k])=>pianoVoce(k) && fin[k] && fin[k].a>m && fin[k].a-m<=45);
-      if(vProssimo) return {t:"Tra poco: "+vProssimo[1], s:"dalle "+hhmm(fin[vProssimo[0]].a)+" alle "+hhmm(fin[vProssimo[0]].z), fallback:true};
+      if(vProssimo) return {t:"Tra poco: "+vProssimo[1], s:"Dalle "+hhmm(fin[vProssimo[0]].a)+" alle "+hhmm(fin[vProssimo[0]].z), finKey:vProssimo[0], fallback:false};
     }
   }catch(e){}
   const napVicino=(P.naps||[]).find(n=>n.a>m && n.a-m<=45);
-  if(napVicino) return {t:"Tra poco: pisolino", s:"dalle "+hhmm(napVicino.a)+" alle "+hhmm(napVicino.b), fallback:true};
+  if(napVicino) return {t:"Tra poco: pisolino", s:"Dalle "+hhmm(napVicino.a)+" alle "+hhmm(napVicino.b), fallback:false};
 
   // "Ora" non deve mai restare vuoto: se non c'è nulla di urgente, dice
   // comunque qualcosa. Il caffè resta in cima perché tocca il sonno di
@@ -6866,7 +6869,10 @@ function renderEssenziale(P, CARDS){
     // «Poi»: il prossimo passo, se «Adesso» non lo dice già
     const card=$("#ora .ora-card");
     if(card && !card.querySelector(".ora-poi")){
-      const cardTimes = (card.textContent.match(/\b\d{1,2}:\d{2}\b/g)||[]).map(t=>{ const [h,min]=t.split(":").map(Number); return h*60+min; });
+      const clone=card.cloneNode(true);
+      const subEl=clone.querySelector(".ora-sub");
+      if(subEl && /\(stima\)/.test(subEl.textContent)) subEl.remove();
+      const cardTimes = (clone.textContent.match(/\b\d{1,2}:\d{2}\b/g)||[]).map(t=>{ const [h,min]=t.split(":").map(Number); return h*60+min; });
       const next=voci.find(v=>{
         if(!eVoce(v) || /^<div class="tl[^"]*\b(past|ora)\b/.test(v.html)) return false;
         const a=+dammi(v,"a"), testo=dammi(v,"poi");
@@ -8968,11 +8974,11 @@ function renderPianoVoci(){
   el.innerHTML='<label class="riga-sw pv-ess" for="pv-_essenziale"><span><b>Piano essenziale</b><small>Solo sonno, turno, pisolino, caffè, rientro e luce: il resto si nasconde</small></span>'+
     '<span class="switch"><input type="checkbox" id="pv-_essenziale" data-pv="_essenziale"'+(essenziale?" checked":"")+'><span class="slider"></span></span></label>'+
     comuni.map(riga).join("")+
-    '<details class="pv-momenti"'+(accesi.length?" open":"")+'><summary><span><b>Momenti migliori</b><small>'+(accesi.length?esc(accesi.join(", ")):"Quando pensare, muoverti o allenarti: spenti")+'</small></span></summary>'+
+    '<details class="pv-momenti"><summary><span><b>Momenti migliori</b><small>'+(accesi.length?esc(accesi.join(", ")):"Quando pensare, muoverti o allenarti: spenti")+'</small></span></summary>'+
     momenti.map(v=>riga(v)+(pianoVoce(v[0]) ? quandoHtml(v[0]) : "")).join("")+'</details>';
   const elLaggy=$("#opzLaggy");
   if(elLaggy){
-    elLaggy.innerHTML='<label class="riga-sw" for="pv-laggy"><span><b>Laggy</b><small>La tartaruga che cresce man mano che annoti le tue notti</small></span>'+
+    elLaggy.innerHTML='<label class="riga-sw" for="pv-laggy"><span><b>Laggy</b><small>Il gufo che cresce man mano che annoti le tue notti</small></span>'+
       '<span class="switch"><input type="checkbox" id="pv-laggy" data-pv-laggy'+(pianoVoce("laggy")?" checked":"")+'><span class="slider"></span></span></label>';
   }
 }
