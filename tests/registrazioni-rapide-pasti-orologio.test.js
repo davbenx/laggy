@@ -109,3 +109,34 @@ test("alertness: calibraFaseEnergia con pochi voti vs con voti sufficienti", () 
   const alertShift = alertness({ ...base, faseOffset: 30 });
   assert.notEqual(alertBase.now.value, alertShift.now.value, "lo scostamento di fase calibra il livello di vigilanza percepita");
 });
+
+test("alertness: pressione del sonno residua (Åkerstedt & Folkard TPMA)", () => {
+  const d = (h, m = 0) => new Date(2026, 10, 8, h, m);
+  const base = { now: d(12), freeWake: "07:30", freeBed: "23:30", lastSleepEnd: d(7), nextSleepStart: d(23), nadir: 330 };
+
+  // 1. Sonno pieno (8 ore): nessuna pressione residua, calo e picco identici al default
+  const aDefault = alertness(base);
+  const aPieno = alertness({ ...base, lastSleepDur: 480 });
+  assert.equal(aPieno.residualPressure, 0, "con sonno normale la pressione residua S0 è 0");
+  assert.equal(aPieno.now.value, aDefault.now.value, "l'allerta con sonno pieno coincide con il default");
+  if (aDefault.risk && aPieno.risk) {
+    assert.equal(aPieno.risk.hhmm, aDefault.risk.hhmm, "calo nello stesso identico orario");
+    assert.equal(aPieno.risk.value, aDefault.risk.value, "intensità del calo identica");
+  }
+
+  // 2. Sonno ridotto a 4 ore (tipico sonno diurno post-notte):
+  // La pressione residua permane e l'allerta cala prima e più intensamente
+  const aCorto = alertness({ ...base, lastSleepDur: 240 });
+  assert.ok(aCorto.residualPressure > 0.15, "S0 residuo positivo: " + aCorto.residualPressure);
+  assert.ok(aCorto.now.value < aPieno.now.value, "l'allerta al momento attuale è inferiore dopo 4h di sonno");
+  if (aCorto.risk && aPieno.risk) {
+    assert.ok(aCorto.risk.value < aPieno.risk.value, "la stanchezza al punto di calo è più profonda");
+  }
+
+  // 3. Sonno ridotto (4h) vs Sonno ridotto + pisolino (4h + 90 min = 5.5h):
+  // Il recupero aggiuntivo riduce la pressione residua
+  const aPisolino = alertness({ ...base, lastSleepDur: 330 });
+  assert.ok(aPisolino.residualPressure < aCorto.residualPressure, "il pisolino riduce la pressione residua rispetto a sole 4 ore");
+  assert.ok(aPisolino.now.value > aCorto.now.value, "l'allerta migliora grazie al pisolino");
+});
+

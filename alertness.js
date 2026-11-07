@@ -80,8 +80,14 @@ export function alertness(opts) {
   const rawHorizon = opts.nextSleepStart ? opts.nextSleepStart.getTime() - 60 * 60000 : now.getTime() + 16 * 3600e3;
   const horizon = Math.max(rawHorizon, now.getTime() + 60 * 60000);
 
+  // Modello a tre processi (Åkerstedt & Folkard 1995/1997): decadimento esponenziale in sonno (tau = 4.2 h).
+  // Se la durata del sonno precedente è inferiore al fabbisogno (di norma 7.5–8 h), permane una pressione residua S0.
+  const durH = Number.isFinite(opts.lastSleepDur) ? (opts.lastSleepDur > 24 ? opts.lastSleepDur / 60 : opts.lastSleepDur) : null;
+  const needH = Number.isFinite(opts.need) ? (opts.need > 24 ? opts.need / 60 : opts.need) : 7.5;
+  const S0 = (durH != null && durH < needH) ? Math.max(0, Math.min(0.85, ((Math.exp(-durH / 4.2) - Math.exp(-needH / 4.2)) / (1 - Math.exp(-needH / 4.2))) * 0.85)) : 0;
+
   const C = min => ritmo24(min, wake) + ritmo12(min, wake);
-  const S = tMs => 1 - Math.exp(-Math.max(0, (tMs - lastEnd) / 3600e3) / 8); // pressione del sonno
+  const S = tMs => 1 - (1 - S0) * Math.exp(-Math.max(0, (tMs - lastEnd) / 3600e3) / 8); // pressione del sonno con residuo al risveglio
   const A = tMs => C(minOf(new Date(tMs))) - 1.1 * S(tMs);                   // allerta netta
 
   // Il calo e il picco sono veri punti di svolta della curva (più bassa/alta dei punti vicini, 45 minuti prima
@@ -113,7 +119,8 @@ export function alertness(opts) {
     now: { level: aNow > 0.2 ? "alta" : aNow < -0.35 ? "bassa" : "media", value: +aNow.toFixed(3) },
     risk: riskT != null ? { at: new Date(riskT), value: +riskV.toFixed(3), severe: riskV < -0.6, hhmm: hhmm(new Date(riskT)) } : null,
     peak: peakFuture ? { at: new Date(peakT), value: +peakV.toFixed(3), hhmm: hhmm(new Date(peakT)) } : null,
-    hoursAwakeAtRisk: riskT != null ? Math.round((riskT - lastEnd) / 3600e3) : null
+    hoursAwakeAtRisk: riskT != null ? Math.round((riskT - lastEnd) / 3600e3) : null,
+    residualPressure: +S0.toFixed(3)
   };
 }
 
@@ -122,7 +129,7 @@ export function alertness(opts) {
 // con le regole del buon senso (non appena svegli, non subito dopo i pasti, non a ridosso del sonno,
 // non durante il turno). Nessun dato biologico: solo i tuoi orari. Minuti sulla scala del giorno guardato.
 // inp: { wake, sleepOnset, fase (minuto del minimo corporeo, opzionale), freeWake,
-//        occupato:[[a,z]...] (turno con viaggio, sonni, pisolini), pasti:[{at, lt}] }
+//        occupato:[[a,z]...] (turno con viaggio, sonni, pisolini), pasti:[{at, lt}], lastSleepDur, need }
 const FIN = {
   testa:   { lungo: 90, dopoSveglia: 90,  primaSonno: 120, dopoPasto: [0, 60],  dopoPastoLt: [0, 30] },
   leggera: { lungo: 45, dopoSveglia: 45,  primaSonno: 60,  dopoPasto: [0, 30],  dopoPastoLt: [0, 20] },
@@ -135,7 +142,10 @@ export function finestreAttivita(inp) {
   const w0 = inp.wake, w1 = inp.sleepOnset;
   const out = { testa: null, leggera: null, intensa: null };
   if (!isFinite(w0) || !isFinite(w1) || w1 <= w0) return out;
-  const S = m => 1 - Math.exp(-Math.max(0, (m - w0) / 60) / 8);
+  const durH = Number.isFinite(inp.lastSleepDur) ? (inp.lastSleepDur > 24 ? inp.lastSleepDur / 60 : inp.lastSleepDur) : null;
+  const needH = Number.isFinite(inp.need) ? (inp.need > 24 ? inp.need / 60 : inp.need) : 7.5;
+  const S0 = (durH != null && durH < needH) ? Math.max(0, Math.min(0.85, ((Math.exp(-durH / 4.2) - Math.exp(-needH / 4.2)) / (1 - Math.exp(-needH / 4.2))) * 0.85)) : 0;
+  const S = m => 1 - (1 - S0) * Math.exp(-Math.max(0, (m - w0) / 60) / 8);
   const A = m => ritmo24(((m % 1440) + 1440) % 1440, fw) + ritmo12(((m % 1440) + 1440) % 1440, fw) - 1.1 * S(m);
   const F = m => 0.8 * ritmo24(((m % 1440) + 1440) % 1440, fw) + 0.2 * A(m);   // forza e coordinazione seguono soprattutto il ritmo della temperatura
   const occ = (inp.occupato || []).filter(x => x && isFinite(x[0]) && isFinite(x[1]));
@@ -173,7 +183,8 @@ export function finestreDelPiano(P, cfg) {
   const b = P.b, occupato = [];
   if (b && !b.rest && isFinite(b.start) && isFinite(b.end)) occupato.push([b.start - prep - cTo, b.end + cFrom]);
   for (const n of (P.naps || [])) occupato.push([n.a, n.b]);
-  return finestreAttivita({ wake: P.wake, sleepOnset: P.s.onset, fase: P.cbt, freeWake: c.freeWake, occupato, pasti: P.meals || [], quando: (c.piano || {}).quando });
+  const lastSleepDur = P.sp && isFinite(P.sp.dur) ? P.sp.dur : (c.need || 480);
+  return finestreAttivita({ wake: P.wake, sleepOnset: P.s.onset, fase: P.cbt, freeWake: c.freeWake, occupato, pasti: P.meals || [], quando: (c.piano || {}).quando, lastSleepDur, need: c.need });
 }
 
 // ─────────── integrazione GRATIS nella pagina (guardata: se manca il ponte, non fa nulla) ───────────

@@ -5043,6 +5043,18 @@ function renderOra(Pfocus){
   try{ if(window.NTAlert){
     const todayIso = iso(vero);
     const todayWake = wakes[todayIso];
+    const todayBed = state.beds[todayIso];
+    let lastSleepDur = null;
+    if(todayWake && todayBed && /^(\d{1,2}):(\d{2})$/.test(todayWake) && /^(\d{1,2}):(\d{2})$/.test(todayBed)){
+      lastSleepDur = ((t(todayWake) - t(todayBed)) % 1440 + 1440) % 1440;
+    } else if(Array.isArray(state.hcSonno) && lastEnd){
+      const tEnd = lastEnd.getTime();
+      const hcMatch = state.hcSonno.find(v => Array.isArray(v) && Math.abs(v[1] - tEnd) <= 90 * 60e3);
+      if(hcMatch) lastSleepDur = (hcMatch[1] - hcMatch[0]) / 60e3;
+    }
+    if(!lastSleepDur && P.sp && isFinite(P.sp.dur) && P.sp.dur > 0){
+      lastSleepDur = P.sp.dur;
+    }
     if(todayWake && /^(\d{1,2}):(\d{2})$/.test(todayWake)){
       const [h, min] = todayWake.split(":").map(Number);
       lastEnd = new Date(vero.getFullYear(), vero.getMonth(), vero.getDate(), h, min);
@@ -5074,7 +5086,7 @@ function renderOra(Pfocus){
     const midnight=new Date(vero.getFullYear(),vero.getMonth(),vero.getDate());
     const nextSleep=(P.s&&typeof P.s.onset==="number")?new Date(midnight.getFullYear(),midnight.getMonth(),midnight.getDate(),0,P.s.onset):null;   // con il calendario: giusto anche nei giorni del cambio d'ora
     const cal = calibrazioneEnergia(P.cbt);
-    r=window.NTAlert.alertness({now, freeWake:state.freeWake, freeBed:state.freeBed, lastSleepEnd:lastEnd, nextSleepStart:nextSleep, nadir:P.cbt, faseOffset:cal.faseOffset});
+    r=window.NTAlert.alertness({now, freeWake:state.freeWake, freeBed:state.freeBed, lastSleepEnd:lastEnd, lastSleepDur, need:state.need, nextSleepStart:nextSleep, nadir:P.cbt, faseOffset:cal.faseOffset});
     _stimaOra={livello:r && r.now ? r.now.level : "", fonte:(P.orologio||{}).fonte||"", giorno:iso(state.focus), calibrazione:cal.solido};
   } }catch(e){}
 
@@ -8094,7 +8106,7 @@ function orologio(){
     const d=new Date(); d.setHours(0,0,0,0);
     const sv=new Date(+d+wake*6e4), letto=new Date(+d+(bed>wake?bed:bed+1440)*6e4);
     const cal = calibrazioneEnergia(cbt);
-    const r=window.NTAlert.alertness({now:sv, freeWake:hhmm(wake), freeBed:state.freeBed, lastSleepEnd:sv, nextSleepStart:letto, nadir:cbt, faseOffset:cal.faseOffset});
+    const r=window.NTAlert.alertness({now:sv, freeWake:hhmm(wake), freeBed:state.freeBed, lastSleepEnd:sv, lastSleepDur:sdF, need:state.need, nextSleepStart:letto, nadir:cbt, faseOffset:cal.faseOffset});
     if(r && r.peak) lucido=r.peak.hhmm;
   } }catch(e){}
   return {tipo, h, mid, msf:msfsc, recupero: corr && sdF>sdMedia+15, liberiDiario: lp ? lp.n : 0, cbt, mel:mod1440(bed-120), lucido, partenza: state.freeBed==="23:30" && state.freeWake==="07:30"};
