@@ -26,13 +26,52 @@ const hhmm = d => {
 const ritmo24 = (min, wake) => 0.7 * Math.cos(2 * Math.PI * (min - (wake + 540) % 1440) / 1440);
 const ritmo12 = (min, wake) => 0.5 * Math.cos(2 * Math.PI * (min - (wake + 180) % 1440) / 720);
 
-// opts: { now:Date, freeWake, freeBed, lastSleepEnd:Date|null, nextSleepStart:Date|null, nadir?:minuti }
+// Taratura della fase circadiana dai voti sull'energia (ciclo chiuso senza wearable):
+// Con abbastanza voti (almeno 6) registrati con timestamp, calcola lo scostamento
+// circadiano (-45..+45 min) che massimizza la concordanza fra l'energia percepita e
+// l'allerta stimata. Con meno voti: 0 min (nessun effetto).
+export function calibraFaseEnergia(voti, opts = {}) {
+  if (!Array.isArray(voti) || voti.length < 6) return { faseOffset: 0, nVoti: (voti || []).length, solido: false };
+  const fw = parseHM(opts.freeWake) != null ? parseHM(opts.freeWake) : 450;
+  const nadirRef = Number.isFinite(opts.nadir) ? ((Math.round(opts.nadir) % 1440) + 1440) % 1440 : ((fw - 180) % 1440 + 1440) % 1440;
+  const wakeRef = nadirRef + 180;
+
+  // Candidati di scostamento della fase: da -60 a +60 minuti con passo 15 min
+  const candidati = [-60, -45, -30, -15, 0, 15, 30, 45, 60];
+  let bestShift = 0, minErr = Infinity;
+
+  for (const shift of candidati) {
+    const w = wakeRef + shift;
+    let errTot = 0, count = 0;
+    for (const item of voti) {
+      if (!item || typeof item.voto !== "number" || !item.at) continue;
+      const v = Math.min(5, Math.max(1, item.voto));
+      const yNorm = (v - 3) / 2;
+      const dt = new Date(item.at);
+      const min = dt.getHours() * 60 + dt.getMinutes();
+      const predC = ritmo24(min, w) + ritmo12(min, w);
+      errTot += Math.pow(yNorm - predC, 2);
+      count++;
+    }
+    if (count >= 6 && errTot < minErr) {
+      minErr = errTot;
+      bestShift = shift;
+    }
+  }
+
+  // Smorzamento prudente (massimo 45 minuti) per evitare oscillazioni repentine
+  const faseOffset = Math.max(-45, Math.min(45, Math.round(bestShift * 0.75 / 15) * 15));
+  return { faseOffset, nVoti: voti.length, solido: true };
+}
+
+// opts: { now:Date, freeWake, freeBed, lastSleepEnd:Date|null, nextSleepStart:Date|null, nadir?:minuti, faseOffset?:minuti }
 // nadir: il minimo corporeo del motore (il modello dell'orologio, P.cbt): il ritmo si centra lì, così la vigilanza e il
 // piano dicono la stessa ora. Senza, si stima dalla sveglia libera.
 export function alertness(opts) {
   const now = opts.now || new Date();
   const fw = parseHM(opts.freeWake) != null ? parseHM(opts.freeWake) : 450;   // 07:30
-  const nadir = Number.isFinite(opts.nadir) ? ((Math.round(opts.nadir) % 1440) + 1440) % 1440 : ((fw - 180) % 1440 + 1440) % 1440;
+  const faseOffset = Number.isFinite(opts.faseOffset) ? opts.faseOffset : 0;
+  const nadir = Number.isFinite(opts.nadir) ? ((Math.round(opts.nadir + faseOffset) % 1440) + 1440) % 1440 : (((fw - 180 + faseOffset) % 1440 + 1440) % 1440);
   const wake = nadir + 180;   // il ritmo a due armoniche ha il fondo 3 h prima di questo riferimento (senza nadir: la sveglia libera)
 
   const lastEnd = opts.lastSleepEnd ? opts.lastSleepEnd.getTime() : now.getTime() - 6 * 3600e3;
@@ -143,7 +182,7 @@ export function finestreDelPiano(P, cfg) {
 // un re-render così il core può usarla (il modulo arriva dopo il primo render).
 try {
   if (typeof window !== "undefined") {
-    window.NTAlert = { alertness, finestreAttivita, finestreDelPiano };
+    window.NTAlert = { alertness, finestreAttivita, finestreDelPiano, calibraFaseEnergia };
     var _k = function () { try { window.dispatchEvent(new Event("nt:refresh")); } catch (e) {} };
     if (document.readyState === "loading") window.addEventListener("DOMContentLoaded", _k);
     else setTimeout(_k, 0);

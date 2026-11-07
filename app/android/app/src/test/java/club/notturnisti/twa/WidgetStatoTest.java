@@ -132,4 +132,32 @@ public class WidgetStatoTest {
         assertTrue("prima del cambio di pulsante o dell'inizio del turno", s.prossimoCambio <= t(0, 22, 0));
         assertTrue(s.rinfresco > t(0, 20, 43));
     }
+
+    @Test public void azioniRapidePreso() throws Exception {
+        // Caffeina: dalle 18:30 (s - 60 min) alle 21:00 (s + 90 min) se il caffè è alle 19:30
+        JSONObject pCaffe = piano(null, voce(t(0, 19, 30), t(0, 19, 45), "Ultimo caffè", "caffe"));
+        WidgetStato sCaffe = WidgetStato.calcola(pCaffe, VUOTO, t(0, 19, 0));
+        assertEquals(WidgetStato.Azione.PRESO_CAFFE, sCaffe.azione);
+        assertEquals("Caffè · Preso ✓", sCaffe.testoAzione);
+        assertEquals("caffe", sCaffe.tipoPreso);
+
+        // Se già preso, l'azione non si ripete
+        JSONObject rispCaffe = new JSONObject().put("2026-10-24", new JSONObject().put("caffe", System.currentTimeMillis()));
+        WidgetStato sGiaPreso = WidgetStato.calcola(pCaffe, rispCaffe, t(0, 19, 0));
+        assertNotEquals(WidgetStato.Azione.PRESO_CAFFE, sGiaPreso.azione);
+
+        // Luce: da 30 min prima a 120 min dopo
+        JSONObject pLuce = piano(null, voce(t(0, 10, 0), t(0, 10, 30), "Luce", "luce"));
+        WidgetStato sLuce = WidgetStato.calcola(pLuce, VUOTO, t(0, 10, 15));
+        assertEquals(WidgetStato.Azione.PRESO_LUCE, sLuce.azione);
+        assertEquals("Luce · Presa ✓", sLuce.testoAzione);
+        assertEquals("luce", sLuce.tipoPreso);
+
+        // Pasto: da 30 min prima a 180 min dopo
+        JSONObject pPasto = piano(null, voce(t(0, 13, 0), t(0, 13, 45), "Finestra dei pasti", "pasti"));
+        WidgetStato sPasto = WidgetStato.calcola(pPasto, VUOTO, t(0, 13, 15));
+        assertEquals(WidgetStato.Azione.PRESO_PASTO, sPasto.azione);
+        assertEquals("Pasto · Preso ✓", sPasto.testoAzione);
+        assertEquals("pasto", sPasto.tipoPreso);
+    }
 }

@@ -34,6 +34,7 @@ export const TIPI = [
   { k: "luce",     nome: "Luce del mattino",         desc: "Quando prendere luce per tenere l'orologio del corpo al passo",                               essenziale: false, canale: "luce" },
   { k: "momenti",  nome: "Momenti buoni",            desc: "All'inizio di un momento per la testa, per muoverti o per allenarti: solo quelli che accendi in «Cosa vedi nel piano»", essenziale: false, canale: "momenti" },
   { k: "paga",     nome: "Giorno di paga",           desc: "La mattina del giorno di paga impostato",                                essenziale: false, canale: "suggerimenti" },
+  { k: "pasti",    nome: "Finestra dei pasti",       desc: "Quando mangiare nei giorni di turno per digerire meglio e non appesantirti prima del riposo", essenziale: false, canale: "suggerimenti" },
   { k: "wake",     nome: "Ora di alzarti",           desc: "Fine del sonno pianificato. Non è una sveglia: per quella c'è la sveglia del telefono (nell'app Android, «Metti la sveglia» in Dormi)", essenziale: false, canale: "sveglie" },
   { k: "settimana",nome: "La tua settimana",         desc: "La domenica sera, i turni dei prossimi 7 giorni",                        essenziale: false, canale: "suggerimenti" },
   // Questi due li prepara index.html (servono il diario e le impostazioni),
@@ -50,7 +51,7 @@ export const TIPI_TUTTI = TIPI.map(t => t.k);
 // cancellava il primo).
 const KIND = { bedtime: 1, wake: 2, nap: 3, coffee: 4, ret: 5, prep: 6, cambio: 7, domani: 8, luce: 9, settimana: 0 };
 // Priorità quando un giorno ne avrebbe troppe (si tengono le prime).
-const PRIO = ["cambio", "ret", "rischio", "bedtime", "domani", "nap", "coffee", "prep", "luce", "wake", "settimana", "paga", "momenti"];
+const PRIO = ["cambio", "ret", "rischio", "bedtime", "domani", "nap", "coffee", "prep", "luce", "pasti", "wake", "settimana", "paga", "momenti"];
 // «momenti»: tre al giorno al massimo, in una fascia di id sua (come «rischio»), fra 970000 e 979999
 const MOMENTI = [["testa", "Buon momento per pensare", "la testa"], ["leggera", "Buon momento per muoverti", "il movimento leggero"], ["intensa", "Buon momento per allenarti", "l'allenamento"]];
 const MAX_AL_GIORNO = 4, UNISCI_ENTRO = 20 * MIN;
@@ -65,6 +66,7 @@ export function buildSchedule(config, opts = {}) {
     types = TIPI_ESSENZIALI
   } = opts;
 
+  const pianoCfg = (opts && opts.piano) || (config && config.piano);
   const e = createEngine(config);
   const f0 = e.state.focus;
   const now = Date.now();
@@ -77,8 +79,8 @@ export function buildSchedule(config, opts = {}) {
     const dayIdx = Math.round((localMidnight(base) - localMidnight(f0)) / (1440 * MIN));
     const k = dayIdx + ":" + kind, n = seq[k] = (seq[k] || 0) + 1;   // contato anche se nel passato: id stabili
     if (when.getTime() <= now) return;            // solo futuro
-    // "rischio", "momenti", "paga" non hanno una cifra libera in KIND (0–9 usate): fascie di id dedicate
-    const id = kind === "rischio" ? 980000 + (dayIdx + 1) * 10 + (n - 1) : kind === "momenti" ? 970000 + (dayIdx + 1) * 10 + (n - 1) : kind === "paga" ? 960000 + (dayIdx + 1) * 10 + (n - 1) : dayIdx * 100 + KIND[kind] * 10 + (n - 1);
+    // "rischio", "momenti", "paga", "pasti" non hanno una cifra libera in KIND (0–9 usate): fascie di id dedicate
+    const id = kind === "rischio" ? 980000 + (dayIdx + 1) * 10 + (n - 1) : kind === "momenti" ? 970000 + (dayIdx + 1) * 10 + (n - 1) : kind === "paga" ? 960000 + (dayIdx + 1) * 10 + (n - 1) : kind === "pasti" ? 950000 + (dayIdx + 1) * 10 + (n - 1) : dayIdx * 100 + KIND[kind] * 10 + (n - 1);
     out.push({ id, kind, title, body, at: when, extra });
   };
   const fb = /^(\d\d):(\d\d)$/.exec(String(e.state.freeBed || "23:30"));
@@ -176,15 +178,23 @@ export function buildSchedule(config, opts = {}) {
         "Inizio alle " + hhmm(at(mid, P.b.start)) + ".");
 
     // I momenti buoni: all'inizio di quelli che la persona ha acceso nel piano (mai da soli: serve l'interruttore).
-    if (want("momenti") && P.s.dur > 0 && config.piano) {
-      const fin = finestreDelPiano(P, config);
-      for (const [k, titolo, cosa] of MOMENTI) { const w = fin[k]; if (config.piano[k] !== true || !w) continue;
+    if (want("momenti") && P.s.dur > 0 && pianoCfg) {
+      const fin = finestreDelPiano(P, Object.assign({}, config, { piano: pianoCfg }));
+      for (const [k, titolo, cosa] of MOMENTI) { const w = fin[k]; if (pianoCfg[k] !== true || !w) continue;
         push(base, w.a, "momenti", titolo, "Dalle " + hhmm(at(mid, w.a)) + " alle " + hhmm(at(mid, w.z)) + ": " + cosa + ". Una stima dai tuoi orari.", { tab: "oggi" }); }
     }
 
     if (want("luce") && !P.night)
       push(base, P.wake + 15, "luce", "Luce del mattino",
         "Esci o apri le tende entro un'ora: la luce del mattino aiuta a tenere l'orologio del corpo al passo.");
+
+    if (want("pasti") && (!pianoCfg || pianoCfg.pasti !== false) && P.meals && P.meals.length) {
+      const mm = P.meals.find(m => m.main) || P.meals[1] || P.meals[0];
+      const ini = P.night ? (P.meals[0] ? P.meals[0].at : mm.at) : (P.meals[0] ? P.meals[0].at : (mm.at - 240));
+      const fin = P.night ? (P.meals[1] ? P.meals[1].at : (mm.at + 300)) : (P.meals[2] ? P.meals[2].at : (mm.at + 240));
+      push(base, ini, "pasti", "Finestra dei pasti",
+        "Mangia fra le " + hhmm(at(mid, ini)) + " e le " + hhmm(at(mid, fin)) + ": mangiare a orari stabili e chiudere prima del riposo aiuta la digestione.", { tab: "oggi" });
+    }
 
     // Domani cambi turno: il giorno prima di un cambio che chiede di
     // spostare il sonno (a letto presto) o di prepararsi a una notte.

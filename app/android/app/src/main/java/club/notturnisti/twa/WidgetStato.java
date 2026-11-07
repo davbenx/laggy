@@ -18,7 +18,7 @@ import org.json.JSONObject;
  *   SONNO / PISOLINO           più in anticipo: a che ora si va a letto / si fa il pisolino (apre il giorno nell'app)
  */
 final class WidgetStato {
-    enum Azione { NESSUNA, VOTO_SONNO, VOTO_ENERGIA, SVEGLIA, SONNO, PISOLINO }
+    enum Azione { NESSUNA, VOTO_SONNO, VOTO_ENERGIA, SVEGLIA, SONNO, PISOLINO, PRESO_CAFFE, PRESO_LUCE, PRESO_PASTO }
 
     static final class Evento {
         final String ora, titolo, chip, icona; final long s;
@@ -33,6 +33,7 @@ final class WidgetStato {
     final List<Evento> eventi = new ArrayList<>();       // già in ordine di ora, al più MAX_VOCI
     Azione azione = Azione.NESSUNA;
     String testoAzione = "";
+    String tipoPreso = "";                               // per PRESO_CAFFE, PRESO_LUCE, PRESO_PASTO ("caffe"|"luce"|"pasto")
     int oraSveglia = -1, minSveglia = -1;                // per SVEGLIA
     String giornoAzione = "";                            // AAAA-MM-GG da aprire nell'app (SONNO, PISOLINO)
     JSONObject diario;                                   // per i voti: {d, bed, wake}
@@ -80,7 +81,7 @@ final class WidgetStato {
 
     private static String tipoIcona(String k) {
         if (k == null) return "libero";
-        for (String p : new String[]{ "sonno", "pisolino", "turno", "caffe", "luce", "rientro" }) if (k.startsWith(p)) return p;
+        for (String p : new String[]{ "sonno", "pisolino", "turno", "caffe", "luce", "rientro", "pasti", "pasto" }) if (k.startsWith(p)) return p;
         return "libero";
     }
 
@@ -172,17 +173,59 @@ final class WidgetStato {
                 testoAzione = "Metti la sveglia · " + hhmm(usata.getLong("e"));
                 cambio(usata.getLong("s") + 30 * MIN, ora);
             } else {
-                // il primo che comincia fra sonno e pisolino
-                if (sonnoInfo != null && (pisolinoInfo == null || sonnoInfo.getLong("s") <= pisolinoInfo.getLong("s"))) { usata = sonnoInfo; azione = Azione.SONNO; testoAzione = "A letto " + hhmm(usata.getLong("s")) + " → " + hhmm(usata.getLong("e")); }
-                else if (pisolinoInfo != null) { usata = pisolinoInfo; azione = Azione.PISOLINO; testoAzione = "Pisolino " + hhmm(usata.getLong("s")) + " → " + hhmm(usata.getLong("e")); }
-                // il giorno dell'app: un sonno che comincia dopo la mezzanotte (fino alle 04:30) è ancora la notte del giorno prima
-                if (usata != null) giornoAzione = iso(usata.getLong("s") - 270 * MIN);
+                // Azioni veloci (caffeina, luce, pasto): se c'è una finestra attiva/imminente non ancora registrata oggi
+                String dOggi = iso(ora);
+                JSONObject rOggi = risposte.optJSONObject(dOggi);
+                JSONObject rapida = null;
+                String tipoRapida = null;
+                for (int i = 0; i < v.length(); i++) {
+                    JSONObject x = v.getJSONObject(i);
+                    long s = x.getLong("s");
+                    String k = x.optString("k", "");
+                    if (e(x, "caffe")) {
+                        if (ora >= s - 60 * MIN && ora <= s + 90 * MIN && (rOggi == null || !rOggi.has("caffe"))) {
+                            rapida = x; tipoRapida = "caffe"; break;
+                        }
+                    } else if (e(x, "luce")) {
+                        if (ora >= s - 30 * MIN && ora <= s + 120 * MIN && (rOggi == null || !rOggi.has("luce"))) {
+                            rapida = x; tipoRapida = "luce"; break;
+                        }
+                    } else if (k.startsWith("pasti") || k.startsWith("pasto")) {
+                        if (ora >= s - 30 * MIN && ora <= s + 180 * MIN && (rOggi == null || !rOggi.has("pasto"))) {
+                            rapida = x; tipoRapida = "pasto"; break;
+                        }
+                    }
+                }
+                if (rapida != null) {
+                    usata = rapida;
+                    giornoAzione = dOggi;
+                    tipoPreso = tipoRapida;
+                    if ("caffe".equals(tipoRapida)) {
+                        azione = Azione.PRESO_CAFFE; testoAzione = "Caffè · Preso ✓";
+                    } else if ("luce".equals(tipoRapida)) {
+                        azione = Azione.PRESO_LUCE; testoAzione = "Luce · Presa ✓";
+                    } else {
+                        azione = Azione.PRESO_PASTO; testoAzione = "Pasto · Preso ✓";
+                    }
+                    cambio(rapida.getLong("s") + 90 * MIN, ora);
+                } else if (sonnoInfo != null && (pisolinoInfo == null || sonnoInfo.getLong("s") <= pisolinoInfo.getLong("s"))) {
+                    usata = sonnoInfo; azione = Azione.SONNO; testoAzione = "A letto " + hhmm(usata.getLong("s")) + " → " + hhmm(usata.getLong("e"));
+                } else if (pisolinoInfo != null) {
+                    usata = pisolinoInfo; azione = Azione.PISOLINO; testoAzione = "Pisolino " + hhmm(usata.getLong("s")) + " → " + hhmm(usata.getLong("e"));
+                }
+                if (usata != null && azione != Azione.PRESO_CAFFE && azione != Azione.PRESO_LUCE && azione != Azione.PRESO_PASTO) {
+                    giornoAzione = iso(usata.getLong("s") - 270 * MIN);
+                }
             }
             // quando cambia il pulsante: 4 ore prima del sonno (o mezz'ora prima del pisolino) e quando comincia
             for (int i = 0; i < v.length(); i++) {
                 JSONObject x = v.getJSONObject(i); long s = x.getLong("s");
+                String k = x.optString("k", "");
                 if (e(x, "sonno")) { cambio(s - 12 * ORA, ora); cambio(s - 4 * ORA, ora); cambio(s + 30 * MIN, ora); }
                 else if (e(x, "pisolino")) { cambio(s - 3 * ORA, ora); cambio(s - 30 * MIN, ora); }
+                else if (e(x, "caffe")) { cambio(s - 60 * MIN, ora); cambio(s + 90 * MIN, ora); }
+                else if (e(x, "luce")) { cambio(s - 30 * MIN, ora); cambio(s + 120 * MIN, ora); }
+                else if (k.startsWith("pasti") || k.startsWith("pasto")) { cambio(s - 30 * MIN, ora); cambio(s + 180 * MIN, ora); }
             }
         }
 

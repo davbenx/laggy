@@ -229,19 +229,25 @@ const CANALI = [
   { id: "promemoria",   name: "Prova e altri avvisi",      importance: 3 }
 ];
 const CANALE_DI = { cambio: "turni", domani: "turni", prep: "turni", ret: "sicurezza", rischio: "sicurezza", bedtime: "sonno", coffee: "caffe",
-  nap: "pisolini", luce: "luce", momenti: "momenti", wake: "sveglie", settimana: "suggerimenti", tip: "suggerimenti",
+  nap: "pisolini", luce: "luce", momenti: "momenti", pasti: "suggerimenti", wake: "sveglie", settimana: "suggerimenti", tip: "suggerimenti",
   diario: "diario", consigli: "suggerimenti" };
 let _channels = false;
 // Pulsanti nella notifica: solo dove un tocco basta a fare la cosa.
 // «Come hai dormito?» → «Come previsto» registra gli orari del piano (con
-// Annulla subito dopo), «Altri orari» apre il modulo. Il tocco sulla
-// notifica fa come «Altri orari».
-const AZIONI_DI = { diario: "diario" };
+// Annulla subito dopo), «Altri orari» apre il modulo.
+// Caffeina, luce e pasti → «Preso ✓» registra subito l'attività con orario corrente.
+const AZIONI_DI = { diario: "diario", coffee: "quick_preso", luce: "quick_preso", pasti: "quick_preso" };
 let _azioni = false;
 async function ensureAzioni(LN) {
   if (_azioni) return;
-  try { await LN.registerActionTypes({ types: [{ id: "diario", actions: [
-    { id: "previsto", title: "Come previsto" }, { id: "altri", title: "Altri orari" } ] }] }); } catch (e) {}
+  try {
+    await LN.registerActionTypes({
+      types: [
+        { id: "diario", actions: [ { id: "previsto", title: "Come previsto" }, { id: "altri", title: "Altri orari" } ] },
+        { id: "quick_preso", actions: [ { id: "preso", title: "Preso ✓" } ] }
+      ]
+    });
+  } catch (e) {}
   _azioni = true;
 }
 async function ensureChannels(LN) {

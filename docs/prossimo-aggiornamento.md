@@ -33,10 +33,10 @@ Fatto nella 1.1.1 (non serve più): tolto il vecchio wizard nascosto; suggerimen
   - in Turni e in «Tempo libero» compaiono come fasce «occupato»; nel piano una riga avvisa se un impegno cade nel sonno o nel pisolino, senza spostarlo da solo;
   - serve il permesso `READ_CALENDAR`: aggiornare informativa privacy e dichiarazioni Play;
   - prima guardare se gli «impegni» inseriti a mano vengono usati.
-- [ ] **Registrazioni veloci** (caffeina, pasto, luce presa) anche dal widget e dalle notifiche («Preso ✓»).
-- [ ] **Finestra dei pasti** come voce facoltativa («mangia fra le X e le Y»), senza promesse metaboliche.
-- [ ] **La luce presa davvero** entra nel modello dell'orologio del giorno dopo (oggi lo aggiorna solo il sonno).
-- [ ] **Il voto sull'energia per tarare la vigilanza:** con abbastanza voti, spostare un po' la fase del modello per quella persona (ciclo chiuso senza wearable).
+- [x] **Registrazioni veloci** (caffeina, pasto, luce presa) anche dal widget e dalle notifiche («Preso ✓»).
+- [x] **Finestra dei pasti** come voce facoltativa («mangia fra le X e le Y»), senza promesse metaboliche.
+- [x] **La luce presa davvero** entra nel modello dell'orologio del giorno dopo (oggi lo aggiorna solo il sonno).
+- [x] **Il voto sull'energia per tarare la vigilanza:** con abbastanza voti, spostare un po' la fase del modello per quella persona (ciclo chiuso senza wearable).
 - [ ] **Pressione del sonno residua al risveglio** (`alertness.js`). Oggi `S = 1 − e^(−t/8)` riparte sempre da zero, e un sonno di 4 ore dopo la notte vale come uno di 8.
   - Farla dipendere dal sonno fatto davvero (diario, Health Connect o piano): salita in veglia e discesa in sonno, con le costanti del **modello a tre processi** che dichiariamo (Åkerstedt & Folkard; non quelle di Borbély mescolate al nostro ritmo).
   - Ritarare il peso pressione/ritmo con test fissi: con un sonno normale calo e picco restano dove sono; dopo 4 ore di sonno la stanchezza arriva prima e più forte.

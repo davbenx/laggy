@@ -4996,6 +4996,17 @@ function votoOraRecente(){
   }
   return false;
 }
+function calibrazioneEnergia(nadir){
+  if(!window.NTAlert || !window.NTAlert.calibraFaseEnergia) return { faseOffset: 0, solido: false };
+  const voti = [];
+  for(const k in diary){
+    const v = diary[k], at = diaryAt[k];
+    if(typeof v === "number" && v >= 1 && v <= 5 && at){
+      voti.push({ voto: v, at });
+    }
+  }
+  return window.NTAlert.calibraFaseEnergia(voti, { freeWake: state.freeWake, nadir });
+}
 // La sveglia per la fine del sonno (solo app Android): vale se la fine cade nelle prossime 24 ore (l'Orologio la mette
 // alla prossima volta che arriva quell'ora). `m` = minuti di adesso sulla scala del piano. L'Orologio non dice se l'abbiamo messa:
 // lo ricordiamo noi, in locale, per quell'ora e per 24 ore.
@@ -5062,8 +5073,9 @@ function renderOra(Pfocus){
     }
     const midnight=new Date(vero.getFullYear(),vero.getMonth(),vero.getDate());
     const nextSleep=(P.s&&typeof P.s.onset==="number")?new Date(midnight.getFullYear(),midnight.getMonth(),midnight.getDate(),0,P.s.onset):null;   // con il calendario: giusto anche nei giorni del cambio d'ora
-    r=window.NTAlert.alertness({now, freeWake:state.freeWake, freeBed:state.freeBed, lastSleepEnd:lastEnd, nextSleepStart:nextSleep, nadir:P.cbt});
-    _stimaOra={livello:r && r.now ? r.now.level : "", fonte:(P.orologio||{}).fonte||"", giorno:iso(state.focus)};
+    const cal = calibrazioneEnergia(P.cbt);
+    r=window.NTAlert.alertness({now, freeWake:state.freeWake, freeBed:state.freeBed, lastSleepEnd:lastEnd, nextSleepStart:nextSleep, nadir:P.cbt, faseOffset:cal.faseOffset});
+    _stimaOra={livello:r && r.now ? r.now.level : "", fonte:(P.orologio||{}).fonte||"", giorno:iso(state.focus), calibrazione:cal.solido};
   } }catch(e){}
 
   const kssSleepy = votoOraRecente();
@@ -6966,8 +6978,10 @@ function renderEssenziale(P, CARDS){
           {a:P.s.onset-180, poi:"luci basse dalle "+hhmm(P.s.onset-180)})});
       }
     } else if(cd.k==="m"){
-      voci.push({t, html:riga("pasti","Finestra dei pasti",ora||cd.val,cd.small||"",false,ICON.plate,dett(cd)+'<div class="att-tit">Pasto abbondante</div>'+attivitaHtml("pasto")+'<div class="att-tit">Alcol</div>'+attivitaHtml("alcol"),
-        {a:cd.at, poi:"pasti dalle "+hhmm(cd.at)})});
+      if(pianoVoce("pasti")){
+        voci.push({t, html:riga("pasti","Finestra dei pasti",ora||cd.val,cd.small||"",false,ICON.plate,dett(cd)+'<div class="att-tit">Pasto abbondante</div>'+attivitaHtml("pasto")+'<div class="att-tit">Alcol</div>'+attivitaHtml("alcol"),
+          {a:cd.at, poi:"pasti dalle "+hhmm(cd.at)})});
+      }
     } else if(cd.k==="t"){
       voci.push({t, html:riga("rientro",cd.lab,ora||cd.val,frase(cd.val,ora)||cd.small||"",!P.b.rest,ICON.car,dett(cd),
         {a:cd.at, poi:(P.b.rest?"veglia lunga":"rientro")+" alle "+hhmm(cd.at)})});
@@ -8079,7 +8093,8 @@ function orologio(){
   try{ if(window.NTAlert){
     const d=new Date(); d.setHours(0,0,0,0);
     const sv=new Date(+d+wake*6e4), letto=new Date(+d+(bed>wake?bed:bed+1440)*6e4);
-    const r=window.NTAlert.alertness({now:sv, freeWake:hhmm(wake), freeBed:state.freeBed, lastSleepEnd:sv, nextSleepStart:letto, nadir:cbt});
+    const cal = calibrazioneEnergia(cbt);
+    const r=window.NTAlert.alertness({now:sv, freeWake:hhmm(wake), freeBed:state.freeBed, lastSleepEnd:sv, nextSleepStart:letto, nadir:cbt, faseOffset:cal.faseOffset});
     if(r && r.peak) lucido=r.peak.hhmm;
   } }catch(e){}
   return {tipo, h, mid, msf:msfsc, recupero: corr && sdF>sdMedia+15, liberiDiario: lp ? lp.n : 0, cbt, mel:mod1440(bed-120), lucido, partenza: state.freeBed==="23:30" && state.freeWake==="07:30"};
@@ -8128,8 +8143,9 @@ function cronotipoTurni(o){
 function datiUsatiTesto(){
   const oggi=giornoVero(), da=day(oggi,-14), dms=da.getTime(), ams=oggi.getTime()+864e5;
   const notti=[];   // [inizio, fine] in ms
-  let diario=0;
+  let diario=0, luceGiorni=0;
   for(let o=-13;o<=0;o++){ const k=iso(day(oggi,o)), w=(state.wakes||{})[k], bd=(state.beds||{})[k];
+    if(attGiorno(k).some(a=>a.t==="luce")) luceGiorni++;
     if(!/^\d\d:\d\d$/.test(w||"") || !/^\d\d:\d\d$/.test(bd||"")) continue;
     const fine=new Date(k+"T"+w+":00").getTime(); let ini=new Date(k+"T"+bd+":00").getTime(); if(ini>=fine) ini-=864e5;
     if(fine-ini<60*6e4) continue; diario++; notti.push([ini,fine]); }
@@ -8141,6 +8157,9 @@ function datiUsatiTesto(){
   if(diario) parti.push(diario+(diario===1?" notte":" notti")+" dal diario");
   if(hc.length) parti.push(hc.length+(hc.length===1?" notte":" notti")+" da Health Connect"+(info.fonte?" ("+nomeAppSalute(info.fonte)+")":""));
   if(saluteCfg().passi && attivi.length) parti.push("passi: "+(interrotte ? interrotte+(interrotte===1?" notte interrotta":" notti interrotte") : "nessuna notte interrotta"));
+  if(luceGiorni) parti.push(luceGiorni+(luceGiorni===1?" giorno":" giorni")+" con luce registrata");
+  const cal=calibrazioneEnergia();
+  if(cal && cal.solido) parti.push("vigilanza tarata sui tuoi voti di energia");
   return parti.length ? "Dati usati nelle ultime due settimane: "+parti.join(" · ")+"."
     : "Per ora la stima usa solo gli orari del piano: segna come dormi (o collega Health Connect) e diventa tua.";
 }
@@ -8825,7 +8844,7 @@ function eventiCalendario(){
   const f=state.focus, oggi=new Date(); oggi.setHours(0,0,0,0);
   let ev=[], cp=[];
   try{
-    NT.setIcs({turni:true,sonno:true,pisolini:true,caffe:true,luce:true,rientro:true,pasti:false,avviso:0});
+    NT.setIcs({turni:true,sonno:true,pisolini:true,caffe:true,luce:true,rientro:true,pasti:pianoVoce("pasti"),avviso:0});
     // Si parte da ieri: il sonno e il rientro dopo una notte stanno nel piano del giorno prima, e alle 06:38
     // sono ancora da venire. Gli eventi già finiti prima di oggi non servono.
     state.focus=day(oggi,-1);
@@ -9160,13 +9179,24 @@ function diarioWidget(off=0){
 // è già stato annotato nell'app.
 async function risposteWidget(){
   if(!platform.widget.available) return;
-  const R=await platform.widget.risposte(); let n=0;
+  const R=await platform.widget.risposte(); let n=0, nAtt=0;
   for(const k in R){ if(!/^\d{4}-\d{2}-\d{2}$/.test(k)) continue; const r=R[k]||{};
     if(r.sonno && !wakes[k] && /^\d\d:\d\d$/.test(r.bed||"") && /^\d\d:\d\d$/.test(r.wake||"")){ state.beds[k]=r.bed; wakes[k]=r.wake; segnaSonnoPiano(k, r.fonte!=="m"); esitoNotte(k, r.bed, r.wake); n++; }
-    if(r.voto>=1 && r.voto<=5 && diary[k]==null){ diary[k]=+r.voto; diaryAt[k]=+r.at||Date.now(); n++; } }
-  if(!n) return;
-  store.set("beds",state.beds); store.set("wakes",wakes); store.set("diaryAt",diaryAt); store.set("diary",diary);
-  track("setup_item", {item:"diario_widget"}); usata("votowidget");
+    if(r.voto>=1 && r.voto<=5 && diary[k]==null){ diary[k]=+r.voto; diaryAt[k]=+r.at||Date.now(); n++; }
+    for(const act of ["caffe", "luce", "pasto"]){
+      if(r[act]){
+        const ts = new Date(+r[act]);
+        const ora = hhmm(ts.getHours()*60 + ts.getMinutes());
+        const lista = attGiorno(k).filter(a => a.t !== act);
+        lista.push({ t: act, fine: ora });
+        state.attivita[k] = lista;
+        nAtt++;
+      }
+    }
+  }
+  if(!n && !nAtt) return;
+  if(n){ store.set("beds",state.beds); store.set("wakes",wakes); store.set("diaryAt",diaryAt); store.set("diary",diary); track("setup_item", {item:"diario_widget"}); usata("votowidget"); }
+  if(nAtt){ store.set("attivita",state.attivita); track("setup_item", {item:"attivita_widget"}); }
   render();
 }
 // Tocco su un giorno del widget: l'app si apre su quel giorno.
@@ -9968,7 +9998,7 @@ const SPIEGAZIONI = {
   },
   orologio: {
     t: "Il tuo orologio biologico",
-    h: '<p class="ed-sub">Stima circadiana del cronotipo e momento di sonnolenza.</p><div class="why"><p>Il modello calcola la fase biologica partendo dai tuoi orari abituali nei giorni liberi (senza sveglia) usando i modelli circadiani validati di Forger (1999) e Hannay (2019).</p><p>Nei giorni di turno l\'orologio si adatta dinamicamente alle ore di sonno reali per prevedere il calo di vigilanza e indicare quando la luce aiuta la sincronizzazione.</p></div>'
+    h: '<p class="ed-sub">Stima circadiana del cronotipo e momento di sonnolenza.</p><div class="why"><p>Il modello calcola la fase biologica partendo dai tuoi orari abituali nei giorni liberi (senza sveglia) usando i modelli circadiani validati di Forger (1999) e Hannay (2019).</p><p>Nei giorni di turno l\'orologio si adatta dinamicamente alle ore di sonno reali e all\'esposizione alla luce registrata per prevedere il calo di vigilanza; se annoti i voti di energia nel diario, il modello tara la vigilanza sui tuoi ritmi personali.</p></div>'
   },
   festivi: {
     t: "I festivi del tuo contratto",
@@ -12631,7 +12661,7 @@ function ntNotifiche(){
     // riceveva cambi turno e "vai a dormire" di turni non suoi.
     if(promemoriaSpenti() || !state.turniConfigurati){ platform.notify.schedule([]).catch(()=>{}); return; }
     if(!window.NTNotif || !window.NTNotif.buildSchedule) return;
-    const items = window.NTNotif.buildSchedule(statoPerNotifiche(), { days:platform.notify.days+1, types:tipiNotifiche().filter(k=>k!=="coffee" || pianoVoce("caffe")) });
+    const items = window.NTNotif.buildSchedule(statoPerNotifiche(), { days:platform.notify.days+1, types:tipiNotifiche().filter(k=>(k!=="coffee" || pianoVoce("caffe")) && (k!=="pasti" || pianoVoce("pasti"))) });
     _ultimiPromemoria = items;
     try{ const na=notificaAdatta(); if(na) items.push(na); }catch(e){}
     // Diagnostica minima (letta dal test sul telefono): quante ne aggiunge
@@ -12715,6 +12745,7 @@ platform.onBackButton(()=>{
 function apriDestinazione(tab){
   try{
     if(/^diario\?previsto=1/.test(String(tab||""))){ registraComePrevisto(); return; }
+    if(/^preso:/.test(String(tab||""))){ registraAttivitaRapida(String(tab).slice(6)); return; }
     const t=String(tab||"oggi").replace(/\?.*/,"");
     chiudiQuickShift();
     if(t==="turni"){ setTab("turni"); return; }
@@ -12753,9 +12784,41 @@ function registraComePrevisto(){
     });
   }catch(e){}
 }
+// Registrazione rapida da notifica o widget («Preso ✓» per caffeina, luce o pasto)
+function registraAttivitaRapida(tipo){
+  try{
+    const kAct = (tipo === "coffee" || tipo === "caffe") ? "caffe" :
+                 (tipo === "pasti" || tipo === "pasto") ? "pasto" :
+                 (tipo === "luce") ? "luce" : null;
+    if(!kAct) return;
+    chiudiQuickShift();
+    state.focus=giornoVero(); cicloOff=0; setTab("oggi");
+    const g = iso(state.focus);
+    const n = new Date();
+    const ora = hhmm(n.getHours()*60 + n.getMinutes());
+    const prima = (state.attivita[g] || []).slice();
+    const lista = attGiorno(g).filter(a => a.t !== kAct);
+    lista.push({ t: kAct, fine: ora });
+    state.attivita[g] = lista;
+    store.set("attivita", state.attivita);
+    track("attivita_rapida", { tipo: kAct });
+    try { ntWidget(); } catch(e){}
+    render();
+    const etichetta = kAct === "caffe" ? "Caffè" : kAct === "luce" ? "Luce" : "Pasto";
+    toastUndo(etichetta + " segnato alle " + ora, () => {
+      if(prima.length) state.attivita[g] = prima;
+      else delete state.attivita[g];
+      store.set("attivita", state.attivita);
+      try { ntWidget(); } catch(e){}
+      render();
+    });
+  }catch(e){}
+}
 platform.onNotificationTap((tab, kind, azione)=>{
   if(kind) track("notif_aperta", {tipo:String(kind)});
   if(azione==="previsto"){ registraComePrevisto(); return; }
+  if(azione==="preso"){ registraAttivitaRapida(kind || tab); return; }
+  if(/^preso:/.test(String(tab||""))){ registraAttivitaRapida(String(tab).slice(6)); return; }
   apriDestinazione(tab);
 });
 platform.onResume(leggiCanaliSpenti);

@@ -212,6 +212,10 @@ function _opts(n) {
       { action: "previsto", title: "Come previsto" },
       { action: "altri",    title: "Altri orari" }
     ];
+  } else if (n.kind === "coffee" || n.kind === "luce" || n.kind === "pasti") {
+    opts.actions = [
+      { action: "preso", title: "Preso ✓" }
+    ];
   }
   return opts;
 }
@@ -291,6 +295,7 @@ self.addEventListener("notificationclick", e => {
 
   const tab = action === "previsto" ? "diario?previsto=1" :
               action === "altri" ? "diario" :
+              action === "preso" ? ("preso:" + (data.kind || "caffe")) :
               (data.tab || "oggi");
 
   const url = self.registration.scope + "?t=" + tab;

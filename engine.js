@@ -777,7 +777,25 @@ function minimiOrologio(S, mi = 0){
         if(z - pezzo >= 30) spezzati.push([pezzo, z]); }
       sonni.length = 0; sonni.push(...spezzati);
     }
-    const chiaveTutto = oggi + "|" + lib.chiave + JSON.stringify(sonni) + JSON.stringify(lavoro);
+    // Luce reale presa davvero (registrata in attivita): entra nel calcolo circadiano con intensità forte (2500 lux).
+    // Sposta l'orologio del giorno dopo in base alla curva di risposta di fase (PRC).
+    const luceReale = [];
+    const attMap = state.attivita || {};
+    for(let o = inizio - 1; o <= 0; o++){
+      const k = iso(day(state.focus, o)), list = attMap[k];
+      if(!Array.isArray(list)) continue;
+      for(const item of list){
+        if(item && item.t === "luce" && /^\d\d:\d\d$/.test(item.fine || "")){
+          const f = oraDi(item.fine);
+          if(f !== null){
+            const dur = (typeof item.min === "number" && item.min >= 5 && item.min <= 180) ? item.min : 30;
+            const s = Math.max(0, f - dur);
+            luceReale.push([o * 1440 + s, o * 1440 + f]);
+          }
+        }
+      }
+    }
+    const chiaveTutto = oggi + "|" + lib.chiave + JSON.stringify(sonni) + JSON.stringify(lavoro) + JSON.stringify(luceReale);
     const memo = _orologio.get(mi); if(memo && memo.chiave === chiaveTutto) return memo.minimi;
     if(_orolGiorni.size > 3000) _orolGiorni.clear();
     const taglia = (L, a, z) => L.filter(([p, q]) => q > a && p < z).map(([p, q]) => [Math.max(p, a) - a, Math.min(q, z) - a]);
@@ -785,14 +803,18 @@ function minimiOrologio(S, mi = 0){
     const passo = FJK_DT * 60, minimi = [];
     let chiave = lib.chiave + "|" + (oggi + inizio), st = {y: lib.y.slice(), prec: null, prec2: null};
     for(let o = inizio; o <= OROL_DOPO; o++){
-      const a = o*1440, sG = taglia(sonni, a, a + 1440), lG = taglia(lavoro, a, a + 1440);
-      chiave += "|" + JSON.stringify(sG) + JSON.stringify(lG);
+      const a = o*1440, sG = taglia(sonni, a, a + 1440), lG = taglia(lavoro, a, a + 1440), luG = taglia(luceReale, a, a + 1440);
+      chiave += "|" + JSON.stringify(sG) + JSON.stringify(lG) + JSON.stringify(luG);
       let g = _orolGiorni.get(chiave);
       if(!g){
         const [alba, tramonto] = luceDelGiorno(day(state.focus, o));
         let y = st.y, prec = st.prec, prec2 = st.prec2; const mm = [];
         for(let m = 0; m < 1440; m += passo){
-          y = fjkPasso(y, luceStimata(m, dentro(sG, m) ? "sonno" : dentro(lG, m) ? "lavoro" : "", alba, tramonto), mod);
+          let lux = luceStimata(m, dentro(sG, m) ? "sonno" : dentro(lG, m) ? "lavoro" : "", alba, tramonto);
+          if(!dentro(sG, m) && dentro(luG, m)){
+            lux = 2500;   // Luce solare o forte presa davvero
+          }
+          y = fjkPasso(y, lux, mod);
           const x = mod.segno(y);
           if(!isFinite(x)) throw new Error("modello instabile");
           if(prec2 !== null && prec < prec2 && prec <= x) mm.push(m - passo*(1 - vertice(prec2, prec, x)));
@@ -815,23 +837,27 @@ function stimaOrologio(S, rif){
     let best = null; for(const v of L) if(best === null || Math.abs(v - rif) < Math.abs(best - rif)) best = v;
     return Math.abs(best - rif) <= 720 ? best : null; }).filter(v => v !== null);
   const d = datiSonno(), reali = Math.max(d.diario, d.salute);
-  const fonte = d.salute >= 2 && d.salute >= d.diario ? "salute" : d.diario >= 2 ? "diario" : "orari";
+  const fonte = d.salute >= 2 && d.salute >= d.diario ? "salute" : d.diario >= 2 ? "diario" : (d.luce >= 1 ? "luce" : "orari");
   // Il margine: quanto i modelli non sono d'accordo, più quanto mancano i dati veri. Con solo gli orari del piano la fase
   // vera può stare un'ora più in là (chi dorme meno o più tardi del piano); con 5 giorni su 7 di sonno vero, no.
   const manca = reali >= 5 ? 0 : reali >= 2 ? 15 : 30;
-  if(!per.length) return {cbt: rif, modelli: [], incertezza: 60 + manca, fonte, giorniVeri: reali};
+  if(!per.length) return {cbt: rif, modelli: [], incertezza: 60 + manca, fonte, giorniVeri: reali, giorniLuce: d.luce};
   const media = per.reduce((a, b) => a + b, 0) / per.length;
-  return {cbt: Math.round(media), modelli: per.map(Math.round), incertezza: Math.max(30, Math.round((Math.max(...per) - Math.min(...per)) / 2)) + manca, fonte, giorniVeri: reali};
+  return {cbt: Math.round(media), modelli: per.map(Math.round), incertezza: Math.max(30, Math.round((Math.max(...per) - Math.min(...per)) / 2)) + manca, fonte, giorniVeri: reali, giorniLuce: d.luce};
 }
-// Quanti degli ultimi 7 giorni hanno un sonno vero: annotato nel diario (letto e sveglia) o da Health Connect.
+// Quanti degli ultimi 7 giorni hanno un sonno vero: annotato nel diario (letto e sveglia) o da Health Connect, o esposizione alla luce.
 function datiSonno(){
-  let diario = 0;
-  for(let o = -6; o <= 0; o++){ const k = iso(day(state.focus, o));
-    if(oraDi((state.wakes||{})[k]) !== null && oraDi((state.beds||{})[k]) !== null) diario++; }
+  let diario = 0, luce = 0;
+  for(let o = -6; o <= 0; o++){
+    const k = iso(day(state.focus, o));
+    if(oraDi((state.wakes||{})[k]) !== null && oraDi((state.beds||{})[k]) !== null) diario++;
+    const list = (state.attivita||{})[k];
+    if(Array.isArray(list) && list.some(a => a && a.t === "luce")) luce++;
+  }
   const fine = new Date(state.focus).getTime() + 864e5, inizio = fine - 8 * 864e5;
   const salute = new Set((Array.isArray(state.hcSonno) ? state.hcSonno : []).filter(v => Array.isArray(v) && +v[1] > inizio && +v[0] < fine)
     .map(v => Math.floor(+v[1] / 864e5))).size;
-  return {diario, salute: Math.min(7, salute)};
+  return {diario, salute: Math.min(7, salute), luce};
 }
 function minimoVicino(S, rif){ return stimaOrologio(S, rif).cbt; }
 // La soglia dell'ultimo caffè: quanto ti resta addosso (la tua scelta in Impostazioni) per quanto dura in te.
@@ -1415,6 +1441,7 @@ function buildIcs(days){
     CFG, constraint, simulate, at,
     startsInNight, spansNight, oraDi, isolaDalMio,
     freeWakeOk, freeWakeUsata, naturalMid, durataLibera, sincronizzaNeed, setFestivo,
+    datiSonno, stimaOrologio,
     // index.html la richiama di nuovo dopo aver ripristinato lo state da
     // link/localStorage (quei valori possono arrivare fuori dai limiti
     // sensati) — prima aveva una seconda copia di LIMITI/normalizza() tutta

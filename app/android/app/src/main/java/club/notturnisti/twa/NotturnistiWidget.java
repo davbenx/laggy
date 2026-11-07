@@ -86,8 +86,14 @@ public class NotturnistiWidget extends AppWidgetProvider {
         try {
             SharedPreferences sp = prefs(ctx);
             JSONObject tutte = new JSONObject(sp.getString(KEY_RISPOSTE, "{}"));
-            JSONObject r = tutte.optJSONObject(d); if (r == null) r = new JSONObject();
             if ("sonno".equals(i.getStringExtra("cosa"))) { salvaSonno(ctx, d, i.getStringExtra("bed"), i.getStringExtra("wake"), "p"); return; }   // «Sì, così»: gli orari del piano
+            String cosa = i.getStringExtra("cosa");
+            if ("caffe".equals(cosa) || "luce".equals(cosa) || "pasto".equals(cosa)) {
+                r.put(cosa, System.currentTimeMillis());
+                tutte.put(d, r);
+                sp.edit().putString(KEY_RISPOSTE, tutte.toString()).apply();
+                return;
+            }
             r.put("voto", i.getIntExtra("v", 3)); r.put("at", System.currentTimeMillis());
             tutte.put(d, r);
             sp.edit().putString(KEY_RISPOSTE, tutte.toString()).apply();
@@ -201,15 +207,20 @@ public class NotturnistiWidget extends AppWidgetProvider {
 
     private static void azione(Context ctx, RemoteViews rv, WidgetStato st) {
         boolean sonno = st.azione == WidgetStato.Azione.VOTO_SONNO, energia = st.azione == WidgetStato.Azione.VOTO_ENERGIA;
+        boolean preso = st.azione == WidgetStato.Azione.PRESO_CAFFE || st.azione == WidgetStato.Azione.PRESO_LUCE || st.azione == WidgetStato.Azione.PRESO_PASTO;
         rv.setViewVisibility(R.id.w_voto, sonno ? View.VISIBLE : View.GONE);
         rv.setViewVisibility(R.id.w_facce, energia ? View.VISIBLE : View.GONE);
         rv.setViewVisibility(R.id.w_az, sonno || energia ? View.GONE : View.VISIBLE);
         if (!sonno && !energia) {
             rv.setTextViewText(R.id.w_az, st.testoAzione);
-            boolean pieno = st.azione == WidgetStato.Azione.SVEGLIA;
+            boolean pieno = st.azione == WidgetStato.Azione.SVEGLIA || preso;
             rv.setInt(R.id.w_az, "setBackgroundResource", pieno ? R.drawable.widget_bottone_pri : R.drawable.widget_bottone);
             rv.setTextColor(R.id.w_az, ctx.getColor(pieno ? R.color.w_su_accento : R.color.w_ink));
-            if (pieno) {
+            if (preso) {
+                JSONObject diaRapido = new JSONObject();
+                try { diaRapido.put("d", st.giornoAzione); } catch (Exception ignored) {}
+                rv.setOnClickPendingIntent(R.id.w_az, risposta(ctx, 220, diaRapido, st.tipoPreso, 0));
+            } else if (pieno) {
                 Intent al = new Intent(AlarmClock.ACTION_SET_ALARM)
                     .putExtra(AlarmClock.EXTRA_HOUR, st.oraSveglia).putExtra(AlarmClock.EXTRA_MINUTES, st.minSveglia)
                     .putExtra(AlarmClock.EXTRA_MESSAGE, "Notturnisti").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
