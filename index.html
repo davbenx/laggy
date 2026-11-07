@@ -559,15 +559,12 @@ body.primo-avvio #firstPlanBanner,body.primo-avvio #setupChecklist,body.primo-av
 .ctile.p .ctile-ic svg{width:10px;height:10px}
 .tt-icon-btn{display:inline-flex;align-items:center;justify-content:center;background:var(--s2);border:1px solid var(--line);border-radius:6px;width:28px;height:28px;cursor:pointer;color:var(--ink);padding:0;flex:none;margin-right:4px}
 .tt-icon-btn svg{width:16px;height:16px}
-.tag-chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
-.tag-chip{display:inline-flex;align-items:center;background:var(--s1);border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:12.5px;font-weight:600;color:var(--dim);cursor:pointer;transition:all .15s ease}
-.tag-chip:hover{background:var(--s2)}
+.tag-chips{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0 10px}
+.tag-chip{display:inline-flex;align-items:center;justify-content:center;height:28px;padding:0 11px;font-family:inherit;font-size:12px;font-weight:600;line-height:1;border:1px solid var(--line);border-radius:999px;background:var(--s1);color:var(--dim);cursor:pointer;user-select:none;box-sizing:border-box;white-space:nowrap;-webkit-appearance:none;appearance:none;transition:all .15s ease}
+.tag-chip:hover{background:var(--s2);color:var(--ink)}
 .tag-chip.on{background:var(--blue-soft);color:var(--blue);border-color:var(--blue)}
-.tag-altri-box{display:inline-block}
-.tag-altri-box summary{list-style:none}
-.tag-altri-box summary::-webkit-details-marker{display:none}
-.tag-chip.tag-more{border-style:dashed;color:var(--faint)}
-.tag-altri-chips{margin-top:6px}
+.tag-chip.tag-more{border-style:dashed;color:var(--faint);background:transparent}
+.tag-chip.tag-more:hover{background:var(--s1);color:var(--dim);border-color:var(--dim)}
 .sleep-tags-summary{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
 .sleep-tag-pill{display:inline-block;padding:1px 7px;border-radius:999px;font-size:11px;background:var(--s2);color:var(--dim)}
 .att-box-quick{margin:6px 0 10px}
@@ -4815,10 +4812,16 @@ function diaryReminder(P, CARDS){
       const label = (isDaySleep && t.labelDay) ? t.labelDay : t.label;
       return '<button type="button" class="tag-chip'+(on?' on':'')+'" data-sleep-tag="'+t.id+'" data-sleep-day="'+esc(key0)+'" aria-pressed="'+on+'">'+label+'</button>';
     };
-    x+='<div class="dq-sez" style="margin-top:8px">Cosa ha accompagnato questo sonno? <span class="hint" style="display:inline;font-weight:400">(facoltativo)</span></div>'+
+    const showAll = !!state.mostraAltriTag;
+    const tagsToShow = showAll ? listTags.concat(extraTags) : listTags;
+    const moreBtn = extraTags.length
+      ? (showAll
+          ? '<button type="button" class="tag-chip tag-more" data-altri-tags="0" aria-label="Mostra meno fattori">− meno</button>'
+          : '<button type="button" class="tag-chip tag-more" data-altri-tags="1" aria-label="Mostra altri fattori">+ altri ('+extraTags.length+')</button>')
+      : '';
+    x+='<div class="dq-sez">Cosa ha accompagnato questo sonno? <span>(facoltativo)</span></div>'+
       '<div class="tag-chips" role="group" aria-label="Cosa ha accompagnato questo sonno">'+
-      listTags.map(chipHtml).join("")+
-      (extraTags.length ? '<details class="tag-altri-box"><summary class="tag-chip tag-more">+ altri</summary><div class="tag-chips tag-altri-chips">'+extraTags.map(chipHtml).join("")+'</div></details>' : '')+
+      tagsToShow.map(chipHtml).join("") + moreBtn +
       '</div>';
   }
   // Come ti senti: una scelta, si salva al tocco. Solo dopo il sonno, e poi
@@ -9699,6 +9702,13 @@ function diaryChange(e){
   segnaSonnoPiano(k,false); store.set("wakes",wakes); render();
 }
 function diaryClick(e){
+  const moreBtn=e.target.closest("[data-altri-tags]");
+  if(moreBtn){
+    state.mostraAltriTag = moreBtn.dataset.altriTags === "1";
+    haptic(4);
+    render();
+    return;
+  }
   const tagBtn=e.target.closest("[data-sleep-tag]");
   if(tagBtn){
     const tid=tagBtn.dataset.sleepTag, dayKey=tagBtn.dataset.sleepDay;

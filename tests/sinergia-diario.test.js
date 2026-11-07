@@ -13,7 +13,8 @@ test("index.html contiene la funzione tagPreselezionati, tagsPerOrario e lo stil
   assert.ok(html.includes("+ Segna pasto tardivo o abbondante"), "pulsante rapido pasto presente");
   assert.ok(html.includes("+ Ho bevuto alcol stasera"), "pulsante rapido alcol presente");
   assert.ok(html.includes('id: "allenamento_tardi"'), "tag allenamento_tardi presente in SLEEP_TAGS");
-  assert.ok(html.includes(".tag-altri-box"), "stile .tag-altri-box per fattori secondari presente");
+  assert.ok(html.includes(".tag-chip.tag-more"), "stile .tag-chip.tag-more per fattori secondari presente");
+  assert.ok(html.includes("data-altri-tags"), "supporto espansione fattori secondari data-altri-tags presente");
 });
 
 test("tagsPerOrario adatta le chip in modo lean e contestuale (giorno vs notte)", () => {
