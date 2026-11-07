@@ -13,27 +13,31 @@ test("index.html contiene la funzione tagPreselezionati, tagsPerOrario e lo stil
   assert.ok(html.includes("+ Segna pasto tardivo o abbondante"), "pulsante rapido pasto presente");
   assert.ok(html.includes("+ Ho bevuto alcol stasera"), "pulsante rapido alcol presente");
   assert.ok(html.includes('id: "allenamento_tardi"'), "tag allenamento_tardi presente in SLEEP_TAGS");
+  assert.ok(html.includes('id: "tensione"'), "tag tensione presente in SLEEP_TAGS");
+  assert.ok(html.includes('id: "caldo"'), "tag caldo presente in SLEEP_TAGS");
+  assert.ok(html.includes('id: "luce"'), "tag luce presente in SLEEP_TAGS");
   assert.ok(html.includes(".tag-chip.tag-more"), "stile .tag-chip.tag-more per fattori secondari presente");
   assert.ok(html.includes("data-altri-tags"), "supporto espansione fattori secondari data-altri-tags presente");
 });
 
 test("tagsPerOrario adatta le chip in modo lean e contestuale (giorno vs notte)", () => {
   const SLEEP_TAGS = [
-    { id: "cena_tardi", label: "Cena tardi", labelDay: "Pasto prima di dormire" },
+    { id: "cena_tardi", label: "Cena tardi", labelDay: "Pasto pre-sonno" },
     { id: "alcol", label: "Alcol" },
     { id: "caffe_serale", label: "Caffè serale", labelDay: "Caffè a fine turno" },
-    { id: "rumore", label: "Rumore / Luce" },
-    { id: "buio", label: "Mascherina / Buio" },
     { id: "schermi", label: "Schermi a letto" },
+    { id: "tensione", label: "Tensione / Stress" },
+    { id: "rumore", label: "Rumore" },
+    { id: "caldo", label: "Stanza calda" },
+    { id: "luce", label: "Luce in stanza" },
     { id: "allenamento_tardi", label: "Allenamento tardi", labelDay: "Allenamento pre-sonno" },
-    { id: "stretching", label: "Stretching / Yoga" },
-    { id: "tisana", label: "Tisana / Caldo" }
+    { id: "buio", label: "Mascherina / Tappi" }
   ];
 
   function tagsPerOrario(isDaySleep, curTags) {
     const primari = isDaySleep
-      ? ["rumore", "buio", "cena_tardi", "caffe_serale", "schermi"]
-      : ["cena_tardi", "alcol", "caffe_serale", "rumore", "schermi"];
+      ? ["rumore", "caldo", "luce", "caffe_serale", "cena_tardi"]
+      : ["cena_tardi", "alcol", "caffe_serale", "schermi", "tensione"];
     const out = [];
     primari.forEach(id => {
       const t = SLEEP_TAGS.find(x => x.id === id);
@@ -49,12 +53,12 @@ test("tagsPerOrario adatta le chip in modo lean e contestuale (giorno vs notte)"
   // 1. Sonno notturno standard
   const notte = tagsPerOrario(false, []);
   assert.equal(notte.length, 5, "esattamente 5 chip snelle di notte");
-  assert.deepEqual(notte.map(x => x.id), ["cena_tardi", "alcol", "caffe_serale", "rumore", "schermi"]);
+  assert.deepEqual(notte.map(x => x.id), ["cena_tardi", "alcol", "caffe_serale", "schermi", "tensione"]);
 
-  // 2. Sonno diurno (smonto notte): rumore e buio in testa, alcol sostituito da mascherina/buio
+  // 2. Sonno diurno (smonto notte): rumore, caldo, luce, caffè a fine turno e pasto pre-sonno
   const giorno = tagsPerOrario(true, []);
   assert.equal(giorno.length, 5, "esattamente 5 chip snelle di giorno");
-  assert.deepEqual(giorno.map(x => x.id), ["rumore", "buio", "cena_tardi", "caffe_serale", "schermi"]);
+  assert.deepEqual(giorno.map(x => x.id), ["rumore", "caldo", "luce", "caffe_serale", "cena_tardi"]);
 
   // 3. Se un tag secondario o non primario è pre-selezionato, viene incluso per trasparenza
   const giornoConAlcol = tagsPerOrario(true, ["alcol"]);
@@ -270,4 +274,6 @@ test("coerenza timeline sonnolenza: momento di sonnolenza mostra orario del picc
   assert.ok(html.includes("const numVoce = cd.sveglia ? cd.val : hhmm(cd.at);"), "numVoce usa il picco hhmm(cd.at)");
   assert.ok(html.includes('const subVoce = cd.sveglia ? cd.small : ("finestra " + cd.val + (cd.small ? " · " + cd.small : ""));'), "subVoce indica chiaramente la finestra");
   assert.ok(html.includes("/stanchezza|sonnolenza/i.test(card.textContent) && /sonnolenza/i.test(testo)"), "Poi esclude sonnolenza se la card è già su stanchezza/sonnolenza");
+  assert.ok(html.includes("if(haVoto)") && html.includes("const haVoto = isFinite(+val)"), "chip mostrate solo dopo aver inserito sia orario che voto");
 });
+

@@ -4637,21 +4637,24 @@ function energiaPresto(key, wk){
 }
 
 const SLEEP_TAGS = [
-  { id: "cena_tardi", label: "Cena tardi", labelDay: "Pasto prima di dormire" },
+  { id: "cena_tardi", label: "Cena tardi", labelDay: "Pasto pre-sonno" },
   { id: "alcol", label: "Alcol" },
   { id: "caffe_serale", label: "Caffè serale", labelDay: "Caffè a fine turno" },
-  { id: "rumore", label: "Rumore / Luce" },
-  { id: "buio", label: "Mascherina / Buio" },
   { id: "schermi", label: "Schermi a letto" },
+  { id: "tensione", label: "Tensione / Stress" },
+  { id: "rumore", label: "Rumore" },
+  { id: "caldo", label: "Stanza calda" },
+  { id: "luce", label: "Luce in stanza" },
   { id: "allenamento_tardi", label: "Allenamento tardi", labelDay: "Allenamento pre-sonno" },
-  { id: "stretching", label: "Stretching / Yoga" },
+  { id: "buio", label: "Mascherina / Tappi" },
+  { id: "stretching", label: "Stretching / Relax" },
   { id: "tisana", label: "Tisana / Caldo" }
 ];
 
 function tagsPerOrario(isDaySleep, curTags){
   const primari = isDaySleep
-    ? ["rumore", "buio", "cena_tardi", "caffe_serale", "schermi"]
-    : ["cena_tardi", "alcol", "caffe_serale", "rumore", "schermi"];
+    ? ["rumore", "caldo", "luce", "caffe_serale", "cena_tardi"]
+    : ["cena_tardi", "alcol", "caffe_serale", "schermi", "tensione"];
   const out = [];
   primari.forEach(id => {
     const t = SLEEP_TAGS.find(x => x.id === id);
@@ -4800,35 +4803,12 @@ function diaryReminder(P, CARDS){
          '<button type="button" class="btn g sm" data-perche="turno">Il turno era diverso</button><button type="button" class="btn g sm" data-perche="abitudine">Dormo così di solito</button>'+
          '<button type="button" class="btn g sm" data-perche="altro">Altro</button><button type="button" class="lnk dim" data-perche="no">No, grazie</button></span></div>':'');
   }
-  if(logged && !sleepEditing){
-    const curTags = tagPreselezionati(key0);
-    const bedMin = t(bd || defBed);
-    const isDaySleep = isFinite(bedMin) && bedMin >= 300 && bedMin <= 960;
-    const listTags = tagsPerOrario(isDaySleep, curTags);
-    const primariIds = new Set(listTags.map(x=>x.id));
-    const extraTags = SLEEP_TAGS.filter(x => !primariIds.has(x.id));
-    const chipHtml = t => {
-      const on = curTags.includes(t.id);
-      const label = (isDaySleep && t.labelDay) ? t.labelDay : t.label;
-      return '<button type="button" class="tag-chip'+(on?' on':'')+'" data-sleep-tag="'+t.id+'" data-sleep-day="'+esc(key0)+'" aria-pressed="'+on+'">'+label+'</button>';
-    };
-    const showAll = !!state.mostraAltriTag;
-    const tagsToShow = showAll ? listTags.concat(extraTags) : listTags;
-    const moreBtn = extraTags.length
-      ? (showAll
-          ? '<button type="button" class="tag-chip tag-more" data-altri-tags="0" aria-label="Mostra meno fattori">− meno</button>'
-          : '<button type="button" class="tag-chip tag-more" data-altri-tags="1" aria-label="Mostra altri fattori">+ altri ('+extraTags.length+')</button>')
-      : '';
-    x+='<div class="dq-sez">Cosa ha accompagnato questo sonno? <span>(facoltativo)</span></div>'+
-      '<div class="tag-chips" role="group" aria-label="Cosa ha accompagnato questo sonno">'+
-      tagsToShow.map(chipHtml).join("") + moreBtn +
-      '</div>';
-  }
   // Come ti senti: una scelta, si salva al tocco. Solo dopo il sonno, e poi
   // resta la riga con la scelta fatta (i grafici di «Come sto dormendo» la usano).
   const VOTI=[[1,"Senza energie",ICON.faceTerrible,"var(--risk)"],[2,"Poca energia",ICON.faceLow,"var(--orange)"],
     [3,"Così così",ICON.faceMid,"var(--faint)"],[4,"Bene",ICON.faceOk,"var(--blue)"],[5,"Al meglio",ICON.faceGreat,"var(--ok)"]];
-  let xEn="";
+  let xEn="", xTags="";
+  const haVoto = isFinite(+val) && +val >= 1 && +val <= 5;
   if(logged && !sleepEditing){
     const v=VOTI.find(o=>o[0]===+val), votoEditing=state.diaryEditing.has("voto:"+key0);
     if(v && !votoEditing){
@@ -4841,6 +4821,32 @@ function diaryReminder(P, CARDS){
         VOTI.map(o=>'<button class="dbtn kface'+(+val===o[0]?" on":"")+'" data-diary="'+o[0]+'" aria-label="'+o[1]+'" title="'+o[1]+'" aria-pressed="'+(+val===o[0])+'" style="--tone:'+o[3]+'">'+
           '<i class="kic" style="color:'+o[3]+'">'+o[2]+'</i></button>').join("")+'</div>'+
         '<div class="kleg" aria-hidden="true"><span>Senza energie</span><span>Al meglio</span></div></div>';
+
+    // I tag facoltativi appaiono solo dopo che l'utente ha confermato sia l'orario che il voto
+    if(haVoto){
+      const curTags = tagPreselezionati(key0);
+      const bedMin = t(bd || defBed);
+      const isDaySleep = isFinite(bedMin) && bedMin >= 300 && bedMin <= 960;
+      const listTags = tagsPerOrario(isDaySleep, curTags);
+      const primariIds = new Set(listTags.map(x=>x.id));
+      const extraTags = SLEEP_TAGS.filter(x => !primariIds.has(x.id));
+      const chipHtml = t => {
+        const on = curTags.includes(t.id);
+        const label = (isDaySleep && t.labelDay) ? t.labelDay : t.label;
+        return '<button type="button" class="tag-chip'+(on?' on':'')+'" data-sleep-tag="'+t.id+'" data-sleep-day="'+esc(key0)+'" aria-pressed="'+on+'">'+label+'</button>';
+      };
+      const showAll = !!state.mostraAltriTag;
+      const tagsToShow = showAll ? listTags.concat(extraTags) : listTags;
+      const moreBtn = extraTags.length
+        ? (showAll
+            ? '<button type="button" class="tag-chip tag-more" data-altri-tags="0" aria-label="Mostra meno fattori">− meno</button>'
+            : '<button type="button" class="tag-chip tag-more" data-altri-tags="1" aria-label="Mostra altri fattori">+ altri ('+extraTags.length+')</button>')
+        : '';
+      xTags = '<div class="dq-sez">Cosa ha accompagnato questo sonno? <span>(facoltativo)</span></div>'+
+        '<div class="tag-chips" role="group" aria-label="Cosa ha accompagnato questo sonno">'+
+        tagsToShow.map(chipHtml).join("") + moreBtn +
+        '</div>';
+    }
   }
   // Il pisolino: la domanda solo quando è cominciato (prima non c'è niente da
   // dire: «Fatto?» per un pisolino delle 17 alle 9 del mattino non ha senso).
@@ -4905,6 +4911,7 @@ function diaryReminder(P, CARDS){
   // L'ordine segue l'urgenza: un pisolino da confermare (il tempo scorre) prima dell'energia; altrimenti energia, poi i pisolini.
   x=x.replace("\u0001EN\u0001","").replace("\u0002EN\u0002","");
   x+= pend ? xNap+xEn : xEn+xNap;
+  x+= xTags;
   x+=xExtra;
   x+='</div>';
   return x;
