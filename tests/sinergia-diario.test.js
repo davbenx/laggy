@@ -12,6 +12,8 @@ test("index.html contiene la funzione tagPreselezionati, tagsPerOrario e lo stil
   assert.ok(html.includes(".att-btn-quick"), "stile .att-btn-quick presente");
   assert.ok(html.includes("+ Segna pasto tardivo o abbondante"), "pulsante rapido pasto presente");
   assert.ok(html.includes("+ Ho bevuto alcol stasera"), "pulsante rapido alcol presente");
+  assert.ok(html.includes('id: "allenamento_tardi"'), "tag allenamento_tardi presente in SLEEP_TAGS");
+  assert.ok(html.includes(".tag-altri-box"), "stile .tag-altri-box per fattori secondari presente");
 });
 
 test("tagsPerOrario adatta le chip in modo lean e contestuale (giorno vs notte)", () => {
@@ -22,6 +24,7 @@ test("tagsPerOrario adatta le chip in modo lean e contestuale (giorno vs notte)"
     { id: "rumore", label: "Rumore / Luce" },
     { id: "buio", label: "Mascherina / Buio" },
     { id: "schermi", label: "Schermi a letto" },
+    { id: "allenamento_tardi", label: "Allenamento tardi", labelDay: "Allenamento pre-sonno" },
     { id: "stretching", label: "Stretching / Yoga" },
     { id: "tisana", label: "Tisana / Caldo" }
   ];
@@ -60,7 +63,8 @@ test("tagsPerOrario adatta le chip in modo lean e contestuale (giorno vs notte)"
 test("tagPreselezionati estrae correttamente i tag dalle attività serali e della notte", () => {
   const state = {
     diaryTags: {},
-    attivita: {}
+    attivita: {},
+    beds: {}
   };
   const t = s => (+s.slice(0, 2)) * 60 + (+s.slice(3, 5));
   const iso = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
@@ -78,9 +82,7 @@ test("tagPreselezionati estrae correttamente i tag dalle attività serali e dell
     try {
       const dObj = new Date(dayKey + "T12:00:00");
       const prevKey = iso(day(dObj, -1));
-      const attsPrev = typeof attGiorno === "function" ? attGiorno(prevKey) : [];
-      const attsOggi = typeof attGiorno === "function" ? attGiorno(dayKey) : [];
-      const atts = attsPrev.concat(attsOggi);
+      const atts = typeof attGiorno === "function" ? attGiorno(prevKey) : [];
 
       if (atts.some(a => a.t === "alcol")) auto.push("alcol");
       if (atts.some(a => a.t === "pasto")) auto.push("cena_tardi");
@@ -90,42 +92,67 @@ test("tagPreselezionati estrae correttamente i tag dalle attività serali e dell
         return isFinite(m) && (m >= 840 || m <= 360);
       })) auto.push("caffe_serale");
       if (atts.some(a => a.t === "leggera")) auto.push("stretching");
+      if (atts.some(a => {
+        if (a.t !== "intensa") return false;
+        const finM = typeof t === "function" ? t(a.fine) : NaN;
+        if (!isFinite(finM)) return false;
+        let bedMin = NaN;
+        const bedSaved = (state.beds || {})[dayKey];
+        if (bedSaved && typeof t === "function") bedMin = t(bedSaved);
+        if (isFinite(bedMin)) {
+          const gap = (((bedMin - finM) % 1440) + 1440) % 1440;
+          return gap <= 180 || gap >= 1320;
+        }
+        return finM >= 1200 || finM <= 360;
+      })) auto.push("allenamento_tardi");
     } catch (e) {}
     return auto;
   }
 
   const oggi = "2026-05-12";
   const ieri = "2026-05-11";
+  const domani = "2026-05-13";
 
   // 1. Senza attività: nessun tag pre-selezionato
   assert.deepEqual(tagPreselezionati(oggi), []);
 
-  // 2. Pasto segnato la sera prima nella timeline -> cena_tardi pre-acceso al risveglio
+  // 2. Pasto segnato nella timeline del giorno X (ieri) -> cena_tardi pre-acceso al risveglio X+1 (oggi)
   state.attivita[ieri] = [{ t: "pasto", fine: "21:30" }];
   assert.deepEqual(tagPreselezionati(oggi), ["cena_tardi"]);
 
-  // 3. Alcol segnato la sera prima -> alcol pre-acceso
-  state.attivita[ieri].push({ t: "alcol", fine: "22:45" });
-  assert.deepEqual(tagPreselezionati(oggi), ["alcol", "cena_tardi"]);
+  // 3. Quello che inserisco nella timeline del giorno X si riferisce a X+1:
+  // Se inserisco pasto oggi, NON pre-seleziona oggi, ma pre-selezionerà domani!
+  state.attivita[ieri] = [];
+  state.attivita[oggi] = [{ t: "pasto", fine: "21:00" }];
+  assert.deepEqual(tagPreselezionati(oggi), [], "attività di oggi non intacca il diario di oggi");
+  assert.deepEqual(tagPreselezionati(domani), ["cena_tardi"], "attività di oggi pre-seleziona il diario di domani (X+1)");
 
-  // 4. Caffè pomeridiano/serale (>= 14:00 o notte <= 06:00)
+  // 4. Alcol segnato la sera prima -> alcol pre-acceso
+  state.attivita[ieri] = [{ t: "alcol", fine: "22:45" }];
+  assert.deepEqual(tagPreselezionati(oggi), ["alcol"]);
+
+  // 5. Caffè pomeridiano/serale (>= 14:00 o notte <= 06:00)
   state.attivita[ieri].push({ t: "caffe", fine: "20:00" });
-  assert.deepEqual(tagPreselezionati(oggi), ["alcol", "cena_tardi", "caffe_serale"]);
+  assert.deepEqual(tagPreselezionati(oggi), ["alcol", "caffe_serale"]);
 
-  // 5. Caffè mattutino (ore 09:00): NON è caffè serale
+  // 6. Caffè mattutino (ore 09:00): NON è caffè serale
   state.attivita[ieri] = [{ t: "caffe", fine: "09:00" }];
   assert.deepEqual(tagPreselezionati(oggi), []);
 
-  // 6. Turno notturno: pasto alle 02:30 del mattino di 'oggi'
-  state.attivita[ieri] = [];
-  state.attivita[oggi] = [{ t: "pasto", fine: "02:30" }];
-  assert.deepEqual(tagPreselezionati(oggi), ["cena_tardi"]);
+  // 7. Allenamento intenso finito alle 22:00 con sonno alle 23:30 (gap 90 min <= 180 min) -> allenamento_tardi pre-acceso!
+  state.beds[oggi] = "23:30";
+  state.attivita[ieri] = [{ t: "intensa", fine: "22:00" }];
+  assert.deepEqual(tagPreselezionati(oggi), ["allenamento_tardi"]);
 
-  // 7. Sovrascrittura manuale dell'utente nel diario: vince la scelta dell'utente
+  // 8. Allenamento intenso finito alle 17:00 (lontano dal letto, gap > 3 ore) -> NON pre-seleziona allenamento_tardi
+  state.attivita[ieri] = [{ t: "intensa", fine: "17:00" }];
+  assert.deepEqual(tagPreselezionati(oggi), []);
+
+  // 9. Sovrascrittura manuale dell'utente nel diario: vince la scelta dell'utente
   state.diaryTags[oggi] = ["buio"];
   assert.deepEqual(tagPreselezionati(oggi), ["buio"]);
 
-  // 8. Se l'utente ha deselezionato tutto (array vuoto salvato), non ri-accende automaticamente
+  // 10. Se l'utente ha deselezionato tutto (array vuoto salvato), non ri-accende automaticamente
   state.diaryTags[oggi] = [];
   assert.deepEqual(tagPreselezionati(oggi), []);
 });
@@ -138,6 +165,7 @@ test("tagInsight calcola correttamente l'impatto sul sonno tenendo conto dei tag
     { id: "alcol", label: "Alcol" },
     { id: "caffe_serale", label: "Caffè serale" },
     { id: "schermi", label: "Schermi a letto" },
+    { id: "allenamento_tardi", label: "Allenamento tardi" },
     { id: "rumore", label: "Rumore / Luce" },
     { id: "buio", label: "Buio totale" }
   ];

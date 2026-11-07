@@ -563,6 +563,11 @@ body.primo-avvio #firstPlanBanner,body.primo-avvio #setupChecklist,body.primo-av
 .tag-chip{display:inline-flex;align-items:center;background:var(--s1);border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:12.5px;font-weight:600;color:var(--dim);cursor:pointer;transition:all .15s ease}
 .tag-chip:hover{background:var(--s2)}
 .tag-chip.on{background:var(--blue-soft);color:var(--blue);border-color:var(--blue)}
+.tag-altri-box{display:inline-block}
+.tag-altri-box summary{list-style:none}
+.tag-altri-box summary::-webkit-details-marker{display:none}
+.tag-chip.tag-more{border-style:dashed;color:var(--faint)}
+.tag-altri-chips{margin-top:6px}
 .sleep-tags-summary{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
 .sleep-tag-pill{display:inline-block;padding:1px 7px;border-radius:999px;font-size:11px;background:var(--s2);color:var(--dim)}
 .att-box-quick{margin:6px 0 10px}
@@ -4641,6 +4646,7 @@ const SLEEP_TAGS = [
   { id: "rumore", label: "Rumore / Luce" },
   { id: "buio", label: "Mascherina / Buio" },
   { id: "schermi", label: "Schermi a letto" },
+  { id: "allenamento_tardi", label: "Allenamento tardi", labelDay: "Allenamento pre-sonno" },
   { id: "stretching", label: "Stretching / Yoga" },
   { id: "tisana", label: "Tisana / Caldo" }
 ];
@@ -4669,9 +4675,7 @@ function tagPreselezionati(dayKey){
   try {
     const dObj = new Date(dayKey + "T12:00:00");
     const prevKey = iso(day(dObj, -1));
-    const attsPrev = typeof attGiorno==="function" ? attGiorno(prevKey) : [];
-    const attsOggi = typeof attGiorno==="function" ? attGiorno(dayKey) : [];
-    const atts = attsPrev.concat(attsOggi);
+    const atts = typeof attGiorno==="function" ? attGiorno(prevKey) : [];
 
     if (atts.some(a => a.t === "alcol")) auto.push("alcol");
     if (atts.some(a => a.t === "pasto")) auto.push("cena_tardi");
@@ -4681,6 +4685,25 @@ function tagPreselezionati(dayKey){
       return isFinite(m) && (m >= 840 || m <= 360);
     })) auto.push("caffe_serale");
     if (atts.some(a => a.t === "leggera")) auto.push("stretching");
+    if (atts.some(a => {
+      if (a.t !== "intensa") return false;
+      const finM = typeof t==="function" ? t(a.fine) : NaN;
+      if (!isFinite(finM)) return false;
+      let bedMin = NaN;
+      const bedSaved = (state.beds||{})[dayKey];
+      if (bedSaved && typeof t==="function") bedMin = t(bedSaved);
+      else {
+        try {
+          const Pprev = typeof NT_planSafe==="function" ? NT_planSafe(day(dObj, -1)) : null;
+          if (Pprev && Pprev.s && isFinite(Pprev.s.onset)) bedMin = Pprev.s.onset % 1440;
+        } catch(e) {}
+      }
+      if (isFinite(bedMin)) {
+        const gap = (((bedMin - finM) % 1440) + 1440) % 1440;
+        return gap <= 180 || gap >= 1320;
+      }
+      return finM >= 1200 || finM <= 360;
+    })) auto.push("allenamento_tardi");
   } catch(e) {}
   return auto;
 }
@@ -4785,13 +4808,18 @@ function diaryReminder(P, CARDS){
     const bedMin = t(bd || defBed);
     const isDaySleep = isFinite(bedMin) && bedMin >= 300 && bedMin <= 960;
     const listTags = tagsPerOrario(isDaySleep, curTags);
+    const primariIds = new Set(listTags.map(x=>x.id));
+    const extraTags = SLEEP_TAGS.filter(x => !primariIds.has(x.id));
+    const chipHtml = t => {
+      const on = curTags.includes(t.id);
+      const label = (isDaySleep && t.labelDay) ? t.labelDay : t.label;
+      return '<button type="button" class="tag-chip'+(on?' on':'')+'" data-sleep-tag="'+t.id+'" data-sleep-day="'+esc(key0)+'" aria-pressed="'+on+'">'+label+'</button>';
+    };
     x+='<div class="dq-sez" style="margin-top:8px">Cosa ha accompagnato questo sonno? <span class="hint" style="display:inline;font-weight:400">(facoltativo)</span></div>'+
       '<div class="tag-chips" role="group" aria-label="Cosa ha accompagnato questo sonno">'+
-      listTags.map(t=>{
-        const on=curTags.includes(t.id);
-        const label = (isDaySleep && t.labelDay) ? t.labelDay : t.label;
-        return '<button type="button" class="tag-chip'+(on?' on':'')+'" data-sleep-tag="'+t.id+'" data-sleep-day="'+esc(key0)+'" aria-pressed="'+on+'">'+label+'</button>';
-      }).join("")+'</div>';
+      listTags.map(chipHtml).join("")+
+      (extraTags.length ? '<details class="tag-altri-box"><summary class="tag-chip tag-more">+ altri</summary><div class="tag-chips tag-altri-chips">'+extraTags.map(chipHtml).join("")+'</div></details>' : '')+
+      '</div>';
   }
   // Come ti senti: una scelta, si salva al tocco. Solo dopo il sonno, e poi
   // resta la riga con la scelta fatta (i grafici di «Come sto dormendo» la usano).
