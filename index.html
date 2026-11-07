@@ -6974,10 +6974,11 @@ function renderEssenziale(P, CARDS){
       voci.push({t, html:riga("turno","Turno",cd.val,cd.small,false,ICON.alarm,dett(cd),
         {a:P.b.start, z:P.b.end, poi:"entri in turno alle "+hhmm(P.b.start)})});
     } else if(cd.k==="cbt"){
-      // In ordine dall'inizio della finestra (l'ora che si legge a sinistra), non dal centro: prima finiva dopo voci
-      // con un orario successivo («Luce 04:55» sopra «Momento di sonnolenza 04:20»).
       const da=isFinite(cd.da) ? cd.da : cd.at-(cd.mezza||60), a=isFinite(cd.a) ? cd.a : cd.at+(cd.mezza||60);
-      voci.push({t:dSv(da), html:riga("sonnolenza",cd.sveglia?"Risveglio lento":"Momento di sonnolenza",cd.val,cd.small,!cd.sveglia,cd.sveglia?ICON.bed:ICON.warn,dett(cd),
+      const numVoce = cd.sveglia ? cd.val : hhmm(cd.at);
+      const subVoce = cd.sveglia ? cd.small : ("finestra " + cd.val + (cd.small ? " · " + cd.small : ""));
+      const tVoce = cd.sveglia ? dSv(da) : dSv(cd.at);
+      voci.push({t:tVoce, html:riga("sonnolenza",cd.sveglia?"Risveglio lento":"Momento di sonnolenza",numVoce,subVoce,!cd.sveglia,cd.sveglia?ICON.bed:ICON.warn,dett(cd),
         {a:da, z:a, poi:"momento di sonnolenza verso le "+hhmm(cd.at)})});
     }
   }
@@ -7034,13 +7035,19 @@ function renderEssenziale(P, CARDS){
       const subEl=clone.querySelector(".ora-sub");
       if(subEl && /\(stima\)/.test(subEl.textContent)) subEl.remove();
       const cardTimes = (clone.textContent.match(/\b\d{1,2}:\d{2}\b/g)||[]).map(t=>{ const [h,min]=t.split(":").map(Number); return h*60+min; });
+      const distNow = m => { let d = m - nowT; while(d < 0) d += 1440; return d; };
+      const maxCardDist = cardTimes.length ? Math.max(...cardTimes.map(ct => { let d = ct - mod1440(nowT); while(d < 0) d += 1440; return d; })) : 0;
       const next=voci.find(v=>{
         if(!eVoce(v) || /^<div class="tl[^"]*\b(past|ora)\b/.test(v.html)) return false;
         const a=+dammi(v,"a"), testo=dammi(v,"poi");
         if(!testo || !isFinite(a)) return false;
+        if(/stanchezza|sonnolenza/i.test(card.textContent) && /sonnolenza/i.test(testo)) return false;
+        const poiTimes = (testo.match(/\b\d{1,2}:\d{2}\b/g)||[]).map(t=>{ const [h,min]=t.split(":").map(Number); return h*60+min; });
+        if(poiTimes.some(pt => cardTimes.includes(pt))) return false;
+        if(cardTimes.includes(mod1440(a))) return false;
         if(card.textContent.includes(hhmm(a))) return false;
-        // Non proporre come "Poi" un orario precedente agli orari già citati nella card Adesso
-        if(cardTimes.length && cardTimes.some(ct => ct > a && (ct - a) < 720)) return false;
+        // Non proporre come "Poi" un evento che accade prima o contemporaneamente a quello già annunciato in Adesso
+        if(cardTimes.length && distNow(a) <= maxCardDist + 5) return false;
         return true;
       });
       if(next){

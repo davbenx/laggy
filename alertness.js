@@ -58,6 +58,17 @@ export function alertness(opts) {
   }
   const aNow = A(now.getTime());
   const peakFuture = peakT != null;
+  if (riskT != null && Number.isFinite(opts.nadir)) {
+    const rDate = new Date(riskT);
+    const rMin = minOf(rDate);
+    const diff = Math.min(Math.abs(rMin - nadir), 1440 - Math.abs(rMin - nadir));
+    if (diff <= 25) {
+      let deltaMin = nadir - rMin;
+      if (deltaMin > 720) deltaMin -= 1440;
+      else if (deltaMin < -720) deltaMin += 1440;
+      riskT += deltaMin * 60000;
+    }
+  }
   return {
     nadirMin: nadir,
     now: { level: aNow > 0.2 ? "alta" : aNow < -0.35 ? "bassa" : "media", value: +aNow.toFixed(3) },

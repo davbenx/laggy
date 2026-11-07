@@ -48,9 +48,10 @@ test("caffeina nelle notti: anche con una soglia lunga resta un caffè a inizio 
 test("alertness: con il minimo del motore il calo si sposta con lui", () => {
   const d = (h, m = 0) => new Date(2026, 10, 14, h, m);
   const base = { now: d(23), freeWake: "07:30", freeBed: "23:30", lastSleepEnd: d(14), nextSleepStart: new Date(2026, 10, 15, 10) };
-  const a = alertness({ ...base, nadir: 330 }), b = alertness({ ...base, nadir: 450 });
-  assert.equal(a.nadirMin, 330); assert.equal(b.nadirMin, 450);
+  const a = alertness({ ...base, nadir: 330 }), b = alertness({ ...base, nadir: 450 }), c = alertness({ ...base, nadir: 350 });
+  assert.equal(a.nadirMin, 330); assert.equal(b.nadirMin, 450); assert.equal(c.nadirMin, 350);
   assert.equal(a.risk.hhmm, "05:30"); assert.equal(b.risk.hhmm, "07:30", "un minimo due ore più tardi porta il calo due ore più tardi");
+  assert.equal(c.risk.hhmm, "05:50", "il minimo del motore a 350 (05:50) porta esattamente il calo a 05:50");
 });
 
 test("il diario sposta l'orologio: chi dorme davvero più tardi del piano ha il minimo più tardi", () => {

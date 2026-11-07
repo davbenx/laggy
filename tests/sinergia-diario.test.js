@@ -265,3 +265,9 @@ test("tagInsight calcola correttamente l'impatto sul sonno tenendo conto dei tag
   assert.ok(res.testo.includes("alcol"), "evidenzia l'alcol");
   assert.ok(res.testo.includes("più bassa"), "energia più bassa con alcol");
 });
+
+test("coerenza timeline sonnolenza: momento di sonnolenza mostra orario del picco e Poi non duplica se stesso", () => {
+  assert.ok(html.includes("const numVoce = cd.sveglia ? cd.val : hhmm(cd.at);"), "numVoce usa il picco hhmm(cd.at)");
+  assert.ok(html.includes('const subVoce = cd.sveglia ? cd.small : ("finestra " + cd.val + (cd.small ? " · " + cd.small : ""));'), "subVoce indica chiaramente la finestra");
+  assert.ok(html.includes("/stanchezza|sonnolenza/i.test(card.textContent) && /sonnolenza/i.test(testo)"), "Poi esclude sonnolenza se la card è già su stanchezza/sonnolenza");
+});
