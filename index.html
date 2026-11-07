@@ -7460,7 +7460,27 @@ function renderMese(){
     (()=>{ const v=specialiMese(r); return v.length ? '<p class="mese-spec">'+esc(v.join(" · "))+'</p>' : ''; })()+
     (vuoto ? '' : '<p class="hint mese-nota">Ore dall\'inizio alla fine di ogni turno, pause comprese: per controllare, non è un conteggio ufficiale.</p>')+
     (r.ignoti && !vuoto ? '<p class="mese-da-segnare"><b>'+r.ignoti+(r.ignoti===1?' giorno ancora da segnare':' giorni ancora da segnare')+'</b></p>' : '')+
-    (vuoto ? '' : '<button type="button" class="btn g lnk-indennita" id="btnApriIndennita" style="width:100%;margin-top:10px;display:flex;align-items:center;justify-content:space-between"><span>Verifica indennità e riposi di legge (D.Lgs 66/2003)</span><span class="tchev" aria-hidden="true">›</span></button>')+
+    (()=>{
+      let badgeSub = "";
+      if(!vuoto && typeof INDENNITA !== "undefined"){
+        try{
+          const cFest = festiviCfg();
+          const festFn = d => (festivoIT(d) || (cFest.dom && d.getDay() === 0) || cFest.extra.includes((d.getMonth()+1)+"-"+d.getDate()));
+          const cart = INDENNITA.analizzaCartellinoMese(NT, meseOff, festFn);
+          const st = INDENNITA.calcolaStimaIndennita(cart, state.indennita || {});
+          const rip = INDENNITA.verificaRiposiLegge(NT, meseOff);
+          const ripTxt = (rip.riposoGiornalieroOk && rip.riposoSettimanaleOk) ? "Riposi conformi ✓" : "Verifica riposi ⚠️";
+          if(st.haTariffe && st.totaleEuro != null){
+            badgeSub = INDENNITA.formatEuro(st.totaleEuro) + " indennità · " + ripTxt;
+          } else {
+            badgeSub = "Stima maggiorazioni CCNL · " + ripTxt;
+          }
+        }catch(e){}
+      }
+      return vuoto ? '' : '<button type="button" class="btn g lnk-indennita" id="btnApriIndennita" style="width:100%;margin-top:10px;display:flex;align-items:center;justify-content:space-between;text-align:left;padding:8px 12px">'+
+        '<span><b style="display:block;font-size:13.5px">Verifica indennità e riposi di legge (D.Lgs 66/2003)</b>'+(badgeSub ? '<small class="dim" style="font-size:11.5px;display:block;margin-top:2px">'+esc(badgeSub)+'</small>' : '')+'</span>'+
+        '<span class="tchev" aria-hidden="true" style="margin-left:8px">›</span></button>';
+    })()+
     '';
   // una riga sola (ore, turni, notti), e i dettagli si aprono; «Segna» e «Importa» stanno in «Modifica turni»
   const riga = vuoto ? "Nessun turno segnato" : String(ore).replace(".",",")+" h · "+r.turni+(r.turni===1?" turno":" turni")+" · "+r.notti+(r.notti===1?" notte":" notti");
@@ -11635,20 +11655,11 @@ function renderIndennita(off){
 
   let html = '';
 
-  // 1. Scheda Cartellino Presenze
-  html += '<span class="eyebrow" style="display:block;margin:0 0 8px">Cartellino ore del mese</span>';
-  html += '<div class="mese-num" style="margin-bottom:14px">'+
-    '<div><b>' + String(cartellino.oreTotali).replace(".", ",") + '</b><span>ore totali</span></div>'+
-    '<div><b>' + cartellino.turniTotali + '</b><span>turni svolti</span></div>'+
-    '<div><b>' + cartellino.nottiTotali + '</b><span>notti (' + String(cartellino.oreNotturne).replace(".", ",") + 'h 22–06)</span></div>'+
-    '<div><b>' + cartellino.festiviTotali + '</b><span>festivi/domeniche</span></div>'+
-    '<div><b>' + cartellino.liberiTotali + '</b><span>giorni senza turno</span></div>'+
+  // Riepilogo ore essenziale (senza duplicare la griglia a 5 riquadri già visibile nel mese)
+  html += '<div class="dim" style="font-size:13px;margin:0 0 14px;padding:8px 12px;background:var(--s1);border:1px solid var(--line);border-radius:var(--r);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">'+
+    '<span><b>Cartellino ore del mese:</b> <b>' + String(cartellino.oreTotali).replace(".", ",") + ' h</b> totali · <b>' + String(cartellino.oreNotturne).replace(".", ",") + ' h</b> notturne (22–06)' + (cartellino.festiviTotali ? ' · <b>' + cartellino.festiviTotali + '</b> festivi' : '') + '</span>'+
+    (cartellino.straordinarioMinuti >= 15 ? '<span style="color:var(--orange);font-weight:600">+' + (Math.round((cartellino.straordinarioMinuti / 60) * 10) / 10) + 'h straordinario</span>' : '')+
   '</div>';
-
-  if(cartellino.straordinarioMinuti >= 15){
-    const hExtra = Math.round((cartellino.straordinarioMinuti / 60) * 10) / 10;
-    html += '<p class="hint" style="margin:-6px 0 12px;color:var(--orange)"><b>+' + hExtra + ' ore</b> di straordinario registrate oltre il previsto.</p>';
-  }
 
   // 2. Scheda Stima Indennità
   html += '<span class="eyebrow" style="display:block;margin:16px 0 8px">Stima indennità di turno</span>';
