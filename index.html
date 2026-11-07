@@ -3244,7 +3244,7 @@ const nomeGiorno = d => d.toLocaleDateString(LINGUA, {weekday:"long"});
 let _gvCache = null;
 function giornoVero(){
   const min=Math.floor(Date.now()/60000);
-  let firma=""; try{ firma=[state.pattern,state.anchor,state.repeat,state.freeBed,state.freeWake,state.cTo,state.cFrom,JSON.stringify(state.ecc),JSON.stringify(state.shifts)].join("|"); }catch(e){}
+  let firma=""; try{ firma=[state.pattern,state.anchor,state.repeat,state.freeBed,state.freeWake,state.cTo,state.cFrom,(state.wakes||{})[iso(new Date())],(state.beds||{})[iso(new Date())],JSON.stringify(state.ecc),JSON.stringify(state.shifts)].join("|"); }catch(e){}
   if(_gvCache && _gvCache.min===min && _gvCache.firma===firma) return new Date(_gvCache.d);
   const d=giornoVeroCalcola();
   _gvCache={min, firma, d:d.getTime()};
@@ -3253,6 +3253,10 @@ function giornoVero(){
 function giornoVeroCalcola(){
   const reale=new Date();
   const oraReale = reale.getHours()*60 + reale.getMinutes();
+  const keyReale = iso(reale);
+  // Se per oggi hai già registrato la sveglia, il sonno è finito: sei sveglio dentro Oggi
+  if((state.wakes||{})[keyReale] && /^\d{1,2}:\d{2}$/.test(state.wakes[keyReale])) return reale;
+
   if(oraReale < 900){   // entro metà pomeriggio: unica finestra in cui "ieri" può ancora essere in corso
     try{
       const ieri = day(reale, -1);
@@ -3266,11 +3270,13 @@ function giornoVeroCalcola(){
         const inSonnoIeri = oraReale < 270 && Pieri.s && isFinite(Pieri.s.onset) && isFinite(Pieri.s.dur)
           && adessoRel>=Pieri.s.onset && adessoRel<Pieri.s.onset+Pieri.s.dur;
         // Dopo un turno di notte il sonno di giorno appartiene ancora a ieri: dallo
-        // smonto fino al risveglio il piano è quello di ieri (con il sonno che sta
-        // per cominciare), non quello di oggi, che parte dopo.
+        // smonto e durante il sonno diurno l'app resta sul giorno del turno,
+        // ma solo fino all'inizio della finestra di risveglio (ultimi 90 min di sonno o oltre).
+        const fineSonnoIeri = (Pieri.s && isFinite(Pieri.s.onset) && isFinite(Pieri.s.dur)) ? Pieri.s.onset + Pieri.s.dur : 0;
+        const sogliaRisveglio = fineSonnoIeri - 90;
         const inSonnoDopoTurno = Pieri.b && !Pieri.b.rest && isFinite(Pieri.b.end) && Pieri.s && (Pieri.s.kind==="diurno" || Pieri.s.kind==="corto")
           && isFinite(Pieri.s.onset) && isFinite(Pieri.s.dur) && Pieri.s.onset>=Pieri.b.end-30
-          && adessoRel>=Pieri.b.end && adessoRel<Pieri.s.onset+Pieri.s.dur;
+          && adessoRel>=Pieri.b.end && adessoRel<sogliaRisveglio;
         // Il sonno di ieri comincia dopo mezzanotte (letto all'01:00): finché non è iniziato sei
         // ancora nel giorno di ieri, che ha il «Dormi» che stai per fare.
         const inAttesaSonno = Pieri.s && isFinite(Pieri.s.onset) && Pieri.s.onset>=1440 && adessoRel<Pieri.s.onset;
@@ -4635,6 +4641,16 @@ function energiaPresto(key, wk){
   const d=parseIso(key); d.setHours(+wk.slice(0,2), +wk.slice(3,5), 0, 0);
   return Date.now() < d.getTime()+ENERGIA_DOPO*60e3;
 }
+function inFinestraRisveglio(bedStr, wakeStr, nowMin){
+  const b = typeof t==="function" ? t(bedStr) : NaN, w = typeof t==="function" ? t(wakeStr) : NaN;
+  if(!isFinite(b) || !isFinite(w)) return true;
+  const dur = (w - b + 1440) % 1440;
+  const daInizio = (nowMin - b + 1440) % 1440;
+  const aFine = (w - nowMin + 1440) % 1440;
+  if(daInizio >= dur && daInizio <= dur + 720) return true;
+  if(aFine <= 120 && daInizio >= Math.min(120, dur * 0.5)) return true;
+  return false;
+}
 
 const SLEEP_TAGS = [
   { id: "cena_tardi", label: "Cena tardi", labelDay: "Pasto pre-sonno" },
@@ -4709,11 +4725,8 @@ function tagPreselezionati(dayKey){
 }
 function diaryReminder(P, CARDS){
   const f=state.focus;
-  // Usava la data letterale invece del giorno vero — la stessa incoerenza
-  // già trovata e corretta altrove (l'intestazione, il badge, la
-  // descrizione del turno): durante un turno di notte ancora in corso,
-  // "domani" per il calendario può essere ancora "oggi" per l'app.
-  if(dnum(f) > dnum(giornoVero())) return "";
+  // Non si mostra per giorni futuri rispetto al calendario reale
+  if(dnum(f) > dnum(new Date())) return "";
   // Il primo giorno d'uso no: quel sonno non l'aveva pianificato l'app, e a
   // chi ha appena scelto il suo turno un modulo con orari inventati da
   // "confermare" dice solo che qualcosa non torna.
@@ -4723,7 +4736,7 @@ function diaryReminder(P, CARDS){
   const key0=iso(f), val=diary[key0];
   const wk=wakes[key0]||"", bd=(state.beds||{})[key0]||"";
   const comePiano = bd===cd.bedPiano && wk===cd.wakePiano;
-  const diverso = (bd||wk) && !comePiano;
+  const diverso = !!(bd && wk) && !comePiano;
   const logged = comePiano || diverso;
 
   let durTxt="", cmp="", debt=false;
@@ -4766,7 +4779,14 @@ function diaryReminder(P, CARDS){
     if(stato) infoVoci.set("debito",{t:"Il tuo conto del sonno",h:'<p class="ed-sub">'+esc(statoPerche)+'</p>'+(notti?'<p class="ed-sub" style="margin-bottom:4px">Le notti che pesano di più, rispetto al sonno che il piano proponeva:</p><div class="rows">'+notti+'</div>':'')+'<p class="ed-sub" style="margin-top:10px"><b>Come si recupera.</b> Non un\'ora per un\'ora: dopo una notte corta il sonno si fa più profondo, e già una notte normale ne recupera una parte. Dopo più notti corte di fila, in laboratorio tre notti normali non sono bastate a tornare lucidi come prima, e il recupero del weekend non ha rimesso a posto il metabolismo. Per questo contano anche la sveglia regolare e la luce.</p><p class="ed-sub" style="margin-top:10px">Sono stime: il conto usa le notti che annoti degli ultimi 14 giorni.</p>'});
   }
   const statoHtml = stato ? '<div class="drem-rec drem-stato"><span>'+esc(stato)+'</span><button type="button" class="lnk" data-info-debito="1">Perché?</button></div>' : "";
-  if(dnum(f)===dnum(giornoVero())) setBadge(logged?0:1);
+  const nowD = new Date(), nowMin = nowD.getHours()*60 + nowD.getMinutes();
+  const isToday = dnum(f) === dnum(nowD);
+  const hcProp = !bd && !wk ? sonnoHcDel(f, cd.bedPiano, cd.wakePiano) : null;
+  const defBed = bd || (hcProp && hcProp.bed) || cd.bedPiano || (P && P.sp ? hhmm(P.sp.onset) : "23:00");
+  const sveglio = !isToday || inFinestraRisveglio(defBed, cd.wakePiano, nowMin);
+  const defWake = wk || (hcProp && hcProp.wake) || (isToday && sveglio && nowMin < t(cd.wakePiano) ? hhmm(nowMin) : cd.wakePiano) || (P && P.sp ? hhmm(P.sp.onset + P.sp.dur) : "07:00");
+
+  if(dnum(f)===dnum(giornoVero()) || (isToday && sveglio)) setBadge(logged?0:1);
 
   // Un solo modo per tutto il diario, quello delle app di tutti i giorni:
   // una domanda con gli orari del piano → «Sì, così» (un tocco) oppure «Altri
@@ -4781,19 +4801,25 @@ function diaryReminder(P, CARDS){
   const sleepEditing = state.diaryEditing.has("sleep:"+key0);
   let x='<div class="drem'+(logged && !sleepEditing?" done":"")+'">';
   x+='<div class="drem-q"><span class="dic">'+ICON.moon+'</span>Il tuo sonno</div>';
-  const nowD = new Date(), nowMin = nowD.getHours()*60 + nowD.getMinutes();
-  const isToday = dnum(f) === dnum(nowD);
-  const hcProp = !bd && !wk ? sonnoHcDel(f, cd.bedPiano, cd.wakePiano) : null;
-  const defBed = bd || (hcProp && hcProp.bed) || cd.bedPiano || (P && P.sp ? hhmm(P.sp.onset) : "23:00");
-  const defWake = wk || (hcProp && hcProp.wake) || (isToday && nowMin < t(cd.wakePiano) ? hhmm(nowMin) : cd.wakePiano) || (P && P.sp ? hhmm(P.sp.onset + P.sp.dur) : "07:00");
   if(sleepEditing){
     x+=campiOra(['data-sleep-bed="1" aria-label="A letto"','data-sleep-wake="1" aria-label="Sveglia"'], defBed, defWake,
       '<button class="dbtn pri" data-confirm-sleep="1">Salva</button>',
       '<button class="lnk dim" data-annulla-sleep="1">Annulla</button>');
   } else if(!logged){
-    x+='<p class="dq" data-k="s-q">Hai dormito <b>'+esc(defBed)+' → '+esc(defWake)+'</b>?'+(hcProp?' <span class="hc-da">da Health Connect</span>':'')+'</p>'+
-      '<div class="dq-az"><button class="dbtn pri" data-confirm-sleep="1" data-def-bed="'+esc(defBed)+'" data-def-wake="'+esc(defWake)+'">Sì, così</button>'+
-      '<button class="dbtn" data-open="1">Altri orari</button></div>';
+    if(bd && !wk){
+      const wakeMostra = sveglio ? defWake : cd.wakePiano;
+      x+='<p class="dq" data-k="s-q">A letto alle <b>'+esc(bd)+'</b> · sveglia prevista <b>'+esc(cd.wakePiano)+'</b></p>'+
+        '<div class="dq-az"><button class="dbtn pri" data-confirm-sleep="1" data-def-bed="'+esc(bd)+'" data-def-wake="'+esc(wakeMostra)+'">'+(sveglio ? 'Svegliato alle '+esc(wakeMostra) : 'Sveglia alle '+esc(wakeMostra))+'</button>'+
+        '<button class="dbtn" data-open="1">Altri orari</button></div>';
+    } else if(isToday && !sveglio && !bd){
+      x+='<p class="dq" data-k="s-q">Sonno previsto: <b>'+esc(defBed)+' → '+esc(cd.wakePiano)+'</b></p>'+
+        '<div class="dq-az"><button class="dbtn pri" data-vado-a-letto="1" data-vado-bed="'+esc(hhmm(nowMin))+'">Vado a letto ora ('+hhmm(nowMin)+')</button>'+
+        '<button class="dbtn" data-open="1">Altri orari</button></div>';
+    } else {
+      x+='<p class="dq" data-k="s-q">Hai dormito <b>'+esc(defBed)+' → '+esc(defWake)+'</b>?'+(hcProp?' <span class="hc-da">da Health Connect</span>':'')+'</p>'+
+        '<div class="dq-az"><button class="dbtn pri" data-confirm-sleep="1" data-def-bed="'+esc(defBed)+'" data-def-wake="'+esc(defWake)+'">Sì, così</button>'+
+        '<button class="dbtn" data-open="1">Altri orari</button></div>';
+    }
   } else {
     x+='<div class="drem-done" data-k="s-fatto"><span class="drem-tx"><span class="drem-ok">✓</span> Sonno <b>'+esc(bd)+'–'+esc(wk)+'</b> · '+durTxt+'\u0001EN\u0001'+
        (cmp?' <span class="drem-cmp">'+cmp+'</span>':'')+
@@ -7171,7 +7197,17 @@ function renderHeader(P, f){
   $("#dateLabel").textContent = dataTesto;
   // «Ancora lunedì» alle 3 di martedì: una riga che dice perché, sotto la data, solo in quel caso.
   { let n=$("#ancoraNota"); if(ancora){ if(!n){ n=document.createElement("p"); n.id="ancoraNota"; n.className="ancora-nota solo-oggi"; $(".appbar").after(n); }
-      n.textContent="Per il calendario è già "+new Date().toLocaleDateString(LINGUA,{weekday:"long"})+": la tua giornata finisce quando vai a dormire."; n.hidden=false; }
+      const nowMinReale = new Date().getHours()*60 + new Date().getMinutes();
+      let sveglioIeri = true;
+      try {
+        const Pieri = NT_planSafe(day(new Date(), -1));
+        if(Pieri && Pieri.s && isFinite(Pieri.s.onset) && isFinite(Pieri.s.dur)){
+          sveglioIeri = inFinestraRisveglio(hhmm(Pieri.s.onset), hhmm(Pieri.s.onset+Pieri.s.dur), nowMinReale);
+        }
+      }catch(e){}
+      const linkTxt = sveglioIeri ? "Ti sei già svegliato? Vai a oggi →" : "Vai a oggi →";
+      n.innerHTML="Per il calendario è già "+new Date().toLocaleDateString(LINGUA,{weekday:"long"})+": la tua giornata finisce quando vai a dormire."+
+        ' <button type="button" class="lnk" id="btnGiaSveglio" style="margin-left:6px;text-decoration:underline">'+linkTxt+'</button>'; n.hidden=false; }
     else if(n) n.hidden=true; }
   // La pillola del turno torna in linea accanto alla data, come nel
   // mockup — non più una riga a parte sotto (#nowShift, rimossa): stesso
@@ -9825,6 +9861,22 @@ function diaryClick(e){
       render();
       controllaLaggyCrescita(); }
     return; }
+  const vl=e.target.closest("[data-vado-a-letto]");
+  if(vl){
+    const k=iso(state.focus);
+    const nowD=new Date(), nowOra=vl.dataset.vadoBed || vl.dataset.bed || hhmm(nowD.getHours()*60+nowD.getMinutes());
+    state.beds[k]=nowOra;
+    store.set("beds",state.beds);
+    _gvCache=null; salva();
+    toast("A letto alle "+nowOra);
+    render();
+    return;
+  }
+  if(e.target.closest("#btnGiaSveglio")){
+    state.focus=new Date();
+    render();
+    return;
+  }
   const op=e.target.closest("[data-open]");
   if(op){ const k=iso(state.focus);
     state.diaryEditing.add("sleep:"+k);
@@ -9844,6 +9896,7 @@ function diaryClick(e){
     chiediPerche(k, esitoNotte(k, bedVal, wakeVal));
     store.set("beds",state.beds);
     store.set("wakes",wakes);
+    _gvCache=null;
     state.diaryEditing.delete("sleep:"+k);
     state.diaryTags = state.diaryTags || {};
     if(state.diaryTags[k] === undefined){
@@ -10030,6 +10083,11 @@ const SPIEGAZIONI = {
   }
 };
 document.addEventListener("click", e=>{
+  if(e.target.closest("#btnGiaSveglio")){
+    state.focus=new Date();
+    render();
+    return;
+  }
   const b=e.target.closest("[data-spiega]"); if(!b) return;
   const sp=SPIEGAZIONI[b.dataset.spiega];
   if(sp){ $("#infoTitolo").textContent=sp.t; $("#infoCorpo").innerHTML=sp.h; strutturaPerche($("#infoCorpo")); apriFoglio("infoModal",true); }

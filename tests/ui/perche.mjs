@@ -30,7 +30,7 @@ await p.context().close();
 p=await apri(new Date(2026,10,5,3,0), {pattern:"MPNSRR"});
 const sn=await p.evaluate(()=>{ const r=document.querySelector('#essenziale [data-row="sonnolenza"]'); return r ? r.innerText.replace(/\s+/g," ") : ""; });
 ok(/Momento di sonnolenza/.test(sn) && /stima dai tuoi orari/.test(sn), "momento di sonnolenza con la fonte della stima → "+sn);
-const m=sn.match(/(\d\d):(\d\d).*?(\d\d):(\d\d)/); const larg=m ? ((((+m[3])*60+(+m[4]))-((+m[1])*60+(+m[2])))+1440)%1440 : 0;
+const m=sn.match(/finestra\s+(\d\d):(\d\d).*?(\d\d):(\d\d)/) || sn.match(/(\d\d):(\d\d).*?(\d\d):(\d\d)/); const larg=m ? ((((+m[3])*60+(+m[4]))-((+m[1])*60+(+m[2])))+1440)%1440 : 0;
 ok(larg>=150 && larg<=240, "senza diario la finestra è larga (dagli orari del piano): "+larg+" minuti");
 // Piano essenziale: un interruttore nasconde pasti, tempo libero e luce bassa; spento, tornano
 const voci=()=>p.evaluate(()=>[...document.querySelectorAll("#essenziale [data-row]")].map(r=>r.dataset.row));

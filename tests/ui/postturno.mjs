@@ -73,4 +73,41 @@ const stato=p=>p.evaluate(()=>({titolo:document.querySelector("#dateLabel").text
     ok(!/Appena smontato/.test(s.ora), "giorno della prima notte, alle "+ora+": niente «Appena smontato» → "+s.ora.slice(0,80)); }
   await ctx.close(); }
 
+// Smonto: risveglio anticipato (es. alle 12:00, prima della sveglia teorica delle 13:25).
+// L'app apre su Oggi, la card chiede conferma del sonno fino alle 12:00, e cliccando «Sì, così» salva la sveglia.
+{ const ctx=await b.newContext({locale:"it-IT",viewport:{width:360,height:740}});
+  const ieri=new Date(); ieri.setDate(ieri.getDate()-1);
+  await ctx.addInitScript(a=>{ if(sessionStorage.getItem("x")) return; sessionStorage.setItem("x","1");
+    localStorage.setItem("nt:state",JSON.stringify({turniConfigurati:true,pattern:"NNNRR",anchor:a,shifts:{N:{n:"Notte",s:1320,e:1800}},repeat:true,firstSeenAt:"2026-01-01"}));
+    localStorage.setItem("nt:turniConfigurati","true"); localStorage.setItem("nt:firstPlanBannerChiuso","true"); localStorage.setItem("nt:attivazioneNascosta","true"); }, iso(ieri));
+  const p=await ctx.newPage(); p.on("pageerror",e=>errs.push(e.message));
+  const d=new Date(); d.setHours(12,0,0,0); await p.clock.setFixedTime(d);
+  await p.goto("http://localhost:8765/index.html"); await p.waitForTimeout(1000);
+  const tit=await p.evaluate(()=>document.querySelector("#dateLabel").textContent);
+  ok(/^Oggi/.test(tit), "smonto con risveglio anticipato alle 12:00: l'app apre su Oggi → "+tit);
+  const q=await p.evaluate(()=>document.querySelector(".drem [data-k=\"s-q\"]").textContent);
+  ok(/Hai dormito.*?→ 12:00/.test(q), "la domanda propone la sveglia alle 12:00 → "+q);
+  await p.click(".drem [data-confirm-sleep]"); await p.waitForTimeout(500);
+  const done=await p.evaluate(()=>document.querySelector(".drem-done").textContent);
+  ok(/Sonno.*?–12:00/.test(done), "salvato: sveglia alle 12:00 registrata con successo → "+done);
+  await ctx.close(); }
+
+// Letto più tardi del previsto (es. alle 01:15 su notte normale 23:30–07:30):
+// la scheda non dice 'Hai dormito', ma mostra 'Vado a letto ora' per annotare l'ora reale.
+{ const ctx=await b.newContext({locale:"it-IT",viewport:{width:360,height:740}});
+  await ctx.addInitScript(()=>{ if(sessionStorage.getItem("x")) return; sessionStorage.setItem("x","1");
+    localStorage.setItem("nt:state",JSON.stringify({turniConfigurati:true,pattern:"RRRR",anchor:"2026-01-01",shifts:{N:{n:"Notte",s:1320,e:1800}},repeat:true,firstSeenAt:"2026-01-01",freeBed:"23:30",freeWake:"07:30"}));
+    localStorage.setItem("nt:turniConfigurati","true"); localStorage.setItem("nt:firstPlanBannerChiuso","true"); localStorage.setItem("nt:attivazioneNascosta","true"); });
+  const p=await ctx.newPage(); p.on("pageerror",e=>errs.push(e.message));
+  const d=new Date(); d.setHours(1,15,0,0); await p.clock.setFixedTime(d);
+  await p.goto("http://localhost:8765/index.html"); await p.waitForTimeout(1000);
+  // Naviga a oggi per vedere la card del giorno
+  await p.click("#btnGiaSveglio"); await p.waitForTimeout(500);
+  const btnVado=await p.evaluate(()=>document.querySelector(".drem [data-vado-a-letto]").textContent);
+  ok(/Vado a letto ora \(01:15\)/.test(btnVado), "a letto tardi alle 01:15: bottone «Vado a letto ora (01:15)» → "+btnVado);
+  await p.click(".drem [data-vado-a-letto]"); await p.waitForTimeout(500);
+  const testoAttesa=await p.evaluate(()=>document.querySelector(".drem [data-k=\"s-q\"]").textContent);
+  ok(/A letto alle 01:15/.test(testoAttesa), "registrato letto alle 01:15, in attesa della sveglia → "+testoAttesa);
+  await ctx.close(); }
+
 console.log("errori", errs); await b.close();
