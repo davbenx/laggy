@@ -12181,13 +12181,51 @@ function applicaCopia(dati){
   localStorage.setItem("nt:backupDone","true");
 }
 async function salvaCopiaFile(){
-  const R=raccogliCopia(), json=JSON.stringify(R);
-  const nome="notturnisti-copia-"+iso(new Date())+".json";
-  const file=new File([json],nome,{type:"application/json"});
+  let R, json;
   try{
-    if(navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({files:[file],title:"Notturnisti"}); }
-    else { const a=document.createElement("a"); a.href=URL.createObjectURL(file); a.download=nome; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),60000); }
-  }catch(e){ if(e && e.name==="AbortError") return; toast("Non sono riuscito a salvare il file"); return; }
+    R = raccogliCopia();
+    json = JSON.stringify(R);
+  }catch(e){
+    toast("Non sono riuscito a preparare la copia");
+    return;
+  }
+  const nome="notturnisti-copia-"+iso(new Date())+".json";
+  const blob=new Blob([json],{type:"application/json"});
+  let file=null;
+  try{ file=new File([blob],nome,{type:"application/json"}); }catch(e){}
+
+  let salvato=false;
+  // Su iOS/Safari navigator.share permette di scegliere "Salva su File" / iCloud Drive / AirDrop.
+  if(file && typeof navigator!=="undefined" && navigator.canShare){
+    try{
+      if(navigator.canShare({files:[file]})){
+        await navigator.share({files:[file],title:"Notturnisti"});
+        salvato=true;
+      }
+    }catch(e){
+      if(e && e.name==="AbortError") return; // L'utente ha annullato il foglio di condivisione
+      // Se fallisce (es. NotAllowedError su Chromium dove il tipo .json non è permesso in Web Share),
+      // non blocchiamo l'operazione ma passiamo al download diretto sottostante!
+    }
+  }
+
+  if(!salvato){
+    try{
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement("a");
+      a.href=url;
+      a.download=nome;
+      a.style.display="none";
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(()=>{ a.remove(); URL.revokeObjectURL(url); }, 2000);
+      salvato=true;
+    }catch(e){
+      toast("Non sono riuscito a salvare il file");
+      return;
+    }
+  }
+
   store.set("copiaFileAl", iso(new Date())); state.backupDone=true; store.set("backupDone",true);
   track("setup_item", {item:"copia_file"}); aggiornaCopiaUI(); toast("Copia salvata"); render();
 }
