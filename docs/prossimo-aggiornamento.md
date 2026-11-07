@@ -43,7 +43,7 @@ Fatto nella 1.1.1 (non serve più): tolto il vecchio wizard nascosto; suggerimen
   - Nuova riga del dossier (C) e passaggio dal revisore prima di ogni testo che la usa.
   - Dopo qualche settimana, confronto fra modello vecchio e nuovo con i voti sull'energia («Il modello sul campo»).
   - Mai scrivere «grado clinico».
-- [ ] Test che usano la data vera: fissare l'ora (come in `speciali`), perché prima della sveglia per l'app è ancora «ieri» e di notte falliscono.
+- [x] Test che usano la data vera: fissare l'ora (come in `speciali`), perché prima della sveglia per l'app è ancora «ieri» e di notte falliscono. Fissato di default a mezzogiorno in `_pw.mjs` per tutti i test del browser e in `e2e.cjs`.
 
 ### Valutati e scartati (con il motivo)
 - Suoni rilassanti: fuori missione, pesanti (audio, licenze, riproduzione ad app chiusa).

@@ -9,9 +9,9 @@
 set -uo pipefail
 cd "$(dirname "$0")/../.."
 OUT="${OUT:-$(mktemp -d)}"; export OUT
-# Ora locale verso mezzogiorno: tra mezzanotte e la sveglia l'app conta
-# ancora il giorno prima (voluto), e alcune suite che dicono "oggi"
-# fallivano solo se lanciate di notte. TZ=... dal chiamante vince.
+# L'orologio dei test del browser è fissato a mezzogiorno in _pw.mjs (così
+# anche lanciati di notte i test non scambiano oggi con ieri per giornoVero()).
+# Per le parti Node pure, TZ verso mezzogiorno fa da cintura di sicurezza se non specificato.
 if [ -z "${TZ:-}" ]; then
   n=$((12 - 10#$(date -u +%H)))
   if [ $n -ge 0 ]; then export TZ="Etc/GMT-$n"; else export TZ="Etc/GMT+$((-n))"; fi

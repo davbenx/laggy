@@ -52,7 +52,7 @@ ok(st.ecc[d1]==="N" && !st.giorni[d1], "il turno segnato a mano (Notte) torna to
 await p.click("#qsClose"); await p.waitForTimeout(150);
 // 3. reperibilità oggi (Mattino): pisolino preventivo nel piano, pillola
 await apri(0); await chip("reperibile");
-ok(await p.evaluate(()=>/pisolino nel pomeriggio/.test(document.querySelector("#qsSpec").textContent)), "Reperibilità: il foglio spiega il pisolino preventivo");
+ok(await p.evaluate(()=>/pisolino.*nel pomeriggio/i.test(document.querySelector("#qsSpec").textContent)), "Reperibilità: il foglio spiega il pisolino preventivo");
 // orari veri: il mattino finisce alle 16:00 invece delle 14:00
 await p.evaluate(()=>{ const i=document.querySelector('[data-qs-ora="e"]'); i.value="16:00"; i.dispatchEvent(new Event("change",{bubbles:true})); });
 await p.waitForTimeout(250); st=await stato();

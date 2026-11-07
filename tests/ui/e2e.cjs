@@ -2,6 +2,8 @@ const { chromium } = require(require("child_process").execSync("npm root -g").to
 (async () => {
   const b = await chromium.launch();
   const ctx = await b.newContext();
+  const mezzogiorno = new Date(); mezzogiorno.setHours(12, 0, 0, 0);
+  try { await ctx.clock.setFixedTime(mezzogiorno); } catch (_) {}
   await ctx.grantPermissions(["notifications"], { origin: "http://localhost:8765" });
   await ctx.addInitScript(() => { try { Object.defineProperty(Notification, "permission", { get: () => "granted" }); } catch (e) {} });
   const p = await ctx.newPage();
