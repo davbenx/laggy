@@ -964,6 +964,8 @@ display:flex;align-items:center;justify-content:center;position:relative;z-index
 .tl-adesso i{justify-self:center;width:9px;height:9px;border-radius:50%;background:var(--blue);position:relative;z-index:1;box-shadow:0 0 0 3px var(--bg)}
 .tl-adesso::after{content:"";position:absolute;left:calc(var(--tcol) + 10px + var(--nodo));right:0;top:50%;height:1px;background:var(--blue);opacity:.45}
 .drem .dopo-notte{margin:var(--sp-3) 0 0;padding:var(--sp-3) 0 0;border-top:1px solid var(--line)}
+.dopo-turno-box{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:8px 12px;margin:6px 0 10px}
+.dopo-turno-box .dopo-notte{margin:0;padding:0}
 .sv-riga{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);margin-top:var(--sp-3);padding-top:var(--sp-3);border-top:1px solid var(--line);font-size:14px;color:var(--dim)}
 .sv-t{display:flex;align-items:center;gap:var(--sp-2);min-width:0}
 .sv-t b{color:var(--ink)}
@@ -1824,6 +1826,7 @@ header b{font-size:23px}
     <button type="button" class="tool tool-1line azione" data-mese-manda><span class="tool-ic" data-ic="calendar"></span><span class="tool-tx"><b id="riepMeseT">Riepilogo del mese</b><span>Ore, turni, notti e festivi, in un messaggio</span></span></button>
     <button type="button" class="tool tool-1line azione" data-anno-manda><span class="tool-ic" data-ic="calendar"></span><span class="tool-tx"><b>Ultimi 12 mesi</b><span>Mese più pesante, notti, sonno annotato</span></span></button>
     <button type="button" class="tool tool-1line azione" data-riepilogo-medico><span class="tool-ic" data-ic="scudo"></span><span class="tool-tx"><b>PDF per il medico competente</b><span>Turni, notti e riposi degli ultimi 12 mesi</span></span></button>
+    <button type="button" class="tool tool-1line azione" data-riepilogo-indennita><span class="tool-ic" data-ic="paga"></span><span class="tool-tx"><b>Riepilogo ore, indennità e riposi</b><span>Testo per controllo cartellino con D.Lgs 66/2003</span></span></button>
   </div></div></div>
 <div id="infoModal" class="qs-backdrop" hidden aria-hidden="true"><div class="qs-sheet" role="dialog" aria-modal="true" aria-labelledby="infoTitolo"><div class="qs-header"><div><b class="qs-title" id="infoTitolo"></b></div><div class="qs-hd-az"><button type="button" class="qs-close" id="infoChiudi" aria-label="Chiudi">✕</button></div></div><div class="ed" id="infoCorpo"></div></div></div>
 <div id="modificaModal" class="qs-backdrop" hidden aria-hidden="true"><div class="qs-sheet" role="dialog" aria-modal="true" aria-label="Modifica turni"><div class="qs-header"><div><b class="qs-title">Modifica turni</b></div><div class="qs-hd-az"><button type="button" class="qs-close" id="modificaChiudi" aria-label="Chiudi">✕</button></div></div>
@@ -1836,6 +1839,9 @@ header b{font-size:23px}
 <div id="laggyModal" class="qs-backdrop" hidden aria-hidden="true"><div class="qs-sheet" role="dialog" aria-modal="true" aria-label="Laggy"><div class="qs-header"><div><b class="qs-title">Laggy</b></div><div class="qs-hd-az"><button type="button" class="qs-close" id="laggyChiudi" aria-label="Chiudi">✕</button></div></div><div class="ed" id="laggyCorpo" style="text-align:center;padding:16px 20px 24px"></div></div></div>
 <div id="pagaModal" class="qs-backdrop" hidden aria-hidden="true"><div class="qs-sheet" role="dialog" aria-modal="true" aria-labelledby="pagaTitolo"><div class="qs-header"><div><b class="qs-title" id="pagaTitolo">Giorno di paga</b></div><div class="qs-hd-az"><button type="button" class="qs-close" id="pagaChiudi" aria-label="Chiudi">✕</button></div></div><div class="ed" style="padding:10px 16px 20px"><p class="ed-sub">Mostra il giorno dello stipendio nel calendario con un'icona e ricevi un promemoria facoltativo alle 09:00.</p><div class="q"><label for="pagaGiornoSel">Giorno del mese</label><select id="pagaGiornoSel"><option value="">Nessuno (disattivato)</option></select></div><label class="riga-sw" for="pagaNotifSw" style="margin-top:14px"><span><b>Promemoria alle 09:00</b><small>Notifica la mattina del giorno di paga</small></span><span class="switch"><input type="checkbox" id="pagaNotifSw" checked><span class="slider"></span></span></label><button type="button" class="btn pri" id="pagaSalva" style="width:100%;min-height:46px;margin-top:16px">Salva</button></div></div></div>
 <div id="shiftIconModal" class="qs-backdrop" hidden aria-hidden="true"><div class="qs-sheet" role="dialog" aria-modal="true" aria-labelledby="shiftIconTitolo"><div class="qs-header"><div><b class="qs-title" id="shiftIconTitolo">Icona del turno</b></div><div class="qs-hd-az"><button type="button" class="qs-close" id="shiftIconChiudi" aria-label="Chiudi">✕</button></div></div><div class="ed" style="padding:10px 16px 20px"><p class="ed-sub" id="shiftIconSub">Scegli un'icona per identificare a colpo d'occhio questo turno nel calendario e nelle stampe.</p><div class="tag-chips" id="shiftIconChips" style="gap:8px;margin-top:12px"></div><button type="button" class="btn g qs-close" style="width:100%;min-height:42px;margin-top:14px" id="shiftIconRimuovi">Nessuna icona</button></div></div></div>
+<div id="indennitaModal" class="qs-backdrop" hidden aria-hidden="true"><div class="qs-sheet" role="dialog" aria-modal="true" aria-labelledby="indennitaTitolo"><div class="qs-header"><div><b class="qs-title" id="indennitaTitolo">Verifica turni e indennità</b></div><div class="qs-hd-az"><button type="button" class="btn g" id="indennitaApriConfig" style="padding:4px 10px;font-size:12.5px;margin-right:6px">Tariffe</button><button type="button" class="qs-close" id="indennitaChiudi" aria-label="Chiudi">✕</button></div></div><div class="ed" id="indennitaCorpo" style="padding:10px 16px 24px"></div></div></div>
+<div id="indennitaConfigModal" class="qs-backdrop" hidden aria-hidden="true"><div class="qs-sheet" role="dialog" aria-modal="true" aria-labelledby="indennitaConfigTitolo"><div class="qs-header"><div><b class="qs-title" id="indennitaConfigTitolo">Le tue indennità di contratto</b></div><div class="qs-hd-az"><button type="button" class="qs-close" id="indennitaConfigChiudi" aria-label="Chiudi">✕</button></div></div><div class="ed" style="padding:10px 16px 24px"><p class="ed-sub">Imposta le maggiorazioni e le quote orarie della tua busta paga. I calcoli restano solo su questo telefono. <button type="button" class="btn-i" data-spiega="indennita" aria-label="Maggiori informazioni sulle indennità"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button></p><span class="eyebrow" style="display:block;margin:10px 0 6px">Preset contrattuali veloci</span><div class="tag-chips" id="indennitaPresetChips" style="gap:6px;margin-bottom:14px;flex-wrap:wrap"><button type="button" class="tag-chip" data-ccnl="sanita">Sanità</button><button type="button" class="tag-chip" data-ccnl="metalmeccanico">Metalmeccanici</button><button type="button" class="tag-chip" data-ccnl="commercio">Commercio</button><button type="button" class="tag-chip" data-ccnl="vigilanza">Vigilanza</button><button type="button" class="tag-chip" data-ccnl="trasporti">Trasporti</button><button type="button" class="tag-chip" data-ccnl="personalizzato">Personalizzato</button></div><div class="q"><label for="indPagaBase">Paga base lorda oraria (€/h, facoltativa con quote fisse)</label><input type="number" id="indPagaBase" step="0.05" min="0" placeholder="es. 12.50"></div><div class="q" style="margin-top:10px"><label for="indOreSettimana">Orario settimanale di contratto (ore)</label><input type="number" id="indOreSettimana" step="1" min="20" max="60" value="36"></div><div class="q" style="margin-top:14px"><label>Maggiorazione notturna (22:00 – 06:00)</label><div style="display:flex;gap:8px;align-items:center"><input type="number" id="indNotteVal" step="0.1" min="0" placeholder="Valore" style="flex:1"><select id="indNotteTipo" style="flex:1"><option value="perc">% su paga base</option><option value="ora">€ all'ora</option><option value="turno">€ a turno</option></select></div></div><div class="q" style="margin-top:10px"><label>Maggiorazione festiva e domenicale</label><div style="display:flex;gap:8px;align-items:center"><input type="number" id="indFestivoVal" step="0.1" min="0" placeholder="Valore" style="flex:1"><select id="indFestivoTipo" style="flex:1"><option value="perc">% su paga base</option><option value="ora">€ all'ora</option><option value="turno">€ a turno</option></select></div></div><div class="q" style="margin-top:10px"><label>Maggiorazione notte festiva</label><div style="display:flex;gap:8px;align-items:center"><input type="number" id="indNotteFestivaVal" step="0.1" min="0" placeholder="Auto o valore" style="flex:1"><select id="indNotteFestivaTipo" style="flex:1"><option value="auto">Automatica</option><option value="perc">% su paga base</option><option value="ora">€ all'ora</option><option value="turno">€ a turno</option></select></div></div><div class="q" style="margin-top:10px"><label>Maggiorazione straordinario</label><div style="display:flex;gap:8px;align-items:center"><input type="number" id="indStraordVal" step="0.1" min="0" placeholder="Valore" style="flex:1"><select id="indStraordTipo" style="flex:1"><option value="perc">% su paga base</option><option value="ora">€ all'ora</option></select></div></div><p class="hint" style="margin-top:14px">Questi valori servono solo a stimare le indennità nel cartellino mensile dell'app.</p><button type="button" class="btn pri" id="indennitaConfigSalva" style="width:100%;min-height:46px;margin-top:16px">Salva configurazione</button></div></div></div>
+<div id="sleepTagsModal" class="qs-backdrop" hidden aria-hidden="true"><div class="qs-sheet" role="dialog" aria-modal="true" aria-labelledby="sleepTagsTitolo"><div class="qs-header"><div><b class="qs-title" id="sleepTagsTitolo">Cosa ha accompagnato questo sonno?</b></div><div class="qs-hd-az"><button type="button" class="qs-close" id="sleepTagsChiudi" aria-label="Chiudi">✕</button></div></div><div class="ed" style="padding:10px 16px 24px"><p class="ed-sub">Fattori facoltativi per capire cosa incide sul tuo riposo (si salvano al tocco).</p><div class="tag-chips" id="sleepTagsChips" role="group" aria-label="Fattori del sonno" style="gap:8px;margin-top:12px"></div><button type="button" class="btn g qs-close" style="width:100%;min-height:44px;margin-top:18px" id="sleepTagsFine">Fatto</button></div></div></div>
 <!-- I turni del mese (un tocco per giorno, o dal foglio turni): si apre
      dal riquadro del mese, qui sopra. -->
 <div id="segnaPagina" class="solo-turni" hidden>
@@ -1876,6 +1882,7 @@ header b{font-size:23px}
     <button type="button" class="tool tool-1line va" data-tt="riposi"><span class="tool-ic" data-ic="bed"></span><span class="tool-tx"><b>Giorni di riposo</b><span><span id="ttValRiposi"></span></span></span></button>
     <button type="button" class="tool tool-1line va" data-tt="festivi"><span class="tool-ic" data-ic="sparkles"></span><span class="tool-tx"><b>Festivi</b><span><span id="ttValFestivi"></span></span></span></button>
     <button type="button" class="tool tool-1line va" data-tt="paga"><span class="tool-ic" data-ic="paga"></span><span class="tool-tx"><b>Giorno di paga</b><span><span id="ttValPaga"></span></span></span></button>
+    <button type="button" class="tool tool-1line va" data-tt="indennita"><span class="tool-ic" data-ic="scudo"></span><span class="tool-tx"><b>Indennità e riposi di legge</b><span><span id="ttValIndennita"></span></span></span></button>
     <button type="button" class="tool tool-1line va" data-tt="schema"><span class="tool-ic" data-ic="cycle"></span><span class="tool-tx"><b>Cambia tipo di turni</b><span>In quinta, 12 ore, sempre lo stesso turno, turni che cambiano…</span></span></button>
   </div>
   <div id="ttFlusso"></div>
@@ -3154,6 +3161,7 @@ import { createEngine, encEcc, decEcc, encGiorni, decGiorni, GIORNI_SPECIALI } f
 import { LINGUA, giorniBrevi, mesiBrevi } from "./lingua.js";
 import * as CAL from "./calendario.js";   // il calendario a settimane del ciclo: stesse regole del widget   // formato di date e giorni: un solo punto
 import platform from "./platform.js";
+import * as INDENNITA from "./indennita.js";
 /* MOTORE NOTTURNISTI v4 — turni arbitrari.
    Nessuna regola guarda più la lettera del turno. Tutto si decide dalla
    geometria: dove cade il turno rispetto alla finestra di sonno naturale.
@@ -3526,10 +3534,10 @@ let diaryAt = store.mappa("diaryAt");
 // regolari per costruzione. Una notte senza segno è un dato inserito a mano.
 let sonnoPiano = store.mappa("sonnoPiano");
 function segnaSonnoPiano(k, comePiano){ if(comePiano) sonnoPiano[k]=1; else delete sonnoPiano[k]; store.set("sonnoPiano", sonnoPiano); }
-state.wakes = store.mappa("wakes");
+state.wakes = Object.assign(state.wakes || {}, store.mappa("wakes"));
 // Health Connect: quello che si è letto (solo se acceso), nelle sue chiavi; spegnendo un tipo, l'app lo dimentica
 try{ state.hcSonno = store.get("hcSonno", []); state.hcPassi = store.get("hcPassi", []); }catch(e){ state.hcSonno = []; state.hcPassi = []; }
-state.beds  = store.mappa("beds");
+state.beds  = Object.assign(state.beds || {}, store.mappa("beds"));
 state.pisolini = store.mappa("pisolini");
 // Due turni con lo stesso nome (creati prima che i nomi fossero unici): il secondo prende gli orari nel nome, così
 // pennelli, calendario e fogli li distinguono. Quello nel ciclo resta com'è. Chiamata a ogni render (pochi turni: costa nulla).
@@ -4734,7 +4742,7 @@ function diaryReminder(P, CARDS){
   const cd=CARDS.find(c=>c.k==="d");
   if(!cd || !cd.wakeAsk) return "";
   const key0=iso(f), val=diary[key0];
-  const wk=wakes[key0]||"", bd=(state.beds||{})[key0]||"";
+  const wk=(state.wakes||{})[key0]||wakes[key0]||"", bd=(state.beds||{})[key0]||"";
   const comePiano = bd===cd.bedPiano && wk===cd.wakePiano;
   const diverso = !!(bd && wk) && !comePiano;
   const logged = comePiano || diverso;
@@ -4853,25 +4861,17 @@ function diaryReminder(P, CARDS){
       const curTags = tagPreselezionati(key0);
       const bedMin = t(bd || defBed);
       const isDaySleep = isFinite(bedMin) && bedMin >= 300 && bedMin <= 960;
-      const listTags = tagsPerOrario(isDaySleep, curTags);
-      const primariIds = new Set(listTags.map(x=>x.id));
-      const extraTags = SLEEP_TAGS.filter(x => !primariIds.has(x.id));
-      const chipHtml = t => {
-        const on = curTags.includes(t.id);
-        const label = (isDaySleep && t.labelDay) ? t.labelDay : t.label;
-        return '<button type="button" class="tag-chip'+(on?' on':'')+'" data-sleep-tag="'+t.id+'" data-sleep-day="'+esc(key0)+'" aria-pressed="'+on+'">'+label+'</button>';
-      };
-      const showAll = !!state.mostraAltriTag;
-      const tagsToShow = showAll ? listTags.concat(extraTags) : listTags;
-      const moreBtn = extraTags.length
-        ? (showAll
-            ? '<button type="button" class="tag-chip tag-more" data-altri-tags="0" aria-label="Mostra meno fattori">− meno</button>'
-            : '<button type="button" class="tag-chip tag-more" data-altri-tags="1" aria-label="Mostra altri fattori">+ altri ('+extraTags.length+')</button>')
-        : '';
-      xTags = '<div class="dq-sez">Cosa ha accompagnato questo sonno? <span>(facoltativo)</span></div>'+
-        '<div class="tag-chips" role="group" aria-label="Cosa ha accompagnato questo sonno">'+
-        tagsToShow.map(chipHtml).join("") + moreBtn +
-        '</div>';
+      let tagLabelTxt = "";
+      if(curTags.length){
+        const nomi = curTags.map(id => {
+          const tObj = SLEEP_TAGS.find(x => x.id === id);
+          return tObj ? ((isDaySleep && tObj.labelDay) ? tObj.labelDay : tObj.label) : id;
+        });
+        tagLabelTxt = '🏷️ ' + esc(nomi.slice(0, 2).join(", ")) + (nomi.length > 2 ? ' (+' + (nomi.length - 2) + ')' : '') + ' <span class="dim" style="font-size:11px;font-weight:normal">· Modifica</span>';
+      } else {
+        tagLabelTxt = '+ Aggiungi tag (Alcol, Caffè...)';
+      }
+      xTags = '<div style="margin-top:8px"><button type="button" class="btn g sm'+(curTags.length?' on':'')+'" data-apri-sleep-tags="'+esc(key0)+'" style="font-size:12px;min-height:36px;padding:4px 12px">'+tagLabelTxt+'</button></div>';
     }
   }
   // Il pisolino: la domanda solo quando è cominciato (prima non c'è niente da
@@ -4897,7 +4897,7 @@ function diaryReminder(P, CARDS){
       if(aReale!==null && bReale!==null){
         let dReale=bReale-aReale; while(dReale<=0) dReale+=1440;
         if(dReale-c.nap.min>=20 && dReale<300)
-          xNap+='<div class="drem-rec">Più lungo del previsto ('+dur(dReale)+'): oltre una certa durata un pisolino rischia di scivolare in sonno profondo, con più intontimento al risveglio invece di meno.</div>';
+          xNap+='<div class="drem-rec"><span class="eic" style="color:var(--orange)">⚠️</span> <b>Più lungo del previsto ('+dur(dReale)+')</b>: rischio sonno profondo e intontimento.</div>';
       }
     } else if(seg.no){
       xNap+='<div class="drem-done"><span class="drem-tx">Pisolino non fatto</span><button type="button" class="ibtn drem-edit" data-nap-riapri="'+esc(c.nap.k)+'" aria-label="Riapri il pisolino" title="Modifica">'+ICON.pencil+'</button></div>';
@@ -4932,7 +4932,7 @@ function diaryReminder(P, CARDS){
     if(state.diaryEditing.has("extra:"+key0+":nuovo")){
       const fineD=isToday?hhmm(nowMin):"15:30", inD=isToday?hhmm(mod1440(nowMin-30)):"15:00";
       xExtra+=campiExtra("nuovo",inD,fineD);
-    } else if(!pend && logged && !sleepEditing) xExtra+='<button type="button" class="lnk" data-extra-nuovo="1" style="margin-top:8px;min-height:44px">+ Hai fatto un altro pisolino?</button>';
+    } else if(!pend && logged && !sleepEditing) xExtra+='<div style="margin-top:8px"><button type="button" class="btn g sm" data-extra-nuovo="1">+ Pisolino</button></div>';
   }
   // L'ordine segue l'urgenza: un pisolino da confermare (il tempo scorre) prima dell'energia; altrimenti energia, poi i pisolini.
   x=x.replace("\u0001EN\u0001","").replace("\u0002EN\u0002","");
@@ -6632,12 +6632,11 @@ function attSalva(sv){
   const key=iso(state.focus), lista=attGiorno(key).filter(a=>a.t!==k); lista.push(voce); state.attivita[key]=lista;
   store.set("attivita",state.attivita); apriFoglio("infoModal",false); render();
   // Solo un'informazione, mai un giudizio: vicino al letto un allenamento intenso, un caffè o un pasto abbondante possono rallentare l'addormentamento.
-  let msg=k==="pasto"?"Pasto registrato":k==="alcol"?"Alcol registrato":"Segnato";
+  let msg="Segnato";
   try{ const P=NT.plan(), prima=(((P.s.onset-t(ora))%1440)+1440)%1440;
     if(k==="intensa" && prima<60) msg="Segnato. Un allenamento intenso vicino al letto può rallentare l'addormentamento: luce soffusa e qualche minuto di calma aiutano.";
     else if(k==="caffe" && prima<360) msg="Segnato. Un caffè a meno di 6 ore dal letto può rallentare l'addormentamento: dipende da persona a persona, e con i giorni vedrai il tuo schema.";
-    else if(k==="pasto" && prima<180) msg="Pasto registrato. Un pasto abbondante vicino al letto può rendere il sonno meno riposante: una passeggiata leggera aiuta.";
-    else if(k==="alcol" && prima<240) msg="Alcol registrato. L'alcol vicino al sonno frammenta la seconda metà della notte: bevi acqua per idratarti."; }catch(x){}
+    else if(k==="pasto" && prima<180) msg="Segnato. Un pasto abbondante vicino al letto può rendere il sonno meno riposante: una passeggiata leggera aiuta."; }catch(x){}
   toast(msg);
 }
 function attAnnulla(an){
@@ -6668,10 +6667,11 @@ function attivitaHtml(k){
   if(k==="pasto" || k==="alcol"){
     const btnLabel = k==="pasto" ? "+ Segna pasto tardivo o abbondante" : "+ Ho bevuto alcol stasera";
     return '<div data-att-box class="att-box-quick">'+
+      '<div class="att-sub-label dim" style="font-size:0.82rem;margin-bottom:4px;">'+c.ora+' (ora attuale)</div>'+
       '<div class="att-riga"><button type="button" class="dbtn pri att-btn-quick" data-att-salva="'+k+'" aria-label="'+esc(btnLabel)+'">'+esc(btnLabel)+'</button>'+
       '<input type="time" class="ora-in" data-att-ora value="'+adesso+'" style="display:none" aria-hidden="true"></div>'+
       '<details class="att-det"><summary>Personalizza orario o dettagli</summary>'+
-      '<label>Orario <input type="time" class="ora-in" value="'+adesso+'" oninput="const b=this.closest(\'[data-att-box]\');if(b){const h=b.querySelector(\'[data-att-ora]\');if(h)h.value=this.value;}" onchange="const b=this.closest(\'[data-att-box]\');if(b){const h=b.querySelector(\'[data-att-ora]\');if(h)h.value=this.value;}"></label>'+
+      '<label>'+c.ora+' <input type="time" class="ora-in" value="'+adesso+'" oninput="const b=this.closest(\'[data-att-box]\');if(b){const h=b.querySelector(\'[data-att-ora]\');if(h)h.value=this.value;}" onchange="const b=this.closest(\'[data-att-box]\');if(b){const h=b.querySelector(\'[data-att-ora]\');if(h)h.value=this.value;}"></label>'+
       det+'<label>Una nota<input type="text" maxlength="80" class="ora-in" data-att-nota placeholder="facoltativo" aria-label="Una nota"></label></details>'+
       '</div>';
   }
@@ -6903,11 +6903,11 @@ function renderEssenziale(P, CARDS){
   // "pre-turno-bifasico", non "pre-turno"), c'è un modo di risolverlo che
   // l'utente potrebbe non aver ancora trovato da solo.
   const lp=sceltaLettoPresto(P);
-  // Le scelte sul sonno e la sveglia stanno nella scheda «Il tuo sonno», in testa: «Dormi» resta solo informazione.
-  { const azioni=(dn||"")+(lp||"")+svR;
+  // Le scelte sul sonno e la sveglia: prima del turno presto (lp) e sveglia restano collegate; dopo la notte (dn) è un passo successivo della giornata
+  { const azioni=(lp||"")+svR;
     let blocco = azioni ? (drem ? drem.replace(/<\/div>$/, azioni+'</div>') : '<div class="drem done"><div class="drem-q"><span class="dic">'+ICON.moon+'</span>Il tuo sonno</div>'+azioni+'</div>') : drem;
     if(blocco && state.turniConfigurati && pianoVoce("laggy")){
-      const key0=iso(state.focus), wk=wakes[key0]||"", bd=(state.beds||{})[key0]||"";
+      const key0=iso(state.focus), wk=(state.wakes||{})[key0]||wakes[key0]||"", bd=(state.beds||{})[key0]||"";
       const cd=CARDS.find(c=>c.k==="d");
       const logged = cd && ((bd===cd.bedPiano && wk===cd.wakePiano) || ((bd||wk) && (bd!==cd.bedPiano || wk!==cd.wakePiano)));
       const sleepEditing = state.diaryEditing.has("sleep:"+key0);
@@ -6919,7 +6919,9 @@ function renderEssenziale(P, CARDS){
         }catch(e){}
       }
     }
-    if(blocco) voci.push({t:-2, html:blocco}); }
+    if(blocco) voci.push({t:-2, html:blocco});
+    if(dn) voci.push({t:-1.8, html:'<div class="dopo-turno-box">'+dn+'</div>'});
+  }
 
   // Tempo libero: le ore da sveglio fuori da turno, viaggio, sonno e pisolini.
   // Risponde a «e la palestra quando la faccio?» (e figli, spesa…) senza un
@@ -7458,6 +7460,7 @@ function renderMese(){
     (()=>{ const v=specialiMese(r); return v.length ? '<p class="mese-spec">'+esc(v.join(" · "))+'</p>' : ''; })()+
     (vuoto ? '' : '<p class="hint mese-nota">Ore dall\'inizio alla fine di ogni turno, pause comprese: per controllare, non è un conteggio ufficiale.</p>')+
     (r.ignoti && !vuoto ? '<p class="mese-da-segnare"><b>'+r.ignoti+(r.ignoti===1?' giorno ancora da segnare':' giorni ancora da segnare')+'</b></p>' : '')+
+    (vuoto ? '' : '<button type="button" class="btn g lnk-indennita" id="btnApriIndennita" style="width:100%;margin-top:10px;display:flex;align-items:center;justify-content:space-between"><span>Verifica indennità e riposi di legge (D.Lgs 66/2003)</span><span class="tchev" aria-hidden="true">›</span></button>')+
     '';
   // una riga sola (ore, turni, notti), e i dettagli si aprono; «Segna» e «Importa» stanno in «Modifica turni»
   const riga = vuoto ? "Nessun turno segnato" : String(ore).replace(".",",")+" h · "+r.turni+(r.turni===1?" turno":" turni")+" · "+r.notti+(r.notti===1?" notte":" notti");
@@ -9795,12 +9798,60 @@ function diaryChange(e){
   if(w.value) wakes[k]=w.value; else delete wakes[k];
   segnaSonnoPiano(k,false); store.set("wakes",wakes); render();
 }
+function aggiornaSleepTagsModal(dayKey){
+  const c = $("#sleepTagsChips");
+  if(!c) return;
+  const curTags = tagPreselezionati(dayKey);
+  const bd = (state.beds||{})[dayKey]||"";
+  const bedMin = t(bd);
+  const isDaySleep = isFinite(bedMin) && bedMin >= 300 && bedMin <= 960;
+  const listTags = tagsPerOrario(isDaySleep, curTags);
+  const primariIds = new Set(listTags.map(x=>x.id));
+  const extraTags = SLEEP_TAGS.filter(x => !primariIds.has(x.id));
+  const showAll = !!state.mostraAltriTag;
+  const tagsToShow = showAll ? listTags.concat(extraTags) : listTags;
+  const moreBtn = extraTags.length
+    ? (showAll
+        ? '<button type="button" class="tag-chip tag-more" data-altri-tags="0" aria-label="Mostra meno fattori">− meno</button>'
+        : '<button type="button" class="tag-chip tag-more" data-altri-tags="1" aria-label="Mostra altri fattori">+ altri ('+extraTags.length+')</button>')
+    : '';
+  c.innerHTML = tagsToShow.map(tg => {
+    const on = curTags.includes(tg.id);
+    const label = (isDaySleep && tg.labelDay) ? tg.labelDay : tg.label;
+    return '<button type="button" class="tag-chip'+(on?' on':'')+'" data-sleep-tag="'+tg.id+'" data-sleep-day="'+esc(dayKey)+'" aria-pressed="'+on+'">'+label+'</button>';
+  }).join("") + moreBtn;
+}
+function apriSleepTags(dayKey){
+  aggiornaSleepTagsModal(dayKey);
+  apriFoglio("sleepTagsModal", true);
+}
+if($("#sleepTagsChiudi")) $("#sleepTagsChiudi").addEventListener("click", () => apriFoglio("sleepTagsModal", false));
+if($("#sleepTagsFine")) $("#sleepTagsFine").addEventListener("click", () => apriFoglio("sleepTagsModal", false));
+if($("#sleepTagsModal")) $("#sleepTagsModal").addEventListener("click", e => {
+  if(e.target === $("#sleepTagsModal")) apriFoglio("sleepTagsModal", false);
+});
+document.addEventListener("keydown", e => {
+  if(e.key === "Escape" && $("#sleepTagsModal") && !$("#sleepTagsModal").hidden){
+    apriFoglio("sleepTagsModal", false);
+  }
+});
 function diaryClick(e){
+  const stg=e.target.closest("[data-apri-sleep-tags]");
+  if(stg){
+    haptic(6);
+    apriSleepTags(stg.dataset.apriSleepTags);
+    return;
+  }
   const moreBtn=e.target.closest("[data-altri-tags]");
   if(moreBtn){
     state.mostraAltriTag = moreBtn.dataset.altriTags === "1";
     haptic(4);
-    render();
+    if($("#sleepTagsModal") && !$("#sleepTagsModal").hidden){
+      const dayKey = ($("#sleepTagsChips [data-sleep-day]")||{}).dataset?.sleepDay || iso(state.focus);
+      aggiornaSleepTagsModal(dayKey);
+    } else {
+      render();
+    }
     return;
   }
   const tagBtn=e.target.closest("[data-sleep-tag]");
@@ -9814,6 +9865,7 @@ function diaryClick(e){
       state.diaryTags[dayKey] = list;
       haptic(6);
       salva(); render();
+      if($("#sleepTagsModal") && !$("#sleepTagsModal").hidden) aggiornaSleepTagsModal(dayKey);
     }
     return;
   }
@@ -10001,6 +10053,10 @@ function strutturaPerche(el){
   if(fonti.length){ const f=document.createElement("p"); f.className="fonti"; f.innerHTML='<b>Fonti</b> '+fonti.join(" · "); det.appendChild(f); }
 }
 const SPIEGAZIONI = {
+  indennita: {
+    t: "Indennità di turno e CCNL",
+    h: '<p class="ed-sub">Come funzionano le maggiorazioni contrattuali.</p><div class="why"><p><b>Dove trovi questi dati:</b> Consulta la tabella retributiva o le indennità di turno nel tuo Contratto Collettivo (CCNL) o nel cedolino paga (voci «indennità notturna», «lavoro festivo», «maggiorazione turni»).</p><p><b>Notte di legge (22–06):</b> Ai sensi del D.Lgs. 66/2003 e della maggioranza dei CCNL, la fascia notturna va dalle 22:00 alle 06:00.</p><p><b>Privacy totale:</b> La paga oraria e le percentuali restano salvate solo nella memoria del tuo telefono e non vengono mai trasmesse all\'esterno.</p></div>'
+  },
   salute: {
     t: "Health Connect",
     h: '<p class="ed-sub">Integrazione con orologi e app della salute.</p><div class="why"><p><b>Perché collegarlo:</b> Se usi uno smartwatch o un\'app del sonno (Pixel Watch, Galaxy Watch, Fitbit, Garmin, Oura), Notturnisti legge il sonno effettivo e i passi per ricalibrare l\'orologio biologico e il debito su dati reali, senza dover inserire tutto a mano.</p><p><b>Solo lettura locale:</b> L\'app funziona solo in lettura; non scrive dati e nessun dato sanitario lascia il tuo telefono.</p><p><b>Controllo e revoca:</b> Spegnendo l\'interruttore i dati letti vengono subito dimenticati. Puoi revocare i permessi in qualunque momento anche dalle impostazioni di sistema di Android.</p></div>'
@@ -11356,6 +11412,8 @@ function renderTuoiTurni(){
   const voOld=$("#ttValOrari"); const vo=voOld; if(vo) vo.textContent=turni.map(k=>sh[k].n+" "+hhmm(sh[k].s)+"–"+hhmm(sh[k].e)).join(" · ");
   { const vf=$("#ttValFestivi"); if(vf) vf.textContent=festiviRiga().replace(/\.$/,""); }
   { const vp=$("#ttValPaga"); if(vp) vp.textContent=state.giornoPaga ? (state.giornoPaga + " del mese" + (state.giornoPagaNotif !== false ? " · avviso alle 09:00" : "")) : "Non impostato"; }
+  { const vi=$("#ttValIndennita"); if(vi){ const ind=state.indennita||{};
+      vi.textContent = (ind.notteVal||ind.festivoVal||ind.pagaBase) ? "Configurato · tocca per modificare" : "Non configurato · tocca per impostare"; } }
   const rie=$("#ttRiepilogo");
   if(tipo==="variabili"){
     { const o=$("#ttOrari"); if(o){ o.hidden=true; o.innerHTML=""; } const on=$("#ttOggiNota"); if(on) on.hidden=true; }
@@ -11460,6 +11518,7 @@ if($("#ttRighe")) $("#ttRighe").addEventListener("click", e=>{
   if(k==="schema"){ passo("cambia_schema"); cambiaSchema=true; apriFlussoPagina("prossimi"); return; }
   if(k==="festivi"){ apriFestivi(); return; }
   if(k==="paga"){ apriPaga(); return; }
+  if(k==="indennita"){ apriIndennitaConfig(); return; }
   if(k==="orari"){ apriFlussoPagina("orari", "orari"); return; }
   if(k==="riposi"){
     turnoInScelta=[...new Set(String(state.pattern).split("").filter(c=>c!=="R"&&c!=="S"))][0]||null;
@@ -11491,6 +11550,211 @@ if($("#pagaSalva")) $("#pagaSalva").addEventListener("click", ()=>{
   salva(); render(); renderTuoiTurni();
   apriFoglio("pagaModal", false);
   toast(state.giornoPaga ? "Giorno di paga impostato al " + state.giornoPaga + " del mese" : "Giorno di paga disattivato");
+});
+// Indennità di turno e verifica riposi di legge (D.Lgs. 66/2003)
+function apriIndennitaConfig(){
+  const cfg = state.indennita || {};
+  const pb = $("#indPagaBase"), os = $("#indOreSettimana");
+  const nv = $("#indNotteVal"), nt = $("#indNotteTipo");
+  const fv = $("#indFestivoVal"), ft = $("#indFestivoTipo");
+  const nfv = $("#indNotteFestivaVal"), nft = $("#indNotteFestivaTipo");
+  const sv = $("#indStraordVal"), st = $("#indStraordTipo");
+  if(pb) pb.value = (cfg.pagaBase != null) ? cfg.pagaBase : "";
+  if(os) os.value = cfg.oreSettimana || 36;
+  if(nv) nv.value = (cfg.notteVal != null) ? cfg.notteVal : "";
+  if(nt) nt.value = cfg.notteTipo || "perc";
+  if(fv) fv.value = (cfg.festivoVal != null) ? cfg.festivoVal : "";
+  if(ft) ft.value = cfg.festivoTipo || "perc";
+  if(nfv) nfv.value = (cfg.notteFestivaVal != null) ? cfg.notteFestivaVal : "";
+  if(nft) nft.value = cfg.notteFestivaTipo || "auto";
+  if(sv) sv.value = (cfg.straordVal != null) ? cfg.straordVal : "";
+  if(st) st.value = cfg.straordTipo || "perc";
+  apriFoglio("indennitaConfigModal", true);
+}
+
+if($("#indennitaPresetChips")) $("#indennitaPresetChips").addEventListener("click", e => {
+  const b = e.target.closest("[data-ccnl]"); if(!b) return;
+  const p = INDENNITA.PRESET_CCNL_INDENNITA[b.dataset.ccnl];
+  if(!p) return;
+  haptic(6);
+  const pb = $("#indPagaBase"), os = $("#indOreSettimana");
+  const nv = $("#indNotteVal"), nt = $("#indNotteTipo");
+  const fv = $("#indFestivoVal"), ft = $("#indFestivoTipo");
+  const nfv = $("#indNotteFestivaVal"), nft = $("#indNotteFestivaTipo");
+  const sv = $("#indStraordVal"), st = $("#indStraordTipo");
+  if(pb) pb.value = (p.pagaBase != null) ? p.pagaBase : "";
+  if(os) os.value = p.oreSettimana || 36;
+  if(nv) nv.value = (p.notteVal != null) ? p.notteVal : "";
+  if(nt) nt.value = p.notteTipo || "perc";
+  if(fv) fv.value = (p.festivoVal != null) ? p.festivoVal : "";
+  if(ft) ft.value = p.festivoTipo || "perc";
+  if(nfv) nfv.value = (p.notteFestivaVal != null) ? p.notteFestivaVal : "";
+  if(nft) nft.value = p.notteFestivaTipo || "auto";
+  if(sv) sv.value = (p.straordVal != null) ? p.straordVal : "";
+  if(st) st.value = p.straordTipo || "perc";
+  toast("Preset «" + p.nome + "» caricato");
+});
+
+if($("#indennitaConfigSalva")) $("#indennitaConfigSalva").addEventListener("click", () => {
+  const pb = $("#indPagaBase"), os = $("#indOreSettimana");
+  const nv = $("#indNotteVal"), nt = $("#indNotteTipo");
+  const fv = $("#indFestivoVal"), ft = $("#indFestivoTipo");
+  const nfv = $("#indNotteFestivaVal"), nft = $("#indNotteFestivaTipo");
+  const sv = $("#indStraordVal"), st = $("#indStraordTipo");
+  state.indennita = {
+    pagaBase: (pb && pb.value) ? +pb.value : null,
+    oreSettimana: (os && os.value) ? +os.value : 36,
+    notteVal: (nv && nv.value) ? +nv.value : null,
+    notteTipo: nt ? nt.value : "perc",
+    festivoVal: (fv && fv.value) ? +fv.value : null,
+    festivoTipo: ft ? ft.value : "perc",
+    notteFestivaVal: (nfv && nfv.value) ? +nfv.value : null,
+    notteFestivaTipo: nft ? nft.value : "auto",
+    straordVal: (sv && sv.value) ? +sv.value : null,
+    straordTipo: st ? st.value : "perc"
+  };
+  salva();
+  renderTuoiTurni();
+  apriFoglio("indennitaConfigModal", false);
+  toast("Tariffe indennità salvate");
+  const im = document.getElementById("indennitaModal");
+  if(im && !im.hidden) renderIndennita(meseOff);
+});
+
+function renderIndennita(off){
+  const el = $("#indennitaCorpo"); if(!el) return;
+  meseOff = off != null ? off : meseDaVista();
+  const cFest = festiviCfg();
+  const festFn = d => (festivoIT(d) || (cFest.dom && d.getDay() === 0) || cFest.extra.includes((d.getMonth()+1)+"-"+d.getDate()));
+  const cartellino = INDENNITA.analizzaCartellinoMese(NT, meseOff, festFn);
+  const stima = INDENNITA.calcolaStimaIndennita(cartellino, state.indennita || {});
+  const riposi = INDENNITA.verificaRiposiLegge(NT, meseOff);
+  const nomeMese = cartellino.primo.toLocaleDateString(LINGUA, { month: "long", year: "numeric" });
+  const titEl = $("#indennitaTitolo");
+  if(titEl) titEl.textContent = "Verifica " + nomeMese.charAt(0).toUpperCase() + nomeMese.slice(1);
+
+  let html = '';
+
+  // 1. Scheda Cartellino Presenze
+  html += '<span class="eyebrow" style="display:block;margin:0 0 8px">Cartellino ore del mese</span>';
+  html += '<div class="mese-num" style="margin-bottom:14px">'+
+    '<div><b>' + String(cartellino.oreTotali).replace(".", ",") + '</b><span>ore totali</span></div>'+
+    '<div><b>' + cartellino.turniTotali + '</b><span>turni svolti</span></div>'+
+    '<div><b>' + cartellino.nottiTotali + '</b><span>notti (' + String(cartellino.oreNotturne).replace(".", ",") + 'h 22–06)</span></div>'+
+    '<div><b>' + cartellino.festiviTotali + '</b><span>festivi/domeniche</span></div>'+
+    '<div><b>' + cartellino.liberiTotali + '</b><span>giorni senza turno</span></div>'+
+  '</div>';
+
+  if(cartellino.straordinarioMinuti >= 15){
+    const hExtra = Math.round((cartellino.straordinarioMinuti / 60) * 10) / 10;
+    html += '<p class="hint" style="margin:-6px 0 12px;color:var(--orange)"><b>+' + hExtra + ' ore</b> di straordinario registrate oltre il previsto.</p>';
+  }
+
+  // 2. Scheda Stima Indennità
+  html += '<span class="eyebrow" style="display:block;margin:16px 0 8px">Stima indennità di turno</span>';
+  if(stima.haTariffe && stima.totaleEuro != null){
+    html += '<div style="background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:12px;margin-bottom:14px">';
+    for(const v of stima.voci){
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--line);font-size:13.5px">'+
+        '<span><b>' + esc(v.titolo) + '</b><small style="display:block;color:var(--dim)">' + esc(v.quantita) + ' (' + esc(v.tariffa) + ')</small></span>'+
+        '<b style="font-size:14px">' + esc(INDENNITA.formatEuro(v.subtotale)) + '</b>'+
+      '</div>';
+    }
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;padding-top:10px;margin-top:4px;font-size:15px">'+
+      '<b>Totale indennità stimato</b>'+
+      '<b style="font-size:17px;color:var(--ok)">' + esc(INDENNITA.formatEuro(stima.totaleEuro)) + '</b>'+
+    '</div>';
+    html += '</div>';
+    html += '<p class="hint" style="margin:-6px 0 14px;font-style:italic">' + esc(stima.disclaimer) + '</p>';
+  } else {
+    html += '<div style="background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:10px">'+
+      '<div><b style="font-size:14px">Tariffe non configurate</b><p class="hint" style="margin:2px 0 0">Imposta la tua paga o scegli un preset per stimare le indennità.</p></div>'+
+      '<button type="button" class="btn g" id="btnConfigDaMese" style="flex:none">Configura</button>'+
+    '</div>';
+  }
+
+  // 3. Scheda Tutela Riposi di Legge (D.Lgs. 66/2003)
+  html += '<span class="eyebrow" style="display:block;margin:16px 0 8px">Tutela e riposi di legge (D.Lgs. 66/2003)</span>';
+
+  // Riposo giornaliero
+  if(riposi.riposoGiornalieroOk){
+    html += '<div style="background:var(--ok-soft);color:var(--ok);border:1px solid var(--ok-line);border-radius:var(--r);padding:11px 13px;margin-bottom:10px;font-size:13.5px;line-height:1.4">'+
+      '<b>✓ Riposo giornaliero garantito</b><br><span style="color:var(--ink)">Tutti i cambi turno hanno almeno 11 ore di riposo consecutivo (Art. 7 D.Lgs. 66/2003).</span>'+
+    '</div>';
+  } else {
+    html += '<div style="background:var(--risk-soft);color:var(--risk);border:1px solid var(--risk-line);border-radius:var(--r);padding:11px 13px;margin-bottom:10px;font-size:13.5px;line-height:1.4">'+
+      '<b>⚠️ ' + riposi.violazioniGiornaliere.length + ' rientro/i rapido/i con meno di 11 ore di riposo:</b><br>'+
+      '<ul style="margin:6px 0 0 18px;padding:0;color:var(--ink)">'+
+      riposi.violazioniGiornaliere.map(v => {
+        const dStr = v.data.toLocaleDateString(LINGUA, { day: "numeric", month: "short" });
+        return '<li style="margin-bottom:3px"><b>' + esc(dStr) + '</b>: solo ' + v.oreEffettive + 'h di stacco tra ' + esc(v.turnoPrecedente.nome) + ' e ' + esc(v.turnoAttuale.nome) + ' (<span style="color:var(--risk)">-' + v.mancanti + 'h</span> rispetto alle 11h di legge).</li>';
+      }).join("") +
+      '</ul>'+
+    '</div>';
+  }
+
+  // Riposo settimanale
+  if(riposi.riposoSettimanaleOk){
+    html += '<div style="background:var(--ok-soft);color:var(--ok);border:1px solid var(--ok-line);border-radius:var(--r);padding:11px 13px;margin-bottom:14px;font-size:13.5px;line-height:1.4">'+
+      '<b>✓ Riposo settimanale garantito</b><br><span style="color:var(--ink)">Almeno 24 ore consecutive di riposo ogni 7 giorni (Art. 9 D.Lgs. 66/2003).</span>'+
+    '</div>';
+  } else {
+    html += '<div style="background:var(--risk-soft);color:var(--risk);border:1px solid var(--risk-line);border-radius:var(--r);padding:11px 13px;margin-bottom:14px;font-size:13.5px;line-height:1.4">'+
+      '<b>⚠️ Rilevati periodi con oltre 6 giorni consecutivi di lavoro:</b><br>'+
+      '<ul style="margin:6px 0 0 18px;padding:0;color:var(--ink)">'+
+      riposi.violazioniSettimanali.map(v => {
+        const dInizio = v.dataInizio.toLocaleDateString(LINGUA, { day: "numeric", month: "short" });
+        const dFine = v.dataFine.toLocaleDateString(LINGUA, { day: "numeric", month: "short" });
+        return '<li style="margin-bottom:3px">' + esc(dInizio) + ' → ' + esc(dFine) + ': ' + v.giorniConsecutivi + ' giorni di lavoro senza riposo di 24h.</li>';
+      }).join("") +
+      '</ul>'+
+    '</div>';
+  }
+
+  if(riposi.serieNottiLunghe.length > 0){
+    html += '<p class="hint" style="margin:0 0 14px;color:var(--orange)">ℹ️ Rilevata serie di ' + riposi.serieNottiLunghe.map(s=>s.nottiConsecutive+" notti consecutive").join(", ") + ': proteggi il sonno di recupero nei giorni seguenti.</p>';
+  }
+
+  // Azioni: Copia riepilogo
+  html += '<div style="display:flex;gap:8px;margin-top:14px">'+
+    '<button type="button" class="btn g" id="btnCopiaRiepilogoIndennita" style="flex:1">Copia riepilogo</button>'+
+    '<button type="button" class="btn g" id="btnModificaTariffeMese" style="flex:1">Modifica tariffe</button>'+
+  '</div>';
+
+  el.innerHTML = html;
+
+  const btnCopia = $("#btnCopiaRiepilogoIndennita");
+  if(btnCopia) btnCopia.onclick = () => {
+    const txt = INDENNITA.testoRiepilogoIndennita(cartellino, stima, riposi, nomeMese);
+    inviaTesto(txt, "Verifica turni " + nomeMese, "Riepilogo turni e indennità copiato");
+  };
+  const btnMod = $("#btnModificaTariffeMese");
+  if(btnMod) btnMod.onclick = () => apriIndennitaConfig();
+  const btnConf = $("#btnConfigDaMese");
+  if(btnConf) btnConf.onclick = () => apriIndennitaConfig();
+}
+
+function apriIndennita(off){
+  renderIndennita(off);
+  apriFoglio("indennitaModal", true);
+}
+
+if($("#indennitaApriConfig")) $("#indennitaApriConfig").addEventListener("click", () => apriIndennitaConfig());
+if($("#indennitaChiudi")) $("#indennitaChiudi").addEventListener("click", () => apriFoglio("indennitaModal", false));
+if($("#indennitaConfigChiudi")) $("#indennitaConfigChiudi").addEventListener("click", () => apriFoglio("indennitaConfigModal", false));
+
+document.addEventListener("click", e => {
+  if(e.target.closest("#btnApriIndennita")){
+    haptic(6);
+    apriIndennita(meseDaVista());
+    return;
+  }
+  if(e.target.closest("[data-riepilogo-indennita]")){
+    haptic(6);
+    apriFoglio("condividiModal", false);
+    apriIndennita(meseDaVista());
+    return;
+  }
 });
 let _shiftIconTargetK = null;
 function apriShiftIconModal(k){
@@ -12522,7 +12786,10 @@ const CAMPI_DAL_LINK = new Set(["shifts","pattern","anchor","freeWake","freeBed"
   "pPattern","pAnchor","pShifts","pWake","pBed"]);
 if(!primaVolta){
   const pref = store.get("state", null);
-  if(pref) for(const k in pref) if(!CAMPI_DAL_LINK.has(k)) state[k]=pref[k];
+  if(pref) for(const k in pref) if(!CAMPI_DAL_LINK.has(k)){
+    if(k==="wakes" && typeof wakes!=="undefined"){ Object.assign(wakes, pref.wakes||{}); state.wakes=wakes; }
+    else state[k]=pref[k];
+  }
 }
 // I vecchi inviti chiusi diventano consigli «Lo sapevi?» già visti: una volta
 // sola, prima che il primo salvataggio tolga i loro indicatori.
@@ -12644,7 +12911,7 @@ function salva(){
     pShifts:state.pShifts,pWake:state.pWake,pBed:state.pBed,pName:state.pName,people:state.people,personaGlance:state.personaGlance,piano:state.piano,
     repeat:state.repeat,ecc:state.ecc,giorni:state.giorni,evento:state.evento,festivi:state.festivi,festiviRiposo:state.festiviRiposo,
     napTurno:state.napTurno,sonnoDiurno:state.sonnoDiurno,mattinoBifasico:state.mattinoBifasico,avvisoBifasicoOff:state.avvisoBifasicoOff,guidaLavoro:state.guidaLavoro,calMesi:state.calMesi,firstSeenAt:state.firstSeenAt,pausa:state.pausa,caffSens:state.caffSens,caffFattori:state.caffFattori,salute:state.salute,vista:state.vista,
-    giornoPaga:state.giornoPaga,giornoPagaNotif:state.giornoPagaNotif,diaryTags:state.diaryTags};
+    giornoPaga:state.giornoPaga,giornoPagaNotif:state.giornoPagaNotif,diaryTags:state.diaryTags,indennita:state.indennita};
   const testo=JSON.stringify(dati);
   if(testo!==_ultimoSalvato){
     store.set("turniConfigurati", !!state.turniConfigurati);
@@ -12667,7 +12934,7 @@ function salva(){
       state.freeWake,state.freeBed,state.cTo,state.cFrom,state.need,state.prep,state.maxAdvance,
       state.pPattern,state.pAnchor,state.pShifts,state.pWake,state.pBed,state.pName,state.people,state.personaGlance,
       state.ecc,state.giorni,state.evento,state.napTurno,state.pausa,state.caffSens,state.caffFattori,state.salute,
-      state.giornoPaga,state.giornoPagaNotif]);
+      state.giornoPaga,state.giornoPagaNotif,state.indennita]);
     if(_cfgSig!==null && sig!==_cfgSig) dispatchEvent(new Event("nt:config-changed"));
     _cfgSig=sig;
   }catch(e){}

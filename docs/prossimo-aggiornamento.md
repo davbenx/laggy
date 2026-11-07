@@ -24,9 +24,10 @@ Fatto nella 1.1.1 (non serve più): tolto il vecchio wizard nascosto; suggerimen
 - [x] **Tag sul sonno** (latte caldo, stretching, yoga, cena tardi…): una ✓ da un elenco, al mattino. Alimenta «Cosa emerge»; le correlazioni si mostrano solo con abbastanza notti, e dette come correlazioni.
 - [x] **Giorno di paga**: un giorno del mese scelto dall'utente; nel calendario, con una notifica facoltativa.
 - [x] **Icone dei turni** (sole, tramonto, luna…), scelte da un set piccolo, oltre a colore e sigla: anche nel PDF e nel widget.
-- [ ] **Calcolatrice dello stipendio**, non busta paga.
-  - L'utente inserisce le maggiorazioni del suo contratto (notte %, festivo %, straordinario %) con una guida «dove trovi questi numeri»; l'app moltiplica ore per tariffe.
-  - Sempre con la scritta «stima, non è la busta paga».
+- [x] **Verifica turni, indennità e riposi di legge (D.Lgs 66/2003)**:
+  - Analisi cartellino ore (totali, notturne 22-06, domeniche e festivi, straordinari).
+  - Stima delle indennità di turno (% su paga base oraria, €/ora fissa o €/turno) con preset rapidi (Sanità Pubblica, Metalmeccanico, Commercio, Vigilanza, Trasporti o Personalizzato) e disclaimer visibile.
+  - Verifica automatica riposo giornaliero di 11h (Art. 7) e riposo settimanale di 24h (Art. 9) con report condivisibile. Privato e locale al 100%.
 - [ ] **Impegni dal calendario del telefono** (solo app Android):
   - interruttore spento di default; si scelgono i calendari da leggere;
   - si leggono solo inizio e fine, niente titoli né luoghi, solo i prossimi 7 giorni; niente esce dal telefono;
