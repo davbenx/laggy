@@ -1704,7 +1704,7 @@ header b{font-size:23px}
         <option value="media">Normale</option>
         <option value="alta">Molto</option>
       </select>
-      <span class="hint">Poco: dormi anche con un caffè nel pomeriggio. Molto: se lo prendi tardi non chiudi occhio. L'ultima caffeina (caffè, tè, cola, energy drink) si sposta di 4, 6 o 8 ore prima del sonno.</span>
+      <span class="hint">Sposta l'ultima caffeina di 4, 6 o 8 ore prima del sonno. <button type="button" class="btn-i" data-spiega="caffeina" aria-label="Maggiori informazioni sulla sensibilità alla caffeina"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button></span>
       <details class="caff-fatt" id="caffFatt"><summary>Altre cose che cambiano quanto dura la caffeina in te <span>(facoltativo)</span></summary>
         <label class="riga-sw" for="cfFumo"><span><b>Fumi</b><small>il fumo fa smaltire la caffeina più in fretta</small></span><span class="switch"><input type="checkbox" id="cfFumo" data-cf="fumo"><span class="slider"></span></span></label>
         <label class="riga-sw" for="cfPillola"><span><b>Pillola o altro contraccettivo ormonale</b><small>la caffeina resta in circolo quasi il doppio</small></span><span class="switch"><input type="checkbox" id="cfPillola" data-cf="pillola"><span class="slider"></span></span></label>
@@ -1848,7 +1848,7 @@ header b{font-size:23px}
   <div id="segnaOut"></div>
   <section class="sg-importa" aria-labelledby="sgImpTit">
     <h2 class="sg-h" id="sgImpTit">Hai già i turni da qualche parte?</h2>
-    <p class="hint" style="margin:2px 0 10px">Anche da un'altra app per i turni: tienila, esporta i turni su Google Calendar o in un file. Li leggo io e ti chiedo conferma prima di segnarli.</p>
+    <p class="hint" style="margin:2px 0 10px">Importa da file, foto o calendari: ti chiedo conferma prima di segnarli. <button type="button" class="btn-i" data-spiega="importa_turni" aria-label="Come funziona l'importazione turni"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button></p>
     <div class="sg-fonti">
       <button type="button" class="btn g" id="sgDaFoto" hidden>Da una foto del foglio turni o un PDF</button>
       <button type="button" class="btn g" id="sgDaCalendario" hidden>Dal calendario del telefono</button>
@@ -2054,7 +2054,7 @@ header b{font-size:23px}
   <div id="opzFunzioni"></div>
   <div class="ecc" id="saluteBox" hidden>
     <b>Health Connect</b>
-    <p class="hint">Leggi sonno e passi dal tuo orologio o app della salute. <button type="button" class="btn-i" data-spiega="salute" aria-label="Maggiori informazioni su Health Connect"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button></p>
+    <p class="hint">Leggi sonno e passi da orologi e app salute. <button type="button" class="btn-i" data-spiega="salute" aria-label="Maggiori informazioni su Health Connect"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button></p>
     <label class="riga-sw" for="hcSonno"><span><b>Sonno</b><small>quando hai dormito davvero; nel diario ti propone quegli orari</small></span><span class="switch"><input type="checkbox" id="hcSonno" data-hc="sonno"><span class="slider"></span></span></label>
     <label class="riga-sw" for="hcPassi"><span><b>Passi</b><small>per capire quando eri sveglio anche se il piano diceva sonno</small></span><span class="switch"><input type="checkbox" id="hcPassi" data-hc="passi"><span class="slider"></span></span></label>
     <p class="hint" id="hcNota" aria-live="polite"></p>
@@ -2082,7 +2082,7 @@ header b{font-size:23px}
           <option value="60">un'ora prima</option>
         </select>
       </div>
-      <p class="hint" id="icsAndroid" hidden style="margin:8px 0 0">Su Android, Google Calendar non apre questi file dal telefono (Samsung Calendar sì): importalo da calendar.google.com sul computer, oppure usa il calendario automatico.</p>
+      <p class="hint" id="icsAndroid" hidden style="margin:8px 0 0">Su Google Calendar per Android importalo da computer o usa il feed automatico. <button type="button" class="btn-i" data-spiega="ics_android" aria-label="Come importare su Google Calendar Android"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button></p>
       <button class="btn" id="icsVai" style="width:100%;min-height:44px;margin-top:4px">Scarica 4 settimane</button>
   </div>
 
@@ -2221,7 +2221,7 @@ header b{font-size:23px}
       <span class="tool-tx"><b>Salva la copia completa</b>
       <span id="copiaFileSub">Un file con turni, diario del sonno, impostazioni e persone. Lo tieni su Drive o File.</span></span>
     </button>
-    <p class="hint" id="copiaAuto" hidden style="margin:0;padding:10px 4px">Su Android la copia è automatica: Google salva anche il diario, se hai il backup di Android acceso.</p>
+    <p class="hint" id="copiaAuto" hidden style="margin:0;padding:10px 4px">Backup automatico con Google su Android. <button type="button" class="btn-i" data-spiega="backup_android" aria-label="Come funziona il backup automatico di Android"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button></p>
     <button class="tool azione" id="doRipristina">
       <span class="tool-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3M7 8l5-5 5 5M5 21h14"/></svg></span>
       <span class="tool-tx"><b>Ripristina da un file</b>
@@ -4970,6 +4970,9 @@ const SHIFT_WIDGET_MAP = {
   sparkles: "✨",
   alarm: "⏰",
 };
+function btnInfo(id, ariaLabel){
+  return '<button type="button" class="btn-i" data-spiega="'+esc(id)+'" aria-label="'+esc(ariaLabel||"Maggiori informazioni")+'">'+ICON.info+'</button>';
+}
 
 // Blocco unico "Ora": un solo eroe in cima che, a seconda del momento, mostra IL
 // rischio fatica OPPURE l'azione del momento. Fonde i due moduli che prima
@@ -5399,7 +5402,7 @@ function renderDemoEsempio(){
       // notte. Per il piano vale come un giorno libero (stesso calcolo del
       // riposo), ma nei fogli turni della sanità ha una lettera sua: averla
       // permette di ricopiare il proprio foglio così com'è.
-      (!sh.S?'<p class="hint" style="margin:6px 0 0;font-size:12px"><b>Smonto</b> = il giorno in cui torni a casa dalla notte. Non ha orari di lavoro: per il piano conta come un giorno libero. Mettilo solo se nel tuo foglio turni c\'è.</p>':'')+
+      (!sh.S?'<p class="hint" style="margin:6px 0 0;font-size:12px"><b>Smonto</b> = rientro a casa dopo la notte. '+btnInfo("smonto","Cos'è lo smonto")+'</p>':'')+
       (nuovoTurnoAperto
         ? '<div class="qh-nuovo"><div class="qh-nome-sigla"><input type="text" id="qhNtNome" maxlength="20" placeholder="Nome (es. Giorno 12h)" aria-label="Nome del turno">'+
             '<label class="qh-sigla">Sigla<input type="text" id="qhNtSigla" maxlength="1" autocapitalize="characters" autocomplete="off" aria-label="Sigla del turno, una lettera" placeholder="?"></label></div>'+
@@ -6653,8 +6656,7 @@ function sceltaLettoPresto(P){
   if(!tutto || !diviso || tutto.a===diviso.a) return "";
   const on=!!state.mattinoBifasico;
   const opz=(v,nome,o,acceso)=>'<button type="button" class="vb'+(acceso?" on":"")+'" data-mattinobif="'+(v?1:0)+'" aria-pressed="'+acceso+'"><b>'+nome+'</b><span>a letto alle '+hhmm(o.a)+'</span></button>';
-  const spiega='<p class="dn-hint">Tutto stanotte: le ore piene, ma prima delle 21 addormentarsi è difficile per molti. '+
-    'Più tardi + pisolino: a letto a un\'ora normale, e una parte di quello che manca la recuperi con un pisolino dopo il turno.</p>';
+  const spiega='<p class="dn-hint">Scegli tra sonno intero o più tardi con pisolino dopo. '+btnInfo("prima_presto","Dettagli sul sonno prima del turno presto")+'</p>';
   // Una riga sola (la scelta in vigore e l'ora di letto): le due strade e il perché si aprono al tocco. Prima erano sempre aperti.
   return '<details class="dopo-notte dn-comp" aria-label="Prima di un turno molto presto, come dormi"><summary><span class="dn-sum"><small>Prima del turno presto</small><span><b>'+(on?"Più tardi + pisolino":"Tutto stanotte")+'</b> · a letto alle '+hhmm((on?diviso:tutto).a)+'</span></span></summary>'+
     '<div class="dn-scelta">'+opz(false,"Tutto stanotte",tutto,!on)+opz(true,"Più tardi + pisolino",diviso,on)+'</div>'+spiega+'<p class="dn-vale">Vale per tutti i turni presto.</p></details>';
@@ -6675,8 +6677,8 @@ function sceltaDopoNotte(P){
   const corto=P.s.kind==="corto", diviso=cur==="diviso";
   const opz=(val,nome,fine,on,nota)=>'<button type="button" class="vb'+(on?" on":"")+'" data-sonnod="'+val+'" aria-pressed="'+on+'"><b>'+nome+'</b><span>fino alle '+hhmm(fine)+'</span><span class="dn-nota">'+nota+'</span></button>';
   const spiega = '<p class="dn-hint">'+(corto
-    ? 'Sonno breve: il pomeriggio è tuo e stasera, di solito, il sonno arriva prima. Sonno lungo: recuperi di più adesso, ma di solito stasera il sonno arriva più tardi.'
-    : 'In due tempi: un sonno più corto e un pisolino prima della prossima notte (di giorno si dorme più leggeri). Tutto di fila: un blocco solo, se di giorno dormi bene.')+'</p>';
+    ? 'Sonno breve (pomeriggio libero) o lungo (più recupero).'
+    : 'In due tempi (consigliato) o tutto di fila.')+' '+btnInfo("dopo_notte","Dettagli sulle strategie di sonno dopo la notte")+'</p>';
   const scelte='<div class="dn-scelta">'+opz("diviso", corto?"Sonno breve":"In due tempi", eD, diviso, corto?"pomeriggio libero":"poi un pisolino")+opz(unito, corto?"Sonno lungo":"Tutto di fila", eU, !diviso, corto?"recuperi di più":"un blocco solo")+'</div>'+
     spiega+'<p class="dn-vale">Vale per tutte le notti.</p>';
   // Una riga sola (la scelta in vigore e fino a che ora dormi): le due strade e il perché si aprono al tocco.
@@ -7411,13 +7413,13 @@ function festiviEditorHtml(){
   return '<div class="ecc mese-fest-box">'+
     '<button type="button" class="lnk dim qh-annulla" data-fest-chiudi>‹ Fatto</button>'+
     '<h2 class="qh-h">I festivi del tuo contratto</h2>'+
-    '<p class="hint" style="margin:4px 0 10px">Oltre ai festivi nazionali: il santo patrono o altre feste che per te contano. Si ripetono ogni anno.</p>'+
+    '<p class="hint" style="margin:4px 0 10px">Festivi nazionali, patrono o date del tuo contratto. '+btnInfo("festivi","Come funzionano i festivi nel piano")+'</p>'+
     (c.extra.length ? '<div class="qh-chips" style="margin:0 0 10px">'+c.extra.map(k=>'<button type="button" class="btn g" data-fest-del="'+k+'" aria-label="Togli '+esc(nomeGiornoMese(k))+'">'+esc(nomeGiornoMese(k))+' ×</button>').join("")+'</div>' : '')+
     '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input type="date" id="festData" aria-label="Giorno festivo" style="flex:1;min-width:150px">'+
     '<button type="button" class="btn g" data-fest-add>Aggiungi</button></div>'+
     '<label class="chk" style="display:flex;gap:10px;align-items:center;margin-top:12px;min-height:44px"><input type="checkbox" data-fest-dom'+(c.dom?' checked':'')+'> La domenica conta come festivo</label>'+
     (state.repeat!==false ? '<label class="chk" style="display:flex;gap:10px;align-items:center;min-height:44px"><input type="checkbox" data-fest-riposo'+(state.festiviRiposo?' checked':'')+'> '+(fisso?'Nei festivi non lavoro':'Nei festivi sono a casa')+'</label>'+
-      (fisso ? '' : '<p class="hint" style="margin:0 0 8px">Il turno di quei giorni diventa riposo, anche per le ferie. Le domeniche restano come il ciclo.</p>') : '')+
+      (fisso ? '' : '<p class="hint" style="margin:0 0 8px">Nei festivi il turno diventa riposo.</p>') : '')+
     '</div>';
 }
 var festiviPagina=false;   // var: letto da renderTuoiTurni durante l'avvio
@@ -8154,8 +8156,8 @@ function orologioHtml(){
       riga("Momento di sonnolenza", hhmm(o.cbt), "il punto più basso della notte: la luce prima ti sposta indietro, dopo in avanti")+
       (o.lucido ? riga("Più vigile", "verso le "+o.lucido, "stima: di solito è più difficile addormentarsi") : "")+
       '<p class="hint" style="margin:10px 0 0">'+(o.partenza
-        ? 'Per ora parte da orari tipici: dimmi come dormi nei giorni liberi e diventa davvero tuo.'
-        : (o.liberiDiario ? 'Il tipo viene dal tuo diario. Il metodo vale per i liberi senza sveglia: se la usi, questa stima non è affidabile. Le ore qui sopra vengono dagli orari dei giorni liberi ('+esc(state.freeBed)+' → '+esc(state.freeWake)+').' : 'Stime dai tuoi orari nei giorni liberi ('+esc(state.freeBed)+' → '+esc(state.freeWake)+'), che il diario può aggiornare.')+' Nei giorni di turno l\'orologio si sposta con il sonno, e il piano lo segue giorno per giorno. Non sono una misura.')+
+        ? 'Stima iniziale da orari tipici.'
+        : (o.liberiDiario ? 'Stima calcolata dai giorni liberi del tuo diario.' : 'Stima dai tuoi orari abituali nei giorni liberi.'))+' '+btnInfo("orologio","Come viene stimato l'orologio biologico")+
       '</p><p class="hint oro-dati" style="margin:8px 0 0">'+esc(datiUsatiTesto())+'</p>'+
       '<button type="button" class="lnk" data-oro-cambia style="margin-top:8px">'+(o.partenza?'Dimmi come dormi nei giorni liberi':'Cambia come dormi nei giorni liberi')+' →</button>'+
       '', {id:"orologio", cls:"oro"});
@@ -8682,7 +8684,7 @@ function renderPartner(CARDS){
     }
   });
 
-  if(tuttePer.length) h+='<p class="hint" style="margin:10px 0 0">Il loro sonno è una stima dai turni e dagli orari che hai inserito: dopo una notte conto circa sei ore e mezza di sonno di giorno.</p>';
+  if(tuttePer.length) h+='<p class="hint" style="margin:10px 0 0">Il loro sonno è stimato dai turni inseriti. '+btnInfo("sonno_altri","Come viene stimato il sonno degli altri")+'</p>';
 
   // La gestione delle persone sta in Impostazioni › Persone: qui, che si guarda soltanto, un link.
   h+='<button type="button" data-partner-edit class="lnk" style="margin-top:var(--gap-sezione);min-height:44px">'+(tuttePer.length?"Gestisci le persone":"Aggiungi qualcuno")+' →</button>';
@@ -9517,7 +9519,7 @@ function renderQsSpeciale(){
     (evQui ? '<div class="qs-ore"><span>Impegno alle</span><input type="time" data-qs-impegno-h value="'+esc(ev.h)+'" aria-label="Ora dell\'impegno">'+
       '<small>Esame, visita, colloquio: il sonno dei giorni prima si sposta verso quest\'ora. Un impegno alla volta.</small></div>' : '')+
     (g.t==="extra" && !lavoro ? '<p class="hint" style="margin:0;font-size:12.5px">Scegli qui sopra quale turno fai.</p>' : '')+
-    (g.t==="reperibile" ? '<p class="hint" style="margin:0;font-size:12.5px">Nel piano trovi un pisolino nel pomeriggio: una riserva se ti chiamano. Al risveglio, se puoi, aspetta un quarto d\'ora prima di guidare.</p>' : '');
+    (g.t==="reperibile" ? '<p class="hint" style="margin:0;font-size:12.5px">Pisolino preventivo nel pomeriggio per fare scorta. '+btnInfo("reperibile","Come funziona la reperibilità")+'</p>' : '');
 }
 var _qsAltro=false, _qsOrariApri=false;   // var: il foglio si disegna da apriQuickShift, mai prima di queste righe
 // Gli orari del giorno, in una riga: cambi un'ora e vale subito (con «Annulla»); il nome segue gli orari. Se ne esce un turno
@@ -9906,7 +9908,7 @@ function strutturaPerche(el){
 const SPIEGAZIONI = {
   salute: {
     t: "Health Connect",
-    h: '<p class="ed-sub">Integrazione con orologi e app della salute.</p><div class="why"><p>Facoltativo. Se usi uno smartwatch o un\'app del sonno compatibile, il piano può leggere il sonno vero e i passi registrati: in questo modo la stima dell\'orologio biologico e dell\'adattamento circadiano risulta più precisa.</p><p>Tutto funziona solo in lettura e nessun dato lascia il tuo telefono. Ogni categoria va abilitata singolarmente e il permesso di sistema viene chiesto solo quando attivi l\'interruttore corrispondente.</p></div>'
+    h: '<p class="ed-sub">Integrazione con orologi e app della salute.</p><div class="why"><p><b>Perché collegarlo:</b> Se usi uno smartwatch o un\'app del sonno (Pixel Watch, Galaxy Watch, Fitbit, Garmin, Oura), Notturnisti legge il sonno effettivo e i passi per ricalibrare l\'orologio biologico e il debito su dati reali, senza dover inserire tutto a mano.</p><p><b>Solo lettura locale:</b> L\'app funziona solo in lettura; non scrive dati e nessun dato sanitario lascia il tuo telefono.</p><p><b>Controllo e revoca:</b> Spegnendo l\'interruttore i dati letti vengono subito dimenticati. Puoi revocare i permessi in qualunque momento anche dalle impostazioni di sistema di Android.</p></div>'
   },
   salute_revoca: {
     t: "Revoca dei permessi",
@@ -9916,13 +9918,21 @@ const SPIEGAZIONI = {
     t: "Il calendario come file",
     h: '<p class="ed-sub">Esportazione per app calendario esterne.</p><div class="why"><p>Ideale per chi non desidera la sincronizzazione continua del calendario automatico: esporta 4 settimane di turni, sonno e pisolini in un file standard (.ics) compatibile con Google Calendar, Apple Calendario e Outlook.</p><p>Il file non si aggiorna da solo; se i tuoi turni cambiano, ti basterà scaricarlo di nuovo. I turni non hanno promemoria sonori superflui, mentre le notifiche sono presenti solo per gli eventi dove il rispetto dell\'orario è critico.</p></div>'
   },
+  ics_android: {
+    t: "Google Calendar su Android",
+    h: '<p class="ed-sub">Importazione file .ics sul calendario Google.</p><div class="why"><p>L\'app Google Calendar per Android non consente l\'importazione diretta dei file .ics dal dispositivo (al contrario di Samsung Calendar).</p><p>Per vederli su Google Calendar puoi importare il file aprendo <i>calendar.google.com</i> dal computer, oppure attivare il calendario sincronizzato automatico di Notturnisti per avere i turni aggiornati in tempo reale.</p></div>'
+  },
   notifiche: {
     t: "Promemoria e notifiche",
-    h: '<p class="ed-sub">Come funzionano i promemoria del piano.</p><div class="why"><p>I promemoria arrivano puntuali finché il sistema operativo mantiene attivo il processo dell\'app o del browser: per garantire la puntualità nei giorni successivi, apri l\'app una volta ogni giorno o due.</p><p>Non sostituiscono la sveglia del mattino, ma ti guidano su quando prepararti al sonno, l\'ultima caffeina utile e le pause strategiche per non arrivare a fine turno a pezzi.</p></div>'
+    h: '<p class="ed-sub">Come funzionano i promemoria del piano.</p><div class="why"><p><b>Non sostituiscono la sveglia:</b> I promemoria ti avvisano su quando prepararti al sonno, l\'ultima caffeina utile e le pause strategiche. Per svegliarti usa la sveglia del telefono o il comando rapido <i>Metti la sveglia</i> in <i>Il tuo sonno</i>.</p><p><b>Risparmio batteria:</b> Se arrivano in ritardo o non suonano ad app chiusa, controlla nelle impostazioni del telefono che il risparmio energetico non limiti Notturnisti in background.</p><p><b>Server e privacy:</b> Ad app chiusa, il server conserva solo l\'orario programmato per inviare il segnale di sveglia al dispositivo; non conosce i tuoi turni né cosa c\'è scritto nel promemoria.</p></div>'
   },
   persone: {
     t: "Momenti in comune",
     h: '<p class="ed-sub">Trova quando sei libero insieme a chi ami.</p><div class="why"><p>Aggiungi partner, familiari, amici o colleghi di reparto: l\'app calcolerà in automatico i momenti e i giorni liberi in cui i vostri orari coincidono, mostrandoli in <i>Turni › Tempo libero</i>.</p><p>Tutti i loro turni rimangono memorizzati esclusivamente nella memoria locale di questo telefono: niente server, niente cloud, zero profilazione.</p></div>'
+  },
+  sonno_altri: {
+    t: "Sonno delle altre persone",
+    h: '<p class="ed-sub">Stima del riposo per trovare il tempo libero in comune.</p><div class="why"><p>Gli orari di sonno di partner o colleghi sono stimati in base ai loro turni (ad esempio dopo una notte si conta un riposo diurno di circa 6 ore e mezza).</p><p>Serve per individuare le ore in cui entrambi siete liberi e svegli, rispettando il recupero di ciascuno.</p></div>'
   },
   privacy: {
     t: "Privacy e zero-knowledge",
@@ -9931,6 +9941,50 @@ const SPIEGAZIONI = {
   stats: {
     t: "Statistiche anonime",
     h: '<p class="ed-sub">Migliorare l\'app nel rispetto dell\'anonimato.</p><div class="why"><p>Le statistiche aggregate ci aiutano a capire quali funzioni vengono effettivamente utilizzate (ad esempio se le notifiche sono attive o quale sia il sistema operativo più diffuso) per prioritizzare lo sviluppo.</p><p>Non inviano mai orari, turni, note del diario né alcun identificativo che possa risalire alla tua persona. Restano completamente spente fino a quando non scegli espressamente di attivarle.</p></div>'
+  },
+  smonto: {
+    t: "Smonto dalla notte",
+    h: '<p class="ed-sub">Il giorno in cui rientri dal turno di notte.</p><div class="why"><p><b>Nessun orario di lavoro:</b> Lo smonto non è un turno da lavorare; è il giorno in cui stacchi dalla notte. Per il calcolo biologico del piano vale come un giorno libero (stesso calcolo del riposo, con la sveglia del rientro e i pisolini pomeridiani).</p><p><b>Quando inserirlo:</b> Ha senso inserirlo solo se nel cartellino ufficiale della tua azienda o reparto ha una sigla specifica (di solito «S»), permettendoti di ricopiare lo schema esattamente com\'è.</p></div>'
+  },
+  caffeina: {
+    t: "Sensibilità alla caffeina",
+    h: '<p class="ed-sub">Come il tuo corpo smaltisce caffè, tè ed energy drink.</p><div class="why"><p>Ognuno smaltisce la caffeina con tempi diversi. Se sei poco sensibile, il piano fissa l\'ultima caffeina a 4 ore dal sonno; per una sensibilità media sono 6 ore, mentre con sensibilità alta viene anticipata a 8 ore prima di dormire.</p><p>Fattori come il fumo ne accelerano lo smaltimento, mentre contraccettivi ormonali o gravidanza ne prolungano la permanenza in circolo.</p></div>'
+  },
+  dopo_notte: {
+    t: "Sonno dopo la notte",
+    h: '<p class="ed-sub">Strategie di riposo dopo il turno notturno.</p><div class="why"><p><b>In due tempi (consigliato):</b> un blocco di sonno di 4–5 ore al mattino seguito da un pisolino nel tardo pomeriggio prima della notte successiva. Aiuta a non frammentare l\'orologio circadiano e mantiene libero il pomeriggio.</p><p><b>Tutto di fila:</b> un unico sonno prolungato (7–8 ore) al mattino. Indicato se riesci a dormire profondamente anche di giorno senza svegliarti per caldo o rumore.</p></div>'
+  },
+  prima_presto: {
+    t: "Sonno prima di un turno presto",
+    h: '<p class="ed-sub">Come gestire il riposo prima delle mattine anticipate.</p><div class="why"><p><b>Tutto stanotte:</b> andare a letto presto per dormire tutte le ore necessarie prima della sveglia (spesso difficile prima delle 21:00 per la naturale finestra di vigilanza serale).</p><p><b>Più tardi + pisolino:</b> andare a letto a un\'ora confortevole senza forzare il sonno, recuperando la quota mancante con un pisolino pomeridiano dopo il turno.</p></div>'
+  },
+  import_ai: {
+    t: "Importazione con l'AI",
+    h: '<p class="ed-sub">Lettura del foglio turni con intelligenza artificiale.</p><div class="why"><p>Il file (foto o PDF) viene inviato in modo protetto al server e analizzato dall\'API di Anthropic (Claude) esclusivamente per estrarre date e turni. Non viene memorizzato né utilizzato per addestrare modelli.</p><p>Se nel foglio sono visibili altri colleghi, puoi ritagliare la tua riga o scrivere il tuo nome: l\'algoritmo isolerà solo i tuoi turni.</p></div>'
+  },
+  importa_turni: {
+    t: "Importazione turni",
+    h: '<p class="ed-sub">Carica i turni da file, foto o calendari esterni.</p><div class="why"><p>Puoi importare i tuoi turni da un file Excel (.xlsx), CSV, calendario (.ics) o da una foto/PDF del tabellone di reparto.</p><p>L\'app analizza i dati e ti mostra sempre un\'anteprima completa per confermare o correggere i turni prima di salvarli nel tuo calendario.</p></div>'
+  },
+  orologio: {
+    t: "Il tuo orologio biologico",
+    h: '<p class="ed-sub">Stima circadiana del cronotipo e momento di sonnolenza.</p><div class="why"><p>Il modello calcola la fase biologica partendo dai tuoi orari abituali nei giorni liberi (senza sveglia) usando i modelli circadiani validati di Forger (1999) e Hannay (2019).</p><p>Nei giorni di turno l\'orologio si adatta dinamicamente alle ore di sonno reali per prevedere il calo di vigilanza e indicare quando la luce aiuta la sincronizzazione.</p></div>'
+  },
+  festivi: {
+    t: "I festivi del tuo contratto",
+    h: '<p class="ed-sub">Festività nazionali, patrono e riposi contrattuali.</p><div class="why"><p>Include i festivi nazionali e le festività locali o patronali aggiunte da te. Se nel tuo contratto nei festivi non lavori, il turno programmato viene automaticamente convertito in riposo.</p><p>Nei cicli continui o su turni in cui i festivi si lavorano, puoi decidere se considerare la domenica come festivo per il calcolo delle maggiorazioni.</p></div>'
+  },
+  ferie_conto: {
+    t: "Calcolo delle ferie",
+    h: '<p class="ed-sub">Come vengono conteggiati i giorni di assenza.</p><div class="why"><p>Il calcolo include i cambi e le ferie già segnati nel calendario, evidenziando i festivi nazionali e contrattuali.</p><p>Verifica le clausole del tuo CCNL: in alcuni settori (come la sanità) lo smonto non è considerato riposo e le ferie vengono scalate con regole specifiche.</p></div>'
+  },
+  reperibile: {
+    t: "Turno di reperibilità",
+    h: '<p class="ed-sub">Gestione della vigilanza e del riposo preventivo.</p><div class="why"><p>Nei giorni di reperibilità il piano programma un pisolino nel pomeriggio per accumulare sonno preventivo prima della fascia di possibile chiamata.</p><p>In caso di chiamata notturna improvvisa, attendi se possibile 15 minuti dal risveglio prima di guidare per smaltire l\'inerzia del sonno.</p></div>'
+  },
+  backup_android: {
+    t: "Backup automatico su Android",
+    h: '<p class="ed-sub">Salvataggio automatico con il tuo account Google.</p><div class="why"><p>Se il backup di Android è attivo nelle impostazioni del telefono, i dati dell\'app Notturnisti (turni, preferenze e diario) vengono salvati in modo cifrato nel tuo spazio Google Drive personale.</p><p>Cambiando telefono o reinstallando l\'app, Android ripristinerà i tuoi dati in automatico.</p></div>'
   }
 };
 document.addEventListener("click", e=>{
@@ -10969,8 +11023,7 @@ function renderFerie(){
   // cosa è già dentro il conto, e dove si aggiunge il resto
   const nFer=G.filter(g=>g.ferieGia).length, nCam=G.filter(g=>g.cambio).length, nFest=G.filter(g=>g.festivo).length;
   const gia=[nFer?(nFer===1?"1 giorno di ferie già segnato":nFer+" giorni di ferie già segnati"):"", nCam?(nCam===1?"1 cambio turno":nCam+" cambi turno"):"", nFest?nFest+" festivi (col puntino rosso)":""].filter(Boolean);
-  h+='<p class="hint" style="margin-top:4px"><b>Già nel conto:</b> '+(gia.length?esc(gia.join(", ")):"nessuna ferie o cambio segnati")+'. Ferie e cambi si segnano in Turni › Modifica turni › «Segna i giorni del mese». I festivi sono quelli nazionali: il patrono lo aggiungi in Modifica turni › Festivi. '+
-    'Un festivo in cui lavori resta un giorno di lavoro: se lo lavori puoi metterlo in ferie. Controlla le regole del tuo contratto: in alcuni lo smonto non è riposo e le ferie si contano in modo diverso.</p>';
+  h+='<p class="hint" style="margin-top:4px"><b>Già nel conto:</b> '+(gia.length?esc(gia.join(", ")):"nessuna ferie o cambio segnati")+'. '+btnInfo("ferie_conto","Come vengono calcolate ferie e festivi")+'</p>';
   out.innerHTML=h;
 }
 function segnaFerie(i){
@@ -11401,7 +11454,7 @@ function renderImport(){
   const chiudi='<button type="button" class="btn g" data-imp-annulla>Annulla</button>';
   if(I.stato==="consenso"){
     el.innerHTML='<div class="sg-box"><p><b>Foto o PDF del foglio turni</b></p>'+
-      '<p class="hint">Il file va al server di Notturnisti e ad <b>Anthropic</b> (Claude), che lo legge e mi restituisce i turni. Non lo salviamo. Se nel foglio ci sono i nomi dei colleghi, meglio ritagliare la tua riga; altrimenti scrivi il tuo nome come è scritto nel foglio, così leggo solo quello. <a href="'+esc(window.NT_APP.base.replace(/[^/]*$/,""))+'privacy/" target="_blank" rel="noopener">Privacy</a></p>'+
+      '<p class="hint">Il file va ad Anthropic (Claude) per estrarre i turni: non viene salvato. '+btnInfo("import_ai","Dettagli su privacy e intelligenza artificiale")+'</p>'+
       '<label class="hint" for="sgNome" style="display:block;margin:6px 0 4px">Il tuo nome nel foglio (se ci sono più persone)</label>'+
       '<input type="text" id="sgNome" maxlength="40" autocomplete="off" value="'+esc(store.get("sgNome","")||"")+'">'+
       '<label class="riga-sw" for="sgOk" style="margin-top:10px"><span>Ho capito: il file va ad Anthropic per essere letto</span><span class="switch"><input type="checkbox" id="sgOk"><span class="slider"></span></span></label>'+
@@ -11956,9 +12009,9 @@ if(store.get("sub") && $("#privacyNotaAbbonato")) $("#privacyNotaAbbonato").hidd
 // i promemoria arrivano anche ad app chiusa. Detto insieme a cosa resta sul
 // server per farlo: solo gli orari, non cosa dicono.
 if(!window.NT_APP.nativo && platform.notify.pushStato && platform.notify.pushStato()!=="no" && $("#notifHint"))
-  $("#notifHint").textContent="Arrivano anche ad app chiusa: per svegliarla all'ora giusta il nostro server conserva solo gli orari dei promemoria (non cosa dicono), finché li tieni accesi. Non sostituiscono la sveglia.";
+  $("#notifHint").innerHTML="Arrivano anche ad app chiusa. "+btnInfo("notifiche","Dettagli sui promemoria");
 if(window.NT_APP.nativo){
-  if($("#notifHint")) $("#notifHint").textContent="Arrivano anche con l'app chiusa. Non sono una sveglia: per quella usa «Metti la sveglia» in «Il tuo sonno». Se non ti arrivano, controlla che il risparmio batteria non limiti Notturnisti.";
+  if($("#notifHint")) $("#notifHint").innerHTML="Arrivano anche con l'app chiusa. "+btnInfo("notifiche","Dettagli sui promemoria");
   // Android 12+: senza "Sveglie e promemoria" la sveglia può arrivare con
   // qualche minuto di ritardo. Si propone solo a chi ha già le notifiche.
   const riga=document.createElement("p"); riga.className="hint"; riga.hidden=true; riga.style.margin="6px 2px 0";

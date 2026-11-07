@@ -277,3 +277,41 @@ test("coerenza timeline sonnolenza: momento di sonnolenza mostra orario del picc
   assert.ok(html.includes("if(haVoto)") && html.includes("const haVoto = isFinite(+val)"), "chip mostrate solo dopo aver inserito sia orario che voto");
 });
 
+test("tutte le chiamate data-spiega in index.html hanno una voce corrispondente in SPIEGAZIONI", () => {
+  const matchSpiega = html.match(/const SPIEGAZIONI = \{([\s\S]*?)\n\};/);
+  assert.ok(matchSpiega, "SPIEGAZIONI è definito in index.html");
+
+  const keysDefinite = new Set();
+  const keyRegex = /^\s*([a-zA-Z0-9_]+):\s*\{/gm;
+  let m;
+  while ((m = keyRegex.exec(matchSpiega[1])) !== null) {
+    keysDefinite.add(m[1]);
+  }
+
+  const chiaviAttese = [
+    "salute", "salute_revoca", "ics", "ics_android", "notifiche", "persone",
+    "sonno_altri", "privacy", "stats", "smonto", "caffeina", "dopo_notte",
+    "prima_presto", "import_ai", "importa_turni", "orologio", "festivi",
+    "ferie_conto", "reperibile", "backup_android"
+  ];
+  chiaviAttese.forEach(k => {
+    assert.ok(keysDefinite.has(k), `Chiave '${k}' deve essere presente in SPIEGAZIONI`);
+  });
+
+  const regexDataSpiega = /data-spiega=["']([^"']+)["']/g;
+  const chiaviUsate = [];
+  while ((m = regexDataSpiega.exec(html)) !== null) {
+    chiaviUsate.push(m[1]);
+  }
+  const regexBtnInfo = /btnInfo\(["']([^"']+)["']/g;
+  while ((m = regexBtnInfo.exec(html)) !== null) {
+    chiaviUsate.push(m[1]);
+  }
+
+  assert.ok(chiaviUsate.length >= 10, "Almeno 10 chiamate data-spiega / btnInfo trovate");
+  chiaviUsate.forEach(k => {
+    assert.ok(keysDefinite.has(k), `Chiave usata '${k}' deve esistere in SPIEGAZIONI`);
+  });
+});
+
+

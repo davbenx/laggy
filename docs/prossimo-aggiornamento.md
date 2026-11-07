@@ -15,16 +15,15 @@ Fatto nella 1.1.1 (non serve più): tolto il vecchio wizard nascosto; suggerimen
 - [x] «Sonno e carico»: le due «Scoperta» diventano un solo riquadro «Cosa emerge dai tuoi dati».
   - Al massimo 2 righe, ognuna con un fatto tuo, quanto è solido (per esempio «8 notti su 11») e cosa provare.
   - Se non c'è niente di solido (meno di 6–8 notti per confronto), il riquadro non compare.
-- [ ] Spiegazioni lunghe nella ⓘ (lo stesso foglio della timeline, niente tooltip al passaggio del mouse): sotto il comando resta una riga sola.
+- [x] Spiegazioni lunghe nella ⓘ (lo stesso foglio della timeline, niente tooltip al passaggio del mouse): sotto il comando resta una riga sola.
   - Casi: notifiche (sveglia, risparmio batteria, server), Health Connect, file .ics e Google Calendar su Android, statistiche anonime, Smonto, sensibilità alla caffeina, Diviso/Unico, import con l'AI, persone, ferie e festivi, «Il tuo orologio».
-  - Ne ho contate 28 con `class="hint"` oltre i 120 caratteri, più quelle scritte dal codice (per esempio `#notifHint`).
-  - Prima mostrare a Davide gli screenshot di 3 casi (notifiche, Health Connect, Smonto).
+  - Sostituiti i testi prolissi con una riga essenziale + pulsante .btn-i e voci strutturate in SPIEGAZIONI.
 - [x] Testi da incollare in Play Console (note di versione, scheda): un «•» per riga, in un blocco di codice.
 
 ### Dopo il test aperto
-- [ ] **Tag sul sonno** (latte caldo, stretching, yoga, cena tardi…): una ✓ da un elenco, al mattino. Alimenta «Cosa emerge»; le correlazioni si mostrano solo con abbastanza notti, e dette come correlazioni.
-- [ ] **Giorno di paga**: un giorno del mese scelto dall'utente; nel calendario, con una notifica facoltativa.
-- [ ] **Icone dei turni** (sole, tramonto, luna…), scelte da un set piccolo, oltre a colore e sigla: anche nel PDF e nel widget.
+- [x] **Tag sul sonno** (latte caldo, stretching, yoga, cena tardi…): una ✓ da un elenco, al mattino. Alimenta «Cosa emerge»; le correlazioni si mostrano solo con abbastanza notti, e dette come correlazioni.
+- [x] **Giorno di paga**: un giorno del mese scelto dall'utente; nel calendario, con una notifica facoltativa.
+- [x] **Icone dei turni** (sole, tramonto, luna…), scelte da un set piccolo, oltre a colore e sigla: anche nel PDF e nel widget.
 - [ ] **Calcolatrice dello stipendio**, non busta paga.
   - L'utente inserisce le maggiorazioni del suo contratto (notte %, festivo %, straordinario %) con una guida «dove trovi questi numeri»; l'app moltiplica ore per tariffe.
   - Sempre con la scritta «stima, non è la busta paga».
